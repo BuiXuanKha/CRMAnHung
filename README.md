@@ -61,11 +61,18 @@ Load unpacked thư mục `apps/extension/dist` trong `chrome://extensions`.
 | Phase | Nội dung |
 |-------|----------|
 | **P0** | Foundation (monorepo, auth, shell) — đang làm |
+| **P0b** | Deploy staging Mắt Bão (`crm-next.anhungland.com`) song song với CRM cũ |
 | **P1** | Customers + extension ingest |
 | **P2** | Lodats + Addresses |
 | **P3** | Transactions + Title services |
 | **P4** | Admin registry, CI, migrate data |
-| **P5** | Cutover production |
+| **P5** | Cutover production `crm.anhungland.com` |
+
+## Deploy (Mắt Bão)
+
+Production hiện tại vẫn là FacebookCustomerCRM tại **https://crm.anhungland.com**.
+
+CRMAnHung deploy **song song** trên cùng VPS, subdomain staging — xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Ghi chú
 

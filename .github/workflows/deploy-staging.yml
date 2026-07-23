@@ -1,0 +1,104 @@
+name: Deploy CRMAnHung (staging)
+
+# Staging trên Mắt Bão: crm-next.anhungland.com
+# KHÔNG đụng production crm.anhungland.com / anhungland-api.
+#
+# Bật tay sau khi đã làm checklist một lần trong docs/DEPLOYMENT.md
+# (DNS, nginx, .env, thư mục /var/www/crmanhung).
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-crmanhung-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      SSH_HOST: '125.253.113.104'
+      SSH_USER: 'deploy'
+      REMOTE_ROOT: '/var/www/crmanhung'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${SSH_KEY:-}" || { echo "Missing secret DEPLOY_SSH_KEY — xem docs/DEPLOYMENT.md"; exit 1; }
+
+          echo "Deploy target: ${SSH_USER}@${SSH_HOST} → ${REMOTE_ROOT}"
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          KEY_TRIMMED=$(printf '%s' "$SSH_KEY" | tr -d '\r')
+          if printf '%s' "$KEY_TRIMMED" | grep -q "BEGIN .*PRIVATE KEY"; then
+            printf '%s\n' "$KEY_TRIMMED" > ~/.ssh/deploy_key
+          else
+            printf '%s' "$KEY_TRIMMED" | base64 -d > ~/.ssh/deploy_key
+          fi
+          chmod 600 ~/.ssh/deploy_key
+
+          if ! grep -q "BEGIN .*PRIVATE KEY" ~/.ssh/deploy_key; then
+            echo "DEPLOY_SSH_KEY không hợp lệ. Cần private key có BEGIN/END."
+            exit 1
+          fi
+
+          ssh-keyscan -H "$SSH_HOST" > ~/.ssh/known_hosts 2>/tmp/keyscan.err || true
+          if [[ ! -s ~/.ssh/known_hosts ]]; then
+            echo "ssh-keyscan thất bại:"
+            cat /tmp/keyscan.err || true
+            exit 1
+          fi
+
+          printf '%s\n' \
+            '#!/bin/bash' \
+            'exec ssh -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" "$@"' \
+            > "$HOME/.ssh/rsh.sh"
+          chmod +x "$HOME/.ssh/rsh.sh"
+
+          echo "REMOTE=${SSH_USER}@${SSH_HOST}" > "$HOME/.ssh/deploy.env"
+
+          echo "Testing SSH..."
+          "$HOME/.ssh/rsh.sh" "${SSH_USER}@${SSH_HOST}" "echo SSH_FROM_ACTIONS_OK"
+
+      - name: Sync monorepo to server
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+
+          "$RSH" "$REMOTE" "mkdir -p ${REMOTE_ROOT}/{repo,web,uploads,database,scripts}"
+
+          # Đồng bộ source — giữ .env, DB, uploads, node_modules trên server
+          rsync -az --delete \
+            --exclude node_modules/ \
+            --exclude .git/ \
+            --exclude .env \
+            --exclude .env.* \
+            --exclude '!.env.example' \
+            --exclude apps/api/prisma/dev.db \
+            --exclude apps/api/prisma/dev.db-* \
+            --exclude apps/api/uploads/ \
+            --exclude apps/web/dist/ \
+            --exclude apps/extension/dist/ \
+            --exclude '**/*.db' \
+            -e "$RSH" \
+            ./ "${REMOTE}:${REMOTE_ROOT}/repo/"
+
+          rsync -az \
+            -e "$RSH" \
+            ./scripts/remote_deploy.sh "${REMOTE}:${REMOTE_ROOT}/scripts/remote_deploy.sh"
+
+      - name: Build and restart on server
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/scripts/remote_deploy.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/scripts/remote_deploy.sh"

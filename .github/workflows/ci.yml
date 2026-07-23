@@ -1,0 +1,56 @@
+name: CI
+
+on:
+  push:
+    branches: [main, 'cursor/**']
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-crmanhung-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.33.3
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Build shared
+        run: pnpm --filter @crmanhung/shared build
+
+      - name: Prisma generate
+        working-directory: apps/api
+        env:
+          DATABASE_URL: 'file:./ci.db'
+        run: pnpm exec prisma generate
+
+      - name: Typecheck / build API
+        working-directory: apps/api
+        env:
+          DATABASE_URL: 'file:./ci.db'
+        run: pnpm run build
+
+      - name: Build Web
+        working-directory: apps/web
+        env:
+          VITE_API_URL: /api/v1
+        run: pnpm run build
+
+      - name: Build Extension
+        run: pnpm --filter @crmanhung/extension build
