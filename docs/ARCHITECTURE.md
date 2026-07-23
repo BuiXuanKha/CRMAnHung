@@ -2,6 +2,9 @@
 
 Viết lại **FacebookCustomerCRM** với cấu trúc có thể mở rộng, bảo mật hơn, và dễ bảo trì.
 
+**Cách làm việc hàng ngày:** [`PLAYBOOK.md`](./PLAYBOOK.md) (docs → skill → contract → UI mock → API).  
+**Quyết định công nghệ:** [`adr/`](./adr/).
+
 Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Land CRM — khách hàng (Facebook/Messenger), lô đất, giao dịch, dịch vụ sổ đỏ.
 
 ---
@@ -28,7 +31,7 @@ Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Lan
 |-----|-----------|--------|
 | Monorepo | pnpm workspaces | Shared package, cài đặt nhất quán |
 | Language | TypeScript (strict) | An toàn kiểu, refactor tự tin |
-| API | NestJS 11 + Fastify adapter | Module rõ ràng, DI, guards/pipes sẵn |
+| API | NestJS 11 (Express) | Module rõ ràng, DI, guards/pipes sẵn |
 | ORM / DB | Prisma + SQLite (dev/prod giai 1) | Schema rõ, migrate chuẩn; sau có thể đổi PostgreSQL |
 | Validation | Zod (`@crmanhung/shared`) + Nest ValidationPipe | Contract dùng chung FE/BE/Extension |
 | Auth | JWT access (ngắn) + refresh (httpOnly cookie / storage có rotation) | Bảo mật hơn JWT 7 ngày cố định |

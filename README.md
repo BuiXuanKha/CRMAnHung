@@ -2,7 +2,17 @@
 
 Viết lại **FacebookCustomerCRM** với kiến trúc chuyên nghiệp hơn, dễ mở rộng và bảo mật hơn.
 
-> Hệ cũ vẫn chạy production. Repo này phát triển song song — xem [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) và [`docs/MIGRATION.md`](docs/MIGRATION.md).
+> Hệ cũ vẫn chạy production. Repo này phát triển song song.
+
+**Bắt đầu đọc:** [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) · [`AGENTS.md`](AGENTS.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+
+## Cách chúng ta làm việc
+
+```
+Docs domain → Skill (nếu cần) → Contract Zod → UI + mock → API → Nối thật → Extension → Staging
+```
+
+Không nhảy cóc. Chi tiết + Definition of Done: **PLAYBOOK**. Skills Cursor: `.cursor/skills/`.
 
 ## Stack
 
@@ -12,6 +22,8 @@ Viết lại **FacebookCustomerCRM** với kiến trúc chuyên nghiệp hơn, d
 | `apps/web` | React 19 + Vite + TypeScript + TanStack Query |
 | `apps/extension` | Chrome MV3 + TypeScript |
 | `packages/shared` | Enums + Zod schemas dùng chung |
+
+Lý do chọn stack: [`docs/adr/0001-tech-stack.md`](docs/adr/0001-tech-stack.md).
 
 ## Yêu cầu
 
