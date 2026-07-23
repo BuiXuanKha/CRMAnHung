@@ -1,0 +1,355 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+/// Nhân viên / admin
+model User {
+  id           String   @id @default(cuid())
+  fullName     String
+  username     String   @unique
+  passwordHash String
+  role         String   @default("STAFF") // STAFF | ADMIN
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  refreshTokens     RefreshToken[]
+  customers         Customer[]             @relation("CustomerOwner")
+  facebookProfiles  EmployeeFacebookProfile[]
+  hotlines          EmployeeHotline[]
+  careNotes         CustomerCareNote[]
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+/// Khách hàng (tương đương tblPerson)
+model Customer {
+  id              String   @id @default(cuid())
+  employeeId      String
+  fullName        String
+  status          String   @default("KHACH_MOI")
+  budgetMinVnd    Int?
+  budgetMaxVnd    Int?
+  note            String?
+  isPinned        Boolean  @default(false)
+  isHidden        Boolean  @default(false)
+  sourceHotlineId String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  employee      User                   @relation("CustomerOwner", fields: [employeeId], references: [id])
+  sourceHotline EmployeeHotline?       @relation(fields: [sourceHotlineId], references: [id])
+  facebook      CustomerFacebook?
+  phones        CustomerPhone[]
+  careNotes     CustomerCareNote[]
+  lodatMaps     LodatCustomerMap[]
+
+  @@index([employeeId])
+  @@index([status])
+  @@index([isHidden])
+}
+
+model CustomerFacebook {
+  id          String   @id @default(cuid())
+  customerId  String   @unique
+  customerUid String?
+  threadId    String?
+  facebookName String?
+  avatarUrl   String?
+  scanSource  String?
+  rawMeta     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer Customer                    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  messages CustomerMessengerMessage[]
+
+  @@index([customerUid])
+  @@index([threadId])
+}
+
+model CustomerPhone {
+  id         String   @id @default(cuid())
+  customerId String
+  phone      String
+  label      String?
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([phone])
+}
+
+model CustomerMessengerMessage {
+  id                 String   @id @default(cuid())
+  customerFacebookId String
+  externalMessageId  String?
+  body               String?
+  direction          String?
+  sentAt             DateTime?
+  createdAt          DateTime @default(now())
+
+  customerFacebook CustomerFacebook          @relation(fields: [customerFacebookId], references: [id], onDelete: Cascade)
+  images           CustomerMessengerImage[]
+
+  @@index([customerFacebookId])
+}
+
+model CustomerMessengerImage {
+  id        String   @id @default(cuid())
+  messageId String
+  filePath  String
+  createdAt DateTime @default(now())
+
+  message CustomerMessengerMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+}
+
+model CustomerCareNote {
+  id         String   @id @default(cuid())
+  customerId String
+  employeeId String
+  note       String
+  createdAt  DateTime @default(now())
+
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  employee User     @relation(fields: [employeeId], references: [id])
+
+  @@index([customerId])
+}
+
+model EmployeeFacebookProfile {
+  id         String   @id @default(cuid())
+  employeeId String
+  facebookUid String
+  nickname   String?
+  createdAt  DateTime @default(now())
+
+  employee User @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, facebookUid])
+}
+
+model EmployeeHotline {
+  id         String   @id @default(cuid())
+  employeeId String
+  phone      String
+  label      String?
+  createdAt  DateTime @default(now())
+
+  employee  User       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  customers Customer[]
+
+  @@index([employeeId])
+}
+
+model Province {
+  id        String     @id @default(cuid())
+  code      String     @unique
+  name      String
+  districts District[]
+}
+
+model District {
+  id         String   @id @default(cuid())
+  provinceId String
+  code       String
+  name       String
+  wards      Ward[]
+  province   Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+
+  @@unique([provinceId, code])
+}
+
+model Ward {
+  id         String   @id @default(cuid())
+  districtId String
+  code       String
+  name       String
+  district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+
+  @@unique([districtId, code])
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  kind       String   @default("REGULAR") // REGULAR | PROJECT
+  name       String?
+  detail     String?
+  provinceId String?
+  districtId String?
+  wardId     String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  lodats Lodat[]
+  images AddressImage[]
+}
+
+model AddressImage {
+  id        String   @id @default(cuid())
+  addressId String
+  filePath  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  address Address @relation(fields: [addressId], references: [id], onDelete: Cascade)
+}
+
+/// Lô đất
+model Lodat {
+  id         String   @id @default(cuid())
+  title      String
+  areaM2     Float?
+  frontageM  Float?
+  direction  String?
+  note       String?
+  addressId  String?
+  isForSale  Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  address Address?           @relation(fields: [addressId], references: [id])
+  images  LodatImage[]
+  maps    LodatCustomerMap[]
+}
+
+model LodatImage {
+  id        String   @id @default(cuid())
+  lodatId   String
+  filePath  String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  lodat Lodat @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+}
+
+model LodatTempImage {
+  id        String   @id @default(cuid())
+  sessionId String
+  filePath  String
+  createdAt DateTime @default(now())
+
+  @@index([sessionId])
+}
+
+model LodatCustomerMap {
+  id         String   @id @default(cuid())
+  lodatId    String
+  customerId String
+  priceVnd   Int?
+  status     String   @default("DANG_BAN")
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  lodat    Lodat     @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+  customer Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+
+  @@unique([lodatId, customerId])
+  @@index([customerId])
+}
+
+model Transaction {
+  id                 String   @id @default(cuid())
+  lodatCustomerMapId String
+  type               String   @default("OWN")
+  status             String   @default("DA_COC")
+  amountVnd          Int?
+  note               String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  lodatCustomerMap LodatCustomerMap        @relation(fields: [lodatCustomerMapId], references: [id], onDelete: Cascade)
+  parties          TransactionParty[]
+  attachments      TransactionAttachment[]
+}
+
+model TransactionParty {
+  id            String  @id @default(cuid())
+  transactionId String
+  role          String // BUYER | SELLER | OTHER
+  fullName      String
+  phone         String?
+  note          String?
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+}
+
+model TransactionAttachment {
+  id            String   @id @default(cuid())
+  transactionId String
+  filePath      String
+  label         String?
+  createdAt     DateTime @default(now())
+
+  transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+}
+
+model TitleService {
+  id         String   @id @default(cuid())
+  customerId String?
+  title      String
+  status     String   @default("DANG_LAM")
+  note       String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  progress    TitleServiceProgress[]
+  moneyEntries TitleServiceMoney[]
+  attachments TitleServiceAttachment[]
+}
+
+model TitleServiceProgress {
+  id             String   @id @default(cuid())
+  titleServiceId String
+  note           String
+  createdAt      DateTime @default(now())
+
+  titleService TitleService @relation(fields: [titleServiceId], references: [id], onDelete: Cascade)
+}
+
+model TitleServiceMoney {
+  id             String   @id @default(cuid())
+  titleServiceId String
+  direction      String // IN | OUT
+  amountVnd      Int
+  note           String?
+  createdAt      DateTime @default(now())
+
+  titleService TitleService @relation(fields: [titleServiceId], references: [id], onDelete: Cascade)
+}
+
+model TitleServiceAttachment {
+  id             String   @id @default(cuid())
+  titleServiceId String
+  filePath       String
+  label          String?
+  createdAt      DateTime @default(now())
+
+  titleService TitleService @relation(fields: [titleServiceId], references: [id], onDelete: Cascade)
+}
+
+model ImageRotation {
+  id        String   @id @default(cuid())
+  filePath  String   @unique
+  degrees   Int      @default(0)
+  updatedAt DateTime @updatedAt
+}

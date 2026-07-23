@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <title>CRMAnHung Extension — Cài đặt</title>
+    <style>
+      body {
+        font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+        max-width: 480px;
+        margin: 40px auto;
+        padding: 0 16px;
+        color: #14201a;
+      }
+      label {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 12px;
+      }
+      input {
+        padding: 10px 12px;
+      }
+      button {
+        padding: 10px 14px;
+        cursor: pointer;
+      }
+      .ok {
+        color: #1f6b4a;
+      }
+      .err {
+        color: #b42318;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>An Hưng Land Extension</h1>
+    <p>Cấu hình API và đăng nhập (P1 sẽ nối đầy đủ ingest khách hàng).</p>
+    <form id="form">
+      <label>
+        API URL
+        <input id="apiUrl" name="apiUrl" placeholder="http://localhost:5050/api/v1" />
+      </label>
+      <label>
+        Username
+        <input id="username" name="username" autocomplete="username" />
+      </label>
+      <label>
+        Password
+        <input
+          id="password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+        />
+      </label>
+      <button type="submit">Lưu &amp; đăng nhập</button>
+    </form>
+    <p id="status"></p>
+    <script src="./options.js"></script>
+  </body>
+</html>
