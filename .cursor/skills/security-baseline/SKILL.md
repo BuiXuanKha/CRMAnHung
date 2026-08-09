@@ -28,11 +28,12 @@ description: Apply CRMAnHung security baseline for auth, authorization, secrets,
 
 ## Uploads (Cloudflare R2)
 
+- Đọc skill **`cloudflare-r2`** — credentials + bucket đã chốt; **không hỏi lại owner**
 - Giới hạn size + MIME ở API trước `PutObject`
 - Object key do server đặt; không tin path từ client
-- DB lưu `objectKey`; URL = `R2_PUBLIC_BASE_URL` + key (hoặc signed URL nếu private)
+- DB lưu `objectKey`; URL = `R2_PUBLIC_BASE_URL` + key
 - **Không** lưu / serve file trên disk VPS
-- R2 credentials chỉ qua env; production bắt buộc đủ biến R2
+- Secrets: `apps/api/.env` (gitignored) hoặc bootstrap từ skill `cloudflare-r2`
 
 ## Extension
 
