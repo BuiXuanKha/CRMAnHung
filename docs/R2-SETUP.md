@@ -13,11 +13,14 @@ Dành cho chủ sở hữu (không cần biết lập trình). Làm lần lượ
 
 File cấu hình mẫu: `apps/api/.env.example` (đã điền 3 dòng trên).
 
-**Bạn còn cần cung cấp cho agent / điền `.env`:**
+**Trạng thái cấu hình (cập nhật 2026-08-09):**
 
-1. `R2_ACCESS_KEY_ID`
-2. `R2_SECRET_ACCESS_KEY`
-3. `R2_PUBLIC_BASE_URL`
+| Mục | Trạng thái |
+|-----|------------|
+| Account ID / Endpoint / Bucket | Đã lưu trong `.env.example` + `.env` local |
+| Access Key ID + Secret | Đã lưu trong `apps/api/.env` (**không** commit git) |
+| Token `cfat_…` (Cloudflare API) | Không cần cho upload S3 — giữ riêng nếu dùng API Cloudflare khác |
+| `R2_PUBLIC_BASE_URL` | **Chưa** — cần Bước B bên dưới |
 
 ---
 
