@@ -48,7 +48,7 @@ Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Lan
 crmanhung/
 ├── apps/
 │   ├── api/          # NestJS — REST API
-│   ├── web/          # Next.js — nhân viên / admin
+│   ├── web/          # Next.js — public web + CRM (nhân viên / admin)
 │   └── extension/    # Chrome MV3 — quét Inbox/Messenger
 ├── packages/
 │   └── shared/       # Types, enums, Zod schemas, constants

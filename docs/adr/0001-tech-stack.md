@@ -15,7 +15,7 @@
 | DB | **PostgreSQL** từ đầu | SQLite — đã supersede (ADR 0003 → 0004) |
 | Object storage | **Cloudflare R2** (S3 API) | Disk VPS `/uploads` — phình disk, khó scale (ADR 0005) |
 | Validation / contract | **Zod** trong `@crmanhung/shared` | Chỉ class-validator — không share được với Web/Extension |
-| Web | **Next.js 15 (App Router) + React 19 + TanStack Query** | Vite SPA — đã supersede (ADR 0006) |
+| Web | **Next.js 15 (App Router) + React 19 + TanStack Query** | Vite SPA thuần — không đủ cho web **public** (SEO/SSR); xem ADR 0006 |
 | State server | TanStack Query | Redux — quá nặng cho form CRUD |
 | Auth | JWT **access ngắn** + **refresh rotation** | JWT 7 ngày cố định như hệ cũ |
 | Extension | Chrome MV3 + TS (esbuild) | Giữ vanilla khổng lồ một file — sẽ tách module khi port scanner |
