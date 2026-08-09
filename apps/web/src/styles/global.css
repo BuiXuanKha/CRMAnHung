@@ -9,7 +9,6 @@
   --color-danger: #b42318;
   --shadow-soft: 0 10px 30px rgba(20, 32, 26, 0.08);
   --radius: 14px;
-  --font: 'Be Vietnam Pro', system-ui, sans-serif;
 }
 
 * {
@@ -23,7 +22,7 @@ body {
 
 body {
   margin: 0;
-  font-family: var(--font);
+  /* Font: next/font (Be Vietnam Pro) trên <body> — app/layout.tsx */
   color: var(--color-ink);
   background:
     radial-gradient(circle at top left, rgba(31, 107, 74, 0.12), transparent 40%),

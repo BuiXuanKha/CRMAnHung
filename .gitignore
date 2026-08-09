@@ -6,9 +6,9 @@ node_modules/
 dist/
 build/
 **/dist/
-**/.vite/
 .next/
 **/.next/
+out/
 *.tsbuildinfo
 
 # Env & secrets
