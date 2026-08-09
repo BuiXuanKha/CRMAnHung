@@ -35,9 +35,9 @@ Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Lan
 | ORM / DB | Prisma + **PostgreSQL** | Schema rõ, migrate chuẩn; giống nhau từ dev → prod |
 | Object storage | **Cloudflare R2** (S3 API) | Ảnh/file không nằm disk VPS |
 | Validation | Zod (`@crmanhung/shared`) + Nest ValidationPipe | Contract dùng chung FE/BE/Extension |
-| Auth | JWT access (ngắn) + refresh (httpOnly cookie / storage có rotation) | Bảo mật hơn JWT 7 ngày cố định |
-| Web | React 19 + Vite + React Router + TanStack Query | State server rõ, ít boilerplate |
-| Extension | Chrome MV3 + TypeScript (Vite build) | Cùng type với API |
+| Auth | JWT access (ngắn) + refresh (rotation) | Bảo mật hơn JWT 7 ngày cố định |
+| Web | **Next.js 15 (App Router) + React 19 + TanStack Query** | Routing/layout chuẩn; mở rộng SSR sau này |
+| Extension | Chrome MV3 + TypeScript (esbuild) | Cùng type với API |
 | Lint/format | ESLint + Prettier (workspace) | Chất lượng đồng đều |
 
 ---
@@ -48,7 +48,7 @@ Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Lan
 crmanhung/
 ├── apps/
 │   ├── api/          # NestJS — REST API
-│   ├── web/          # React SPA — nhân viên / admin
+│   ├── web/          # Next.js — nhân viên / admin
 │   └── extension/    # Chrome MV3 — quét Inbox/Messenger
 ├── packages/
 │   └── shared/       # Types, enums, Zod schemas, constants
@@ -84,14 +84,16 @@ Mỗi module: `*.module.ts` → `*.controller.ts` → `*.service.ts` → (option
 
 **Không** nhét business logic vào controller. **Không** gọi Prisma trực tiếp từ controller.
 
-### Web — theo domain UI
+### Web — Next.js App Router
 
 ```
-apps/web/src/
-├── app/            # router, providers
-├── features/       # auth, customers, lodats, transactions, title-services, admin
-├── shared/         # ui kit, hooks, api client, lib
-└── styles/
+apps/web/
+├── app/              # routes (App Router): login, (crm)/*
+├── src/
+│   ├── features/     # auth, customers, …
+│   ├── shared/       # ui, api client
+│   └── styles/
+└── next.config.ts    # output: 'standalone'
 ```
 
 ### Extension
@@ -142,7 +144,7 @@ Meta Inbox / Messenger
   → Extension (scan + JWT)
   → POST /api/v1/customers/from-extension
   → DB (Person + Facebook + Messenger)
-  → Web SPA quản lý qua /api/v1/*
+  → Web quản lý qua /api/v1/*
 ```
 
 API version prefix: `/api/v1` — dễ thay contract sau này mà không phá client cũ trong giai đoạn chuyển tiếp.

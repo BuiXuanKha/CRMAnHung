@@ -9,6 +9,7 @@ Quyết định công nghệ / kiến trúc được ghi ở đây để sau nà
 | [0003](./0003-sqlite-then-optional-pg.md) | SQLite trước; PostgreSQL khi cần | **Superseded** bởi 0004 |
 | [0004](./0004-postgresql.md) | PostgreSQL từ đầu (dev → prod) | Accepted |
 | [0005](./0005-cloudflare-r2.md) | Cloudflare R2 cho mọi file upload | Accepted |
+| [0006](./0006-nextjs-web.md) | Next.js App Router cho Web (thay Vite SPA) | Accepted |
 
 Cách thêm ADR mới:
 

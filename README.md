@@ -19,11 +19,11 @@ Không nhảy cóc. Chi tiết + Definition of Done: **PLAYBOOK**. Skills Cursor
 | App | Công nghệ |
 |-----|-----------|
 | `apps/api` | NestJS + Prisma + **PostgreSQL** + JWT + **Cloudflare R2** |
-| `apps/web` | React 19 + Vite + TypeScript + TanStack Query |
+| `apps/web` | **Next.js 15** (App Router) + React 19 + TanStack Query |
 | `apps/extension` | Chrome MV3 + TypeScript |
 | `packages/shared` | Enums + Zod schemas dùng chung |
 
-Lý do chọn stack: [`docs/adr/0001-tech-stack.md`](docs/adr/0001-tech-stack.md) · Postgres [0004](docs/adr/0004-postgresql.md) · R2 [0005](docs/adr/0005-cloudflare-r2.md).
+Lý do chọn stack: [`docs/adr/0001-tech-stack.md`](docs/adr/0001-tech-stack.md) · Postgres [0004](docs/adr/0004-postgresql.md) · R2 [0005](docs/adr/0005-cloudflare-r2.md) · Next [0006](docs/adr/0006-nextjs-web.md).
 
 ## Yêu cầu
 

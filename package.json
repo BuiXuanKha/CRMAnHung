@@ -10,7 +10,8 @@
       "prisma",
       "@prisma/client",
       "@prisma/engines",
-      "esbuild"
+      "esbuild",
+      "sharp"
     ]
   },
   "scripts": {

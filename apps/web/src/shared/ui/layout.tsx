@@ -1,23 +1,31 @@
-import { Link, Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../features/auth/auth-context';
+'use client';
+
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, type ReactNode } from 'react';
+import { useAuth } from '@/features/auth/auth-context';
 import './layout.css';
 
 const navItems = [
-  { to: '/khach-hang', label: 'Khách hàng' },
-  { to: '/lo-dat', label: 'Lô đất' },
-  { to: '/giao-dich', label: 'Giao dịch' },
-  { to: '/dich-vu-so-do', label: 'Dịch vụ sổ đỏ' },
+  { href: '/khach-hang', label: 'Khách hàng' },
+  { href: '/lo-dat', label: 'Lô đất' },
+  { href: '/giao-dich', label: 'Giao dịch' },
+  { href: '/dich-vu-so-do', label: 'Dịch vụ sổ đỏ' },
 ];
 
-export function AppLayout() {
+export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
   const { user, loading, logout } = useAuth();
 
-  if (loading) {
-    return <div className="boot-screen">Đang tải…</div>;
-  }
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
+  if (loading || !user) {
+    return <div className="boot-screen">Đang tải…</div>;
   }
 
   return (
@@ -29,12 +37,21 @@ export function AppLayout() {
         </div>
         <nav>
           {navItems.map((item) => (
-            <Link key={item.to} to={item.to}>
+            <Link
+              key={item.href}
+              href={item.href}
+              className={pathname === item.href ? 'active' : undefined}
+            >
               {item.label}
             </Link>
           ))}
           {user.role === 'ADMIN' ? (
-            <Link to="/quan-tri/khach-hang">Quản trị khách</Link>
+            <Link
+              href="/quan-tri/khach-hang"
+              className={pathname === '/quan-tri/khach-hang' ? 'active' : undefined}
+            >
+              Quản trị khách
+            </Link>
           ) : null}
         </nav>
         <div className="sidebar-user">
@@ -42,14 +59,17 @@ export function AppLayout() {
             <strong>{user.fullName}</strong>
             <span>{user.role}</span>
           </div>
-          <button type="button" onClick={() => void logout()}>
+          <button
+            type="button"
+            onClick={() => {
+              void logout().then(() => router.replace('/login'));
+            }}
+          >
             Đăng xuất
           </button>
         </div>
       </aside>
-      <main className="content">
-        <Outlet />
-      </main>
+      <main className="content">{children}</main>
     </div>
   );
 }

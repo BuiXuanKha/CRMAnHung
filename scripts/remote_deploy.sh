@@ -7,7 +7,6 @@ ROOT="${CRMANHUNG_ROOT:-/var/www/crmanhung}"
 REPO="$ROOT/repo"
 API="$REPO/apps/api"
 WEB="$REPO/apps/web"
-WEB_DIST="$ROOT/web"
 PM2_BIN="$(command -v pm2)"
 
 pm2_cmd() {
@@ -47,17 +46,20 @@ echo "==> Build API"
 cd "$API"
 pnpm run build
 
-echo "==> Build Web"
+echo "==> Build Web (Next.js standalone)"
 cd "$WEB"
-# Production web gọi API same-origin /api/v1 (nginx proxy)
 if [[ ! -f .env.production ]]; then
-  printf 'VITE_API_URL=/api/v1\n' > .env.production
+  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=false\n' > .env.production
 fi
 pnpm run build
 
-echo "==> Publish Web dist → $WEB_DIST"
-mkdir -p "$WEB_DIST"
-rsync -a --delete "$WEB/dist/" "$WEB_DIST/"
+# standalone cần static + public cạnh server.js
+STANDALONE="$WEB/.next/standalone"
+mkdir -p "$STANDALONE/apps/web/.next"
+rsync -a "$WEB/.next/static/" "$STANDALONE/apps/web/.next/static/"
+if [[ -d "$WEB/public" ]]; then
+  rsync -a "$WEB/public/" "$STANDALONE/apps/web/public/"
+fi
 
 echo "==> PM2 restart crmanhung-api"
 if pm2_cmd describe crmanhung-api >/dev/null 2>&1; then
@@ -66,12 +68,21 @@ else
   cd "$API"
   pm2_cmd start ecosystem.config.cjs
 fi
+
+echo "==> PM2 restart crmanhung-web"
+if pm2_cmd describe crmanhung-web >/dev/null 2>&1; then
+  pm2_cmd restart crmanhung-web --update-env
+else
+  cd "$WEB"
+  pm2_cmd start ecosystem.config.cjs
+fi
 pm2_cmd save
 
 echo "==> Health checks"
 sleep 2
 curl -sf "http://127.0.0.1:5050/api/v1/health"
 echo
+curl -sf "http://127.0.0.1:5001/" >/dev/null && echo "web_local=ok" || echo "web_local=fail"
 code=$(curl -s -o /dev/null -w '%{http_code}' https://crm-next.anhungland.com/ || true)
 echo "web_http=$code"
 pm2_cmd list

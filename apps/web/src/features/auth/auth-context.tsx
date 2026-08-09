@@ -1,3 +1,5 @@
+'use client';
+
 import {
   createContext,
   useCallback,
@@ -14,7 +16,7 @@ import {
   getAccessToken,
   getRefreshToken,
   setTokens,
-} from '../../shared/api/client';
+} from '@/shared/api/client';
 
 type AuthContextValue = {
   user: AuthUser | null;

@@ -1,18 +1,27 @@
-import { FormEvent, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+'use client';
+
+import { FormEvent, useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from './auth-context';
-import { ApiError } from '../../shared/api/client';
+import { ApiError } from '@/shared/api/client';
 import './login.css';
 
-export function LoginPage() {
+export function LoginForm() {
+  const router = useRouter();
   const { user, loading, login } = useAuth();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace('/khach-hang');
+    }
+  }, [loading, user, router]);
+
   if (!loading && user) {
-    return <Navigate to="/khach-hang" replace />;
+    return <div className="login-page">Đang chuyển…</div>;
   }
 
   const onSubmit = async (e: FormEvent) => {
@@ -21,6 +30,7 @@ export function LoginPage() {
     setSubmitting(true);
     try {
       await login(username, password);
+      router.replace('/khach-hang');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Đăng nhập thất bại');
     } finally {
@@ -58,7 +68,7 @@ export function LoginPage() {
 
         {error ? <p className="login-error">{error}</p> : null}
 
-        <button type="submit" disabled={submitting}>
+        <button type="submit" disabled={submitting || loading}>
           {submitting ? 'Đang đăng nhập…' : 'Đăng nhập'}
         </button>
       </form>

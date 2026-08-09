@@ -10,7 +10,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 1. **Docs** — `docs/domains/<domain>.md` (status ≥ Ready for mock)
 2. **Skill** — cập nhật `.cursor/skills` nếu xuất hiện pattern mới
 3. **Contract** — Zod/types trong `packages/shared`
-4. **UI + mock** — `apps/web` với `VITE_USE_MOCK` / mock module
+4. **UI + mock** — `apps/web` với `NEXT_PUBLIC_USE_MOCK` / mock module
 5. **API** — Nest module implement contract
 6. **Nối UI → API**
 7. **Extension** chỉ nếu domain cần ingest Meta

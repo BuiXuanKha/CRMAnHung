@@ -22,7 +22,7 @@ Không thuê server mới. Trên cùng Mắt Bão:
 
 ```
 crm.anhungland.com          →  /var/www/anhungland-crm   (cũ, port 5000)
-crm-next.anhungland.com     →  /var/www/crmanhung       (mới, port 5050)
+crm-next.anhungland.com     →  Next :5001 + API :5050
 ```
 
 | Lý do chọn | |
@@ -43,7 +43,6 @@ crm-next.anhungland.com     →  /var/www/crmanhung       (mới, port 5050)
 ```
 /var/www/crmanhung/
 ├── repo/                 # monorepo sync từ GitHub (apps/, packages/, …)
-├── web/                  # nginx root = bản build apps/web/dist
 └── scripts/
     └── remote_deploy.sh
 ```
@@ -53,7 +52,8 @@ Postgres và R2 **không** nằm trong cây trên — kết nối qua `.env`.
 | Process | Port | Ghi chú |
 |---------|------|---------|
 | `anhungland-api` (cũ) | 5000 | Giữ nguyên |
-| `crmanhung-api` (mới) | **5050** | `apps/api/ecosystem.config.cjs` |
+| `crmanhung-api` (mới) | **5050** | NestJS — `apps/api/ecosystem.config.cjs` |
+| `crmanhung-web` (mới) | **5001** | Next.js standalone — `apps/web/ecosystem.config.cjs` |
 | PostgreSQL | 5432 (hoặc socket) | DB `crmanhung` — user riêng |
 | Cloudflare R2 | — | Bucket staging/prod; ảnh qua `R2_PUBLIC_BASE_URL` |
 
@@ -74,7 +74,7 @@ Tạo bản ghi A:
 ### 2. Thư mục + quyền
 
 ```bash
-sudo mkdir -p /var/www/crmanhung/{repo,web,scripts}
+sudo mkdir -p /var/www/crmanhung/{repo,scripts}
 sudo chown -R deploy:deploy /var/www/crmanhung
 ```
 
@@ -140,6 +140,7 @@ sudo nginx -t && sudo systemctl reload nginx
 ```
 
 Ảnh **không** proxy qua nginx VPS — client lấy URL từ `R2_PUBLIC_BASE_URL`.
+Web Next.js proxy tới port **5001**; API Nest proxy `/api/` tới **5050**.
 
 ### 7. Sudo PM2 cho user `deploy`
 
@@ -167,7 +168,7 @@ Workflow: [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-s
 
 - Trigger: **workflow_dispatch** (bấm tay) — chưa auto-deploy mỗi push `main`.
 - Rsync monorepo → `/var/www/crmanhung/repo/` (giữ `.env` trên server)
-- Chạy `scripts/remote_deploy.sh`: `pnpm install` → Prisma migrate (Postgres) → build web → publish `web/` → `pm2 restart crmanhung-api`
+- Chạy `scripts/remote_deploy.sh`: `pnpm install` → Prisma migrate → build Nest + Next standalone → `pm2 restart crmanhung-api` + `crmanhung-web`
 
 Sau khi DNS + nginx + Postgres + R2 + `.env` sẵn sàng: Actions → **Deploy CRMAnHung (staging)** → Run workflow.
 
@@ -177,7 +178,7 @@ Sau khi DNS + nginx + Postgres + R2 + `.env` sẵn sàng: Actions → **Deploy C
 
 1. Backup Postgres staging/prod + snapshot R2  
 2. Migrate data từ SQLite/`img/` hệ cũ → Postgres + R2  
-3. Đổi nginx `crm.anhungland.com` → `root` + `proxy_pass` sang crmanhung (port 5050)  
+3. Đổi nginx `crm.anhungland.com` → proxy Next (5001) + API (5050)  
 4. Giữ `crm-next` hoặc tắt sau khi ổn định  
 5. Giữ `/var/www/anhungland-crm` tối thiểu 30 ngày để rollback  
 
@@ -188,8 +189,8 @@ Chi tiết data: [`MIGRATION.md`](./MIGRATION.md).
 ## Checklist an toàn
 
 - [ ] Không rsync đè `.env`
-- [ ] Port 5050 ≠ 5000
-- [ ] PM2 name `crmanhung-api` ≠ `anhungland-api`
+- [ ] Port 5050 ≠ 5000; Web Next 5001
+- [ ] PM2 `crmanhung-api` / `crmanhung-web` ≠ `anhungland-api`
 - [ ] CORS chỉ origin `crm-next` (rồi thêm `crm` lúc cutover)
 - [ ] `DATABASE_URL` trỏ Postgres (không `file:`)
 - [ ] R2 keys chỉ nằm trên server / secrets — không commit

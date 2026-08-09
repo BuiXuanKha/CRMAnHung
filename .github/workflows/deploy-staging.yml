@@ -74,7 +74,7 @@ jobs:
           source "$HOME/.ssh/deploy.env"
           RSH="$HOME/.ssh/rsh.sh"
 
-          "$RSH" "$REMOTE" "mkdir -p ${REMOTE_ROOT}/{repo,web,scripts}"
+          "$RSH" "$REMOTE" "mkdir -p ${REMOTE_ROOT}/{repo,scripts}"
 
           # Đồng bộ source — giữ .env trên server (Postgres + R2 secrets)
           rsync -az --delete \
@@ -83,7 +83,7 @@ jobs:
             --exclude .env \
             --exclude .env.* \
             --exclude '!.env.example' \
-            --exclude apps/web/dist/ \
+            --exclude apps/web/.next/ \
             --exclude apps/extension/dist/ \
             -e "$RSH" \
             ./ "${REMOTE}:${REMOTE_ROOT}/repo/"

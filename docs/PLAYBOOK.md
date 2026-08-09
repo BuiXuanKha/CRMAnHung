@@ -69,7 +69,7 @@ Tham chiếu nhanh:
 ### ④ UI + mock data
 
 - Feature trong `apps/web/src/features/<domain>/`.
-- `mocks/` hoặc `mock-api.ts` — bật bằng `VITE_USE_MOCK=true` (mặc định dev có thể bật).
+- `mocks/` hoặc `mock-api.ts` — bật bằng `NEXT_PUBLIC_USE_MOCK=true` (mặc định dev có thể bật).
 - UI phải dùng type từ `@crmanhung/shared`, không invent shape riêng.
 
 ### ⑤ API

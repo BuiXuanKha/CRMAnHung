@@ -60,10 +60,11 @@ jobs:
         working-directory: apps/api
         run: pnpm run build
 
-      - name: Build Web
+      - name: Build Web (Next.js)
         working-directory: apps/web
         env:
-          VITE_API_URL: /api/v1
+          NEXT_PUBLIC_API_URL: /api/v1
+          NEXT_PUBLIC_USE_MOCK: 'false'
         run: pnpm run build
 
       - name: Build Extension
