@@ -77,7 +77,9 @@ if (!existsSync(apiEnv)) {
     else if (key === 'DATABASE_URL' && !val.startsWith('postgresql'))
       bad('DATABASE_URL phải postgresql://…');
     else if (key === 'R2_PUBLIC_BASE_URL' && val.includes('r2.dev'))
-      warn(`${key} đang dùng r2.dev — đổi sang https://cdn.anhungland.com khi CDN Active`);
+      warn(`${key} vẫn dùng r2.dev — nên là https://cdn.anhungland.com`);
+    else if (key === 'R2_PUBLIC_BASE_URL' && val.includes('cdn.anhungland.com'))
+      ok(`${key} (CDN)`);
     else ok(key);
   }
 }

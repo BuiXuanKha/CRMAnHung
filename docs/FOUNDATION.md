@@ -28,8 +28,8 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | Web shell **public** `/` | Ready | landing stub — mở rộng sau |
 | Postgres local (`docker compose`) | Ready (cần Docker) | `pnpm db:up` |
 | R2 keys + endpoint + bucket | Ready | skill `cloudflare-r2` + `.env` |
-| R2 Public URL tạm `r2.dev` | Ready | đang dùng |
-| R2 **custom domain** `cdn.anhungland.com` | **Owner đang làm** | Connect Domain trên Cloudflare |
+| R2 Public URL tạm `r2.dev` | Ready (dự phòng) | có thể Disable sau khi CDN Active |
+| R2 **custom domain** `cdn.anhungland.com` | Ready | TLS 1.3 · `R2_PUBLIC_BASE_URL` đã đổi |
 | `apps/web/.env` | Ready sau `pnpm doctor` / copy example | |
 | ESLint workspace | Pending (không chặn P1) | placeholder script |
 | Postgres trên VPS staging | Owner / deploy lúc P0b | xem `DEPLOYMENT.md` |
@@ -56,7 +56,5 @@ pnpm dev             # API :5050 + Web :5001
 
 ## Việc chủ sở hữu còn lại (không phải code)
 
-1. Cloudflare R2 → Connect Domain **`cdn.anhungland.com`** → báo agent khi **Active**.
+1. ~~Cloudflare R2 custom domain~~ — đã Connect `cdn.anhungland.com`.
 2. (Khi deploy staging) Postgres trên Mắt Bão + DNS/nginx `crm-next` — `DEPLOYMENT.md`.
-
-Khi CDN Active: agent cập nhật `R2_PUBLIC_BASE_URL=https://cdn.anhungland.com` trong `.env` + skill.
