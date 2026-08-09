@@ -74,21 +74,17 @@ jobs:
           source "$HOME/.ssh/deploy.env"
           RSH="$HOME/.ssh/rsh.sh"
 
-          "$RSH" "$REMOTE" "mkdir -p ${REMOTE_ROOT}/{repo,web,uploads,database,scripts}"
+          "$RSH" "$REMOTE" "mkdir -p ${REMOTE_ROOT}/{repo,web,scripts}"
 
-          # Đồng bộ source — giữ .env, DB, uploads, node_modules trên server
+          # Đồng bộ source — giữ .env trên server (Postgres + R2 secrets)
           rsync -az --delete \
             --exclude node_modules/ \
             --exclude .git/ \
             --exclude .env \
             --exclude .env.* \
             --exclude '!.env.example' \
-            --exclude apps/api/prisma/dev.db \
-            --exclude apps/api/prisma/dev.db-* \
-            --exclude apps/api/uploads/ \
             --exclude apps/web/dist/ \
             --exclude apps/extension/dist/ \
-            --exclude '**/*.db' \
             -e "$RSH" \
             ./ "${REMOTE}:${REMOTE_ROOT}/repo/"
 

@@ -32,7 +32,8 @@ Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Lan
 | Monorepo | pnpm workspaces | Shared package, cài đặt nhất quán |
 | Language | TypeScript (strict) | An toàn kiểu, refactor tự tin |
 | API | NestJS 11 (Express) | Module rõ ràng, DI, guards/pipes sẵn |
-| ORM / DB | Prisma + SQLite (dev/prod giai 1) | Schema rõ, migrate chuẩn; sau có thể đổi PostgreSQL |
+| ORM / DB | Prisma + **PostgreSQL** | Schema rõ, migrate chuẩn; giống nhau từ dev → prod |
+| Object storage | **Cloudflare R2** (S3 API) | Ảnh/file không nằm disk VPS |
 | Validation | Zod (`@crmanhung/shared`) + Nest ValidationPipe | Contract dùng chung FE/BE/Extension |
 | Auth | JWT access (ngắn) + refresh (httpOnly cookie / storage có rotation) | Bảo mật hơn JWT 7 ngày cố định |
 | Web | React 19 + Vite + React Router + TanStack Query | State server rõ, ít boilerplate |
@@ -65,6 +66,7 @@ apps/api/src/
 ├── config/                 # env validation
 ├── common/                 # guards, filters, decorators, interceptors
 ├── prisma/                 # PrismaService
+├── storage/                # Cloudflare R2 (S3 client)
 └── modules/
     ├── health/
     ├── auth/
@@ -128,7 +130,7 @@ Vai trò: `STAFF` (dữ liệu theo `employeeId`) · `ADMIN` (toàn cục + cấ
 4. **Helmet**, rate limit login, giới hạn body size có chủ đích.
 5. **Authorization** ở service layer (ownership), không chỉ dựa vào UI ẩn nút.
 6. **Secrets** chỉ qua env; không commit `.env`.
-7. Upload ảnh: validate MIME/size; serve tĩnh tách path; không tin client path.
+7. Upload: validate MIME/size → R2; DB lưu **object key**; không tin path client; không serve file từ disk VPS.
 8. Extension: token trong `chrome.storage.session` / local có scope rõ; API URL cấu hình, không hardcode prod secret.
 
 ---
@@ -156,7 +158,7 @@ API version prefix: `/api/v1` — dễ thay contract sau này mà không phá cl
 | **P1 — Customers** | CRUD khách, ingest extension, care history |
 | **P2 — Lodats + Addresses** | Lô đất, map khách–lô, địa chỉ, import Excel |
 | **P3 — Transactions + Title** | Giao dịch, dịch vụ sổ đỏ |
-| **P4 — Hardening** | Admin registry, CI, deploy, migration data từ SQLite cũ |
+| **P4 — Hardening** | Admin registry, CI, deploy, migration data (SQLite cũ → Postgres + `img/` → R2) |
 | **P5 — Cutover** | Song song → chuyển DNS/nginx → tắt hệ cũ |
 
 Chi tiết migrate dữ liệu: xem `docs/MIGRATION.md`.

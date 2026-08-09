@@ -15,14 +15,14 @@ build/
 .env.*.local
 !.env.example
 
-# Database & uploads
+# Database & local artifacts
 *.db
 *.db-journal
 *.db-wal
 *.db-shm
 apps/api/prisma/dev.db
-apps/api/uploads/
-database/
+*.sql.gz
+dump/
 
 # IDE / OS
 .DS_Store

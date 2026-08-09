@@ -141,4 +141,4 @@ Trong mỗi phase domain: **luôn** đi ①→⑨, không code API trước docs
 - Không god-file (> ~400 dòng hãy tách).
 - Không business logic trong React component / Nest controller.
 - Không `origin: true` CORS trên production.
-- Không commit `.env`, DB, uploads.
+- Không commit `.env`, secrets R2, dump DB.

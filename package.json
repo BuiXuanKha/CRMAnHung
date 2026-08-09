@@ -23,6 +23,8 @@
     "typecheck": "pnpm -r run typecheck",
     "db:generate": "pnpm --filter @crmanhung/api db:generate",
     "db:migrate": "pnpm --filter @crmanhung/api db:migrate",
-    "db:seed": "pnpm --filter @crmanhung/api db:seed"
+    "db:seed": "pnpm --filter @crmanhung/api db:seed",
+    "db:up": "docker compose up -d postgres",
+    "db:down": "docker compose down"
   }
 }

@@ -22,7 +22,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 - Code API trước khi có domain doc + contract
 - Copy nguyên file lớn từ FacebookCustomerCRM
 - God-file / business logic trong controller hoặc React view
-- Commit `.env`, `*.db`, uploads
+- Commit `.env`, secrets R2, dump DB
 
 ## Definition of Done
 

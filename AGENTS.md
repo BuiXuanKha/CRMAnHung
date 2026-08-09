@@ -32,4 +32,4 @@ Gọi skill bằng `/skill-name` hoặc để agent tự chọn theo `descriptio
 
 ## Stack (tóm tắt)
 
-pnpm monorepo · NestJS + Prisma + SQLite · React/Vite · Zod shared · Chrome MV3 — chi tiết ADR 0001.
+pnpm monorepo · NestJS + Prisma + **PostgreSQL** · Cloudflare **R2** · React/Vite · Zod shared · Chrome MV3 — chi tiết ADR 0001 / 0004 / 0005.

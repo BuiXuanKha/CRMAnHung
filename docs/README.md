@@ -4,8 +4,8 @@
 |-----|--------|
 | [PLAYBOOK.md](./PLAYBOOK.md) | **Cách làm việc** — thứ tự docs → skill → mock → API |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Kiến trúc tổng thể |
-| [DEPLOYMENT.md](./DEPLOYMENT.md) | Deploy Mắt Bão / staging |
-| [MIGRATION.md](./MIGRATION.md) | Migrate từ FacebookCustomerCRM |
+| [DEPLOYMENT.md](./DEPLOYMENT.md) | Deploy Mắt Bão / staging (Postgres + R2) |
+| [MIGRATION.md](./MIGRATION.md) | Migrate từ FacebookCustomerCRM → Postgres + R2 |
 | [adr/](./adr/) | Architecture Decision Records |
 | [domains/](./domains/) | Đặc tả nghiệp vụ từng module |
 

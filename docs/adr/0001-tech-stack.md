@@ -12,7 +12,8 @@
 | Language | **TypeScript strict** | JS thuần — đã gây khó refactor ở hệ cũ |
 | API | **NestJS** (Express adapter) | Raw Express — thiếu khung module/guard; Fastify-only — Nest đủ và quen thuộc hơn cho CRUD nội bộ |
 | ORM | **Prisma** | SQL tay / callback migrate — đã đau ở hệ cũ |
-| DB | **SQLite** (file) ban đầu | PostgreSQL ngay — xem ADR 0003 |
+| DB | **PostgreSQL** từ đầu | SQLite — đã supersede (ADR 0003 → 0004) |
+| Object storage | **Cloudflare R2** (S3 API) | Disk VPS `/uploads` — phình disk, khó scale (ADR 0005) |
 | Validation / contract | **Zod** trong `@crmanhung/shared` | Chỉ class-validator — không share được với Web/Extension |
 | Web | **React 19 + Vite + React Router + TanStack Query** | Next.js — CRM là SPA nội bộ sau login, không cần RSC/SSR |
 | State server | TanStack Query | Redux — quá nặng cho form CRUD |
@@ -26,9 +27,10 @@
 - Contract Zod là nguồn sự thật cho shape dữ liệu giữa UI mock, API, extension.
 - Nest module = biên giới domain → dễ tìm code sau 5 năm.
 - Staging `crm-next` tách khỏi production `crm.anhungland.com`.
+- DB = Postgres; file = R2 — VPS chỉ chạy API + static Web.
 
 ## Khi nào revisit
 
 - Team > 3 người full-time → cân nhắc Turborepo/Nx.
-- Concurrent write / multi-server → PostgreSQL (ADR 0003).
 - Cần mobile native → tách BFF hoặc OpenAPI generate client.
+- Managed Postgres / private R2 objects — xem ADR 0004 / 0005.

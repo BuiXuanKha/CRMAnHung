@@ -18,30 +18,36 @@ Không nhảy cóc. Chi tiết + Definition of Done: **PLAYBOOK**. Skills Cursor
 
 | App | Công nghệ |
 |-----|-----------|
-| `apps/api` | NestJS + Prisma + SQLite + JWT (access/refresh) |
+| `apps/api` | NestJS + Prisma + **PostgreSQL** + JWT + **Cloudflare R2** |
 | `apps/web` | React 19 + Vite + TypeScript + TanStack Query |
 | `apps/extension` | Chrome MV3 + TypeScript |
 | `packages/shared` | Enums + Zod schemas dùng chung |
 
-Lý do chọn stack: [`docs/adr/0001-tech-stack.md`](docs/adr/0001-tech-stack.md).
+Lý do chọn stack: [`docs/adr/0001-tech-stack.md`](docs/adr/0001-tech-stack.md) · Postgres [0004](docs/adr/0004-postgresql.md) · R2 [0005](docs/adr/0005-cloudflare-r2.md).
 
 ## Yêu cầu
 
 - Node.js ≥ 22
 - pnpm 10+
+- Docker (Postgres local) hoặc Postgres sẵn có
+- Cloudflare R2 (bắt buộc khi upload / production)
 
 ## Bắt đầu nhanh
 
 ```bash
 pnpm install
 
-# API env
+# Postgres local
+pnpm db:up
+
+# API / Web env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
+# Điền R2_* nếu sẽ test upload
 
 # DB
 pnpm db:generate
-pnpm --filter @crmanhung/api exec prisma migrate dev --name init
+pnpm --filter @crmanhung/api exec prisma migrate deploy
 pnpm db:seed
 
 # Chạy API + Web

@@ -3,9 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+// Image/attachment fields use objectKey = Cloudflare R2 object key (ADR 0005).
 
 /// Nhân viên / admin
 model User {
@@ -115,7 +117,7 @@ model CustomerMessengerMessage {
 model CustomerMessengerImage {
   id        String   @id @default(cuid())
   messageId String
-  filePath  String
+  objectKey  String
   createdAt DateTime @default(now())
 
   message CustomerMessengerMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
@@ -205,7 +207,7 @@ model Address {
 model AddressImage {
   id        String   @id @default(cuid())
   addressId String
-  filePath  String
+  objectKey  String
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 
@@ -233,7 +235,7 @@ model Lodat {
 model LodatImage {
   id        String   @id @default(cuid())
   lodatId   String
-  filePath  String
+  objectKey  String
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 
@@ -243,7 +245,7 @@ model LodatImage {
 model LodatTempImage {
   id        String   @id @default(cuid())
   sessionId String
-  filePath  String
+  objectKey  String
   createdAt DateTime @default(now())
 
   @@index([sessionId])
@@ -296,7 +298,7 @@ model TransactionParty {
 model TransactionAttachment {
   id            String   @id @default(cuid())
   transactionId String
-  filePath      String
+  objectKey      String
   label         String?
   createdAt     DateTime @default(now())
 
@@ -340,7 +342,7 @@ model TitleServiceMoney {
 model TitleServiceAttachment {
   id             String   @id @default(cuid())
   titleServiceId String
-  filePath       String
+  objectKey       String
   label          String?
   createdAt      DateTime @default(now())
 
@@ -349,7 +351,7 @@ model TitleServiceAttachment {
 
 model ImageRotation {
   id        String   @id @default(cuid())
-  filePath  String   @unique
+  objectKey  String   @unique
   degrees   Int      @default(0)
   updatedAt DateTime @updatedAt
 }
