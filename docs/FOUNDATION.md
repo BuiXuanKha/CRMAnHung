@@ -30,7 +30,7 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | R2 keys + endpoint + bucket | Ready | skill `cloudflare-r2` + `.env` |
 | R2 Public URL tạm `r2.dev` | Ready (dự phòng) | có thể Disable sau khi CDN Active |
 | R2 **custom domain** `cdn.anhungland.com` | Ready | TLS 1.3 · public assets |
-| R2 **private bucket** `anhungland-crm-private` | **Owner tạo bucket** | Không public URL; signed URL trong code đã sẵn |
+| R2 **private bucket** `anhungland-crm-private` | Ready (bucket đã tạo) | Cần token Read & Write **cả 2** bucket |
 | `apps/web/.env` | Ready sau `pnpm doctor` / copy example | |
 | ESLint workspace | Pending (không chặn P1) | placeholder script |
 | Postgres trên VPS staging | Owner / deploy lúc P0b | xem `DEPLOYMENT.md` |
