@@ -18,11 +18,11 @@ Repo phải **private**. Không đăng secrets ra chat công khai / PR screensho
 | `R2_ENDPOINT` | `https://271dac0fb7f61cb74a3d5427b93661bc.r2.cloudflarestorage.com` |
 | `R2_ACCESS_KEY_ID` | `7a6b2fb153f8469fc4d09e242aea725a` |
 | `R2_SECRET_ACCESS_KEY` | `908590b4b338ecb65ffa0a84661eefa5bb32f693ac28a359a8eb6cbf7932111f` |
-| `R2_PUBLIC_BASE_URL` | Tạm: `https://pub-a7fdc52e01074525b49243e98faf8b81.r2.dev` → **đổi sang** `https://cdn.anhungland.com` khi Custom Domain Active |
+| `R2_PUBLIC_BASE_URL` | `https://cdn.anhungland.com` |
 
 - Region: Asia-Pacific (APAC)
 - Token Cloudflare dạng `cfat_…` **không** dùng cho S3 upload — bỏ qua
-- **Production / web public:** bắt buộc custom domain `cdn.anhungland.com` (xem `docs/R2-SETUP.md`). Không dùng `pub-*.r2.dev` làm URL chính khi đã Active CDN.
+- Custom domain R2: `cdn.anhungland.com` (TLS 1.3). Dự phòng tạm: `https://pub-a7fdc52e01074525b49243e98faf8b81.r2.dev`
 
 ## Bootstrap `.env` khi thiếu
 
