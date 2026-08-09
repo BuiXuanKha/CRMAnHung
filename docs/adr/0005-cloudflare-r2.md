@@ -24,7 +24,13 @@
 | Account / keys | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` |
 | Bucket | `R2_BUCKET` (vd. `crmanhung-staging`, `crmanhung-prod`) |
 | Endpoint | `R2_ENDPOINT` = `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` |
-| Public URL | `R2_PUBLIC_BASE_URL` (custom domain hoặc `*.r2.dev`) |
+| Public URL | `R2_PUBLIC_BASE_URL` — **chốt production:** `https://cdn.anhungland.com` (custom domain); `pub-*.r2.dev` chỉ tạm |
+
+## Custom domain (web public)
+
+- Domain CDN đã chọn: **`cdn.anhungland.com`** gắn bucket `anhungland-crm`.
+- Hướng dẫn chủ sở hữu: [`../R2-SETUP.md`](../R2-SETUP.md).
+- Sau khi DNS Active, mọi env/skill dùng `R2_PUBLIC_BASE_URL=https://cdn.anhungland.com`.
 
 - Nginx **không** serve `/uploads/` từ disk.
 - Migrate từ hệ cũ: copy `img/` → R2, map path cũ → object key mới (P4).

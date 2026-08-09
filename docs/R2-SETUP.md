@@ -1,8 +1,8 @@
 # Hướng dẫn Cloudflare R2 — CRMAnHung
 
-Dành cho chủ sở hữu (không cần biết lập trình). Làm lần lượt các bước dưới.
+Dành cho chủ sở hữu. Agent đọc thêm skill `.cursor/skills/cloudflare-r2/SKILL.md`.
 
-**Đã lưu trong repo (từ màn Settings bucket):**
+## Đã có sẵn
 
 | Mục | Giá trị |
 |-----|---------|
@@ -10,105 +10,73 @@ Dành cho chủ sở hữu (không cần biết lập trình). Làm lần lượ
 | Bucket | `anhungland-crm` |
 | Endpoint | `https://271dac0fb7f61cb74a3d5427b93661bc.r2.cloudflarestorage.com` |
 | Region | Asia-Pacific (APAC) |
+| Access Key + Secret | Trong `apps/api/.env` + skill `cloudflare-r2` |
+| Public URL tạm (`r2.dev`) | `https://pub-a7fdc52e01074525b49243e98faf8b81.r2.dev` |
 
-File cấu hình mẫu: `apps/api/.env.example` (đã điền 3 dòng trên).
+## Đang chuẩn bị (web public): Custom Domain
 
-**Trạng thái cấu hình (cập nhật 2026-08-09):**
+**Domain đã chốt:** `cdn.anhungland.com`  
+→ Sau khi Active: `R2_PUBLIC_BASE_URL=https://cdn.anhungland.com`
 
-| Mục | Trạng thái |
-|-----|------------|
-| Account ID / Endpoint / Bucket | Đã lưu `.env.example` + skill `cloudflare-r2` |
-| Access Key ID + Secret | `apps/api/.env` (gitignored) + skill **`cloudflare-r2`** (cho agent bootstrap) |
-| Token `cfat_…` (Cloudflare API) | Không cần cho upload S3 |
-| `R2_PUBLIC_BASE_URL` | `https://pub-a7fdc52e01074525b49243e98faf8b81.r2.dev` |
-
-**Cho Cursor Agent:** dùng skill [`.cursor/skills/cloudflare-r2/SKILL.md`](../.cursor/skills/cloudflare-r2/SKILL.md) — không hỏi lại chủ sở hữu.
+Vì sao: URL `pub-*.r2.dev` bị giới hạn tốc độ, không phù hợp production / web khách xem ảnh.
 
 ---
 
-## Bước A — Tạo API Token (lấy 2 key)
+## Việc bạn làm trên Cloudflare (Custom Domain)
 
-1. Vào [Cloudflare Dashboard](https://dash.cloudflare.com) → đăng nhập.
-2. Menu trái: **R2 Object Storage**.
-3. Góc phải / phía trên: **Manage R2 API Tokens** (hoặc **API Tokens**).
-4. Bấm **Create API token**.
-5. Đặt tên, ví dụ: `crmanhung-api`.
-6. Permissions:
-   - Object: **Read & Write**
-   - (Nếu hỏi Apply to) chọn bucket **`anhungland-crm`** — hoặc All buckets nếu chỉ có 1 bucket.
-7. Bấm **Create API Token**.
-8. Màn hình sẽ hiện **một lần**:
-   - **Access Key ID**
-   - **Secret Access Key**
-9. **Copy ngay** 2 dòng đó (Secret không hiện lại lần sau).
-10. Gửi cho agent qua chat **hoặc** tự dán vào file `.env` trên máy/server (không đưa lên GitHub công khai nếu repo public).
+### Điều kiện
 
-> Không chụp Secret lên group chat rộng / không commit vào git.
+- Domain `anhungland.com` **đang quản lý DNS trên Cloudflare** (cùng account với R2).  
+  Nếu domain đang ở nhà khác (Mắt Bão / nhà đăng ký) mà **chưa** trỏ nameserver về Cloudflare → báo agent trước khi làm.
 
----
+### Các bước
 
-## Bước B — Cho phép web xem ảnh (Public URL)
+1. Vào [Cloudflare Dashboard](https://dash.cloudflare.com) → **R2** → bucket **`anhungland-crm`**.
+2. Tab **Settings**.
+3. Mục **Custom Domains** → **Connect Domain** (hoặc Add).
+4. Nhập: `cdn.anhungland.com` → Continue / Connect.
+5. Cloudflare thường **tự tạo** bản ghi DNS kiểu CNAME cho `cdn` trỏ về R2.  
+   Nếu hỏi xác nhận DNS → **Confirm** / Allow.
+6. Đợi trạng thái **Active** (có thể vài phút). SSL sẽ hiện hợp lệ khi xong.
+7. Thử mở trình duyệt:  
+   `https://cdn.anhungland.com`  
+   (có thể 404 / trang trống nếu chưa có file — miễn là **không** lỗi DNS/SSL là được).
+8. **Gửi cho agent** (hoặc chụp màn Active):  
+   `R2_PUBLIC_BASE_URL=https://cdn.anhungland.com`
 
-Trên bucket **anhungland-crm** → **Settings**, hiện đang:
+Agent sẽ cập nhật `.env`, `.env.example`, skill `cloudflare-r2`.
 
-- Custom Domains: chưa gắn  
-- Public Development URL: **Disabled**
+### Giữ hay tắt `r2.dev`?
 
-App cần một URL công khai để `<img src="…">` hiển thị được.
-
-### Cách 1 — Nhanh (dev / staging): bật R2.dev
-
-1. Bucket **anhungland-crm** → **Settings**.
-2. Mục **Public Development URL** → **Allow Access** / Enable.
-3. Cloudflare cho một URL dạng:  
-   `https://pub-xxxxxxxxxxxx.r2.dev`
-4. Copy URL đó → đó là `R2_PUBLIC_BASE_URL` (không có dấu `/` ở cuối).
-
-### Cách 2 — Production đẹp hơn: Custom Domain
-
-1. Cùng trang Settings → **Custom Domains** → **Connect Domain**.
-2. Ví dụ: `cdn.anhungland.com` (domain phải nằm trong Cloudflare).
-3. Làm theo hướng dẫn DNS (thường tự thêm bản ghi).
-4. Khi Active: `R2_PUBLIC_BASE_URL=https://cdn.anhungland.com`
-
-Có thể làm Cách 1 trước để code chạy; sau gắn custom domain rồi đổi biến env.
+- Có thể **giữ Enable** `pub-….r2.dev` làm dự phòng khi test.
+- App **chính** dùng `cdn.anhungland.com` sau khi Active.
 
 ---
 
-## Bước C — Điền vào `.env` API
+## API Token (đã làm — chỉ khi tạo lại)
 
-Trên máy dev hoặc server staging (`apps/api/.env`):
+1. R2 → **Manage R2 API Tokens** → Create  
+2. Object Read & Write · bucket `anhungland-crm`  
+3. Lưu Access Key ID + Secret (hiện một lần)
 
-```env
-R2_ACCOUNT_ID=271dac0fb7f61cb74a3d5427b93661bc
-R2_BUCKET=anhungland-crm
-R2_ENDPOINT=https://271dac0fb7f61cb74a3d5427b93661bc.r2.cloudflarestorage.com
-R2_ACCESS_KEY_ID=...dán Access Key ID...
-R2_SECRET_ACCESS_KEY=...dán Secret...
-R2_PUBLIC_BASE_URL=https://pub-....r2.dev
-```
-
-Production mẫu: `apps/api/.env.production.example`.
+Token `cfat_…` không dùng cho upload S3.
 
 ---
 
-## App dùng R2 thế nào (để bạn hiểu)
+## App dùng R2 thế nào
 
-1. Nhân viên / extension upload ảnh → **API Nest** nhận file.
-2. API kiểm tra loại/size → gửi lên R2 (`PutObject`).
-3. Database chỉ lưu **object key** (đường dẫn trong bucket), không lưu file trên VPS.
-4. Web hiện ảnh bằng: `R2_PUBLIC_BASE_URL` + `/` + object key.
+1. Upload → API Nest → R2 `PutObject`  
+2. DB lưu `objectKey`  
+3. Web hiện: `https://cdn.anhungland.com/<objectKey>`
 
-Chi tiết kỹ thuật: [`adr/0005-cloudflare-r2.md`](./adr/0005-cloudflare-r2.md).
+ADR: [`adr/0005-cloudflare-r2.md`](./adr/0005-cloudflare-r2.md).
 
 ---
 
-## Checklist gửi lại cho agent
+## Checklist
 
-Khi xong, gửi (hoặc xác nhận đã điền `.env`):
-
-- [ ] Access Key ID  
-- [ ] Secret Access Key  
-- [ ] Public base URL (sau khi bật R2.dev hoặc custom domain)  
-
-Account ID + bucket + endpoint **không cần gửi lại** — đã lưu trong repo.
+- [x] Account / bucket / endpoint  
+- [x] Access Key + Secret  
+- [x] Public URL tạm `r2.dev`  
+- [ ] **Custom domain `cdn.anhungland.com` Active** ← bạn làm bước này  
+- [ ] Agent đổi `R2_PUBLIC_BASE_URL` sang `https://cdn.anhungland.com`
