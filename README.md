@@ -4,7 +4,7 @@ Viết lại **FacebookCustomerCRM** với kiến trúc chuyên nghiệp hơn, d
 
 > Hệ cũ vẫn chạy production. Repo này phát triển song song.
 
-**Bắt đầu đọc:** [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) · [`AGENTS.md`](AGENTS.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+**Bắt đầu đọc:** [`docs/FOUNDATION.md`](docs/FOUNDATION.md) · [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) · [`AGENTS.md`](AGENTS.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 ## Cách chúng ta làm việc
 
@@ -51,6 +51,8 @@ pnpm --filter @crmanhung/api exec prisma migrate deploy
 pnpm db:seed
 
 # Chạy API + Web
+pnpm doctor
+pnpm db:up
 pnpm dev
 ```
 

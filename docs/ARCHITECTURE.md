@@ -88,7 +88,10 @@ Mỗi module: `*.module.ts` → `*.controller.ts` → `*.service.ts` → (option
 
 ```
 apps/web/
-├── app/              # routes (App Router): login, (crm)/*
+├── app/
+│   ├── (public)/     # web public — `/` landing
+│   ├── (crm)/        # CRM sau login
+│   └── login/
 ├── src/
 │   ├── features/     # auth, customers, …
 │   ├── shared/       # ui, api client

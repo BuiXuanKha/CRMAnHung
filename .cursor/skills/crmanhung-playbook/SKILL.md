@@ -5,6 +5,8 @@ description: Enforce CRMAnHung feature workflow — docs then skills then shared
 
 # CRMAnHung playbook
 
+Trước mọi feature: `docs/FOUNDATION.md` + `pnpm doctor` (FAIL → sửa nền trước).
+
 Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng thứ tự**:
 
 1. **Docs** — `docs/domains/<domain>.md` (status ≥ Ready for mock)

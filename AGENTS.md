@@ -4,6 +4,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 
 ## Đọc trước khi code
 
+0. [`docs/FOUNDATION.md`](docs/FOUNDATION.md) — **công cụ / stack đã sẵn chưa?** chạy `pnpm doctor`  
 1. [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) — **thứ tự bắt buộc**: docs → skill → contract → UI mock → API  
 2. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)  
 3. [`docs/adr/`](docs/adr/) — quyết định công nghệ  
