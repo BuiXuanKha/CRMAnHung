@@ -100,7 +100,8 @@ DATABASE_URL="postgresql://crmanhung:<password>@127.0.0.1:5432/crmanhung?schema=
 3. (Khuyến nghị) Custom domain public cho bucket, hoặc bật `r2.dev` public URL.
 4. Điền biến R2 vào `.env` (xem dưới).
 
-Chi tiết: [`adr/0005-cloudflare-r2.md`](./adr/0005-cloudflare-r2.md).
+Chi tiết: [`adr/0005-cloudflare-r2.md`](./adr/0005-cloudflare-r2.md).  
+**Hướng dẫn bấm từng bước (chủ sở hữu):** [`R2-SETUP.md`](./R2-SETUP.md).
 
 ### 5. File `.env` API (chỉ trên server)
 
