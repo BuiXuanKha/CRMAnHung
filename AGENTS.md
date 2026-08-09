@@ -19,8 +19,14 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | `ui-mock-feature` | Làm màn hình Web với mock data |
 | `nest-domain-module` | Thêm module NestJS API |
 | `security-baseline` | Auth, authz, secrets, CORS, upload |
+| `cloudflare-r2` | **R2 đã chốt** — credentials + StorageService; không hỏi lại owner |
 
 Gọi skill bằng `/skill-name` hoặc để agent tự chọn theo `description`.
+
+## Cloudflare R2
+
+Đã cấu hình bucket `anhungland-crm`. Agent đọc skill **`cloudflare-r2`** (và `apps/api/.env` nếu có).  
+**Không** xin lại Account / endpoint / keys / public URL từ chủ sở hữu trừ khi họ rotate token.
 
 ## Nguyên tắc ngắn
 

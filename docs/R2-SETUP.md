@@ -17,10 +17,12 @@ File cấu hình mẫu: `apps/api/.env.example` (đã điền 3 dòng trên).
 
 | Mục | Trạng thái |
 |-----|------------|
-| Account ID / Endpoint / Bucket | Đã lưu trong `.env.example` + `.env` local |
-| Access Key ID + Secret | Đã lưu trong `apps/api/.env` (**không** commit git) |
-| Token `cfat_…` (Cloudflare API) | Không cần cho upload S3 — giữ riêng nếu dùng API Cloudflare khác |
-| `R2_PUBLIC_BASE_URL` | Đã lưu: `https://pub-a7fdc52e01074525b49243e98faf8b81.r2.dev` (R2.dev — tạm; production nên custom domain) |
+| Account ID / Endpoint / Bucket | Đã lưu `.env.example` + skill `cloudflare-r2` |
+| Access Key ID + Secret | `apps/api/.env` (gitignored) + skill **`cloudflare-r2`** (cho agent bootstrap) |
+| Token `cfat_…` (Cloudflare API) | Không cần cho upload S3 |
+| `R2_PUBLIC_BASE_URL` | `https://pub-a7fdc52e01074525b49243e98faf8b81.r2.dev` |
+
+**Cho Cursor Agent:** dùng skill [`.cursor/skills/cloudflare-r2/SKILL.md`](../.cursor/skills/cloudflare-r2/SKILL.md) — không hỏi lại chủ sở hữu.
 
 ---
 
