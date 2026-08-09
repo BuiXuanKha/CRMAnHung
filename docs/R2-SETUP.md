@@ -1,33 +1,54 @@
 # Hướng dẫn Cloudflare R2 — CRMAnHung
 
-Dành cho chủ sở hữu. Agent đọc skill `.cursor/skills/cloudflare-r2/SKILL.md`.
-
-## Đã cấu hình xong
+## Đã có
 
 | Mục | Giá trị |
 |-----|---------|
-| Account ID | `271dac0fb7f61cb74a3d5427b93661bc` |
-| Bucket | `anhungland-crm` |
-| Endpoint | `https://271dac0fb7f61cb74a3d5427b93661bc.r2.cloudflarestorage.com` |
-| Region | Asia-Pacific (APAC) |
-| Access Key + Secret | `apps/api/.env` + skill `cloudflare-r2` |
-| **Public URL (chính)** | **`https://cdn.anhungland.com`** |
-| Dự phòng `r2.dev` | `https://pub-a7fdc52e01074525b49243e98faf8b81.r2.dev` (có thể Disable sau) |
+| Account / Endpoint | đã lưu skill + `.env` |
+| Bucket **public** | `anhungland-crm` + CDN `https://cdn.anhungland.com` |
+| Access Key (hiện tại) | trong `.env` / skill — có thể cần **token mới** cho cả 2 bucket |
 
-Domain `anhungland.com` đã trên Cloudflare DNS (`beau` / `lana`). Custom domain R2 đã Connect (TLS 1.3).
+## Việc bạn làm ngay: bucket tài liệu mật
 
-## App dùng R2 thế nào
+### 1. Tạo bucket private
 
-1. Upload → API Nest → R2 `PutObject`  
-2. DB lưu `objectKey`  
-3. Web hiện: `https://cdn.anhungland.com/<objectKey>`
+1. Cloudflare → **R2** → **Create bucket**
+2. Tên: **`anhungland-crm-private`**
+3. Location: **Asia-Pacific (APAC)** (giống bucket kia)
+4. Create  
 
-ADR: [`adr/0005-cloudflare-r2.md`](./adr/0005-cloudflare-r2.md).
+**Không** bật Public Development URL.  
+**Không** Connect Custom Domain.
 
-## Checklist
+### 2. Cho API quyền ghi cả 2 bucket
 
-- [x] Account / bucket / endpoint  
-- [x] Access Key + Secret  
-- [x] Domain trên Cloudflare  
-- [x] Custom domain `cdn.anhungland.com` (Initializing → Active trong vài phút)  
-- [x] `R2_PUBLIC_BASE_URL=https://cdn.anhungland.com` trong env + skill  
+Token cũ có thể chỉ gắn `anhungland-crm`. Làm một trong hai:
+
+**A — Tạo token mới (khuyên dùng)**  
+1. R2 → **Manage R2 API Tokens** → Create  
+2. Tên: `crmanhung-api-both`  
+3. Object **Read & Write**  
+4. Apply to: chọn **cả** `anhungland-crm` **và** `anhungland-crm-private` (hoặc All buckets)  
+5. Copy Access Key ID + Secret → gửi agent (đổi `.env` + skill)
+
+**B —** Nếu token hiện tại đã là All buckets → chỉ cần tạo bucket, không tạo token mới.
+
+### 3. Xác nhận với agent
+
+Gửi:
+```text
+Bucket anhungland-crm-private đã tạo
+(Token mới nếu có: Access Key + Secret)
+```
+
+## Hai loại file (để nhớ)
+
+| | Public | Mật |
+|--|--------|-----|
+| Bucket | `anhungland-crm` | `anhungland-crm-private` |
+| Xem | `cdn.anhungland.com/...` | Link tạm từ API (signed, ~15 phút) |
+| Ví dụ | Ảnh lô đất, avatar | Hợp đồng, CMND, hồ sơ nhạy cảm |
+
+App: `R2_PRIVATE_BUCKET=anhungland-crm-private` (đã ghi `.env.example`).
+
+Chi tiết kỹ thuật: skill `cloudflare-r2` · ADR 0005.

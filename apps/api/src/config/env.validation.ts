@@ -71,6 +71,11 @@ class EnvironmentVariables {
   @IsOptional()
   @IsString()
   R2_PUBLIC_BASE_URL?: string;
+
+  /** Bucket riêng cho tài liệu mật — không gắn CDN public */
+  @IsOptional()
+  @IsString()
+  R2_PRIVATE_BUCKET?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
@@ -90,6 +95,7 @@ export function validateEnv(config: Record<string, unknown>) {
       'R2_BUCKET',
       'R2_ENDPOINT',
       'R2_PUBLIC_BASE_URL',
+      'R2_PRIVATE_BUCKET',
     ] as const;
     const missing = requiredR2.filter((key) => !validated[key]);
     if (missing.length) {

@@ -29,11 +29,11 @@ description: Apply CRMAnHung security baseline for auth, authorization, secrets,
 ## Uploads (Cloudflare R2)
 
 - Đọc skill **`cloudflare-r2`** — credentials + bucket đã chốt; **không hỏi lại owner**
+- Public: `upload()` → CDN `cdn.anhungland.com`
+- Mật: `uploadPrivate()` + `getPrivateSignedUrl()` — bucket `anhungland-crm-private`, **không** CDN
 - Giới hạn size + MIME ở API trước `PutObject`
 - Object key do server đặt; không tin path từ client
-- DB lưu `objectKey`; URL = `R2_PUBLIC_BASE_URL` + key
 - **Không** lưu / serve file trên disk VPS
-- Secrets: `apps/api/.env` (gitignored) hoặc bootstrap từ skill `cloudflare-r2`
 
 ## Extension
 

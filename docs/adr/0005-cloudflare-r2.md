@@ -2,42 +2,41 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-09
+- **Updated:** 2026-08-09 — tách bucket public / private
 
 ## Quyết định
 
-- Mọi file người dùng tải lên (ảnh khách, lô đất, đính kèm giao dịch / sổ đỏ, messenger…) lưu trên **Cloudflare R2**.
-- **Không** lưu file upload trên disk VPS (`/var/www/crmanhung/uploads`).
-- API dùng SDK S3-compatible (`@aws-sdk/client-s3`) với endpoint R2.
-- DB chỉ lưu **object key** (và metadata cần thiết); URL công khai ghép từ `R2_PUBLIC_BASE_URL` + key (hoặc signed URL khi cần private).
+- File lưu trên **Cloudflare R2**, không lưu disk VPS.
+- API dùng S3 SDK (`@aws-sdk/client-s3` + `s3-request-presigner`).
+- DB lưu **object key** (+ cờ visibility nếu cần).
+
+### Hai bucket
+
+| Mục đích | Bucket | Truy cập |
+|----------|--------|----------|
+| Ảnh / file **công khai** (CDN) | `anhungland-crm` | `https://cdn.anhungland.com/<key>` |
+| **Tài liệu mật** (hợp đồng, giấy tờ…) | `anhungland-crm-private` | Chỉ qua **signed URL** từ API (có hạn). **Không** public URL, **không** custom domain |
 
 ## Lý do
 
-- VPS không phình disk theo ảnh.
-- Deploy/rsync không đụng thư mục upload.
-- CDN / custom domain R2 phục vụ ảnh nhanh hơn nginx local.
-- Cùng pattern cho staging và production (bucket tách theo env).
+- CDN nhanh cho ảnh marketing / CRM không mật.
+- Tài liệu mật không được “ai có link cũng xem” trên CDN public.
+- Signed URL: API kiểm tra quyền user rồi mới cấp link tạm.
 
 ## Hệ quả
 
-| Env | Biến |
-|-----|------|
-| Account / keys | `R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` |
-| Bucket | `R2_BUCKET` (vd. `crmanhung-staging`, `crmanhung-prod`) |
-| Endpoint | `R2_ENDPOINT` = `https://<ACCOUNT_ID>.r2.cloudflarestorage.com` |
-| Public URL | `R2_PUBLIC_BASE_URL` — **chốt production:** `https://cdn.anhungland.com` (custom domain); `pub-*.r2.dev` chỉ tạm |
+| Env | Giá trị chốt |
+|-----|----------------|
+| `R2_BUCKET` | `anhungland-crm` |
+| `R2_PUBLIC_BASE_URL` | `https://cdn.anhungland.com` |
+| `R2_PRIVATE_BUCKET` | `anhungland-crm-private` |
+| Keys / endpoint | Skill `cloudflare-r2` + `.env` |
 
-## Custom domain (web public)
+Code: `StorageService.upload` (public) · `uploadPrivate` · `getPrivateSignedUrl`.
 
-- Domain CDN đã chọn: **`cdn.anhungland.com`** gắn bucket `anhungland-crm`.
-- Hướng dẫn chủ sở hữu: [`../R2-SETUP.md`](../R2-SETUP.md).
-- Sau khi DNS Active, mọi env/skill dùng `R2_PUBLIC_BASE_URL=https://cdn.anhungland.com`.
-
-- Nginx **không** serve `/uploads/` từ disk.
-- Migrate từ hệ cũ: copy `img/` → R2, map path cũ → object key mới (P4).
-- Validate MIME + size ở API trước khi `PutObject`.
-- Object key do server đặt (`customers/…`, `lodats/…`) — không tin path client.
+Hướng dẫn owner: [`../R2-SETUP.md`](../R2-SETUP.md).
 
 ## Khi nào revisit
 
-- File private-only (hợp đồng) → signed URL ngắn hạn thay vì public bucket.
-- Quá nhiều egress / cost → cân nhắc lifecycle / compression.
+- Cloudflare Access trước CDN (hiếm khi cần nếu đã tách bucket).
+- Lifecycle / compression khi cost tăng.

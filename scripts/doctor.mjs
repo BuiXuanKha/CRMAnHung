@@ -63,6 +63,7 @@ if (!existsSync(apiEnv)) {
     'R2_ACCESS_KEY_ID',
     'R2_SECRET_ACCESS_KEY',
     'R2_PUBLIC_BASE_URL',
+    'R2_PRIVATE_BUCKET',
   ];
   for (const key of need) {
     const m = text.match(new RegExp(`^${key}=(.*)$`, 'm'));

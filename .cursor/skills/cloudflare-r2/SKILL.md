@@ -1,49 +1,45 @@
 ---
 name: cloudflare-r2
-description: CRMAnHung Cloudflare R2 connection and StorageService usage. Use when uploading files, configuring apps/api .env R2_*, migrating images, or any object storage task. Do not ask the owner to re-provide R2 credentials — they are recorded here and in apps/api/.env.
+description: CRMAnHung Cloudflare R2 connection and StorageService usage (public CDN + private signed URLs). Use when uploading files, configuring R2_* env, or secret documents. Do not ask the owner to re-provide R2 credentials already recorded here.
 ---
 
 # Cloudflare R2 — CRMAnHung (đã chốt)
 
-**Không hỏi lại chủ sở hữu** Account ID / bucket / endpoint / Access Key / Secret / Public URL — đã cấu hình bên dưới.
+**Không hỏi lại** credentials / bucket / CDN — bảng dưới. Repo **private**.
 
-Repo phải **private**. Không đăng secrets ra chat công khai / PR screenshot.
-
-## Connection (An Hưng Land)
+## Connection
 
 | Biến | Giá trị |
 |------|---------|
 | `R2_ACCOUNT_ID` | `271dac0fb7f61cb74a3d5427b93661bc` |
-| `R2_BUCKET` | `anhungland-crm` |
 | `R2_ENDPOINT` | `https://271dac0fb7f61cb74a3d5427b93661bc.r2.cloudflarestorage.com` |
 | `R2_ACCESS_KEY_ID` | `7a6b2fb153f8469fc4d09e242aea725a` |
 | `R2_SECRET_ACCESS_KEY` | `908590b4b338ecb65ffa0a84661eefa5bb32f693ac28a359a8eb6cbf7932111f` |
+| `R2_BUCKET` (public) | `anhungland-crm` |
 | `R2_PUBLIC_BASE_URL` | `https://cdn.anhungland.com` |
+| `R2_PRIVATE_BUCKET` | `anhungland-crm-private` |
 
-- Region: Asia-Pacific (APAC)
-- Token Cloudflare dạng `cfat_…` **không** dùng cho S3 upload — bỏ qua
-- Custom domain R2: `cdn.anhungland.com` (TLS 1.3). Dự phòng tạm: `https://pub-a7fdc52e01074525b49243e98faf8b81.r2.dev`
+- Token `cfat_…` không dùng cho S3.
+- API token hiện có thể **chỉ** quyền bucket public — owner cần token Read & Write **cả hai** bucket (xem `docs/R2-SETUP.md`).
 
-## Bootstrap `.env` khi thiếu
+## Khi nào dùng bucket nào
 
-1. Nếu `apps/api/.env` đã có đủ `R2_*` → dùng file đó.
-2. Nếu thiếu `.env` hoặc thiếu `R2_*`:
-   - Copy từ `apps/api/.env.example`
-   - Điền đúng bảng Connection ở trên (kể cả Access Key + Secret)
-   - **Không** `git add` file `.env`
-3. Production/staging trên VPS: cùng giá trị trong `/var/www/crmanhung/repo/apps/api/.env` (không rsync đè từ CI).
+| Loại file | Method | Ghi chú |
+|-----------|--------|---------|
+| Ảnh công khai / CRM không mật | `upload()` | URL = CDN |
+| Hợp đồng, giấy tờ, đính kèm mật | `uploadPrivate()` | Chỉ lưu `objectKey` |
+| Xem/tải file mật | `getPrivateSignedUrl(key)` | **Sau** khi API check authz; TTL mặc định 15 phút |
+
+## Bootstrap `.env`
+
+Copy `.env.example`, điền bảng Connection (kể cả `R2_PRIVATE_BUCKET`). Không `git add` `.env`.
 
 ## Code
 
-- Service: `apps/api/src/storage/storage.service.ts` (`StorageModule` global)
-- Upload → `storage.upload({ folder, buffer, contentType, originalName })` → `{ objectKey, url }`
-- DB lưu **`objectKey`**, không lưu path VPS
-- URL công khai = `R2_PUBLIC_BASE_URL` + `/` + `objectKey`
-- Validate MIME + size trước `PutObject`
-- Docs chủ sở hữu: [`docs/R2-SETUP.md`](../../../docs/R2-SETUP.md) · ADR [`docs/adr/0005-cloudflare-r2.md`](../../../docs/adr/0005-cloudflare-r2.md)
+`apps/api/src/storage/storage.service.ts` · ADR `docs/adr/0005-cloudflare-r2.md` · Owner `docs/R2-SETUP.md`
 
 ## Checklist agent
 
-- [ ] Không hỏi lại R2 credentials nếu bảng trên còn đúng
-- [ ] Không commit `.env` / Secret
-- [ ] Feature upload dùng `StorageService`, không ghi disk `uploads/`
+- [ ] Không hỏi lại R2 nếu bảng còn đúng
+- [ ] Tài liệu mật → private bucket + signed URL, không `cdn.anhungland.com`
+- [ ] Không commit Secret
