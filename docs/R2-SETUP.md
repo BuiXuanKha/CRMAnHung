@@ -1,32 +1,24 @@
 # Hướng dẫn Cloudflare R2 — CRMAnHung
 
-## Đã có
+## Đã xong
 
 | Mục | Giá trị |
 |-----|---------|
-| Account / Endpoint | skill + `.env` |
-| Bucket **public** | `anhungland-crm` + CDN `https://cdn.anhungland.com` |
-| Bucket **private** | `anhungland-crm-private` (đã tạo, không public) |
-| Access Key | skill + `.env` — **nên tạo token mới** quyền cả 2 bucket |
+| Bucket public | `anhungland-crm` + CDN `https://cdn.anhungland.com` |
+| Bucket private | `anhungland-crm-private` (Public access Disabled) |
+| Token API | `crmanhung-api-both` — All buckets, Read & Write |
+| Endpoint | `https://271dac0fb7f61cb74a3d5427b93661bc.r2.cloudflarestorage.com` |
 
-## Việc còn lại: token API cho cả 2 bucket
+Credentials nằm trong `apps/api/.env` (gitignored) + skill `cloudflare-r2`.
 
-Token cũ lúc tạo có thể chỉ gắn `anhungland-crm`. Để upload tài liệu mật được:
-
-1. R2 → **Manage R2 API Tokens** → **Create API token**
-2. Tên: `crmanhung-api-both`
-3. Object **Read & Write**
-4. Apply to: **`anhungland-crm`** + **`anhungland-crm-private`** (hoặc All buckets)
-5. Copy **Access Key ID** + **Secret Access Key** → gửi agent
-
-(Nếu chắc token hiện tại đã All buckets → báo “token All buckets”, không cần tạo mới.)
+Tuỳ chọn: xoá token cũ `anhungland-crm-r2` trên Cloudflare (chỉ gắn 1 bucket).
 
 ## Hai loại file
 
 | | Public | Mật |
 |--|--------|-----|
 | Bucket | `anhungland-crm` | `anhungland-crm-private` |
-| Xem | `cdn.anhungland.com/...` | Signed URL từ API (~15 phút) |
-| Ví dụ | Ảnh lô đất, avatar | Hợp đồng, giấy tờ nhạy cảm |
+| Link | `cdn.anhungland.com/...` (lâu dài) | Signed URL tạm từ API |
+| Ví dụ | Ảnh lô đất | Sổ đỏ, hợp đồng |
 
-App: `R2_PRIVATE_BUCKET=anhungland-crm-private`. Skill: `cloudflare-r2`.
+Skill: `.cursor/skills/cloudflare-r2` · ADR 0005.
