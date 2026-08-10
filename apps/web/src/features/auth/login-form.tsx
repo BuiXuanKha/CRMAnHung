@@ -44,6 +44,11 @@ export function LoginForm() {
         <p className="login-brand">An Hưng Land</p>
         <h1>CRM nội bộ</h1>
         <p className="login-sub">Quản lý khách hàng và lô đất</p>
+        {process.env.NEXT_PUBLIC_USE_MOCK === 'true' ? (
+          <p className="login-sub">
+            Mock: <code>staff / staff123</code> hoặc <code>admin / admin123</code>
+          </p>
+        ) : null}
 
         <label>
           Tên đăng nhập

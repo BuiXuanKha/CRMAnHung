@@ -24,14 +24,15 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | ADR / Playbook / Architecture | Ready | `docs/adr`, `PLAYBOOK.md` |
 | Cursor skills | Ready | gồm `cloudflare-r2` |
 | API scaffold (auth/users/health) | Ready | nhánh foundation + branch hiện tại |
-| Web shell CRM `(crm)/*` | Ready | login + placeholder modules |
+| Web shell CRM `(crm)/*` | Ready | login + **Customers mock list/detail** |
 | Web shell **public** `/` | Ready | landing stub — mở rộng sau |
-| Postgres local (`docker compose`) | Ready (cần Docker) | `pnpm db:up` |
+| Postgres local (`docker compose`) | **Skipped (owner)** | Không bắt buộc; UI mock không cần DB. VPS sẽ có Postgres khi deploy |
 | R2 keys + endpoint + bucket | Ready | skill `cloudflare-r2` + `.env` |
 | R2 Public URL tạm `r2.dev` | Ready (dự phòng) | có thể Disable sau khi CDN Active |
 | R2 **custom domain** `cdn.anhungland.com` | Ready | TLS 1.3 · public assets |
 | R2 **private bucket** `anhungland-crm-private` | Ready | Token `crmanhung-api-both` (All buckets) |
 | `apps/web/.env` | Ready sau `pnpm doctor` / copy example | |
+| Shared Customers contract | Ready | `packages/shared/src/customers.ts` |
 | ESLint workspace | Pending (không chặn P1) | placeholder script |
 | Postgres trên VPS staging | Owner / deploy lúc P0b | xem `DEPLOYMENT.md` |
 | Domain docs ngoài Customers | Draft sau | Lodats… theo phase |
@@ -58,4 +59,5 @@ pnpm dev             # API :5050 + Web :5001
 ## Việc chủ sở hữu còn lại (không phải code)
 
 1. ~~Cloudflare R2 custom domain~~ — đã Connect `cdn.anhungland.com`.
-2. (Khi deploy) Postgres trên Mắt Bão + DNS A `@` → VPS + nginx `anhungland.com` — `DEPLOYMENT.md`.
+2. ~~Postgres local trên máy~~ — tạm bỏ; không chặn làm UI mock / deploy VPS.
+3. (Khi deploy) Postgres trên Mắt Bão + DNS A `@` → VPS + nginx `anhungland.com` — `DEPLOYMENT.md`.

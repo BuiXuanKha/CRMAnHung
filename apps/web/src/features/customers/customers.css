@@ -1,0 +1,270 @@
+.customers-page {
+  display: grid;
+  gap: 20px;
+}
+
+.customers-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.customers-header h1 {
+  margin: 0 0 6px;
+  font-size: 1.6rem;
+}
+
+.customers-header p {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.customers-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+}
+
+.customers-toolbar input,
+.customers-toolbar select,
+.detail-block select,
+.care-form textarea,
+.modal input {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  border-radius: 10px;
+  padding: 10px 12px;
+  color: var(--color-ink);
+}
+
+.customers-toolbar input {
+  min-width: min(280px, 100%);
+  flex: 1;
+}
+
+.check {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--color-muted);
+  font-size: 0.92rem;
+}
+
+.btn-primary,
+.btn-ghost {
+  border-radius: 10px;
+  padding: 10px 14px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.btn-primary {
+  background: var(--color-brand);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--color-brand-strong);
+}
+
+.btn-ghost {
+  background: transparent;
+  border-color: var(--color-border);
+  color: var(--color-ink);
+}
+
+.customers-error {
+  margin: 0;
+  color: var(--color-danger);
+}
+
+.customers-table-wrap {
+  overflow: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  background: var(--color-surface);
+}
+
+.customers-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.95rem;
+}
+
+.customers-table th,
+.customers-table td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  vertical-align: top;
+}
+
+.customers-table th {
+  font-weight: 600;
+  color: var(--color-muted);
+  background: #eef3f0;
+}
+
+.customers-table tr.is-hidden {
+  opacity: 0.55;
+}
+
+.customers-table .empty {
+  text-align: center;
+  color: var(--color-muted);
+  padding: 28px;
+}
+
+.name-link {
+  display: grid;
+  gap: 2px;
+  color: var(--color-brand-strong);
+  font-weight: 600;
+}
+
+.name-link .sub {
+  font-weight: 400;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+}
+
+.badge {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--color-danger);
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+.pin {
+  border: none;
+  background: transparent;
+  color: #c5cec9;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 0 4px;
+}
+
+.pin.on {
+  color: #c98512;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 32, 26, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  z-index: 40;
+}
+
+.modal {
+  width: min(420px, 100%);
+  background: var(--color-surface);
+  border-radius: var(--radius);
+  padding: 22px;
+  display: grid;
+  gap: 14px;
+  box-shadow: var(--shadow-soft);
+}
+
+.modal h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.modal label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.92rem;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.back {
+  margin: 0;
+}
+
+.detail-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.detail-block {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.detail-block h2 {
+  margin: 0 0 14px;
+  font-size: 1.05rem;
+}
+
+.detail-block dl {
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.detail-block dt {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-bottom: 4px;
+}
+
+.detail-block dd {
+  margin: 0;
+}
+
+.care-form {
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.care-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.care-list li {
+  border-top: 1px solid var(--color-border);
+  padding-top: 12px;
+}
+
+.care-list p {
+  margin: 6px 0 0;
+}
+
+@media (max-width: 860px) {
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .customers-header {
+    flex-direction: column;
+  }
+}

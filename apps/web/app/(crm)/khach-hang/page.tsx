@@ -1,10 +1,5 @@
-import { PlaceholderPage } from '@/shared/ui/placeholder-page';
+import { CustomerListPage } from '@/features/customers/customer-list-page';
 
 export default function KhachHangPage() {
-  return (
-    <PlaceholderPage
-      title="Khách hàng"
-      description="Module khách hàng sẽ được chuyển từ FacebookCustomerCRM sang đây (P1)."
-    />
-  );
+  return <CustomerListPage />;
 }

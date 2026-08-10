@@ -40,7 +40,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Link
               key={item.href}
               href={item.href}
-              className={pathname === item.href ? 'active' : undefined}
+              className={
+                pathname === item.href || pathname.startsWith(`${item.href}/`)
+                  ? 'active'
+                  : undefined
+              }
             >
               {item.label}
             </Link>
