@@ -50,6 +50,6 @@ Script migrate sẽ nằm tại `apps/api/scripts/migrate-from-legacy.ts` (imple
 - [ ] Dry-run migrate trên bản sao DB
 - [ ] So khớp số bản ghi + spot-check nghiệp vụ + URL ảnh R2
 - [ ] Backup SQLite + `img/` hệ cũ; `pg_dump` đích
-- [ ] Deploy crmanhung song song (`crm-next`)
+- [ ] Deploy crmanhung trên `anhungland.com` (CRM cũ giữ `crm`)
 - [ ] Chuyển nginx → crmanhung
 - [ ] Giữ backup hệ cũ tối thiểu 30 ngày

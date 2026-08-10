@@ -17,7 +17,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 6. **Nối UI → API**
 7. **Extension** chỉ nếu domain cần ingest Meta
 8. Smoke test + cập nhật docs nếu cần
-9. Staging deploy chỉ khi được yêu cầu (`crm-next`, không đụng `crm.anhungland.com`)
+9. Staging deploy chỉ khi được yêu cầu (`anhungland.com`, không đụng `crm.anhungland.com`)
 
 ## Cấm
 

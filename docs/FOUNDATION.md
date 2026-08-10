@@ -15,7 +15,7 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | File | Cloudflare R2 |
 | Auth | JWT access ngắn + refresh rotation |
 | Extension | Chrome MV3 + TypeScript (esbuild) |
-| Deploy | Mắt Bão · staging `crm-next.anhungland.com` |
+| Deploy | Mắt Bão · staging `anhungland.com` |
 
 ## Trạng thái công cụ
 
@@ -58,4 +58,4 @@ pnpm dev             # API :5050 + Web :5001
 ## Việc chủ sở hữu còn lại (không phải code)
 
 1. ~~Cloudflare R2 custom domain~~ — đã Connect `cdn.anhungland.com`.
-2. (Khi deploy staging) Postgres trên Mắt Bão + DNS/nginx `crm-next` — `DEPLOYMENT.md`.
+2. (Khi deploy) Postgres trên Mắt Bão + DNS A `@` → VPS + nginx `anhungland.com` — `DEPLOYMENT.md`.

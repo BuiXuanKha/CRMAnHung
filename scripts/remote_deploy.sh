@@ -83,7 +83,7 @@ sleep 2
 curl -sf "http://127.0.0.1:5050/api/v1/health"
 echo
 curl -sf "http://127.0.0.1:5001/" >/dev/null && echo "web_local=ok" || echo "web_local=fail"
-code=$(curl -s -o /dev/null -w '%{http_code}' https://crm-next.anhungland.com/ || true)
+code=$(curl -s -o /dev/null -w '%{http_code}' https://anhungland.com/ || true)
 echo "web_http=$code"
 pm2_cmd list
 echo "Done. Production crm.anhungland.com không bị thay đổi."

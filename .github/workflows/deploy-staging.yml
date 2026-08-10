@@ -1,6 +1,6 @@
 name: Deploy CRMAnHung (staging)
 
-# Staging trên Mắt Bão: crm-next.anhungland.com
+# Staging trên Mắt Bão: anhungland.com
 # KHÔNG đụng production crm.anhungland.com / anhungland-api.
 #
 # Bật tay sau khi đã làm checklist một lần trong docs/DEPLOYMENT.md

@@ -45,7 +45,7 @@ Tham chiếu nhanh:
     ↓
 ⑧ Test smoke + cập nhật docs user (khi gần xong)
     ↓
-⑨ Deploy staging (crm-next) khi slice ổn
+⑨ Deploy lên anhungland.com khi slice ổn
 ```
 
 ### Chi tiết từng bước
@@ -100,7 +100,7 @@ Tham chiếu nhanh:
 | Phase | Việc | Kết quả nhìn thấy |
 |-------|------|-------------------|
 | **P0** | Foundation + playbook + skills | Repo chạy local, auth, docs quy trình |
-| **P0b** | Staging Mắt Bão | `crm-next.anhungland.com` song song CRM cũ |
+| **P0b** | Staging Mắt Bão | `anhungland.com` song song CRM cũ |
 | **P1** | Customers (docs→mock UI→API→ext) | Quản lý khách + ingest stub |
 | **P2** | Lodats + Addresses | Lô đất / địa chỉ |
 | **P3** | Transactions + Title services | Giao dịch / sổ đỏ |

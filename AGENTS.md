@@ -32,7 +32,7 @@ Gọi skill bằng `/skill-name` hoặc để agent tự chọn theo `descriptio
 ## Nguyên tắc ngắn
 
 - Không copy god-file từ `facebookcustomercrm`.
-- Không đụng production `crm.anhungland.com` khi deploy — staging = `crm-next`.
+- Không đụng production `crm.anhungland.com` khi deploy — web mới = `anhungland.com`.
 - Tiếng Anh trong code; tiếng Việt trong UI/docs user.
 - Một PR = một vertical slice nhỏ.
 - File > ~400 dòng → tách.

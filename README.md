@@ -81,7 +81,7 @@ Load unpacked thư mục `apps/extension/dist` trong `chrome://extensions`.
 | Phase | Nội dung |
 |-------|----------|
 | **P0** | Foundation (monorepo, auth, shell) — đang làm |
-| **P0b** | Deploy staging Mắt Bão (`crm-next.anhungland.com`) song song với CRM cũ |
+| **P0b** | Deploy staging Mắt Bão (`anhungland.com`) song song với CRM cũ |
 | **P1** | Customers + extension ingest |
 | **P2** | Lodats + Addresses |
 | **P3** | Transactions + Title services |

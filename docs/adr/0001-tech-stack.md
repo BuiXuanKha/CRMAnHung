@@ -19,14 +19,14 @@
 | State server | TanStack Query | Redux — quá nặng cho form CRUD |
 | Auth | JWT **access ngắn** + **refresh rotation** | JWT 7 ngày cố định như hệ cũ |
 | Extension | Chrome MV3 + TS (esbuild) | Giữ vanilla khổng lồ một file — sẽ tách module khi port scanner |
-| Deploy | Cùng VPS Mắt Bão, staging subdomain | Server mới — chưa cần chi phí/ops |
+| Deploy | Cùng VPS Mắt Bão, domain `anhungland.com` | Server mới — chưa cần chi phí/ops |
 
 ## Hệ quả
 
 - Mọi app/package dùng TypeScript → refactor an toàn hơn.
 - Contract Zod là nguồn sự thật cho shape dữ liệu giữa UI mock, API, extension.
 - Nest module = biên giới domain → dễ tìm code sau 5 năm.
-- Staging `crm-next` tách khỏi production `crm.anhungland.com`.
+- Web mới = `anhungland.com`; CRM cũ giữ `crm.anhungland.com` đến cutover.
 - DB = Postgres; file = R2; Web = Next standalone (PM2) + API Nest.
 
 ## Khi nào revisit

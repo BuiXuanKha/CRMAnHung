@@ -23,7 +23,7 @@ description: Apply CRMAnHung security baseline for auth, authorization, secrets,
 - CORS allowlist từ `CORS_ORIGINS` — không `origin: true` trên prod/staging
 - Helmet bật
 - Secrets chỉ `.env` trên server — không commit, không rsync đè từ CI
-- Staging = `crm-next.anhungland.com`; **không** deploy đè `/var/www/anhungland-crm`
+- Staging = `anhungland.com`; **không** deploy đè `/var/www/anhungland-crm`
 - `DATABASE_URL` phải là `postgresql://…` (không `file:`)
 
 ## Uploads (Cloudflare R2)

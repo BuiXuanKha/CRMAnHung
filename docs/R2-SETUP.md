@@ -11,7 +11,7 @@
 
 Credentials nằm trong `apps/api/.env` (gitignored) + skill `cloudflare-r2`.
 
-Tuỳ chọn: xoá token cũ `anhungland-crm-r2` trên Cloudflare (chỉ gắn 1 bucket).
+Tuỳ chọn: ~~xoá token cũ `anhungland-crm-r2`~~ — đã xoá.
 
 ## Hai loại file
 

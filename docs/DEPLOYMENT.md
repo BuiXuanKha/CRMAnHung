@@ -21,16 +21,17 @@ CRM cũ tiếp tục phục vụ nhân viên cho đến khi crmanhung đủ pari
 Không thuê server mới. Trên cùng Mắt Bão:
 
 ```
-crm.anhungland.com          →  /var/www/anhungland-crm   (cũ, port 5000)
-crm-next.anhungland.com     →  Next :5001 + API :5050
+crm.anhungland.com   →  CRM cũ (port 5000) — giữ đến khi migrate xong
+anhungland.com       →  CRMAnHung mới (Next :5001 + API :5050) — web public + CRM
+cdn.anhungland.com    →  R2 ảnh public
 ```
 
 | Lý do chọn | |
 |------------|--|
-| An toàn | Deploy nhầm không ghi đè production |
-| Rẻ / đơn giản | Một VPS, một user `deploy`, cùng SSH key |
-| So sánh dễ | Nhân viên / bạn test `crm-next` trong khi `crm` vẫn chạy |
-| Rollback | Cutover chỉ là đổi nginx; giữ cây cũ ≥ 30 ngày |
+| Rõ ràng | Domain chính `anhungland.com` cho hệ mới (không dùng `crm-next`) |
+| An toàn | CRM cũ vẫn ở `crm.anhungland.com` — không ghi đè |
+| Rẻ / đơn giản | Một VPS, cùng SSH |
+| Rollback | Giữ cây `/var/www/anhungland-crm` ≥ 30 ngày |
 
 **Không** dùng chung thư mục / PM2 name / port / DB với hệ cũ.
 
@@ -61,15 +62,18 @@ Postgres và R2 **không** nằm trong cây trên — kết nối qua `.env`.
 
 ## Việc cần làm **một lần** trên Mắt Bão / DNS / Cloudflare
 
-### 1. DNS (panel Mắt Bão)
+### 1. DNS (Cloudflare — domain đã trên CF)
 
-Tạo bản ghi A:
+Thêm / kiểm tra bản ghi:
 
-| Host | Type | Value |
-|------|------|-------|
-| `crm-next` | A | `125.253.113.104` |
+| Host | Type | Value | Ghi chú |
+|------|------|-------|---------|
+| `@` | A | `125.253.113.104` | `anhungland.com` → VPS |
+| `www` | CNAME hoặc A | `@` hoặc cùng IP | tuỳ chọn |
+| `crm` | A | `125.253.113.104` | CRM cũ — đã có |
+| `cdn` | (R2 Custom Domain) | do Cloudflare R2 quản | ảnh public |
 
-(Hoặc CNAME trỏ về cùng host với `crm` nếu bạn đang dùng pattern đó.)
+Proxy (đám mây cam) OK cho `@` / `www` / `crm`. SSL Cloudflare: **Full**.
 
 ### 2. Thư mục + quyền
 
@@ -95,13 +99,15 @@ DATABASE_URL="postgresql://crmanhung:<password>@127.0.0.1:5432/crmanhung?schema=
 
 ### 4. Cloudflare R2
 
-1. Tạo bucket (vd. `crmanhung-staging`).
-2. Tạo API token (Object Read & Write) → Access Key ID + Secret.
-3. (Khuyến nghị) Custom domain public cho bucket, hoặc bật `r2.dev` public URL.
-4. Điền biến R2 vào `.env` (xem dưới).
+Đã chuẩn bị sẵn (xem skill `cloudflare-r2` / [`R2-SETUP.md`](./R2-SETUP.md)):
 
-Chi tiết: [`adr/0005-cloudflare-r2.md`](./adr/0005-cloudflare-r2.md).  
-**Hướng dẫn bấm từng bước (chủ sở hữu):** [`R2-SETUP.md`](./R2-SETUP.md).
+| Biến | Giá trị |
+|------|---------|
+| Public bucket | `anhungland-crm` + CDN `https://cdn.anhungland.com` |
+| Private bucket | `anhungland-crm-private` (không CDN) |
+| Token | `crmanhung-api-both` (Read & Write cả hai bucket) |
+
+Chi tiết ADR: [`adr/0005-cloudflare-r2.md`](./adr/0005-cloudflare-r2.md).
 
 ### 5. File `.env` API (chỉ trên server)
 
@@ -120,23 +126,24 @@ JWT_ACCESS_SECRET=<random ≥ 32 ký tự>
 JWT_REFRESH_SECRET=<random ≥ 32 ký tự khác>
 JWT_ACCESS_EXPIRES_IN=15m
 JWT_REFRESH_EXPIRES_IN=7d
-CORS_ORIGINS=https://crm-next.anhungland.com
-R2_ACCOUNT_ID=<cloudflare_account_id>
+CORS_ORIGINS=https://anhungland.com
+R2_ACCOUNT_ID=271dac0fb7f61cb74a3d5427b93661bc
 R2_ACCESS_KEY_ID=<r2_access_key>
 R2_SECRET_ACCESS_KEY=<r2_secret>
-R2_BUCKET=crmanhung-staging
-R2_ENDPOINT=https://<ACCOUNT_ID>.r2.cloudflarestorage.com
-R2_PUBLIC_BASE_URL=https://<your-r2-public-domain>
+R2_BUCKET=anhungland-crm
+R2_ENDPOINT=https://271dac0fb7f61cb74a3d5427b93661bc.r2.cloudflarestorage.com
+R2_PUBLIC_BASE_URL=https://cdn.anhungland.com
+R2_PRIVATE_BUCKET=anhungland-crm-private
 ```
 
 ### 6. Nginx + SSL
 
-Mẫu server block: [`deploy/nginx/crm-next.anhungland.com.conf`](../deploy/nginx/crm-next.anhungland.com.conf)
+Mẫu server block: [`deploy/nginx/anhungland.com.conf`](../deploy/nginx/anhungland.com.conf)
 
 ```bash
-sudo cp .../crm-next.anhungland.com.conf /etc/nginx/sites-available/
-sudo ln -s /etc/nginx/sites-available/crm-next.anhungland.com.conf /etc/nginx/sites-enabled/
-sudo certbot --nginx -d crm-next.anhungland.com
+sudo cp .../anhungland.com.conf /etc/nginx/sites-available/
+sudo ln -s /etc/nginx/sites-available/anhungland.com.conf /etc/nginx/sites-enabled/
+sudo certbot --nginx -d anhungland.com
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
@@ -175,13 +182,14 @@ Sau khi DNS + nginx + Postgres + R2 + `.env` sẵn sàng: Actions → **Deploy C
 
 ---
 
-## Cutover production (sau P4 — chưa làm bây giờ)
+## Cutover CRM cũ (sau P4 — chưa làm bây giờ)
 
-1. Backup Postgres staging/prod + snapshot R2  
+Hệ mới đã chạy ở `anhungland.com`. Cutover chỉ xử lý subdomain CRM cũ:
+
+1. Backup Postgres + snapshot R2  
 2. Migrate data từ SQLite/`img/` hệ cũ → Postgres + R2  
-3. Đổi nginx `crm.anhungland.com` → proxy Next (5001) + API (5050)  
-4. Giữ `crm-next` hoặc tắt sau khi ổn định  
-5. Giữ `/var/www/anhungland-crm` tối thiểu 30 ngày để rollback  
+3. Redirect `crm.anhungland.com` → `https://anhungland.com` (hoặc `/crm`)  
+4. Giữ `/var/www/anhungland-crm` tối thiểu 30 ngày để rollback  
 
 Chi tiết data: [`MIGRATION.md`](./MIGRATION.md).
 
@@ -192,7 +200,7 @@ Chi tiết data: [`MIGRATION.md`](./MIGRATION.md).
 - [ ] Không rsync đè `.env`
 - [ ] Port 5050 ≠ 5000; Web Next 5001
 - [ ] PM2 `crmanhung-api` / `crmanhung-web` ≠ `anhungland-api`
-- [ ] CORS chỉ origin `crm-next` (rồi thêm `crm` lúc cutover)
+- [ ] CORS chỉ origin `https://anhungland.com` (thêm `crm` nếu còn redirect tạm)
 - [ ] `DATABASE_URL` trỏ Postgres (không `file:`)
 - [ ] R2 keys chỉ nằm trên server / secrets — không commit
-- [ ] Đổi mật khẩu seed `admin123` / `staff123` trên staging
+- [ ] Đổi mật khẩu seed `admin123` / `staff123` trên production

@@ -159,7 +159,7 @@ API version prefix: `/api/v1` — dễ thay contract sau này mà không phá cl
 | Giai đoạn | Nội dung |
 |-----------|----------|
 | **P0 — Foundation** | Monorepo, auth, users, health, Web shell, Extension stub, Prisma schema core |
-| **P0b — Staging MatBao** | `crm-next.anhungland.com` trên cùng VPS với CRM cũ; PM2 port 5050 |
+| **P0b — Staging MatBao** | `anhungland.com` trên cùng VPS với CRM cũ; PM2 port 5050 |
 | **P1 — Customers** | CRUD khách, ingest extension, care history |
 | **P2 — Lodats + Addresses** | Lô đất, map khách–lô, địa chỉ, import Excel |
 | **P3 — Transactions + Title** | Giao dịch, dịch vụ sổ đỏ |
