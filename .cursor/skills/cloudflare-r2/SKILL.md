@@ -13,14 +13,15 @@ description: CRMAnHung Cloudflare R2 connection and StorageService usage (public
 |------|---------|
 | `R2_ACCOUNT_ID` | `271dac0fb7f61cb74a3d5427b93661bc` |
 | `R2_ENDPOINT` | `https://271dac0fb7f61cb74a3d5427b93661bc.r2.cloudflarestorage.com` |
-| `R2_ACCESS_KEY_ID` | `7a6b2fb153f8469fc4d09e242aea725a` |
-| `R2_SECRET_ACCESS_KEY` | `908590b4b338ecb65ffa0a84661eefa5bb32f693ac28a359a8eb6cbf7932111f` |
+| `R2_ACCESS_KEY_ID` | `8477fa7a9ce04776b38339ee13b0a87f` |
+| `R2_SECRET_ACCESS_KEY` | `f15f49556ff7d3f03f928043d31736b61bff9da9c7e94b47d56c343bd9598126` |
 | `R2_BUCKET` (public) | `anhungland-crm` |
 | `R2_PUBLIC_BASE_URL` | `https://cdn.anhungland.com` |
 | `R2_PRIVATE_BUCKET` | `anhungland-crm-private` |
 
-- Token `cfat_…` không dùng cho S3.
-- API token hiện có thể **chỉ** quyền bucket public — owner cần token Read & Write **cả hai** bucket (xem `docs/R2-SETUP.md`).
+- Token Account API: `crmanhung-api-both` (All buckets, Object Read & Write)
+- Token `cfat_…` không dùng cho S3 upload — bỏ qua
+- Token cũ `anhungland-crm-r2` (chỉ 1 bucket) có thể **Revoke/Delete** trên Cloudflare cho gọn
 
 ## Khi nào dùng bucket nào
 
