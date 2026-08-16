@@ -1,79 +1,61 @@
 # Cấu hình anhungland.com (CRM mới)
 
-Hướng dẫn **bấm từng bước** cho chủ sở hữu.  
-CRM cũ `crm.anhungland.com` **giữ nguyên** (kể cả khi đã chuyển server).
+CRM cũ `crm.anhungland.com` **giữ nguyên** trên cùng VPS mới.
 
 ```
-crm.anhungland.com  → CRM cũ (giữ nguyên)
-anhungland.com     → CRMAnHung mới (server mới)
+crm.anhungland.com  → CRM cũ (port 5000) — đang chạy
+anhungland.com     → CRMAnHung mới (Next :5001 + API :5050)
 cdn.anhungland.com  → R2 (đã xong)
 ```
 
-> **Server:** không còn dùng IP cũ `125.253.113.104`.  
-> Điền **IP server mới** vào chỗ `<IP_SERVER_MOI>` bên dưới và vào GitHub secret `DEPLOY_SSH_HOST`.
-
-Agent **không** đăng nhập Cloudflare / SSH giúp bạn. Bạn làm các việc dưới rồi báo lại.
+| Hạng mục | Giá trị |
+|----------|---------|
+| Server mới | `103.15.51.19` |
+| SSH deploy | user `deploy` (key-based; không commit mật khẩu) |
+| App root mới | `/var/www/crmanhung/` |
+| App root cũ | `/var/www/anhungland-crm/` |
 
 ---
 
-## Việc 1 — Cloudflare DNS (bắt buộc)
+## Việc bạn còn lại — Cloudflare DNS
 
-1. Vào [Cloudflare Dashboard](https://dash.cloudflare.com) → domain **`anhungland.com`**
-2. **DNS** → **Records**
-3. Thêm / sửa (dùng **IP server mới**):
+1. [Cloudflare](https://dash.cloudflare.com) → domain **`anhungland.com`** → **DNS**
+2. Thêm / sửa:
 
 | Type | Name | Content | Proxy |
 |------|------|---------|-------|
-| **A** | `@` | `<IP_SERVER_MOI>` | Proxied (đám mây **cam**) |
-| **A** | `www` | `<IP_SERVER_MOI>` | Proxied (cam) |
+| **A** | `@` | `103.15.51.19` | Proxied (cam) |
+| **A** | `www` | `103.15.51.19` | Proxied (cam) |
 
-- Bản ghi **`crm`**: nếu CRM cũ cũng chuyển server thì trỏ `crm` → IP server đang chạy CRM cũ; nếu CRM cũ vẫn chỗ khác thì giữ IP cũ của CRM cũ. **Không xóa** `crm` nếu nhân viên còn dùng.
-- Bản ghi **`cdn`**: để Cloudflare R2 quản — không sửa tay.
+3. Bản ghi **`crm`** → cũng `103.15.51.19` nếu CRM cũ đã chuyển sang server này (đang đúng hướng).
+4. **`cdn`** — không sửa (R2).
+5. SSL/TLS: **Full** (sau khi ổn có thể gắn Origin Certificate).
 
-4. **SSL/TLS** → Overview → **Full** (sau khi origin có cert; lúc đầu có thể dùng HTTP origin — xem bootstrap).
+Sau DNS: mở https://anhungland.com
 
-5. Đợi 1–5 phút; DNS apex phải resolve được.
+Tài khoản seed (đổi ngay): `admin` / `admin123` hoặc `staff` / `staff123`
 
 ---
 
-## Việc 2 — GitHub secrets (repo CRMAnHung)
+## GitHub secrets (để Deploy Actions sau này)
 
-Repo: **[BuiXuanKha/CRMAnHung](https://github.com/BuiXuanKha/CRMAnHung)**  
-→ Settings → Secrets and variables → Actions → **New repository secret**:
+Repo CRMAnHung → Settings → Secrets → Actions:
 
 | Secret | Giá trị |
 |--------|---------|
-| `DEPLOY_SSH_HOST` | IP (hoặc hostname) **server mới** |
-| `DEPLOY_SSH_KEY` | Private key OpenSSH user `deploy` trên server mới |
+| `DEPLOY_SSH_HOST` | `103.15.51.19` |
+| `DEPLOY_SSH_KEY` | Private key deploy (ed25519) — agent đã gắn public key trên server; nhờ agent gửi lại private key nếu cần |
 
 ---
 
-## Việc 3 — Một lần trên VPS mới (SSH)
+## Đã làm trên server (agent)
 
-```bash
-ssh deploy@<IP_SERVER_MOI>
-# Sau khi sync/clone repo:
-sudo bash /var/www/crmanhung/repo/scripts/bootstrap-vps.sh
-```
+- [x] Thư mục `/var/www/crmanhung`
+- [x] Postgres db/user `crmanhung`
+- [x] `.env` API + R2 + CORS `https://anhungland.com`
+- [x] Nginx `anhungland.com` (không sửa site `crm`)
+- [x] Build + PM2 `crmanhung-api` / `crmanhung-web`
+- [x] Seed users
+- [x] Health local OK (`:5050`, `:5001`, Host nginx)
 
-Script: Postgres + nginx `anhungland.com` + `.env` API.  
-**Không** đụng cây / PM2 của CRM cũ.
-
----
-
-## Việc 4 — Deploy
-
-GitHub **CRMAnHung** → Actions → **Deploy CRMAnHung (staging)** → Run workflow.
-
----
-
-## Checklist
-
-- [ ] Biết IP server mới → gửi cho agent hoặc điền `DEPLOY_SSH_HOST`
-- [ ] DNS A `@` + `www` → IP mới (proxied)
-- [ ] Secrets `DEPLOY_SSH_HOST` + `DEPLOY_SSH_KEY` trên CRMAnHung
-- [ ] `bootstrap-vps.sh` đã chạy trên server mới
-- [ ] Workflow deploy OK
-- [ ] `crm.anhungland.com` vẫn vào được như cũ
-
-Chi tiết: [`DEPLOYMENT.md`](./DEPLOYMENT.md).
+Chi tiết kỹ thuật: [`DEPLOYMENT.md`](./DEPLOYMENT.md).
