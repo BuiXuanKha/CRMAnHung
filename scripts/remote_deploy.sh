@@ -49,7 +49,8 @@ pnpm run build
 echo "==> Build Web (Next.js standalone)"
 cd "$WEB"
 if [[ ! -f .env.production ]]; then
-  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=false\n' > .env.production
+  # FE mock trước khi API public/auth sẵn sàng — đổi false khi nối API thật
+  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=true\n' > .env.production
 fi
 pnpm run build
 

@@ -87,7 +87,9 @@ export function PublicHome() {
               <a href="#san-pham">Sản phẩm</a>
               <a href="#du-an">Dự án</a>
               <a href="#bai-viet">Kiến thức</a>
-              <Link href="/login">Đăng nhập</Link>
+              <Link href="/login" className="ph-nav-login">
+                Đăng nhập
+              </Link>
             </nav>
           </div>
         </div>

@@ -92,6 +92,21 @@
   color: var(--ph-brand);
 }
 
+.ph-nav a.ph-nav-login {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--ph-brand);
+  color: #fff;
+  font-weight: 700;
+}
+
+.ph-nav a.ph-nav-login:hover {
+  background: var(--ph-brand-deep);
+  color: #fff;
+}
+
 .ph-hero {
   position: relative;
   min-height: min(100vh, 820px);
