@@ -7,13 +7,15 @@ description: Build CRMAnHung web UI features with mock data before the real API 
 
 ## Prerequisites
 
-- Domain doc status ≥ `Ready for mock`
-- Contract đã có trong `@crmanhung/shared` (hoặc thêm cùng PR **trước** UI)
+- Domain doc status ≥ `Ready for mock` (trừ trang marketing public thuần — theo `PUBLIC-SEO.md`)
+- Contract đã có trong `@crmanhung/shared` (hoặc thêm cùng PR **trước** UI) — **không bắt buộc** với landing public tĩnh
+- Trang **web công khai**: đọc skill **`web-public-seo`** + `docs/PUBLIC-SEO.md`
 
 ## Layout
 
 ```
-apps/web/app/(crm)/<route>/page.tsx   # Next.js App Router
+apps/web/app/(public)/…          # web công khai — SEO bắt buộc
+apps/web/app/(crm)/<route>/page.tsx   # Next.js App Router CRM
 apps/web/src/features/<domain>/
   components/      # UI chỉ dùng trong domain
   api.ts           # hàm gọi API thật

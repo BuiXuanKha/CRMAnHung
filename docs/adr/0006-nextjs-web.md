@@ -22,6 +22,7 @@
 
 - Env: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_USE_MOCK`.
 - Route public và route `(crm)` tách rõ; auth bắt buộc chỉ trong khu CRM.
+- Chuẩn SEO web công khai: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) + skill `web-public-seo`.
 - Dev: `pnpm --filter @crmanhung/web dev` → http://localhost:5001
 
 ## Khi nào revisit

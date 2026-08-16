@@ -10,8 +10,12 @@ const beVietnam = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  title: 'An Hưng Land CRM',
-  description: 'CRM nội bộ An Hưng Land',
+  metadataBase: new URL('https://anhungland.com'),
+  title: {
+    default: 'An Hưng Land',
+    template: '%s | An Hưng Land',
+  },
+  description: 'An Hưng Land — bất động sản và CRM nội bộ.',
 };
 
 export default function RootLayout({

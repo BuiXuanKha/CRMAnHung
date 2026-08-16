@@ -8,8 +8,8 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 1. [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) — **thứ tự bắt buộc**: docs → skill → contract → UI mock → API  
 2. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)  
 3. [`docs/adr/`](docs/adr/) — quyết định công nghệ  
-4. Domain liên quan trong [`docs/domains/`](docs/domains/)
-
+4. Domain liên quan trong [`docs/domains/`](docs/domains/)  
+5. Web công khai: [`docs/PUBLIC-SEO.md`](docs/PUBLIC-SEO.md) + skill `web-public-seo`
 ## Skills (`.cursor/skills/`)
 
 | Skill | Khi nào dùng |
@@ -21,6 +21,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | `nest-domain-module` | Thêm module NestJS API |
 | `security-baseline` | Auth, authz, secrets, CORS, upload |
 | `cloudflare-r2` | **R2 đã chốt** — credentials + StorageService; không hỏi lại owner |
+| `web-public-seo` | **Web công khai** — metadata, sitemap, robots, OG; xem `docs/PUBLIC-SEO.md` |
 
 Gọi skill bằng `/skill-name` hoặc để agent tự chọn theo `description`.
 

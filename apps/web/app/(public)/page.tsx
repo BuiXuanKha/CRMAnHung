@@ -3,7 +3,7 @@ import './public.css';
 
 /**
  * Landing public — stub P0.
- * Nội dung marketing / SEO thật làm sau; giữ route `/` cho web public.
+ * Nội dung marketing / SEO thật mở rộng sau; metadata theo docs/PUBLIC-SEO.md.
  */
 export default function PublicHomePage() {
   return (

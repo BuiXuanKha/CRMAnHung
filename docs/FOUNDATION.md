@@ -25,7 +25,7 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | Cursor skills | Ready | gồm `cloudflare-r2` |
 | API scaffold (auth/users/health) | Ready | nhánh foundation + branch hiện tại |
 | Web shell CRM `(crm)/*` | Ready | login + **Customers mock list/detail** |
-| Web shell **public** `/` | Ready | landing stub — mở rộng sau |
+| Web shell **public** `/` | Ready | landing stub — chuẩn SEO: `PUBLIC-SEO.md` |
 | Postgres local (`docker compose`) | **Skipped (owner)** | Không bắt buộc; UI mock không cần DB. VPS sẽ có Postgres khi deploy |
 | R2 keys + endpoint + bucket | Ready | skill `cloudflare-r2` + `.env` |
 | R2 Public URL tạm `r2.dev` | Ready (dự phòng) | có thể Disable sau khi CDN Active |
@@ -33,6 +33,7 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | R2 **private bucket** `anhungland-crm-private` | Ready | Token `crmanhung-api-both` (All buckets) |
 | `apps/web/.env` | Ready sau `pnpm doctor` / copy example | |
 | Shared Customers contract | Ready | `packages/shared/src/customers.ts` |
+| Chuẩn SEO web công khai | Ready | `docs/PUBLIC-SEO.md` + skill `web-public-seo` |
 | ESLint workspace | Pending (không chặn P1) | placeholder script |
 | Postgres trên VPS staging | **Owner — ANHUNGLAND-SETUP** | DNS + secret + bootstrap |
 | Domain docs ngoài Customers | Draft sau | Lodats… theo phase |

@@ -18,6 +18,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 7. **Extension** chỉ nếu domain cần ingest Meta
 8. Smoke test + cập nhật docs nếu cần
 9. Staging deploy chỉ khi được yêu cầu (`anhungland.com`, không đụng `crm.anhungland.com`)
+10. **Web công khai** — áp dụng skill `web-public-seo` / `docs/PUBLIC-SEO.md`
 
 ## Cấm
 
