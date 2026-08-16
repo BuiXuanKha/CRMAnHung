@@ -61,7 +61,6 @@ pnpm dev             # API :5050 + Web :5001
 1. ~~Cloudflare R2 custom domain~~ — đã Connect `cdn.anhungland.com`.
 2. ~~Postgres local trên máy~~ — tạm bỏ; không chặn làm UI mock / deploy VPS.
 3. **Cấu hình `anhungland.com`:** làm theo [`ANHUNGLAND-SETUP.md`](./ANHUNGLAND-SETUP.md)
-   - DNS A `@` + `www` → **IP server mới**
-   - Secrets GitHub: `DEPLOY_SSH_HOST` + `DEPLOY_SSH_KEY` trên repo CRMAnHung
-   - Chạy `bootstrap-vps.sh` trên VPS mới (Postgres + nginx + `.env`)
-   - Actions → Deploy CRMAnHung (staging)
+   - DNS A `@` + `www` → `103.15.51.19` (Cloudflare) — bạn cần bấm
+   - Secrets GitHub: `DEPLOY_SSH_HOST=103.15.51.19` + `DEPLOY_SSH_KEY` (lần deploy sau)
+   - ~~bootstrap + deploy lần đầu~~ — đã xong trên VPS mới
