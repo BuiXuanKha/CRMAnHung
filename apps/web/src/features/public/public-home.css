@@ -1,13 +1,14 @@
 .ph {
-  --ph-ink: #1a1212;
-  --ph-muted: #6b5e5e;
-  --ph-line: #f0e4e4;
-  --ph-soft: #faf6f6;
-  --ph-brand: #e31c23;
-  --ph-brand-deep: #b8141a;
-  --ph-gold: #f0c14b;
-  --ph-gold-deep: #d4a017;
-  --ph-accent: #e31c23;
+  --ph-ink: #1c1714;
+  --ph-muted: #6a615c;
+  --ph-line: #ebe6e2;
+  --ph-soft: #f7f5f3;
+  /* Brand dịu hơn bảng hiệu — vẫn đỏ/vàng nhưng bớt rực */
+  --ph-brand: #b91c22;
+  --ph-brand-deep: #8f151a;
+  --ph-gold: #c9a227;
+  --ph-gold-deep: #a6841c;
+  --ph-accent: #b91c22;
   --ph-radius: 12px;
   color: var(--ph-ink);
   background: #fff;
@@ -22,18 +23,21 @@
   position: fixed;
   inset: 0 0 auto;
   z-index: 30;
-  background: var(--ph-brand);
-  box-shadow: 0 2px 12px rgba(120, 10, 14, 0.25);
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--ph-line);
+  box-shadow: none;
 }
 
 .ph-header.is-solid {
-  background: var(--ph-brand-deep);
+  background: rgba(255, 255, 255, 0.97);
+  box-shadow: 0 1px 0 var(--ph-line);
 }
 
 .ph-header-inner {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 10px 24px;
+  padding: 12px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -48,7 +52,9 @@
 
 .ph-logo img {
   width: auto;
-  height: 42px;
+  height: 40px;
+  /* Logo vàng trên nền đỏ → dùng phiên bản tối cho header trắng */
+  filter: none;
 }
 
 .ph-header-right {
@@ -60,13 +66,13 @@
 }
 
 .ph-hotline {
-  color: var(--ph-gold);
+  color: var(--ph-brand-deep);
   font-weight: 700;
   font-size: 0.95rem;
 }
 
 .ph-hotline:hover {
-  color: #ffe08a;
+  color: var(--ph-brand);
 }
 
 .ph-nav {
@@ -79,11 +85,11 @@
 }
 
 .ph-nav a {
-  color: rgba(255, 255, 255, 0.95);
+  color: var(--ph-ink);
 }
 
 .ph-nav a:hover {
-  color: var(--ph-gold);
+  color: var(--ph-brand);
 }
 
 .ph-hero {
@@ -109,8 +115,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(180deg, rgba(120, 12, 16, 0.45) 0%, rgba(40, 8, 10, 0.55) 40%, rgba(20, 4, 6, 0.88) 100%),
-    linear-gradient(90deg, rgba(180, 20, 28, 0.5), transparent 58%);
+    linear-gradient(180deg, rgba(28, 18, 16, 0.35) 0%, rgba(28, 18, 16, 0.5) 42%, rgba(20, 14, 12, 0.82) 100%),
+    linear-gradient(90deg, rgba(80, 24, 24, 0.35), transparent 58%);
 }
 
 .ph-hero-content {
@@ -129,7 +135,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ph-gold);
+  color: rgba(243, 230, 192, 0.9);
 }
 
 .ph-hero-brand {
@@ -138,8 +144,8 @@
   font-weight: 800;
   letter-spacing: -0.03em;
   line-height: 1.05;
-  color: var(--ph-gold);
-  text-shadow: 0 2px 0 rgba(0, 0, 0, 0.25);
+  color: #f3e6c0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
 }
 
 .ph-hero h1 {
@@ -173,7 +179,7 @@
 }
 
 .ph-hero-contact a {
-  color: var(--ph-gold);
+  color: #f3e6c0;
   font-weight: 700;
 }
 
@@ -194,23 +200,23 @@
 }
 
 .ph-btn-primary {
-  background: var(--ph-gold);
-  color: #5a3a00;
+  background: #fff;
+  color: var(--ph-brand-deep);
 }
 
 .ph-btn-primary:hover {
-  background: #ffe08a;
+  background: #f7f5f3;
 }
 
 .ph-btn-ghost {
   background: transparent;
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.45);
+  border-color: rgba(255, 255, 255, 0.4);
 }
 
 .ph-btn-ghost:hover {
-  border-color: var(--ph-gold);
-  color: var(--ph-gold);
+  border-color: #fff;
+  color: #fff;
 }
 
 .ph-section {
@@ -511,7 +517,7 @@
 .ph-footer {
   border-top: 1px solid var(--ph-line);
   padding: 40px 24px 28px;
-  background: var(--ph-brand);
+  background: #2a2220;
   color: #fff;
 }
 
@@ -537,7 +543,7 @@
 
 .ph-footer-legal {
   margin: 0 0 8px;
-  color: var(--ph-gold);
+  color: #d4c4a0;
   font-weight: 700;
   font-size: 0.9rem;
 }
@@ -555,7 +561,7 @@
 }
 
 .ph-footer-contact a {
-  color: var(--ph-gold);
+  color: #e8d9b0;
   font-weight: 800;
 }
 
@@ -573,7 +579,7 @@
 }
 
 .ph-footer-links a:hover {
-  color: var(--ph-gold);
+  color: #e8d9b0;
 }
 
 .ph-copy {

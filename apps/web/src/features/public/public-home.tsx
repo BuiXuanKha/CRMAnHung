@@ -43,13 +43,18 @@ function ShareButton({ product }: { product: PublicProduct }) {
   );
 }
 
-function BrandLogo({ className }: { className?: string }) {
+function BrandLogo({
+  className,
+  onLight = false,
+}: {
+  className?: string;
+  onLight?: boolean;
+}) {
   return (
-    // SVG brand mark — dùng <img> để tránh tối ưu next/image với SVG
     // eslint-disable-next-line @next/next/no-img-element
     <img
       className={className}
-      src={ANHUNG_BRAND.logoSrc}
+      src={onLight ? ANHUNG_BRAND.logoOnLightSrc : ANHUNG_BRAND.logoSrc}
       alt={ANHUNG_BRAND.name}
       width={200}
       height={45}
@@ -72,7 +77,7 @@ export function PublicHome() {
       <header className={scrolled ? 'ph-header is-solid' : 'ph-header'}>
         <div className="ph-header-inner">
           <Link href="/" className="ph-logo" aria-label={ANHUNG_BRAND.name}>
-            <BrandLogo />
+            <BrandLogo onLight />
           </Link>
           <div className="ph-header-right">
             <a className="ph-hotline" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>

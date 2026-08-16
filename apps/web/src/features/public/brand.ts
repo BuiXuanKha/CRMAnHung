@@ -15,11 +15,12 @@ export const ANHUNG_BRAND = {
   address: 'BT6.8 KĐT Tây Nam Sách',
   website: 'https://anhungland.com',
   logoSrc: '/brand/anhung-logo.svg',
+  logoOnLightSrc: '/brand/anhung-logo-on-light.svg',
   colors: {
-    red: '#E31C23',
-    redDeep: '#B8141A',
-    gold: '#F0C14B',
-    goldDeep: '#D4A017',
+    red: '#B91C22',
+    redDeep: '#8F151A',
+    gold: '#C9A227',
+    goldDeep: '#A6841C',
     white: '#FFFFFF',
   },
 } as const;
