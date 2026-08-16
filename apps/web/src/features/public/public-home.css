@@ -215,10 +215,6 @@
   transform: translateY(-1px);
 }
 
-.ph a {
-  color: inherit;
-}
-
 .ph a.ph-btn-primary,
 .ph-btn-primary {
   background: #fff;
