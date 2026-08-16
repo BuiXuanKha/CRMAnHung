@@ -9,7 +9,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 2. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)  
 3. [`docs/adr/`](docs/adr/) — quyết định công nghệ  
 4. Domain liên quan trong [`docs/domains/`](docs/domains/)  
-5. Web công khai: [`docs/PUBLIC-SEO.md`](docs/PUBLIC-SEO.md) + skill `web-public-seo`
+5. Web công khai: [`docs/PUBLIC-SEO.md`](docs/PUBLIC-SEO.md) + [`docs/PUBLIC-WEB.md`](docs/PUBLIC-WEB.md) + skill `web-public-seo`
 ## Skills (`.cursor/skills/`)
 
 | Skill | Khi nào dùng |

@@ -34,6 +34,7 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | `apps/web/.env` | Ready sau `pnpm doctor` / copy example | |
 | Shared Customers contract | Ready | `packages/shared/src/customers.ts` |
 | Chuẩn SEO web công khai | Ready | `docs/PUBLIC-SEO.md` + skill `web-public-seo` |
+| IA web công khai | Ready | `docs/PUBLIC-WEB.md` — brand + sản phẩm chính; bài phụ |
 | ESLint workspace | Pending (không chặn P1) | placeholder script |
 | Postgres trên VPS staging | **Owner — ANHUNGLAND-SETUP** | DNS + secret + bootstrap |
 | Domain docs ngoài Customers | Draft sau | Lodats… theo phase |

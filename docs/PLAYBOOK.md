@@ -9,6 +9,7 @@ Tham chiếu nhanh:
 |-----|----------|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Kiến trúc tổng thể |
 | [PUBLIC-SEO.md](./PUBLIC-SEO.md) | Chuẩn SEO **web công khai** |
+| [PUBLIC-WEB.md](./PUBLIC-WEB.md) | IA / nội dung trang khách (brand, sản phẩm, bài phụ) |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Mắt Bão / staging |
 | [MIGRATION.md](./MIGRATION.md) | Migrate từ FacebookCustomerCRM |
 | [adr/](./adr/) | Quyết định công nghệ (ADR) |
