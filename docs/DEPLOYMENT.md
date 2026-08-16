@@ -62,6 +62,9 @@ Postgres và R2 **không** nằm trong cây trên — kết nối qua `.env`.
 
 ## Việc cần làm **một lần** trên Mắt Bão / DNS / Cloudflare
 
+> **Chủ sở hữu (không kỹ thuật):** làm theo checklist có hình / bấm từng bước → [`ANHUNGLAND-SETUP.md`](./ANHUNGLAND-SETUP.md).  
+> Script một lần trên VPS: [`scripts/bootstrap-vps.sh`](../scripts/bootstrap-vps.sh).
+
 ### 1. DNS (Cloudflare — domain đã trên CF)
 
 Thêm / kiểm tra bản ghi:
