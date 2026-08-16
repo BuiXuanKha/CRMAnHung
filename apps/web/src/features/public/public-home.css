@@ -215,21 +215,30 @@
   transform: translateY(-1px);
 }
 
+.ph a {
+  color: inherit;
+}
+
+.ph a.ph-btn-primary,
 .ph-btn-primary {
   background: #fff;
   color: var(--ph-brand-deep);
 }
 
+.ph a.ph-btn-primary:hover,
 .ph-btn-primary:hover {
   background: #f7f5f3;
+  color: var(--ph-brand-deep);
 }
 
+.ph a.ph-btn-ghost,
 .ph-btn-ghost {
   background: transparent;
   color: #fff;
   border-color: rgba(255, 255, 255, 0.4);
 }
 
+.ph a.ph-btn-ghost:hover,
 .ph-btn-ghost:hover {
   border-color: #fff;
   color: #fff;
