@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { ANHUNG_BRAND } from './brand';
 import {
   ARTICLE_CATEGORY_LABEL,
   PROJECT_STATUS_LABEL,
@@ -28,7 +29,7 @@ function ShareButton({ product }: { product: PublicProduct }) {
         return;
       }
     } catch {
-      // fall through to clipboard
+      // clipboard
     }
     await navigator.clipboard.writeText(url);
     setCopied(true);
@@ -42,11 +43,25 @@ function ShareButton({ product }: { product: PublicProduct }) {
   );
 }
 
+function BrandLogo({ className }: { className?: string }) {
+  return (
+    // SVG brand mark — dùng <img> để tránh tối ưu next/image với SVG
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      className={className}
+      src={ANHUNG_BRAND.logoSrc}
+      alt={ANHUNG_BRAND.name}
+      width={200}
+      height={45}
+    />
+  );
+}
+
 export function PublicHome() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
+    const onScroll = () => setScrolled(window.scrollY > 12);
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -56,15 +71,20 @@ export function PublicHome() {
     <div className="ph">
       <header className={scrolled ? 'ph-header is-solid' : 'ph-header'}>
         <div className="ph-header-inner">
-          <Link href="/" className="ph-logo">
-            An Hưng Land
+          <Link href="/" className="ph-logo" aria-label={ANHUNG_BRAND.name}>
+            <BrandLogo />
           </Link>
-          <nav className="ph-nav" aria-label="Menu chính">
-            <a href="#san-pham">Sản phẩm</a>
-            <a href="#du-an">Dự án</a>
-            <a href="#bai-viet">Kiến thức</a>
-            <Link href="/login">Đăng nhập</Link>
-          </nav>
+          <div className="ph-header-right">
+            <a className="ph-hotline" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
+              Hotline {ANHUNG_BRAND.hotlineDisplay}
+            </a>
+            <nav className="ph-nav" aria-label="Menu chính">
+              <a href="#san-pham">Sản phẩm</a>
+              <a href="#du-an">Dự án</a>
+              <a href="#bai-viet">Kiến thức</a>
+              <Link href="/login">Đăng nhập</Link>
+            </nav>
+          </div>
         </div>
       </header>
 
@@ -78,19 +98,22 @@ export function PublicHome() {
         />
         <div className="ph-hero-veil" />
         <div className="ph-hero-content">
-          <p className="ph-hero-brand">An Hưng Land</p>
-          <h1>Đất nền &amp; nhà phố Đồng Nai — rõ pháp lý, đồng hành lâu dài</h1>
-          <p className="ph-hero-lead">
-            Khám phá sản phẩm đang mở bán. Không cần đăng nhập để xem và chia sẻ.
-          </p>
+          <p className="ph-hero-kicker">{ANHUNG_BRAND.legalLine}</p>
+          <p className="ph-hero-brand">{ANHUNG_BRAND.name}</p>
+          <h1>Mua bán · ký gửi BĐS — tư vấn đo đạc, thừa kế, sổ hồng</h1>
+          <p className="ph-hero-lead">{ANHUNG_BRAND.services}</p>
           <div className="ph-hero-cta">
             <a className="ph-btn ph-btn-primary" href="#san-pham">
               Xem sản phẩm
             </a>
-            <a className="ph-btn ph-btn-ghost" href="#du-an">
-              Dự án nổi bật
+            <a className="ph-btn ph-btn-ghost" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
+              Gọi {ANHUNG_BRAND.hotlineDisplay}
             </a>
           </div>
+          <p className="ph-hero-contact">
+            {ANHUNG_BRAND.address} ·{' '}
+            <a href={`tel:${ANHUNG_BRAND.hotlineTel}`}>{ANHUNG_BRAND.hotlineDisplay}</a>
+          </p>
         </div>
       </section>
 
@@ -207,8 +230,18 @@ export function PublicHome() {
       <footer className="ph-footer">
         <div className="ph-footer-inner">
           <div>
-            <p className="ph-footer-brand">An Hưng Land</p>
-            <p>Đồng hành pháp lý rõ ràng — sản phẩm Đồng Nai &amp; vùng phụ cận.</p>
+            <Link href="/" className="ph-footer-logo" aria-label={ANHUNG_BRAND.name}>
+              <BrandLogo />
+            </Link>
+            <p className="ph-footer-legal">{ANHUNG_BRAND.legalLine}</p>
+            <p>{ANHUNG_BRAND.services}</p>
+            <p className="ph-footer-contact">
+              <a href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
+                Hotline: {ANHUNG_BRAND.hotlineDisplay}
+              </a>
+              <br />
+              Địa chỉ: {ANHUNG_BRAND.address}
+            </p>
           </div>
           <div className="ph-footer-links">
             <Link href="/san-pham">Sản phẩm</Link>
@@ -218,7 +251,9 @@ export function PublicHome() {
             <Link href="/login">Đăng nhập CRM</Link>
           </div>
         </div>
-        <p className="ph-copy">© {new Date().getFullYear()} An Hưng Land. Mock FE — chưa nối CMS.</p>
+        <p className="ph-copy">
+          © {new Date().getFullYear()} {ANHUNG_BRAND.name} · {ANHUNG_BRAND.website}
+        </p>
       </footer>
     </div>
   );

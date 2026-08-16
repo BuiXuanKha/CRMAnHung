@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
+import { ANHUNG_BRAND } from './brand';
 import { getProductBySlug } from './mock-data';
 import './public-home.css';
 
@@ -62,10 +63,16 @@ export function ProductDetail() {
           <button type="button" className="ph-btn ph-btn-primary" onClick={() => void share()}>
             {copied ? 'Đã copy link' : 'Chia sẻ lên MXH'}
           </button>
+          <a className="ph-btn ph-btn-ghost" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
+            Gọi {ANHUNG_BRAND.hotlineDisplay}
+          </a>
           <Link href="/login" className="ph-btn ph-btn-ghost">
             Nhân viên đăng nhập CRM
           </Link>
         </div>
+        <p className="ph-detail-loc" style={{ marginTop: 16 }}>
+          {ANHUNG_BRAND.address}
+        </p>
       </div>
     </div>
   );

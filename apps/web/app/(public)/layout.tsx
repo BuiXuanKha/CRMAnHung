@@ -4,11 +4,11 @@ import './public.css';
 
 export const metadata: Metadata = {
   title: {
-    default: 'An Hưng Land — Bất động sản',
+    default: 'An Hưng Land — Văn phòng giao dịch bất động sản',
     template: '%s | An Hưng Land',
   },
   description:
-    'An Hưng Land — đất nền, nhà phố Đồng Nai. Xem sản phẩm và chia sẻ không cần đăng nhập.',
+    'An Hưng Land — mua bán, ký gửi BĐS. Hotline 0977.656.280. Địa chỉ BT6.8 KĐT Tây Nam Sách.',
   alternates: {
     canonical: 'https://anhungland.com',
   },
@@ -17,15 +17,15 @@ export const metadata: Metadata = {
     locale: 'vi_VN',
     url: 'https://anhungland.com',
     siteName: 'An Hưng Land',
-    title: 'An Hưng Land — Bất động sản',
+    title: 'An Hưng Land — Văn phòng giao dịch bất động sản',
     description:
-      'An Hưng Land — đất nền, nhà phố Đồng Nai. Xem sản phẩm và chia sẻ không cần đăng nhập.',
+      'An Hưng Land — mua bán, ký gửi BĐS. Hotline 0977.656.280. Địa chỉ BT6.8 KĐT Tây Nam Sách.',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'An Hưng Land — Bất động sản',
+    title: 'An Hưng Land — Văn phòng giao dịch bất động sản',
     description:
-      'An Hưng Land — đất nền, nhà phố Đồng Nai. Xem sản phẩm và chia sẻ không cần đăng nhập.',
+      'An Hưng Land — mua bán, ký gửi BĐS. Hotline 0977.656.280. Địa chỉ BT6.8 KĐT Tây Nam Sách.',
   },
   robots: {
     index: true,

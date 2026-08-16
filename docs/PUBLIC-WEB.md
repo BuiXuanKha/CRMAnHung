@@ -8,7 +8,17 @@
 
 ---
 
-## 1. Mục đích
+## Brand thật (đã có)
+
+| Hạng mục | Giá trị |
+|----------|---------|
+| Tên | An Hưng Land / AnHung |
+| Hotline chính | 0977.656.280 |
+| Địa chỉ | BT6.8 KĐT Tây Nam Sách |
+| Gam màu logo | Đỏ `#E31C23` + vàng gold `#F0C14B` + trắng |
+| Logo FE | `apps/web/public/brand/anhung-logo.svg` |
+
+Nguồn: bảng hiệu VPGD BĐS An Hưng Land.
 
 Trang khách thể hiện **thương hiệu An Hưng Land**, cho phép ai cũng xem **sản phẩm** (chia sẻ MXH được), và đọc thêm nội dung phụ (dự án, kiến thức, kinh nghiệm).
 
