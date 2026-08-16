@@ -116,9 +116,5 @@ fi
 
 echo
 echo "==== Bootstrap xong ===="
-echo "1. DNS Cloudflare: A @ và www → 125.253.113.104 (proxied)"
-echo "2. SSL: Cloudflare SSL/TLS = Full + Origin Certificate,"
-echo "   hoặc: certbot --nginx -d anhungland.com -d www.anhungland.com"
-echo "3. Deploy: GitHub Actions → Deploy CRMAnHung (staging)"
-echo "4. Kiểm tra crm.anhungland.com vẫn OK"
-echo
+echo "1. DNS Cloudflare: A @ và www → IP server mới (proxied)"
+echo "2. GitHub secrets: DEPLOY_SSH_HOST + DEPLOY_SSH_KEY"

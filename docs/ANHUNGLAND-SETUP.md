@@ -1,99 +1,79 @@
 # Cấu hình anhungland.com (CRM mới)
 
 Hướng dẫn **bấm từng bước** cho chủ sở hữu.  
-CRM cũ `crm.anhungland.com` **không đụng**.
+CRM cũ `crm.anhungland.com` **giữ nguyên** (kể cả khi đã chuyển server).
 
 ```
 crm.anhungland.com  → CRM cũ (giữ nguyên)
-anhungland.com     → CRMAnHung mới
+anhungland.com     → CRMAnHung mới (server mới)
 cdn.anhungland.com  → R2 (đã xong)
 ```
 
-Agent **không** đăng nhập được Cloudflare / SSH VPS giúp bạn. Bạn làm 2 việc dưới; agent làm phần còn lại qua GitHub Actions.
+> **Server:** không còn dùng IP cũ `125.253.113.104`.  
+> Điền **IP server mới** vào chỗ `<IP_SERVER_MOI>` bên dưới và vào GitHub secret `DEPLOY_SSH_HOST`.
+
+Agent **không** đăng nhập Cloudflare / SSH giúp bạn. Bạn làm các việc dưới rồi báo lại.
 
 ---
 
 ## Việc 1 — Cloudflare DNS (bắt buộc)
 
-1. Vào [Cloudflare Dashboard](https://dash.cloudflare.com) → chọn domain **`anhungland.com`**
-2. Menu **DNS** → **Records**
-3. Thêm / sửa:
+1. Vào [Cloudflare Dashboard](https://dash.cloudflare.com) → domain **`anhungland.com`**
+2. **DNS** → **Records**
+3. Thêm / sửa (dùng **IP server mới**):
 
 | Type | Name | Content | Proxy |
 |------|------|---------|-------|
-| **A** | `@` | `125.253.113.104` | Proxied (đám mây **cam**) |
-| **A** | `www` | `125.253.113.104` | Proxied (cam) |
+| **A** | `@` | `<IP_SERVER_MOI>` | Proxied (đám mây **cam**) |
+| **A** | `www` | `<IP_SERVER_MOI>` | Proxied (cam) |
 
-- Nếu đã có A `@` trỏ chỗ khác → **Edit** thành IP trên (không xóa `crm`).
-- Bản ghi **`crm`** giữ nguyên → VPS.
-- Bản ghi **`cdn`** để Cloudflare R2 quản — không sửa tay.
+- Bản ghi **`crm`**: nếu CRM cũ cũng chuyển server thì trỏ `crm` → IP server đang chạy CRM cũ; nếu CRM cũ vẫn chỗ khác thì giữ IP cũ của CRM cũ. **Không xóa** `crm` nếu nhân viên còn dùng.
+- Bản ghi **`cdn`**: để Cloudflare R2 quản — không sửa tay.
 
-4. **SSL/TLS** → Overview → mã hóa: chọn **Full** (không Flexible nếu đã có cert origin; lần đầu có thể **Full** sau khi gắn Origin Certificate — xem Việc 3).
+4. **SSL/TLS** → Overview → **Full** (sau khi origin có cert; lúc đầu có thể dùng HTTP origin — xem bootstrap).
 
-5. Đợi ~1–5 phút. Kiểm tra: mở trình duyệt `http://anhungland.com` — có thể chưa ra CRM (chưa deploy), nhưng DNS không được báo “site not found”.
-
----
-
-## Việc 2 — GitHub secret (bắt buộc để deploy)
-
-Repo mới: **[BuiXuanKha/CRMAnHung](https://github.com/BuiXuanKha/CRMAnHung)**
-
-1. Mở repo **FacebookCustomerCRM** → Settings → Secrets and variables → Actions  
-   → mở secret **`DEPLOY_SSH_KEY`** (nếu thấy nút Update thì nhớ: GitHub **không hiện** lại private key đã lưu).
-2. Nếu bạn còn file private key ed25519 đã dùng deploy CRM cũ: copy nguyên khối `-----BEGIN … KEY-----` … `-----END … KEY-----`.
-3. Vào **CRMAnHung** → Settings → Secrets and variables → Actions → **New repository secret**  
-   - Name: `DEPLOY_SSH_KEY`  
-   - Value: dán private key  
-4. Báo lại agent: *“đã thêm DEPLOY_SSH_KEY + DNS xong”*.
-
-> Cùng key với CRM cũ (`deploy@125.253.113.104`) — an toàn, không đụng thư mục cũ.
+5. Đợi 1–5 phút; DNS apex phải resolve được.
 
 ---
 
-## Việc 3 — Một lần trên VPS (SSH)
+## Việc 2 — GitHub secrets (repo CRMAnHung)
 
-Ai có SSH `deploy@125.253.113.104` chạy:
+Repo: **[BuiXuanKha/CRMAnHung](https://github.com/BuiXuanKha/CRMAnHung)**  
+→ Settings → Secrets and variables → Actions → **New repository secret**:
+
+| Secret | Giá trị |
+|--------|---------|
+| `DEPLOY_SSH_HOST` | IP (hoặc hostname) **server mới** |
+| `DEPLOY_SSH_KEY` | Private key OpenSSH user `deploy` trên server mới |
+
+---
+
+## Việc 3 — Một lần trên VPS mới (SSH)
 
 ```bash
-# Sau khi code đã có trên server HOẶC clone tạm
+ssh deploy@<IP_SERVER_MOI>
+# Sau khi sync/clone repo:
 sudo bash /var/www/crmanhung/repo/scripts/bootstrap-vps.sh
 ```
 
-Hoặc từ máy bạn (nếu có key):
-
-```bash
-ssh deploy@125.253.113.104
-```
-
-Script sẽ:
-
-1. Tạo `/var/www/crmanhung/{repo,scripts}`
-2. Cài / kiểm tra PostgreSQL + user/db `crmanhung`
-3. Tạo `apps/api/.env` (JWT random + R2 đã biết + CORS `https://anhungland.com`)
-4. Gắn nginx `anhungland.com` (không sửa site `crm`)
-5. Gợi ý Cloudflare Origin Certificate hoặc certbot
-
-**Không** restart / ghi đè `anhungland-api` hay `/var/www/anhungland-crm`.
+Script: Postgres + nginx `anhungland.com` + `.env` API.  
+**Không** đụng cây / PM2 của CRM cũ.
 
 ---
 
-## Việc 4 — Deploy code (GitHub Actions)
+## Việc 4 — Deploy
 
-Sau Việc 1–3:
-
-1. GitHub **CRMAnHung** → Actions → **Deploy CRMAnHung (staging)** → **Run workflow**
-2. Đợi xanh
-3. Mở https://anhungland.com → landing / login CRM mới  
-4. https://crm.anhungland.com vẫn là CRM cũ
+GitHub **CRMAnHung** → Actions → **Deploy CRMAnHung (staging)** → Run workflow.
 
 ---
 
-## Checklist nhanh
+## Checklist
 
-- [ ] DNS A `@` + `www` → `125.253.113.104` (proxied)
-- [ ] Secret `DEPLOY_SSH_KEY` trên repo CRMAnHung
-- [ ] `bootstrap-vps.sh` đã chạy (Postgres + nginx + `.env`)
-- [ ] Workflow deploy chạy OK
+- [ ] Biết IP server mới → gửi cho agent hoặc điền `DEPLOY_SSH_HOST`
+- [ ] DNS A `@` + `www` → IP mới (proxied)
+- [ ] Secrets `DEPLOY_SSH_HOST` + `DEPLOY_SSH_KEY` trên CRMAnHung
+- [ ] `bootstrap-vps.sh` đã chạy trên server mới
+- [ ] Workflow deploy OK
 - [ ] `crm.anhungland.com` vẫn vào được như cũ
 
-Chi tiết kỹ thuật: [`DEPLOYMENT.md`](./DEPLOYMENT.md).
+Chi tiết: [`DEPLOYMENT.md`](./DEPLOYMENT.md).

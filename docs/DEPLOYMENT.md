@@ -4,10 +4,10 @@
 
 | Hạng mục | Giá trị |
 |----------|---------|
-| Domain production | `https://crm.anhungland.com` |
-| Server | Mắt Bão — `125.253.113.104` |
-| SSH | `deploy@…` |
-| App root | `/var/www/anhungland-crm/` |
+| Domain production (cũ) | `https://crm.anhungland.com` |
+| Server CRM mới | **VPS mới** — IP trong secret `DEPLOY_SSH_HOST` (không dùng `125.253.113.104`) |
+| SSH | `deploy@<IP_SERVER_MOI>` |
+| App root (cũ) | `/var/www/anhungland-crm/` |
 | API (PM2) | `anhungland-api` · port **5000** |
 | Web (nginx `root`) | `/var/www/anhungland-crm/web/` |
 | DB / ảnh | SQLite + `img/` trong cây `anhungland-crm` (không sync từ CI) |
@@ -71,9 +71,9 @@ Thêm / kiểm tra bản ghi:
 
 | Host | Type | Value | Ghi chú |
 |------|------|-------|---------|
-| `@` | A | `125.253.113.104` | `anhungland.com` → VPS |
+| `@` | A | `<IP_SERVER_MOI>` | `anhungland.com` → VPS **mới** |
 | `www` | CNAME hoặc A | `@` hoặc cùng IP | tuỳ chọn |
-| `crm` | A | `125.253.113.104` | CRM cũ — đã có |
+| `crm` | A | IP đang chạy CRM cũ | CRM cũ — giữ / cập nhật đúng chỗ đang host |
 | `cdn` | (R2 Custom Domain) | do Cloudflare R2 quản | ảnh public |
 
 Proxy (đám mây cam) OK cho `@` / `www` / `crm`. SSL Cloudflare: **Full**.
@@ -169,7 +169,8 @@ Settings → Secrets → Actions:
 
 | Secret | Giá trị |
 |--------|---------|
-| `DEPLOY_SSH_KEY` | Cùng private key đang dùng cho FacebookCustomerCRM (user `deploy`) |
+| `DEPLOY_SSH_HOST` | IP (hoặc hostname) **server mới** |
+| `DEPLOY_SSH_KEY` | Private key OpenSSH user `deploy` trên server mới |
 
 ---
 

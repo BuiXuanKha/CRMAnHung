@@ -1,10 +1,13 @@
 name: Deploy CRMAnHung (staging)
 
-# Staging trên Mắt Bão: anhungland.com
-# KHÔNG đụng production crm.anhungland.com / anhungland-api.
+# Staging: anhungland.com trên VPS mới.
+# KHÔNG đụng production crm.anhungland.com / anhungland-api (nếu vẫn chạy chỗ khác).
 #
-# Bật tay sau khi đã làm checklist một lần trong docs/DEPLOYMENT.md
-# (DNS, nginx, .env, thư mục /var/www/crmanhung).
+# Secrets bắt buộc:
+#   DEPLOY_SSH_KEY  — private key user deploy
+#   DEPLOY_SSH_HOST — IP (hoặc hostname) server mới
+# Optional:
+#   DEPLOY_SSH_USER — không dùng; user cố định `deploy`
 
 on:
   workflow_dispatch:
@@ -18,8 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
-      SSH_HOST: '125.253.113.104'
-      SSH_USER: 'deploy'
+      SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+      SSH_USER: deploy
       REMOTE_ROOT: '/var/www/crmanhung'
     steps:
       - name: Checkout
@@ -30,7 +33,8 @@ jobs:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
           set -euo pipefail
-          test -n "${SSH_KEY:-}" || { echo "Missing secret DEPLOY_SSH_KEY — xem docs/DEPLOYMENT.md"; exit 1; }
+          test -n "${SSH_HOST:-}" || { echo "Missing secret DEPLOY_SSH_HOST (IP server mới)"; exit 1; }
+          test -n "${SSH_KEY:-}" || { echo "Missing secret DEPLOY_SSH_KEY — xem docs/ANHUNGLAND-SETUP.md"; exit 1; }
 
           echo "Deploy target: ${SSH_USER}@${SSH_HOST} → ${REMOTE_ROOT}"
 
