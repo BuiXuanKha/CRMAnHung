@@ -20,6 +20,8 @@
 
 Nguồn: bảng hiệu VPGD BĐS An Hưng Land.
 
+## 1. Mục đích
+
 Trang khách thể hiện **thương hiệu An Hưng Land**, cho phép ai cũng xem **sản phẩm** (chia sẻ MXH được), và đọc thêm nội dung phụ (dự án, kiến thức, kinh nghiệm).
 
 Đăng nhập chỉ để nhân viên / admin vào **CRM nội bộ**.
