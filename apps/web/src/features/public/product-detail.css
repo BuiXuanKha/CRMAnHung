@@ -1,7 +1,7 @@
 .pd-main {
   max-width: 1180px;
   margin: 0 auto;
-  padding: 88px 24px 120px;
+  padding: 88px 24px 72px;
 }
 
 .pd-breadcrumb {
@@ -21,7 +21,7 @@
 
 .pd-breadcrumb span:last-child {
   color: var(--ph-ink);
-  max-width: 42ch;
+  max-width: min(42ch, 100%);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -29,16 +29,21 @@
 
 .pd-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
   gap: 36px 40px;
   align-items: start;
 }
 
+.pd-primary {
+  min-width: 0;
+}
+
 .pd-primary h1 {
   margin: 0 0 10px;
-  font-size: clamp(1.45rem, 2.8vw, 2rem);
+  font-size: clamp(1.35rem, 2.8vw, 2rem);
   letter-spacing: -0.02em;
   line-height: 1.25;
+  overflow-wrap: anywhere;
 }
 
 .pd-posted {
@@ -51,15 +56,18 @@
 .pd-price {
   margin: 0 0 22px;
   color: var(--ph-brand);
-  font-size: 1.35rem;
+  font-size: clamp(1.2rem, 2.4vw, 1.35rem);
   font-weight: 800;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
 }
 
 .pd-price span {
   color: var(--ph-muted);
   font-size: 0.95rem;
   font-weight: 600;
-  margin-left: 6px;
 }
 
 .pd-gallery {
@@ -96,6 +104,7 @@
   cursor: pointer;
   background: #efe8e4;
   aspect-ratio: 4 / 3;
+  min-height: 56px;
 }
 
 .pd-thumb img {
@@ -127,6 +136,7 @@
 .pd-specs > div {
   background: #fff;
   padding: 14px 16px;
+  min-width: 0;
 }
 
 .pd-specs dt {
@@ -142,6 +152,7 @@
   margin: 4px 0 0;
   font-weight: 700;
   color: var(--ph-ink);
+  overflow-wrap: anywhere;
 }
 
 .pd-section {
@@ -220,6 +231,7 @@
   width: 100%;
   justify-content: center;
   text-align: center;
+  min-height: 44px;
 }
 
 .pd-aside-cta.ph-btn-primary {
@@ -264,6 +276,17 @@
   display: none;
 }
 
+@media (max-width: 1024px) {
+  .pd-layout {
+    grid-template-columns: minmax(0, 1fr) 260px;
+    gap: 28px 24px;
+  }
+
+  .pd-related-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 960px) {
   .pd-layout {
     grid-template-columns: 1fr;
@@ -276,19 +299,76 @@
   .pd-specs {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-
-  .pd-related-grid {
-    grid-template-columns: 1fr;
-  }
 }
 
 @media (max-width: 720px) {
   .pd-main {
-    padding: 80px 16px 110px;
+    padding: 76px 16px 108px;
+  }
+
+  .pd-breadcrumb {
+    font-size: 0.82rem;
+    gap: 6px;
+    margin-bottom: 16px;
+  }
+
+  .pd-breadcrumb span:last-child {
+    flex: 1 1 100%;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .pd-gallery-main {
+    border-radius: 12px;
+    aspect-ratio: 4 / 3;
   }
 
   .pd-gallery-thumbs {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    display: flex;
+    overflow-x: auto;
+    gap: 8px;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 2px;
+  }
+
+  .pd-thumb {
+    flex: 0 0 76px;
+    width: 76px;
+    min-height: 58px;
+    scroll-snap-align: start;
+  }
+
+  .pd-price {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-bottom: 18px;
+  }
+
+  .pd-specs {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .pd-specs > div {
+    padding: 12px 12px;
+  }
+
+  .pd-aside {
+    padding: 16px;
+  }
+
+  /* Tránh trùng với thanh gọi cố định dưới máy */
+  .pd-aside .pd-aside-cta {
+    display: none;
+  }
+
+  .pd-related {
+    margin-top: 40px;
+  }
+
+  .pd-related-grid {
+    grid-template-columns: 1fr;
   }
 
   .pd-mobile-bar {
@@ -296,22 +376,42 @@
     inset: auto 0 0;
     z-index: 40;
     display: grid;
-    grid-template-columns: 1.4fr 1fr;
+    grid-template-columns: 1.45fr 1fr;
     gap: 8px;
-    padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
-    background: rgba(255, 255, 255, 0.96);
+    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(255, 255, 255, 0.97);
     border-top: 1px solid var(--ph-line);
     backdrop-filter: blur(10px);
   }
 
   .pd-mobile-bar .ph-btn {
     width: 100%;
+    min-height: 46px;
     justify-content: center;
     text-align: center;
+    font-size: 0.9rem;
+    padding-left: 10px;
+    padding-right: 10px;
   }
 
   .pd-mobile-bar .ph-btn-primary {
     background: var(--ph-brand);
     color: #fff;
+  }
+
+  .pd-mobile-bar .ph-btn-ghost {
+    color: var(--ph-ink);
+    border-color: var(--ph-line);
+    background: #fff;
+  }
+}
+
+@media (max-width: 380px) {
+  .pd-mobile-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .pd-specs {
+    grid-template-columns: 1fr;
   }
 }

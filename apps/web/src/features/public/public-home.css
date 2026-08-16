@@ -13,6 +13,7 @@
   color: var(--ph-ink);
   background: #fff;
   min-height: 100vh;
+  overflow-x: clip;
 }
 
 .ph a {
@@ -723,23 +724,130 @@
 }
 
 @media (max-width: 720px) {
+  .ph-header-inner {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .ph-logo {
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .ph-logo img {
+    height: 32px;
+    max-width: min(168px, 52vw);
+    object-fit: contain;
+    object-position: left center;
+  }
+
+  .ph-header-right {
+    flex: 0 0 auto;
+    gap: 8px;
+  }
+
   .ph-hotline {
     display: none;
   }
 
-  .ph-nav a:not(:last-child) {
+  .ph-nav {
+    gap: 0;
+  }
+
+  .ph-nav a:not(.ph-nav-login) {
     display: none;
+  }
+
+  .ph-nav a.ph-nav-login {
+    padding: 9px 12px;
+    font-size: 0.84rem;
+    white-space: nowrap;
+  }
+
+  .ph-hero {
+    min-height: min(92svh, 640px);
+    padding-top: 56px;
+  }
+
+  .ph-hero-content {
+    padding: 56px 16px 40px;
+  }
+
+  .ph-hero-brand {
+    font-size: clamp(1.75rem, 9vw, 2.4rem);
+  }
+
+  .ph-hero h1 {
+    max-width: none;
+    font-size: clamp(1.15rem, 4.6vw, 1.45rem);
+  }
+
+  .ph-hero-lead {
+    font-size: 0.95rem;
+  }
+
+  .ph-hero-cta {
+    flex-direction: column;
+    align-items: stretch;
+    margin-top: 22px;
+  }
+
+  .ph-hero-cta .ph-btn {
+    width: 100%;
+    min-height: 46px;
+  }
+
+  .ph-section {
+    padding: 44px 16px;
+  }
+
+  .ph-section-muted .ph-section-head,
+  .ph-section-muted .ph-project-row {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .ph-section-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 20px;
   }
 
   .ph-product-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
   }
 
-  .ph-hero-content {
-    padding-bottom: 48px;
+  .ph-product-body {
+    padding: 14px;
   }
 
+  .ph-footer {
+    padding: 40px 16px 28px;
+  }
+
+  .ph-footer-inner {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+
+  .ph-footer-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px 16px;
+  }
+
+  .ph-list-page {
+    padding: 80px 16px 56px;
+  }
+}
+
+@media (min-width: 721px) and (max-width: 1024px) {
+  .ph-header-inner,
+  .ph-hero-content,
   .ph-section {
-    padding: 48px 20px;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 }

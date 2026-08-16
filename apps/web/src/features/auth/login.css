@@ -181,7 +181,32 @@
 }
 
 @media (max-width: 480px) {
+  .login-page {
+    padding: 20px 14px 28px;
+  }
+
   .login-card {
-    padding: 24px 18px 26px;
+    padding: 22px 16px 24px;
+    border-radius: 14px;
+  }
+
+  .login-logo img {
+    height: 36px;
+    max-width: 100%;
+  }
+
+  .login-card h1 {
+    font-size: 1.35rem;
+  }
+
+  .login-card input,
+  .login-card button[type='submit'],
+  .login-mock-btn {
+    min-height: 46px;
+  }
+
+  .login-mock-btn {
+    font-size: 0.82rem;
+    line-height: 1.35;
   }
 }
