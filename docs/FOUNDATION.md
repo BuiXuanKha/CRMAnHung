@@ -34,7 +34,7 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | `apps/web/.env` | Ready sau `pnpm doctor` / copy example | |
 | Shared Customers contract | Ready | `packages/shared/src/customers.ts` |
 | ESLint workspace | Pending (không chặn P1) | placeholder script |
-| Postgres trên VPS staging | Owner / deploy lúc P0b | xem `DEPLOYMENT.md` |
+| Postgres trên VPS staging | **Owner — ANHUNGLAND-SETUP** | DNS + secret + bootstrap |
 | Domain docs ngoài Customers | Draft sau | Lodats… theo phase |
 
 ## Lệnh kiểm tra nhanh
@@ -60,4 +60,8 @@ pnpm dev             # API :5050 + Web :5001
 
 1. ~~Cloudflare R2 custom domain~~ — đã Connect `cdn.anhungland.com`.
 2. ~~Postgres local trên máy~~ — tạm bỏ; không chặn làm UI mock / deploy VPS.
-3. (Khi deploy) Postgres trên Mắt Bão + DNS A `@` → VPS + nginx `anhungland.com` — `DEPLOYMENT.md`.
+3. **Cấu hình `anhungland.com`:** làm theo [`ANHUNGLAND-SETUP.md`](./ANHUNGLAND-SETUP.md)
+   - DNS A `@` + `www` → `125.253.113.104`
+   - Secret GitHub `DEPLOY_SSH_KEY` trên repo CRMAnHung
+   - Chạy `bootstrap-vps.sh` trên Mắt Bão (Postgres + nginx + `.env`)
+   - Actions → Deploy CRMAnHung (staging)
