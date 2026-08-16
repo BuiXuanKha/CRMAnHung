@@ -8,8 +8,8 @@ import './layout.css';
 
 const navItems = [
   { href: '/khach-hang', label: 'Quản lý khách hàng' },
-  { href: '/lo-dat', label: 'Lô đất' },
-  { href: '/giao-dich', label: 'Giao dịch' },
+  { href: '/lo-dat', label: 'Quản lý lô đất' },
+  { href: '/giao-dich', label: 'Quản lý giao dịch' },
   { href: '/dich-vu-so-do', label: 'Dịch vụ sổ đỏ' },
 ];
 
@@ -30,12 +30,27 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="shell">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <strong>An Hưng Land</strong>
-          <span>CRM</span>
+      <header className="shell-top">
+        <div className="shell-top-inner">
+          <Link href="/khach-hang" className="shell-brand">
+            <strong>An Hưng Land CRM</strong>
+          </Link>
+          <div className="shell-user">
+            <span>
+              {user.fullName} | {user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+            </span>
+            <button
+              type="button"
+              className="shell-logout"
+              onClick={() => {
+                void logout().then(() => router.replace('/login'));
+              }}
+            >
+              Đăng xuất
+            </button>
+          </div>
         </div>
-        <nav>
+        <nav className="shell-nav" aria-label="Thanh điều hướng">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -58,21 +73,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ) : null}
         </nav>
-        <div className="sidebar-user">
-          <div>
-            <strong>{user.fullName}</strong>
-            <span>{user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              void logout().then(() => router.replace('/login'));
-            }}
-          >
-            Đăng xuất
-          </button>
-        </div>
-      </aside>
+      </header>
       <main className="content">{children}</main>
     </div>
   );
