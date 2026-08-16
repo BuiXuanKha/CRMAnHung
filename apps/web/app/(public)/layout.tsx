@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import './public.css';
 
 export const metadata: Metadata = {
   title: {
@@ -7,7 +8,7 @@ export const metadata: Metadata = {
     template: '%s | An Hưng Land',
   },
   description:
-    'An Hưng Land — thông tin bất động sản và cổng đăng nhập CRM nội bộ.',
+    'An Hưng Land — đất nền, nhà phố Đồng Nai. Xem sản phẩm và chia sẻ không cần đăng nhập.',
   alternates: {
     canonical: 'https://anhungland.com',
   },
@@ -18,13 +19,13 @@ export const metadata: Metadata = {
     siteName: 'An Hưng Land',
     title: 'An Hưng Land — Bất động sản',
     description:
-      'An Hưng Land — thông tin bất động sản và cổng đăng nhập CRM nội bộ.',
+      'An Hưng Land — đất nền, nhà phố Đồng Nai. Xem sản phẩm và chia sẻ không cần đăng nhập.',
   },
   twitter: {
     card: 'summary_large_image',
     title: 'An Hưng Land — Bất động sản',
     description:
-      'An Hưng Land — thông tin bất động sản và cổng đăng nhập CRM nội bộ.',
+      'An Hưng Land — đất nền, nhà phố Đồng Nai. Xem sản phẩm và chia sẻ không cần đăng nhập.',
   },
   robots: {
     index: true,
