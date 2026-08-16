@@ -78,6 +78,7 @@
 
 .content {
   padding: 28px;
+  min-width: 0;
 }
 
 .page h1 {
@@ -98,11 +99,40 @@
     position: sticky;
     top: 0;
     z-index: 10;
+    padding: 12px 14px;
+    gap: 12px;
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
   }
 
   .sidebar nav {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 6px;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .sidebar nav a {
+    white-space: nowrap;
+    padding: 8px 10px;
+    font-size: 0.88rem;
+  }
+
+  .sidebar-user {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-top: 8px;
+  }
+
+  .content {
+    padding: 14px 12px 24px;
   }
 }

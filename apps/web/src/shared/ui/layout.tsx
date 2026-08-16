@@ -7,7 +7,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import './layout.css';
 
 const navItems = [
-  { href: '/khach-hang', label: 'Khách hàng' },
+  { href: '/khach-hang', label: 'Quản lý khách hàng' },
   { href: '/lo-dat', label: 'Lô đất' },
   { href: '/giao-dich', label: 'Giao dịch' },
   { href: '/dich-vu-so-do', label: 'Dịch vụ sổ đỏ' },
@@ -61,7 +61,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="sidebar-user">
           <div>
             <strong>{user.fullName}</strong>
-            <span>{user.role}</span>
+            <span>{user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}</span>
           </div>
           <button
             type="button"
