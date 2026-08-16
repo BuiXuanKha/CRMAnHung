@@ -14,8 +14,8 @@ export const ANHUNG_BRAND = {
   hotlineAltTel: '0898524117',
   address: 'BT6.8 KĐT Tây Nam Sách',
   website: 'https://anhungland.com',
-  logoSrc: '/brand/anhung-logo.svg',
-  logoOnLightSrc: '/brand/anhung-logo-on-light.svg',
+  logoSrc: '/brand/anhung-logo.svg?v=2',
+  logoOnLightSrc: '/brand/anhung-logo-on-light.svg?v=2',
   colors: {
     red: '#B91C22',
     redDeep: '#8F151A',

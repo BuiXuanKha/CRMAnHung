@@ -1,19 +1,14 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 72" role="img" aria-label="An H?ng Land">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 88" role="img" aria-label="An Hung Land">
   <defs>
-    <linearGradient id="g" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FFE69C"/>
-      <stop offset="50%" stop-color="#F0C14B"/>
-      <stop offset="100%" stop-color="#C99612"/>
+    <linearGradient id="goldDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F5E6A8"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#B8860B"/>
     </linearGradient>
   </defs>
-  <g fill="none" stroke="url(#g)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M16 36 L38 16 L60 36"/>
-    <path d="M24 36 V56 H52 V36"/>
-  </g>
-  <rect x="34" y="40" width="8" height="10" rx="1" fill="url(#g)"/>
-  <path d="M22 60 Q38 53 54 60" fill="none" stroke="url(#g)" stroke-width="2.6" stroke-linecap="round"/>
-  <path d="M20 65 Q38 58 56 65" fill="none" stroke="url(#g)" stroke-width="2.6" stroke-linecap="round"/>
-  <text x="76" y="28" font-family="Arial, Helvetica, sans-serif" font-size="11" font-weight="700" letter-spacing="0.22em" fill="#FFFFFF">AN H?NG</text>
-  <text x="74" y="58" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="800" fill="url(#g)">AnHung</text>
-  <text x="212" y="58" font-family="Arial, Helvetica, sans-serif" font-size="22" font-weight="700" fill="#FFFFFF">Land</text>
+  <rect x="2" y="10" width="68" height="68" rx="10" fill="#B91C22"/>
+  <rect x="6" y="14" width="60" height="60" rx="8" fill="none" stroke="url(#goldDark)" stroke-width="2.5"/>
+  <text x="36" y="58" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700" fill="url(#goldDark)">AH</text>
+  <text x="88" y="42" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700" fill="#F8FAFC" letter-spacing="1.5">AN HUNG</text>
+  <text x="88" y="68" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#D4AF37" letter-spacing="6">LAND</text>
 </svg>
