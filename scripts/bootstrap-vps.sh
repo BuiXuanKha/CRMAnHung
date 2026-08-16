@@ -118,3 +118,7 @@ echo
 echo "==== Bootstrap xong ===="
 echo "1. DNS Cloudflare: A @ và www → IP server mới (proxied)"
 echo "2. GitHub secrets: DEPLOY_SSH_HOST + DEPLOY_SSH_KEY"
+echo "3. SSL: Cloudflare Full + Origin Certificate, hoặc certbot"
+echo "4. Deploy: GitHub Actions → Deploy CRMAnHung (staging)"
+echo "5. Kiểm tra crm.anhungland.com vẫn OK"
+echo
