@@ -3,6 +3,7 @@ import { LoginForm } from '@/features/auth/login-form';
 
 export const metadata: Metadata = {
   title: 'Đăng nhập CRM',
+  description: 'Đăng nhập hệ thống CRM nội bộ An Hưng Land.',
   robots: { index: false, follow: false },
 };
 
