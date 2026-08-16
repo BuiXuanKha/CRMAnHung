@@ -1,16 +1,16 @@
 # Cấu hình anhungland.com (CRM mới)
 
-CRM cũ `crm.anhungland.com` **giữ nguyên** trên cùng VPS mới.
+CRM cũ `crm.anhungland.com` **đã chuyển** sang cùng VPS mới — giữ nguyên, không đụng khi deploy CRMAnHung.
 
 ```
-crm.anhungland.com  → CRM cũ (port 5000) — đang chạy
+crm.anhungland.com  → CRM cũ (port 5000) — cùng server, đang chạy
 anhungland.com     → CRMAnHung mới (Next :5001 + API :5050)
 cdn.anhungland.com  → R2 (đã xong)
 ```
 
 | Hạng mục | Giá trị |
 |----------|---------|
-| Server mới | `103.15.51.19` |
+| VPS (cũ + mới) | `103.15.51.19` |
 | SSH deploy | user `deploy` (key-based; không commit mật khẩu) |
 | App root mới | `/var/www/crmanhung/` |
 | App root cũ | `/var/www/anhungland-crm/` |
@@ -27,11 +27,12 @@ cdn.anhungland.com  → R2 (đã xong)
 | **A** | `@` | `103.15.51.19` | Proxied (cam) |
 | **A** | `www` | `103.15.51.19` | Proxied (cam) |
 
-3. Bản ghi **`crm`** → cũng `103.15.51.19` nếu CRM cũ đã chuyển sang server này (đang đúng hướng).
+3. Bản ghi **`crm`** → `103.15.51.19` (CRM cũ đã ở server này).
 4. **`cdn`** — không sửa (R2).
 5. SSL/TLS: **Full** (sau khi ổn có thể gắn Origin Certificate).
 
-Sau DNS: mở https://anhungland.com
+Sau DNS apex: mở https://anhungland.com  
+CRM cũ: https://crm.anhungland.com (đã chạy trên cùng VPS).
 
 Tài khoản seed (đổi ngay): `admin` / `admin123` hoặc `staff` / `staff123`
 

@@ -4,8 +4,8 @@
 
 | Hạng mục | Giá trị |
 |----------|---------|
-| Domain production (cũ) | `https://crm.anhungland.com` |
-| Server CRM mới | `103.15.51.19` (secret `DEPLOY_SSH_HOST`) |
+| Domain production (cũ) | `https://crm.anhungland.com` — **đã chuyển** VPS `103.15.51.19` |
+| Server (cũ + mới) | `103.15.51.19` (secret `DEPLOY_SSH_HOST`) |
 | SSH | `deploy@103.15.51.19` |
 | App root (cũ) | `/var/www/anhungland-crm/` |
 | API (PM2) | `anhungland-api` · port **5000** |
