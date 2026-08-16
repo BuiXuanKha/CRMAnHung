@@ -5,7 +5,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 
 # Web công khai — SEO
 
-Đọc đầy đủ: [`docs/PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md).
+Đọc đầy đủ: [`docs/PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) · IA nội dung: [`docs/PUBLIC-WEB.md`](../../../docs/PUBLIC-WEB.md).
 
 ## Phạm vi
 
