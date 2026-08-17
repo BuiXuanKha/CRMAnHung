@@ -1,6 +1,9 @@
 'use client';
 
+import { MessageCircle, Phone } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
+import { CrmBadge } from '@/shared/ui/badge';
+import { Icon } from '@/shared/ui/icon';
 import {
   channelLabel,
   demandLabel,
@@ -88,18 +91,16 @@ export function CustomerTable({
                       <strong>{c.fullName}</strong>
                       {c.primaryPhone ? (
                         <span className="kh-mini-icon phone" title="Có số điện thoại">
-                          ☎
+                          <Icon icon={Phone} size="mini" />
                         </span>
                       ) : null}
                       {c.facebook ? (
                         <span className="kh-mini-icon chat" title="Có Facebook">
-                          💬
+                          <Icon icon={MessageCircle} size="mini" />
                         </span>
                       ) : null}
                     </div>
-                    <span className={`kh-badge ${statusTone(c.status)}`}>
-                      {statusLabel(c.status)}
-                    </span>
+                    <CrmBadge tone={statusTone(c.status)}>{statusLabel(c.status)}</CrmBadge>
                     {c.facebook?.facebookName ? (
                       <span className="kh-sub">{c.facebook.facebookName}</span>
                     ) : null}

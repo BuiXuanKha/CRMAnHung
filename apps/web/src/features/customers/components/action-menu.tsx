@@ -1,7 +1,19 @@
 'use client';
 
+import {
+  ChevronDown,
+  ChevronUp,
+  FileText,
+  Map,
+  MessageCircle,
+  MessageSquare,
+  NotebookPen,
+  Pin,
+  Trash2,
+} from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import type { CustomerListItem } from '@crmanhung/shared';
+import { Icon } from '@/shared/ui/icon';
 
 export type CustomerAction =
   | 'chat'
@@ -53,9 +65,7 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
         aria-label={`Thao tác ${customer.fullName}`}
         onClick={onToggle}
       >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" aria-hidden>
-          {open ? <polyline points="18 15 12 9 6 15" /> : <polyline points="6 9 12 15 18 9" />}
-        </svg>
+        <Icon icon={open ? ChevronUp : ChevronDown} size={14} strokeWidth={2.4} />
       </button>
       {open ? (
         <ul
@@ -65,96 +75,41 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
         >
           <li>
             <button type="button" role="menuitem" onClick={() => onAction('chat')}>
-              <IconChat /> Mở chat
+              <Icon icon={MessageSquare} /> Mở chat
             </button>
           </li>
           <li>
             <button type="button" role="menuitem" onClick={() => onAction('messenger')}>
-              <IconMessenger /> Mở Messenger
+              <Icon icon={MessageCircle} /> Mở Messenger
             </button>
           </li>
           <li>
             <button type="button" role="menuitem" onClick={() => onAction('care')}>
-              <IconNote /> Cập nhật chăm sóc
+              <Icon icon={NotebookPen} /> Cập nhật chăm sóc
             </button>
           </li>
           <li>
             <button type="button" role="menuitem" onClick={() => onAction('lodat')}>
-              <IconMap /> Tạo lô đất
+              <Icon icon={Map} /> Tạo lô đất
             </button>
           </li>
           <li>
             <button type="button" role="menuitem" onClick={() => onAction('sodo')}>
-              <IconDoc /> Dịch vụ sổ đỏ
+              <Icon icon={FileText} /> Dịch vụ sổ đỏ
             </button>
           </li>
           <li>
             <button type="button" role="menuitem" onClick={() => onAction('pin')}>
-              <IconPin /> {customer.isPinned ? 'Bỏ ghim khách' : 'Ghim khách'}
+              <Icon icon={Pin} /> {customer.isPinned ? 'Bỏ ghim khách' : 'Ghim khách'}
             </button>
           </li>
           <li>
             <button type="button" role="menuitem" className="danger" onClick={() => onAction('delete')}>
-              <IconTrash /> Xóa khách
+              <Icon icon={Trash2} /> Xóa khách
             </button>
           </li>
         </ul>
       ) : null}
     </div>
-  );
-}
-
-function IconChat() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M4 4h16v12H7l-3 3V4z" />
-    </svg>
-  );
-}
-function IconMessenger() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M12 2C6.5 2 2 6.1 2 11.2c0 2.9 1.4 5.5 3.6 7.2V22l3.3-1.8c.9.3 1.9.4 3.1.4 5.5 0 10-4.1 10-9.2S17.5 2 12 2zm1 12.3-2.6-2.8-5 2.8L11 9l2.7 2.8L19 9l-6 5.3z" />
-    </svg>
-  );
-}
-function IconNote() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-      <path d="M14 2v6h6" />
-    </svg>
-  );
-}
-function IconMap() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <polygon points="1 6 8 3 16 6 23 3 23 18 16 21 8 18 1 21" />
-    </svg>
-  );
-}
-function IconDoc() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <rect x="5" y="3" width="14" height="18" rx="2" />
-      <circle cx="12" cy="14" r="2.2" />
-    </svg>
-  );
-}
-function IconPin() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-      <path d="M14 2l8 8-3 1-4 7-3-3-5 5-2-2 5-5-3-3 7-4z" />
-    </svg>
-  );
-}
-function IconTrash() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <polyline points="3 6 5 6 21 6" />
-      <path d="M19 6l-1 14H6L5 6" />
-      <path d="M10 11v6M14 11v6" />
-      <path d="M9 6V4h6v2" />
-    </svg>
   );
 }

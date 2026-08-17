@@ -285,17 +285,22 @@ Skill: `crm-data-table`. Tham chiếu triển khai: `/khach-hang` (`features/cus
 
 Cursor: `pointer` trên dòng (trừ vùng nút menu).
 
-#### 4.5.4 Icon & badge
+#### 4.5.4 Icon & hangtag (badge)
+
+Icon trong bảng / menu: **chỉ Lucide** (§4.7). Avatar giữ quy tắc dưới.
 
 | Phần | Quy tắc |
 |------|---------|
 | Avatar | Tròn **32×32**; ảnh hoặc chữ tắt; nền `#e2e8f0` |
-| Icon phụ cạnh tên | Nhỏ (~12px); SĐT cam; chat/FB xanh lá — không emoji lớn nếu đã có SVG |
-| Badge | Pill bo tròn; padding `2px 10px`; **không** shadow |
-| Badge xanh lá | Nền `#dcfce7` / chữ `#166534` (vd. Khách nét) |
-| Badge xanh dương | Nền `#dbeafe` / chữ `#1e3a8a` (vd. Khách mới) |
-| Badge cam | Nền `#fed7aa` / chữ `#9a3412` (vd. Cần chăm sóc) |
-| Badge xám | Nền `#e2e8f0` / chữ `#475569` |
+| Icon phụ cạnh tên | Lucide **12px**; SĐT `Phone` màu `#ea580c`; chat/FB `MessageCircle` màu `#16a34a` — **cấm** emoji |
+| Hangtag | Component `CrmBadge` — pill bo tròn; padding `2px 10px`; **không** shadow |
+| Tone `green` | Nền `#dcfce7` / chữ `#166534` (vd. Khách nét) |
+| Tone `blue` | Nền `#dbeafe` / chữ `#1e3a8a` (vd. Khách mới) |
+| Tone `amber` | Nền `#fed7aa` / chữ `#9a3412` (vd. Cần chăm sóc) |
+| Tone `gray` | Nền `#e2e8f0` / chữ `#475569` (vd. Khác) |
+| Tone `red` | Nền `#fee2e2` / chữ `#991b1b` (cảnh báo / lỗi trạng thái) |
+
+**Cấm** invent màu hangtag từng màn — map domain → một trong 5 tone trên.
 
 #### 4.5.5 Cột Thao tác & menu
 
@@ -310,10 +315,41 @@ Cursor: `pointer` trên dòng (trừ vùng nút menu).
 - Đổi cột = props/config domain; **không** đổi token hover/font mỗi trang.
 - File CSS bảng > ~400 dòng → tách (vd. `*-table.css` / `*-chrome.css`).
 
-### 4.6 Checklist trước khi merge UI CRM
+### 4.6 Icon CRM — một bộ (đã chốt)
+
+- **Thư viện:** [`lucide-react`](https://lucide.dev) — **duy nhất** trong CRM shell / list / menu / modal.
+- **Kiểu:** outline (stroke); mặc định `strokeWidth={2}`; kích thước chuẩn: **12** (mini cạnh tên), **16** (nav / menu), **18** (header / modal title).
+- **Màu:** `currentColor` trừ khi guidelines chỉ định (vd. mini phone/chat, danger).
+- **Cấm:** emoji làm icon; trộn Heroicons / Font Awesome / SVG tự vẽ song song Lucide; fill-solid lệch bộ outline.
+- Import qua `shared/ui/icon` khi cần wrapper size; hoặc `lucide-react` trực tiếp với size chuẩn.
+
+### 4.7 Dialog / thông báo dùng chung (đã chốt)
+
+**Không** dùng `window.alert` / `window.confirm` / `window.prompt` trên CRM.
+
+| Loại | Khi nào | UI |
+|------|---------|-----|
+| **Alert** | Thông báo 1 nút (OK / Đã hiểu) | Modal giữa màn; tiêu đề + nội dung; 1 nút primary |
+| **Confirm** | Hỏi Có / Không trước hành động | Modal; Huỷ (secondary) + Xác nhận (primary); phá hủy → nút xác nhận **đỏ** |
+| **Form dialog** | Nhập liệu ngắn (thêm SĐT, ghi chú…) | Cùng khung modal; body = form; Huỷ + Submit primary |
+| **Toast** | Feedback nhẹ sau thao tác (không chặn) | Thanh dưới giữa; tự ẩn ~2,8s |
+
+**Khung chung** (`CrmDialog` / `shared/ui/dialog`):
+
+- Backdrop `#0f172a` / 50%; panel trắng, bo **12px**, shadow nhẹ, rộng max **460px**.
+- Header: nền `#f1f5f9`, chữ **600**, có thể kèm icon Lucide 18px.
+- Body: padding `16–18px`; chữ `#334155`.
+- Footer actions: căn phải; secondary viền `#cbd5e1`; primary `#2563eb`; danger `#b91c1c`.
+- Escape / click backdrop = Huỷ (trừ khi `busy`).
+
+Skill: `crm-dialog`. Tham chiếu: `apps/web/src/shared/ui/dialog.tsx`.
+
+### 4.8 Checklist trước khi merge UI CRM
 
 - [ ] Đúng quy tắc mục 3 + shell mục 4.2 + nội dung đã chốt ở 4.3
 - [ ] Bảng list: đúng **§4.5** (header ngoài scroll, hover/selected/ghim, typography, footer)
+- [ ] Icon: **Lucide** (§4.6); hangtag: tone chuẩn (§4.5.4)
+- [ ] Alert / confirm / form: **CrmDialog** (§4.7) — không `window.*`
 - [ ] Desktop + mobile xem ổn
 - [ ] Trạng thái trống / loading / lỗi có UI
 - [ ] Không lộ mục chỉ dành cho Admin với user STAFF
@@ -348,6 +384,9 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 - Làm UI CRM bằng cách “clone cảm giác” CRM cũ khi chủ sở hữu **không** yêu cầu.
 - Form / bảng không có trạng thái rỗng hoặc lỗi.
 - Bảng list CRM lệch §4.5 (font khác, scroll cắt header, hover tự invent…).
+- Icon không Lucide / emoji làm icon CRM (§4.6).
+- Hangtag màu tự invent ngoài 5 tone (§4.5.4).
+- `window.alert` / `confirm` / `prompt` thay vì CrmDialog (§4.7).
 - Nút quan trọng chỉ hiện trong menu sâu trên mobile.
 - Trộn token màu public (đỏ-vàng landing) vào CRM nếu chưa chốt.
 - Card trang trí không phục vụ thao tác (CRM).
@@ -368,6 +407,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | Mock UI `/khach-hang` theo §4.2 + §4.3.1–4.3.4 (chưa chốt mobile) |
 | 2026-08-17 | Layout workbench full ngang + Noto Sans 14px; phân cấp §1–§3.2.2 trang khách hàng |
 | 2026-08-17 | **Chốt §4.5 bảng list dùng chung** + skill `crm-data-table` (hover, scroll, font, badge…) |
+| 2026-08-17 | **Chốt §4.6 Lucide**; hangtag 5 tone; **§4.7 CrmDialog** (alert/confirm/form/toast) |
 
 ---
 
@@ -377,4 +417,5 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 - Skill mock UI: `.cursor/skills/ui-mock-feature`
 - Skill đọc quy tắc UI: `.cursor/skills/ui-guidelines`
 - Skill bảng list CRM: `.cursor/skills/crm-data-table`
+- Skill dialog CRM: `.cursor/skills/crm-dialog`
 - Domain khách hàng: [`domains/customers.md`](./domains/customers.md)

@@ -1,6 +1,8 @@
 'use client';
 
+import { ChevronLeft } from 'lucide-react';
 import type { CustomerDetail, CustomerListItem } from '@crmanhung/shared';
+import { Icon } from '@/shared/ui/icon';
 import { mockChats, mockLodatsByCustomer } from '../mock-data';
 
 export type RailKey = 'chat' | 'care' | 'lodat';
@@ -42,7 +44,7 @@ export function RightRail({ open, onToggle, customer, detail }: Props) {
             title={tab.label}
           >
             <span className="chev" aria-hidden>
-              ‹
+              <Icon icon={ChevronLeft} size="sm" />
             </span>
             <span className="lbl">{tab.label}</span>
           </button>

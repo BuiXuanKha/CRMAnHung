@@ -53,7 +53,7 @@ export function statusLabel(status: CustomerStatus): string {
   return CUSTOMER_STATUS_LABELS[status];
 }
 
-export function statusTone(status: CustomerStatus): 'green' | 'blue' | 'amber' | 'gray' {
+export function statusTone(status: CustomerStatus): 'green' | 'blue' | 'amber' | 'gray' | 'red' {
   if (status === CustomerStatus.KHACH_NET) return 'green';
   if (status === CustomerStatus.KHACH_MOI) return 'blue';
   if (status === CustomerStatus.KHACH_CAN_CHAM_SOC) return 'amber';

@@ -19,7 +19,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 8. Smoke test + cập nhật docs nếu cần
 9. Staging deploy chỉ khi được yêu cầu (`anhungland.com`, không đụng `crm.anhungland.com`)
 10. **Web công khai** — áp dụng skill `web-public-seo` / `docs/PUBLIC-SEO.md`
-11. **UI** — đọc `docs/UI-GUIDELINES.md` (skill `ui-guidelines`) trước khi làm/sửa giao diện; bảng list → skill `crm-data-table` / §4.5
+11. **UI** — đọc `docs/UI-GUIDELINES.md` (skill `ui-guidelines`) trước khi làm/sửa giao diện; bảng list → `crm-data-table` / §4.5; icon Lucide §4.6; dialog → `crm-dialog` / §4.7
 
 ## Cấm
 
@@ -29,6 +29,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 - Commit `.env`, secrets R2, dump DB
 - Làm UI bỏ qua `UI-GUIDELINES.md` hoặc tự clone CRM cũ khi chưa được yêu cầu
 - Invent style bảng list CRM khác §4.5
+- Invent icon set / hangtag màu / `window.confirm` lệch §4.6–4.7
 
 ## Definition of Done
 

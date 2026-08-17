@@ -25,6 +25,8 @@ Bảng danh sách dùng lại nhiều màn CRM. **Không** invent style mới m�
 | Link | `#2563eb` |
 | Footer | `Hiển thị N / Tổng M …` |
 | Thao tác | Một nút chevron → menu; xóa = đỏ |
+| Icon | Lucide (§4.6); mini cạnh tên 12px |
+| Hangtag | `CrmBadge` tone green/blue/amber/gray/red |
 | Ô trống | `—` |
 
 ## Cấm

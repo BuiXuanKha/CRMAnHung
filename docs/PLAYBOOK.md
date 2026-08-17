@@ -71,7 +71,7 @@ Tham chiếu nhanh:
 
 ### ④ UI + mock data
 
-- **Đọc** [`UI-GUIDELINES.md`](./UI-GUIDELINES.md) trước (quy tắc visual / UX đã chốt). Bảng list CRM → §4.5 + skill `crm-data-table`.
+- **Đọc** [`UI-GUIDELINES.md`](./UI-GUIDELINES.md) trước (quy tắc visual / UX đã chốt). Bảng list CRM → §4.5 + skill `crm-data-table`; icon Lucide §4.6; dialog → §4.7 + skill `crm-dialog`.
 - Feature trong `apps/web/src/features/<domain>/`.
 - `mocks/` hoặc `mock-api.ts` — bật bằng `NEXT_PUBLIC_USE_MOCK=true` (mặc định dev có thể bật).
 - UI phải dùng type từ `@crmanhung/shared`, không invent shape riêng.

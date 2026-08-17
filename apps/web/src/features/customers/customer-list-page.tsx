@@ -2,7 +2,10 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, NotebookPen, Plus, Trash2 } from 'lucide-react';
 import { CustomerStatus, type CustomerListItem } from '@crmanhung/shared';
+import { CrmAlertDialog, CrmConfirmDialog, CrmDialog, CrmToast } from '@/shared/ui/dialog';
+import { Icon } from '@/shared/ui/icon';
 import { addCareNote, createCustomer, getCustomer, listCustomers, updateCustomer } from './api';
 import { AddByPhoneModal } from './components/add-by-phone-modal';
 import { type CustomerAction } from './components/action-menu';
@@ -21,6 +24,20 @@ const DEFAULT_EXTRA: ExtraFilters = {
   demand: 'all',
 };
 
+type ConfirmState = {
+  customer: CustomerListItem;
+} | null;
+
+type CareState = {
+  customer: CustomerListItem;
+  note: string;
+} | null;
+
+type AlertState = {
+  title: string;
+  message: string;
+} | null;
+
 export function CustomerListPage() {
   const qc = useQueryClient();
   const [keyword, setKeyword] = useState('');
@@ -32,6 +49,11 @@ export function CustomerListPage() {
   const [addOpen, setAddOpen] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<ConfirmState>(null);
+  const [careEdit, setCareEdit] = useState<CareState>(null);
+  const [alertBox, setAlertBox] = useState<AlertState>(null);
+  const [deleteBusy, setDeleteBusy] = useState(false);
+  const [careBusy, setCareBusy] = useState(false);
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
@@ -85,19 +107,15 @@ export function CustomerListPage() {
       if (thread) {
         window.open(`https://www.facebook.com/messages/t/${thread}`, '_blank', 'noopener,noreferrer');
       } else {
-        flash('Khách này chưa có thread Messenger.');
+        setAlertBox({
+          title: 'Không mở được Messenger',
+          message: 'Khách này chưa có thread Messenger.',
+        });
       }
       return;
     }
     if (action === 'care') {
-      const note = window.prompt('Cập nhật chăm sóc', customer.latestCareNote ?? '');
-      if (note?.trim()) {
-        await addCareNote(customer.id, { note: note.trim() });
-        await qc.invalidateQueries({ queryKey: ['customers'] });
-        await qc.invalidateQueries({ queryKey: ['customer', customer.id] });
-        setRail('care');
-        flash('Đã thêm ghi chú chăm sóc.');
-      }
+      setCareEdit({ customer, note: customer.latestCareNote ?? '' });
       return;
     }
     if (action === 'lodat') {
@@ -114,10 +132,35 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'delete') {
-      if (!window.confirm(`Ẩn khách «${customer.fullName}»?`)) return;
-      await updateCustomer(customer.id, { isHidden: true });
+      setConfirmDelete({ customer });
+    }
+  }
+
+  async function confirmHideCustomer() {
+    if (!confirmDelete) return;
+    setDeleteBusy(true);
+    try {
+      await updateCustomer(confirmDelete.customer.id, { isHidden: true });
       await qc.invalidateQueries({ queryKey: ['customers'] });
+      setConfirmDelete(null);
       flash('Đã ẩn khách (xóa mềm).');
+    } finally {
+      setDeleteBusy(false);
+    }
+  }
+
+  async function submitCareNote() {
+    if (!careEdit || !careEdit.note.trim()) return;
+    setCareBusy(true);
+    try {
+      await addCareNote(careEdit.customer.id, { note: careEdit.note.trim() });
+      await qc.invalidateQueries({ queryKey: ['customers'] });
+      await qc.invalidateQueries({ queryKey: ['customer', careEdit.customer.id] });
+      setRail('care');
+      setCareEdit(null);
+      flash('Đã thêm ghi chú chăm sóc.');
+    } finally {
+      setCareBusy(false);
     }
   }
 
@@ -127,7 +170,7 @@ export function CustomerListPage() {
       <header className="kh-s31">
         <h1>Quản lý khách hàng</h1>
         <button type="button" className="kh-add" onClick={() => setAddOpen(true)}>
-          + Thêm khách hàng bằng số điện thoại
+          <Icon icon={Plus} size="sm" /> Thêm khách hàng bằng số điện thoại
         </button>
       </header>
 
@@ -193,7 +236,77 @@ export function CustomerListPage() {
           await createMut.mutateAsync({ fullName, phone });
         }}
       />
-      {toast ? <div className="kh-toast">{toast}</div> : null}
+
+      <CrmConfirmDialog
+        open={Boolean(confirmDelete)}
+        title="Ẩn khách hàng"
+        icon={Trash2}
+        message={
+          confirmDelete
+            ? `Ẩn khách «${confirmDelete.customer.fullName}»? Khách sẽ không hiện trong danh sách mặc định.`
+            : ''
+        }
+        confirmLabel="Ẩn khách"
+        danger
+        busy={deleteBusy}
+        onCancel={() => {
+          if (!deleteBusy) setConfirmDelete(null);
+        }}
+        onConfirm={() => {
+          void confirmHideCustomer();
+        }}
+      />
+
+      <CrmDialog
+        open={Boolean(careEdit)}
+        title="Cập nhật chăm sóc"
+        icon={NotebookPen}
+        onClose={() => {
+          if (!careBusy) setCareEdit(null);
+        }}
+        busy={careBusy}
+      >
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void submitCareNote();
+          }}
+        >
+          <label>
+            Ghi chú
+            <textarea
+              value={careEdit?.note ?? ''}
+              onChange={(e) =>
+                setCareEdit((cur) => (cur ? { ...cur, note: e.target.value } : cur))
+              }
+              required
+            />
+          </label>
+          <div className="crm-dialog-actions">
+            <button
+              type="button"
+              className="crm-btn"
+              disabled={careBusy}
+              onClick={() => setCareEdit(null)}
+            >
+              Huỷ
+            </button>
+            <button type="submit" className="crm-btn primary" disabled={careBusy}>
+              {careBusy ? 'Đang lưu…' : 'Lưu ghi chú'}
+            </button>
+          </div>
+        </form>
+      </CrmDialog>
+
+      <CrmAlertDialog
+        open={Boolean(alertBox)}
+        title={alertBox?.title ?? ''}
+        icon={AlertTriangle}
+        message={alertBox?.message ?? ''}
+        onClose={() => setAlertBox(null)}
+      />
+
+      <CrmToast message={toast} />
     </div>
   );
 }

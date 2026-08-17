@@ -1,4 +1,4 @@
-/* §3.2.2 Rail phải + modal/toast — tách khỏi customers.css */
+/* §3.2.2 Rail phải — modal/toast dùng shared/ui/dialog */
 
 .kh-s322 {
   display: flex;
@@ -45,7 +45,7 @@
 }
 
 .kh-rail-tabs .chev {
-  font-size: 1rem;
+  display: inline-flex;
   line-height: 1;
 }
 
@@ -162,100 +162,6 @@
 .kh-care p {
   margin: 0;
   font-size: 0.86rem;
-}
-
-.kh-modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.5);
-  z-index: 50;
-  display: grid;
-  place-items: center;
-  padding: 16px;
-}
-
-.kh-modal {
-  width: min(460px, 100%);
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 18px 50px rgba(15, 23, 42, 0.25);
-}
-
-.kh-modal h2 {
-  margin: 0;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--kh-line);
-  background: #f8fafc;
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.kh-modal form {
-  display: grid;
-  gap: 12px;
-  padding: 16px 18px 18px;
-}
-
-.kh-modal label {
-  display: grid;
-  gap: 4px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #334155;
-}
-
-.kh-modal input {
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 0.9rem;
-  font-weight: 400;
-  color: #0f172a;
-}
-
-.kh-modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.kh-modal-actions button {
-  border-radius: 8px;
-  padding: 8px 14px;
-  cursor: pointer;
-  border: 1px solid #cbd5e1;
-  background: #fff;
-  color: #334155;
-  font-weight: 500;
-}
-
-.kh-modal-actions .primary {
-  border-color: var(--kh-blue);
-  background: var(--kh-blue);
-  color: #fff;
-  font-weight: 600;
-}
-
-.kh-form-error {
-  margin: 0;
-  color: #b91c1c;
-  font-size: 0.85rem;
-  font-weight: 400;
-}
-
-.kh-toast {
-  position: fixed;
-  bottom: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: #0f172a;
-  color: #fff;
-  padding: 10px 14px;
-  border-radius: 8px;
-  z-index: 60;
-  font-size: 0.9rem;
 }
 
 @media (max-width: 1024px) {

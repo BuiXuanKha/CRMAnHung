@@ -1,0 +1,38 @@
+/* CRM hangtag tones — UI-GUIDELINES §4.5.4 */
+
+.crm-badge {
+  display: inline-flex;
+  width: fit-content;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.35;
+}
+
+.crm-badge--green {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.crm-badge--blue {
+  background: #dbeafe;
+  color: #1e3a8a;
+}
+
+.crm-badge--amber {
+  background: #fed7aa;
+  color: #9a3412;
+}
+
+.crm-badge--gray {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.crm-badge--red {
+  background: #fee2e2;
+  color: #991b1b;
+}

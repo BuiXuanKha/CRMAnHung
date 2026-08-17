@@ -188,7 +188,8 @@
 }
 
 .kh-mini-icon {
-  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
   line-height: 1;
 }
 
@@ -198,36 +199,6 @@
 
 .kh-mini-icon.chat {
   color: #16a34a;
-}
-
-.kh-badge {
-  display: inline-flex;
-  width: fit-content;
-  padding: 2px 10px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-}
-
-.kh-badge.green {
-  background: var(--kh-green-bg);
-  color: var(--kh-green);
-}
-
-.kh-badge.blue {
-  background: var(--kh-blue-badge-bg);
-  color: var(--kh-blue-badge);
-}
-
-.kh-badge.amber {
-  background: var(--kh-amber-bg);
-  color: var(--kh-amber);
-}
-
-.kh-badge.gray {
-  background: #e2e8f0;
-  color: #475569;
 }
 
 .kh-demand {

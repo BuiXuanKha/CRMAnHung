@@ -8,12 +8,6 @@
   --kh-line: #e2e8f0;
   --kh-hot: #fef9c3;
   --kh-hot-edge: #ca8a04;
-  --kh-green: #166534;
-  --kh-green-bg: #dcfce7;
-  --kh-blue-badge: #1e3a8a;
-  --kh-blue-badge-bg: #dbeafe;
-  --kh-amber: #9a3412;
-  --kh-amber-bg: #fed7aa;
   display: flex;
   flex-direction: column;
   gap: 16px;
