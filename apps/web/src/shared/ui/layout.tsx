@@ -68,6 +68,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                 );
               })}
             </nav>
+            <span className="shell-nav-sep" aria-hidden>
+              |
+            </span>
             <UserMenu
               fullName={user.fullName}
               roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}

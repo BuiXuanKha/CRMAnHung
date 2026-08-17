@@ -80,7 +80,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 |----------|------------|
 | Kiểu shell | **Một hàng header**, **full chiều ngang viewport** (workbench) |
 | Header trái | Logo + tên ứng dụng **An Hưng Land CRM** |
-| Header phải | Menu chính **cạnh avatar**, mục cách nhau dấu **`|`**; rồi **avatar** |
+| Header phải | Menu chính **cạnh avatar**, mục cách nhau dấu **`|`**; **cũng có `|` trước avatar** |
 | Menu | Quản lý khách hàng \| Quản lý lô đất \| Quản lý giao dịch \| Dịch vụ sổ đỏ (+ Admin nếu có) |
 | Active | Chữ **xanh** `#2563eb` **700** — không pill nền riêng |
 | Avatar | Click → menu: tên + vai trò; **Cài đặt**; **Đăng xuất** cuối (đỏ) |

@@ -84,7 +84,7 @@
 .shell-top-end {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 0;
   min-width: 0;
 }
 
@@ -93,7 +93,12 @@
   align-items: center;
   min-width: 0;
   overflow-x: auto;
+  scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
+}
+
+.shell-header-nav::-webkit-scrollbar {
+  display: none;
 }
 
 .shell-header-nav-item {
