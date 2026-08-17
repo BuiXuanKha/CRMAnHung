@@ -11,6 +11,7 @@ import { FilterBar } from './components/filter-bar';
 import { RightRail, type RailKey } from './components/right-rail';
 import { applyExtraFilters, parseSearchKeyword, type ExtraFilters } from './display';
 import './customers.css';
+import './customers-table.css';
 import './customers-chrome.css';
 
 const DEFAULT_EXTRA: ExtraFilters = {
