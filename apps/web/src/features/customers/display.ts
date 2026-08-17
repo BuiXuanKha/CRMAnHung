@@ -67,6 +67,33 @@ export type ExtraFilters = {
   demand: 'all' | 'has' | 'empty';
 };
 
+export const NAME_FILTER_OPTIONS = [
+  { value: '', label: 'Tất cả trạng thái' },
+  { value: CustomerStatus.KHACH_MOI, label: 'Khách mới' },
+  { value: CustomerStatus.KHACH_NET, label: 'Khách nét' },
+  { value: CustomerStatus.KHACH_CAN_CHAM_SOC, label: 'Khách cần chăm sóc' },
+  { value: CustomerStatus.KHAC, label: 'Khác' },
+];
+
+export const DEMAND_FILTER_OPTIONS = [
+  { value: 'all', label: 'Tất cả nhu cầu' },
+  { value: 'has', label: 'Có nhu cầu' },
+  { value: 'empty', label: 'Chưa có' },
+];
+
+export const FINANCE_FILTER_OPTIONS = [
+  { value: 'all', label: 'Tất cả tài chính' },
+  { value: 'has', label: 'Có ngân sách' },
+  { value: 'empty', label: 'Chưa nhập' },
+];
+
+export const CHANNEL_FILTER_OPTIONS = [
+  { value: 'all', label: 'Tất cả kênh liên hệ' },
+  { value: 'facebook', label: 'Facebook / Messenger' },
+  { value: 'phone', label: 'SĐT / Zalo' },
+  { value: 'page', label: 'Page' },
+];
+
 export function applyExtraFilters(
   items: CustomerListItem[],
   extra: ExtraFilters,

@@ -1,7 +1,12 @@
 'use client';
 
-import { CustomerStatus } from '@crmanhung/shared';
 import type { ExtraFilters } from '../display';
+import {
+  CHANNEL_FILTER_OPTIONS,
+  DEMAND_FILTER_OPTIONS,
+  FINANCE_FILTER_OPTIONS,
+  NAME_FILTER_OPTIONS,
+} from '../display';
 
 type Props = {
   keyword: string;
@@ -27,30 +32,33 @@ export function FilterBar({ keyword, onKeyword, status, onStatus, extra, onExtra
         onChange={(e) => onStatus(e.target.value)}
         aria-label="Lọc trạng thái"
       >
-        <option value="">Tất cả trạng thái</option>
-        <option value={CustomerStatus.KHACH_MOI}>Khách mới</option>
-        <option value={CustomerStatus.KHACH_NET}>Khách nét</option>
-        <option value={CustomerStatus.KHACH_CAN_CHAM_SOC}>Khách cần chăm sóc</option>
-        <option value={CustomerStatus.KHAC}>Khác</option>
+        {NAME_FILTER_OPTIONS.map((o) => (
+          <option key={o.value || 'all'} value={o.value}>
+            {o.label}
+          </option>
+        ))}
       </select>
       <select
         value={extra.finance}
         onChange={(e) => onExtra({ ...extra, finance: e.target.value as ExtraFilters['finance'] })}
         aria-label="Lọc tài chính"
       >
-        <option value="all">Tất cả tài chính</option>
-        <option value="has">Có ngân sách</option>
-        <option value="empty">Chưa nhập</option>
+        {FINANCE_FILTER_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
       </select>
       <select
         value={extra.channel}
         onChange={(e) => onExtra({ ...extra, channel: e.target.value as ExtraFilters['channel'] })}
         aria-label="Lọc kênh liên hệ"
       >
-        <option value="all">Tất cả kênh liên hệ</option>
-        <option value="facebook">Facebook / Messenger</option>
-        <option value="phone">SĐT / Zalo</option>
-        <option value="page">Page</option>
+        {CHANNEL_FILTER_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
       </select>
       <select
         value={extra.lodat}
@@ -66,9 +74,11 @@ export function FilterBar({ keyword, onKeyword, status, onStatus, extra, onExtra
         onChange={(e) => onExtra({ ...extra, demand: e.target.value as ExtraFilters['demand'] })}
         aria-label="Lọc nhu cầu"
       >
-        <option value="all">Tất cả nhu cầu</option>
-        <option value="has">Có nhu cầu</option>
-        <option value="empty">Chưa có</option>
+        {DEMAND_FILTER_OPTIONS.map((o) => (
+          <option key={o.value} value={o.value}>
+            {o.label}
+          </option>
+        ))}
       </select>
     </div>
   );

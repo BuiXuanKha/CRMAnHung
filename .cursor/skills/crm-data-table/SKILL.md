@@ -28,6 +28,7 @@ Bảng danh sách dùng lại nhiều màn CRM. **Không** invent style mới m�
 | Thao tác | Một nút chevron → menu; xóa = đỏ |
 | Icon | Lucide (§4.6); mini cạnh tên 12px |
 | Hangtag | `CrmBadge` tone green/blue/amber/gray/red |
+| Lọc cột | Icon `ListFilter` trên tên cột dữ liệu; `ColumnFilter` |
 | Ô trống | `—` |
 
 ## Cấm

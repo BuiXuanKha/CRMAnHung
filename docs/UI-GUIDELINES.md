@@ -302,14 +302,28 @@ Icon trong bảng / menu: **chỉ Lucide** (§4.7). Avatar giữ quy tắc dư�
 
 **Cấm** invent màu hangtag từng màn — map domain → một trong 5 tone trên.
 
-#### 4.5.5 Cột Thao tác & menu
+#### 4.5.5 Icon lọc trên tên cột (đã chốt)
+
+Mỗi **cột dữ liệu** (không gồm `#` và **Thao tác**): tên cột bên trái + icon Lucide `ListFilter` **14px** bên phải.
+
+| Trạng thái | Hình |
+|------------|------|
+| Mặc định | Icon xám `#94a3b8`, nền trong suốt |
+| Hover / menu mở | Nền `#e2e8f0`, icon `#334155` |
+| Đang lọc | Icon + nền xanh `#2563eb` / `#dbeafe` |
+
+Bấm icon → menu trắng (cùng chrome menu thao tác): danh sách lựa chọn; mục đang chọn có `Check`. Một menu lọc mở / bảng. Lọc cột **cùng state** với thanh lọc §4.3.4 (không hai bộ lọc lệch nhau).
+
+Component: `shared/ui/column-filter.tsx`.
+
+#### 4.5.6 Cột Thao tác & menu
 
 - Một nút **32×32**, viền `#e2e8f0`, nền trắng, chevron xuống/lên (§4.3.3).
 - Menu: trắng, bo 10px, shadow nhẹ; mục `0.88rem` **600**; icon 16px trái.
 - Hành động phá hủy: chữ + icon **đỏ** `#b91c1c`.
 - Chỉ **một** menu mở / bảng.
 
-#### 4.5.6 Implement
+#### 4.5.7 Implement
 
 - Tái dùng **một** component/shared styles (không copy CSS từng màn).
 - Đổi cột = props/config domain; **không** đổi token hover/font mỗi trang.
@@ -356,7 +370,8 @@ Skill: `crm-dialog`. Tham chiếu: `apps/web/src/shared/ui/dialog.tsx`.
 - [ ] Header + navbar đúng cấu trúc 4.2 trên mọi trang CRM
 - [ ] Cột / domain đúng mục 4.3.x của màn đó
 - [ ] Rail phải (nếu có): §4.3.2
-- [ ] Menu hành động (nếu có cột Thao tác): §4.3.3 + §4.5.5
+- [ ] Menu hành động (nếu có cột Thao tác): §4.3.3 + §4.5.6
+- [ ] Icon lọc trên tên cột dữ liệu: §4.5.5
 - [ ] Thanh tìm/lọc (nếu có): §4.3.4
 
 ---
@@ -409,6 +424,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt §4.5 bảng list dùng chung** + skill `crm-data-table` (hover, scroll, font, badge…) |
 | 2026-08-17 | **Chốt §4.6 Lucide**; hangtag 5 tone; **§4.7 CrmDialog** (alert/confirm/form/toast) |
 | 2026-08-17 | **Chốt màu số tiền CRM** `#b45309` (`crm-money`) — thống nhất mọi cột giá / tài chính |
+| 2026-08-17 | **Chốt §4.5.5** icon lọc `ListFilter` trên tên cột dữ liệu; đồng bộ thanh lọc |
 
 ---
 

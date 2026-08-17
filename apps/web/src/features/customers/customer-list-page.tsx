@@ -204,6 +204,10 @@ export function CustomerListPage() {
                 total={list.data?.total ?? filtered.length}
                 selectedId={selectedId}
                 menuId={menuId}
+                status={status}
+                extra={extra}
+                onStatus={setStatus}
+                onExtra={setExtra}
                 onSelect={setSelectedId}
                 onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
                 onCloseMenu={() => setMenuId(null)}
