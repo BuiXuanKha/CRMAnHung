@@ -51,40 +51,70 @@
 
 ---
 
-## 4. CRM nhân viên (STAFF) — *đang chờ chủ sở hữu mô tả chi tiết*
+## 4. CRM nhân viên (STAFF)
 
 Phạm vi ưu tiên hiện tại: màn sau login, đặc biệt **Quản lý khách hàng**.
 
 ### 4.1 Đã thống nhất tạm
 
-- Không bắt buộc giống pixel CRM cũ.
+- Không bắt buộc giống pixel CRM cũ từng chi tiết; **cấu trúc shell** theo mục 4.2 (đã chốt).
 - Admin UI: **chưa làm** cho đến khi STAFF ổn.
 - Mock được (`NEXT_PUBLIC_USE_MOCK`); không gọi API production CRM cũ.
-- **UI list/detail `/khach-hang` bản mock cũ đã gỡ** — đang để placeholder; làm lại sau khi mục 4.2 được chốt.
+- **UI list/detail `/khach-hang` bản mock cũ đã gỡ** — đang để placeholder; làm lại sau khi nội dung trang (mục 4.3) được chốt.
 
-### 4.2 Chờ chốt (điền khi chủ sở hữu mô tả)
+### 4.2 Shell CRM chung (đã chốt) — mọi trang sau login
 
-Ghi rõ vào đây khi có quyết định — ví dụ:
+Phần **chung** (AppShell), không thuộc nội dung từng trang:
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│ HEADER                                                      │
+│  Trái: logo + tên «An Hưng Land CRM»                        │
+│  Phải: «Họ tên | Nhân viên/Admin» · Cài đặt · Đăng xuất     │
+├─────────────────────────────────────────────────────────────┤
+│ NAVBAR (Thanh điều hướng) — menu ngang                      │
+│  · Quản lý khách hàng                                       │
+│  · Quản lý lô đất                                           │
+│  · Quản lý giao dịch                                        │
+│  · Dịch vụ sổ đỏ                                            │
+│  (+ mục Admin chỉ hiện với role ADMIN, khi làm sau)         │
+├─────────────────────────────────────────────────────────────┤
+│ NỘI DUNG TRANG (riêng từng route — chưa chốt chi tiết)      │
+└─────────────────────────────────────────────────────────────┘
+```
+
+| Hạng mục | Quyết định |
+|----------|------------|
+| Kiểu shell | **Header trên + navbar ngang** (không dùng sidebar làm nav chính) |
+| Header trái | Logo + tên ứng dụng **An Hưng Land CRM** |
+| Header phải | Tên người dùng + vai trò, nút **Cài đặt**, nút **Đăng xuất** |
+| Navbar | Menu ngang; mục đang mở phải **active** rõ (nền/viền/chữ nổi) |
+| Mobile | Navbar vẫn dùng được (cuộn ngang hoặc tương đương); không ẩn mất mục chính |
+
+Implement: `apps/web` layout CRM (`(crm)/layout` → `AppShell`). Đổi shell = đổi một chỗ, áp mọi trang CRM.
+
+### 4.3 Nội dung trang (chờ chốt)
+
+Phần **dưới navbar** — từng màn (ưu tiên `/khach-hang`):
 
 | Hạng mục | Quyết định | Ghi chú |
 |----------|------------|---------|
 | Cảm giác tổng thể | *(vd. hiện đại / gọn / ấm /…)* | |
-| Màu chủ đạo CRM | | |
+| Màu chủ đạo CRM | | Xanh primary kiểu CRM làm việc là hướng tham chiếu từ shell |
 | Font | | |
-| Shell: menu ngang hay sidebar | | |
 | Trang khách hàng: layout chính | *(list + panel / full table / cards…)* | |
 | Thao tác luôn hiện vs menu ⋮ | | |
 | Mobile: ưu tiên thẻ hay list | | |
 | Mật độ thông tin (thoáng / đặc) | | |
 | Tránh tuyệt đối | *(vd. bảng xám nhàm, quá nhiều filter…)* | |
 
-### 4.3 Checklist trước khi merge UI CRM
+### 4.4 Checklist trước khi merge UI CRM
 
-- [ ] Đúng quy tắc mục 3 + mục 4 đã chốt
+- [ ] Đúng quy tắc mục 3 + shell mục 4.2 + nội dung đã chốt ở 4.3
 - [ ] Desktop + mobile xem ổn
 - [ ] Trạng thái trống / loading / lỗi có UI
 - [ ] Không lộ mục chỉ dành cho Admin với user STAFF
-
+- [ ] Header + navbar đúng cấu trúc 4.2 trên mọi trang CRM
 ---
 
 ## 5. CRM Admin
