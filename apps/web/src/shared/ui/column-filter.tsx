@@ -38,9 +38,9 @@ export function ColumnFilter({
 
   useLayoutEffect(() => {
     if (!open) return;
-    const el = wrapRef.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
+    const btn = wrapRef.current?.querySelector('button');
+    if (!btn) return;
+    const r = btn.getBoundingClientRect();
     const width = 220;
     const left = Math.min(r.left, window.innerWidth - width - 8);
     setPos({ top: r.bottom + 4, left: Math.max(8, left) });
@@ -59,7 +59,7 @@ export function ColumnFilter({
     <div className="crm-col-filter" ref={wrapRef}>
       <button
         type="button"
-        className={['crm-col-filter-trigger', open ? 'is-open' : '', active ? 'is-active' : '']
+        className={['crm-col-filter-btn', open ? 'is-open' : '', active ? 'is-active' : '']
           .filter(Boolean)
           .join(' ')}
         aria-haspopup="menu"
@@ -71,14 +71,7 @@ export function ColumnFilter({
           onToggle();
         }}
       >
-        <span className="crm-col-filter-label">{label}</span>
-        <span
-          className={['crm-col-filter-icon', open ? 'is-open' : '', active ? 'is-active' : '']
-            .filter(Boolean)
-            .join(' ')}
-        >
-          <Icon icon={ListFilter} size={14} />
-        </span>
+        <Icon icon={ListFilter} size={14} />
       </button>
       {open ? (
         <ul

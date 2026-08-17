@@ -312,7 +312,7 @@ Mỗi **cột dữ liệu** (không gồm `#` và **Thao tác**): tên cột bê
 | Hover / menu mở | Nền `#e2e8f0`, icon `#334155` |
 | Đang lọc | Icon + nền xanh `#2563eb` / `#dbeafe` |
 
-Bấm **tên cột hoặc icon** → menu trắng (cùng chrome menu thao tác): danh sách lựa chọn; mục đang chọn có `Check`. Một menu lọc mở / bảng. Lọc cột **cùng state** với thanh lọc §4.3.4 (không hai bộ lọc lệch nhau).
+Bấm **chỉ icon** (không bấm tên cột) → menu trắng (cùng chrome menu thao tác): danh sách lựa chọn; mục đang chọn có `Check`. Một menu lọc mở / bảng. Lọc cột **cùng state** với thanh lọc §4.3.4 (không hai bộ lọc lệch nhau).
 
 Component: `shared/ui/column-filter.tsx`.
 

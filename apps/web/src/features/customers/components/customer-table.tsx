@@ -67,6 +67,7 @@ export function CustomerTable({
             #
           </div>
           <div className="kh-col-head" role="columnheader">
+            <span>Tên khách</span>
             <ColumnFilter
               label="Tên khách"
               value={status}
@@ -79,6 +80,7 @@ export function CustomerTable({
             />
           </div>
           <div className="kh-col-head" role="columnheader">
+            <span>Nhu cầu</span>
             <ColumnFilter
               label="Nhu cầu"
               value={extra.demand}
@@ -90,6 +92,7 @@ export function CustomerTable({
             />
           </div>
           <div className="kh-col-head" role="columnheader">
+            <span>Tài chính</span>
             <ColumnFilter
               label="Tài chính"
               value={extra.finance}
@@ -101,6 +104,7 @@ export function CustomerTable({
             />
           </div>
           <div className="kh-col-head" role="columnheader">
+            <span>Kênh liên hệ</span>
             <ColumnFilter
               label="Kênh liên hệ"
               value={extra.channel}

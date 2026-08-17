@@ -57,7 +57,14 @@
 
 .kh-col-head {
   width: 100%;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.kh-col-head > span {
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .kh-table-scroll {
