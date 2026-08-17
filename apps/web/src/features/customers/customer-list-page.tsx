@@ -1,5 +1,7 @@
 'use client';
 
+import './customers.css';
+
 /**
  * Placeholder — UI cũ đã gỡ.
  * Làm lại theo docs/UI-GUIDELINES.md khi chủ sở hữu chốt quy tắc.
@@ -14,4 +16,3 @@ export function CustomerListPage() {
     </div>
   );
 }
-

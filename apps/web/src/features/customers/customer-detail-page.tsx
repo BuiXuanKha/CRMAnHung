@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import './customers.css';
 
 /**
  * Placeholder — UI cũ đã gỡ.
