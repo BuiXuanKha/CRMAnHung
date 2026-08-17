@@ -306,7 +306,7 @@ Mỗi **cột dữ liệu** (không gồm `#` và **Thao tác**): tên cột + i
 |------------|------|
 | Mặc định | Icon xám `#94a3b8`, nền trong suốt |
 | Hover / menu mở | Nền `#e2e8f0`, icon `#334155` |
-| Đang lọc | Icon lọc xanh `#2563eb` / `#dbeafe`; **thêm** icon Lucide `X` **sát phải** (chỉ lúc này) — bấm để về «Tất cả» |
+| Đang lọc | Icon lọc xanh `#2563eb` / `#dbeafe`; **thêm** icon Lucide `X` **sát phải** (chỉ lúc này) — mặc định nền `#fee2e2` chữ `#b91c1c`; hover đậm hơn `#fecaca` / `#7f1d1d`; bấm về «Tất cả» |
 | Không lọc | Không hiện icon xóa |
 
 Bấm **chỉ icon** (không bấm tên cột) → menu trắng (cùng chrome menu thao tác): danh sách lựa chọn; mục đang chọn có `Check`. Một menu lọc mở / bảng. Lọc cột **thay** dropdown trùng trên thanh §4.3.4.
