@@ -100,7 +100,7 @@ function renderBody(open: RailKey, customer: CustomerListItem | null, detail: Cu
         <li key={l.id}>
           <strong>{l.title}</strong>
           <span>
-            {l.area} · {l.price}
+            {l.area} · <span className="crm-money">{l.price}</span>
           </span>
         </li>
       ))}

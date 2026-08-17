@@ -266,7 +266,7 @@ Skill: `crm-data-table`. Tham chiếu triển khai: `/khach-hang` (`features/cus
 | Tên / primary cell | **600** | `#0f172a` |
 | Dòng phụ (vd. tên FB) | **0.78rem**, italic | `#64748b` |
 | Nhu cầu / mô tả | **0.82rem** | `#334155` |
-| Số tiền / tài chính | **0.82rem**, **600** | `#0f172a` |
+| Số tiền / tài chính | **0.82rem**, **600** | **`#047857`** (money — một màu toàn CRM; class `crm-money`) |
 | Link / kênh liên hệ | **0.78rem**, **600** | `#2563eb` (primary) |
 | Cột `#` | **700**, tabular | `#1e40af` |
 | Badge trạng thái | **0.72rem**, **600** | theo tone bên dưới |
@@ -408,6 +408,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | Layout workbench full ngang + Noto Sans 14px; phân cấp §1–§3.2.2 trang khách hàng |
 | 2026-08-17 | **Chốt §4.5 bảng list dùng chung** + skill `crm-data-table` (hover, scroll, font, badge…) |
 | 2026-08-17 | **Chốt §4.6 Lucide**; hangtag 5 tone; **§4.7 CrmDialog** (alert/confirm/form/toast) |
+| 2026-08-17 | **Chốt màu số tiền CRM** `#047857` (`crm-money`) — thống nhất mọi cột giá / tài chính |
 
 ---
 

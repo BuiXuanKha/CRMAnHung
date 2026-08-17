@@ -16,6 +16,7 @@ import { applyExtraFilters, parseSearchKeyword, type ExtraFilters } from './disp
 import './customers.css';
 import './customers-table.css';
 import './customers-chrome.css';
+import '@/shared/ui/money.css';
 
 const DEFAULT_EXTRA: ExtraFilters = {
   finance: 'all',

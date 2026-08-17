@@ -1,0 +1,7 @@
+/* Shared CRM money / price color — UI-GUIDELINES §4.5.2 */
+
+.crm-money {
+  color: #047857;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}

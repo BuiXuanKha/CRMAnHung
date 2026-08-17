@@ -23,6 +23,7 @@ Bảng danh sách dùng lại nhiều màn CRM. **Không** invent style mới m�
 | Selected | `#eff6ff` |
 | Ghim / nổi bật | `#fef9c3` + viền trái `#ca8a04` |
 | Link | `#2563eb` |
+| Số tiền / giá | `#047857` (class `crm-money`) |
 | Footer | `Hiển thị N / Tổng M …` |
 | Thao tác | Một nút chevron → menu; xóa = đỏ |
 | Icon | Lucide (§4.6); mini cạnh tên 12px |

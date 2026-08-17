@@ -111,7 +111,7 @@ export function CustomerTable({
                 <span className="kh-demand">{demandLabel(c)}</span>
               </div>
               <div className="kh-cell" role="cell">
-                <span className="kh-budget">{formatBudget(c.budgetMinVnd, c.budgetMaxVnd)}</span>
+                <span className="kh-budget crm-money">{formatBudget(c.budgetMinVnd, c.budgetMaxVnd)}</span>
               </div>
               <div className="kh-cell" role="cell">
                 <span className="kh-channel">{channelLabel(c)}</span>
