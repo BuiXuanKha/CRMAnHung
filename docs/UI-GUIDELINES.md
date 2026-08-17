@@ -60,6 +60,7 @@ Phạm vi ưu tiên hiện tại: màn sau login, đặc biệt **Quản lý kh�
 - Không bắt buộc giống pixel CRM cũ.
 - Admin UI: **chưa làm** cho đến khi STAFF ổn.
 - Mock được (`NEXT_PUBLIC_USE_MOCK`); không gọi API production CRM cũ.
+- **UI list/detail `/khach-hang` bản mock cũ đã gỡ** — đang để placeholder; làm lại sau khi mục 4.2 được chốt.
 
 ### 4.2 Chờ chốt (điền khi chủ sở hữu mô tả)
 
@@ -119,6 +120,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | Ngày | Nội dung |
 |------|----------|
 | 2026-08-17 | Tạo `UI-GUIDELINES.md` làm nơi quy tắc UI chung; không mock theo CRM cũ làm mặc định; chờ mô tả UI nhân viên từ chủ sở hữu |
+| 2026-08-17 | Gỡ UI mock `/khach-hang` (list/detail) — placeholder chờ chốt mục 4.2 |
 
 ---
 

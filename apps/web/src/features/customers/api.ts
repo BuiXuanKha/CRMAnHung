@@ -13,16 +13,9 @@ import {
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 import { isMockMode } from '@/shared/api/mode';
-import { MOCK_CONTACT_CHANNELS, contactChannelOf, mockCustomers } from './mock-data';
+import { mockCustomers } from './mock-data';
 
 let mockStore: CustomerDetail[] = structuredClone(mockCustomers);
-
-export type StaffListQuery = CustomerListQuery & {
-  budget?: '' | 'none' | 'has' | 'lt_1b' | '1b_2b' | 'gt_2b';
-  channel?: string;
-  lodat?: '' | 'none';
-  need?: '' | 'none';
-};
 
 function currentMockUser(): AuthUser {
   if (typeof window === 'undefined') {
@@ -54,14 +47,10 @@ function visibleFor(user: AuthUser, items: CustomerDetail[]) {
   return items.filter((c) => c.employeeId === user.id);
 }
 
-function avgBudget(c: CustomerDetail) {
-  const { budgetMinVnd: min, budgetMaxVnd: max } = c;
-  if (min == null && max == null) return null;
-  if (min != null && max != null) return (min + max) / 2;
-  return min ?? max ?? null;
-}
-
-function applyQuery(items: CustomerDetail[], query: StaffListQuery = {}): CustomerDetail[] {
+function applyQuery(
+  items: CustomerDetail[],
+  query: CustomerListQuery = {},
+): CustomerDetail[] {
   let next = items;
   if (query.hiddenOnly) {
     next = next.filter((c) => c.isHidden);
@@ -71,35 +60,6 @@ function applyQuery(items: CustomerDetail[], query: StaffListQuery = {}): Custom
   if (query.status) {
     next = next.filter((c) => c.status === query.status);
   }
-  if (query.budget === 'none') {
-    next = next.filter((c) => c.budgetMinVnd == null && c.budgetMaxVnd == null);
-  } else if (query.budget === 'has') {
-    next = next.filter((c) => c.budgetMinVnd != null || c.budgetMaxVnd != null);
-  } else if (query.budget === 'lt_1b') {
-    next = next.filter((c) => {
-      const v = avgBudget(c);
-      return v != null && v < 1_000_000_000;
-    });
-  } else if (query.budget === '1b_2b') {
-    next = next.filter((c) => {
-      const v = avgBudget(c);
-      return v != null && v >= 1_000_000_000 && v <= 2_000_000_000;
-    });
-  } else if (query.budget === 'gt_2b') {
-    next = next.filter((c) => {
-      const v = avgBudget(c);
-      return v != null && v > 2_000_000_000;
-    });
-  }
-  if (query.channel) {
-    next = next.filter((c) => contactChannelOf(c.id) === query.channel);
-  }
-  if (query.lodat === 'none') {
-    next = next.filter((c) => c.lodatCount === 0);
-  }
-  if (query.need === 'none') {
-    next = next.filter((c) => !String(c.note || '').trim());
-  }
   if (query.keyword?.trim()) {
     const q = query.keyword.trim().toLowerCase();
     next = next.filter((c) => {
@@ -108,8 +68,6 @@ function applyQuery(items: CustomerDetail[], query: StaffListQuery = {}): Custom
         c.primaryPhone ?? '',
         c.facebook?.facebookName ?? '',
         c.note ?? '',
-        c.latestCareNote ?? '',
-        contactChannelOf(c.id),
         ...c.phones.map((p) => p.phone),
       ]
         .join(' ')
@@ -124,7 +82,7 @@ function applyQuery(items: CustomerDetail[], query: StaffListQuery = {}): Custom
 }
 
 export async function listCustomers(
-  query: StaffListQuery = {},
+  query: CustomerListQuery = {},
 ): Promise<CustomerListResponse> {
   if (isMockMode()) {
     const user = currentMockUser();
@@ -180,7 +138,6 @@ export async function createCustomer(
       careNotes: [],
     };
     mockStore = [created, ...mockStore];
-    MOCK_CONTACT_CHANNELS[created.id] = '0977656280 (Zalo Demo)';
     return created;
   }
   return apiFetch<CustomerDetail>('/customers', {
