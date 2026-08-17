@@ -7,11 +7,11 @@ import {
   CreditCard,
   FileText,
   Map,
-  Settings,
   Users,
 } from 'lucide-react';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from './icon';
+import { UserMenu } from './user-menu';
 import './layout.css';
 
 const navItems = [
@@ -47,27 +47,13 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
             <strong>An Hưng Land CRM</strong>
           </Link>
-          <div className="shell-user">
-            <span className="shell-user-meta">
-              {user.fullName}
-              <span className="shell-user-role">
-                {' '}
-                | {user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
-              </span>
-            </span>
-            <button type="button" className="shell-settings" aria-label="Cài đặt" title="Cài đặt">
-              <Icon icon={Settings} size="md" />
-            </button>
-            <button
-              type="button"
-              className="shell-logout"
-              onClick={() => {
-                void logout().then(() => router.replace('/login'));
-              }}
-            >
-              Đăng xuất
-            </button>
-          </div>
+          <UserMenu
+            fullName={user.fullName}
+            roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+            onLogout={() => {
+              void logout().then(() => router.replace('/login'));
+            }}
+          />
         </div>
 
         {/* §2 Thanh điều hướng — menu căn phải */}

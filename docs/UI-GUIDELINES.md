@@ -70,7 +70,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 ┌─────────────────────────────────────────────────────────────┐
 │ HEADER                                                      │
 │  Trái: logo + tên «An Hưng Land CRM»                        │
-│  Phải: «Họ tên | Nhân viên/Admin» · Cài đặt · Đăng xuất     │
+│  Phải: **avatar** nhân viên (chữ tắt) → menu                  │
 ├─────────────────────────────────────────────────────────────┤
 │ NAVBAR (Thanh điều hướng) — menu ngang                      │
 │  · Quản lý khách hàng                                       │
@@ -87,7 +87,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 |----------|------------|
 | Kiểu shell | **Header trên + navbar ngang**, **full chiều ngang viewport** (workbench, không khung hẹp giữa trang) |
 | Header trái | Logo + tên ứng dụng **An Hưng Land CRM** |
-| Header phải | Tên người dùng + vai trò, nút **Cài đặt**, nút **Đăng xuất** |
+| Header phải | **Một avatar** (chữ tắt tên). Click → menu: tên + vai trò trên cùng; **Cài đặt** phía dưới; **Đăng xuất** cuối (đỏ). Không hiện tên/nút rời trên header. |
 | Navbar | Nhãn «Thanh điều hướng» trái; **menu căn phải**; mục active nền xanh nhạt |
 | Typography CRM | **Noto Sans**, gốc **14px** (public vẫn Be Vietnam Pro) |
 | Mobile | Navbar vẫn dùng được (cuộn ngang hoặc tương đương); không ẩn mất mục chính |
@@ -412,6 +412,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | Tạo `UI-GUIDELINES.md` làm nơi quy tắc UI chung; không mock theo CRM cũ làm mặc định; chờ mô tả UI nhân viên từ chủ sở hữu |
 | 2026-08-17 | Gỡ UI mock `/khach-hang` (list/detail) — placeholder chờ chốt nội dung trang |
 | 2026-08-17 | **Chốt shell CRM:** header (logo+tên, user, cài đặt, đăng xuất) + navbar ngang (4 mục STAFF) |
+| 2026-08-17 | Header phải = **avatar** → menu (Cài đặt dưới, Đăng xuất cuối) |
 | 2026-08-17 | **Chốt bảng dữ liệu (§4.3.1):** header cột + dòng + footer «Hiển thị N / Tổng M»; mẫu cột `/khach-hang` theo ảnh |
 | 2026-08-17 | **Chốt rail phải (§4.3.2):** thanh dọc chữ xoay 90°; mở rộng / thu hẹp; nhãn Chat · Lịch sử chăm sóc · Danh sách lô đất |
 | 2026-08-17 | **Chốt menu hành động (§4.3.3):** dropdown cột Thao tác; chevron lên/xuống; Xóa khách đỏ |

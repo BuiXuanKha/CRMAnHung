@@ -81,55 +81,6 @@
   color: var(--shell-ink);
 }
 
-.shell-user {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--shell-ink);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.shell-user-meta {
-  color: var(--shell-ink);
-}
-
-.shell-user-role {
-  color: var(--shell-muted);
-  font-weight: 600;
-}
-
-.shell-settings {
-  width: 38px;
-  height: 38px;
-  border: 1px solid var(--shell-line);
-  background: #fff;
-  color: var(--shell-muted);
-  border-radius: 8px;
-  display: grid;
-  place-items: center;
-  cursor: pointer;
-}
-
-.shell-settings:hover {
-  background: #f3f4f6;
-}
-
-.shell-logout {
-  border: 0;
-  background: var(--shell-blue);
-  color: #fff;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
-}
-
-.shell-logout:hover {
-  background: #1d4ed8;
-}
-
 /* §2 Nav — nhãn trái, menu căn phải */
 .shell-nav {
   display: flex;
@@ -206,13 +157,6 @@
 
   .shell-brand strong {
     font-size: 17px;
-  }
-
-  .shell-user-meta {
-    max-width: 36vw;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .shell-nav {
