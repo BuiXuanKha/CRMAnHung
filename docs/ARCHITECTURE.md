@@ -32,11 +32,12 @@ Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Lan
 | Monorepo | pnpm workspaces | Shared package, cài đặt nhất quán |
 | Language | TypeScript (strict) | An toàn kiểu, refactor tự tin |
 | API | NestJS 11 (Express) | Module rõ ràng, DI, guards/pipes sẵn |
-| ORM / DB | Prisma + SQLite (dev/prod giai 1) | Schema rõ, migrate chuẩn; sau có thể đổi PostgreSQL |
+| ORM / DB | Prisma + **PostgreSQL** | Schema rõ, migrate chuẩn; giống nhau từ dev → prod |
+| Object storage | **Cloudflare R2** (S3 API) | Ảnh/file không nằm disk VPS |
 | Validation | Zod (`@crmanhung/shared`) + Nest ValidationPipe | Contract dùng chung FE/BE/Extension |
-| Auth | JWT access (ngắn) + refresh (httpOnly cookie / storage có rotation) | Bảo mật hơn JWT 7 ngày cố định |
-| Web | React 19 + Vite + React Router + TanStack Query | State server rõ, ít boilerplate |
-| Extension | Chrome MV3 + TypeScript (Vite build) | Cùng type với API |
+| Auth | JWT access (ngắn) + refresh (rotation) | Bảo mật hơn JWT 7 ngày cố định |
+| Web | **Next.js 15 (App Router) + React 19 + TanStack Query** | Public web + CRM sau login; SEO/SSR cho trang mở |
+| Extension | Chrome MV3 + TypeScript (esbuild) | Cùng type với API |
 | Lint/format | ESLint + Prettier (workspace) | Chất lượng đồng đều |
 
 ---
@@ -47,7 +48,7 @@ Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Lan
 crmanhung/
 ├── apps/
 │   ├── api/          # NestJS — REST API
-│   ├── web/          # React SPA — nhân viên / admin
+│   ├── web/          # Next.js — public web + CRM (nhân viên / admin)
 │   └── extension/    # Chrome MV3 — quét Inbox/Messenger
 ├── packages/
 │   └── shared/       # Types, enums, Zod schemas, constants
@@ -65,6 +66,7 @@ apps/api/src/
 ├── config/                 # env validation
 ├── common/                 # guards, filters, decorators, interceptors
 ├── prisma/                 # PrismaService
+├── storage/                # Cloudflare R2 (S3 client)
 └── modules/
     ├── health/
     ├── auth/
@@ -82,14 +84,19 @@ Mỗi module: `*.module.ts` → `*.controller.ts` → `*.service.ts` → (option
 
 **Không** nhét business logic vào controller. **Không** gọi Prisma trực tiếp từ controller.
 
-### Web — theo domain UI
+### Web — Next.js App Router
 
 ```
-apps/web/src/
-├── app/            # router, providers
-├── features/       # auth, customers, lodats, transactions, title-services, admin
-├── shared/         # ui kit, hooks, api client, lib
-└── styles/
+apps/web/
+├── app/
+│   ├── (public)/     # web public — `/` landing
+│   ├── (crm)/        # CRM sau login
+│   └── login/
+├── src/
+│   ├── features/     # auth, customers, …
+│   ├── shared/       # ui, api client
+│   └── styles/
+└── next.config.ts    # output: 'standalone'
 ```
 
 ### Extension
@@ -128,7 +135,7 @@ Vai trò: `STAFF` (dữ liệu theo `employeeId`) · `ADMIN` (toàn cục + cấ
 4. **Helmet**, rate limit login, giới hạn body size có chủ đích.
 5. **Authorization** ở service layer (ownership), không chỉ dựa vào UI ẩn nút.
 6. **Secrets** chỉ qua env; không commit `.env`.
-7. Upload ảnh: validate MIME/size; serve tĩnh tách path; không tin client path.
+7. Upload: validate MIME/size → R2; DB lưu **object key**; không tin path client; không serve file từ disk VPS.
 8. Extension: token trong `chrome.storage.session` / local có scope rõ; API URL cấu hình, không hardcode prod secret.
 
 ---
@@ -140,7 +147,7 @@ Meta Inbox / Messenger
   → Extension (scan + JWT)
   → POST /api/v1/customers/from-extension
   → DB (Person + Facebook + Messenger)
-  → Web SPA quản lý qua /api/v1/*
+  → Web quản lý qua /api/v1/*
 ```
 
 API version prefix: `/api/v1` — dễ thay contract sau này mà không phá client cũ trong giai đoạn chuyển tiếp.
@@ -152,11 +159,11 @@ API version prefix: `/api/v1` — dễ thay contract sau này mà không phá cl
 | Giai đoạn | Nội dung |
 |-----------|----------|
 | **P0 — Foundation** | Monorepo, auth, users, health, Web shell, Extension stub, Prisma schema core |
-| **P0b — Staging MatBao** | `crm-next.anhungland.com` trên cùng VPS với CRM cũ; PM2 port 5050 |
+| **P0b — Staging MatBao** | `anhungland.com` trên cùng VPS với CRM cũ; PM2 port 5050 |
 | **P1 — Customers** | CRUD khách, ingest extension, care history |
 | **P2 — Lodats + Addresses** | Lô đất, map khách–lô, địa chỉ, import Excel |
 | **P3 — Transactions + Title** | Giao dịch, dịch vụ sổ đỏ |
-| **P4 — Hardening** | Admin registry, CI, deploy, migration data từ SQLite cũ |
+| **P4 — Hardening** | Admin registry, CI, deploy, migration data (SQLite cũ → Postgres + `img/` → R2) |
 | **P5 — Cutover** | Song song → chuyển DNS/nginx → tắt hệ cũ |
 
 Chi tiết migrate dữ liệu: xem `docs/MIGRATION.md`.

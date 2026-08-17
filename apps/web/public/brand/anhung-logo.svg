@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 88" role="img" aria-label="An Hung Land">
+  <defs>
+    <linearGradient id="goldDark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#F5E6A8"/>
+      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="100%" stop-color="#B8860B"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="10" width="68" height="68" rx="10" fill="#B91C22"/>
+  <rect x="6" y="14" width="60" height="60" rx="8" fill="none" stroke="url(#goldDark)" stroke-width="2.5"/>
+  <text x="36" y="58" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-size="34" font-weight="700" fill="url(#goldDark)">AH</text>
+  <text x="88" y="42" font-family="Georgia, 'Times New Roman', serif" font-size="28" font-weight="700" fill="#F8FAFC" letter-spacing="1.5">AN HUNG</text>
+  <text x="88" y="68" font-family="Arial, Helvetica, sans-serif" font-size="13" font-weight="700" fill="#D4AF37" letter-spacing="6">LAND</text>
+</svg>

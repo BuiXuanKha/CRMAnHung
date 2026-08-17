@@ -1,0 +1,87 @@
+/* Column header filter — UI-GUIDELINES §4.5.5 */
+
+.crm-col-filter {
+  position: relative;
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.crm-col-filter-btn {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.crm-col-filter-btn:hover,
+.crm-col-filter-btn.is-open {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.crm-col-filter-btn.is-active {
+  color: #2563eb;
+  background: #dbeafe;
+}
+
+.crm-col-filter-clear {
+  width: 22px;
+  height: 22px;
+  border: none;
+  background: #fee2e2;
+  color: #b91c1c;
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.crm-col-filter-clear:hover {
+  background: #fecaca;
+  color: #7f1d1d;
+}
+
+.crm-col-filter-menu {
+  position: fixed;
+  z-index: 40;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  min-width: 200px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+  border: 1px solid #e2e8f0;
+}
+
+.crm-col-filter-menu button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.crm-col-filter-menu button:hover,
+.crm-col-filter-menu button.is-selected {
+  background: #eff6ff;
+  color: #1d4ed8;
+}

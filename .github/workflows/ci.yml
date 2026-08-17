@@ -14,6 +14,22 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: crmanhung
+          POSTGRES_PASSWORD: crmanhung
+          POSTGRES_DB: crmanhung
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U crmanhung -d crmanhung"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://crmanhung:crmanhung@127.0.0.1:5432/crmanhung?schema=public
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -34,22 +50,21 @@ jobs:
       - name: Build shared
         run: pnpm --filter @crmanhung/shared build
 
-      - name: Prisma generate
+      - name: Prisma generate + migrate
         working-directory: apps/api
-        env:
-          DATABASE_URL: 'file:./ci.db'
-        run: pnpm exec prisma generate
+        run: |
+          pnpm exec prisma generate
+          pnpm exec prisma migrate deploy
 
       - name: Typecheck / build API
         working-directory: apps/api
-        env:
-          DATABASE_URL: 'file:./ci.db'
         run: pnpm run build
 
-      - name: Build Web
+      - name: Build Web (Next.js)
         working-directory: apps/web
         env:
-          VITE_API_URL: /api/v1
+          NEXT_PUBLIC_API_URL: /api/v1
+          NEXT_PUBLIC_USE_MOCK: 'false'
         run: pnpm run build
 
       - name: Build Extension

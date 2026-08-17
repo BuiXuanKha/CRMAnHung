@@ -1,0 +1,89 @@
+/* Header avatar + dropdown — UI-GUIDELINES §4.2 */
+
+.shell-user-menu {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.shell-avatar {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #e2e8f0;
+  color: #0f172a;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  padding: 0;
+}
+
+.shell-avatar:hover,
+.shell-avatar.is-open {
+  background: #dbeafe;
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.shell-user-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 50;
+  min-width: 220px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+}
+
+.shell-user-dropdown-meta {
+  display: grid;
+  gap: 2px;
+  padding: 8px 10px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 4px;
+}
+
+.shell-user-dropdown-meta strong {
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+
+.shell-user-dropdown-meta span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.shell-user-dropdown button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.shell-user-dropdown button:hover {
+  background: #f1f5f9;
+}
+
+.shell-user-dropdown button.danger {
+  color: #b91c1c;
+}
+
+.shell-user-dropdown button.danger:hover {
+  background: #fef2f2;
+}

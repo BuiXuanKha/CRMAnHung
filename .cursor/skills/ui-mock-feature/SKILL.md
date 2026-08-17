@@ -7,14 +7,17 @@ description: Build CRMAnHung web UI features with mock data before the real API 
 
 ## Prerequisites
 
-- Domain doc status ≥ `Ready for mock`
-- Contract đã có trong `@crmanhung/shared` (hoặc thêm cùng PR **trước** UI)
+- Đọc [`docs/UI-GUIDELINES.md`](../../../docs/UI-GUIDELINES.md) (+ skill `ui-guidelines`) — **quy tắc UI đã chốt**
+- Domain doc status ≥ `Ready for mock` (trừ trang marketing public thuần — theo `PUBLIC-SEO.md`)
+- Contract đã có trong `@crmanhung/shared` (hoặc thêm cùng PR **trước** UI) — **không bắt buộc** với landing public tĩnh
+- Trang **web công khai**: đọc skill **`web-public-seo`** + `docs/PUBLIC-SEO.md`
 
 ## Layout
 
 ```
+apps/web/app/(public)/…          # web công khai — SEO bắt buộc
+apps/web/app/(crm)/<route>/page.tsx   # Next.js App Router CRM
 apps/web/src/features/<domain>/
-  pages/           # route screens
   components/      # UI chỉ dùng trong domain
   api.ts           # hàm gọi API thật
   mock-data.ts     # dữ liệu giả
@@ -23,14 +26,14 @@ apps/web/src/features/<domain>/
 
 ## Mock switch
 
-- Biến môi trường: `VITE_USE_MOCK=true` (dev mặc định có thể bật trong `.env`)
+- Biến môi trường: `NEXT_PUBLIC_USE_MOCK=true` (dev mặc định có thể bật trong `.env`)
 - Một chỗ duy nhất quyết định mock vs real (ví dụ trong `api.ts` của feature):
 
 ```ts
-const useMock = import.meta.env.VITE_USE_MOCK === 'true';
+import { isMockMode } from '@/shared/api/mode';
 
 export async function listCustomers() {
-  if (useMock) return mockCustomers;
+  if (isMockMode()) return mockCustomers;
   return apiFetch('/customers');
 }
 ```
@@ -40,9 +43,9 @@ export async function listCustomers() {
 1. Dùng type từ `@crmanhung/shared` — không invent interface cục bộ trùng nghĩa.
 2. Mock phủ đủ trạng thái trong domain doc §8.
 3. Không gọi API production / CRM cũ.
-4. Styling theo CSS variables hiện có (`global.css`); tránh card/hero marketing thừa trên app nội bộ.
-5. Route khai báo trong `apps/web/src/app/router.tsx`.
-6. Auth: bọc trong `AppLayout`; trang login đã có.
+4. Styling theo `docs/UI-GUIDELINES.md` + CSS variables; tránh card/hero marketing thừa trên app nội bộ. Bảng list → skill **`crm-data-table`** / §4.5.
+5. Route = thư mục trong `apps/web/app/(crm)/…` (App Router).
+6. Auth: bọc bởi `(crm)/layout.tsx` → `AppShell`; trang `/login` riêng.
 
 ## After
 

@@ -1,0 +1,348 @@
+/* §3.2.1.2 Bảng — header cố định ngoài scroll; chỉ thân danh sách cuộn */
+
+.kh-s3212 {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--kh-line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.kh-table-wrap {
+  --kh-cols:
+    50px
+    minmax(200px, 280px)
+    minmax(0, 1fr)
+    110px
+    160px
+    118px
+    80px;
+  --kh-chrome: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  font-size: 0.84rem;
+}
+
+/* Header nằm NGOÀI vùng overflow — cùng token footer; ô cột không tự tô nền */
+.kh-table-head {
+  flex-shrink: 0;
+  width: 100%;
+  border-bottom: 1px solid var(--kh-line);
+  background: var(--kh-chrome);
+}
+
+.kh-table-head .kh-grid-row,
+.kh-table-head .kh-grid-row > * {
+  background: var(--kh-chrome);
+}
+
+.kh-grid-header {
+  font-weight: 600;
+  color: #0f172a;
+  cursor: default;
+  border-bottom: none;
+}
+
+.kh-grid-header > div {
+  padding: 10px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  background: transparent;
+}
+
+.kh-col-head {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.kh-col-head > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.kh-table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  /* Không dùng scrollbar-gutter:stable — tránh khe góc header lệch màu */
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.kh-table-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.kh-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kh-table-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.kh-grid-row {
+  display: grid;
+  grid-template-columns: var(--kh-cols);
+  width: 100%;
+  min-width: 980px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.kh-table-scroll .kh-grid-row {
+  background: #fff;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.kh-table-scroll .kh-grid-row:hover {
+  background: #f1f5f9;
+}
+
+.kh-table-scroll .kh-grid-row.is-hot {
+  background: var(--kh-hot);
+  box-shadow: inset 3px 0 0 var(--kh-hot-edge);
+}
+
+.kh-table-scroll .kh-grid-row.is-hot:hover {
+  background: #fde68a;
+}
+
+.kh-table-scroll .kh-grid-row.is-selected {
+  background: var(--kh-blue-50);
+}
+
+.kh-table-scroll .kh-grid-row.is-hot.is-selected,
+.kh-table-scroll .kh-grid-row.is-menu-open {
+  background: #fef3c7;
+}
+
+.kh-cell {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.col-idx {
+  color: #1e40af;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  justify-content: center;
+}
+
+.col-lodat {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  justify-content: center;
+  color: #0f172a;
+}
+
+.col-act {
+  justify-content: center;
+}
+
+.kh-empty {
+  text-align: center;
+  color: #64748b;
+  padding: 24px 12px;
+}
+
+.kh-name {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.kh-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: 0 0 32px;
+}
+
+.kh-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.kh-name-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.kh-name-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.kh-name-row strong {
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.25;
+  word-break: break-word;
+}
+
+.kh-sub {
+  font-size: 0.78rem;
+  color: #64748b;
+  font-style: italic;
+  line-height: 1.2;
+}
+
+.kh-mini-icon {
+  display: inline-flex;
+  align-items: center;
+  line-height: 1;
+}
+
+.kh-mini-icon.phone {
+  color: #ea580c;
+}
+
+.kh-mini-icon.chat {
+  color: #16a34a;
+}
+
+.kh-demand {
+  color: #334155;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.kh-budget {
+  font-size: 0.82rem;
+}
+
+.kh-channel {
+  color: var(--kh-blue);
+  font-weight: 600;
+  font-size: 0.78rem;
+  word-break: break-word;
+}
+
+.kh-table-foot {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--kh-line);
+  background: var(--kh-chrome);
+  text-align: right;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.kh-table-foot strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.kh-action {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.kh-action-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.kh-action-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.kh-action-menu {
+  position: fixed;
+  z-index: 40;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  min-width: 196px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+  border: 1px solid var(--kh-line);
+}
+
+.kh-action-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  color: #1e293b;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.kh-action-menu button:hover {
+  background: #f1f5f9;
+}
+
+.kh-action-menu button.danger {
+  color: #b91c1c;
+}
+
+.customers-placeholder {
+  max-width: 40rem;
+  display: grid;
+  gap: 10px;
+}
+
+.customers-placeholder h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.customers-placeholder p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}

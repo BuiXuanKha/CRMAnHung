@@ -2,106 +2,161 @@
   min-height: 100vh;
   display: grid;
   place-items: center;
-  color: var(--color-muted);
+  color: #64748b;
+  font-family: var(--font-crm), 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
 }
 
+/* §1 + §2 shell — full viewport workbench (không max-width) */
 .shell {
-  min-height: 100vh;
-  display: grid;
-  grid-template-columns: 240px 1fr;
-}
-
-.sidebar {
-  background: #123528;
-  color: #e7f2ec;
-  padding: 24px 18px;
+  --shell-blue: #2563eb;
+  --shell-blue-50: #eff6ff;
+  --shell-blue-100: #dbeafe;
+  --shell-line: #e5e7eb;
+  --shell-ink: #1f2937;
+  --shell-muted: #6b7280;
+  height: 100vh;
+  height: 100dvh;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  overflow: hidden;
+  background: #f8f9fa;
+  color: #111827;
+  font-family: var(--font-crm), 'Noto Sans', ui-sans-serif, system-ui, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  letter-spacing: -0.01em;
+  -webkit-font-smoothing: antialiased;
 }
 
-.sidebar-brand {
-  display: grid;
-  gap: 2px;
+.shell button,
+.shell input,
+.shell select,
+.shell textarea {
+  font: inherit;
 }
 
-.sidebar-brand strong {
-  font-size: 1.05rem;
+.shell-top {
+  flex-shrink: 0;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  z-index: 30;
 }
 
-.sidebar-brand span {
-  opacity: 0.75;
-  font-size: 0.85rem;
+/* §1 Header */
+.shell-top-inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 24px;
+  border-bottom: 1px solid var(--shell-line);
 }
 
-.sidebar nav {
-  display: grid;
-  gap: 8px;
-  flex: 1;
-}
-
-.sidebar nav a {
-  padding: 10px 12px;
-  border-radius: 10px;
-  color: #d7ebe1;
-}
-
-.sidebar nav a:hover {
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.sidebar-user {
-  display: grid;
+.shell-brand {
+  display: flex;
+  align-items: center;
   gap: 10px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--shell-ink);
+  min-width: 0;
 }
 
-.sidebar-user strong {
-  display: block;
-}
-
-.sidebar-user span {
-  opacity: 0.7;
-  font-size: 0.8rem;
-}
-
-.sidebar-user button {
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  background: transparent;
-  color: inherit;
+.shell-logo-mark {
+  width: 30px;
+  height: 30px;
   border-radius: 8px;
-  padding: 8px 10px;
-  cursor: pointer;
+  background: #b91c22;
+  color: #e8c547;
+  font-size: 11px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
 }
 
+.shell-brand strong {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--shell-ink);
+}
+
+.shell-top-end {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  min-width: 0;
+}
+
+.shell-header-nav {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.shell-header-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.shell-header-nav-item {
+  display: inline-flex;
+  align-items: center;
+}
+
+.shell-nav-sep {
+  margin: 0 10px;
+  color: #cbd5e1;
+  font-weight: 500;
+  user-select: none;
+}
+
+.shell-header-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--shell-muted);
+  font-weight: 600;
+  font-size: 14px;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.shell-header-nav a:hover {
+  color: var(--shell-ink);
+}
+
+.shell-header-nav a.active {
+  color: var(--shell-blue);
+  font-weight: 700;
+}
+
+/* §3 vùng nội dung trang — full rộng, chiếm chiều cao còn lại */
 .content {
-  padding: 28px;
-}
-
-.page h1 {
-  margin: 0 0 8px;
-}
-
-.page p {
+  flex: 1 1 0%;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
   margin: 0;
-  color: var(--color-muted);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-@media (max-width: 860px) {
-  .shell {
-    grid-template-columns: 1fr;
+@media (max-width: 767px) {
+  .shell-top-inner {
+    padding: 10px 14px;
   }
 
-  .sidebar {
-    position: sticky;
-    top: 0;
-    z-index: 10;
+  .shell-brand strong {
+    font-size: 17px;
   }
 
-  .sidebar nav {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
+  .content {
+    padding: 12px 12px 0;
   }
 }

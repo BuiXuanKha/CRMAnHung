@@ -4,7 +4,7 @@ Viết lại **FacebookCustomerCRM** với kiến trúc chuyên nghiệp hơn, d
 
 > Hệ cũ vẫn chạy production. Repo này phát triển song song.
 
-**Bắt đầu đọc:** [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) · [`AGENTS.md`](AGENTS.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+**Bắt đầu đọc:** [`docs/FOUNDATION.md`](docs/FOUNDATION.md) · [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) · [`AGENTS.md`](AGENTS.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 
 ## Cách chúng ta làm việc
 
@@ -18,33 +18,41 @@ Không nhảy cóc. Chi tiết + Definition of Done: **PLAYBOOK**. Skills Cursor
 
 | App | Công nghệ |
 |-----|-----------|
-| `apps/api` | NestJS + Prisma + SQLite + JWT (access/refresh) |
-| `apps/web` | React 19 + Vite + TypeScript + TanStack Query |
+| `apps/api` | NestJS + Prisma + **PostgreSQL** + JWT + **Cloudflare R2** |
+| `apps/web` | **Next.js 15** (App Router) + React 19 + TanStack Query |
 | `apps/extension` | Chrome MV3 + TypeScript |
 | `packages/shared` | Enums + Zod schemas dùng chung |
 
-Lý do chọn stack: [`docs/adr/0001-tech-stack.md`](docs/adr/0001-tech-stack.md).
+Lý do chọn stack: [`docs/adr/0001-tech-stack.md`](docs/adr/0001-tech-stack.md) · Postgres [0004](docs/adr/0004-postgresql.md) · R2 [0005](docs/adr/0005-cloudflare-r2.md) · Next [0006](docs/adr/0006-nextjs-web.md).
 
 ## Yêu cầu
 
 - Node.js ≥ 22
 - pnpm 10+
+- Docker (Postgres local) hoặc Postgres sẵn có
+- Cloudflare R2 (bắt buộc khi upload / production)
 
 ## Bắt đầu nhanh
 
 ```bash
 pnpm install
 
-# API env
+# Postgres local
+pnpm db:up
+
+# API / Web env
 cp apps/api/.env.example apps/api/.env
 cp apps/web/.env.example apps/web/.env
+# Điền R2_* nếu sẽ test upload
 
 # DB
 pnpm db:generate
-pnpm --filter @crmanhung/api exec prisma migrate dev --name init
+pnpm --filter @crmanhung/api exec prisma migrate deploy
 pnpm db:seed
 
 # Chạy API + Web
+pnpm doctor
+pnpm db:up
 pnpm dev
 ```
 
@@ -72,9 +80,9 @@ Load unpacked thư mục `apps/extension/dist` trong `chrome://extensions`.
 
 | Phase | Nội dung |
 |-------|----------|
-| **P0** | Foundation (monorepo, auth, shell) — đang làm |
-| **P0b** | Deploy staging Mắt Bão (`crm-next.anhungland.com`) song song với CRM cũ |
-| **P1** | Customers + extension ingest |
+| **P0** | Foundation (monorepo, auth, shell) — xong khung |
+| **P0b** | Deploy staging Mắt Bão (`anhungland.com`) song song với CRM cũ |
+| **P1** | Customers + extension ingest — đang làm (docs + mock UI) |
 | **P2** | Lodats + Addresses |
 | **P3** | Transactions + Title services |
 | **P4** | Admin registry, CI, migrate data |
@@ -84,7 +92,7 @@ Load unpacked thư mục `apps/extension/dist` trong `chrome://extensions`.
 
 Production hiện tại vẫn là FacebookCustomerCRM tại **https://crm.anhungland.com**.
 
-CRMAnHung deploy **song song** trên cùng VPS, subdomain staging — xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+CRMAnHung deploy **song song** trên cùng VPS tại **`anhungland.com`** — xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ## Ghi chú
 

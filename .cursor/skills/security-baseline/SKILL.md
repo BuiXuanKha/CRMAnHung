@@ -1,6 +1,6 @@
 ---
 name: security-baseline
-description: Apply CRMAnHung security baseline for auth, authorization, secrets, CORS, uploads, and extension tokens. Use when touching auth, deploy env, file upload, or public endpoints.
+description: Apply CRMAnHung security baseline for auth, authorization, secrets, CORS, R2 uploads, and extension tokens. Use when touching auth, deploy env, file upload, or public endpoints.
 ---
 
 # Security baseline
@@ -23,13 +23,17 @@ description: Apply CRMAnHung security baseline for auth, authorization, secrets,
 - CORS allowlist từ `CORS_ORIGINS` — không `origin: true` trên prod/staging
 - Helmet bật
 - Secrets chỉ `.env` trên server — không commit, không rsync đè từ CI
-- Staging = `crm-next.anhungland.com`; **không** deploy đè `/var/www/anhungland-crm`
+- Staging = `anhungland.com`; **không** deploy đè `/var/www/anhungland-crm`
+- `DATABASE_URL` phải là `postgresql://…` (không `file:`)
 
-## Uploads
+## Uploads (Cloudflare R2)
 
-- Giới hạn size + MIME
-- Đường dẫn file do server đặt; không tin path từ client
-- Serve tĩnh có chủ đích (`/uploads` hoặc qua API)
+- Đọc skill **`cloudflare-r2`** — credentials + bucket đã chốt; **không hỏi lại owner**
+- Public: `upload()` → CDN `cdn.anhungland.com`
+- Mật: `uploadPrivate()` + `getPrivateSignedUrl()` — bucket `anhungland-crm-private`, **không** CDN
+- Giới hạn size + MIME ở API trước `PutObject`
+- Object key do server đặt; không tin path từ client
+- **Không** lưu / serve file trên disk VPS
 
 ## Extension
 

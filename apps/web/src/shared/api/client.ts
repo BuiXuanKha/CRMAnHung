@@ -1,22 +1,31 @@
-const API_URL = import.meta.env.VITE_API_URL ?? 'http://localhost:5050/api/v1';
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5050/api/v1';
 
 const ACCESS_KEY = 'crmanhung_access_token';
 const REFRESH_KEY = 'crmanhung_refresh_token';
 
+function canUseStorage() {
+  return typeof window !== 'undefined';
+}
+
 export function getAccessToken() {
+  if (!canUseStorage()) return null;
   return localStorage.getItem(ACCESS_KEY);
 }
 
 export function getRefreshToken() {
+  if (!canUseStorage()) return null;
   return localStorage.getItem(REFRESH_KEY);
 }
 
 export function setTokens(accessToken: string, refreshToken: string) {
+  if (!canUseStorage()) return;
   localStorage.setItem(ACCESS_KEY, accessToken);
   localStorage.setItem(REFRESH_KEY, refreshToken);
 }
 
 export function clearTokens() {
+  if (!canUseStorage()) return;
   localStorage.removeItem(ACCESS_KEY);
   localStorage.removeItem(REFRESH_KEY);
 }

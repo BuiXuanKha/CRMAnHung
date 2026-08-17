@@ -2,26 +2,25 @@
   "name": "@crmanhung/web",
   "version": "0.1.0",
   "private": true,
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview --port 5001",
+    "dev": "next dev -p 5001 -H 0.0.0.0",
+    "build": "next build",
+    "start": "next start -p 5001 -H 0.0.0.0",
     "typecheck": "tsc --noEmit",
     "lint": "echo \"lint: web — pending eslint workspace config\""
   },
   "dependencies": {
     "@crmanhung/shared": "workspace:*",
     "@tanstack/react-query": "^5.81.5",
+    "lucide-react": "^1.31.0",
+    "next": "^15.4.1",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0",
-    "react-router-dom": "^7.6.2"
+    "react-dom": "^19.1.0"
   },
   "devDependencies": {
+    "@types/node": "^22.15.32",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
-    "@vitejs/plugin-react": "^4.6.0",
-    "typescript": "^5.8.3",
-    "vite": "^6.3.5"
+    "typescript": "^5.8.3"
   }
 }

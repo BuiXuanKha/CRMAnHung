@@ -1,0 +1,135 @@
+/* Trang /khach-hang — §3 theo hierarchy đã chốt với chủ sở hữu.
+   Typography bám CRM cũ: gốc 14px (từ .shell), bảng ~0.84rem. */
+
+.kh-page {
+  --kh-blue: #2563eb;
+  --kh-blue-50: #eff6ff;
+  --kh-blue-100: #dbeafe;
+  --kh-line: #e2e8f0;
+  --kh-hot: #fef9c3;
+  --kh-hot-edge: #ca8a04;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+/* §3.2 Hai cột: trái (lọc+bảng) | phải (rail) */
+.kh-s32 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.kh-s32.is-rail-open {
+  grid-template-columns: minmax(0, 7fr) minmax(260px, 3fr);
+}
+
+/* §3.2.1 Cột trái */
+.kh-s321 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* §3.2.1.1 Lọc */
+.kh-s3211 {
+  flex-shrink: 0;
+  border: 1px solid var(--kh-line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.kh-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+}
+
+.kh-search {
+  flex: 1 1 auto;
+  min-width: 200px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.86rem;
+  background: #fff;
+  color: #0f172a;
+  outline: none;
+}
+
+.kh-search:focus {
+  border-color: var(--kh-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.kh-filter select {
+  flex: 0 0 auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.86rem;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.kh-filter select:focus {
+  outline: none;
+  border-color: var(--kh-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.kh-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  border: 1px solid var(--kh-blue);
+  background: var(--kh-blue);
+  color: #fff;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.kh-add:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
+}
+
+.kh-status {
+  margin: 0;
+  padding: 0 4px;
+  color: #64748b;
+  font-size: 0.86rem;
+  flex-shrink: 0;
+}
+
+.kh-status.error {
+  color: #b91c1c;
+}
+
+@media (max-width: 1024px) {
+  .kh-s32,
+  .kh-s32.is-rail-open {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+}

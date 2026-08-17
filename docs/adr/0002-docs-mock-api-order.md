@@ -24,7 +24,7 @@ Mọi feature domain đi theo thứ tự trong [PLAYBOOK.md](../PLAYBOOK.md):
 
 ## Hệ quả
 
-- PR có thể ship UI mock riêng (flag `VITE_USE_MOCK`) trước khi API xong.
+- PR có thể ship UI mock riêng (flag `NEXT_PUBLIC_USE_MOCK`) trước khi API xong.
 - Không chấp nhận PR “chỉ API” khi chưa có docs domain tương ứng (trừ infra/P0).
 
 ## Không áp dụng cho

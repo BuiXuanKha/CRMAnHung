@@ -1,55 +1,88 @@
-import { Link, Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '../../features/auth/auth-context';
+'use client';
+
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { useEffect, type ReactNode } from 'react';
+import { CreditCard, FileText, Map, Users } from 'lucide-react';
+import { useAuth } from '@/features/auth/auth-context';
+import { Icon } from './icon';
+import { UserMenu } from './user-menu';
 import './layout.css';
 
 const navItems = [
-  { to: '/khach-hang', label: 'Khách hàng' },
-  { to: '/lo-dat', label: 'Lô đất' },
-  { to: '/giao-dich', label: 'Giao dịch' },
-  { to: '/dich-vu-so-do', label: 'Dịch vụ sổ đỏ' },
+  { href: '/khach-hang', label: 'Quản lý khách hàng', icon: Users },
+  { href: '/lo-dat', label: 'Quản lý lô đất', icon: Map },
+  { href: '/giao-dich', label: 'Quản lý giao dịch', icon: CreditCard },
+  { href: '/dich-vu-so-do', label: 'Dịch vụ sổ đỏ', icon: FileText },
 ];
 
-export function AppLayout() {
+export function AppShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
   const { user, loading, logout } = useAuth();
 
-  if (loading) {
+  useEffect(() => {
+    if (!loading && !user) {
+      router.replace('/login');
+    }
+  }, [loading, user, router]);
+
+  if (loading || !user) {
     return <div className="boot-screen">Đang tải…</div>;
   }
 
-  if (!user) {
-    return <Navigate to="/login" replace />;
-  }
+  const links = [
+    ...navItems,
+    ...(user.role === 'ADMIN'
+      ? [{ href: '/quan-tri/khach-hang', label: 'Quản trị khách', icon: null }]
+      : []),
+  ];
 
   return (
     <div className="shell">
-      <aside className="sidebar">
-        <div className="sidebar-brand">
-          <strong>An Hưng Land</strong>
-          <span>CRM</span>
-        </div>
-        <nav>
-          {navItems.map((item) => (
-            <Link key={item.to} to={item.to}>
-              {item.label}
-            </Link>
-          ))}
-          {user.role === 'ADMIN' ? (
-            <Link to="/quan-tri/khach-hang">Quản trị khách</Link>
-          ) : null}
-        </nav>
-        <div className="sidebar-user">
-          <div>
-            <strong>{user.fullName}</strong>
-            <span>{user.role}</span>
+      <header className="shell-top">
+        <div className="shell-top-inner">
+          <Link href="/khach-hang" className="shell-brand">
+            <span className="shell-logo-mark" aria-hidden>
+              AH
+            </span>
+            <strong>An Hưng Land CRM</strong>
+          </Link>
+          <div className="shell-top-end">
+            <nav className="shell-header-nav" aria-label="Menu chính">
+              {links.map((item, i) => {
+                const active =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <span key={item.href} className="shell-header-nav-item">
+                    {i > 0 ? (
+                      <span className="shell-nav-sep" aria-hidden>
+                        |
+                      </span>
+                    ) : null}
+                    <Link href={item.href} className={active ? 'active' : undefined}>
+                      {item.icon ? <Icon icon={item.icon} size="sm" /> : null}
+                      {item.label}
+                    </Link>
+                  </span>
+                );
+              })}
+            </nav>
+            <span className="shell-nav-sep" aria-hidden>
+              |
+            </span>
+            <UserMenu
+              fullName={user.fullName}
+              roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+              onLogout={() => {
+                void logout().then(() => router.replace('/login'));
+              }}
+            />
           </div>
-          <button type="button" onClick={() => void logout()}>
-            Đăng xuất
-          </button>
         </div>
-      </aside>
-      <main className="content">
-        <Outlet />
-      </main>
+      </header>
+
+      <main className="content">{children}</main>
     </div>
   );
 }

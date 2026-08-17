@@ -1,0 +1,178 @@
+/* §3.2.2 Rail phải — modal/toast dùng shared/ui/dialog */
+
+.kh-s322 {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+  flex: 0 0 auto;
+  min-height: 0;
+  max-height: 100%;
+}
+
+.kh-rail-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.kh-rail-tabs button {
+  width: 52px;
+  min-width: 52px;
+  max-width: 52px;
+  min-height: 120px;
+  border: 1px solid var(--kh-line);
+  background: #f8fafc;
+  border-radius: 12px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 8px;
+  color: #334155;
+}
+
+.kh-rail-tabs button:hover {
+  background: var(--kh-blue-50);
+  color: #1d4ed8;
+}
+
+.kh-rail-tabs button.active {
+  background: var(--kh-blue-50);
+  color: #1d4ed8;
+  border-color: #bfdbfe;
+}
+
+.kh-rail-tabs .chev {
+  display: inline-flex;
+  line-height: 1;
+}
+
+.kh-rail-tabs .lbl {
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  transform: rotate(180deg);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.kh-rail-panel {
+  flex: 1 1 auto;
+  min-width: 260px;
+  background: #fff;
+  border: 1px solid var(--kh-line);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.kh-rail-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--kh-line);
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+
+.kh-rail-panel header strong {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.kh-rail-panel header button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  color: #334155;
+}
+
+.kh-rail-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+  background: #f8fafc;
+}
+
+.kh-rail-empty {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.86rem;
+  text-align: center;
+  padding: 24px 16px;
+}
+
+.kh-chat,
+.kh-care,
+.kh-lots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.kh-chat li {
+  max-width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+
+.kh-chat li.customer {
+  align-self: start;
+  background: #fff;
+  border: 1px solid var(--kh-line);
+}
+
+.kh-chat li.staff {
+  margin-left: auto;
+  background: var(--kh-blue-100);
+  border: 1px solid #bfdbfe;
+}
+
+.kh-care li,
+.kh-lots li {
+  border: 1px solid var(--kh-line);
+  border-radius: 10px;
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  background: #fff;
+}
+
+.kh-care time,
+.kh-lots span {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.kh-care p {
+  margin: 0;
+  font-size: 0.86rem;
+}
+
+@media (max-width: 1024px) {
+  .kh-s322 {
+    max-height: none;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .kh-rail-panel {
+    flex: 1;
+    min-width: 0;
+  }
+}

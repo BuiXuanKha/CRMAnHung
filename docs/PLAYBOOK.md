@@ -8,6 +8,9 @@ Tham chiếu nhanh:
 | Doc | Nội dung |
 |-----|----------|
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Kiến trúc tổng thể |
+| [PUBLIC-SEO.md](./PUBLIC-SEO.md) | Chuẩn SEO **web công khai** |
+| [PUBLIC-WEB.md](./PUBLIC-WEB.md) | IA / nội dung trang khách (brand, sản phẩm, bài phụ) |
+| [UI-GUIDELINES.md](./UI-GUIDELINES.md) | **Quy tắc UI chung** (public + CRM) — đọc trước khi làm giao diện |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Mắt Bão / staging |
 | [MIGRATION.md](./MIGRATION.md) | Migrate từ FacebookCustomerCRM |
 | [adr/](./adr/) | Quyết định công nghệ (ADR) |
@@ -45,7 +48,7 @@ Tham chiếu nhanh:
     ↓
 ⑧ Test smoke + cập nhật docs user (khi gần xong)
     ↓
-⑨ Deploy staging (crm-next) khi slice ổn
+⑨ Deploy lên anhungland.com khi slice ổn
 ```
 
 ### Chi tiết từng bước
@@ -68,8 +71,9 @@ Tham chiếu nhanh:
 
 ### ④ UI + mock data
 
+- **Đọc** [`UI-GUIDELINES.md`](./UI-GUIDELINES.md) trước (quy tắc visual / UX đã chốt). Bảng list CRM → §4.5 + skill `crm-data-table`; icon Lucide §4.6; dialog → §4.7 + skill `crm-dialog`.
 - Feature trong `apps/web/src/features/<domain>/`.
-- `mocks/` hoặc `mock-api.ts` — bật bằng `VITE_USE_MOCK=true` (mặc định dev có thể bật).
+- `mocks/` hoặc `mock-api.ts` — bật bằng `NEXT_PUBLIC_USE_MOCK=true` (mặc định dev có thể bật).
 - UI phải dùng type từ `@crmanhung/shared`, không invent shape riêng.
 
 ### ⑤ API
@@ -100,7 +104,7 @@ Tham chiếu nhanh:
 | Phase | Việc | Kết quả nhìn thấy |
 |-------|------|-------------------|
 | **P0** | Foundation + playbook + skills | Repo chạy local, auth, docs quy trình |
-| **P0b** | Staging Mắt Bão | `crm-next.anhungland.com` song song CRM cũ |
+| **P0b** | Staging Mắt Bão | `anhungland.com` song song CRM cũ |
 | **P1** | Customers (docs→mock UI→API→ext) | Quản lý khách + ingest stub |
 | **P2** | Lodats + Addresses | Lô đất / địa chỉ |
 | **P3** | Transactions + Title services | Giao dịch / sổ đỏ |
@@ -141,4 +145,4 @@ Trong mỗi phase domain: **luôn** đi ①→⑨, không code API trước docs
 - Không god-file (> ~400 dòng hãy tách).
 - Không business logic trong React component / Nest controller.
 - Không `origin: true` CORS trên production.
-- Không commit `.env`, DB, uploads.
+- Không commit `.env`, secrets R2, dump DB.

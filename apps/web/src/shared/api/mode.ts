@@ -1,4 +1,4 @@
 /** Bật UI mock khi chưa có / chưa nối API thật. */
 export function isMockMode(): boolean {
-  return import.meta.env.VITE_USE_MOCK === 'true';
+  return process.env.NEXT_PUBLIC_USE_MOCK === 'true';
 }

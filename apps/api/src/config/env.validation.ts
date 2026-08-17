@@ -47,9 +47,35 @@ class EnvironmentVariables {
   @IsString()
   CORS_ORIGINS?: string;
 
+  /** Cloudflare R2 — required in production; optional in development until upload features run */
   @IsOptional()
   @IsString()
-  UPLOAD_DIR?: string;
+  R2_ACCOUNT_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  R2_ACCESS_KEY_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  R2_SECRET_ACCESS_KEY?: string;
+
+  @IsOptional()
+  @IsString()
+  R2_BUCKET?: string;
+
+  @IsOptional()
+  @IsString()
+  R2_ENDPOINT?: string;
+
+  @IsOptional()
+  @IsString()
+  R2_PUBLIC_BASE_URL?: string;
+
+  /** Bucket riêng cho tài liệu mật — không gắn CDN public */
+  @IsOptional()
+  @IsString()
+  R2_PRIVATE_BUCKET?: string;
 }
 
 export function validateEnv(config: Record<string, unknown>) {
@@ -60,5 +86,33 @@ export function validateEnv(config: Record<string, unknown>) {
   if (errors.length > 0) {
     throw new Error(`Invalid environment: ${errors.toString()}`);
   }
+
+  if (validated.NODE_ENV === 'production') {
+    const requiredR2 = [
+      'R2_ACCOUNT_ID',
+      'R2_ACCESS_KEY_ID',
+      'R2_SECRET_ACCESS_KEY',
+      'R2_BUCKET',
+      'R2_ENDPOINT',
+      'R2_PUBLIC_BASE_URL',
+      'R2_PRIVATE_BUCKET',
+    ] as const;
+    const missing = requiredR2.filter((key) => !validated[key]);
+    if (missing.length) {
+      throw new Error(
+        `Invalid environment: production requires R2 vars: ${missing.join(', ')}`,
+      );
+    }
+  }
+
+  if (
+    validated.DATABASE_URL.startsWith('file:') ||
+    !validated.DATABASE_URL.startsWith('postgresql')
+  ) {
+    throw new Error(
+      'Invalid environment: DATABASE_URL must be a postgresql:// connection string (ADR 0004)',
+    );
+  }
+
   return validated;
 }

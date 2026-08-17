@@ -1,21 +1,13 @@
 # ADR 0003 — SQLite trước, PostgreSQL khi cần
 
-- **Status:** Accepted
+- **Status:** Superseded bởi [0004-postgresql.md](./0004-postgresql.md)
 - **Date:** 2026-07-23
+- **Superseded:** 2026-08-09
 
-## Quyết định
+## Quyết định cũ (không còn áp dụng)
 
-- Dùng **SQLite** (Prisma) cho dev + staging + giai đoạn đầu production crmanhung.
-- Giữ schema Prisma **không phụ thuộc** tính năng SQLite-only trừ khi bắt buộc.
-- Chuyển **PostgreSQL** khi có một trong các tín hiệu: multi-instance API, backup/ops đòi hỏi, contention ghi rõ rệt.
+Dùng SQLite ban đầu, chuyển PostgreSQL khi có tín hiệu scale.
 
-## Lý do
+## Lý do supersede
 
-- Hệ cũ đã SQLite trên một VPS — quy mô môi giới đất nội bộ phù hợp.
-- Migrate data từ file DB cũ đơn giản hơn nếu đích ban đầu cũng SQLite.
-- Prisma làm giảm chi phí đổi engine sau.
-
-## Hệ quả
-
-- `DATABASE_URL=file:…` trên server (`/var/www/crmanhung/database/`).
-- Backup = copy file DB + uploads (ghi vào runbook DEPLOYMENT khi cutover).
+Chủ sở hữu chốt **PostgreSQL từ đầu** + file trên **Cloudflare R2** — không giữ DB file trên VPS, tránh bước đổi engine giữa chừng.
