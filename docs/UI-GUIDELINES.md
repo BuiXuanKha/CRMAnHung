@@ -68,16 +68,9 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│ HEADER                                                      │
-│  Trái: logo + tên «An Hưng Land CRM»                        │
-│  Phải: **avatar** nhân viên (chữ tắt) → menu                  │
-├─────────────────────────────────────────────────────────────┤
-│ NAVBAR (Thanh điều hướng) — menu ngang                      │
-│  · Quản lý khách hàng                                       │
-│  · Quản lý lô đất                                           │
-│  · Quản lý giao dịch                                        │
-│  · Dịch vụ sổ đỏ                                            │
-│  (+ mục Admin chỉ hiện với role ADMIN, khi làm sau)         │
+│ HEADER (một hàng)                                           │
+│  Trái: logo + «An Hưng Land CRM»                            │
+│  Phải: menu | menu | menu   [avatar]                        │
 ├─────────────────────────────────────────────────────────────┤
 │ NỘI DUNG: tìm/lọc (§4.3.4) + bảng (§4.3.1) + rail (§4.3.2) │
 └─────────────────────────────────────────────────────────────┘
@@ -85,28 +78,29 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 
 | Hạng mục | Quyết định |
 |----------|------------|
-| Kiểu shell | **Header trên + navbar ngang**, **full chiều ngang viewport** (workbench, không khung hẹp giữa trang) |
+| Kiểu shell | **Một hàng header**, **full chiều ngang viewport** (workbench) |
 | Header trái | Logo + tên ứng dụng **An Hưng Land CRM** |
-| Header phải | **Một avatar** (chữ tắt tên). Click → menu: tên + vai trò trên cùng; **Cài đặt** phía dưới; **Đăng xuất** cuối (đỏ). Không hiện tên/nút rời trên header. |
-| Navbar | Nhãn «Thanh điều hướng» trái; **menu căn phải**; mục active nền xanh nhạt |
+| Header phải | Menu chính **cạnh avatar**, mục cách nhau dấu **`|`**; rồi **avatar** |
+| Menu | Quản lý khách hàng \| Quản lý lô đất \| Quản lý giao dịch \| Dịch vụ sổ đỏ (+ Admin nếu có) |
+| Active | Chữ **xanh** `#2563eb` **700** — không pill nền riêng |
+| Avatar | Click → menu: tên + vai trò; **Cài đặt**; **Đăng xuất** cuối (đỏ) |
 | Typography CRM | **Noto Sans**, gốc **14px** (public vẫn Be Vietnam Pro) |
-| Mobile | Navbar vẫn dùng được (cuộn ngang hoặc tương đương); không ẩn mất mục chính |
+| Mobile | Menu cuộn ngang trong header; không ẩn mất mục chính |
+
+**Không** còn hàng «Thanh điều hướng» riêng.
 
 **Phân cấp trang khách hàng (`/khach-hang`):**
 
-1. Header (shell)  
-2. Thanh điều hướng (shell)  
-3. Nội dung trang  
-   - 3.1 *(không dùng H1 riêng — nav đã có «Quản lý khách hàng»)*  
-   - 3.2 Hai cột  
-     - 3.2.1 Trái: 3.2.1.1 lọc + nút thêm → 3.2.1.2 bảng (scroll nội bộ)  
-     - 3.2.2 Phải: rail thu hẹp / mở rộng  
+1. Header (logo + menu `|` + avatar)  
+2. Nội dung trang  
+   - 2.1 Lọc + nút thêm  
+   - 2.2 Hai cột: bảng trái + rail phải  
 
 Implement: `apps/web` layout CRM (`(crm)/layout` → `AppShell`). Đổi shell = đổi một chỗ, áp mọi trang CRM.
 
 ### 4.3 Nội dung trang
 
-Phần **dưới navbar** — từng màn (ưu tiên `/khach-hang`).
+Phần **dưới header** — từng màn (ưu tiên `/khach-hang`).
 
 #### 4.3.1 Bảng dữ liệu — mẫu trang khách hàng
 
@@ -145,7 +139,7 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 
 #### 4.3.2 Rail phải — mở rộng / thu hẹp (đã chốt — theo ảnh mẫu)
 
-Không phải sidebar điều hướng (nav chính vẫn là navbar ngang §4.2). Đây là **cột phụ bên phải** của nội dung trang: nhiều **thanh dọc hẹp** xếp cạnh nhau; bấm để **mở rộng / thu hẹp** panel chi tiết.
+Không phải sidebar điều hướng (nav chính nằm trên **header** §4.2). Đây là **cột phụ bên phải** của nội dung trang: nhiều **thanh dọc hẹp** xếp cạnh nhau; bấm để **mở rộng / thu hẹp** panel chi tiết.
 
 ```
 ┌──────────────────────────────┬────┬────┬────┐
@@ -220,7 +214,7 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 | Focus | Viền **xanh** |
 | **CTA** | Nút xanh «Thêm khách hàng bằng số điện thoại» **cùng hàng**, bên phải |
 
-**Không** hiện H1 «Quản lý khách hàng» trên trang (đã có trên navbar).  
+**Không** hiện H1 «Quản lý khách hàng» trên trang (đã có trên menu header).  
 **Không** lặp dropdown trên thanh này — trạng thái / nhu cầu / tài chính / kênh / **số lô đất** lọc bằng **icon cột** §4.5.5.
 
 Ô tìm lọc theo tên / SĐT / nhu cầu / ghi chú. `@` = gồm bản ghi đã xóa; `@@` = chỉ bản ghi đã xóa.
@@ -364,7 +358,7 @@ Skill: `crm-dialog`. Tham chiếu: `apps/web/src/shared/ui/dialog.tsx`.
 - [ ] Desktop + mobile xem ổn
 - [ ] Trạng thái trống / loading / lỗi có UI
 - [ ] Không lộ mục chỉ dành cho Admin với user STAFF
-- [ ] Header + navbar đúng cấu trúc 4.2 trên mọi trang CRM
+- [ ] Header (logo + menu `|` + avatar) đúng §4.2 trên mọi trang CRM
 - [ ] Cột / domain đúng mục 4.3.x của màn đó
 - [ ] Rail phải (nếu có): §4.3.2
 - [ ] Menu hành động (nếu có cột Thao tác): §4.3.3 + §4.5.6
@@ -413,6 +407,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | Gỡ UI mock `/khach-hang` (list/detail) — placeholder chờ chốt nội dung trang |
 | 2026-08-17 | **Chốt shell CRM:** header (logo+tên, user, cài đặt, đăng xuất) + navbar ngang (4 mục STAFF) |
 | 2026-08-17 | Header phải = **avatar** → menu (Cài đặt dưới, Đăng xuất cuối) |
+| 2026-08-17 | Bỏ hàng «Thanh điều hướng»; menu lên header cạnh avatar, cách `\|` |
 | 2026-08-17 | **Chốt bảng dữ liệu (§4.3.1):** header cột + dòng + footer «Hiển thị N / Tổng M»; mẫu cột `/khach-hang` theo ảnh |
 | 2026-08-17 | **Chốt rail phải (§4.3.2):** thanh dọc chữ xoay 90°; mở rộng / thu hẹp; nhãn Chat · Lịch sử chăm sóc · Danh sách lô đất |
 | 2026-08-17 | **Chốt menu hành động (§4.3.3):** dropdown cột Thao tác; chevron lên/xuống; Xóa khách đỏ |

@@ -81,43 +81,37 @@
   color: var(--shell-ink);
 }
 
-/* §2 Nav — nhãn trái, menu căn phải */
-.shell-nav {
+.shell-top-end {
   display: flex;
   align-items: center;
   gap: 16px;
-  padding: 10px 24px;
-  border-bottom: 1px solid var(--shell-line);
+  min-width: 0;
+}
+
+.shell-header-nav {
+  display: flex;
+  align-items: center;
+  min-width: 0;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
-.shell-nav-label {
-  flex: 0 0 auto;
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--shell-ink);
-  margin-right: 16px;
-  white-space: nowrap;
-}
-
-.shell-nav-items {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex: 1 1 auto;
-  justify-content: flex-end;
-  min-width: 0;
-}
-
-.shell-nav a {
-  flex: 0 0 auto;
+.shell-header-nav-item {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border: 1px solid transparent;
-  border-radius: 8px;
+}
+
+.shell-nav-sep {
+  margin: 0 10px;
+  color: #cbd5e1;
+  font-weight: 500;
+  user-select: none;
+}
+
+.shell-header-nav a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: var(--shell-muted);
   font-weight: 600;
   font-size: 14px;
@@ -125,13 +119,11 @@
   text-decoration: none;
 }
 
-.shell-nav a:hover {
-  background: #f3f4f6;
+.shell-header-nav a:hover {
+  color: var(--shell-ink);
 }
 
-.shell-nav a.active {
-  background: var(--shell-blue-50);
-  border-color: var(--shell-blue-100);
+.shell-header-nav a.active {
   color: var(--shell-blue);
   font-weight: 700;
 }
@@ -157,19 +149,6 @@
 
   .shell-brand strong {
     font-size: 17px;
-  }
-
-  .shell-nav {
-    padding: 8px 12px;
-    gap: 8px;
-  }
-
-  .shell-nav-label {
-    display: none;
-  }
-
-  .shell-nav-items {
-    justify-content: flex-start;
   }
 
   .content {

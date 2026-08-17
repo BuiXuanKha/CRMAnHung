@@ -3,12 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, type ReactNode } from 'react';
-import {
-  CreditCard,
-  FileText,
-  Map,
-  Users,
-} from 'lucide-react';
+import { CreditCard, FileText, Map, Users } from 'lucide-react';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from './icon';
 import { UserMenu } from './user-menu';
@@ -36,9 +31,15 @@ export function AppShell({ children }: { children: ReactNode }) {
     return <div className="boot-screen">Đang tải…</div>;
   }
 
+  const links = [
+    ...navItems,
+    ...(user.role === 'ADMIN'
+      ? [{ href: '/quan-tri/khach-hang', label: 'Quản trị khách', icon: null }]
+      : []),
+  ];
+
   return (
     <div className="shell">
-      {/* §1 Header */}
       <header className="shell-top">
         <div className="shell-top-inner">
           <Link href="/khach-hang" className="shell-brand">
@@ -47,46 +48,37 @@ export function AppShell({ children }: { children: ReactNode }) {
             </span>
             <strong>An Hưng Land CRM</strong>
           </Link>
-          <UserMenu
-            fullName={user.fullName}
-            roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
-            onLogout={() => {
-              void logout().then(() => router.replace('/login'));
-            }}
-          />
-        </div>
-
-        {/* §2 Thanh điều hướng — menu căn phải */}
-        <nav className="shell-nav" aria-label="Thanh điều hướng">
-          <span className="shell-nav-label">Thanh điều hướng</span>
-          <div className="shell-nav-items">
-            {navItems.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={
-                  pathname === item.href || pathname.startsWith(`${item.href}/`)
-                    ? 'active'
-                    : undefined
-                }
-              >
-                <Icon icon={item.icon} size="sm" />
-                {item.label}
-              </Link>
-            ))}
-            {user.role === 'ADMIN' ? (
-              <Link
-                href="/quan-tri/khach-hang"
-                className={pathname === '/quan-tri/khach-hang' ? 'active' : undefined}
-              >
-                Quản trị khách
-              </Link>
-            ) : null}
+          <div className="shell-top-end">
+            <nav className="shell-header-nav" aria-label="Menu chính">
+              {links.map((item, i) => {
+                const active =
+                  pathname === item.href || pathname.startsWith(`${item.href}/`);
+                return (
+                  <span key={item.href} className="shell-header-nav-item">
+                    {i > 0 ? (
+                      <span className="shell-nav-sep" aria-hidden>
+                        |
+                      </span>
+                    ) : null}
+                    <Link href={item.href} className={active ? 'active' : undefined}>
+                      {item.icon ? <Icon icon={item.icon} size="sm" /> : null}
+                      {item.label}
+                    </Link>
+                  </span>
+                );
+              })}
+            </nav>
+            <UserMenu
+              fullName={user.fullName}
+              roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+              onLogout={() => {
+                void logout().then(() => router.replace('/login'));
+              }}
+            />
           </div>
-        </nav>
+        </div>
       </header>
 
-      {/* §3 Nội dung trang */}
       <main className="content">{children}</main>
     </div>
   );
