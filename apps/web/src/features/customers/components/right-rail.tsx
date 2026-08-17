@@ -20,13 +20,13 @@ type Props = {
 
 export function RightRail({ open, onToggle, customer, detail }: Props) {
   return (
-    <aside className="kh-rail" aria-label="Panel phụ">
+    <aside className="kh-s322" aria-label="Panel phụ">
       {open ? (
         <div className="kh-rail-panel">
           <header>
             <strong>{TABS.find((t) => t.key === open)?.label}</strong>
             <button type="button" onClick={() => onToggle(open)} aria-label="Thu hẹp">
-              ›
+              Thu hẹp
             </button>
           </header>
           <div className="kh-rail-body">{renderBody(open, customer, detail)}</div>

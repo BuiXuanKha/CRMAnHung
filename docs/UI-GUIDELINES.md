@@ -85,11 +85,22 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 
 | Hạng mục | Quyết định |
 |----------|------------|
-| Kiểu shell | **Header trên + navbar ngang** (không dùng sidebar làm nav chính) |
+| Kiểu shell | **Header trên + navbar ngang**, **full chiều ngang viewport** (workbench, không khung hẹp giữa trang) |
 | Header trái | Logo + tên ứng dụng **An Hưng Land CRM** |
 | Header phải | Tên người dùng + vai trò, nút **Cài đặt**, nút **Đăng xuất** |
-| Navbar | Menu ngang; mục đang mở phải **active** rõ (nền/viền/chữ nổi) |
+| Navbar | Nhãn «Thanh điều hướng» trái; **menu căn phải**; mục active nền xanh nhạt |
+| Typography CRM | **Noto Sans**, gốc **14px** (public vẫn Be Vietnam Pro) |
 | Mobile | Navbar vẫn dùng được (cuộn ngang hoặc tương đương); không ẩn mất mục chính |
+
+**Phân cấp trang khách hàng (`/khach-hang`):**
+
+1. Header (shell)  
+2. Thanh điều hướng (shell)  
+3. Nội dung trang  
+   - 3.1 Tiêu đề trái + nút hành động phải  
+   - 3.2 Hai cột  
+     - 3.2.1 Trái: 3.2.1.1 lọc → 3.2.1.2 bảng (scroll nội bộ)  
+     - 3.2.2 Phải: rail thu hẹp / mở rộng  
 
 Implement: `apps/web` layout CRM (`(crm)/layout` → `AppShell`). Đổi shell = đổi một chỗ, áp mọi trang CRM.
 
@@ -293,6 +304,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt menu hành động (§4.3.3):** dropdown cột Thao tác; chevron lên/xuống; Xóa khách đỏ |
 | 2026-08-17 | **Chốt tìm/lọc (§4.3.4):** ô tìm rộng + 5 select (trạng thái, tài chính, kênh, lô đất, nhu cầu) |
 | 2026-08-17 | Mock UI `/khach-hang` theo §4.2 + §4.3.1–4.3.4 (chưa chốt mobile) |
+| 2026-08-17 | Layout workbench full ngang + Noto Sans 14px; phân cấp §1–§3.2.2 trang khách hàng |
 
 ---
 

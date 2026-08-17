@@ -100,8 +100,12 @@ export function CustomerTable({
                       </div>
                     </div>
                   </td>
-                  <td>{demandLabel(c)}</td>
-                  <td>{formatBudget(c.budgetMinVnd, c.budgetMaxVnd)}</td>
+                  <td>
+                    <span className="kh-demand">{demandLabel(c)}</span>
+                  </td>
+                  <td>
+                    <span className="kh-budget">{formatBudget(c.budgetMinVnd, c.budgetMaxVnd)}</span>
+                  </td>
                   <td>
                     <span className="kh-channel">{channelLabel(c)}</span>
                   </td>

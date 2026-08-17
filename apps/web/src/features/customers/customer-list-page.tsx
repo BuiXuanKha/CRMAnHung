@@ -122,46 +122,63 @@ export function CustomerListPage() {
 
   return (
     <div className="kh-page">
-      <div className="kh-main">
-        <div className="kh-head">
-          <h1>Quản lý khách hàng</h1>
-          <button type="button" className="kh-add" onClick={() => setAddOpen(true)}>
-            + Thêm khách hàng bằng số điện thoại
-          </button>
+      {/* §3.1 */}
+      <header className="kh-s31">
+        <h1>Quản lý khách hàng</h1>
+        <button type="button" className="kh-add" onClick={() => setAddOpen(true)}>
+          + Thêm khách hàng bằng số điện thoại
+        </button>
+      </header>
+
+      {/* §3.2 */}
+      <div className={`kh-s32${rail ? ' is-rail-open' : ''}`}>
+        {/* §3.2.1 */}
+        <div className="kh-s321">
+          {/* §3.2.1.1 */}
+          <section className="kh-s3211" aria-label="Tìm kiếm và lọc">
+            <FilterBar
+              keyword={keyword}
+              onKeyword={setKeyword}
+              status={status}
+              onStatus={setStatus}
+              extra={extra}
+              onExtra={setExtra}
+            />
+          </section>
+
+          {list.isLoading ? <p className="kh-status">Đang tải danh sách…</p> : null}
+          {list.error ? (
+            <p className="kh-status error">{(list.error as Error).message}</p>
+          ) : null}
+
+          {/* §3.2.1.2 */}
+          {!list.isLoading && !list.error ? (
+            <section className="kh-s3212" aria-label="Danh sách khách hàng">
+              <CustomerTable
+                items={filtered}
+                total={list.data?.total ?? filtered.length}
+                selectedId={selectedId}
+                menuId={menuId}
+                onSelect={setSelectedId}
+                onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+                onCloseMenu={() => setMenuId(null)}
+                onAction={(c, a) => {
+                  void handleAction(c, a);
+                }}
+              />
+            </section>
+          ) : null}
         </div>
-        <FilterBar
-          keyword={keyword}
-          onKeyword={setKeyword}
-          status={status}
-          onStatus={setStatus}
-          extra={extra}
-          onExtra={setExtra}
+
+        {/* §3.2.2 */}
+        <RightRail
+          open={rail}
+          onToggle={(key) => setRail((cur) => (cur === key ? null : key))}
+          customer={selected}
+          detail={detail.data ?? null}
         />
-        {list.isLoading ? <p className="kh-status">Đang tải danh sách…</p> : null}
-        {list.error ? (
-          <p className="kh-status error">{(list.error as Error).message}</p>
-        ) : null}
-        {!list.isLoading && !list.error ? (
-          <CustomerTable
-            items={filtered}
-            total={list.data?.total ?? filtered.length}
-            selectedId={selectedId}
-            menuId={menuId}
-            onSelect={setSelectedId}
-            onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
-            onCloseMenu={() => setMenuId(null)}
-            onAction={(c, a) => {
-              void handleAction(c, a);
-            }}
-          />
-        ) : null}
       </div>
-      <RightRail
-        open={rail}
-        onToggle={(key) => setRail((cur) => (cur === key ? null : key))}
-        customer={selected}
-        detail={detail.data ?? null}
-      />
+
       <AddByPhoneModal
         open={addOpen}
         busy={createMut.isPending}

@@ -7,11 +7,11 @@ import { useAuth } from '@/features/auth/auth-context';
 import './layout.css';
 
 const navItems = [
-  { href: '/khach-hang', label: 'Quản lý khách hàng', icon: 'users' },
-  { href: '/lo-dat', label: 'Quản lý lô đất', icon: 'map' },
-  { href: '/giao-dich', label: 'Quản lý giao dịch', icon: 'deal' },
-  { href: '/dich-vu-so-do', label: 'Dịch vụ sổ đỏ', icon: 'doc' },
-] as const;
+  { href: '/khach-hang', label: 'Quản lý khách hàng', icon: 'users' as const },
+  { href: '/lo-dat', label: 'Quản lý lô đất', icon: 'map' as const },
+  { href: '/giao-dich', label: 'Quản lý giao dịch', icon: 'deal' as const },
+  { href: '/dich-vu-so-do', label: 'Dịch vụ sổ đỏ', icon: 'doc' as const },
+];
 
 function NavIcon({ name }: { name: (typeof navItems)[number]['icon'] }) {
   const common = {
@@ -21,8 +21,8 @@ function NavIcon({ name }: { name: (typeof navItems)[number]['icon'] }) {
     fill: 'none',
     stroke: 'currentColor',
     strokeWidth: 2,
-    'aria-hidden': true,
-  } as const;
+    'aria-hidden': true as const,
+  };
   if (name === 'users') {
     return (
       <svg {...common}>
@@ -76,6 +76,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="shell">
+      {/* §1 Header */}
       <header className="shell-top">
         <div className="shell-top-inner">
           <Link href="/khach-hang" className="shell-brand">
@@ -85,8 +86,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             <strong>An Hưng Land CRM</strong>
           </Link>
           <div className="shell-user">
-            <span>
-              {user.fullName} | {user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+            <span className="shell-user-meta">
+              {user.fullName}
+              <span className="shell-user-role">
+                {' '}
+                | {user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+              </span>
             </span>
             <button type="button" className="shell-settings" aria-label="Cài đặt" title="Cài đặt">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
@@ -105,32 +110,38 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
           </div>
         </div>
+
+        {/* §2 Thanh điều hướng — menu căn phải */}
         <nav className="shell-nav" aria-label="Thanh điều hướng">
           <span className="shell-nav-label">Thanh điều hướng</span>
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={
-                pathname === item.href || pathname.startsWith(`${item.href}/`)
-                  ? 'active'
-                  : undefined
-              }
-            >
-              <NavIcon name={item.icon} />
-              {item.label}
-            </Link>
-          ))}
-          {user.role === 'ADMIN' ? (
-            <Link
-              href="/quan-tri/khach-hang"
-              className={pathname === '/quan-tri/khach-hang' ? 'active' : undefined}
-            >
-              Quản trị khách
-            </Link>
-          ) : null}
+          <div className="shell-nav-items">
+            {navItems.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={
+                  pathname === item.href || pathname.startsWith(`${item.href}/`)
+                    ? 'active'
+                    : undefined
+                }
+              >
+                <NavIcon name={item.icon} />
+                {item.label}
+              </Link>
+            ))}
+            {user.role === 'ADMIN' ? (
+              <Link
+                href="/quan-tri/khach-hang"
+                className={pathname === '/quan-tri/khach-hang' ? 'active' : undefined}
+              >
+                Quản trị khách
+              </Link>
+            ) : null}
+          </div>
         </nav>
       </header>
+
+      {/* §3 Nội dung trang */}
       <main className="content">{children}</main>
     </div>
   );
