@@ -1,4 +1,5 @@
-/* §3.2.1.2 Bảng */
+/* §3.2.1.2 Bảng — header cố định ngoài scroll; chỉ thân danh sách cuộn */
+
 .kh-s3212 {
   flex: 1;
   min-height: 0;
@@ -11,11 +12,39 @@
 }
 
 .kh-table-wrap {
+  --kh-cols:
+    50px
+    minmax(200px, 300px)
+    minmax(0, 1fr)
+    110px
+    180px
+    80px;
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
   font-size: 0.84rem;
+}
+
+/* Header nằm NGOÀI vùng overflow — thanh cuộn không cắt qua header */
+.kh-table-head {
+  flex-shrink: 0;
+  /* Bù scrollbar-gutter: stable (8px) của .kh-table-scroll để cột thẳng hàng */
+  padding-right: 8px;
+  border-bottom: 1px solid var(--kh-line);
+  background: #f1f5f9;
+}
+
+.kh-grid-header {
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.kh-grid-header > div {
+  padding: 10px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 
 .kh-table-scroll {
@@ -24,78 +53,81 @@
   overflow: auto;
   scrollbar-gutter: stable;
   overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
 }
 
-.kh-table {
+.kh-table-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.kh-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.kh-table-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.kh-grid-row {
+  display: grid;
+  grid-template-columns: var(--kh-cols);
   width: 100%;
-  border-collapse: collapse;
   min-width: 860px;
-}
-
-.kh-table th {
-  text-align: left;
-  font-size: 0.84rem;
-  font-weight: 600;
-  color: #0f172a;
-  background: #f1f5f9;
-  padding: 10px;
-  border-bottom: 1px solid var(--kh-line);
-  white-space: nowrap;
-  position: sticky;
-  top: 0;
-  z-index: 1;
-}
-
-.kh-table td {
-  padding: 8px 10px;
   border-bottom: 1px solid #f1f5f9;
-  vertical-align: middle;
-}
-
-.kh-table tbody tr {
   background: #fff;
   cursor: pointer;
   transition: background-color 0.12s ease;
 }
 
-.kh-table tbody tr:hover {
+.kh-table-scroll .kh-grid-row:hover {
   background: #f1f5f9;
 }
 
-.kh-table tbody tr.is-hot {
+.kh-table-scroll .kh-grid-row.is-hot {
   background: var(--kh-hot);
   box-shadow: inset 3px 0 0 var(--kh-hot-edge);
 }
 
-.kh-table tbody tr.is-hot:hover {
+.kh-table-scroll .kh-grid-row.is-hot:hover {
   background: #fde68a;
 }
 
-.kh-table tbody tr.is-selected {
+.kh-table-scroll .kh-grid-row.is-selected {
   background: var(--kh-blue-50);
 }
 
-.kh-table tbody tr.is-hot.is-selected,
-.kh-table tbody tr.is-menu-open {
+.kh-table-scroll .kh-grid-row.is-hot.is-selected,
+.kh-table-scroll .kh-grid-row.is-menu-open {
   background: #fef3c7;
 }
 
+.kh-cell {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .col-idx {
-  width: 50px;
   color: #1e40af;
   font-weight: 700;
   font-variant-numeric: tabular-nums;
+  justify-content: center;
 }
 
 .col-act {
-  width: 80px;
-  text-align: center;
+  justify-content: center;
 }
 
 .kh-empty {
   text-align: center;
   color: #64748b;
-  padding: 24px 12px !important;
+  padding: 24px 12px;
 }
 
 .kh-name {
@@ -103,6 +135,7 @@
   gap: 10px;
   align-items: center;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .kh-avatar {
@@ -202,6 +235,10 @@
   color: #334155;
   font-size: 0.82rem;
   line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .kh-budget {
