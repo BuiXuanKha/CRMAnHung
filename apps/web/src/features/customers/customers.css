@@ -17,43 +17,6 @@
   width: 100%;
 }
 
-/* §3.1 Tiêu đề trái + CTA phải */
-.kh-s31 {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  flex-shrink: 0;
-}
-
-.kh-s31 h1 {
-  margin: 0;
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #0f172a;
-}
-
-.kh-add {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  border: 1px solid var(--kh-blue);
-  background: var(--kh-blue);
-  color: #fff;
-  border-radius: 8px;
-  padding: 8px 14px;
-  font-weight: 600;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.kh-add:hover {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
-}
-
 /* §3.2 Hai cột: trái (lọc+bảng) | phải (rail) */
 .kh-s32 {
   display: grid;
@@ -127,6 +90,28 @@
   outline: none;
   border-color: var(--kh-blue);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.kh-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  border: 1px solid var(--kh-blue);
+  background: var(--kh-blue);
+  color: #fff;
+  border-radius: 8px;
+  padding: 7px 14px;
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.kh-add:hover {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.25);
 }
 
 .kh-status {

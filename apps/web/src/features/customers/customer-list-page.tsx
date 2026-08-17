@@ -2,10 +2,9 @@
 
 import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, NotebookPen, Plus, Trash2 } from 'lucide-react';
+import { AlertTriangle, NotebookPen, Trash2 } from 'lucide-react';
 import { CustomerStatus, type CustomerListItem } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmDialog, CrmToast } from '@/shared/ui/dialog';
-import { Icon } from '@/shared/ui/icon';
 import { addCareNote, createCustomer, getCustomer, listCustomers, updateCustomer } from './api';
 import { AddByPhoneModal } from './components/add-by-phone-modal';
 import { type CustomerAction } from './components/action-menu';
@@ -167,15 +166,6 @@ export function CustomerListPage() {
 
   return (
     <div className="kh-page">
-      {/* §3.1 */}
-      <header className="kh-s31">
-        <h1>Quản lý khách hàng</h1>
-        <button type="button" className="kh-add" onClick={() => setAddOpen(true)}>
-          <Icon icon={Plus} size="sm" /> Thêm khách hàng bằng số điện thoại
-        </button>
-      </header>
-
-      {/* §3.2 */}
       <div className={`kh-s32${rail ? ' is-rail-open' : ''}`}>
         {/* §3.2.1 */}
         <div className="kh-s321">
@@ -186,6 +176,7 @@ export function CustomerListPage() {
               onKeyword={setKeyword}
               extra={extra}
               onExtra={setExtra}
+              onAdd={() => setAddOpen(true)}
             />
           </section>
 

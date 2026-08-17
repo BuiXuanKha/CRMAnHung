@@ -1,5 +1,7 @@
 'use client';
 
+import { Plus } from 'lucide-react';
+import { Icon } from '@/shared/ui/icon';
 import type { ExtraFilters } from '../display';
 
 type Props = {
@@ -7,9 +9,10 @@ type Props = {
   onKeyword: (v: string) => void;
   extra: ExtraFilters;
   onExtra: (next: ExtraFilters) => void;
+  onAdd: () => void;
 };
 
-export function FilterBar({ keyword, onKeyword, extra, onExtra }: Props) {
+export function FilterBar({ keyword, onKeyword, extra, onExtra, onAdd }: Props) {
   return (
     <div className="kh-filter">
       <input
@@ -28,6 +31,9 @@ export function FilterBar({ keyword, onKeyword, extra, onExtra }: Props) {
         <option value="has">Đã gắn lô</option>
         <option value="empty">Chưa gắn lô</option>
       </select>
+      <button type="button" className="kh-add" onClick={onAdd}>
+        <Icon icon={Plus} size="sm" /> Thêm khách hàng bằng số điện thoại
+      </button>
     </div>
   );
 }
