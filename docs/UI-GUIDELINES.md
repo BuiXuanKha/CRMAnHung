@@ -60,7 +60,7 @@ Phạm vi ưu tiên hiện tại: màn sau login, đặc biệt **Quản lý kh�
 - Không bắt buộc giống pixel CRM cũ từng chi tiết; **cấu trúc shell** theo mục 4.2 (đã chốt).
 - Admin UI: **chưa làm** cho đến khi STAFF ổn.
 - Mock được (`NEXT_PUBLIC_USE_MOCK`); không gọi API production CRM cũ.
-- **UI list/detail `/khach-hang` bản mock cũ đã gỡ** — đang placeholder; làm lại theo **4.3.1** (bảng) + **4.3.2** (rail) + **4.3.3** (menu hành động) + phần còn lại khi chốt đủ.
+- **UI list/detail `/khach-hang` bản mock cũ đã gỡ** — đang placeholder; làm lại theo **4.3.1–4.3.4** + phần còn lại khi chốt đủ.
 
 ### 4.2 Shell CRM chung (đã chốt) — mọi trang sau login
 
@@ -79,7 +79,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 │  · Dịch vụ sổ đỏ                                            │
 │  (+ mục Admin chỉ hiện với role ADMIN, khi làm sau)         │
 ├─────────────────────────────────────────────────────────────┤
-│ NỘI DUNG: bảng (§4.3.1) + rail phải thu hẹp/mở (§4.3.2)    │
+│ NỘI DUNG: tìm/lọc (§4.3.4) + bảng (§4.3.1) + rail (§4.3.2) │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -137,14 +137,14 @@ Mọi **danh sách dạng bảng** trên CRM (ví dụ **Danh sách khách hàng
 - Badge nhỏ, bo góc nhẹ; không card trang trí quanh bảng
 - Container bảng: bo góc nhẹ + đổ bóng rất nhẹ (tuỳ implement, không phồng)
 
-**Chưa chốt (hỏi tiếp):** filter/toolbar phía trên bảng; layout mobile (bảng cuộn ngang vs thẻ); cảm giác màu toàn CRM ngoài bảng; hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
+**Chưa chốt (hỏi tiếp):** layout mobile (bảng cuộn ngang vs thẻ; thanh lọc xếp dọc?); cảm giác màu toàn CRM ngoài bảng; hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
 
 | Hạng mục | Quyết định | Ghi chú |
 |----------|------------|---------|
 | Cảm giác tổng thể | *(chờ)* | Bảng: sạch, trắng + vàng nhạt + xanh link |
 | Màu chủ đạo CRM | *(chờ palette đầy đủ)* | Xanh primary + vàng highlight dòng |
 | Font | *(chờ)* | Sans-serif UI, không marketing display |
-| Trang khách hàng: layout chính | **Bảng** trái + **rail phải** thu hẹp/mở | §4.3.1 + §4.3.2 |
+| Trang khách hàng: layout chính | Tìm/lọc trên + **bảng** trái + **rail phải** | §4.3.1–4.3.4 |
 | Thao tác trên dòng | **Menu hành động** (dropdown) | §4.3.3 |
 | Mobile: ưu tiên thẻ hay list | *(chờ)* | |
 | Mật độ thông tin | **Đặc** trên desktop | |
@@ -211,6 +211,34 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 
 Chỉ **một** menu mở tại một thời điểm. Bấm ra ngoài / chọn mục / bấm lại nút → đóng.
 
+#### 4.3.4 Section tìm kiếm và lọc (đã chốt — theo ảnh mẫu)
+
+Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viền xám rất mỏng. Không nhồi filter thành nhiều hàng trừ khi màn hẹp.
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│ [  ô tìm kiếm rộng …          ] [▼] [▼] [▼] [▼] [▼]         │
+└──────────────────────────────────────────────────────────────┘
+```
+
+| Phần | Quy tắc |
+|------|---------|
+| **Ô tìm** (trái, ~40–50% bề ngang) | Input một dòng; placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)` |
+| Focus | Viền **xanh** |
+| **Lọc** (phải) | 5 select cùng hàng, viền xám nhạt, chevron xuống |
+
+**Select mặc định — trang khách hàng** (trái → phải):
+
+1. Tất cả trạng thái  
+2. Tất cả tài chính  
+3. Tất cả kênh liên hệ  
+4. Tất cả lô đất  
+5. Tất cả nhu cầu  
+
+Ô tìm lọc theo tên / SĐT / nhu cầu / ghi chú. Gợi ý trong placeholder: `@` = gồm bản ghi đã xóa; `@@` = chỉ bản ghi đã xóa (giữ nguyên nghĩa khi implement).
+
+Đổi ô tìm hoặc select → cập nhật bảng bên dưới (mock: lọc client; sau: API).
+
 ### 4.4 Checklist trước khi merge UI CRM
 
 - [ ] Đúng quy tắc mục 3 + shell mục 4.2 + nội dung đã chốt ở 4.3
@@ -221,6 +249,7 @@ Chỉ **một** menu mở tại một thời điểm. Bấm ra ngoài / chọn m
 - [ ] Bảng danh sách: đủ header cột + dòng + footer đếm (§4.3.1); giống ảnh mẫu
 - [ ] Rail phải: thanh dọc chữ xoay + mở rộng/thu hẹp (§4.3.2); giống ảnh mẫu
 - [ ] Menu hành động cột Thao tác: chevron + danh sách mục; Xóa khách màu đỏ (§4.3.3)
+- [ ] Thanh tìm + 5 select lọc phía trên bảng (§4.3.4); giống ảnh mẫu
 
 ---
 
