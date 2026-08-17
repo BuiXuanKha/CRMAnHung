@@ -2,29 +2,51 @@
 
 .crm-col-filter {
   position: relative;
-  flex-shrink: 0;
+  width: 100%;
+  min-width: 0;
 }
 
-.crm-col-filter-btn {
-  width: 22px;
-  height: 22px;
+.crm-col-filter-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  width: 100%;
+  margin: 0;
+  padding: 0;
   border: none;
   background: transparent;
-  color: #94a3b8;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+}
+
+.crm-col-filter-label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.crm-col-filter-icon {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
   border-radius: 6px;
   display: grid;
   place-items: center;
-  cursor: pointer;
-  padding: 0;
+  color: #94a3b8;
 }
 
-.crm-col-filter-btn:hover,
-.crm-col-filter-btn.is-open {
+.crm-col-filter-trigger:hover .crm-col-filter-icon,
+.crm-col-filter-icon.is-open {
   background: #e2e8f0;
   color: #334155;
 }
 
-.crm-col-filter-btn.is-active {
+.crm-col-filter-icon.is-active {
   color: #2563eb;
   background: #dbeafe;
 }
