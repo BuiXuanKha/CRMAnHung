@@ -10,6 +10,7 @@ import {
   CHANNEL_FILTER_OPTIONS,
   DEMAND_FILTER_OPTIONS,
   FINANCE_FILTER_OPTIONS,
+  LODAT_FILTER_OPTIONS,
   NAME_FILTER_OPTIONS,
   channelLabel,
   demandLabel,
@@ -21,7 +22,7 @@ import {
 } from '../display';
 import { ActionMenu, type CustomerAction } from './action-menu';
 
-type HeaderFilter = 'name' | 'demand' | 'finance' | 'channel' | null;
+type HeaderFilter = 'name' | 'demand' | 'finance' | 'channel' | 'lodat' | null;
 
 type Props = {
   items: CustomerListItem[];
@@ -115,6 +116,18 @@ export function CustomerTable({
               onChange={(v) => onExtra({ ...extra, channel: v as ExtraFilters['channel'] })}
             />
           </div>
+          <div className="kh-col-head" role="columnheader">
+            <span>Số lô đất</span>
+            <ColumnFilter
+              label="Số lô đất"
+              value={extra.lodat}
+              options={LODAT_FILTER_OPTIONS}
+              open={headerFilter === 'lodat'}
+              onToggle={() => toggleFilter('lodat')}
+              onClose={() => setHeaderFilter(null)}
+              onChange={(v) => onExtra({ ...extra, lodat: v as ExtraFilters['lodat'] })}
+            />
+          </div>
           <div className="col-act" role="columnheader">
             Thao tác
           </div>
@@ -183,6 +196,9 @@ export function CustomerTable({
               </div>
               <div className="kh-cell" role="cell">
                 <span className="kh-channel">{channelLabel(c)}</span>
+              </div>
+              <div className="col-lodat kh-cell" role="cell">
+                {c.lodatCount}
               </div>
               <div
                 className="col-act kh-cell"

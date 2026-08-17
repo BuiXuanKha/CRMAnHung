@@ -94,6 +94,12 @@ export const CHANNEL_FILTER_OPTIONS = [
   { value: 'page', label: 'Page' },
 ];
 
+export const LODAT_FILTER_OPTIONS = [
+  { value: 'all', label: 'Tất cả lô đất' },
+  { value: 'has', label: 'Đã gắn lô' },
+  { value: 'empty', label: 'Chưa gắn lô' },
+];
+
 export function applyExtraFilters(
   items: CustomerListItem[],
   extra: ExtraFilters,

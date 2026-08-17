@@ -14,10 +14,11 @@
 .kh-table-wrap {
   --kh-cols:
     50px
-    minmax(200px, 300px)
+    minmax(200px, 280px)
     minmax(0, 1fr)
     110px
-    180px
+    160px
+    118px
     80px;
   --kh-chrome: #f1f5f9;
   display: flex;
@@ -97,7 +98,7 @@
   display: grid;
   grid-template-columns: var(--kh-cols);
   width: 100%;
-  min-width: 860px;
+  min-width: 980px;
   border-bottom: 1px solid #f1f5f9;
 }
 
@@ -141,6 +142,13 @@
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   justify-content: center;
+}
+
+.col-lodat {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  justify-content: center;
+  color: #0f172a;
 }
 
 .col-act {

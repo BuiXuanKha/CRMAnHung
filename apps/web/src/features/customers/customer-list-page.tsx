@@ -174,8 +174,6 @@ export function CustomerListPage() {
             <FilterBar
               keyword={keyword}
               onKeyword={setKeyword}
-              extra={extra}
-              onExtra={setExtra}
               onAdd={() => setAddOpen(true)}
             />
           </section>

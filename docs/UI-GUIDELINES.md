@@ -127,6 +127,7 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 | `Nhu cầu` | Mô tả ngắn hoặc `—` |
 | `Tài chính` | Khoảng ngân sách (vd. `1,5 tỷ - 2 tỷ`) hoặc `—` |
 | `Kênh liên hệ` | Link/chữ **xanh** (tên NV, SĐT+ghi chú Zalo, Page…) |
+| `Số lô đất` | Số nguyên (`lodatCount`); 0 nếu chưa gắn; icon lọc: tất cả / đã gắn / chưa gắn |
 | `Thao tác` | Nút vuông → **menu hành động** (§4.3.3) |
 
 **Chưa chốt (hỏi tiếp):** layout mobile (bảng cuộn ngang vs thẻ; thanh lọc xếp dọc?); hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
@@ -209,7 +210,7 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ [  ô tìm kiếm rộng …          ] [ lô đất ▼] [ + Thêm khách ] │
+│ [  ô tìm kiếm rộng …                        ] [ + Thêm khách ] │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -217,11 +218,10 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 |------|---------|
 | **Ô tìm** (trái, chiếm phần lớn hàng) | Input một dòng; placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)` |
 | Focus | Viền **xanh** |
-| **Select** | Chỉ **lô đất** — bảng khách chưa có cột lô đất |
-| **CTA** | Nút xanh «Thêm khách hàng bằng số điện thoại» **cùng hàng**, bên phải dropdown lô đất |
+| **CTA** | Nút xanh «Thêm khách hàng bằng số điện thoại» **cùng hàng**, bên phải |
 
 **Không** hiện H1 «Quản lý khách hàng» trên trang (đã có trên navbar).  
-**Không** lặp dropdown trạng thái / tài chính / kênh / nhu cầu — lọc đó nằm **icon cột** §4.5.5.
+**Không** lặp dropdown trên thanh này — trạng thái / nhu cầu / tài chính / kênh / **số lô đất** lọc bằng **icon cột** §4.5.5.
 
 Ô tìm lọc theo tên / SĐT / nhu cầu / ghi chú. `@` = gồm bản ghi đã xóa; `@@` = chỉ bản ghi đã xóa.
 
@@ -414,7 +414,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt bảng dữ liệu (§4.3.1):** header cột + dòng + footer «Hiển thị N / Tổng M»; mẫu cột `/khach-hang` theo ảnh |
 | 2026-08-17 | **Chốt rail phải (§4.3.2):** thanh dọc chữ xoay 90°; mở rộng / thu hẹp; nhãn Chat · Lịch sử chăm sóc · Danh sách lô đất |
 | 2026-08-17 | **Chốt menu hành động (§4.3.3):** dropdown cột Thao tác; chevron lên/xuống; Xóa khách đỏ |
-| 2026-08-17 | **Chốt tìm/lọc (§4.3.4):** ô tìm + select lô đất + nút thêm SĐT; không H1 trùng navbar |
+| 2026-08-17 | **Chốt tìm/lọc (§4.3.4):** ô tìm + nút thêm SĐT; lọc cột gồm Số lô đất |
 | 2026-08-17 | Mock UI `/khach-hang` theo §4.2 + §4.3.1–4.3.4 (chưa chốt mobile) |
 | 2026-08-17 | Layout workbench full ngang + Noto Sans 14px; phân cấp §1–§3.2.2 trang khách hàng |
 | 2026-08-17 | **Chốt §4.5 bảng list dùng chung** + skill `crm-data-table` (hover, scroll, font, badge…) |
