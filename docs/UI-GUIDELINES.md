@@ -304,7 +304,7 @@ Icon trong bảng / menu: **chỉ Lucide** (§4.7). Avatar giữ quy tắc dư�
 
 #### 4.5.5 Icon lọc trên tên cột (đã chốt)
 
-Mỗi **cột dữ liệu** (không gồm `#` và **Thao tác**): tên cột bên trái + icon Lucide `ListFilter` **14px** bên phải.
+Mỗi **cột dữ liệu** (không gồm `#` và **Thao tác**): tên cột + icon Lucide `ListFilter` **14px** **sát ngay bên phải chữ** (không đẩy icon ra mép phải ô).
 
 | Trạng thái | Hình |
 |------------|------|

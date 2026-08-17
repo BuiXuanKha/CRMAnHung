@@ -57,8 +57,8 @@
 
 .kh-col-head {
   width: 100%;
-  justify-content: space-between;
-  gap: 4px;
+  justify-content: flex-start;
+  gap: 6px;
 }
 
 .kh-col-head > span {
