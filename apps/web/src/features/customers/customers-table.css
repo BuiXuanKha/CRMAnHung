@@ -19,6 +19,7 @@
     110px
     180px
     80px;
+  --kh-chrome: #f1f5f9;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -26,24 +27,24 @@
   font-size: 0.84rem;
 }
 
-/* Header nằm NGOÀI vùng overflow — nền phủ hết góc phải (không để khe bù scrollbar) */
+/* Header nằm NGOÀI vùng overflow — cùng token footer; ô cột không tự tô nền */
 .kh-table-head {
   flex-shrink: 0;
   width: 100%;
   border-bottom: 1px solid var(--kh-line);
-  background: #f1f5f9;
+  background: var(--kh-chrome);
+}
+
+.kh-table-head .kh-grid-row,
+.kh-table-head .kh-grid-row > * {
+  background: var(--kh-chrome);
 }
 
 .kh-grid-header {
   font-weight: 600;
   color: #0f172a;
-  background: #f1f5f9;
   cursor: default;
   border-bottom: none;
-}
-
-.kh-grid-header:hover {
-  background: #f1f5f9;
 }
 
 .kh-grid-header > div {
@@ -51,6 +52,7 @@
   white-space: nowrap;
   display: flex;
   align-items: center;
+  background: transparent;
 }
 
 .kh-table-scroll {
@@ -85,6 +87,9 @@
   width: 100%;
   min-width: 860px;
   border-bottom: 1px solid #f1f5f9;
+}
+
+.kh-table-scroll .kh-grid-row {
   background: #fff;
   cursor: pointer;
   transition: background-color 0.12s ease;
@@ -233,7 +238,7 @@
   flex-shrink: 0;
   padding: 10px 16px;
   border-top: 1px solid var(--kh-line);
-  background: #f1f5f9;
+  background: var(--kh-chrome);
   text-align: right;
   font-size: 0.85rem;
   color: #475569;
