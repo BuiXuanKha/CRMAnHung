@@ -253,7 +253,7 @@ Skill: `crm-data-table`. Tham chiếu triển khai: `/khach-hang` (`features/cus
 |------|---------|
 | Header cột | Nền `#f1f5f9` phủ **hết bề ngang** (kể cả góc phải); chữ `#0f172a` **600**; **không** nằm trong vùng `overflow` |
 | Thân | Chỉ thân có scrollbar; header + footer đứng yên khi cuộn; **không** để khe trống góc header vì bù scrollbar |
-| Footer | Nền `#f8fafc`; chữ `0.85rem` `#475569`; số **đậm** `#0f172a` |
+| Footer | Cùng nền header `#f1f5f9`; chữ `0.85rem` `#475569`; số **đậm** `#0f172a` |
 | Ô trống | Luôn hiện `—` |
 | Trống list | Một dòng/khối giữa: «Không có … phù hợp.» |
 
