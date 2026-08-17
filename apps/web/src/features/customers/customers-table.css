@@ -26,11 +26,10 @@
   font-size: 0.84rem;
 }
 
-/* Header nằm NGOÀI vùng overflow — thanh cuộn không cắt qua header */
+/* Header nằm NGOÀI vùng overflow — nền phủ hết góc phải (không để khe bù scrollbar) */
 .kh-table-head {
   flex-shrink: 0;
-  /* Bù scrollbar-gutter: stable (8px) của .kh-table-scroll để cột thẳng hàng */
-  padding-right: 8px;
+  width: 100%;
   border-bottom: 1px solid var(--kh-line);
   background: #f1f5f9;
 }
@@ -51,7 +50,7 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
-  scrollbar-gutter: stable;
+  /* Không dùng scrollbar-gutter:stable — tránh khe góc header lệch màu */
   overscroll-behavior: contain;
   scrollbar-width: thin;
   scrollbar-color: #cbd5e1 transparent;
