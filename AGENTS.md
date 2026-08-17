@@ -9,7 +9,8 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 2. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)  
 3. [`docs/adr/`](docs/adr/) — quyết định công nghệ  
 4. Domain liên quan trong [`docs/domains/`](docs/domains/)  
-5. Web công khai: [`docs/PUBLIC-SEO.md`](docs/PUBLIC-SEO.md) + [`docs/PUBLIC-WEB.md`](docs/PUBLIC-WEB.md) + skill `web-public-seo`
+5. **UI:** [`docs/UI-GUIDELINES.md`](docs/UI-GUIDELINES.md) — quy tắc giao diện (đọc trước khi làm/sửa UI)  
+6. Web công khai: [`docs/PUBLIC-SEO.md`](docs/PUBLIC-SEO.md) + [`docs/PUBLIC-WEB.md`](docs/PUBLIC-WEB.md) + skill `web-public-seo`
 ## Skills (`.cursor/skills/`)
 
 | Skill | Khi nào dùng |
@@ -17,6 +18,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | `crmanhung-playbook` | Mọi task feature — nhắc thứ tự làm việc |
 | `write-domain-doc` | Viết / cập nhật `docs/domains/*` |
 | `add-shared-contract` | Thêm Zod/types vào `packages/shared` |
+| `ui-guidelines` | **Trước mọi UI** — đọc `docs/UI-GUIDELINES.md` |
 | `ui-mock-feature` | Làm màn hình Web với mock data |
 | `nest-domain-module` | Thêm module NestJS API |
 | `security-baseline` | Auth, authz, secrets, CORS, upload |

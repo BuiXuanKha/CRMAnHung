@@ -19,6 +19,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 8. Smoke test + cập nhật docs nếu cần
 9. Staging deploy chỉ khi được yêu cầu (`anhungland.com`, không đụng `crm.anhungland.com`)
 10. **Web công khai** — áp dụng skill `web-public-seo` / `docs/PUBLIC-SEO.md`
+11. **UI** — đọc `docs/UI-GUIDELINES.md` (skill `ui-guidelines`) trước khi làm/sửa giao diện
 
 ## Cấm
 
@@ -26,6 +27,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 - Copy nguyên file lớn từ FacebookCustomerCRM
 - God-file / business logic trong controller hoặc React view
 - Commit `.env`, secrets R2, dump DB
+- Làm UI bỏ qua `UI-GUIDELINES.md` hoặc tự clone CRM cũ khi chưa được yêu cầu
 
 ## Definition of Done
 

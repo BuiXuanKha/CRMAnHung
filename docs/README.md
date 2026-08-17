@@ -3,6 +3,7 @@
 | Doc | Mô tả |
 |-----|--------|
 | [PLAYBOOK.md](./PLAYBOOK.md) | **Cách làm việc** — thứ tự docs → skill → mock → API |
+| [UI-GUIDELINES.md](./UI-GUIDELINES.md) | **Quy tắc UI** — public + CRM; đọc trước khi làm giao diện |
 | [FOUNDATION.md](./FOUNDATION.md) | **Checklist nền** — công cụ sẵn trước khi code feature |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Kiến trúc tổng thể |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Deploy Mắt Bão / staging (Postgres + R2) |

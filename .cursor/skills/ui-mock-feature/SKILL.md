@@ -7,6 +7,7 @@ description: Build CRMAnHung web UI features with mock data before the real API 
 
 ## Prerequisites
 
+- Đọc [`docs/UI-GUIDELINES.md`](../../../docs/UI-GUIDELINES.md) (+ skill `ui-guidelines`) — **quy tắc UI đã chốt**
 - Domain doc status ≥ `Ready for mock` (trừ trang marketing public thuần — theo `PUBLIC-SEO.md`)
 - Contract đã có trong `@crmanhung/shared` (hoặc thêm cùng PR **trước** UI) — **không bắt buộc** với landing public tĩnh
 - Trang **web công khai**: đọc skill **`web-public-seo`** + `docs/PUBLIC-SEO.md`
@@ -42,7 +43,7 @@ export async function listCustomers() {
 1. Dùng type từ `@crmanhung/shared` — không invent interface cục bộ trùng nghĩa.
 2. Mock phủ đủ trạng thái trong domain doc §8.
 3. Không gọi API production / CRM cũ.
-4. Styling theo CSS variables hiện có (`global.css`); tránh card/hero marketing thừa trên app nội bộ.
+4. Styling theo `docs/UI-GUIDELINES.md` + CSS variables; tránh card/hero marketing thừa trên app nội bộ.
 5. Route = thư mục trong `apps/web/app/(crm)/…` (App Router).
 6. Auth: bọc bởi `(crm)/layout.tsx` → `AppShell`; trang `/login` riêng.
 

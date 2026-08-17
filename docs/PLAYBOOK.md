@@ -10,6 +10,7 @@ Tham chiếu nhanh:
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Kiến trúc tổng thể |
 | [PUBLIC-SEO.md](./PUBLIC-SEO.md) | Chuẩn SEO **web công khai** |
 | [PUBLIC-WEB.md](./PUBLIC-WEB.md) | IA / nội dung trang khách (brand, sản phẩm, bài phụ) |
+| [UI-GUIDELINES.md](./UI-GUIDELINES.md) | **Quy tắc UI chung** (public + CRM) — đọc trước khi làm giao diện |
 | [DEPLOYMENT.md](./DEPLOYMENT.md) | Mắt Bão / staging |
 | [MIGRATION.md](./MIGRATION.md) | Migrate từ FacebookCustomerCRM |
 | [adr/](./adr/) | Quyết định công nghệ (ADR) |
@@ -70,6 +71,7 @@ Tham chiếu nhanh:
 
 ### ④ UI + mock data
 
+- **Đọc** [`UI-GUIDELINES.md`](./UI-GUIDELINES.md) trước (quy tắc visual / UX đã chốt).
 - Feature trong `apps/web/src/features/<domain>/`.
 - `mocks/` hoặc `mock-api.ts` — bật bằng `NEXT_PUBLIC_USE_MOCK=true` (mặc định dev có thể bật).
 - UI phải dùng type từ `@crmanhung/shared`, không invent shape riêng.
