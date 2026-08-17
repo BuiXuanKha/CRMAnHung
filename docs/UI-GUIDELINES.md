@@ -60,7 +60,7 @@ Phạm vi ưu tiên hiện tại: màn sau login, đặc biệt **Quản lý kh�
 - Không bắt buộc giống pixel CRM cũ từng chi tiết; **cấu trúc shell** theo mục 4.2 (đã chốt).
 - Admin UI: **chưa làm** cho đến khi STAFF ổn.
 - Mock được (`NEXT_PUBLIC_USE_MOCK`); không gọi API production CRM cũ.
-- **UI list/detail `/khach-hang` bản mock cũ đã gỡ** — đang placeholder; làm lại theo mục **4.3.1** (bảng) + phần còn lại khi chốt đủ.
+- **UI list/detail `/khach-hang` bản mock cũ đã gỡ** — đang placeholder; làm lại theo mục **4.3.1** (bảng) + **4.3.2** (rail phải) + phần còn lại khi chốt đủ.
 
 ### 4.2 Shell CRM chung (đã chốt) — mọi trang sau login
 
@@ -79,7 +79,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 │  · Dịch vụ sổ đỏ                                            │
 │  (+ mục Admin chỉ hiện với role ADMIN, khi làm sau)         │
 ├─────────────────────────────────────────────────────────────┤
-│ NỘI DUNG TRANG (riêng từng route — bảng theo §4.3.1)        │
+│ NỘI DUNG: bảng (§4.3.1) + rail phải thu hẹp/mở (§4.3.2)    │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -137,18 +137,52 @@ Mọi **danh sách dạng bảng** trên CRM (ví dụ **Danh sách khách hàng
 - Badge nhỏ, bo góc nhẹ; không card trang trí quanh bảng
 - Container bảng: bo góc nhẹ + đổ bóng rất nhẹ (tuỳ implement, không phồng)
 
-**Chưa chốt (hỏi tiếp):** filter/toolbar phía trên bảng; layout mobile (bảng cuộn ngang vs thẻ); cảm giác màu toàn CRM ngoài bảng; panel phụ (nếu có).
+**Chưa chốt (hỏi tiếp):** filter/toolbar phía trên bảng; layout mobile (bảng cuộn ngang vs thẻ); cảm giác màu toàn CRM ngoài bảng; hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
 
 | Hạng mục | Quyết định | Ghi chú |
 |----------|------------|---------|
 | Cảm giác tổng thể | *(chờ)* | Bảng: sạch, trắng + vàng nhạt + xanh link |
 | Màu chủ đạo CRM | *(chờ palette đầy đủ)* | Xanh primary + vàng highlight dòng |
 | Font | *(chờ)* | Sans-serif UI, không marketing display |
-| Trang khách hàng: layout chính | **Bảng đầy đủ** (header + dòng + footer) | Theo §4.3.1 |
+| Trang khách hàng: layout chính | **Bảng** trái + **rail phải** thu hẹp/mở | §4.3.1 + §4.3.2 |
 | Thao tác trên dòng | Menu qua nút chevron xuống | Không hiện hết nút trên ô |
 | Mobile: ưu tiên thẻ hay list | *(chờ)* | |
 | Mật độ thông tin | **Đặc** trên desktop | |
 | Tránh tuyệt đối | Bảng xám nhàm không badge/highlight; thiếu footer đếm; thiếu header cột | |
+
+#### 4.3.2 Rail phải — mở rộng / thu hẹp (đã chốt — theo ảnh mẫu)
+
+Không phải sidebar điều hướng (nav chính vẫn là navbar ngang §4.2). Đây là **cột phụ bên phải** của nội dung trang: nhiều **thanh dọc hẹp** xếp cạnh nhau; bấm để **mở rộng / thu hẹp** panel chi tiết.
+
+```
+┌──────────────────────────────┬────┬────┬────┐
+│ BẢNG / nội dung chính        │ C  │ L  │ Đ  │
+│ (§4.3.1)                     │ h  │ ị  │ ấ  │
+│                              │ a  │ c  │ t  │
+│                              │ t  │ h  │    │
+└──────────────────────────────┴────┴────┴────┘
+     thu hẹp: chỉ thấy thanh dọc + chữ xoay 90°
+     mở rộng: panel bung sang trái, hiện nội dung đầy đủ
+```
+
+**Khi thu hẹp** (trạng thái mặc định trên ảnh):
+
+| Chi tiết | Quy tắc |
+|----------|---------|
+| Hình dạng | Thanh dọc hẹp, bo góc, xếp **cạnh nhau** bên phải |
+| Đỉnh thanh | Icon chevron **sang trái** (`‹`) — gợi ý «mở ra» |
+| Nhãn | Chữ **xoay 90°** (đọc từ dưới lên), tiếng Việt |
+| Active | Thanh đang chọn: nền **xanh nhạt**, chữ/icon xanh; các thanh khác: nền trắng, chữ tối |
+
+**Nhãn mẫu — trang khách hàng** (theo ảnh, trái → phải):
+
+1. **Nội dung chat**
+2. **Lịch sử chăm sóc**
+3. **Danh sách lô đất**
+
+**Khi mở rộng:** panel bung sang trái, hiện dữ liệu của đúng nhãn đó (chat / lịch sử / lô đất). Đóng lại thì thu về thanh dọc.
+
+Implement: một component rail dùng lại được (không copy layout god-file CRM cũ); gắn vào layout nội dung `/khach-hang` (và màn list tương tự khi cần).
 
 ### 4.4 Checklist trước khi merge UI CRM
 
@@ -158,6 +192,7 @@ Mọi **danh sách dạng bảng** trên CRM (ví dụ **Danh sách khách hàng
 - [ ] Không lộ mục chỉ dành cho Admin với user STAFF
 - [ ] Header + navbar đúng cấu trúc 4.2 trên mọi trang CRM
 - [ ] Bảng danh sách: đủ header cột + dòng + footer đếm (§4.3.1); giống ảnh mẫu
+- [ ] Rail phải: thanh dọc chữ xoay + mở rộng/thu hẹp (§4.3.2); giống ảnh mẫu
 
 ---
 
@@ -197,6 +232,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | Gỡ UI mock `/khach-hang` (list/detail) — placeholder chờ chốt nội dung trang |
 | 2026-08-17 | **Chốt shell CRM:** header (logo+tên, user, cài đặt, đăng xuất) + navbar ngang (4 mục STAFF) |
 | 2026-08-17 | **Chốt bảng dữ liệu (§4.3.1):** header cột + dòng + footer «Hiển thị N / Tổng M»; mẫu cột `/khach-hang` theo ảnh |
+| 2026-08-17 | **Chốt rail phải (§4.3.2):** thanh dọc chữ xoay 90°; mở rộng / thu hẹp; nhãn Chat · Lịch sử chăm sóc · Danh sách lô đất |
 
 ---
 
