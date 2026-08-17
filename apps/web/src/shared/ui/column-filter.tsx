@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, ListFilter } from 'lucide-react';
+import { Check, ListFilter, X } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Icon } from './icon';
 import './column-filter.css';
@@ -73,6 +73,21 @@ export function ColumnFilter({
       >
         <Icon icon={ListFilter} size={14} />
       </button>
+      {active ? (
+        <button
+          type="button"
+          className="crm-col-filter-clear"
+          aria-label={`Xóa lọc ${label}`}
+          title={`Xóa lọc ${label}`}
+          onClick={(e) => {
+            e.stopPropagation();
+            onChange(allValue);
+            onClose();
+          }}
+        >
+          <Icon icon={X} size={14} />
+        </button>
+      ) : null}
       {open ? (
         <ul
           className="crm-col-filter-menu"
