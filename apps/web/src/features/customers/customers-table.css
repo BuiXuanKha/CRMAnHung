@@ -37,6 +37,13 @@
 .kh-grid-header {
   font-weight: 600;
   color: #0f172a;
+  background: #f1f5f9;
+  cursor: default;
+  border-bottom: none;
+}
+
+.kh-grid-header:hover {
+  background: #f1f5f9;
 }
 
 .kh-grid-header > div {
