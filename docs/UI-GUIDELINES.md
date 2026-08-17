@@ -150,7 +150,8 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | Ngày | Nội dung |
 |------|----------|
 | 2026-08-17 | Tạo `UI-GUIDELINES.md` làm nơi quy tắc UI chung; không mock theo CRM cũ làm mặc định; chờ mô tả UI nhân viên từ chủ sở hữu |
-| 2026-08-17 | Gỡ UI mock `/khach-hang` (list/detail) — placeholder chờ chốt mục 4.2 |
+| 2026-08-17 | Gỡ UI mock `/khach-hang` (list/detail) — placeholder chờ chốt nội dung trang |
+| 2026-08-17 | **Chốt shell CRM:** header (logo+tên, user, cài đặt, đăng xuất) + navbar ngang (4 mục STAFF) |
 
 ---
 
