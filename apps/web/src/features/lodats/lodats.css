@@ -1,0 +1,95 @@
+/* Trang /lo-dat — layout workbench, token bảng theo §4.5 */
+
+.ld-page {
+  --ld-blue: #2563eb;
+  --ld-blue-50: #eff6ff;
+  --ld-line: #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ld-main {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1;
+}
+
+.ld-filter-wrap {
+  flex-shrink: 0;
+  border: 1px solid var(--ld-line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.ld-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 12px;
+}
+
+.ld-search {
+  flex: 1 1 auto;
+  min-width: 200px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.86rem;
+  background: #fff;
+  color: #0f172a;
+  outline: none;
+}
+
+.ld-search:focus {
+  border-color: var(--ld-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.ld-status {
+  margin: 0;
+  padding: 0 4px;
+  color: #64748b;
+  font-size: 0.86rem;
+  flex-shrink: 0;
+}
+
+.ld-status.error {
+  color: #b91c1c;
+}
+
+.ld-placeholder {
+  max-width: 40rem;
+  display: grid;
+  gap: 10px;
+}
+
+.ld-placeholder h1 {
+  margin: 0;
+  font-size: 1.35rem;
+}
+
+.ld-placeholder p {
+  margin: 0;
+  color: #64748b;
+  line-height: 1.5;
+}
+
+.ld-placeholder a {
+  color: var(--ld-blue);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.ld-placeholder a:hover {
+  text-decoration: underline;
+}

@@ -221,6 +221,24 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 
 Đổi ô tìm hoặc lọc → cập nhật bảng (mock: lọc client; sau: API).
 
+#### 4.3.5 Bảng dữ liệu — trang lô đất (đã chốt cột)
+
+Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** clone toggle «Mở bán» hay nút GD/Sửa trên dòng).
+
+**Cột — Danh sách lô đất** (desktop):
+
+| Cột | Nội dung ô |
+|-----|------------|
+| `Ảnh` | Thumbnail vuông bo góc; overlay `+N` nếu còn ảnh; thiếu ảnh = ô xám + `—` trong lọc «chưa có ảnh» |
+| `Tiêu đề / Địa chỉ` | **Tiêu đề đậm**; dòng phụ nhạt = địa chỉ / khu |
+| `DT · MT · Hướng` | Dòng 1: diện tích (`90 m²`); dòng 2: `MT 4,5 m · Bắc` — thiếu = `—` |
+| `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng `%` |
+| `Trạng thái` | Hangtag `CrmBadge`: Đang bán `green` · Đặt cọc `amber` · Đã bán `blue` · Tạm dừng `gray` |
+| `Cập nhật` | `HH:mm:ss D/M/YYYY` — **không** icon lọc (timestamp) |
+| `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Giao dịch**, **Sửa** |
+
+**Thanh tìm (§4.3.4, biến thể lô đất):** chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Không rail phải trên màn này. Không nút «Thêm lô» (chưa có trên ảnh mẫu).
+
 ### 4.5 Bảng danh sách CRM — dùng chung (đã chốt)
 
 Áp dụng **mọi** màn CRM có list dạng bảng (khách hàng, lô đất, giao dịch, sổ đỏ…).  
@@ -418,6 +436,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt §4.6 Lucide**; hangtag 5 tone; **§4.7 CrmDialog** (alert/confirm/form/toast) |
 | 2026-08-17 | **Chốt màu số tiền CRM** `#b45309` (`crm-money`) — thống nhất mọi cột giá / tài chính |
 | 2026-08-17 | **Chốt §4.5.5** icon lọc `ListFilter` trên tên cột dữ liệu; đồng bộ thanh lọc |
+| 2026-08-17 | **Chốt §4.3.5** cột list `/lo-dat` (ảnh, tiêu đề, DT·MT·hướng, giá, hangtag, menu thao tác) |
 
 ---
 
