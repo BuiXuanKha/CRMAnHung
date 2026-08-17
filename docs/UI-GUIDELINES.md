@@ -108,27 +108,15 @@ Implement: `apps/web` layout CRM (`(crm)/layout` → `AppShell`). Đổi shell =
 
 Phần **dưới navbar** — từng màn (ưu tiên `/khach-hang`).
 
-#### 4.3.1 Bảng dữ liệu (đã chốt — theo ảnh mẫu)
+#### 4.3.1 Bảng dữ liệu — mẫu trang khách hàng
 
-Mọi **danh sách dạng bảng** trên CRM (ví dụ **Danh sách khách hàng**) phải gồm **đúng 3 khối**, nhìn giống ảnh mẫu chủ sở hữu gửi:
+Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nội dung** riêng `/khach-hang`:
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ HEADER bảng — tên cột (nền xám/xanh rất nhạt, chữ đậm)      │
-├──────────────────────────────────────────────────────────────┤
-│ DÒNG dữ liệu × N                                             │
-│  (một số dòng nền vàng nhạt = nổi bật / ưu tiên)             │
-│  viền trái xanh mỏng · ngăn dòng bằng đường ngang mảnh       │
-├──────────────────────────────────────────────────────────────┤
-│ FOOTER — góc phải: «Hiển thị N / Tổng M khách hàng»          │
+│ HEADER cột · THÂN dòng · FOOTER đếm — xem §4.5               │
 └──────────────────────────────────────────────────────────────┘
 ```
-
-| Khối | Quy tắc |
-|------|---------|
-| **Header** | Một hàng cố định; chỉ **tên cột**; nền xám-xanh rất nhạt; chữ đậm tối |
-| **Dòng dữ liệu** | Mỗi record một dòng; ô trống hiện `—`; mật độ thông tin **đặc** (nhiều cột, chữ gọn) |
-| **Footer** | Dưới bảng, căn phải; chữ nhỏ xám: **Hiển thị {đang xem} / Tổng {tổng} …** |
 
 **Cột mẫu — Danh sách khách hàng** (desktop):
 
@@ -139,27 +127,20 @@ Mọi **danh sách dạng bảng** trên CRM (ví dụ **Danh sách khách hàng
 | `Nhu cầu` | Mô tả ngắn hoặc `—` |
 | `Tài chính` | Khoảng ngân sách (vd. `1,5 tỷ - 2 tỷ`) hoặc `—` |
 | `Kênh liên hệ` | Link/chữ **xanh** (tên NV, SĐT+ghi chú Zalo, Page…) |
-| `Thao tác` | Nút vuông xám nhạt → **menu hành động** (§4.3.3); không rải nhiều nút trên dòng |
+| `Thao tác` | Nút vuông → **menu hành động** (§4.3.3) |
 
-**Nhìn / token (bám ảnh):**
-
-- Nền trang/bảng trắng; dòng nổi bật: vàng nhạt (~`#FFF9E6`)
-- Accent link / viền trái dòng: xanh primary CRM
-- Badge nhỏ, bo góc nhẹ; không card trang trí quanh bảng
-- Container bảng: bo góc nhẹ + đổ bóng rất nhẹ (tuỳ implement, không phồng)
-
-**Chưa chốt (hỏi tiếp):** layout mobile (bảng cuộn ngang vs thẻ; thanh lọc xếp dọc?); cảm giác màu toàn CRM ngoài bảng; hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
+**Chưa chốt (hỏi tiếp):** layout mobile (bảng cuộn ngang vs thẻ; thanh lọc xếp dọc?); hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
 
 | Hạng mục | Quyết định | Ghi chú |
 |----------|------------|---------|
-| Cảm giác tổng thể | *(chờ)* | Bảng: sạch, trắng + vàng nhạt + xanh link |
-| Màu chủ đạo CRM | *(chờ palette đầy đủ)* | Xanh primary + vàng highlight dòng |
-| Font | *(chờ)* | Sans-serif UI, không marketing display |
+| Cảm giác tổng thể | Workbench, đặc | Theo §4.2 + §4.5 |
+| Màu chủ đạo CRM | Xanh `#2563eb` + vàng ghim | §4.5 |
+| Font | **Noto Sans**, gốc 14px | §4.2 / §4.5 |
 | Trang khách hàng: layout chính | Tìm/lọc trên + **bảng** trái + **rail phải** | §4.3.1–4.3.4 |
 | Thao tác trên dòng | **Menu hành động** (dropdown) | §4.3.3 |
 | Mobile: ưu tiên thẻ hay list | *(chờ)* | |
 | Mật độ thông tin | **Đặc** trên desktop | |
-| Tránh tuyệt đối | Bảng xám nhàm không badge/highlight; thiếu footer đếm; thiếu header cột | |
+| Tránh tuyệt đối | Invent style bảng khác §4.5; thiếu footer; scroll cắt header cột | |
 
 #### 4.3.2 Rail phải — mở rộng / thu hẹp (đã chốt — theo ảnh mẫu)
 
@@ -250,17 +231,97 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 
 Đổi ô tìm hoặc select → cập nhật bảng bên dưới (mock: lọc client; sau: API).
 
-### 4.4 Checklist trước khi merge UI CRM
+### 4.5 Bảng danh sách CRM — dùng chung (đã chốt)
+
+Áp dụng **mọi** màn CRM có list dạng bảng (khách hàng, lô đất, giao dịch, sổ đỏ…).  
+Cột / dữ liệu đổi theo domain; **hình thức** (font, hover, scroll, icon, footer…) **một bộ**.  
+Skill: `crm-data-table`. Tham chiếu triển khai: `/khach-hang` (`features/customers`).
+
+#### 4.5.1 Cấu trúc bắt buộc
+
+```
+┌─ container (bo góc 12px, viền #e2e8f0, nền trắng) ─────────────┐
+│ HEADER CỘT — cố định, NGOÀI vùng overflow                      │
+├────────────────────────────────────────────────────────────────┤
+│ THÂN DÒNG — đây mới có thanh cuộn dọc                           │
+├────────────────────────────────────────────────────────────────┤
+│ FOOTER — «Hiển thị N / Tổng M …» căn phải                      │
+└────────────────────────────────────────────────────────────────┘
+```
+
+| Khối | Quy tắc |
+|------|---------|
+| Header cột | Nền `#f1f5f9`; chữ `#0f172a` **600**; **không** nằm trong vùng `overflow` |
+| Thân | Chỉ thân có scrollbar; header + footer đứng yên khi cuộn |
+| Footer | Nền `#f8fafc`; chữ `0.85rem` `#475569`; số **đậm** `#0f172a` |
+| Ô trống | Luôn hiện `—` |
+| Trống list | Một dòng/khối giữa: «Không có … phù hợp.» |
+
+#### 4.5.2 Typography & màu chữ
+
+| Phần | Cỡ / weight | Màu |
+|------|-------------|-----|
+| Toàn CRM shell | Noto Sans, gốc **14px**, line-height 1.5 | `#111827` |
+| Lưới bảng (gốc) | **0.84rem** | kế thừa |
+| Tên / primary cell | **600** | `#0f172a` |
+| Dòng phụ (vd. tên FB) | **0.78rem**, italic | `#64748b` |
+| Nhu cầu / mô tả | **0.82rem** | `#334155` |
+| Số tiền / tài chính | **0.82rem**, **600** | `#0f172a` |
+| Link / kênh liên hệ | **0.78rem**, **600** | `#2563eb` (primary) |
+| Cột `#` | **700**, tabular | `#1e40af` |
+| Badge trạng thái | **0.72rem**, **600** | theo tone bên dưới |
+
+**Không** dùng font marketing (Be Vietnam Pro) trong CRM list.
+
+#### 4.5.3 Trạng thái dòng (hover / selected / nổi bật)
+
+| Trạng thái | Nền | Ghi chú |
+|------------|-----|---------|
+| Mặc định | `#fff` | Viền dưới `#f1f5f9` |
+| **Hover** | `#f1f5f9` | Cả dòng |
+| **Selected** (đang chọn) | `#eff6ff` | Click dòng |
+| **Nổi bật / ghim** | `#fef9c3` + viền trái inset `#ca8a04` (3px) | Ưu tiên hơn selected khi kết hợp → `#fef3c7` |
+| Menu hành động đang mở | `#fef3c7` | Cùng cảm giác “đang thao tác” |
+
+Cursor: `pointer` trên dòng (trừ vùng nút menu).
+
+#### 4.5.4 Icon & badge
+
+| Phần | Quy tắc |
+|------|---------|
+| Avatar | Tròn **32×32**; ảnh hoặc chữ tắt; nền `#e2e8f0` |
+| Icon phụ cạnh tên | Nhỏ (~12px); SĐT cam; chat/FB xanh lá — không emoji lớn nếu đã có SVG |
+| Badge | Pill bo tròn; padding `2px 10px`; **không** shadow |
+| Badge xanh lá | Nền `#dcfce7` / chữ `#166534` (vd. Khách nét) |
+| Badge xanh dương | Nền `#dbeafe` / chữ `#1e3a8a` (vd. Khách mới) |
+| Badge cam | Nền `#fed7aa` / chữ `#9a3412` (vd. Cần chăm sóc) |
+| Badge xám | Nền `#e2e8f0` / chữ `#475569` |
+
+#### 4.5.5 Cột Thao tác & menu
+
+- Một nút **32×32**, viền `#e2e8f0`, nền trắng, chevron xuống/lên (§4.3.3).
+- Menu: trắng, bo 10px, shadow nhẹ; mục `0.88rem` **600**; icon 16px trái.
+- Hành động phá hủy: chữ + icon **đỏ** `#b91c1c`.
+- Chỉ **một** menu mở / bảng.
+
+#### 4.5.6 Implement
+
+- Tái dùng **một** component/shared styles (không copy CSS từng màn).
+- Đổi cột = props/config domain; **không** đổi token hover/font mỗi trang.
+- File CSS bảng > ~400 dòng → tách (vd. `*-table.css` / `*-chrome.css`).
+
+### 4.6 Checklist trước khi merge UI CRM
 
 - [ ] Đúng quy tắc mục 3 + shell mục 4.2 + nội dung đã chốt ở 4.3
+- [ ] Bảng list: đúng **§4.5** (header ngoài scroll, hover/selected/ghim, typography, footer)
 - [ ] Desktop + mobile xem ổn
 - [ ] Trạng thái trống / loading / lỗi có UI
 - [ ] Không lộ mục chỉ dành cho Admin với user STAFF
 - [ ] Header + navbar đúng cấu trúc 4.2 trên mọi trang CRM
-- [ ] Bảng danh sách: đủ header cột + dòng + footer đếm (§4.3.1); giống ảnh mẫu
-- [ ] Rail phải: thanh dọc chữ xoay + mở rộng/thu hẹp (§4.3.2); giống ảnh mẫu
-- [ ] Menu hành động cột Thao tác: chevron + danh sách mục; Xóa khách màu đỏ (§4.3.3)
-- [ ] Thanh tìm + 5 select lọc phía trên bảng (§4.3.4); giống ảnh mẫu
+- [ ] Cột / domain đúng mục 4.3.x của màn đó
+- [ ] Rail phải (nếu có): §4.3.2
+- [ ] Menu hành động (nếu có cột Thao tác): §4.3.3 + §4.5.5
+- [ ] Thanh tìm/lọc (nếu có): §4.3.4
 
 ---
 
@@ -286,6 +347,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 
 - Làm UI CRM bằng cách “clone cảm giác” CRM cũ khi chủ sở hữu **không** yêu cầu.
 - Form / bảng không có trạng thái rỗng hoặc lỗi.
+- Bảng list CRM lệch §4.5 (font khác, scroll cắt header, hover tự invent…).
 - Nút quan trọng chỉ hiện trong menu sâu trên mobile.
 - Trộn token màu public (đỏ-vàng landing) vào CRM nếu chưa chốt.
 - Card trang trí không phục vụ thao tác (CRM).
@@ -305,6 +367,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt tìm/lọc (§4.3.4):** ô tìm rộng + 5 select (trạng thái, tài chính, kênh, lô đất, nhu cầu) |
 | 2026-08-17 | Mock UI `/khach-hang` theo §4.2 + §4.3.1–4.3.4 (chưa chốt mobile) |
 | 2026-08-17 | Layout workbench full ngang + Noto Sans 14px; phân cấp §1–§3.2.2 trang khách hàng |
+| 2026-08-17 | **Chốt §4.5 bảng list dùng chung** + skill `crm-data-table` (hover, scroll, font, badge…) |
 
 ---
 
@@ -313,4 +376,5 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 - Playbook: [`PLAYBOOK.md`](./PLAYBOOK.md)
 - Skill mock UI: `.cursor/skills/ui-mock-feature`
 - Skill đọc quy tắc UI: `.cursor/skills/ui-guidelines`
+- Skill bảng list CRM: `.cursor/skills/crm-data-table`
 - Domain khách hàng: [`domains/customers.md`](./domains/customers.md)

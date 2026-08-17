@@ -19,6 +19,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | `write-domain-doc` | Viết / cập nhật `docs/domains/*` |
 | `add-shared-contract` | Thêm Zod/types vào `packages/shared` |
 | `ui-guidelines` | **Trước mọi UI** — đọc `docs/UI-GUIDELINES.md` |
+| `crm-data-table` | **Bảng list CRM** — hover/scroll/font theo §4.5 |
 | `ui-mock-feature` | Làm màn hình Web với mock data |
 | `nest-domain-module` | Thêm module NestJS API |
 | `security-baseline` | Auth, authz, secrets, CORS, upload |

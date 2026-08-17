@@ -43,7 +43,7 @@ export async function listCustomers() {
 1. Dùng type từ `@crmanhung/shared` — không invent interface cục bộ trùng nghĩa.
 2. Mock phủ đủ trạng thái trong domain doc §8.
 3. Không gọi API production / CRM cũ.
-4. Styling theo `docs/UI-GUIDELINES.md` + CSS variables; tránh card/hero marketing thừa trên app nội bộ.
+4. Styling theo `docs/UI-GUIDELINES.md` + CSS variables; tránh card/hero marketing thừa trên app nội bộ. Bảng list → skill **`crm-data-table`** / §4.5.
 5. Route = thư mục trong `apps/web/app/(crm)/…` (App Router).
 6. Auth: bọc bởi `(crm)/layout.tsx` → `AppShell`; trang `/login` riêng.
 
