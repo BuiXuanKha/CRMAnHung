@@ -96,7 +96,7 @@
 }
 
 .kh-search {
-  flex: 1 1 220px;
+  flex: 1 1 auto;
   min-width: 200px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;

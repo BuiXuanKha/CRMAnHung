@@ -203,33 +203,27 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 
 Chỉ **một** menu mở tại một thời điểm. Bấm ra ngoài / chọn mục / bấm lại nút → đóng.
 
-#### 4.3.4 Section tìm kiếm và lọc (đã chốt — theo ảnh mẫu)
+#### 4.3.4 Section tìm kiếm và lọc (đã chốt)
 
-Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viền xám rất mỏng. Không nhồi filter thành nhiều hàng trừ khi màn hẹp.
+Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viền xám rất mỏng.
 
 ```
 ┌──────────────────────────────────────────────────────────────┐
-│ [  ô tìm kiếm rộng …          ] [▼] [▼] [▼] [▼] [▼]         │
+│ [  ô tìm kiếm rộng …                              ] [ lô đất ▼] │
 └──────────────────────────────────────────────────────────────┘
 ```
 
 | Phần | Quy tắc |
 |------|---------|
-| **Ô tìm** (trái, ~40–50% bề ngang) | Input một dòng; placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)` |
+| **Ô tìm** (trái, chiếm phần lớn hàng) | Input một dòng; placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)` |
 | Focus | Viền **xanh** |
-| **Lọc** (phải) | 5 select cùng hàng, viền xám nhạt, chevron xuống |
+| **Select còn lại** | Chỉ **lô đất** — bảng khách chưa có cột lô đất nên lọc này ở thanh trên |
 
-**Select mặc định — trang khách hàng** (trái → phải):
+**Không** lặp dropdown trạng thái / tài chính / kênh / nhu cầu trên thanh này — những lọc đó nằm **icon cột** §4.5.5.
 
-1. Tất cả trạng thái  
-2. Tất cả tài chính  
-3. Tất cả kênh liên hệ  
-4. Tất cả lô đất  
-5. Tất cả nhu cầu  
+Ô tìm lọc theo tên / SĐT / nhu cầu / ghi chú. `@` = gồm bản ghi đã xóa; `@@` = chỉ bản ghi đã xóa.
 
-Ô tìm lọc theo tên / SĐT / nhu cầu / ghi chú. Gợi ý trong placeholder: `@` = gồm bản ghi đã xóa; `@@` = chỉ bản ghi đã xóa (giữ nguyên nghĩa khi implement).
-
-Đổi ô tìm hoặc select → cập nhật bảng bên dưới (mock: lọc client; sau: API).
+Đổi ô tìm hoặc lọc → cập nhật bảng (mock: lọc client; sau: API).
 
 ### 4.5 Bảng danh sách CRM — dùng chung (đã chốt)
 
@@ -312,7 +306,7 @@ Mỗi **cột dữ liệu** (không gồm `#` và **Thao tác**): tên cột + i
 | Hover / menu mở | Nền `#e2e8f0`, icon `#334155` |
 | Đang lọc | Icon + nền xanh `#2563eb` / `#dbeafe` |
 
-Bấm **chỉ icon** (không bấm tên cột) → menu trắng (cùng chrome menu thao tác): danh sách lựa chọn; mục đang chọn có `Check`. Một menu lọc mở / bảng. Lọc cột **cùng state** với thanh lọc §4.3.4 (không hai bộ lọc lệch nhau).
+Bấm **chỉ icon** (không bấm tên cột) → menu trắng (cùng chrome menu thao tác): danh sách lựa chọn; mục đang chọn có `Check`. Một menu lọc mở / bảng. Lọc cột **thay** dropdown trùng trên thanh §4.3.4.
 
 Component: `shared/ui/column-filter.tsx`.
 
@@ -418,7 +412,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt bảng dữ liệu (§4.3.1):** header cột + dòng + footer «Hiển thị N / Tổng M»; mẫu cột `/khach-hang` theo ảnh |
 | 2026-08-17 | **Chốt rail phải (§4.3.2):** thanh dọc chữ xoay 90°; mở rộng / thu hẹp; nhãn Chat · Lịch sử chăm sóc · Danh sách lô đất |
 | 2026-08-17 | **Chốt menu hành động (§4.3.3):** dropdown cột Thao tác; chevron lên/xuống; Xóa khách đỏ |
-| 2026-08-17 | **Chốt tìm/lọc (§4.3.4):** ô tìm rộng + 5 select (trạng thái, tài chính, kênh, lô đất, nhu cầu) |
+| 2026-08-17 | **Chốt tìm/lọc (§4.3.4):** ô tìm rộng + 1 select lô đất; trạng thái/tài chính/kênh/nhu cầu → icon cột §4.5.5 |
 | 2026-08-17 | Mock UI `/khach-hang` theo §4.2 + §4.3.1–4.3.4 (chưa chốt mobile) |
 | 2026-08-17 | Layout workbench full ngang + Noto Sans 14px; phân cấp §1–§3.2.2 trang khách hàng |
 | 2026-08-17 | **Chốt §4.5 bảng list dùng chung** + skill `crm-data-table` (hover, scroll, font, badge…) |

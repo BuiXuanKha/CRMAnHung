@@ -184,8 +184,6 @@ export function CustomerListPage() {
             <FilterBar
               keyword={keyword}
               onKeyword={setKeyword}
-              status={status}
-              onStatus={setStatus}
               extra={extra}
               onExtra={setExtra}
             />
