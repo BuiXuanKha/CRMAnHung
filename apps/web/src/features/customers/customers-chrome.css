@@ -1,0 +1,240 @@
+.kh-rail {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+  flex: 0 0 auto;
+  position: sticky;
+  top: 108px;
+  max-height: calc(100vh - 128px);
+}
+
+.kh-rail-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.kh-rail-tabs button {
+  width: 42px;
+  min-height: 140px;
+  border: 1px solid var(--kh-line);
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 4px;
+  color: #1e293b;
+}
+
+.kh-rail-tabs button.active {
+  background: var(--kh-blue-soft);
+  color: var(--kh-blue);
+  border-color: #c5daf8;
+}
+
+.kh-rail-tabs .chev {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.kh-rail-tabs .lbl {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.kh-rail-panel {
+  width: 300px;
+  background: #fff;
+  border: 1px solid var(--kh-line);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  min-height: 280px;
+  overflow: hidden;
+}
+
+.kh-rail-panel header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--kh-line);
+}
+
+.kh-rail-panel header button {
+  border: 0;
+  background: transparent;
+  font-size: 1.2rem;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.kh-rail-body {
+  padding: 12px;
+  overflow: auto;
+}
+
+.kh-rail-empty {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.kh-chat,
+.kh-care,
+.kh-lots {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.kh-chat li {
+  max-width: 90%;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font-size: 0.86rem;
+}
+
+.kh-chat li.customer {
+  background: #f1f5f9;
+}
+
+.kh-chat li.staff {
+  background: var(--kh-blue-soft);
+  margin-left: auto;
+}
+
+.kh-care li,
+.kh-lots li {
+  border: 1px solid var(--kh-line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  display: grid;
+  gap: 4px;
+}
+
+.kh-care time,
+.kh-lots span {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.kh-care p {
+  margin: 0;
+  font-size: 0.88rem;
+}
+
+.kh-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.kh-modal {
+  width: min(420px, 100%);
+  background: #fff;
+  border-radius: 12px;
+  padding: 18px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.2);
+}
+
+.kh-modal h2 {
+  margin: 0 0 14px;
+  font-size: 1.1rem;
+}
+
+.kh-modal form {
+  display: grid;
+  gap: 10px;
+}
+
+.kh-modal label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.86rem;
+  font-weight: 600;
+}
+
+.kh-modal input {
+  border: 1px solid var(--kh-line);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-weight: 400;
+}
+
+.kh-modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.kh-modal-actions button,
+.kh-modal-actions .primary {
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border: 1px solid var(--kh-line);
+  background: #fff;
+}
+
+.kh-modal-actions .primary {
+  border: 0;
+  background: var(--kh-blue);
+  color: #fff;
+  font-weight: 600;
+}
+
+.kh-form-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 0.86rem;
+  font-weight: 400;
+}
+
+.kh-toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #0f172a;
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 8px;
+  z-index: 60;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 900px) {
+  .kh-page {
+    flex-direction: column;
+  }
+
+  .kh-rail {
+    position: static;
+    max-height: none;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  .kh-rail-panel {
+    flex: 1;
+    width: auto;
+  }
+
+  .kh-rail-tabs button {
+    min-height: 110px;
+  }
+}

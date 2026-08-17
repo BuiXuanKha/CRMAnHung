@@ -12,7 +12,7 @@
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: #f3f6fb;
+  background: #eef2f7;
 }
 
 .shell-top {
@@ -24,7 +24,7 @@
 }
 
 .shell-top-inner {
-  max-width: 1480px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 10px 16px;
   display: flex;
@@ -34,9 +34,25 @@
 }
 
 .shell-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   color: var(--shell-blue);
   font-size: 1.05rem;
   letter-spacing: -0.01em;
+}
+
+.shell-logo-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #b91c22;
+  color: #e8c547;
+  font-size: 0.72rem;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex: 0 0 auto;
 }
 
 .shell-user {
@@ -45,6 +61,22 @@
   gap: 10px;
   color: #334155;
   font-size: 0.9rem;
+}
+
+.shell-settings {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--shell-line);
+  background: #fff;
+  color: #475569;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.shell-settings:hover {
+  background: #f8fafc;
 }
 
 .shell-logout {
@@ -62,19 +94,32 @@
 }
 
 .shell-nav {
-  max-width: 1480px;
+  max-width: 1600px;
   margin: 0 auto;
   padding: 0 12px 10px;
   display: flex;
   flex-wrap: nowrap;
+  align-items: center;
   gap: 6px;
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
 }
 
+.shell-nav-label {
+  flex: 0 0 auto;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #64748b;
+  padding: 0 8px 0 4px;
+  white-space: nowrap;
+}
+
 .shell-nav a {
   flex: 0 0 auto;
-  padding: 9px 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px;
   border-radius: 10px;
   color: #334155;
   font-weight: 600;
@@ -87,14 +132,14 @@
 }
 
 .shell-nav a.active {
-  background: var(--shell-blue-soft);
-  color: var(--shell-blue);
+  background: var(--shell-blue);
+  color: #fff;
 }
 
 .content {
   flex: 1;
   min-width: 0;
-  max-width: 1480px;
+  max-width: 1600px;
   width: 100%;
   margin: 0 auto;
   padding: 14px 16px 28px;
@@ -115,7 +160,7 @@
   }
 
   .shell-user span {
-    max-width: 42vw;
+    max-width: 36vw;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -123,6 +168,10 @@
 
   .shell-nav {
     padding: 0 8px 10px;
+  }
+
+  .shell-nav-label {
+    display: none;
   }
 
   .content {

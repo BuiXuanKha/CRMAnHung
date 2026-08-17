@@ -68,6 +68,7 @@ function applyQuery(
         c.primaryPhone ?? '',
         c.facebook?.facebookName ?? '',
         c.note ?? '',
+        c.latestCareNote ?? '',
         ...c.phones.map((p) => p.phone),
       ]
         .join(' ')

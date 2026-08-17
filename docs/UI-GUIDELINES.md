@@ -60,7 +60,7 @@ Phạm vi ưu tiên hiện tại: màn sau login, đặc biệt **Quản lý kh�
 - Không bắt buộc giống pixel CRM cũ từng chi tiết; **cấu trúc shell** theo mục 4.2 (đã chốt).
 - Admin UI: **chưa làm** cho đến khi STAFF ổn.
 - Mock được (`NEXT_PUBLIC_USE_MOCK`); không gọi API production CRM cũ.
-- **UI list/detail `/khach-hang` bản mock cũ đã gỡ** — đang placeholder; làm lại theo **4.3.1–4.3.4** + phần còn lại khi chốt đủ.
+- **UI list `/khach-hang`:** mock theo **4.3.1–4.3.4** (tìm/lọc, bảng, menu hành động, rail phải). Chi tiết `[id]` vẫn placeholder.
 
 ### 4.2 Shell CRM chung (đã chốt) — mọi trang sau login
 
@@ -291,6 +291,8 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt bảng dữ liệu (§4.3.1):** header cột + dòng + footer «Hiển thị N / Tổng M»; mẫu cột `/khach-hang` theo ảnh |
 | 2026-08-17 | **Chốt rail phải (§4.3.2):** thanh dọc chữ xoay 90°; mở rộng / thu hẹp; nhãn Chat · Lịch sử chăm sóc · Danh sách lô đất |
 | 2026-08-17 | **Chốt menu hành động (§4.3.3):** dropdown cột Thao tác; chevron lên/xuống; Xóa khách đỏ |
+| 2026-08-17 | **Chốt tìm/lọc (§4.3.4):** ô tìm rộng + 5 select (trạng thái, tài chính, kênh, lô đất, nhu cầu) |
+| 2026-08-17 | Mock UI `/khach-hang` theo §4.2 + §4.3.1–4.3.4 (chưa chốt mobile) |
 
 ---
 
