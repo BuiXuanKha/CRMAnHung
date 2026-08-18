@@ -1,8 +1,10 @@
 import {
   LodatSaleStatus,
+  updateLodatSaleStatusSchema,
   type LodatListItem,
   type LodatListQuery,
   type LodatListResponse,
+  type UpdateLodatSaleStatusInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 import { isMockMode } from '@/shared/api/mode';
@@ -55,4 +57,33 @@ export async function getLodat(id: string): Promise<LodatListItem> {
     return found;
   }
   return apiFetch<LodatListItem>(`/lodats/${id}`);
+}
+
+export async function updateLodatSaleStatus(
+  id: string,
+  input: UpdateLodatSaleStatusInput,
+): Promise<LodatListItem> {
+  const parsed = updateLodatSaleStatusSchema.parse(input);
+  if (isMockMode()) {
+    const idx = mockStore.findIndex((p) => p.id === id);
+    if (idx < 0) throw new Error('Không tìm thấy lô đất');
+    const current = mockStore[idx];
+    if (
+      current.status !== LodatSaleStatus.DANG_BAN &&
+      current.status !== LodatSaleStatus.TAM_DUNG
+    ) {
+      throw new Error('Chỉ chuyển Mở bán hoặc Tạm dừng trên lô đang bán / tạm dừng.');
+    }
+    const updated: LodatListItem = {
+      ...current,
+      status: parsed.status,
+      updatedAt: new Date().toISOString(),
+    };
+    mockStore = mockStore.map((p, i) => (i === idx ? updated : p));
+    return updated;
+  }
+  return apiFetch<LodatListItem>(`/lodats/${id}/sale-status`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed),
+  });
 }

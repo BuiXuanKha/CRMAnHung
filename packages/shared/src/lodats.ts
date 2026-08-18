@@ -38,3 +38,11 @@ export const lodatListResponseSchema = z.object({
 });
 
 export type LodatListResponse = z.infer<typeof lodatListResponseSchema>;
+
+export const updateLodatSaleStatusSchema = z.object({
+  status: z.enum([LodatSaleStatus.DANG_BAN, LodatSaleStatus.TAM_DUNG], {
+    errorMap: () => ({ message: 'Chỉ chuyển Mở bán hoặc Tạm dừng' }),
+  }),
+});
+
+export type UpdateLodatSaleStatusInput = z.infer<typeof updateLodatSaleStatusSchema>;

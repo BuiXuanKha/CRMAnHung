@@ -84,7 +84,7 @@ export const PRICE_FILTER_OPTIONS = [
 
 export const STATUS_FILTER_OPTIONS = [
   { value: '', label: 'Tất cả trạng thái' },
-  { value: LodatSaleStatus.DANG_BAN, label: LODAT_SALE_STATUS_LABELS[LodatSaleStatus.DANG_BAN] },
+  { value: LodatSaleStatus.DANG_BAN, label: 'Mở bán' },
   { value: LodatSaleStatus.DAT_COC, label: LODAT_SALE_STATUS_LABELS[LodatSaleStatus.DAT_COC] },
   { value: LodatSaleStatus.DA_BAN, label: LODAT_SALE_STATUS_LABELS[LodatSaleStatus.DA_BAN] },
   { value: LodatSaleStatus.TAM_DUNG, label: LODAT_SALE_STATUS_LABELS[LodatSaleStatus.TAM_DUNG] },

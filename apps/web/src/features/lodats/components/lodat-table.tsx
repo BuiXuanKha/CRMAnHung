@@ -21,6 +21,7 @@ import {
   type ExtraFilters,
 } from '../display';
 import { ActionMenu, type LodatAction } from './action-menu';
+import { SaleToggle, canToggleSaleStatus } from './sale-toggle';
 
 type HeaderFilter = 'photo' | 'address' | 'specs' | 'price' | 'status' | null;
 
@@ -37,6 +38,8 @@ type Props = {
   onToggleMenu: (id: string) => void;
   onCloseMenu: () => void;
   onAction: (plot: LodatListItem, action: LodatAction) => void;
+  togglingId: string | null;
+  onToggleSale: (plot: LodatListItem) => void;
 };
 
 export function LodatTable({
@@ -52,6 +55,8 @@ export function LodatTable({
   onToggleMenu,
   onCloseMenu,
   onAction,
+  togglingId,
+  onToggleSale,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
 
@@ -190,7 +195,16 @@ export function LodatTable({
                 </div>
               </div>
               <div className="ld-cell" role="cell">
-                <CrmBadge tone={statusTone(p.status)}>{statusLabel(p.status)}</CrmBadge>
+                {canToggleSaleStatus(p.status) ? (
+                  <SaleToggle
+                    title={p.title}
+                    status={p.status}
+                    busy={togglingId === p.id}
+                    onToggle={() => onToggleSale(p)}
+                  />
+                ) : (
+                  <CrmBadge tone={statusTone(p.status)}>{statusLabel(p.status)}</CrmBadge>
+                )}
               </div>
               <div className="ld-cell ld-updated" role="cell">
                 {formatUpdatedAt(p.updatedAt)}

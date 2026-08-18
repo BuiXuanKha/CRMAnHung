@@ -40,7 +40,7 @@ Tìm kiếm: `@` = gồm cả lô tạm dừng; `@@` = chỉ tạm dừng.
 ## 4. Use cases
 
 1. Vào `/lo-dat` → bảng list, tìm theo tiêu đề / địa chỉ / tên khách
-2. Lọc cột trạng thái, giá (có / chưa nhập)
+2. Lọc cột trạng thái, giá (có / chưa nhập); công tắc Mở bán ↔ Tạm dừng trên dòng đang bán / tạm dừng
 3. Menu thao tác: Xem chi tiết (placeholder), Giao dịch / Sửa (toast mock)
 4. (Sau) Chi tiết: ảnh, ghi chú, danh sách chủ — `/lo-dat/[id]` placeholder
 
@@ -68,7 +68,7 @@ Prefix: `/api/v1/lodats`
 | GET | `/lodats` | JWT |
 | GET | `/lodats/:id` | JWT |
 | POST | `/lodats` | JWT (sau) |
-| PATCH | `/lodats/:id` | JWT (sau) |
+| PATCH | `/lodats/:id/sale-status` | JWT — chỉ `DANG_BAN` ↔ `TAM_DUNG` |
 
 ## 8. Mock data cần có
 
@@ -87,5 +87,4 @@ Map gần: Title, address/project, AreaM2, FrontageM, Direction, PriceVnd, Price
 
 ## 11. Open questions
 
-- Toggle «Mở bán» trên list (CRM cũ) vs hangtag trạng thái — **P2 mock dùng hangtag §4.5.4**
 - Nút thêm lô trên thanh tìm — chưa có trên ảnh mẫu; chưa làm
