@@ -4,42 +4,17 @@ import { ImageOff } from 'lucide-react';
 import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
-import {
-  formatPriceVnd,
-  formatSpecsInline,
-  kindLabel,
-  kindTone,
-} from '../display';
-import { ActionMenu, type LodatAction } from './action-menu';
-import { SaleToggle } from './sale-toggle';
+import { formatPriceVnd, formatSpecsInline } from '../display';
 
 type Props = {
   items: LodatListItem[];
   total: number;
   selectedId: string | null;
-  menuId: string | null;
-  togglingId: string | null;
   onSelect: (id: string) => void;
   onOpen: (id: string) => void;
-  onToggleMenu: (id: string) => void;
-  onCloseMenu: () => void;
-  onAction: (plot: LodatListItem, action: LodatAction) => void;
-  onToggleSale: (plot: LodatListItem) => void;
 };
 
-export function LodatCardList({
-  items,
-  total,
-  selectedId,
-  menuId,
-  togglingId,
-  onSelect,
-  onOpen,
-  onToggleMenu,
-  onCloseMenu,
-  onAction,
-  onToggleSale,
-}: Props) {
+export function LodatCardList({ items, total, selectedId, onSelect, onOpen }: Props) {
   return (
     <div className="ld-cards-shell">
       <div className="ld-cards" role="list" aria-label="Danh sách lô đất">
@@ -48,48 +23,30 @@ export function LodatCardList({
         ) : (
           items.map((p) => {
             const open = p.status === LodatSaleStatus.DANG_BAN;
+            function openCard() {
+              onSelect(p.id);
+              onOpen(p.id);
+            }
             return (
               <article
                 key={p.id}
                 role="listitem"
-                className={[
-                  'ld-card',
-                  selectedId === p.id ? 'is-selected' : '',
-                  menuId === p.id ? 'is-menu-open' : '',
-                ]
+                className={['ld-card', selectedId === p.id ? 'is-selected' : '']
                   .filter(Boolean)
                   .join(' ')}
+                onClick={openCard}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openCard();
+                  }
+                }}
+                tabIndex={0}
               >
-                <header className="ld-card-head">
-                  <button
-                    type="button"
-                    className="ld-card-title"
-                    onClick={() => {
-                      onSelect(p.id);
-                      onOpen(p.id);
-                    }}
-                  >
-                    <strong>{p.title}</strong>
-                    <CrmBadge tone={kindTone(p.kind)}>{kindLabel(p.kind)}</CrmBadge>
-                  </button>
-                  <div onClick={(e) => e.stopPropagation()}>
-                    <ActionMenu
-                      plot={p}
-                      open={menuId === p.id}
-                      onToggle={() => onToggleMenu(p.id)}
-                      onClose={onCloseMenu}
-                      onAction={(a) => onAction(p, a)}
-                    />
-                  </div>
+                <header className="ld-card-title">
+                  <strong>{p.title}</strong>
                 </header>
-
-                <div
-                  className="ld-card-body"
-                  onClick={() => {
-                    onSelect(p.id);
-                    onOpen(p.id);
-                  }}
-                >
+                <div className="ld-card-body">
                   <div className="ld-card-thumb">
                     {p.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -99,10 +56,7 @@ export function LodatCardList({
                         <Icon icon={ImageOff} size={16} />
                       </span>
                     )}
-                    <CrmBadge
-                      tone={open ? 'green' : 'gray'}
-                      className="ld-card-status"
-                    >
+                    <CrmBadge tone={open ? 'green' : 'gray'} className="ld-card-status">
                       {open ? 'Mở bán' : 'Tạm dừng'}
                     </CrmBadge>
                     {p.extraPhotoCount > 0 ? (
@@ -110,26 +64,11 @@ export function LodatCardList({
                     ) : null}
                   </div>
                   <div className="ld-card-meta">
-                    <span className="ld-sub">{p.address?.trim() || '—'}</span>
+                    <span className="ld-card-address">{p.address?.trim() || '—'}</span>
                     <span className="crm-money">{formatPriceVnd(p.priceVnd)}</span>
-                    {p.priceNote?.trim() ? (
-                      <span className="ld-sub">Ghi chú giá: {p.priceNote}</span>
-                    ) : null}
-                    {p.commissionPercent != null ? (
-                      <span className="ld-sub">Hoa hồng: {p.commissionPercent}%</span>
-                    ) : null}
                     <span className="ld-card-specs">{formatSpecsInline(p)}</span>
                   </div>
                 </div>
-
-                <footer className="ld-card-foot">
-                  <SaleToggle
-                    title={p.title}
-                    status={p.status}
-                    busy={togglingId === p.id}
-                    onToggle={() => onToggleSale(p)}
-                  />
-                </footer>
               </article>
             );
           })

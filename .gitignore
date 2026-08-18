@@ -8,6 +8,8 @@ build/
 **/dist/
 .next/
 **/.next/
+.next-build/
+**/.next-build/
 out/
 *.tsbuildinfo
 

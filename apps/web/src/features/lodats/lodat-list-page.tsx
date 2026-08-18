@@ -9,14 +9,15 @@ import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { listLodats, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
-import { FilterDialog } from './components/filter-dialog';
 import { LodatCardList } from './components/lodat-card-list';
 import { LodatTable } from './components/lodat-table';
 import {
   applyExtraFilters,
-  countActiveLodatFilters,
+  applyPriceBracket,
+  countMobileLodatFilters,
   parseSearchKeyword,
   type ExtraFilters,
+  type PriceBracket,
 } from './display';
 import './lodats.css';
 import './lodats-table.css';
@@ -42,6 +43,7 @@ export function LodatListPage() {
   const [status, setStatus] = useState('');
   const [kind, setKind] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
+  const [priceBracket, setPriceBracket] = useState<PriceBracket>('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -61,11 +63,11 @@ export function LodatListPage() {
   });
 
   const filtered = useMemo(
-    () => applyExtraFilters(list.data?.items ?? [], extra),
-    [list.data?.items, extra],
+    () => applyPriceBracket(applyExtraFilters(list.data?.items ?? [], extra), priceBracket),
+    [list.data?.items, extra, priceBracket],
   );
 
-  const filterCount = countActiveLodatFilters(status, kind, extra);
+  const mobileFilterCount = countMobileLodatFilters(status, priceBracket);
 
   const toggleMut = useMutation({
     mutationFn: (plot: LodatListItem) => {
@@ -123,8 +125,17 @@ export function LodatListPage() {
           <FilterBar
             keyword={keyword}
             onKeyword={setKeyword}
-            filterCount={filterCount}
-            onOpenFilters={() => setFilterOpen(true)}
+            filtersOpen={filterOpen}
+            onToggleFilters={() => setFilterOpen((v) => !v)}
+            status={status}
+            onStatus={setStatus}
+            priceBracket={priceBracket}
+            onPriceBracket={setPriceBracket}
+            hasActiveFilters={mobileFilterCount > 0}
+            onResetFilters={() => {
+              setStatus('');
+              setPriceBracket('');
+            }}
           />
         </section>
 
@@ -161,33 +172,11 @@ export function LodatListPage() {
             items={filtered}
             total={list.data?.total ?? filtered.length}
             selectedId={selectedId}
-            menuId={menuId}
-            togglingId={toggleMut.isPending ? (toggleMut.variables?.id ?? null) : null}
             onSelect={setSelectedId}
             onOpen={(id) => router.push(`/lo-dat/${id}`)}
-            onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
-            onCloseMenu={() => setMenuId(null)}
-            onAction={(p, a) => handleAction(p.id, a, p.title)}
-            onToggleSale={handleToggleSale}
           />
         ) : null}
       </div>
-
-      <FilterDialog
-        open={filterOpen}
-        status={status}
-        kind={kind}
-        extra={extra}
-        onStatus={setStatus}
-        onKind={setKind}
-        onExtra={setExtra}
-        onReset={() => {
-          setStatus('');
-          setKind('');
-          setExtra(DEFAULT_EXTRA);
-        }}
-        onClose={() => setFilterOpen(false)}
-      />
 
       <CrmAlertDialog
         open={Boolean(alertBox)}

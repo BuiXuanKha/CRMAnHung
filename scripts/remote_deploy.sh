@@ -55,9 +55,10 @@ fi
 pnpm run build
 
 # standalone cần static + public cạnh server.js
-STANDALONE="$WEB/.next/standalone"
-mkdir -p "$STANDALONE/apps/web/.next"
-rsync -a "$WEB/.next/static/" "$STANDALONE/apps/web/.next/static/"
+# distDir = .next-build → Next phục vụ /_next/static từ .next-build/static, không phải .next/static
+STANDALONE="$WEB/.next-build/standalone"
+mkdir -p "$STANDALONE/apps/web/.next-build/static"
+rsync -a "$WEB/.next-build/static/" "$STANDALONE/apps/web/.next-build/static/"
 if [[ -d "$WEB/public" ]]; then
   rsync -a "$WEB/public/" "$STANDALONE/apps/web/public/"
 fi
@@ -71,12 +72,11 @@ else
 fi
 
 echo "==> PM2 restart crmanhung-web"
+cd "$WEB"
 if pm2_cmd describe crmanhung-web >/dev/null 2>&1; then
-  pm2_cmd restart crmanhung-web --update-env
-else
-  cd "$WEB"
-  pm2_cmd start ecosystem.config.cjs
+  pm2_cmd delete crmanhung-web
 fi
+pm2_cmd start ecosystem.config.cjs
 pm2_cmd save
 
 echo "==> Health checks"
