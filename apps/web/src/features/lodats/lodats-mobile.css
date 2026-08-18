@@ -153,6 +153,7 @@
     border-radius: 12px;
     overflow: hidden;
     cursor: pointer;
+    flex-shrink: 0;
   }
 
   .ld-card:focus-visible {
