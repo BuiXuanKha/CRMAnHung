@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, type ReactNode } from 'react';
-import { CreditCard, FileText, Map, Users } from 'lucide-react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { CreditCard, FileText, Map, Menu, Users } from 'lucide-react';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from './icon';
 import { UserMenu } from './user-menu';
@@ -20,6 +20,8 @@ export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout } = useAuth();
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mobileNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -38,16 +40,38 @@ export function AppShell({ children }: { children: ReactNode }) {
       : []),
   ];
 
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!mobileNavRef.current?.contains(e.target as Node)) setMobileNavOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [mobileNavOpen]);
+
   return (
     <div className="shell">
       <header className="shell-top">
         <div className="shell-top-inner">
-          <Link href="/khach-hang" className="shell-brand">
-            <span className="shell-logo-mark" aria-hidden>
-              AH
-            </span>
-            <strong>An Hưng Land CRM</strong>
-          </Link>
+          <div className="shell-left">
+            <button
+              type="button"
+              className="shell-mobile-menu-btn"
+              aria-label="Mở menu"
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen((v) => !v)}
+            >
+              <Icon icon={Menu} size="sm" />
+            </button>
+            <Link href="/khach-hang" className="shell-brand">
+              <span className="shell-logo-mark" aria-hidden>
+                AH
+              </span>
+              <strong className="shell-brand-desktop">An Hưng Land CRM</strong>
+              <strong className="shell-brand-mobile">AH CRM</strong>
+              <span className="shell-mobile-user">{user.fullName}</span>
+            </Link>
+          </div>
           <div className="shell-top-end">
             <nav className="shell-header-nav" aria-label="Menu chính">
               {links.map((item, i) => {
@@ -74,6 +98,27 @@ export function AppShell({ children }: { children: ReactNode }) {
             />
           </div>
         </div>
+
+        {mobileNavOpen ? (
+          <div className="shell-mobile-nav" ref={mobileNavRef} role="menu" aria-label="Menu">
+            {links.map((item) => {
+              const active =
+                pathname === item.href || pathname.startsWith(`${item.href}/`);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  role="menuitem"
+                  className={active ? 'active' : undefined}
+                  onClick={() => setMobileNavOpen(false)}
+                >
+                  {item.icon ? <Icon icon={item.icon} size="sm" /> : null}
+                  <span>{item.label}</span>
+                </Link>
+              );
+            })}
+          </div>
+        ) : null}
       </header>
 
       <main className="content">{children}</main>
