@@ -233,7 +233,7 @@ Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** 
 | `Tiêu đề / Địa chỉ` | **Tiêu đề đậm**; dòng phụ nhạt = địa chỉ / khu |
 | `DT · MT · Hướng` | Dòng 1: diện tích (`90 m²`); dòng 2: `MT 4,5 m · Bắc` — thiếu = `—` |
 | `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng `%` |
-| `Trạng thái` | **Công tắc** Mở bán ↔ Tạm dừng (track xanh `#10b981` khi bật; xám khi tắt; nhãn bên phải). `Đặt cọc` / `Đã bán` vẫn hangtag `CrmBadge` |
+| `Trạng thái` | **Chỉ** Mở bán ↔ Tạm dừng (công tắc). **Không** phải đã bán / đặt cọc. Track xanh `#10b981` khi Mở bán; xám khi Tạm dừng |
 | `Cập nhật` | `HH:mm:ss D/M/YYYY` — **không** icon lọc (timestamp) |
 | `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Giao dịch**, **Sửa** |
 
@@ -438,7 +438,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt §4.5.5** icon lọc `ListFilter` trên tên cột dữ liệu; đồng bộ thanh lọc |
 | 2026-08-17 | **Chốt §4.3.5** cột list `/lo-dat` (ảnh, tiêu đề, DT·MT·hướng, giá, hangtag, menu thao tác) |
 | 2026-08-18 | Header: vạch phân cách CSS 1px (không ký tự `|`); ẩn caret soạn thảo trên chữ tĩnh |
-| 2026-08-18 | **Chốt §4.3.5 cột Trạng thái `/lo-dat`:** công tắc Mở bán ↔ Tạm dừng; Đặt cọc / Đã bán = hangtag |
+| 2026-08-18 | **Chốt §4.3.5 cột Trạng thái `/lo-dat`:** chỉ Mở bán ↔ Tạm dừng (không phải đã bán / đặt cọc) |
 
 ---
 

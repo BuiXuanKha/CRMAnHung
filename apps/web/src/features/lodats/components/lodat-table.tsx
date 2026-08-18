@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import type { LodatListItem } from '@crmanhung/shared';
 import { ColumnFilter } from '@/shared/ui/column-filter';
-import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 import {
   ADDRESS_FILTER_OPTIONS,
@@ -16,12 +15,10 @@ import {
   formatFrontageDir,
   formatPriceVnd,
   formatUpdatedAt,
-  statusLabel,
-  statusTone,
   type ExtraFilters,
 } from '../display';
 import { ActionMenu, type LodatAction } from './action-menu';
-import { SaleToggle, canToggleSaleStatus } from './sale-toggle';
+import { SaleToggle } from './sale-toggle';
 
 type HeaderFilter = 'photo' | 'address' | 'specs' | 'price' | 'status' | null;
 
@@ -195,16 +192,12 @@ export function LodatTable({
                 </div>
               </div>
               <div className="ld-cell" role="cell">
-                {canToggleSaleStatus(p.status) ? (
-                  <SaleToggle
-                    title={p.title}
-                    status={p.status}
-                    busy={togglingId === p.id}
-                    onToggle={() => onToggleSale(p)}
-                  />
-                ) : (
-                  <CrmBadge tone={statusTone(p.status)}>{statusLabel(p.status)}</CrmBadge>
-                )}
+                <SaleToggle
+                  title={p.title}
+                  status={p.status}
+                  busy={togglingId === p.id}
+                  onToggle={() => onToggleSale(p)}
+                />
               </div>
               <div className="ld-cell ld-updated" role="cell">
                 {formatUpdatedAt(p.updatedAt)}

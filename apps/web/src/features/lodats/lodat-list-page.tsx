@@ -4,13 +4,12 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
-import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
+import { LodatSaleStatus, type LodatListItem, type LodatListingStatus } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { listLodats, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
 import { LodatTable } from './components/lodat-table';
-import { canToggleSaleStatus } from './components/sale-toggle';
 import { applyExtraFilters, parseSearchKeyword, type ExtraFilters } from './display';
 import './lodats.css';
 import './lodats-table.css';
@@ -42,7 +41,7 @@ export function LodatListPage() {
   const search = parseSearchKeyword(keyword);
   const listQuery = {
     ...search,
-    status: (status || undefined) as LodatSaleStatus | undefined,
+    status: (status || undefined) as LodatListingStatus | undefined,
   };
 
   const list = useQuery({
@@ -99,7 +98,7 @@ export function LodatListPage() {
   }
 
   function handleToggleSale(plot: LodatListItem) {
-    if (!canToggleSaleStatus(plot.status) || toggleMut.isPending) return;
+    if (toggleMut.isPending) return;
     setMenuId(null);
     void toggleMut.mutateAsync(plot);
   }

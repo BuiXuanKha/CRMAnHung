@@ -1,8 +1,18 @@
 /**
  * Lodats contract — P2 mock
+ *
+ * `status` trên list = trạng thái **rao bán** (Mở bán / Tạm dừng),
+ * không phải đã bán / đặt cọc (giao dịch P3).
  */
 import { z } from 'zod';
 import { LodatSaleStatus } from './enums.js';
+
+export const lodatListingStatusSchema = z.enum([
+  LodatSaleStatus.DANG_BAN,
+  LodatSaleStatus.TAM_DUNG,
+]);
+
+export type LodatListingStatus = z.infer<typeof lodatListingStatusSchema>;
 
 export const lodatListItemSchema = z.object({
   id: z.string(),
@@ -14,7 +24,7 @@ export const lodatListItemSchema = z.object({
   priceVnd: z.number().int().nullable().optional(),
   priceNote: z.string().nullable().optional(),
   commissionPercent: z.number().nullable().optional(),
-  status: z.nativeEnum(LodatSaleStatus),
+  status: lodatListingStatusSchema,
   coverImageUrl: z.string().nullable().optional(),
   extraPhotoCount: z.number().int().nonnegative().default(0),
   customerHint: z.string().nullable().optional(),
@@ -25,7 +35,7 @@ export type LodatListItem = z.infer<typeof lodatListItemSchema>;
 
 export const lodatListQuerySchema = z.object({
   keyword: z.string().trim().optional(),
-  status: z.nativeEnum(LodatSaleStatus).optional(),
+  status: lodatListingStatusSchema.optional(),
   includePaused: z.boolean().optional(),
   pausedOnly: z.boolean().optional(),
 });
@@ -40,9 +50,7 @@ export const lodatListResponseSchema = z.object({
 export type LodatListResponse = z.infer<typeof lodatListResponseSchema>;
 
 export const updateLodatSaleStatusSchema = z.object({
-  status: z.enum([LodatSaleStatus.DANG_BAN, LodatSaleStatus.TAM_DUNG], {
-    errorMap: () => ({ message: 'Chỉ chuyển Mở bán hoặc Tạm dừng' }),
-  }),
+  status: lodatListingStatusSchema,
 });
 
 export type UpdateLodatSaleStatusInput = z.infer<typeof updateLodatSaleStatusSchema>;

@@ -11,9 +11,13 @@ export enum CustomerStatus {
 }
 
 export enum LodatSaleStatus {
+  /** Rao bán — cột Trạng thái list = Mở bán */
   DANG_BAN = 'DANG_BAN',
+  /** Giao dịch (P3) — không dùng trên cột Trạng thái list */
   DAT_COC = 'DAT_COC',
+  /** Giao dịch (P3) — không dùng trên cột Trạng thái list */
   DA_BAN = 'DA_BAN',
+  /** Rao bán — cột Trạng thái list = Tạm dừng */
   TAM_DUNG = 'TAM_DUNG',
 }
 
@@ -49,8 +53,14 @@ export const CUSTOMER_STATUS_LABELS: Record<CustomerStatus, string> = {
 };
 
 export const LODAT_SALE_STATUS_LABELS: Record<LodatSaleStatus, string> = {
-  [LodatSaleStatus.DANG_BAN]: 'Đang bán',
+  [LodatSaleStatus.DANG_BAN]: 'Mở bán',
   [LodatSaleStatus.DAT_COC]: 'Đặt cọc',
   [LodatSaleStatus.DA_BAN]: 'Đã bán',
   [LodatSaleStatus.TAM_DUNG]: 'Tạm dừng',
 };
+
+/** Cột list /lo-dat: chỉ Mở bán ↔ Tạm dừng. Đặt cọc / Đã bán thuộc giao dịch (P3). */
+export const LODAT_LISTING_STATUSES = [
+  LodatSaleStatus.DANG_BAN,
+  LodatSaleStatus.TAM_DUNG,
+] as const;

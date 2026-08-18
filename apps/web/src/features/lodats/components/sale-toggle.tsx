@@ -1,11 +1,11 @@
 'use client';
 
-import { LodatSaleStatus } from '@crmanhung/shared';
+import { LodatSaleStatus, type LodatListingStatus } from '@crmanhung/shared';
 import './sale-toggle.css';
 
 type Props = {
   title: string;
-  status: LodatSaleStatus;
+  status: LodatListingStatus;
   busy?: boolean;
   onToggle: () => void;
 };
@@ -34,8 +34,4 @@ export function SaleToggle({ title, status, busy = false, onToggle }: Props) {
       </span>
     </div>
   );
-}
-
-export function canToggleSaleStatus(status: LodatSaleStatus): boolean {
-  return status === LodatSaleStatus.DANG_BAN || status === LodatSaleStatus.TAM_DUNG;
 }
