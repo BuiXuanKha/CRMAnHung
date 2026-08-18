@@ -6,7 +6,7 @@ function plot(
   return partial;
 }
 
-/** Domain lodats §8 — đủ trạng thái + thiếu trường + đủ dòng để cuộn. */
+/** Domain lodats §8 — Mở bán / Tạm dừng + thiếu trường + đủ dòng để cuộn. */
 export const mockLodats: LodatListItem[] = [
   plot({
     id: 'ld_lk5_37',
@@ -50,7 +50,7 @@ export const mockLodats: LodatListItem[] = [
     priceVnd: 8_900_000_000,
     priceNote: 'Bao sổ',
     commissionPercent: 0.8,
-    status: LodatSaleStatus.DAT_COC,
+    status: LodatSaleStatus.DANG_BAN,
     coverImageUrl: '/mock/lodats/p3.svg',
     extraPhotoCount: 2,
     customerHint: 'Lê Minh Khoa',
@@ -66,7 +66,7 @@ export const mockLodats: LodatListItem[] = [
     priceVnd: 1_850_000_000,
     priceNote: null,
     commissionPercent: 1.5,
-    status: LodatSaleStatus.DA_BAN,
+    status: LodatSaleStatus.DANG_BAN,
     coverImageUrl: '/mock/lodats/p4.svg',
     extraPhotoCount: 1,
     customerHint: 'Phạm Thu Hà',
@@ -146,7 +146,7 @@ export const mockLodats: LodatListItem[] = [
     priceVnd: 1_980_000_000,
     priceNote: null,
     commissionPercent: 1,
-    status: LodatSaleStatus.DAT_COC,
+    status: LodatSaleStatus.DANG_BAN,
     coverImageUrl: '/mock/lodats/p2.svg',
     extraPhotoCount: 2,
     customerHint: 'Nguyễn Văn An',
@@ -194,7 +194,7 @@ export const mockLodats: LodatListItem[] = [
     priceVnd: 2_450_000_000,
     priceNote: null,
     commissionPercent: 1,
-    status: LodatSaleStatus.DA_BAN,
+    status: LodatSaleStatus.DANG_BAN,
     coverImageUrl: '/mock/lodats/p5.svg',
     extraPhotoCount: 0,
     customerHint: 'Phạm Thu Hà',

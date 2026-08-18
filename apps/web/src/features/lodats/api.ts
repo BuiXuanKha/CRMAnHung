@@ -68,12 +68,6 @@ export async function updateLodatSaleStatus(
     const idx = mockStore.findIndex((p) => p.id === id);
     if (idx < 0) throw new Error('Không tìm thấy lô đất');
     const current = mockStore[idx];
-    if (
-      current.status !== LodatSaleStatus.DANG_BAN &&
-      current.status !== LodatSaleStatus.TAM_DUNG
-    ) {
-      throw new Error('Chỉ chuyển Mở bán hoặc Tạm dừng trên lô đang bán / tạm dừng.');
-    }
     const updated: LodatListItem = {
       ...current,
       status: parsed.status,

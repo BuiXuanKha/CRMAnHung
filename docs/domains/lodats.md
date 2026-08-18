@@ -26,21 +26,22 @@ Nhân viên theo dõi danh sách lô đất: tìm/lọc, xem thông số (diện
 | Cover | Ảnh đại diện; `extraPhotoCount` = số ảnh thêm |
 | Giá bán | `priceVnd` + ghi chú giá + % hoa hồng |
 
-**Trạng thái bán (`LodatSaleStatus`):**
+**Trạng thái rao bán (cột Trạng thái trên `/lo-dat`):** Mở bán ↔ Tạm dừng.  
+**Không** phải đã bán / chưa bán / đặt cọc — những trạng thái đó thuộc **giao dịch** (P3).
 
-| Enum | Nhãn |
-|------|------|
-| `DANG_BAN` | Đang bán |
-| `DAT_COC` | Đặt cọc |
-| `DA_BAN` | Đã bán |
+| Enum | Nhãn trên công tắc |
+|------|-------------------|
+| `DANG_BAN` | Mở bán |
 | `TAM_DUNG` | Tạm dừng |
+
+`DAT_COC` / `DA_BAN` giữ trong enum để migrate / P3, **không** hiện trên cột này.
 
 Tìm kiếm: `@` = gồm cả lô tạm dừng; `@@` = chỉ tạm dừng.
 
 ## 4. Use cases
 
 1. Vào `/lo-dat` → bảng list, tìm theo tiêu đề / địa chỉ / tên khách
-2. Lọc cột trạng thái, giá (có / chưa nhập); công tắc Mở bán ↔ Tạm dừng trên dòng đang bán / tạm dừng
+2. Lọc cột trạng thái (Mở bán / Tạm dừng); công tắc đổi rao bán trên mọi dòng
 3. Menu thao tác: Xem chi tiết (placeholder), Giao dịch / Sửa (toast mock)
 4. (Sau) Chi tiết: ảnh, ghi chú, danh sách chủ — `/lo-dat/[id]` placeholder
 
@@ -72,8 +73,7 @@ Prefix: `/api/v1/lodats`
 
 ## 8. Mock data cần có
 
-- Đang bán có ảnh + giá + hoa hồng
-- Đặt cọc, đã bán, tạm dừng
+- Mở bán (công tắc bật) + Tạm dừng (công tắc tắt, ẩn mặc định)
 - Thiếu ảnh / thiếu giá
 - Đủ dòng để cuộn bảng (~12+)
 

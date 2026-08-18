@@ -1,20 +1,4 @@
-import {
-  LODAT_SALE_STATUS_LABELS,
-  LodatSaleStatus,
-  type LodatListItem,
-} from '@crmanhung/shared';
-import type { BadgeTone } from '@/shared/ui/badge';
-
-export function statusLabel(status: LodatSaleStatus): string {
-  return LODAT_SALE_STATUS_LABELS[status];
-}
-
-export function statusTone(status: LodatSaleStatus): BadgeTone {
-  if (status === LodatSaleStatus.DANG_BAN) return 'green';
-  if (status === LodatSaleStatus.DAT_COC) return 'amber';
-  if (status === LodatSaleStatus.DA_BAN) return 'blue';
-  return 'gray';
-}
+import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
 
 export function formatPriceVnd(n?: number | null): string {
   if (n == null) return '—';
@@ -85,9 +69,7 @@ export const PRICE_FILTER_OPTIONS = [
 export const STATUS_FILTER_OPTIONS = [
   { value: '', label: 'Tất cả trạng thái' },
   { value: LodatSaleStatus.DANG_BAN, label: 'Mở bán' },
-  { value: LodatSaleStatus.DAT_COC, label: LODAT_SALE_STATUS_LABELS[LodatSaleStatus.DAT_COC] },
-  { value: LodatSaleStatus.DA_BAN, label: LODAT_SALE_STATUS_LABELS[LodatSaleStatus.DA_BAN] },
-  { value: LodatSaleStatus.TAM_DUNG, label: LODAT_SALE_STATUS_LABELS[LodatSaleStatus.TAM_DUNG] },
+  { value: LodatSaleStatus.TAM_DUNG, label: 'Tạm dừng' },
 ];
 
 export function applyExtraFilters(
