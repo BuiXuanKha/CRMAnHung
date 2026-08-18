@@ -29,6 +29,15 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, [loading, user, router]);
 
+  useEffect(() => {
+    if (!mobileNavOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!mobileNavRef.current?.contains(e.target as Node)) setMobileNavOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [mobileNavOpen]);
+
   if (loading || !user) {
     return <div className="boot-screen">Đang tải…</div>;
   }
@@ -39,15 +48,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       ? [{ href: '/quan-tri/khach-hang', label: 'Quản trị khách', icon: null }]
       : []),
   ];
-
-  useEffect(() => {
-    if (!mobileNavOpen) return;
-    const onDoc = (e: MouseEvent) => {
-      if (!mobileNavRef.current?.contains(e.target as Node)) setMobileNavOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    return () => document.removeEventListener('mousedown', onDoc);
-  }, [mobileNavOpen]);
 
   return (
     <div className="shell">
@@ -91,11 +91,11 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="shell-user-end">
               <span className="shell-mobile-user">{user.fullName}</span>
               <UserMenu
-              fullName={user.fullName}
-              roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
-              onLogout={() => {
-                void logout().then(() => router.replace('/login'));
-              }}
+                fullName={user.fullName}
+                roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+                onLogout={() => {
+                  void logout().then(() => router.replace('/login'));
+                }}
               />
             </div>
           </div>

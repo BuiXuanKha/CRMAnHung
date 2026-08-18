@@ -55,9 +55,10 @@ fi
 pnpm run build
 
 # standalone cần static + public cạnh server.js
+# distDir = .next-build → Next phục vụ /_next/static từ .next-build/static, không phải .next/static
 STANDALONE="$WEB/.next-build/standalone"
-mkdir -p "$STANDALONE/apps/web/.next"
-rsync -a "$WEB/.next-build/static/" "$STANDALONE/apps/web/.next/static/"
+mkdir -p "$STANDALONE/apps/web/.next-build/static"
+rsync -a "$WEB/.next-build/static/" "$STANDALONE/apps/web/.next-build/static/"
 if [[ -d "$WEB/public" ]]; then
   rsync -a "$WEB/public/" "$STANDALONE/apps/web/public/"
 fi
