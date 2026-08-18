@@ -2,13 +2,15 @@
 
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import type { LodatSaleStatus } from '@crmanhung/shared';
-import { CrmToast } from '@/shared/ui/dialog';
-import { listLodats } from './api';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle } from 'lucide-react';
+import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
+import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
+import { listLodats, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
 import { LodatTable } from './components/lodat-table';
+import { canToggleSaleStatus } from './components/sale-toggle';
 import { applyExtraFilters, parseSearchKeyword, type ExtraFilters } from './display';
 import './lodats.css';
 import './lodats-table.css';
@@ -21,14 +23,21 @@ const DEFAULT_EXTRA: ExtraFilters = {
   price: 'all',
 };
 
+type AlertState = {
+  title: string;
+  message: string;
+} | null;
+
 export function LodatListPage() {
   const router = useRouter();
+  const qc = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
+  const [alertBox, setAlertBox] = useState<AlertState>(null);
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
@@ -45,6 +54,30 @@ export function LodatListPage() {
     () => applyExtraFilters(list.data?.items ?? [], extra),
     [list.data?.items, extra],
   );
+
+  const toggleMut = useMutation({
+    mutationFn: (plot: LodatListItem) => {
+      const next =
+        plot.status === LodatSaleStatus.DANG_BAN
+          ? LodatSaleStatus.TAM_DUNG
+          : LodatSaleStatus.DANG_BAN;
+      return updateLodatSaleStatus(plot.id, { status: next });
+    },
+    onSuccess: async (updated) => {
+      await qc.invalidateQueries({ queryKey: ['lodats'] });
+      if (updated.status === LodatSaleStatus.TAM_DUNG) {
+        flash(`Đã tạm dừng «${updated.title}». Gõ @ trên ô tìm để xem lại.`);
+      } else {
+        flash(`Đã mở bán «${updated.title}».`);
+      }
+    },
+    onError: (err: Error) => {
+      setAlertBox({
+        title: 'Không đổi được trạng thái',
+        message: err.message,
+      });
+    },
+  });
 
   function flash(msg: string) {
     setToast(msg);
@@ -63,6 +96,12 @@ export function LodatListPage() {
       return;
     }
     flash(`Sửa «${title}» — form sửa sẽ làm sau.`);
+  }
+
+  function handleToggleSale(plot: LodatListItem) {
+    if (!canToggleSaleStatus(plot.status) || toggleMut.isPending) return;
+    setMenuId(null);
+    void toggleMut.mutateAsync(plot);
   }
 
   return (
@@ -86,16 +125,26 @@ export function LodatListPage() {
               menuId={menuId}
               status={status}
               extra={extra}
+              togglingId={toggleMut.isPending ? (toggleMut.variables?.id ?? null) : null}
               onStatus={setStatus}
               onExtra={setExtra}
               onSelect={setSelectedId}
               onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
               onCloseMenu={() => setMenuId(null)}
               onAction={(p, a) => handleAction(p.id, a, p.title)}
+              onToggleSale={handleToggleSale}
             />
           </section>
         ) : null}
       </div>
+
+      <CrmAlertDialog
+        open={Boolean(alertBox)}
+        title={alertBox?.title ?? ''}
+        icon={AlertTriangle}
+        message={alertBox?.message ?? ''}
+        onClose={() => setAlertBox(null)}
+      />
 
       <CrmToast message={toast} />
     </div>

@@ -17,7 +17,7 @@
     minmax(180px, 1.4fr)
     minmax(120px, 0.85fr)
     minmax(160px, 1.1fr)
-    128px
+    168px
     132px
     80px;
   --ld-chrome: #f1f5f9;
@@ -96,7 +96,7 @@
   display: grid;
   grid-template-columns: var(--ld-cols);
   width: 100%;
-  min-width: 980px;
+  min-width: 1020px;
   border-bottom: 1px solid #f1f5f9;
 }
 
