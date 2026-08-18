@@ -8,7 +8,8 @@ module.exports = {
     {
       name: 'crmanhung-web',
       script: 'server.js',
-      cwd: `${__dirname}/.next/standalone/apps/web`,
+      cwd: `${__dirname}/.next-build/standalone/apps/web`,
+      user: 'deploy',
       instances: 1,
       exec_mode: 'fork',
       env: {
