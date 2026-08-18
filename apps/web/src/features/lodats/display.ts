@@ -1,4 +1,5 @@
-import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
+import { LodatKind, LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
+import type { BadgeTone } from '@/shared/ui/badge';
 
 export function formatPriceVnd(n?: number | null): string {
   if (n == null) return '—';
@@ -64,6 +65,20 @@ export const PRICE_FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả giá' },
   { value: 'has', label: 'Có giá bán' },
   { value: 'empty', label: 'Chưa nhập giá' },
+];
+
+export function kindLabel(kind: LodatKind): string {
+  return kind === LodatKind.NHA ? 'Nhà' : 'Đất';
+}
+
+export function kindTone(kind: LodatKind): BadgeTone {
+  return kind === LodatKind.NHA ? 'blue' : 'amber';
+}
+
+export const KIND_FILTER_OPTIONS = [
+  { value: '', label: 'Tất cả phân loại' },
+  { value: LodatKind.NHA, label: 'Nhà' },
+  { value: LodatKind.DAT, label: 'Đất' },
 ];
 
 export const STATUS_FILTER_OPTIONS = [

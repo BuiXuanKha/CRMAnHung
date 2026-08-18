@@ -5,7 +5,7 @@
  * không phải đã bán / đặt cọc (giao dịch P3).
  */
 import { z } from 'zod';
-import { LodatSaleStatus } from './enums.js';
+import { LodatKind, LodatSaleStatus } from './enums.js';
 
 export const lodatListingStatusSchema = z.enum([
   LodatSaleStatus.DANG_BAN,
@@ -24,6 +24,7 @@ export const lodatListItemSchema = z.object({
   priceVnd: z.number().int().nullable().optional(),
   priceNote: z.string().nullable().optional(),
   commissionPercent: z.number().nullable().optional(),
+  kind: z.nativeEnum(LodatKind),
   status: lodatListingStatusSchema,
   coverImageUrl: z.string().nullable().optional(),
   extraPhotoCount: z.number().int().nonnegative().default(0),
@@ -36,6 +37,7 @@ export type LodatListItem = z.infer<typeof lodatListItemSchema>;
 export const lodatListQuerySchema = z.object({
   keyword: z.string().trim().optional(),
   status: lodatListingStatusSchema.optional(),
+  kind: z.nativeEnum(LodatKind).optional(),
   includePaused: z.boolean().optional(),
   pausedOnly: z.boolean().optional(),
 });

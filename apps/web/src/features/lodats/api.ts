@@ -1,4 +1,5 @@
 import {
+  LODAT_KIND_LABELS,
   LodatSaleStatus,
   updateLodatSaleStatusSchema,
   type LodatListItem,
@@ -22,10 +23,19 @@ function applyQuery(items: LodatListItem[], query: LodatListQuery = {}): LodatLi
   if (query.status) {
     next = next.filter((p) => p.status === query.status);
   }
+  if (query.kind) {
+    next = next.filter((p) => p.kind === query.kind);
+  }
   if (query.keyword?.trim()) {
     const q = query.keyword.trim().toLowerCase();
     next = next.filter((p) => {
-      const hay = [p.title, p.address ?? '', p.customerHint ?? '', p.direction ?? '']
+      const hay = [
+        p.title,
+        p.address ?? '',
+        p.customerHint ?? '',
+        p.direction ?? '',
+        LODAT_KIND_LABELS[p.kind],
+      ]
         .join(' ')
         .toLowerCase();
       return hay.includes(q);
@@ -42,6 +52,7 @@ export async function listLodats(query: LodatListQuery = {}): Promise<LodatListR
   const params = new URLSearchParams();
   if (query.keyword) params.set('keyword', query.keyword);
   if (query.status) params.set('status', query.status);
+  if (query.kind) params.set('kind', query.kind);
   if (query.includePaused) params.set('includePaused', 'true');
   if (query.pausedOnly) params.set('pausedOnly', 'true');
   const qs = params.toString();

@@ -1,4 +1,4 @@
-import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
+import { LodatKind, LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
 
 function plot(
   partial: LodatListItem,
@@ -6,7 +6,7 @@ function plot(
   return partial;
 }
 
-/** Domain lodats §8 — Mở bán / Tạm dừng + thiếu trường + đủ dòng để cuộn. */
+/** Domain lodats §8 — Mở bán / Tạm dừng, Nhà / Đất, thiếu trường. */
 export const mockLodats: LodatListItem[] = [
   plot({
     id: 'ld_lk5_37',
@@ -19,6 +19,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Thương lượng',
     commissionPercent: 1,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p1.svg',
     extraPhotoCount: 3,
     customerHint: 'Trần Thị Bích',
@@ -35,6 +36,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Giá chốt',
     commissionPercent: 1.2,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p2.svg',
     extraPhotoCount: 5,
     customerHint: 'Nguyễn Văn An',
@@ -51,6 +53,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Bao sổ',
     commissionPercent: 0.8,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.NHA,
     coverImageUrl: '/mock/lodats/p3.svg',
     extraPhotoCount: 2,
     customerHint: 'Lê Minh Khoa',
@@ -67,6 +70,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: null,
     commissionPercent: 1.5,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p4.svg',
     extraPhotoCount: 1,
     customerHint: 'Phạm Thu Hà',
@@ -83,6 +87,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Thương lượng',
     commissionPercent: 1,
     status: LodatSaleStatus.TAM_DUNG,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p5.svg',
     extraPhotoCount: 0,
     customerHint: 'Hoàng Đức',
@@ -99,6 +104,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Giá mềm',
     commissionPercent: 1,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: null,
     extraPhotoCount: 0,
     customerHint: null,
@@ -115,6 +121,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Chưa chốt giá',
     commissionPercent: null,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.NHA,
     coverImageUrl: '/mock/lodats/p6.svg',
     extraPhotoCount: 4,
     customerHint: 'Inbox Page',
@@ -131,6 +138,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Tạm tính',
     commissionPercent: 1,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p1.svg',
     extraPhotoCount: 0,
     customerHint: 'Trần Thị Bích',
@@ -147,6 +155,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: null,
     commissionPercent: 1,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p2.svg',
     extraPhotoCount: 2,
     customerHint: 'Nguyễn Văn An',
@@ -163,6 +172,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Thương lượng',
     commissionPercent: 1,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p3.svg',
     extraPhotoCount: 6,
     customerHint: null,
@@ -179,6 +189,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Bao phí',
     commissionPercent: 1.3,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p4.svg',
     extraPhotoCount: 1,
     customerHint: 'Lê Minh Khoa',
@@ -195,6 +206,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: null,
     commissionPercent: 1,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p5.svg',
     extraPhotoCount: 0,
     customerHint: 'Phạm Thu Hà',
@@ -211,6 +223,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Tạm dừng rao',
     commissionPercent: 1,
     status: LodatSaleStatus.TAM_DUNG,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p6.svg',
     extraPhotoCount: 3,
     customerHint: 'Hoàng Đức',
@@ -227,6 +240,7 @@ export const mockLodats: LodatListItem[] = [
     priceNote: 'Giá tốt',
     commissionPercent: 1.1,
     status: LodatSaleStatus.DANG_BAN,
+    kind: LodatKind.DAT,
     coverImageUrl: '/mock/lodats/p1.svg',
     extraPhotoCount: 2,
     customerHint: 'Trần Thị Bích',

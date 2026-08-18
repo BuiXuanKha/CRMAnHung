@@ -4,7 +4,7 @@ import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle } from 'lucide-react';
-import { LodatSaleStatus, type LodatListItem, type LodatListingStatus } from '@crmanhung/shared';
+import { LodatKind, LodatSaleStatus, type LodatListItem, type LodatListingStatus } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { listLodats, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
@@ -32,6 +32,7 @@ export function LodatListPage() {
   const qc = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('');
+  const [kind, setKind] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
@@ -42,6 +43,7 @@ export function LodatListPage() {
   const listQuery = {
     ...search,
     status: (status || undefined) as LodatListingStatus | undefined,
+    kind: (kind || undefined) as LodatKind | undefined,
   };
 
   const list = useQuery({
@@ -123,9 +125,11 @@ export function LodatListPage() {
               selectedId={selectedId}
               menuId={menuId}
               status={status}
+              kind={kind}
               extra={extra}
               togglingId={toggleMut.isPending ? (toggleMut.variables?.id ?? null) : null}
               onStatus={setStatus}
+              onKind={setKind}
               onExtra={setExtra}
               onSelect={setSelectedId}
               onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
