@@ -238,12 +238,13 @@ Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** 
 | `Cập nhật` | `HH:mm:ss D/M/YYYY` — **không** icon lọc (timestamp) |
 | `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Giao dịch**, **Sửa** |
 
-**Thanh tìm (§4.3.4, biến thể lô đất):** chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Không rail phải trên màn này. Không nút «Thêm lô» (chưa có trên ảnh mẫu).
+**Thanh tìm (§4.3.4, biến thể lô đất):** desktop chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới. Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Không rail phải trên màn này. Không nút «Thêm lô» (chưa có trên ảnh mẫu).
 
-**Mobile (≤767px) — đã chốt theo ảnh mẫu:** **thẻ xếp dọc**, không bảng cuộn ngang. Header CRM vẫn §4.2 (không hamburger / nút Đăng xuất trên trang).
+**Mobile (≤767px) — đã chốt theo ảnh CRM cũ:** **thẻ xếp dọc**, không bảng cuộn ngang. Header CRM vẫn §4.2.
 
 ```
-┌─ ô tìm ───────────── [ Bộ lọc ] ─┐
+┌─ ô tìm ───── [ Bộ lọc ] [ Tìm ] ─┐
+│ (mở Bộ lọc: Trạng thái · Giá)    │
 │ thẻ: tiêu đề                     │
 │ [ảnh + hangtag Mở bán]  địa chỉ  │
 │                         giá      │
@@ -253,17 +254,14 @@ Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** 
 
 | Hạng mục | Quy tắc |
 |----------|---------|
-| Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px; tiêu đề **đậm** trên cùng; thân 2 cột |
+| Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px; **chỉ thông tin cơ bản**: tiêu đề đậm trên cùng; thân 2 cột. **Không** hangtag Nhà/Đất, **không** chevron thao tác, **không** công tắc Mở bán trên thẻ |
 | Ảnh | Thumbnail trái ~80×56, bo 8px; overlay hangtag trạng thái **Mở bán** `green` / **Tạm dừng** `gray` (góc trên trái ảnh); `+N` ảnh thêm góc dưới phải |
-| Phải ảnh | Địa chỉ nhạt; giá `crm-money`; ghi chú giá; hoa hồng `%`; một dòng `90 m² · MT 8 m · Nam` |
-| Phân loại | Hangtag Nhà/Đất cạnh tiêu đề |
-| Công tắc | Mở bán ↔ Tạm dừng dưới thân thẻ (cùng control desktop) |
-| Thao tác | Chevron menu trên header thẻ (§4.3.3) |
-| Bấm thẻ | Mở chi tiết (trừ công tắc / menu) |
-| Bộ lọc | Nút **Bộ lọc** (Lucide `ListFilter`) cạnh ô tìm — **chỉ mobile**; mở `CrmDialog` với cùng lọc cột (trạng thái, phân loại, ảnh, địa chỉ, thông số, giá). **Không** nút Tìm — gõ ô tìm là lọc |
+| Phải ảnh | Địa chỉ nhạt; giá `crm-money`; một dòng `90 m² · MT 8 m · Nam`. Không ghi chú giá / hoa hồng trên thẻ |
+| Bấm thẻ | Mở chi tiết |
+| Tìm / lọc | Cùng **một hàng**: ô tìm + nút **Bộ lọc** + nút **Tìm** (nền xanh). Bộ lọc bung panel **inline** dưới hàng (không `CrmDialog`): select Trạng thái, select khoảng giá (bước 500tr + «Chưa có giá»), nút Xoá lọc khi đang lọc. Nút Tìm đóng bàn phím; gõ ô tìm vẫn lọc. Ô tìm viền vàng khi bắt đầu bằng `@` |
 | Footer | Cùng câu «Hiển thị N / Tổng M lô đất», dính đáy vùng list |
 
-Desktop giữ bảng §4.5. Không đổi visual bảng khi làm mobile.
+Desktop giữ bảng §4.5 (cột phân loại, công tắc, menu thao tác, lọc cột). Không hiện nút Bộ lọc / Tìm trên desktop.
 
 #### 4.3.6 Bảng dữ liệu — trang giao dịch (đã chốt cột)
 
@@ -527,6 +525,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-18 | **Chốt §4.3.6** list `/giao-dich`: 3 thẻ thống kê + cột mã/loại/lô/các bên/giá/hoa hồng/trạng thái/hẹn CC |
 | 2026-08-18 | **Chốt §4.3.7** list `/dich-vu-so-do`: cột khách/nhu cầu/tiến độ/thu-chi + panel Chi tiết hồ sơ |
 | 2026-08-18 | **Chốt §4.3.5 mobile `/lo-dat`:** thẻ xếp dọc + nút Bộ lọc (không bảng cuộn ngang) |
+| 2026-08-18 | **Chốt lại §4.3.5 mobile `/lo-dat`:** hàng ô tìm + Bộ lọc + Tìm; thẻ chỉ tiêu đề / ảnh / địa chỉ / giá / DT·MT·Hướng |
 
 ---
 

@@ -95,6 +95,43 @@ export function formatSpecsInline(p: LodatListItem): string {
   return parts.length ? parts.join(' · ') : '—';
 }
 
+/** Khoảng giá bán (bước 500tr) — lọc mobile /lo-dat. */
+export const PRICE_BRACKET_OPTIONS = [
+  { value: '', label: 'Tất cả giá' },
+  { value: 'no_price', label: 'Chưa có giá' },
+  { value: 'lt_500m', label: 'Dưới 500 triệu' },
+  { value: '500m_1b', label: '500 triệu – 1 tỷ' },
+  { value: '1b_15b', label: '1 tỷ – 1,5 tỷ' },
+  { value: '15b_2b', label: '1,5 tỷ – 2 tỷ' },
+  { value: '2b_25b', label: '2 tỷ – 2,5 tỷ' },
+  { value: '25b_3b', label: '2,5 tỷ – 3 tỷ' },
+  { value: 'gt_3b', label: 'Trên 3 tỷ' },
+] as const;
+
+export type PriceBracket = (typeof PRICE_BRACKET_OPTIONS)[number]['value'];
+
+export function applyPriceBracket(
+  items: LodatListItem[],
+  bracket: PriceBracket,
+): LodatListItem[] {
+  if (!bracket) return items;
+  return items.filter((p) => matchesPriceBracket(p.priceVnd, bracket));
+}
+
+function matchesPriceBracket(price: number | null | undefined, bracket: PriceBracket): boolean {
+  const n = price == null ? null : price;
+  if (bracket === 'no_price') return n == null || n <= 0;
+  if (n == null || n <= 0) return false;
+  if (bracket === 'lt_500m') return n > 0 && n < 500_000_000;
+  if (bracket === '500m_1b') return n >= 500_000_000 && n < 1_000_000_000;
+  if (bracket === '1b_15b') return n >= 1_000_000_000 && n < 1_500_000_000;
+  if (bracket === '15b_2b') return n >= 1_500_000_000 && n < 2_000_000_000;
+  if (bracket === '2b_25b') return n >= 2_000_000_000 && n < 2_500_000_000;
+  if (bracket === '25b_3b') return n >= 2_500_000_000 && n < 3_000_000_000;
+  if (bracket === 'gt_3b') return n >= 3_000_000_000;
+  return true;
+}
+
 export function countActiveLodatFilters(
   status: string,
   kind: string,
@@ -108,6 +145,10 @@ export function countActiveLodatFilters(
   if (extra.specs !== 'all') n += 1;
   if (extra.price !== 'all') n += 1;
   return n;
+}
+
+export function countMobileLodatFilters(status: string, priceBracket: PriceBracket): number {
+  return (status ? 1 : 0) + (priceBracket ? 1 : 0);
 }
 
 export function applyExtraFilters(

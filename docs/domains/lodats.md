@@ -55,7 +55,7 @@ Tìm kiếm: `@` = gồm cả lô tạm dừng; `@@` = chỉ tạm dừng.
 
 | Màn | Route | Hành vi |
 |-----|-------|---------|
-| List | `/lo-dat` | Desktop: ô tìm + bảng §4.5 / §4.3.5. Mobile: thẻ xếp dọc + Bộ lọc |
+| List | `/lo-dat` | Desktop: ô tìm + bảng §4.5 / §4.3.5. Mobile: ô tìm + Bộ lọc + Tìm; thẻ cơ bản (tiêu đề, ảnh, địa chỉ, giá, DT·MT·Hướng) |
 | Detail | `/lo-dat/[id]` | Placeholder (tên lô + quay lại list) |
 
 Không H1 trùng menu header. Không dropdown lọc trùng icon cột.
