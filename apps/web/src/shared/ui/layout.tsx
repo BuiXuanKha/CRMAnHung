@@ -55,11 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   pathname === item.href || pathname.startsWith(`${item.href}/`);
                 return (
                   <span key={item.href} className="shell-header-nav-item">
-                    {i > 0 ? (
-                      <span className="shell-nav-sep" aria-hidden>
-                        |
-                      </span>
-                    ) : null}
+                    {i > 0 ? <span className="shell-nav-sep" aria-hidden /> : null}
                     <Link href={item.href} className={active ? 'active' : undefined}>
                       {item.icon ? <Icon icon={item.icon} size="sm" /> : null}
                       {item.label}
@@ -68,9 +64,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 );
               })}
             </nav>
-            <span className="shell-nav-sep" aria-hidden>
-              |
-            </span>
+            <span className="shell-nav-sep" aria-hidden />
             <UserMenu
               fullName={user.fullName}
               roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}

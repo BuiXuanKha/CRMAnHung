@@ -18,6 +18,14 @@
 html,
 body {
   min-height: 100%;
+  /* Static text is not an editor — hide insertion caret (caret-browsing / click-to-place). */
+  caret-color: transparent;
+}
+
+input,
+textarea,
+[contenteditable='true'] {
+  caret-color: auto;
 }
 
 body {
