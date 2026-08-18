@@ -42,6 +42,7 @@
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
   z-index: 30;
   user-select: none;
+  position: relative;
 }
 
 /* §1 Header */
@@ -52,6 +53,30 @@
   gap: 16px;
   padding: 12px 24px;
   border-bottom: 1px solid var(--shell-line);
+}
+
+.shell-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.shell-mobile-menu-btn {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #334155;
+  place-items: center;
+}
+
+.shell-mobile-menu-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .shell-brand {
@@ -82,10 +107,34 @@
   color: var(--shell-ink);
 }
 
+.shell-brand-mobile {
+  display: none;
+}
+
+.shell-mobile-user {
+  display: none;
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
 .shell-top-end {
   display: flex;
   align-items: center;
   gap: 0;
+  min-width: 0;
+  margin-left: auto;
+}
+
+.shell-user-end {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   min-width: 0;
 }
 
@@ -156,11 +205,72 @@
     padding: 10px 14px;
   }
 
+  .shell-mobile-menu-btn {
+    display: inline-grid;
+  }
+
+  .shell-header-nav {
+    display: none;
+  }
+
+  .shell-nav-sep {
+    display: none;
+  }
+
   .shell-brand strong {
+    font-size: 16px;
+  }
+
+  .shell-brand-desktop {
+    display: none;
+  }
+
+  .shell-brand-mobile {
+    display: inline;
     font-size: 17px;
+    letter-spacing: 0.01em;
+  }
+
+  .shell-mobile-user {
+    display: inline-block;
   }
 
   .content {
     padding: 12px 12px 0;
   }
+}
+
+.shell-mobile-nav {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 14px;
+  z-index: 60;
+  min-width: 240px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shell-mobile-nav a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 10px;
+  border-radius: 10px;
+  color: #0f172a;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.shell-mobile-nav a:hover {
+  background: #f1f5f9;
+}
+
+.shell-mobile-nav a.active {
+  color: #2563eb;
 }
