@@ -240,6 +240,39 @@ Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** 
 
 **Thanh tìm (§4.3.4, biến thể lô đất):** chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Không rail phải trên màn này. Không nút «Thêm lô» (chưa có trên ảnh mẫu).
 
+#### 4.3.6 Bảng dữ liệu — trang giao dịch (đã chốt cột)
+
+Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** riêng `/giao-dich` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** nút Xóa trên dòng).
+
+**Ba thẻ thống kê** (trên thanh tìm — chốt theo ảnh mẫu, không phải card marketing):
+
+| Thẻ | Giá trị | Gợi ý dưới số |
+|-----|---------|----------------|
+| Số lô giao dịch | Số dòng đang hiện | Theo bộ lọc hiện tại |
+| Tổng doanh thu | Tổng `salePriceVnd` của `OWN` + `HOAN_TAT` trong bộ lọc hiện tại | Chỉ giao dịch của tôi · Hoàn thành |
+| Tổng hoa hồng | Tổng `commissionVnd` cùng điều kiện | Chỉ giao dịch của tôi · Hoàn thành |
+
+Thẻ: nền trắng, viền `#e2e8f0`, bo 12px. Số tiền dùng `crm-money`.
+
+**Cột — Danh sách giao dịch** (desktop):
+
+| Cột | Nội dung ô |
+|-----|------------|
+| `Mã GD` | Mã (`GD-00012`) — **không** icon lọc (identifier; ô tìm phủ) |
+| `Loại` | Hangtag `CrmBadge`: **Của tôi** `blue` · **Ghi nhận** `gray` |
+| `Lô đất` | Tiêu đề lô; thiếu = `—` |
+| `Người bán` | Mỗi tên một dòng; rỗng = `—` |
+| `Người mua` | Mỗi tên một dòng; rỗng = `—` |
+| `Giá bán` | `crm-money`; thiếu / 0 = `—` |
+| `Hoa hồng` | `crm-money`; **Ghi nhận** hoặc thiếu = `—` |
+| `Trạng thái` | Hangtag: Đã cọc `amber` · Đã công chứng `blue` · Hoàn thành `green` · Đã hủy `red` |
+| `Hẹn CC` | Ngày `D/M/YYYY`. Đếm ngược **chỉ** Của tôi + Đã cọc: `Còn N ngày` (xanh), `Hôm nay` (amber), `Quá N ngày` (đỏ). RECORD / không ngày / không còn Đã cọc = ngày hoặc `—` |
+| `Ghi chú` | Một dòng, cắt `…`; thiếu = `—` |
+| `Ngày tạo` | `HH:mm:ss D/M/YYYY` — **không** icon lọc (timestamp) |
+| `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Sửa**, **Xóa** (đỏ + `CrmConfirmDialog`) |
+
+**Thanh tìm (§4.3.4, biến thể giao dịch):** chỉ ô tìm, **không** H1, **không** dropdown loại/trạng thái trên thanh (lọc bằng icon cột). Placeholder: `Tìm mã GD, lô đất, người bán, người mua, ghi chú...`. Không rail phải. Không nút «Thêm GD». Cột NV (admin) chưa mock.
+
 ### 4.5 Bảng danh sách CRM — dùng chung (đã chốt)
 
 Áp dụng **mọi** màn CRM có list dạng bảng (khách hàng, lô đất, giao dịch, sổ đỏ…).  
@@ -441,6 +474,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-18 | Header: vạch phân cách CSS 1px (không ký tự `|`); ẩn caret soạn thảo trên chữ tĩnh |
 | 2026-08-18 | **Chốt §4.3.5 cột Trạng thái `/lo-dat`:** chỉ Mở bán ↔ Tạm dừng (không phải đã bán / đặt cọc) |
 | 2026-08-18 | **Chốt §4.3.5 cột Phân loại `/lo-dat`:** Nhà / Đất (hangtag + lọc cột) |
+| 2026-08-18 | **Chốt §4.3.6** list `/giao-dich`: 3 thẻ thống kê + cột mã/loại/lô/các bên/giá/hoa hồng/trạng thái/hẹn CC |
 
 ---
 

@@ -1,0 +1,267 @@
+/* Bảng /giao-dich — chrome §4.5 (token giống lô đất, prefix tx-) */
+
+.tx-table-shell {
+  flex: 1;
+  min-height: 0;
+  border: 1px solid var(--tx-line);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tx-table-wrap {
+  --tx-cols:
+    92px
+    108px
+    minmax(140px, 1.2fr)
+    minmax(110px, 0.9fr)
+    minmax(110px, 0.9fr)
+    128px
+    118px
+    128px
+    118px
+    minmax(120px, 0.9fr)
+    148px
+    80px;
+  --tx-chrome: #f1f5f9;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  font-size: 0.84rem;
+}
+
+.tx-table-head {
+  flex-shrink: 0;
+  width: 100%;
+  border-bottom: 1px solid var(--tx-line);
+  background: var(--tx-chrome);
+}
+
+.tx-table-head .tx-grid-row,
+.tx-table-head .tx-grid-row > * {
+  background: var(--tx-chrome);
+}
+
+.tx-grid-header {
+  font-weight: 600;
+  color: #0f172a;
+  cursor: default;
+  border-bottom: none;
+}
+
+.tx-grid-header > div {
+  padding: 10px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  background: transparent;
+}
+
+.tx-col-head {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.tx-col-head > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tx-table-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.tx-table-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tx-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.tx-table-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.tx-grid-row {
+  display: grid;
+  grid-template-columns: var(--tx-cols);
+  width: 100%;
+  min-width: 1480px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.tx-table-scroll .tx-grid-row {
+  background: #fff;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.tx-table-scroll .tx-grid-row:hover {
+  background: #f1f5f9;
+}
+
+.tx-table-scroll .tx-grid-row.is-selected {
+  background: var(--tx-blue-50);
+}
+
+.tx-table-scroll .tx-grid-row.is-menu-open {
+  background: #fef3c7;
+}
+
+.tx-cell {
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.col-act {
+  justify-content: center;
+}
+
+.tx-empty-row {
+  text-align: center;
+  color: #64748b;
+  padding: 24px 12px;
+}
+
+.tx-code {
+  font-weight: 600;
+  color: #0f172a;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tx-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tx-empty {
+  color: #94a3b8;
+}
+
+.tx-note {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tx-created {
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.tx-countdown {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.tx-countdown--ok {
+  color: #047857;
+}
+
+.tx-countdown--today {
+  color: #b45309;
+}
+
+.tx-countdown--overdue {
+  color: #b91c1c;
+}
+
+.tx-table-foot {
+  flex-shrink: 0;
+  padding: 10px 16px;
+  border-top: 1px solid var(--tx-line);
+  background: var(--tx-chrome);
+  text-align: right;
+  font-size: 0.85rem;
+  color: #475569;
+}
+
+.tx-table-foot strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.tx-action {
+  position: relative;
+  display: inline-flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.tx-action-btn {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+
+.tx-action-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.tx-action-menu {
+  position: fixed;
+  z-index: 40;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  min-width: 196px;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.18);
+  border: 1px solid var(--tx-line);
+}
+
+.tx-action-menu button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 0;
+  background: transparent;
+  padding: 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-align: left;
+  color: #1e293b;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.tx-action-menu button:hover {
+  background: #f1f5f9;
+}
+
+.tx-action-menu button.danger {
+  color: #b91c1c;
+}
