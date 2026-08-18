@@ -112,7 +112,8 @@
 }
 
 .crm-dialog-body input,
-.crm-dialog-body textarea {
+.crm-dialog-body textarea,
+.crm-dialog-body select {
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 8px 10px;
@@ -120,6 +121,7 @@
   font-weight: 400;
   color: #0f172a;
   font-family: inherit;
+  background: #fff;
 }
 
 .crm-dialog-body textarea {

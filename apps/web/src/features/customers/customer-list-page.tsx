@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, NotebookPen, Trash2 } from 'lucide-react';
 import { CustomerStatus, type CustomerListItem } from '@crmanhung/shared';
@@ -39,6 +40,7 @@ type AlertState = {
 } | null;
 
 export function CustomerListPage() {
+  const router = useRouter();
   const qc = useQueryClient();
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('');
@@ -123,7 +125,7 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'sodo') {
-      flash('Dịch vụ sổ đỏ — sẽ làm ở màn sổ đỏ.');
+      router.push('/dich-vu-so-do');
       return;
     }
     if (action === 'pin') {
