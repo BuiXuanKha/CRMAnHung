@@ -80,7 +80,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 |----------|------------|
 | Kiểu shell | **Một hàng header**, **full chiều ngang viewport** (workbench) |
 | Header trái | Logo + tên ứng dụng **An Hưng Land CRM** |
-| Header phải | Menu chính **cạnh avatar**, mục cách nhau dấu **`|`**; **cũng có `|` trước avatar** |
+| Header phải | Menu chính **cạnh avatar**, mục cách nhau **vạch đứng 1px** (không dùng ký tự `|` trong DOM); **cũng có vạch trước avatar** |
 | Menu | Quản lý khách hàng \| Quản lý lô đất \| Quản lý giao dịch \| Dịch vụ sổ đỏ (+ Admin nếu có) |
 | Active | Chữ **xanh** `#2563eb` **700** — không pill nền riêng |
 | Avatar | Click → menu: tên + vai trò; **Cài đặt**; **Đăng xuất** cuối (đỏ) |
@@ -437,6 +437,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt màu số tiền CRM** `#b45309` (`crm-money`) — thống nhất mọi cột giá / tài chính |
 | 2026-08-17 | **Chốt §4.5.5** icon lọc `ListFilter` trên tên cột dữ liệu; đồng bộ thanh lọc |
 | 2026-08-17 | **Chốt §4.3.5** cột list `/lo-dat` (ảnh, tiêu đề, DT·MT·hướng, giá, hangtag, menu thao tác) |
+| 2026-08-18 | Header: vạch phân cách CSS 1px (không ký tự `|`); ẩn caret soạn thảo trên chữ tĩnh |
 
 ---
 
