@@ -74,3 +74,15 @@ export const LODAT_LISTING_STATUSES = [
   LodatSaleStatus.DANG_BAN,
   LodatSaleStatus.TAM_DUNG,
 ] as const;
+
+export const TRANSACTION_TYPE_LABELS: Record<TransactionType, string> = {
+  [TransactionType.OWN]: 'Của tôi',
+  [TransactionType.RECORD]: 'Ghi nhận',
+};
+
+export const TRANSACTION_STATUS_LABELS: Record<TransactionStatus, string> = {
+  [TransactionStatus.DA_COC]: 'Đã cọc',
+  [TransactionStatus.DA_CONG_CHUNG]: 'Đã công chứng',
+  [TransactionStatus.HOAN_TAT]: 'Hoàn thành',
+  [TransactionStatus.HUY]: 'Đã hủy',
+};

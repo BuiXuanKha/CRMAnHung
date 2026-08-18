@@ -7,7 +7,7 @@
 | Customers | [customers.md](./customers.md) | Ready for mock (P1) |
 | Lodats | [lodats.md](./lodats.md) | Ready for mock (P2 list) |
 | Addresses | _(tạo khi P2)_ | — |
-| Transactions | _(tạo khi P3)_ | — |
+| Transactions | [transactions.md](./transactions.md) | Ready for mock (P3 list) |
 | Title services | _(tạo khi P3)_ | — |
 | Users / admin registry | _(tạo khi P4)_ | — |
 
