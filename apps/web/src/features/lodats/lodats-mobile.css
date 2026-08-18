@@ -152,6 +152,12 @@
     border: 1px solid var(--ld-line);
     border-radius: 12px;
     overflow: hidden;
+    cursor: pointer;
+  }
+
+  .ld-card:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
   }
 
   .ld-card.is-selected {
@@ -168,9 +174,7 @@
     border-bottom: 1px solid #f1f5f9;
     background: transparent;
     text-align: left;
-    cursor: pointer;
     color: inherit;
-    appearance: none;
   }
 
   .ld-card-title strong {
@@ -191,13 +195,6 @@
     width: 100%;
     margin: 0;
     padding: 10px 14px 12px;
-    border: 0;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-    color: inherit;
-    font: inherit;
-    appearance: none;
   }
 
   .ld-card-thumb {

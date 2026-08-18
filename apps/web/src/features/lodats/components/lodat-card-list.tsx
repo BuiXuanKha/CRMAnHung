@@ -23,6 +23,10 @@ export function LodatCardList({ items, total, selectedId, onSelect, onOpen }: Pr
         ) : (
           items.map((p) => {
             const open = p.status === LodatSaleStatus.DANG_BAN;
+            function openCard() {
+              onSelect(p.id);
+              onOpen(p.id);
+            }
             return (
               <article
                 key={p.id}
@@ -30,25 +34,19 @@ export function LodatCardList({ items, total, selectedId, onSelect, onOpen }: Pr
                 className={['ld-card', selectedId === p.id ? 'is-selected' : '']
                   .filter(Boolean)
                   .join(' ')}
+                onClick={openCard}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    openCard();
+                  }
+                }}
+                tabIndex={0}
               >
-                <button
-                  type="button"
-                  className="ld-card-title"
-                  onClick={() => {
-                    onSelect(p.id);
-                    onOpen(p.id);
-                  }}
-                >
+                <header className="ld-card-title">
                   <strong>{p.title}</strong>
-                </button>
-                <button
-                  type="button"
-                  className="ld-card-body"
-                  onClick={() => {
-                    onSelect(p.id);
-                    onOpen(p.id);
-                  }}
-                >
+                </header>
+                <div className="ld-card-body">
                   <div className="ld-card-thumb">
                     {p.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -70,7 +68,7 @@ export function LodatCardList({ items, total, selectedId, onSelect, onOpen }: Pr
                     <span className="crm-money">{formatPriceVnd(p.priceVnd)}</span>
                     <span className="ld-card-specs">{formatSpecsInline(p)}</span>
                   </div>
-                </button>
+                </div>
               </article>
             );
           })
