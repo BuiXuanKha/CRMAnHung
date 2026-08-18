@@ -240,6 +240,31 @@ Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** 
 
 **Thanh tìm (§4.3.4, biến thể lô đất):** chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Không rail phải trên màn này. Không nút «Thêm lô» (chưa có trên ảnh mẫu).
 
+**Mobile (≤767px) — đã chốt theo ảnh mẫu:** **thẻ xếp dọc**, không bảng cuộn ngang. Header CRM vẫn §4.2 (không hamburger / nút Đăng xuất trên trang).
+
+```
+┌─ ô tìm ───────────── [ Bộ lọc ] ─┐
+│ thẻ: tiêu đề                     │
+│ [ảnh + hangtag Mở bán]  địa chỉ  │
+│                         giá      │
+│                         DT·MT·Hướng │
+└─ Hiển thị N / Tổng M lô đất ─────┘
+```
+
+| Hạng mục | Quy tắc |
+|----------|---------|
+| Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px; tiêu đề **đậm** trên cùng; thân 2 cột |
+| Ảnh | Thumbnail trái ~80×56, bo 8px; overlay hangtag trạng thái **Mở bán** `green` / **Tạm dừng** `gray` (góc trên trái ảnh); `+N` ảnh thêm góc dưới phải |
+| Phải ảnh | Địa chỉ nhạt; giá `crm-money`; ghi chú giá; hoa hồng `%`; một dòng `90 m² · MT 8 m · Nam` |
+| Phân loại | Hangtag Nhà/Đất cạnh tiêu đề |
+| Công tắc | Mở bán ↔ Tạm dừng dưới thân thẻ (cùng control desktop) |
+| Thao tác | Chevron menu trên header thẻ (§4.3.3) |
+| Bấm thẻ | Mở chi tiết (trừ công tắc / menu) |
+| Bộ lọc | Nút **Bộ lọc** (Lucide `ListFilter`) cạnh ô tìm — **chỉ mobile**; mở `CrmDialog` với cùng lọc cột (trạng thái, phân loại, ảnh, địa chỉ, thông số, giá). **Không** nút Tìm — gõ ô tìm là lọc |
+| Footer | Cùng câu «Hiển thị N / Tổng M lô đất», dính đáy vùng list |
+
+Desktop giữ bảng §4.5. Không đổi visual bảng khi làm mobile.
+
 #### 4.3.6 Bảng dữ liệu — trang giao dịch (đã chốt cột)
 
 Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** riêng `/giao-dich` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** nút Xóa trên dòng).
@@ -501,6 +526,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-18 | **Chốt §4.3.5 cột Phân loại `/lo-dat`:** Nhà / Đất (hangtag + lọc cột) |
 | 2026-08-18 | **Chốt §4.3.6** list `/giao-dich`: 3 thẻ thống kê + cột mã/loại/lô/các bên/giá/hoa hồng/trạng thái/hẹn CC |
 | 2026-08-18 | **Chốt §4.3.7** list `/dich-vu-so-do`: cột khách/nhu cầu/tiến độ/thu-chi + panel Chi tiết hồ sơ |
+| 2026-08-18 | **Chốt §4.3.5 mobile `/lo-dat`:** thẻ xếp dọc + nút Bộ lọc (không bảng cuộn ngang) |
 
 ---
 

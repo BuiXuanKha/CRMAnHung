@@ -87,6 +87,29 @@ export const STATUS_FILTER_OPTIONS = [
   { value: LodatSaleStatus.TAM_DUNG, label: 'Tạm dừng' },
 ];
 
+export function formatSpecsInline(p: LodatListItem): string {
+  const parts: string[] = [];
+  if (p.areaM2 != null) parts.push(formatArea(p.areaM2));
+  if (p.frontageM != null) parts.push(`MT ${p.frontageM.toLocaleString('vi-VN')} m`);
+  if (p.direction?.trim()) parts.push(p.direction.trim());
+  return parts.length ? parts.join(' · ') : '—';
+}
+
+export function countActiveLodatFilters(
+  status: string,
+  kind: string,
+  extra: ExtraFilters,
+): number {
+  let n = 0;
+  if (status) n += 1;
+  if (kind) n += 1;
+  if (extra.photo !== 'all') n += 1;
+  if (extra.address !== 'all') n += 1;
+  if (extra.specs !== 'all') n += 1;
+  if (extra.price !== 'all') n += 1;
+  return n;
+}
+
 export function applyExtraFilters(
   items: LodatListItem[],
   extra: ExtraFilters,

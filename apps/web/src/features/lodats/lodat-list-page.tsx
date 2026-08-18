@@ -9,10 +9,18 @@ import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { listLodats, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
+import { FilterDialog } from './components/filter-dialog';
+import { LodatCardList } from './components/lodat-card-list';
 import { LodatTable } from './components/lodat-table';
-import { applyExtraFilters, parseSearchKeyword, type ExtraFilters } from './display';
+import {
+  applyExtraFilters,
+  countActiveLodatFilters,
+  parseSearchKeyword,
+  type ExtraFilters,
+} from './display';
 import './lodats.css';
 import './lodats-table.css';
+import './lodats-mobile.css';
 import '@/shared/ui/money.css';
 
 const DEFAULT_EXTRA: ExtraFilters = {
@@ -38,6 +46,7 @@ export function LodatListPage() {
   const [menuId, setMenuId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<AlertState>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
@@ -55,6 +64,8 @@ export function LodatListPage() {
     () => applyExtraFilters(list.data?.items ?? [], extra),
     [list.data?.items, extra],
   );
+
+  const filterCount = countActiveLodatFilters(status, kind, extra);
 
   const toggleMut = useMutation({
     mutationFn: (plot: LodatListItem) => {
@@ -109,7 +120,12 @@ export function LodatListPage() {
     <div className="ld-page">
       <div className="ld-main">
         <section className="ld-filter-wrap" aria-label="Tìm kiếm lô đất">
-          <FilterBar keyword={keyword} onKeyword={setKeyword} />
+          <FilterBar
+            keyword={keyword}
+            onKeyword={setKeyword}
+            filterCount={filterCount}
+            onOpenFilters={() => setFilterOpen(true)}
+          />
         </section>
 
         {list.isLoading ? <p className="ld-status">Đang tải danh sách…</p> : null}
@@ -139,7 +155,39 @@ export function LodatListPage() {
             />
           </section>
         ) : null}
+
+        {!list.isLoading && !list.error ? (
+          <LodatCardList
+            items={filtered}
+            total={list.data?.total ?? filtered.length}
+            selectedId={selectedId}
+            menuId={menuId}
+            togglingId={toggleMut.isPending ? (toggleMut.variables?.id ?? null) : null}
+            onSelect={setSelectedId}
+            onOpen={(id) => router.push(`/lo-dat/${id}`)}
+            onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+            onCloseMenu={() => setMenuId(null)}
+            onAction={(p, a) => handleAction(p.id, a, p.title)}
+            onToggleSale={handleToggleSale}
+          />
+        ) : null}
       </div>
+
+      <FilterDialog
+        open={filterOpen}
+        status={status}
+        kind={kind}
+        extra={extra}
+        onStatus={setStatus}
+        onKind={setKind}
+        onExtra={setExtra}
+        onReset={() => {
+          setStatus('');
+          setKind('');
+          setExtra(DEFAULT_EXTRA);
+        }}
+        onClose={() => setFilterOpen(false)}
+      />
 
       <CrmAlertDialog
         open={Boolean(alertBox)}
