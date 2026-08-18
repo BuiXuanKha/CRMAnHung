@@ -69,7 +69,6 @@ export function AppShell({ children }: { children: ReactNode }) {
               </span>
               <strong className="shell-brand-desktop">An Hưng Land CRM</strong>
               <strong className="shell-brand-mobile">AH CRM</strong>
-              <span className="shell-mobile-user">{user.fullName}</span>
             </Link>
           </div>
           <div className="shell-top-end">
@@ -89,13 +88,16 @@ export function AppShell({ children }: { children: ReactNode }) {
               })}
             </nav>
             <span className="shell-nav-sep" aria-hidden />
-            <UserMenu
+            <div className="shell-user-end">
+              <span className="shell-mobile-user">{user.fullName}</span>
+              <UserMenu
               fullName={user.fullName}
               roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
               onLogout={() => {
                 void logout().then(() => router.replace('/login'));
               }}
-            />
+              />
+            </div>
           </div>
         </div>
 
