@@ -4,9 +4,11 @@ import { useState } from 'react';
 import { ImageOff } from 'lucide-react';
 import type { LodatListItem } from '@crmanhung/shared';
 import { ColumnFilter } from '@/shared/ui/column-filter';
+import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 import {
   ADDRESS_FILTER_OPTIONS,
+  KIND_FILTER_OPTIONS,
   PHOTO_FILTER_OPTIONS,
   PRICE_FILTER_OPTIONS,
   SPECS_FILTER_OPTIONS,
@@ -15,12 +17,14 @@ import {
   formatFrontageDir,
   formatPriceVnd,
   formatUpdatedAt,
+  kindLabel,
+  kindTone,
   type ExtraFilters,
 } from '../display';
 import { ActionMenu, type LodatAction } from './action-menu';
 import { SaleToggle } from './sale-toggle';
 
-type HeaderFilter = 'photo' | 'address' | 'specs' | 'price' | 'status' | null;
+type HeaderFilter = 'photo' | 'address' | 'kind' | 'specs' | 'price' | 'status' | null;
 
 type Props = {
   items: LodatListItem[];
@@ -28,8 +32,10 @@ type Props = {
   selectedId: string | null;
   menuId: string | null;
   status: string;
+  kind: string;
   extra: ExtraFilters;
   onStatus: (v: string) => void;
+  onKind: (v: string) => void;
   onExtra: (next: ExtraFilters) => void;
   onSelect: (id: string) => void;
   onToggleMenu: (id: string) => void;
@@ -45,8 +51,10 @@ export function LodatTable({
   selectedId,
   menuId,
   status,
+  kind,
   extra,
   onStatus,
+  onKind,
   onExtra,
   onSelect,
   onToggleMenu,
@@ -88,6 +96,19 @@ export function LodatTable({
               onToggle={() => toggleFilter('address')}
               onClose={() => setHeaderFilter(null)}
               onChange={(v) => onExtra({ ...extra, address: v as ExtraFilters['address'] })}
+            />
+          </div>
+          <div className="ld-col-head" role="columnheader">
+            <span>Phân loại</span>
+            <ColumnFilter
+              label="Phân loại"
+              value={kind}
+              allValue=""
+              options={KIND_FILTER_OPTIONS}
+              open={headerFilter === 'kind'}
+              onToggle={() => toggleFilter('kind')}
+              onClose={() => setHeaderFilter(null)}
+              onChange={onKind}
             />
           </div>
           <div className="ld-col-head" role="columnheader">
@@ -173,6 +194,9 @@ export function LodatTable({
                   <strong>{p.title}</strong>
                   <span className="ld-sub">{p.address?.trim() || '—'}</span>
                 </div>
+              </div>
+              <div className="ld-cell" role="cell">
+                <CrmBadge tone={kindTone(p.kind)}>{kindLabel(p.kind)}</CrmBadge>
               </div>
               <div className="ld-cell" role="cell">
                 <div className="ld-stack">

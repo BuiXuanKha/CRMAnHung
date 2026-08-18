@@ -21,6 +21,11 @@ export enum LodatSaleStatus {
   TAM_DUNG = 'TAM_DUNG',
 }
 
+export enum LodatKind {
+  NHA = 'NHA',
+  DAT = 'DAT',
+}
+
 export enum AddressKind {
   REGULAR = 'REGULAR',
   PROJECT = 'PROJECT',
@@ -57,6 +62,11 @@ export const LODAT_SALE_STATUS_LABELS: Record<LodatSaleStatus, string> = {
   [LodatSaleStatus.DAT_COC]: 'Đặt cọc',
   [LodatSaleStatus.DA_BAN]: 'Đã bán',
   [LodatSaleStatus.TAM_DUNG]: 'Tạm dừng',
+};
+
+export const LODAT_KIND_LABELS: Record<LodatKind, string> = {
+  [LodatKind.NHA]: 'Nhà',
+  [LodatKind.DAT]: 'Đất',
 };
 
 /** Cột list /lo-dat: chỉ Mở bán ↔ Tạm dừng. Đặt cọc / Đã bán thuộc giao dịch (P3). */
