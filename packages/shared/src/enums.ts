@@ -50,6 +50,29 @@ export enum TitleServiceStatus {
   HUY = 'HUY',
 }
 
+export enum TitleServiceStepType {
+  BAN_GIA = 'BAN_GIA',
+  THU_THAP_GIAY_TO = 'THU_THAP_GIAY_TO',
+  DO_DAC = 'DO_DAC',
+  NOP_HO_SO = 'NOP_HO_SO',
+  BO_SUNG = 'BO_SUNG',
+  LAM_VIEC_CO_QUAN = 'LAM_VIEC_CO_QUAN',
+  NHAN_KET_QUA = 'NHAN_KET_QUA',
+  BAN_GIAO = 'BAN_GIAO',
+  KHAC = 'KHAC',
+}
+
+export enum TitleServiceDocKind {
+  SO_DO = 'SO_DO',
+  CAN_CUOC = 'CAN_CUOC',
+  KHAC = 'KHAC',
+}
+
+export enum TitleServiceMoneyKind {
+  THU = 'THU',
+  CHI = 'CHI',
+}
+
 export const CUSTOMER_STATUS_LABELS: Record<CustomerStatus, string> = {
   [CustomerStatus.KHACH_MOI]: 'Khách mới',
   [CustomerStatus.KHACH_NET]: 'Khách nét',
@@ -85,4 +108,34 @@ export const TRANSACTION_STATUS_LABELS: Record<TransactionStatus, string> = {
   [TransactionStatus.DA_CONG_CHUNG]: 'Đã công chứng',
   [TransactionStatus.HOAN_TAT]: 'Hoàn thành',
   [TransactionStatus.HUY]: 'Đã hủy',
+};
+
+export const TITLE_SERVICE_STATUS_LABELS: Record<TitleServiceStatus, string> = {
+  [TitleServiceStatus.DANG_LAM]: 'Đang làm',
+  [TitleServiceStatus.TAM_DUNG]: 'Tạm dừng',
+  [TitleServiceStatus.HOAN_THANH]: 'Hoàn thành',
+  [TitleServiceStatus.HUY]: 'Hủy',
+};
+
+export const TITLE_SERVICE_STEP_LABELS: Record<TitleServiceStepType, string> = {
+  [TitleServiceStepType.BAN_GIA]: 'Bàn giá tại nhà',
+  [TitleServiceStepType.THU_THAP_GIAY_TO]: 'Thu thập / scan giấy tờ',
+  [TitleServiceStepType.DO_DAC]: 'Đo đạc',
+  [TitleServiceStepType.NOP_HO_SO]: 'Nộp hồ sơ',
+  [TitleServiceStepType.BO_SUNG]: 'Bổ sung giấy tờ',
+  [TitleServiceStepType.LAM_VIEC_CO_QUAN]: 'Làm việc cơ quan',
+  [TitleServiceStepType.NHAN_KET_QUA]: 'Nhận kết quả',
+  [TitleServiceStepType.BAN_GIAO]: 'Bàn giao khách',
+  [TitleServiceStepType.KHAC]: 'Khác',
+};
+
+export const TITLE_SERVICE_DOC_LABELS: Record<TitleServiceDocKind, string> = {
+  [TitleServiceDocKind.SO_DO]: 'Sổ đỏ',
+  [TitleServiceDocKind.CAN_CUOC]: 'Căn cước',
+  [TitleServiceDocKind.KHAC]: 'Giấy tờ khác',
+};
+
+export const TITLE_SERVICE_MONEY_LABELS: Record<TitleServiceMoneyKind, string> = {
+  [TitleServiceMoneyKind.THU]: 'Thu',
+  [TitleServiceMoneyKind.CHI]: 'Chi',
 };

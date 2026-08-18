@@ -273,6 +273,31 @@ Thẻ: nền trắng, viền `#e2e8f0`, bo 12px. Số tiền dùng `crm-money`.
 
 **Thanh tìm (§4.3.4, biến thể giao dịch):** chỉ ô tìm, **không** H1, **không** dropdown loại/trạng thái trên thanh (lọc bằng icon cột). Placeholder: `Tìm mã GD, lô đất, người bán, người mua, ghi chú...`. Không rail phải. Không nút «Thêm GD». Cột NV (admin) chưa mock.
 
+#### 4.3.7 Bảng dữ liệu — trang dịch vụ sổ đỏ (đã chốt cột)
+
+Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghiệp vụ ảnh CRM cũ).
+
+**Cột — Danh sách hồ sơ sổ đỏ** (desktop):
+
+| Cột | Nội dung ô |
+|-----|------------|
+| `#` | Số thứ tự; nếu **ghim** thì icon Lucide `Star` (vàng `#ca8a04`) thay số — **không** emoji, **không** icon lọc |
+| `Tên khách` | **Tên đậm** + hangtag trạng thái + dòng phụ mã hồ sơ (`SD-2026-0001`) · SĐT. Hangtag: Đang làm `green` · Tạm dừng `gray` · Hoàn thành `blue` · Hủy `red`. Lọc cột = trạng thái |
+| `Nhu cầu` | Mô tả; thiếu = `—` |
+| `Lịch sử đang làm` | Bước mới nhất **đậm** + ngày `D/M/YYYY`; chưa có = `Chưa ghi tiến độ` |
+| `Giá / Thu / Chi` | Ba dòng: Giá `crm-money`; Thu chữ xanh `#047857`; Chi chữ đỏ `#b91c1c`; thiếu giá / 0 = `0 đ` hoặc `—` với giá |
+| `Tài liệu` | `N file` hoặc `Chưa có` |
+| `Số ngày` | Hangtag `CrmBadge` green (`30 ngày` / `Hôm nay`) — **không** icon lọc |
+| `Thao tác` | Chevron → menu: **Xem chi tiết**, **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**, **Xóa hồ sơ** (đỏ + confirm) |
+
+**Thanh tìm:** chỉ ô tìm. Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ.
+
+**Panel phải — Chi tiết hồ sơ** (biến thể §4.3.2, **một** tab):
+
+- Thu hẹp: thanh dọc nhãn **Chi tiết hồ sơ** (chữ xoay 90°).
+- Mở: kicker «Chi tiết hồ sơ», tên + mã; lưới 2×2 Trạng thái / Giá thỏa thuận / Đã thu / Đã chi; hộp Nhu cầu; bốn nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi` (`CrmDialog`); timeline tiến độ, file, thu/chi gần đây.
+- Bấm dòng bảng → chọn + mở panel. Nền dòng chọn `#eff6ff` (§4.5), ghim `#fef9c3`.
+
 ### 4.5 Bảng danh sách CRM — dùng chung (đã chốt)
 
 Áp dụng **mọi** màn CRM có list dạng bảng (khách hàng, lô đất, giao dịch, sổ đỏ…).  
@@ -475,6 +500,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-18 | **Chốt §4.3.5 cột Trạng thái `/lo-dat`:** chỉ Mở bán ↔ Tạm dừng (không phải đã bán / đặt cọc) |
 | 2026-08-18 | **Chốt §4.3.5 cột Phân loại `/lo-dat`:** Nhà / Đất (hangtag + lọc cột) |
 | 2026-08-18 | **Chốt §4.3.6** list `/giao-dich`: 3 thẻ thống kê + cột mã/loại/lô/các bên/giá/hoa hồng/trạng thái/hẹn CC |
+| 2026-08-18 | **Chốt §4.3.7** list `/dich-vu-so-do`: cột khách/nhu cầu/tiến độ/thu-chi + panel Chi tiết hồ sơ |
 
 ---
 
