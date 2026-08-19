@@ -124,7 +124,7 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 | `Số lô đất` | Số nguyên (`lodatCount`); 0 nếu chưa gắn; icon lọc: tất cả / đã gắn / chưa gắn |
 | `Thao tác` | Nút vuông → **menu hành động** (§4.3.3) |
 
-**Chưa chốt (hỏi tiếp):** layout mobile (bảng cuộn ngang vs thẻ; thanh lọc xếp dọc?); hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
+**Chưa chốt (hỏi tiếp):** hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
 
 | Hạng mục | Quyết định | Ghi chú |
 |----------|------------|---------|
@@ -133,9 +133,34 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 | Font | **Noto Sans**, gốc 14px | §4.2 / §4.5 |
 | Trang khách hàng: layout chính | Tìm/lọc trên + **bảng** trái + **rail phải** | §4.3.1–4.3.4 |
 | Thao tác trên dòng | **Menu hành động** (dropdown) | §4.3.3 |
-| Mobile: ưu tiên thẻ hay list | *(chờ)* | |
+| Mobile `/khach-hang` | **Thẻ xếp dọc** + Bộ lọc + Tìm + nút Thêm SĐT đáy | Đã chốt theo ảnh mẫu |
 | Mật độ thông tin | **Đặc** trên desktop | |
 | Tránh tuyệt đối | Invent style bảng khác §4.5; thiếu footer; scroll cắt header cột | |
+
+**Mobile (≤767px) — đã chốt theo ảnh CRM cũ:** **thẻ xếp dọc**, không bảng cuộn ngang. Ẩn rail phải.
+
+```
+┌─ ô tìm ───── [ Bộ lọc ] [ Tìm ] ─┐
+│ thẻ: avatar  tên + gọi/chat      │
+│              kênh    [hangtag]   │
+│              ngân sách           │
+│              nhu cầu     [sửa][▾]│
+└─ All N/M · KN · KM · CCS · KH · ĐG ┘
+└─ [ + Thêm khách bằng SĐT ] ──────┘
+```
+
+| Hạng mục | Quy tắc |
+|----------|---------|
+| Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel lọc inline: trạng thái, tài chính, kênh, lô đất, nhu cầu. Ẩn nút «Thêm khách…» trên thanh (chuyển xuống đáy) |
+| Thẻ | Grid `48px / 1fr / auto`. Ghim: nền `#fef9c3` + viền trái `#ca8a04`. **Không** `<button>` chứa `<div>`. `flex-shrink: 0` |
+| Trái | Avatar tròn 48px (ảnh FB hoặc initials) |
+| Giữa | Tên đậm; icon gọi (`tel:`) nếu có SĐT; hangtag trạng thái; dòng kênh nhạt; ngân sách xanh `#2563eb`; nhu cầu 2 dòng |
+| Phải | Nút sửa = Cập nhật chăm sóc; chevron = menu §4.3.3 |
+| Bấm thẻ | Chọn dòng (không mở placeholder chi tiết) |
+| Footer | `All N / M` · `KN` · `KM` · `CCS` · `KH` · `ĐG` (ghim) |
+| CTA đáy | Nút full-width xanh lá `#16a34a`: **Thêm khách bằng SĐT** |
+
+Desktop giữ bảng §4.5 + rail.
 
 #### 4.3.2 Rail phải — mở rộng / thu hẹp (đã chốt — theo ảnh mẫu)
 
@@ -215,7 +240,8 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 | **CTA** | Nút xanh «Thêm khách hàng bằng số điện thoại» **cùng hàng**, bên phải |
 
 **Không** hiện H1 «Quản lý khách hàng» trên trang (đã có trên menu header).  
-**Không** lặp dropdown trên thanh này — trạng thái / nhu cầu / tài chính / kênh / **số lô đất** lọc bằng **icon cột** §4.5.5.
+Desktop: **không** lặp dropdown trên thanh này — trạng thái / nhu cầu / tài chính / kênh / **số lô đất** lọc bằng **icon cột** §4.5.5.  
+Mobile: ô tìm + Bộ lọc + Tìm; CTA thêm SĐT dính đáy — xem khối Mobile §4.3.1.
 
 Ô tìm lọc theo tên / SĐT / nhu cầu / ghi chú. `@` = gồm bản ghi đã xóa; `@@` = chỉ bản ghi đã xóa.
 
@@ -526,6 +552,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-18 | **Chốt §4.3.7** list `/dich-vu-so-do`: cột khách/nhu cầu/tiến độ/thu-chi + panel Chi tiết hồ sơ |
 | 2026-08-18 | **Chốt §4.3.5 mobile `/lo-dat`:** thẻ xếp dọc + nút Bộ lọc (không bảng cuộn ngang) |
 | 2026-08-18 | **Chốt lại §4.3.5 mobile `/lo-dat`:** hàng ô tìm + Bộ lọc + Tìm; thẻ chỉ tiêu đề / ảnh / địa chỉ / giá / DT·MT·Hướng |
+| 2026-08-19 | **Chốt §4.3.1 mobile `/khach-hang`:** thẻ avatar + hangtag + Bộ lọc/Tìm + footer All/KN/KM + nút Thêm SĐT đáy |
 
 ---
 

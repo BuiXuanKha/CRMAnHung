@@ -100,6 +100,34 @@ export const LODAT_FILTER_OPTIONS = [
   { value: 'empty', label: 'Chưa gắn lô' },
 ];
 
+export function countMobileCustomerFilters(status: string, extra: ExtraFilters): number {
+  let n = 0;
+  if (status) n += 1;
+  if (extra.finance !== 'all') n += 1;
+  if (extra.channel !== 'all') n += 1;
+  if (extra.lodat !== 'all') n += 1;
+  if (extra.demand !== 'all') n += 1;
+  return n;
+}
+
+export function countCustomerStats(items: CustomerListItem[]): {
+  KN: number;
+  KM: number;
+  CCS: number;
+  KH: number;
+  pinned: number;
+} {
+  const counts = { KN: 0, KM: 0, CCS: 0, KH: 0, pinned: 0 };
+  for (const c of items) {
+    if (c.status === CustomerStatus.KHACH_NET) counts.KN += 1;
+    else if (c.status === CustomerStatus.KHACH_MOI) counts.KM += 1;
+    else if (c.status === CustomerStatus.KHACH_CAN_CHAM_SOC) counts.CCS += 1;
+    else counts.KH += 1;
+    if (c.isPinned) counts.pinned += 1;
+  }
+  return counts;
+}
+
 export function applyExtraFilters(
   items: CustomerListItem[],
   extra: ExtraFilters,
