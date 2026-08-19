@@ -1,301 +1,195 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for mock (list đang chốt từng control; **modal chi tiết làm sau**)
-- **Owner:** An Hưng Land
-- **Liên quan hệ cũ:** `Web` khách hàng + `AnhunglandExtension` ingest + `API` `customer.*`
-- **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4 + §4.5–4.7
-- **Contract:** `packages/shared/src/customers.ts` — bổ sung field khi §12 ổn
-- **Chốt list:** 2026-08-19 — **mục 12** viết đúng cấu trúc chủ sở hữu (ô tìm → bảng → từng item/icon). Chưa code Nest / chưa bịa field modal.
+- **Status:** Ready for mock
+- **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
+- **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
+- **Contract:** `packages/shared/src/customers.ts`
+
+§12 = đặc tả list (đánh số, ngắn). Hình thức (font, hangtag) không lặp ở đây.
 
 ---
 
 ## 1. Mục đích
 
-Quản lý lead/khách từ Facebook Messenger / Business Suite Inbox hoặc nhập tay (SĐT), để nhân viên chăm sóc, gắn lô đất, theo dõi lịch sử.
+Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, xem chat đã lưu.
 
-Màn **danh sách** `/khach-hang` là workbench: tìm → đọc dòng → bấm icon/menu. Chi tiết `/khach-hang/[id]` **chưa** thuộc slice này.
+## 2. Actors
 
-## 2. Actors & quyền
+| Actor | List | Không |
+|-------|------|--------|
+| STAFF | Khách của mình | Khách NV khác; tạo lô khi là admin; hard-delete |
+| ADMIN | Tất cả; sửa/xoá SĐT; không tạo lô từ menu | Hard-delete P1 |
 
-| Actor | Được làm trên list | Không được |
-|-------|--------------------|------------|
-| STAFF | Khách **của mình** (`employeeId`); pin / ẩn / khôi phục; care notes; SĐT | Xem khách NV khác; hard-delete |
-| ADMIN | Toàn bộ của STAFF + list toàn hệ | Hard-delete P1 (vẫn soft-hide) |
+## 3. Khái niệm
 
-API lọc ownership ở service, không tin UI.
+| Thứ | CRM cũ | List hiện |
+|-----|--------|-----------|
+| Nhu cầu | `NeedSummary` (care) | Cột Nhu cầu = bản mới nhất |
+| Ghi chú | `Note` (care) | Ô tìm; rail lịch sử |
+| Đã xoá | `isHidden` | Soft-hide |
+| Hangtag | KN / KM / CCS / Khác | Mục 3 UI-GUIDELINES |
 
-## 3. Khái niệm & trạng thái
+## 4–10. (API / mock / migrate)
 
-| Thuật ngữ | Field | Nghĩa trên list |
-|-----------|--------|-----------------|
-| Customer | hồ sơ | Một người đang chăm sóc |
-| Tên | `fullName` | 1.2.2 |
-| Status | `CustomerStatus` | Hangtag 1.2.5 |
-| Nhu cầu | `note` | Cột Nhu cầu — **không** phải lịch sử chăm sóc |
-| Ghi chú | `latestCareNote` | Care note **mới nhất** — ô tìm; rail chăm sóc |
-| SĐT | `CustomerPhone[]` / `primaryPhone` (tính) | Icon đỏ 1.2.3 |
-| Tin nhắn | `messageCount` / `hasMessages` | Icon mess xanh 1.2.4 — **có nội dung chat đã lưu**, không chỉ có Facebook |
-| Facebook | `CustomerFacebook?` | Avatar, tên FB, thread |
-| Pin | `isPinned` | Nền vàng, lên đầu |
-| Đã xoá | `isHidden` | Xóa mềm P1 — không `deletedAt` |
-| Số lô | `lodatCount` | Icon đếm 1.2.6 + cột Số lô đất |
-| Tài chính | `budgetMinVnd` / `budgetMaxVnd` | Cột Tài chính |
-| NV | `employeeId` | Sở hữu |
+Giữ contract hiện tại. Nest làm sau khi §12 ổn. Migrate `tblPerson*` — `MIGRATION.md`. Extension: có, phase sau.
 
-**Hangtag trạng thái:**
+## 11. Lệch mock mới vs CRM cũ (chỉnh theo CRM cũ)
 
-| Enum | Nhãn | Tone | Footer mobile |
-|------|------|------|----------------|
-| `KHACH_NET` | Khách nét | green | KN |
-| `KHACH_MOI` | Khách mới | blue | KM |
-| `KHACH_CAN_CHAM_SOC` | Khách cần chăm sóc | amber | CCS |
-| `KHAC` | Khác | gray | KH |
-
-## 4. Use cases (P1 list)
-
-1. Vào `/khach-hang` → list theo ownership; mặc định **không** hiện đã xoá.
-2. Ô tìm theo §12.1 (kể cả `@` / `@@`).
-3. Lọc cột / Bộ lọc mobile.
-4. Bấm nền dòng/thẻ → chọn (rail desktop). Không vào `[id]`.
-5. Icon SĐT đỏ → modal nhỏ cập nhật SĐT (quy tắc modal sau).
-6. Nút thêm khách bằng SĐT → modal tạo (quy tắc modal sau).
-7. Menu: chat / Messenger / chăm sóc / lô / sổ đỏ / ghim / ẩn.
-
-## 5. Quan hệ dữ liệu
-
-- Customer 1—1 CustomerFacebook (optional)
-- Customer 1—n Phone, CareNote, MessengerMessage
-- Customer n—n Lodat qua map — list cần `lodatCount` (+ `messageCount` cho icon mess)
-
-`primaryPhone` / `hasMessages` là field **list** (computed). CSDL: bảng con.
-
-## 6. UI
-
-| Màn | Route | Hành vi |
-|-----|-------|---------|
-| List | `/khach-hang` | §12 |
-| Detail | `/khach-hang/[id]` | Placeholder |
-| Modal | trên list | Tạo khách / cập nhật SĐT — **field modal viết sau** |
-
-Không H1 trùng header. Desktop không lặp dropdown trên thanh tìm.
-
-## 7. Contract / API dự kiến
-
-Parse `@`/`@@` **ở client**. API nhận `keyword` (không gồm `@`) + `includeHidden` / `hiddenOnly`.
-
-GET `/customers` cần đủ field để vẽ item §12.2 (kể cả `hasMessages` hoặc `messageCount` — **chưa có trên contract hiện tại**, thêm khi làm API).
-
-Chi tiết endpoint giữ trong contract file; không implement Nest khi modal chưa chốt.
-
-## 8. Mock data cần có
-
-- Có SĐT / chưa có SĐT
-- Có tin nhắn / có Facebook nhưng **chưa** có tin
-- Đủ 4 status; 1 ẩn; 1 ghim; 1 của NV khác
-- Có lô (`lodatCount > 0`) và chưa gắn lô
-
-## 9. Extension
-
-- [x] Có — sau API ingest
-
-## 10. Migrate
-
-`tblPerson*` → `Customer*` (`MIGRATION.md`). `@`/`@@` giữ hệ cũ.
-
-## 11. Open questions / làm sau
-
-**Modal (chủ bảo làm sau — không đoán field):**
-
-- Modal «Thêm khách hàng bằng SĐT»
-- Modal nhỏ cập nhật SĐT (thêm / sửa / nhiều số / trùng số)
-- Modal chăm sóc, confirm ẩn/khôi phục — có thể chốt cùng đợt modal
-
-**Khác:**
-
-- Tìm có bỏ dấu tiếng Việt? Hiện **giữ dấu**.
-- Unique SĐT.
-- Phân trang.
-- Trang `[id]`.
-- «Tạo lô đất» / «Dịch vụ sổ đỏ» từ menu: tạo bản ghi gắn khách vs chỉ nhảy trang.
-- Icon mess trên mobile (rail đang ẩn): chỉ báo hay mở đâu.
+- Mock: icon Phone trang trí / `tel:`; CRM cũ: **xanh = copy (PC) / gọi (mobile)**; **cam = thêm SĐT**.
+- Mock: icon mess trên dòng; CRM cũ: **không** có icon mess trên item — chat nằm rail + menu.
+- Mock: cột «Số lô đất»; CRM cũ: **chỉ icon Map + số** cạnh tên.
+- Nhu cầu mock = `Customer.note`; CRM cũ = **NeedSummary** care.
 
 ---
 
-## 12. Đặc tả màn danh sách `/khach-hang`
-
-Cách viết **đã chốt với chủ:** đánh số, ngắn, một control một mục — dễ đọc. Hình thức (font, hangtag, dialog) = UI-GUIDELINES. Modal chi tiết = mục riêng, làm sau.
-
----
+## 12. List `/khach-hang` — theo CRM đang chạy
 
 ### 12.1 Section tìm kiếm
 
 #### 1. Ô tìm kiếm
 
-Input một dòng, chiếm phần lớn hàng (desktop). Placeholder:
+Placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)`
 
-`Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)`
+Gõ → debounce ~250ms rồi lọc. Mobile nút **Tìm** = lọc ngay + đóng bàn phím.
 
-Focus: viền xanh. Bắt đầu bằng `@`: viền vàng (cùng lô đất).
+`@` / `@@` trên ô: badge + viền vàng.
 
-Gõ là lọc ngay. Enter / nút **Tìm** (mobile): chỉ đóng bàn phím, không đổi thuật toán.
+##### 1.1 Tìm theo
 
-##### 1.1 Tìm theo các trường sau
+- Tên CRM
+- Tên Facebook
+- Mọi SĐT
+- Nhu cầu (`NeedSummary`) **và** ghi chú (`Note`) trong **mọi** lần chăm sóc
 
-- **Tên** — `fullName`
-- **SĐT** — `primaryPhone` và mọi `phones[].phone`
-- **Nhu cầu** — `note`
-- **Ghi chú** — `latestCareNote` (bản chăm sóc mới nhất)
-- **Tên Facebook** — `facebook.facebookName` (nếu có)
+Substring, không phân biệt hoa thường (kể cả Á/á). **Giữ dấu** (`hung` ≠ `hùng`).
 
-Khớp **substring**, không phân biệt hoa thường, **có** phân biệt dấu (`hung` không khớp `hùng`). Không tìm tên NV, địa chỉ lô, toàn bộ lịch sử chat, care note cũ hơn bản mới nhất.
+Không `@` → chỉ khách đang hiện.  
+`@` → hiện + đã xoá.  
+`@@` → chỉ đã xoá.
 
-**Quy tắc tập khách** (sau `trim`; `@@` ưu tiên hơn `@`):
+STAFF không thấy khách người khác.
 
-| Từ khóa | Tập tìm kiếm |
-|---------|----------------|
-| **Không** có `@` | Chỉ khách **đang hiển thị** — `isHidden = false` |
-| Tiền tố **`@`** | Khách đang hiển thị **+** khách **đã xoá** (`isHidden = true`) |
-| Tiền tố **`@@`** | **Chỉ** khách đã xoá |
+##### 1.2 Nút Thêm khách hàng bằng SĐT
 
-Phần chữ sau `@` / `@@` (trim) mới là từ khóa field 1.1. Chỉ `@` hoặc chỉ `@@` = không lọc chữ, chỉ đổi tập ẩn/hiện.
+PC: cùng hàng ô tìm. Mobile: nút đáy.
 
-Ownership vẫn áp: STAFF không thấy khách NV khác dù gõ `@`.
+Bấm → modal **Thêm khách hàng bằng số điện**: hotline * (bắt buộc), tên *, SĐT * (`0` + 9 số), ghi chú. Trùng SĐT → modal xác nhận. Chưa có hotline → bảo vào Cài đặt SĐT.
 
-##### 1.2 Nút «Thêm khách hàng bằng số điện thoại»
+##### 1.3 Bộ lọc
 
-- Desktop: **cùng hàng** ô tìm, bên phải.
-- Mobile: **ẩn** nút trên hàng tìm; hiện nút full-width đáy trang (xanh lá).
+PC CRM cũ: select trên thanh lọc. Mock mới: icon cột (cùng nghĩa).
 
-**Bấm → mở 1 modal** tạo khách bằng SĐT.
+- Trạng thái
+- Tài chính: chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ
+- Kênh liên hệ: danh sách page FB + hotline của NV (API)
+- Lô đất: tất cả / chưa gắn
+- Nhu cầu: tất cả / chưa có nhu cầu
 
-> **Quy tắc modal (tên field, validate, trùng số, status mặc định…) làm sau.** Ở đây chỉ chốt: nút này gọi modal, không tạo khách inline.
-
-##### 1.3 Bộ lọc (không phải ô tìm)
-
-Desktop: icon lọc trên **tiêu đề cột** (§12.2 mục 1.1).  
-Mobile: nút **Bộ lọc** cùng hàng ô tìm + Tìm; panel: trạng thái, tài chính, kênh, lô đất, nhu cầu; **Xoá lọc** không xóa chữ ô tìm.
+Mobile: **Bộ lọc** + **Tìm**. Xoá lọc.
 
 ---
 
-### 12.2 Section bảng danh sách khách hàng
+### 12.2 Section bảng
 
-Desktop: bảng §4.5 (header cố định + thân cuộn + footer).  
-Mobile: **thẻ** cùng dữ liệu mục 1.2, không cuộn ngang bảng; ẩn rail.
+PC: `#` · Tên khách · Nhu cầu · Tài chính · Kênh liên hệ · Thao tác.  
+**Không** cột Số lô — lô = icon trên tên.
 
-Bấm nền dòng/thẻ (không phải icon / menu / nút sửa) → **chọn** khách. Không điều hướng `/khach-hang/[id]`.
+Mobile: thẻ. Ẩn rail.
 
-#### 1.1 Tiêu đề cột (desktop)
+**Bấm nền dòng (PC)** → chọn (rail).  
+**Double-click dòng (PC)** → modal chăm sóc (trừ khách đã xoá / trừ khi bấm icon).  
+**Bấm thẻ (mobile)** → `/khach-hang/[id]`.
 
-| Cột | Icon lọc trên header? |
-|-----|------------------------|
-| `#` | Không |
-| Tên khách | Có — lọc **trạng thái** |
-| Nhu cầu | Có — có nhu cầu / chưa có |
-| Tài chính | Có — có ngân sách / chưa nhập |
-| Kênh liên hệ | Có — FB·Messenger / SĐT·Zalo / Page / tất cả |
-| Số lô đất | Có — đã gắn / chưa gắn / tất cả |
-| Thao tác | Không |
+#### 1.2 Item
 
-#### 1.2 Item khách hàng
+##### 1.2.1 STT
 
-Một hàng (desktop) / một thẻ (mobile). Các mục 1.2.1–1.2.6 nằm **cụm Tên khách** (cạnh nhau). 1.2.7–1.2.10 là cột riêng trên desktop; mobile xếp dưới tên.
+`#` 1…N. Ghim trước, rồi mới cập nhật.
 
-##### 1.2.1 STT (`#`)
+##### 1.2.2 Tên
 
-Số thứ tự **1 … N** sau khi đã sort (ghim trước, rồi `updatedAt` mới → cũ). Không phải id CSDL. Chỉ desktop.
+Avatar (ảnh FB / trống). Tên đậm.  
+PC: icon bút → modal **Sửa tên khách**.
 
-##### 1.2.2 Tên khách hàng
+##### 1.2.3 Icon SĐT **xanh** (`#047857`)
 
-- Avatar tròn: ảnh FB, không có thì initials từ tên.
-- **Tên đậm** = `fullName`.
-- Dòng phụ nhạt: tên Facebook nếu có và khác tên CRM.
+Hiện khi **đã có** SĐT.
 
-##### 1.2.3 Icon số điện thoại **màu đỏ**
+- PC: copy số (tick tạm).
+- Mobile: `tel:`.
 
-- Lucide `Phone`, màu đỏ (không xanh mint hệ cũ, không chỉ trang trí).
-- **Luôn là nút** (có hoặc chưa có số).
-- **Bấm → modal nhỏ cập nhật số điện thoại** (thêm nếu chưa có / sửa số đang hiện). Không copy, không `tel:` từ icon này.
-- `stopPropagation` — không kích chọn dòng.
+##### 1.2.4 Icon SĐT **cam** (`#ea580c`)
 
-> **Quy tắc modal SĐT làm sau** (nhiều số, số chính, trùng, gọi điện trong modal…).
+Hiện khi **chưa có** SĐT (và chưa xoá).  
+Bấm → modal **Thêm số điện thoại**. Trùng → modal trùng.
 
-##### 1.2.4 Icon mess **màu xanh**
+##### 1.2.5 Icon thùng rác SĐT
 
-- Lucide `MessageCircle`, màu xanh.
-- **Chỉ hiện khi có nội dung tin nhắn đã lưu** (`hasMessages` / `messageCount > 0`).
-- **Không** hiện chỉ vì có hồ sơ Facebook / thread trống.
-- Việc: **thể hiện có tin**. Bấm (desktop): chọn khách + mở rail **Nội dung chat**. Mobile: rail đang ẩn — tạm thời chỉ hiển thị icon; chỗ mở tin trên mobile chốt sau.
+Chỉ **admin**, khách chưa xoá, đã có số.  
+Bấm → modal **Xoá số điện thoại**.
 
-##### 1.2.5 Hangtag trạng thái khách
+##### 1.2.6 Icon Map + số lô
 
-Một hangtag: **Khách nét** · **Khách mới** · **Khách cần chăm sóc** · **Khác** (bảng mục 3). Tone UI-GUIDELINES §4.5.4.
+Chỉ khi `lodatCount > 0`. Chỉ thể hiện, không điều hướng.
 
-Khách đang xem trong tập đã xoá (`@` / `@@`): thêm hangtag xám **Đã xoá**.
+##### 1.2.7 Hangtag trạng thái
 
-##### 1.2.6 Icon đếm số lô đất
+Khách nét / mới / cần chăm sóc / Khác.
 
-- Lucide `Map` + số `lodatCount`.
-- **Chỉ hiện khi `lodatCount > 0`**.
-- Việc: báo đã gắn bao nhiêu lô. P1 **không** bấm để sang `/lo-dat`.
-- Cột **Số lô đất** (desktop) vẫn hiện số, kể cả `0`.
+Đã xoá: thêm hangtag **Đã xoá**.
 
-##### 1.2.7 Nhu cầu
+##### 1.2.8 Tên Facebook (dòng phụ)
 
-Cột / dòng thẻ: `note`. Trống → `—` (desktop) hoặc ẩn dòng (mobile). Không lấy care note.
+Hiện nếu khác tên CRM, hoặc admin + có FB.  
+Admin: bút → modal **Sửa tên Facebook**.
 
-##### 1.2.8 Tài chính
+##### 1.2.9 Nhu cầu
 
-`budgetMinVnd` / `budgetMaxVnd` → khoảng «tỷ / triệu» class `crm-money`. Cả hai null → `—` (desktop) hoặc ẩn (mobile).
+`latestNeedSummary`. Trống → `—` (PC) / ẩn (mobile).
 
-##### 1.2.9 Kênh liên hệ
+##### 1.2.10 Tài chính
 
-1. Có SĐT label chứa `zalo` → `{số} ({label})`
-2. Không thì `scanSource` `page` / `business_suite` → `Page {tên}`
-3. Không thì tên nhân viên phụ trách
+Khoảng ngân sách. Trống → `—` / ẩn.
 
-##### 1.2.10 Thao tác
+##### 1.2.11 Kênh liên hệ
 
-Nút vuông chevron → **một** menu. Dòng đang mở menu: nền vàng nhạt.
+Page/nick FB của NV **hoặc** hotline (SĐT + nhãn). Mobile: chữ thuần, không link.
 
-| Mục | Việc (P1) | Modal? |
-|-----|-----------|--------|
-| Mở chat | Rail «Nội dung chat» (desktop) | Không |
-| Mở Messenger | Tab `facebook.com/messages/t/{threadId}`; thiếu thread → alert | Alert |
-| Cập nhật chăm sóc | Mở form ghi chú | **Modal — quy tắc sau** |
-| Tạo lô đất | Chưa tạo bản ghi; toast / làm ở `/lo-dat` | Sau |
-| Dịch vụ sổ đỏ | Điều hướng `/dich-vu-so-do` | Sau nếu tạo hồ sơ |
-| Ghim / Bỏ ghim | Đổi `isPinned` | Không |
-| Xóa khách | Ẩn `isHidden = true` | Confirm — quy tắc copy sau |
-| Khôi phục khách | Chỉ khi item đã xoá (`@`/`@@`) → `isHidden = false` | Confirm sau |
+##### 1.2.12 Nút sửa (mobile)
 
-Khách đã xoá: menu **chỉ** khôi phục (không ghim/xóa lại).
+`SquarePen` → cập nhật chăm sóc (trang `/khach-hang/[id]/cham-soc`). Ẩn nếu đã xoá.
 
-Mobile thêm nút `SquarePen` cạnh chevron = cùng «Cập nhật chăm sóc».
+##### 1.2.13 Menu thao tác (chevron)
+
+Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
+
+| Mục | Việc |
+|-----|------|
+| Mở chat | PC + có URL Inbox: tab Facebook messages |
+| Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid) |
+| Cập nhật chăm sóc | PC: modal. Mobile: trang chăm sóc. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
+| Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat`. ADMIN: báo không được tạo |
+| Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` |
+| Ghim / Bỏ ghim | `isPinned` |
+| Xóa khách | Confirm ẩn mềm; tìm lại bằng `@` / `@@` |
+
+##### 1.2.14 Ghim / chọn / ẩn
+
+Ghim: nền vàng. Đang chọn: highlight. Đã xoá: hàng/thẻ kiểu ẩn.
 
 #### 1.3 Footer
 
-- Desktop: `Hiển thị N / Tổng M khách hàng`
-- Mobile: `All` · `KN` · `KM` · `CCS` · `KH` · `ĐG` (ghim) — đếm trên **tập đang hiện**
-
-#### 1.4 Trạng thái dòng
-
-| Trạng thái | Hình |
-|------------|------|
-| Ghim | Nền vàng `#fef9c3` (mobile + viền trái `#ca8a04`) |
-| Đang chọn | Theo §4.5.3 |
-| Đã xoá | Vẫn hiện đủ 1.2 khi đang `@`/`@@`; hangtag Đã xoá |
-
-Sort: `isPinned` trước, rồi `updatedAt` giảm dần.
+PC: Tổng N — hoặc Hiển thị n / Tổng N khi còn trang. Tải thêm ~50 dòng khi cuộn.  
+Mobile: All · KN · KM · CCS · KH · ĐG (trên trang đang nạp).
 
 ---
 
-### 12.3 Rail phải (desktop)
+### 12.3 Rail phải (PC)
 
-Ba thanh: **Nội dung chat** · **Lịch sử chăm sóc** · **Danh sách lô đất**.
-
-**Một panel** tại một thời điểm. Chưa chọn dòng → «Chọn một khách trên bảng để xem.» Mobile: ẩn rail.
+Một panel: **Nội dung chat** (tin đã lưu) · **Lịch sử chăm sóc** · **Danh sách lô đất**.  
+Nhớ panel vừa mở (localStorage). Mobile: ẩn.
 
 ---
 
-*Bước tiếp: chủ đọc §12 — thiếu mục thì bổ sung cùng format 1.2.x. Khi §12 đủ, mới viết quy tắc từng modal, rồi CSDL/API.*
+*Web mới: Lucide + CrmDialog, cùng hành vi trên. Không copy CSS/god-file CRM cũ.*
