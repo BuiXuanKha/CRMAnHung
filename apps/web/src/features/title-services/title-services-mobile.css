@@ -1,0 +1,324 @@
+/* Mobile /dich-vu-so-do — thẻ xếp dọc §4.3.7 */
+
+.sd-search-wrap {
+  flex: 1 1 auto;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sd-search-wrap .sd-search {
+  width: 100%;
+  min-width: 0;
+}
+
+.sd-filter-btn,
+.sd-search-btn,
+.sd-filter-advanced,
+.sd-cards-shell {
+  display: none;
+}
+
+.sd-filter-select {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-size: 0.86rem;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.sd-filter-select:focus {
+  outline: none;
+  border-color: var(--sd-blue);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.sd-filter-clear {
+  width: 100%;
+  border: 1px solid #fecaca;
+  background: #fff;
+  color: #b91c1c;
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+@media (max-width: 767px) {
+  .sd-layout,
+  .sd-layout.is-panel-open {
+    grid-template-columns: 1fr;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .sd-side {
+    display: none;
+  }
+
+  .sd-filter {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .sd-search-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .sd-search {
+    min-width: 0;
+  }
+
+  .sd-filter-btn,
+  .sd-search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .sd-filter-btn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #1e293b;
+  }
+
+  .sd-filter-btn.is-open {
+    background: #e0f2fe;
+    border-color: #38bdf8;
+    color: #075985;
+  }
+
+  .sd-filter-btn.is-active:not(.is-open) {
+    border-color: #bfdbfe;
+    background: var(--sd-blue-50);
+    color: #1d4ed8;
+  }
+
+  .sd-search-btn {
+    border: 1px solid var(--sd-blue);
+    background: var(--sd-blue);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .sd-filter-advanced {
+    display: none;
+    flex-basis: 100%;
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .sd-filter-advanced.is-open {
+    display: flex;
+  }
+
+  .sd-table-shell {
+    display: none;
+  }
+
+  .sd-cards-shell {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .sd-cards {
+    flex: 1;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 0 0 8px;
+    scrollbar-width: thin;
+    scrollbar-color: #cbd5e1 transparent;
+  }
+
+  .sd-card {
+    background: #fff;
+    border: 1px solid var(--sd-line);
+    border-radius: 12px;
+    padding: 12px;
+    cursor: pointer;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .sd-card:focus-visible {
+    outline: 2px solid #93c5fd;
+    outline-offset: 2px;
+  }
+
+  .sd-card.is-selected {
+    background: var(--sd-blue-50);
+    border-color: #bfdbfe;
+  }
+
+  .sd-card.is-pinned {
+    background: var(--sd-hot);
+    border-color: #fde68a;
+    box-shadow: inset 3px 0 0 var(--sd-hot-edge);
+  }
+
+  .sd-card.is-selected.is-pinned,
+  .sd-card.is-menu-open {
+    background: #fef3c7;
+  }
+
+  .sd-card-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .sd-card-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .sd-card-name strong {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .sd-card-pin {
+    flex-shrink: 0;
+    color: var(--sd-hot-edge);
+    display: inline-flex;
+  }
+
+  .sd-card-head-end {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sd-card-actions {
+    display: flex;
+    align-items: center;
+  }
+
+  .sd-card .sd-action {
+    width: auto;
+  }
+
+  .sd-card-meta {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 6px;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .sd-card-need {
+    margin: 0;
+    font-size: 0.84rem;
+    color: #334155;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .sd-card-need em {
+    font-style: normal;
+    font-weight: 700;
+    color: #94a3b8;
+    margin-right: 4px;
+  }
+
+  .sd-card-money {
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #0f172a;
+  }
+
+  .sd-card-progress {
+    margin: 0;
+    font-size: 0.86rem;
+    color: #475569;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .sd-card-progress.is-empty {
+    color: #94a3b8;
+  }
+
+  .sd-card-docs {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .sd-cards-count {
+    flex-shrink: 0;
+    padding: 10px 12px;
+    border: 1px solid var(--sd-line);
+    border-radius: 12px;
+    background: #f1f5f9;
+    text-align: right;
+    font-size: 0.85rem;
+    color: #475569;
+    margin-bottom: 12px;
+  }
+
+  .sd-cards-count strong {
+    color: #0f172a;
+    font-weight: 600;
+  }
+
+  .sd-empty-cards {
+    background: #fff;
+    border: 1px solid var(--sd-line);
+    border-radius: 12px;
+    padding: 16px;
+    margin: 0;
+    text-align: center;
+    color: #64748b;
+  }
+}

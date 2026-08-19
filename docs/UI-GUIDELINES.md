@@ -135,6 +135,7 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 | Thao tác trên dòng | **Menu hành động** (dropdown) | §4.3.3 |
 | Mobile `/khach-hang` | **Thẻ xếp dọc** + Bộ lọc + Tìm + nút Thêm SĐT đáy | Đã chốt theo ảnh mẫu |
 | Mobile `/giao-dich` | **Thẻ xếp dọc** + Bộ lọc + Tìm; 3 thẻ thống kê vẫn 3 cột | Đã chốt theo CRM cũ |
+| Mobile `/dich-vu-so-do` | **Thẻ xếp dọc** + Bộ lọc + Tìm; ẩn panel chi tiết | Đã chốt theo CRM cũ |
 | Mật độ thông tin | **Đặc** trên desktop | |
 | Tránh tuyệt đối | Invent style bảng khác §4.5; thiếu footer; scroll cắt header cột | |
 
@@ -364,13 +365,39 @@ Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / panel** riên
 | `Số ngày` | Hangtag `CrmBadge` green (`30 ngày` / `Hôm nay`) — **không** icon lọc |
 | `Thao tác` | Chevron → menu: **Xem chi tiết**, **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**, **Xóa hồ sơ** (đỏ + confirm) |
 
-**Thanh tìm:** chỉ ô tìm. Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ.
+**Thanh tìm:** desktop chỉ ô tìm. Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ trên desktop. Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới.
 
 **Panel phải — Chi tiết hồ sơ** (biến thể §4.3.2, **một** tab):
 
 - Thu hẹp: thanh dọc nhãn **Chi tiết hồ sơ** (chữ xoay 90°).
 - Mở: kicker «Chi tiết hồ sơ», tên + mã; lưới 2×2 Trạng thái / Giá thỏa thuận / Đã thu / Đã chi; hộp Nhu cầu; bốn nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi` (`CrmDialog`); timeline tiến độ, file, thu/chi gần đây.
 - Bấm dòng bảng → chọn + mở panel. Nền dòng chọn `#eff6ff` (§4.5), ghim `#fef9c3`.
+- **Mobile:** ẩn panel; thao tác qua chevron trên thẻ.
+
+**Mobile (≤767px) — đã chốt theo CRM cũ:** **thẻ xếp dọc**, không bảng cuộn ngang. Header CRM vẫn §4.2.
+
+```
+┌─ ô tìm ───── [ Bộ lọc ] [ Tìm ] ─┐
+│ (mở Bộ lọc: Trạng thái)          │
+│ thẻ: ★ tên           [hangtag][▾]│
+│      mã · số ngày · SĐT          │
+│      Nhu cầu                     │
+│      Giá · Thu · Chi             │
+│      tiến độ · tài liệu          │
+└─ Hiển thị N / Tổng M hồ sơ sổ đỏ ┘
+```
+
+| Hạng mục | Quy tắc |
+|----------|---------|
+| Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px. Ghim: nền `#fef9c3` + viền trái `#ca8a04` + sao Lucide vàng cạnh tên (**không** emoji). **Không** `<button>` chứa `<div>`. `flex-shrink: 0` |
+| Đầu thẻ | Tên đậm; hangtag trạng thái; chevron thao tác §4.3.7 |
+| Meta | Mã hồ sơ · số ngày (`30 ngày` / `Hôm nay`) · SĐT nếu có |
+| Thân | Nhu cầu (2 dòng); một hàng Giá `crm-money` / Thu xanh `#047857` / Chi đỏ `#b91c1c`; bước tiến độ mới nhất; `N file` hoặc `Chưa có` |
+| Bấm thẻ | Chọn dòng (không nhảy placeholder). Chevron = menu đầy đủ |
+| Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel inline: select Trạng thái, nút Xoá lọc khi đang lọc. Desktop không hiện Bộ lọc / Tìm |
+| Footer | «Hiển thị N / Tổng M hồ sơ sổ đỏ». Không nút Thêm hồ sơ |
+
+Desktop giữ bảng §4.5 + panel Chi tiết hồ sơ.
 
 ### 4.5 Bảng danh sách CRM — dùng chung (đã chốt)
 
@@ -579,6 +606,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-18 | **Chốt lại §4.3.5 mobile `/lo-dat`:** hàng ô tìm + Bộ lọc + Tìm; thẻ chỉ tiêu đề / ảnh / địa chỉ / giá / DT·MT·Hướng |
 | 2026-08-19 | **Chốt §4.3.1 mobile `/khach-hang`:** thẻ avatar + hangtag + Bộ lọc/Tìm + footer All/KN/KM + nút Thêm SĐT đáy |
 | 2026-08-19 | **Chốt §4.3.6 mobile `/giao-dich`:** thẻ mã GD + hangtag + meta cơ bản; Bộ lọc Loại/Trạng thái; 3 thẻ thống kê vẫn 3 cột |
+| 2026-08-19 | **Chốt §4.3.7 mobile `/dich-vu-so-do`:** thẻ tên/hangtag/nhu cầu/thu-chi/tiến độ; Bộ lọc Trạng thái; ẩn panel |
 
 ---
 

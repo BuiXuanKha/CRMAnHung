@@ -134,6 +134,10 @@ export const DOCS_FILTER_OPTIONS = [
   { value: 'empty', label: 'Chưa có tài liệu' },
 ];
 
+export function countMobileTitleServiceFilters(status: string): number {
+  return status ? 1 : 0;
+}
+
 export function applyExtraFilters(
   items: TitleServiceListItem[],
   extra: ExtraFilters,
