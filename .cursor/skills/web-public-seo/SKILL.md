@@ -29,6 +29,8 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 
 Next.js App Router — dùng `metadata` API, `next/image`, `app/robots.ts`, `app/sitemap.ts`.
 
+Meta Pixel Facebook: **chỉ** `(public)/layout` (`features/public/meta-pixel.tsx`) — không CRM / login. Chi tiết [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §6.
+
 ## Sau khi làm
 
 Checklist PR trong `docs/PUBLIC-SEO.md`. Owner không cần hiểu kỹ thuật — agent tự áp dụng.

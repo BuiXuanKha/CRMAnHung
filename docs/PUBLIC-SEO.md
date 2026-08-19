@@ -61,6 +61,18 @@ Mỗi route public phải có:
 - Có ảnh OG mặc định brand (ví dụ `/og-default.png`) và ảnh riêng cho trang quan trọng.
 - Kiểm tra bằng Facebook Sharing Debugger / Twitter Card Validator khi gần ship trang mới.
 
+### 6. Meta Pixel (Facebook Ads)
+
+Gắn **chỉ** layout `(public)/` — landing, sản phẩm, bài phụ. **Không** CRM, **Không** `/login` (tránh đo hành vi nhân viên).
+
+| Hạng mục | Quy ước |
+|----------|---------|
+| Vị trí | `features/public/meta-pixel.tsx` + `(public)/layout.tsx` |
+| Pixel ID | `391165622297911` (public, hiện trong HTML) |
+| Load | `next/script` `afterInteractive` — không chặn LCP |
+| PageView | Lần tải đầu + khi đổi route public (Next `Link`) |
+| Dev | Tắt khi `next dev` (`NODE_ENV !== production`) |
+
 ---
 
 ## Không làm trên web công khai

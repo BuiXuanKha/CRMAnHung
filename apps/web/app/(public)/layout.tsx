@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { MetaPixel } from '@/features/public/meta-pixel';
 import './public.css';
 
 export const metadata: Metadata = {
@@ -35,5 +36,10 @@ export const metadata: Metadata = {
 
 /** Layout trang public (landing / marketing) — tách khỏi CRM shell. */
 export default function PublicLayout({ children }: { children: ReactNode }) {
-  return <div className="public-shell">{children}</div>;
+  return (
+    <div className="public-shell">
+      <MetaPixel />
+      {children}
+    </div>
+  );
 }
