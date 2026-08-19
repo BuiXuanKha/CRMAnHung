@@ -86,6 +86,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 | Avatar | Click → menu: tên + vai trò; **Cài đặt**; **Đăng xuất** cuối (đỏ) |
 | Typography CRM | **Noto Sans**, gốc **14px** (public vẫn Be Vietnam Pro) |
 | Mobile | Menu cuộn ngang trong header; không ẩn mất mục chính |
+| Mobile ô nhập | **16px** tối thiểu (`input` / `textarea` / `select`) — Safari phóng to trang nếu nhỏ hơn khi gõ |
 
 **Không** còn hàng «Thanh điều hướng» riêng.
 
@@ -623,6 +624,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **Đặc tả list `/giao-dich`:** `domains/transactions.md` §12 — nguồn anhungland.com/giao-dich |
 | 2026-08-19 | **Đặc tả list `/dich-vu-so-do`:** `domains/title-services.md` §12 — nguồn anhungland.com/dich-vu-so-do |
 | 2026-08-19 | **§12 chia máy tính / mobile trước**, rồi mới chi tiết thành phần — 4 domain list + skill `write-domain-doc` |
+| 2026-08-19 | **Mobile: ô nhập ≥ 16px** — tránh trình duyệt phóng to trang khi focus (iOS Safari) |
 
 ---
 

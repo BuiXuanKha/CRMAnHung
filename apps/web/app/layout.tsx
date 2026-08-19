@@ -1,4 +1,4 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Be_Vietnam_Pro, Noto_Sans } from 'next/font/google';
 import { Providers } from './providers';
 import { MetaPixelRouteTracker } from '@/features/public/meta-pixel-tracker';
@@ -31,6 +31,12 @@ export const metadata: Metadata = {
     template: '%s | An Hưng Land',
   },
   description: 'An Hưng Land — bất động sản và CRM nội bộ.',
+};
+
+/** Keep pinch-zoom; do not set maximumScale (a11y). Font ≥16px stops focus-zoom. */
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 };
 
 export default function RootLayout({
