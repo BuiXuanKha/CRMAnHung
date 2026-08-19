@@ -45,6 +45,8 @@ _Một đoạn: domain này giải quyết việc gì cho nhân viên An Hưng L
 | List | `/…` | … |
 | Detail | `/…/:id` | … |
 
+Đặc tả list/modal: **đánh số, ngắn** (một control = một mục). Mẫu: [`customers.md`](./customers.md) §12. Icon: màu, hiện khi nào, bấm thì làm gì. Modal chưa chốt → «bấm → mở modal; quy tắc sau».
+
 ## 7. Contract / API dự kiến
 
 Prefix: `/api/v1/...`

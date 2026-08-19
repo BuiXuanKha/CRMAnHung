@@ -17,12 +17,36 @@ description: Write or update CRMAnHung domain documentation under docs/domains. 
    - `Ready for API` — contract đã có, sẵn sàng Nest module
    - `Done` — slice đã ship
 
-## Quality bar
+## Đặc tả màn hình (đã chốt — dễ đọc)
 
-- Actors STAFF/ADMIN rõ quyền
-- Enum/status có nhãn tiếng Việt
-- Use case P1 tối thiểu liệt kê được
-- Open questions không để trống im lặng — ghi rõ hoặc quyết định
+Chủ sở hữu chốt **đánh số, ngắn, một control = một mục**. Mẫu: `docs/domains/customers.md` **§12**.
+
+```
+12.1 Section tìm kiếm
+  1. Ô tìm kiếm
+  1.1 Tìm theo field … / quy tắc @ @@
+  1.2 Nút … → mở modal (chi tiết modal mục riêng, sau)
+
+12.2 Section bảng
+  1.1 Tiêu đề cột
+  1.2 Item
+  1.2.1 STT
+  1.2.2 Tên
+  1.2.3 Icon … — màu, hiện khi nào, bấm thì làm gì
+  …
+```
+
+**Làm**
+
+- Tiếng Việt. Gạch đầu dòng / bảng nhỏ. Tên field code trong ngoặc khi cần.
+- Icon: màu + ý nghĩa + hành vi bấm (hoặc «chỉ thể hiện»).
+- Modal chưa chốt field → một câu «bấm → mở modal; quy tắc modal làm sau».
+
+**Không**
+
+- Đoạn văn dài, lặp UI-GUIDELINES (màu font, hangtag tone).
+- Bịa field modal / API khi chủ chưa chốt.
+- Gộp nhiều icon vào một ô «tên khách» mà không tách 1.2.x.
 
 ## After
 

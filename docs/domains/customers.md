@@ -124,7 +124,7 @@ Chi tiết endpoint giữ trong contract file; không implement Nest khi modal c
 
 ## 12. Đặc tả màn danh sách `/khach-hang`
 
-Nguồn sự thật **từng control**. Hình thức (Noto Sans, bảng §4.5, hangtag 5 tone, Lucide, CrmDialog) = UI-GUIDELINES — không clone god-file.
+Cách viết **đã chốt với chủ:** đánh số, ngắn, một control một mục — dễ đọc. Hình thức (font, hangtag, dialog) = UI-GUIDELINES. Modal chi tiết = mục riêng, làm sau.
 
 ---
 
