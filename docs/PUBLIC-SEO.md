@@ -72,7 +72,10 @@ Next.js không có file HTML tĩnh — tương đương: snippet trong `app/layo
 | Pixel ID | `391165622297911` (public, hiện trong View Source) |
 | noscript | Ảnh 1×1 trong `<head>` (fallback tắt JS) |
 | SPA | `MetaPixelRouteTracker` — PageView khi đổi route Next `Link` (bỏ lần tải đầu) |
+| Sản phẩm | URL `/san-pham` → custom **ViewProductList**; `/san-pham/[slug]` → chuẩn **ViewContent** (`content_ids` = slug) |
 | Dev | Tắt khi `next dev` (`NODE_ENV !== production`) |
+
+Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem chi tiết 1 lô; `ViewProductList` = khách vào danh sách. Có thể tạo conversion URL chứa `/san-pham` trên `PageView` nếu muốn gom cả hai.
 
 ---
 
