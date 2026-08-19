@@ -1,6 +1,11 @@
 import type { Metadata } from 'next';
 import { Be_Vietnam_Pro, Noto_Sans } from 'next/font/google';
 import { Providers } from './providers';
+import { MetaPixelRouteTracker } from '@/features/public/meta-pixel-tracker';
+import {
+  META_PIXEL_HEAD_SCRIPT,
+  META_PIXEL_NOSCRIPT_IMG,
+} from '@/features/public/meta-pixel-snippet';
 import '@/styles/global.css';
 
 /** Public marketing */
@@ -35,7 +40,23 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="vi" className={`${beVietnam.variable} ${notoSans.variable}`}>
+      <head>
+        {process.env.NODE_ENV === 'production' ? (
+          <>
+            <script
+              id="meta-pixel"
+              dangerouslySetInnerHTML={{ __html: META_PIXEL_HEAD_SCRIPT }}
+            />
+            <noscript
+              dangerouslySetInnerHTML={{
+                __html: `<img height="1" width="1" style="display:none" src="${META_PIXEL_NOSCRIPT_IMG}" alt="" />`,
+              }}
+            />
+          </>
+        ) : null}
+      </head>
       <body className={beVietnam.className}>
+        {process.env.NODE_ENV === 'production' ? <MetaPixelRouteTracker /> : null}
         <Providers>{children}</Providers>
       </body>
     </html>

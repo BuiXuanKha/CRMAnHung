@@ -63,14 +63,15 @@ Mỗi route public phải có:
 
 ### 6. Meta Pixel (Facebook Ads)
 
-Gắn **chỉ** layout `(public)/` — landing, sản phẩm, bài phụ. **Không** CRM, **Không** `/login` (tránh đo hành vi nhân viên).
+Meta Events Manager: dán **mã cơ sở vào `<head>`** (trước `</head>`), trên **mọi trang**.  
+Next.js không có file HTML tĩnh — tương đương: snippet trong `app/layout.tsx` (`<head>` của layout gốc) để mọi URL `anhungland.com` đều có pixel.
 
 | Hạng mục | Quy ước |
 |----------|---------|
-| Vị trí | `features/public/meta-pixel.tsx` + `(public)/layout.tsx` |
-| Pixel ID | `391165622297911` (public, hiện trong HTML) |
-| Load | `next/script` `afterInteractive` — không chặn LCP |
-| PageView | Lần tải đầu + khi đổi route public (Next `Link`) |
+| Vị trí | `<head>` layout gốc `app/layout.tsx` — cùng snippet Meta (init + PageView) |
+| Pixel ID | `391165622297911` (public, hiện trong View Source) |
+| noscript | Ảnh 1×1 trong `<head>` (fallback tắt JS) |
+| SPA | `MetaPixelRouteTracker` — PageView khi đổi route Next `Link` (bỏ lần tải đầu) |
 | Dev | Tắt khi `next dev` (`NODE_ENV !== production`) |
 
 ---
