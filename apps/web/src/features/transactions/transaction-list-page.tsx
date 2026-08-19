@@ -14,10 +14,12 @@ import { deleteTransaction, listTransactions, statsFromItems } from './api';
 import { type TransactionAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
 import { TransactionStats } from './components/stats';
+import { TransactionCardList } from './components/transaction-card-list';
 import { TransactionTable } from './components/transaction-table';
-import { applyExtraFilters, type ExtraFilters } from './display';
+import { applyExtraFilters, countMobileTransactionFilters, type ExtraFilters } from './display';
 import './transactions.css';
 import './transactions-table.css';
+import './transactions-mobile.css';
 import '@/shared/ui/money.css';
 
 const DEFAULT_EXTRA: ExtraFilters = {
@@ -47,6 +49,7 @@ export function TransactionListPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<AlertState>(null);
   const [confirmDelete, setConfirmDelete] = useState<TransactionListItem | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const listQuery = {
     keyword: keyword.trim() || undefined,
@@ -65,6 +68,7 @@ export function TransactionListPage() {
   );
 
   const stats = useMemo(() => statsFromItems(filtered), [filtered]);
+  const mobileFilterCount = countMobileTransactionFilters(type, status);
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteTransaction(id),
@@ -119,7 +123,21 @@ export function TransactionListPage() {
         />
 
         <section className="tx-filter-wrap" aria-label="Tìm kiếm giao dịch">
-          <FilterBar keyword={keyword} onKeyword={setKeyword} />
+          <FilterBar
+            keyword={keyword}
+            onKeyword={setKeyword}
+            filtersOpen={filterOpen}
+            onToggleFilters={() => setFilterOpen((v) => !v)}
+            type={type}
+            onType={setType}
+            status={status}
+            onStatus={setStatus}
+            hasActiveFilters={mobileFilterCount > 0}
+            onResetFilters={() => {
+              setType('');
+              setStatus('');
+            }}
+          />
         </section>
 
         {list.isLoading ? <p className="tx-status">Đang tải danh sách…</p> : null}
@@ -146,6 +164,20 @@ export function TransactionListPage() {
               onAction={handleAction}
             />
           </section>
+        ) : null}
+
+        {!list.isLoading && !list.error ? (
+          <TransactionCardList
+            items={filtered}
+            total={list.data?.total ?? filtered.length}
+            selectedId={selectedId}
+            menuId={menuId}
+            onSelect={setSelectedId}
+            onOpen={(id) => router.push(`/giao-dich/${id}`)}
+            onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+            onCloseMenu={() => setMenuId(null)}
+            onAction={handleAction}
+          />
         ) : null}
       </div>
 

@@ -79,7 +79,7 @@
 
 .tx-search {
   flex: 1 1 auto;
-  min-width: 200px;
+  min-width: 0;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 7px 10px;
@@ -92,6 +92,11 @@
 .tx-search:focus {
   border-color: var(--tx-blue);
   box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.tx-search-wrap {
+  flex: 1 1 auto;
+  min-width: 200px;
 }
 
 .tx-status {
@@ -133,8 +138,3 @@
   text-decoration: underline;
 }
 
-@media (max-width: 900px) {
-  .tx-stats {
-    grid-template-columns: 1fr;
-  }
-}
