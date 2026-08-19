@@ -213,7 +213,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 
 **Menu (khi mở):** thẻ trắng nổi, bo góc, đổ bóng nhẹ; mỗi mục = icon trái + chữ tiếng Việt.
 
-**Mục — khách hàng** (trên → dưới). Hành vi API/modal: **`customers.md` §12.9**.
+**Mục — khách hàng** (trên → dưới). Việc từng mục: **`customers.md` §12.2 mục 1.2.10**. Quy tắc form/confirm **làm sau**.
 
 | Mục | Ghi chú UI |
 |-----|------------|
