@@ -2,114 +2,182 @@
 
 - **Slug:** `title-services`
 - **Status:** Ready for mock
-- **Owner:** An Hưng Land
-- **Liên quan hệ cũ:** màn Dịch vụ sổ đỏ (`/dich-vu-so-do`) — đối chiếu nghiệp vụ, không copy UI god-file
+- **Nguồn:** màn [`/dich-vu-so-do`](https://anhungland.com/dich-vu-so-do) (web mới) + CRM cũ
+- **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.7 + §4.5
+- **Contract:** `packages/shared/src/title-services.ts`
+
+§12 = đặc tả list (đánh số, ngắn).
 
 ---
 
 ## 1. Mục đích
 
-Nhân viên theo dõi hồ sơ làm sổ đỏ cho khách: nhu cầu, tiến độ các bước, thu/chi, tài liệu đính kèm, số ngày đang làm.
+Theo dõi hồ sơ làm sổ đỏ: nhu cầu, tiến độ, thu/chi, tài liệu, số ngày đang làm.
 
-## 2. Actors & quyền
+## 2. Actors
 
-| Actor | Được làm | Không được |
-|-------|----------|------------|
-| STAFF | Xem / tạo (từ khách) / cập nhật / ghim / xóa hồ sơ mình tạo (P3 mock: list demo + thao tác mock) | Sửa hồ sơ NV khác |
-| ADMIN | Toàn bộ list, xem NV phụ trách (sau) | — |
+| Actor | List | Không |
+|-------|------|--------|
+| STAFF | Hồ sơ mình tạo. Mock: list demo + dialog mock | Sửa hồ sơ NV khác |
+| ADMIN | Tất cả; CRM cũ lọc NV | — |
 
-Hồ sơ **mới** tạo từ menu khách hàng «Dịch vụ sổ đỏ» — list này không có nút Thêm (ảnh mẫu không có).
+Tạo hồ sơ từ menu khách «Dịch vụ sổ đỏ». **Không** nút Thêm trên list.
 
-## 3. Khái niệm & trạng thái
+## 3. Khái niệm
 
-| Thuật ngữ | Nghĩa |
-|-----------|--------|
-| Hồ sơ sổ đỏ | Một việc làm giấy tờ nhà đất gắn một khách |
-| Tiến độ | Bước đã làm (đo đạc, nộp hồ sơ, nhận kết quả…) |
-| Thu / Chi | Khoản tiền đã thu khách / đã chi phí |
-| Số ngày | Số ngày từ lúc bắt đầu; dừng đếm khi Hoàn thành / Hủy |
+| Trạng thái | Enum | Hangtag |
+|------------|------|---------|
+| Đang làm | `DANG_LAM` | green |
+| Tạm dừng | `TAM_DUNG` | gray — **vẫn hiện** mặc định (không ẩn như lô) |
+| Hoàn thành | `HOAN_THANH` | blue |
+| Hủy | `HUY` | red |
 
-**Trạng thái (`TitleServiceStatus`)**
+**Số ngày:** từ `startedAt` đến nay; dừng khi Hoàn thành / Hủy (`completedAt`). `0` → «Hôm nay».
 
-| Enum | Nhãn |
-|------|------|
-| `DANG_LAM` | Đang làm |
-| `TAM_DUNG` | Tạm dừng |
-| `HOAN_THANH` | Hoàn thành |
-| `HUY` | Hủy |
+Tiến độ / thu-chi / loại tài liệu: enum trong contract (Bàn giá, Đo đạc, Nộp hồ sơ… · Thu/Chi · Sổ đỏ/Căn cước/Khác).
 
-**Bước tiến độ (`TitleServiceStepType`)**
+## 4–10.
 
-| Enum | Nhãn |
-|------|------|
-| `BAN_GIA` | Bàn giá tại nhà |
-| `THU_THAP_GIAY_TO` | Thu thập / scan giấy tờ |
-| `DO_DAC` | Đo đạc |
-| `NOP_HO_SO` | Nộp hồ sơ |
-| `BO_SUNG` | Bổ sung giấy tờ |
-| `LAM_VIEC_CO_QUAN` | Làm việc cơ quan |
-| `NHAN_KET_QUA` | Nhận kết quả |
-| `BAN_GIAO` | Bàn giao khách |
-| `KHAC` | Khác |
+GET `keyword`, `status`. PATCH ghim / sửa. POST tiến độ, tiền, file (mock tên file). DELETE mock. Không extension.
 
-**Loại tài liệu:** Sổ đỏ / Căn cước / Giấy tờ khác.
+## 11. CRM cũ vs web mới
 
-## 4. Use cases
+- Tìm: mã + tên + SĐT (cũ). Mới mock thêm nhu cầu / ghi chú / nhãn trạng thái.
+- Cũ ADMIN: lọc NV. Mới: chưa.
+- Không `@` / `@@`.
 
-1. Vào `/dich-vu-so-do` → ô tìm + bảng (desktop) / thẻ (mobile); desktop bấm dòng mở panel **Chi tiết hồ sơ**
-2. Tìm mã hồ sơ / tên khách / SĐT
-3. Desktop: lọc cột trạng thái (trên Tên khách) và có/không nhu cầu, tiến độ, tài liệu. Mobile: Bộ lọc Trạng thái
-4. Ghim hồ sơ lên đầu; xóa (xác nhận)
-5. Panel / menu: thêm tiến độ / thu / chi / tài liệu (mock dialog)
-6. (Sau) Tạo hồ sơ từ `/khach-hang`; trang đầy đủ `[id]`
+---
 
-## 5. Quan hệ dữ liệu
+## 12. List `/dich-vu-so-do`
 
-- TitleService 1—1 Customer (khách của hồ sơ)
-- TitleService 1—n Progress / MoneyEntry / Attachment
-- Ownership: `createdByEmployeeId`. Mock P3: STAFF thấy mọi dòng demo.
+### 12.1 Section tìm kiếm
 
-## 6. UI
+#### 1. Ô tìm kiếm
 
-| Màn | Route | Hành vi |
-|-----|-------|---------|
-| List + panel | `/dich-vu-so-do` | Desktop: ô tìm + bảng §4.5 / §4.3.7 + panel Chi tiết hồ sơ. Mobile: ô tìm + Bộ lọc + Tìm; thẻ tên / hangtag / nhu cầu / thu-chi / tiến độ; ẩn panel |
-| Detail | `/dich-vu-so-do/[id]` | Placeholder (mã + quay lại list) |
+Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`
 
-Không H1 trùng menu. Desktop: không dropdown trạng thái / nút Tìm trên thanh (lọc cột + gõ là lọc). Mobile: Bộ lọc Trạng thái inline. Cột `#` hiện sao Lucide nếu ghim, không emoji. Không rail nhiều tab kiểu khách hàng — **một** panel chi tiết (thu hẹp = thanh dọc §4.3.2; mobile ẩn). Không nút Thêm hồ sơ trên list.
+Gõ là lọc. Mobile **Tìm** = đóng bàn phím. Không `@`.
 
-## 7. Contract / API dự kiến
+##### 1.1 Tìm theo (web mới)
 
-Contract: `packages/shared/src/title-services.ts`  
-Prefix: `/api/v1/title-services`
+- Mã hồ sơ (`SD-…`)
+- Tên khách
+- SĐT
+- Nhu cầu, ghi chú, nhãn trạng thái
 
-| Method | Path | Auth |
-|--------|------|------|
-| GET | `/title-services` | JWT — query `keyword`, `status` |
-| GET | `/title-services/:id` | JWT |
-| PATCH | `/title-services/:id` | JWT — status, giá, nhu cầu, ghim |
-| POST | `/title-services/:id/progress` | JWT |
-| POST | `/title-services/:id/money` | JWT |
-| POST | `/title-services/:id/attachments` | JWT (mock: tên file, chưa upload R2) |
-| DELETE | `/title-services/:id` | JWT |
+##### 1.2 Không nút thêm hồ sơ
 
-## 8. Mock data cần có
+##### 1.3 Bộ lọc
 
-- Đủ 4 trạng thái; ít nhất một hồ sơ **ghim** khớp ảnh (Huyền Trần / SD-2026-0001)
-- Có và không tiến độ; có và không tài liệu
-- Thu / chi > 0 và = 0
-- `TAM_DUNG` vẫn hiện mặc định (không ẩn như lô tạm dừng)
-- Đủ dòng để cuộn (~8+)
+**PC:** icon cột — trạng thái (cột Tên khách), nhu cầu / tiến độ / giá / tài liệu có-chưa.
 
-## 9. Extension?
+**Mobile:** **Bộ lọc** + **Tìm** — Trạng thái. Xoá lọc.
 
-- [x] Không
+---
 
-## 10. Migrate từ hệ cũ
+### 12.2 Section bảng (PC)
 
-`tblTitleService*` → `TitleService*` (`docs/MIGRATION.md`). Giữ 4 status và các step type.
+Tiêu đề: `#` · Tên khách · Nhu cầu · Lịch sử đang làm · Giá / Thu / Chi · Tài liệu · Số ngày · Thao tác.
 
-## 11. Open questions
+Bấm nền hàng → chọn + **mở panel** Chi tiết hồ sơ.
 
-- Form tạo hồ sơ từ khách hàng — làm sau list mock.
-- Upload file thật lên R2 — API P3; mock chỉ ghi tên file.
+Sort: ghim trước, rồi `updatedAt` mới.
+
+Ghim: nền vàng `#fef9c3`. Đang chọn: `#eff6ff`.
+
+#### 1.2 Item
+
+##### 1.2.1 `#`
+
+STT 1…N. **Ghim:** icon Lucide `Star` vàng `#ca8a04` **thay số**. Không emoji. Không lọc cột.
+
+##### 1.2.2 Tên khách
+
+Tên đậm + hangtag trạng thái.  
+Dòng phụ: mã hồ sơ · SĐT.
+
+##### 1.2.3 Nhu cầu
+
+`needSummary`. Thiếu = `—`.
+
+##### 1.2.4 Lịch sử đang làm
+
+Bước mới nhất **đậm** + ngày `D/M/YYYY`. Chưa có = `Chưa ghi tiến độ`.
+
+##### 1.2.5 Giá / Thu / Chi
+
+Ba dòng: Giá `crm-money` · Thu xanh `#047857` · Chi đỏ `#b91c1c`. Thiếu giá = `—`; thu/chi 0 = `0 đ`.
+
+##### 1.2.6 Tài liệu
+
+`N file` hoặc `Chưa có`.
+
+##### 1.2.7 Số ngày
+
+Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
+
+##### 1.2.8 Thao tác (chevron)
+
+| Mục | Việc |
+|-----|------|
+| Xem chi tiết | Chọn + mở panel (PC). Route `[id]` vẫn placeholder |
+| Ghim / Bỏ ghim | `isPinned` |
+| Thêm tiến độ | Dialog mock |
+| Nhập thu | Dialog mock |
+| Nhập chi phí | Dialog mock |
+| Thêm tài liệu | Dialog mock (tên file, chưa R2) |
+| Sửa thông tin | Dialog mock (trạng thái, giá, nhu cầu) |
+| Xóa hồ sơ | Đỏ → confirm → gỡ list (mock) |
+
+#### 1.3 Footer
+
+`Hiển thị N / Tổng M hồ sơ sổ đỏ`.
+
+---
+
+### 12.3 Panel phải — Chi tiết hồ sơ (PC)
+
+**Một** tab (không 3 thanh như khách hàng).
+
+- Thu hẹp: thanh dọc, chữ xoay 90°, nhãn **Chi tiết hồ sơ**.
+- Mở: tên + mã · SĐT; lưới Trạng thái / Giá / Đã thu / Đã chi; hộp Nhu cầu; nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline tiến độ, file, thu/chi.
+- Chưa chọn: «Chọn một hồ sơ…»
+- **Mobile: ẩn panel.**
+
+---
+
+### 12.4 Thẻ mobile
+
+Không bảng, không panel.
+
+##### 1. Đầu
+
+Sao nếu ghim + tên đậm + hangtag + chevron (cùng menu 1.2.8).
+
+##### 2. Meta
+
+Mã · số ngày · SĐT.
+
+##### 3. Thân
+
+Nhu cầu (2 dòng) · Giá / Thu / Chi · bước tiến độ · `N file` / Chưa có.
+
+Ghim: nền vàng + viền trái `#ca8a04`.
+
+##### 4. Bấm thẻ (không phải menu)
+
+Chọn dòng. **Không** nhảy `[id]`.
+
+##### 5. Footer
+
+Cùng câu Hiển thị N / Tổng M.
+
+---
+
+### 12.5 Chi tiết `/dich-vu-so-do/[id]`
+
+Placeholder: mã + quay lại. Làm việc hàng ngày = list + panel / menu.
+
+---
+
+*Hành vi list bám §12. Visual §4.3.7. Không copy god-file.*
