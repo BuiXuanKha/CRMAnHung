@@ -255,7 +255,9 @@ Mobile: ô tìm + Bộ lọc + Tìm; CTA thêm SĐT dính đáy — xem khối M
 
 #### 4.3.5 Bảng dữ liệu — trang lô đất (đã chốt cột)
 
-Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** nút GD/Sửa trên dòng).
+Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`lodats.md` §12](./domains/lodats.md) (màn [`/lo-dat`](https://anhungland.com/lo-dat)).
+
+Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** nút GD/Sửa trên dòng).
 
 **Cột — Danh sách lô đất** (desktop):
 

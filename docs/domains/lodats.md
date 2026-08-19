@@ -2,91 +2,178 @@
 
 - **Slug:** `lodats`
 - **Status:** Ready for mock
-- **Owner:** An Hưng Land
-- **Liên quan hệ cũ:** màn Quản lý lô đất (list + detail) — đối chiếu nghiệp vụ, không copy UI god-file
+- **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
+- **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
+- **Contract:** `packages/shared/src/lodats.ts`
+
+§12 = đặc tả list (đánh số, ngắn).
 
 ---
 
 ## 1. Mục đích
 
-Nhân viên theo dõi danh sách lô đất: tìm/lọc, xem thông số (diện tích, mặt tiền, hướng), giá bán, trạng thái mở bán, ảnh, rồi mở chi tiết / giao dịch / sửa.
+Nhân viên xem / tìm lô đang rao: ảnh, địa chỉ, DT·MT·hướng, giá, mở bán hay tạm dừng.
 
-## 2. Actors & quyền
+## 2. Actors
 
-| Actor | Được làm | Không được |
-|-------|----------|------------|
-| STAFF | Xem list/detail lô được gắn với khách của mình (P2 mock: xem list demo); tạo/sửa lô gắn khách mình | Hard-delete; sửa lô của NV khác |
-| ADMIN | Toàn bộ list, sửa trạng thái, quản trị | — |
+| Actor | List | Không |
+|-------|------|--------|
+| STAFF | Lô gắn khách mình tạo (CRM cũ); mock mới: list demo | Hard-delete |
+| ADMIN | Tất cả; CRM cũ: cột NV, xoá lô admin tạo | Tạo lô từ menu khách (CRM cũ) |
 
-## 3. Khái niệm & trạng thái
+Tạo lô: từ khách → «Tạo lô đất», không có nút thêm trên `/lo-dat`.
 
-| Thuật ngữ | Nghĩa |
-|-----------|--------|
-| Lodat | Một lô / nền / căn đang rao hoặc theo dõi |
-| Cover | Ảnh đại diện; `extraPhotoCount` = số ảnh thêm |
-| Phân loại | Nhà hoặc Đất (`LodatKind`) |
-| Giá bán | `priceVnd` + ghi chú giá + % hoa hồng |
+## 3. Khái niệm
 
-**Trạng thái rao bán (cột Trạng thái trên `/lo-dat`):** Mở bán ↔ Tạm dừng.  
-**Không** phải đã bán / chưa bán / đặt cọc — những trạng thái đó thuộc **giao dịch** (P3).
+| Thứ | Enum / field | List |
+|-----|----------------|------|
+| Rao bán | `DANG_BAN` / `TAM_DUNG` | Công tắc **Mở bán** ↔ **Tạm dừng** |
+| Phân loại | `NHA` / `DAT` | Hangtag Nhà / Đất — **web mới**; CRM cũ không có cột này |
+| Đã cọc / Đã bán | — | **Không** trên list; thuộc giao dịch |
 
-| Enum | Nhãn trên công tắc |
-|------|-------------------|
-| `DANG_BAN` | Mở bán |
-| `TAM_DUNG` | Tạm dừng |
+Mặc định **ẩn** lô tạm dừng.
 
-`DAT_COC` / `DA_BAN` giữ trong enum để migrate / P3, **không** hiện trên cột này.
+## 4–10.
 
-Tìm kiếm: `@` = gồm cả lô tạm dừng; `@@` = chỉ tạm dừng.
+Contract + mock đã có. Nest list sau khi §12 ổn. Không extension. Migrate: Title, địa chỉ, AreaM2, FrontageM, Direction, Price, hoa hồng, SaleStatus, ảnh.
 
-## 4. Use cases
+## 11. CRM cũ vs web mới
 
-1. Vào `/lo-dat` → bảng list, tìm theo tiêu đề / địa chỉ / tên khách
-2. Lọc cột phân loại (Nhà / Đất) và trạng thái (Mở bán / Tạm dừng); công tắc đổi rao bán trên mọi dòng
-3. Menu thao tác: Xem chi tiết (placeholder), Giao dịch / Sửa (toast mock)
-4. (Sau) Chi tiết: ảnh, ghi chú, danh sách chủ — `/lo-dat/[id]` placeholder
+- Cũ: chỉ `@` (gồm tạm dừng). Mới: thêm `@@` = chỉ tạm dừng.
+- Cũ: tìm Title + địa chỉ (placeholder ghi «khách» nhưng API **không** tìm tên khách). Mới: mock tìm thêm `customerHint`.
+- Cũ: bấm hàng → chi tiết; nút **GD** / **Sửa** trên dòng. Mới: menu chevron; bấm hàng PC = chọn.
+- Cũ: lọc trạng thái gồm Đang bán / Đã cọc / Đã bán / Tạm dừng. Mới: **chỉ** Mở bán / Tạm dừng.
 
-## 5. Quan hệ dữ liệu
+---
 
-- Lodat n—n Customer qua map (P2 sâu hơn)
-- Ownership: theo nhân viên gắn / khách sở hữu map
+## 12. List `/lo-dat`
 
-## 6. UI
+### 12.1 Section tìm kiếm
 
-| Màn | Route | Hành vi |
-|-----|-------|---------|
-| List | `/lo-dat` | Desktop: ô tìm + bảng §4.5 / §4.3.5. Mobile: ô tìm + Bộ lọc + Tìm; thẻ cơ bản (tiêu đề, ảnh, địa chỉ, giá, DT·MT·Hướng) |
-| Detail | `/lo-dat/[id]` | Placeholder (tên lô + quay lại list) |
+#### 1. Ô tìm kiếm
 
-Không H1 trùng menu header. Không dropdown lọc trùng icon cột.
+Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`
 
-## 7. Contract / API dự kiến
+Gõ là lọc. Mobile **Tìm** = đóng bàn phím. `@` → viền vàng + badge.
 
-Contract: `packages/shared/src/lodats.ts`  
-Prefix: `/api/v1/lodats`
+##### 1.1 Tìm theo
 
-| Method | Path | Auth |
-|--------|------|------|
-| GET | `/lodats` | JWT |
-| GET | `/lodats/:id` | JWT |
-| POST | `/lodats` | JWT (sau) |
-| PATCH | `/lodats/:id/sale-status` | JWT — chỉ `DANG_BAN` ↔ `TAM_DUNG` |
+- Tiêu đề lô
+- Địa chỉ
+- Tên khách (`customerHint` — mock mới)
+- Hướng, nhãn Nhà/Đất
 
-## 8. Mock data cần có
+Substring, không phân biệt hoa thường, **giữ dấu**.
 
-- Mở bán (công tắc bật) + Tạm dừng (công tắc tắt, ẩn mặc định)
-- Phân loại Nhà và Đất
-- Thiếu ảnh / thiếu giá
-- Đủ dòng để cuộn bảng (~12+)
+| Ô tìm | Tập lô |
+|-------|--------|
+| Không `@` | Chỉ **Mở bán** |
+| `@` | Mở bán **+** Tạm dừng |
+| `@@` | **Chỉ** Tạm dừng |
 
-## 9. Extension?
+Lọc cột Trạng thái = Tạm dừng vẫn hiện lô tạm dừng (không cần `@`).
 
-- [x] Không
+##### 1.2 Không có nút thêm lô
 
-## 10. Migrate từ hệ cũ
+Thêm lô từ màn khách.
 
-Map gần: Title, address/project, AreaM2, FrontageM, Direction, PriceVnd, PriceNote, BrokerFee, SaleStatus, photos, UpdatedAt.
+##### 1.3 Bộ lọc
 
-## 11. Open questions
+**PC:** icon cột (ảnh / địa chỉ / phân loại / thông số / giá có-chưa / trạng thái).
 
-- Nút thêm lô trên thanh tìm — chưa có trên ảnh mẫu; chưa làm
+**Mobile:** **Bộ lọc** + **Tìm** — Trạng thái, khoảng giá (bước 500tr + Chưa có giá). Xoá lọc.
+
+Không rail phải.
+
+---
+
+### 12.2 Section bảng (PC)
+
+Tiêu đề: Ảnh · Tiêu đề / Địa chỉ · Phân loại · DT · MT · Hướng · Giá bán · Trạng thái · Cập nhật · Thao tác.
+
+Bấm nền hàng → chọn. Không vào chi tiết (chi tiết = menu hoặc mobile).
+
+#### 1.2 Item
+
+##### 1.2.1 Ảnh
+
+Thumbnail. Thiếu = ô trống. `+N` nếu còn ảnh.
+
+##### 1.2.2 Tiêu đề / Địa chỉ
+
+Tiêu đề đậm. Dòng phụ = địa chỉ hoặc `—`.
+
+##### 1.2.3 Phân loại
+
+Hangtag **Nhà** xanh / **Đất** vàng.
+
+##### 1.2.4 DT · MT · Hướng
+
+Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
+
+##### 1.2.5 Giá bán
+
+`crm-money`. Phụ: ghi chú giá, hoa hồng `%`. Thiếu giá = `—`.
+
+##### 1.2.6 Trạng thái (công tắc)
+
+Bật = Mở bán. Tắt = Tạm dừng → lô biến khỏi list mặc định (gõ `@` để thấy).  
+Không phải đã bán / đặt cọc.
+
+##### 1.2.7 Cập nhật
+
+`HH:mm:ss D/M/YYYY`. Không lọc cột.
+
+##### 1.2.8 Thao tác (chevron)
+
+| Mục | Việc hiện tại |
+|-----|----------------|
+| Xem chi tiết | `/lo-dat/[id]` (placeholder) |
+| Giao dịch | Toast — form sau |
+| Sửa | Toast — form sau |
+
+CRM cũ: nút GD / Sửa / Xóa (admin, lô admin tạo) trên dòng.
+
+##### 1.2.9 Sort
+
+`updatedAt` mới → cũ.
+
+#### 1.3 Footer
+
+`Hiển thị N / Tổng M lô đất`.
+
+---
+
+### 12.3 Thẻ mobile
+
+Không bảng, không menu, không công tắc, không hangtag Nhà/Đất.
+
+##### 1. Tiêu đề đậm (trên)
+
+##### 2. Ảnh trái
+
+Thumbnail. Hangtag **Mở bán** / **Tạm dừng** trên ảnh. `+N` ảnh thêm.
+
+Bấm ảnh trên CRM cũ → gallery. Web mới: bấm cả thẻ → chi tiết.
+
+##### 3. Phải ảnh
+
+Địa chỉ · giá · một dòng DT · MT · hướng.
+
+##### 4. Bấm thẻ
+
+→ `/lo-dat/[id]`.
+
+##### 5. Footer
+
+Cùng câu Hiển thị N / Tổng M.
+
+---
+
+### 12.4 Chi tiết `/lo-dat/[id]`
+
+Placeholder: tên lô + quay lại. Ảnh / chủ / ghi chú — sau.
+
+---
+
+*Hành vi list bám §12. Visual §4.3.5. Không copy god-file CRM cũ.*
