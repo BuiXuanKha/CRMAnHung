@@ -61,6 +61,19 @@ Mỗi route public phải có:
 - Có ảnh OG mặc định brand (ví dụ `/og-default.png`) và ảnh riêng cho trang quan trọng.
 - Kiểm tra bằng Facebook Sharing Debugger / Twitter Card Validator khi gần ship trang mới.
 
+### 6. Meta Pixel (Facebook Ads)
+
+Meta Events Manager: dán **mã cơ sở vào `<head>`** (trước `</head>`), trên **mọi trang**.  
+Next.js không có file HTML tĩnh — tương đương: snippet trong `app/layout.tsx` (`<head>` của layout gốc) để mọi URL `anhungland.com` đều có pixel.
+
+| Hạng mục | Quy ước |
+|----------|---------|
+| Vị trí | `<head>` layout gốc `app/layout.tsx` — cùng snippet Meta (init + PageView) |
+| Pixel ID | `391165622297911` (public, hiện trong View Source) |
+| noscript | Ảnh 1×1 trong `<head>` (fallback tắt JS) |
+| SPA | `MetaPixelRouteTracker` — PageView khi đổi route Next `Link` (bỏ lần tải đầu) |
+| Dev | Tắt khi `next dev` (`NODE_ENV !== production`) |
+
 ---
 
 ## Không làm trên web công khai
