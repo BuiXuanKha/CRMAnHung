@@ -358,7 +358,9 @@ Desktop giữ bảng §4.5 (lọc cột, menu thao tác).
 
 #### 4.3.7 Bảng dữ liệu — trang dịch vụ sổ đỏ (đã chốt cột)
 
-Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghiệp vụ ảnh CRM cũ).
+Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`title-services.md` §12](./domains/title-services.md) (màn [`/dich-vu-so-do`](https://anhungland.com/dich-vu-so-do)).
+
+Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghiệp vụ ảnh CRM cũ).
 
 **Cột — Danh sách hồ sơ sổ đỏ** (desktop):
 
@@ -619,6 +621,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **§12 theo CRM đang chạy** `crm.anhungland.com/khach-hang`: SĐT xanh/cam, không icon mess trên dòng, lô = icon Map, nhu cầu = NeedSummary |
 | 2026-08-19 | **Đặc tả list `/lo-dat`:** `domains/lodats.md` §12 — cùng format đánh số; nguồn anhungland.com/lo-dat |
 | 2026-08-19 | **Đặc tả list `/giao-dich`:** `domains/transactions.md` §12 — nguồn anhungland.com/giao-dich |
+| 2026-08-19 | **Đặc tả list `/dich-vu-so-do`:** `domains/title-services.md` §12 — nguồn anhungland.com/dich-vu-so-do |
 
 ---
 
@@ -632,3 +635,4 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 - Domain khách hàng: [`domains/customers.md`](./domains/customers.md)
 - Domain lô đất: [`domains/lodats.md`](./domains/lodats.md)
 - Domain giao dịch: [`domains/transactions.md`](./domains/transactions.md)
+- Domain sổ đỏ: [`domains/title-services.md`](./domains/title-services.md)
