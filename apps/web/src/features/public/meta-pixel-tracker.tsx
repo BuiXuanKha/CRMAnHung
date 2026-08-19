@@ -2,6 +2,7 @@
 
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef } from 'react';
+import { trackSanPhamPixel } from './meta-pixel-events';
 
 declare global {
   interface Window {
@@ -9,14 +10,15 @@ declare global {
   }
 }
 
-/** PageView khi đổi trang Next.js (mã cơ sở trong `<head>` đã track lần tải đầu). */
+/** PageView khi đổi trang; ViewContent / ViewProductList trên /san-pham. */
 export function MetaPixelRouteTracker() {
   const pathname = usePathname();
-  const skipFirst = useRef(true);
+  const skipFirstPageView = useRef(true);
 
   useEffect(() => {
-    if (skipFirst.current) {
-      skipFirst.current = false;
+    trackSanPhamPixel(pathname);
+    if (skipFirstPageView.current) {
+      skipFirstPageView.current = false;
       return;
     }
     window.fbq?.('track', 'PageView');
