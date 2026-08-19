@@ -255,7 +255,9 @@ Mobile: ô tìm + Bộ lọc + Tìm; CTA thêm SĐT dính đáy — xem khối M
 
 #### 4.3.5 Bảng dữ liệu — trang lô đất (đã chốt cột)
 
-Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** nút GD/Sửa trên dòng).
+Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`lodats.md` §12](./domains/lodats.md) (màn [`/lo-dat`](https://anhungland.com/lo-dat)).
+
+Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** nút GD/Sửa trên dòng).
 
 **Cột — Danh sách lô đất** (desktop):
 
@@ -613,6 +615,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **Chốt §4.3.7 mobile `/dich-vu-so-do`:** thẻ tên/hangtag/nhu cầu/thu-chi/tiến độ; Bộ lọc Trạng thái; ẩn panel |
 | 2026-08-19 | **Chốt nghiệp vụ list `/khach-hang`:** ô tìm / cột / icon / menu / rail một panel / ẩn=`isHidden` — `domains/customers.md` §12; status domain → Ready for API (list) |
 | 2026-08-19 | **§12 theo CRM đang chạy** `crm.anhungland.com/khach-hang`: SĐT xanh/cam, không icon mess trên dòng, lô = icon Map, nhu cầu = NeedSummary |
+| 2026-08-19 | **Đặc tả list `/lo-dat`:** `domains/lodats.md` §12 — cùng format đánh số; nguồn anhungland.com/lo-dat |
 
 ---
 
@@ -624,3 +627,4 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 - Skill bảng list CRM: `.cursor/skills/crm-data-table`
 - Skill dialog CRM: `.cursor/skills/crm-dialog`
 - Domain khách hàng: [`domains/customers.md`](./domains/customers.md)
+- Domain lô đất: [`domains/lodats.md`](./domains/lodats.md)
