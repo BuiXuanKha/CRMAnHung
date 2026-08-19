@@ -6,7 +6,7 @@
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts`
 
-§12 = đặc tả list (đánh số, ngắn).
+§12 = đặc tả list. Mỗi trang: **máy tính** → **mobile** → rồi chi tiết từng phần.
 
 ---
 
@@ -48,15 +48,31 @@ Contract + mock đã có. Nest list sau khi §12 ổn. Không extension. Migrate
 
 ## 12. List `/lo-dat`
 
-### 12.1 Section tìm kiếm
+Thứ tự mỗi trang: **12.1 máy tính** → **12.2 mobile** → trong từng khối mới chi tiết thành phần. Không ghi «PC: … Mobile: …» trong cùng một mục.
 
-#### 1. Ô tìm kiếm
+---
+
+### 12.1 Giao diện máy tính
+
+```
+┌ Ô tìm ───────────────────────────────────────────────────────┐
+├ Bảng: Ảnh · Tiêu đề/Địa chỉ · Phân loại · DT·MT·Hướng · Giá ─┤
+│       · Trạng thái · Cập nhật · Thao tác                     │
+├ Footer đếm ──────────────────────────────────────────────────┤
+└ Không rail phải ─────────────────────────────────────────────┘
+```
+
+**Bấm nền hàng** → chọn. Không vào chi tiết (chi tiết = menu).
+
+Không nút thêm lô — thêm từ màn khách.
+
+#### 12.1.1 Ô tìm kiếm
 
 Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`
 
-Gõ là lọc. Mobile **Tìm** = đóng bàn phím. `@` → viền vàng + badge.
+Gõ là lọc. `@` → viền vàng + badge.
 
-##### 1.1 Tìm theo
+##### 1. Tìm theo
 
 - Tiêu đề lô
 - Địa chỉ
@@ -73,58 +89,42 @@ Substring, không phân biệt hoa thường, **giữ dấu**.
 
 Lọc cột Trạng thái = Tạm dừng vẫn hiện lô tạm dừng (không cần `@`).
 
-##### 1.2 Không có nút thêm lô
+#### 12.1.2 Bộ lọc
 
-Thêm lô từ màn khách.
+Icon cột: ảnh / địa chỉ / phân loại / thông số / giá có-chưa / trạng thái.
 
-##### 1.3 Bộ lọc
+#### 12.1.3 Item (dòng bảng)
 
-**PC:** icon cột (ảnh / địa chỉ / phân loại / thông số / giá có-chưa / trạng thái).
-
-**Mobile:** **Bộ lọc** + **Tìm** — Trạng thái, khoảng giá (bước 500tr + Chưa có giá). Xoá lọc.
-
-Không rail phải.
-
----
-
-### 12.2 Section bảng (PC)
-
-Tiêu đề: Ảnh · Tiêu đề / Địa chỉ · Phân loại · DT · MT · Hướng · Giá bán · Trạng thái · Cập nhật · Thao tác.
-
-Bấm nền hàng → chọn. Không vào chi tiết (chi tiết = menu hoặc mobile).
-
-#### 1.2 Item
-
-##### 1.2.1 Ảnh
+##### 1. Ảnh
 
 Thumbnail. Thiếu = ô trống. `+N` nếu còn ảnh.
 
-##### 1.2.2 Tiêu đề / Địa chỉ
+##### 2. Tiêu đề / Địa chỉ
 
 Tiêu đề đậm. Dòng phụ = địa chỉ hoặc `—`.
 
-##### 1.2.3 Phân loại
+##### 3. Phân loại
 
 Hangtag **Nhà** xanh / **Đất** vàng.
 
-##### 1.2.4 DT · MT · Hướng
+##### 4. DT · MT · Hướng
 
 Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
 
-##### 1.2.5 Giá bán
+##### 5. Giá bán
 
 `crm-money`. Phụ: ghi chú giá, hoa hồng `%`. Thiếu giá = `—`.
 
-##### 1.2.6 Trạng thái (công tắc)
+##### 6. Trạng thái (công tắc)
 
 Bật = Mở bán. Tắt = Tạm dừng → lô biến khỏi list mặc định (gõ `@` để thấy).  
 Không phải đã bán / đặt cọc.
 
-##### 1.2.7 Cập nhật
+##### 7. Cập nhật
 
 `HH:mm:ss D/M/YYYY`. Không lọc cột.
 
-##### 1.2.8 Thao tác (chevron)
+##### 8. Thao tác (chevron)
 
 | Mục | Việc hiện tại |
 |-----|----------------|
@@ -134,19 +134,41 @@ Không phải đã bán / đặt cọc.
 
 CRM cũ: nút GD / Sửa / Xóa (admin, lô admin tạo) trên dòng.
 
-##### 1.2.9 Sort
+##### 9. Sort
 
 `updatedAt` mới → cũ.
 
-#### 1.3 Footer
+#### 12.1.4 Footer
 
 `Hiển thị N / Tổng M lô đất`.
 
 ---
 
-### 12.3 Thẻ mobile
+### 12.2 Giao diện mobile
+
+```
+┌ Ô tìm ───────────────────────────────────────────────────────┐
+├ [Bộ lọc] [Tìm] ──────────────────────────────────────────────┤
+├ Thẻ xếp dọc ─────────────────────────────────────────────────┤
+├ Footer đếm ──────────────────────────────────────────────────┤
+└ Không rail, không nút thêm ──────────────────────────────────┘
+```
 
 Không bảng, không menu, không công tắc, không hangtag Nhà/Đất.
+
+**Bấm thẻ** → `/lo-dat/[id]`.
+
+#### 12.2.1 Ô tìm + nút Tìm
+
+Placeholder và quy tắc field / `@` / `@@`: **cùng 12.1.1**.
+
+Nút **Tìm** = đóng bàn phím.
+
+#### 12.2.2 Bộ lọc
+
+Nút **Bộ lọc** + **Tìm** — Trạng thái, khoảng giá (bước 500tr + Chưa có giá). Xoá lọc.
+
+#### 12.2.3 Item (thẻ)
 
 ##### 1. Tiêu đề đậm (trên)
 
@@ -154,23 +176,19 @@ Không bảng, không menu, không công tắc, không hangtag Nhà/Đất.
 
 Thumbnail. Hangtag **Mở bán** / **Tạm dừng** trên ảnh. `+N` ảnh thêm.
 
-Bấm ảnh trên CRM cũ → gallery. Web mới: bấm cả thẻ → chi tiết.
+CRM cũ: bấm ảnh → gallery. Web mới: bấm cả thẻ → chi tiết.
 
 ##### 3. Phải ảnh
 
 Địa chỉ · giá · một dòng DT · MT · hướng.
 
-##### 4. Bấm thẻ
+#### 12.2.4 Footer
 
-→ `/lo-dat/[id]`.
-
-##### 5. Footer
-
-Cùng câu Hiển thị N / Tổng M.
+Cùng câu `Hiển thị N / Tổng M lô đất`.
 
 ---
 
-### 12.4 Chi tiết `/lo-dat/[id]`
+### 12.3 Chi tiết `/lo-dat/[id]`
 
 Placeholder: tên lô + quay lại. Ảnh / chủ / ghi chú — sau.
 

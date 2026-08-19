@@ -6,7 +6,7 @@
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.7 + §4.5
 - **Contract:** `packages/shared/src/title-services.ts`
 
-§12 = đặc tả list (đánh số, ngắn).
+§12 = đặc tả list. Mỗi trang: **máy tính** → **mobile** → rồi chi tiết từng phần.
 
 ---
 
@@ -50,77 +50,81 @@ GET `keyword`, `status`. PATCH ghim / sửa. POST tiến độ, tiền, file (mo
 
 ## 12. List `/dich-vu-so-do`
 
-### 12.1 Section tìm kiếm
+Thứ tự mỗi trang: **12.1 máy tính** → **12.2 mobile** → trong từng khối mới chi tiết thành phần. Không ghi «PC: … Mobile: …» trong cùng một mục.
 
-#### 1. Ô tìm kiếm
+---
+
+### 12.1 Giao diện máy tính
+
+```
+┌ Ô tìm ───────────────────────────────────────────────────────┐
+├ Bảng: # · Tên khách · Nhu cầu · Lịch sử · Giá/Thu/Chi        │
+│       · Tài liệu · Số ngày · Thao tác                        │
+├ Footer đếm ──────────────────────────────────────────────────┤
+└ Panel phải: Chi tiết hồ sơ (một tab) ────────────────────────┘
+```
+
+Không nút thêm hồ sơ — thêm từ màn khách.
+
+**Bấm nền hàng** → chọn + **mở panel** Chi tiết hồ sơ.
+
+Sort: ghim trước, rồi `updatedAt` mới.
+
+Ghim: nền vàng `#fef9c3`. Đang chọn: `#eff6ff`.
+
+#### 12.1.1 Ô tìm kiếm
 
 Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`
 
-Gõ là lọc. Mobile **Tìm** = đóng bàn phím. Không `@`.
+Gõ là lọc. Không `@`. (`TAM_DUNG` vẫn hiện trên list — khác `/lo-dat`.)
 
-##### 1.1 Tìm theo (web mới)
+##### 1. Tìm theo (web mới)
 
 - Mã hồ sơ (`SD-…`)
 - Tên khách
 - SĐT
 - Nhu cầu, ghi chú, nhãn trạng thái
 
-##### 1.2 Không nút thêm hồ sơ
+#### 12.1.2 Bộ lọc
 
-##### 1.3 Bộ lọc
+Icon cột — trạng thái (cột Tên khách), nhu cầu / tiến độ / giá / tài liệu có-chưa.
 
-**PC:** icon cột — trạng thái (cột Tên khách), nhu cầu / tiến độ / giá / tài liệu có-chưa.
+#### 12.1.3 Item (dòng bảng)
 
-**Mobile:** **Bộ lọc** + **Tìm** — Trạng thái. Xoá lọc.
-
----
-
-### 12.2 Section bảng (PC)
-
-Tiêu đề: `#` · Tên khách · Nhu cầu · Lịch sử đang làm · Giá / Thu / Chi · Tài liệu · Số ngày · Thao tác.
-
-Bấm nền hàng → chọn + **mở panel** Chi tiết hồ sơ.
-
-Sort: ghim trước, rồi `updatedAt` mới.
-
-Ghim: nền vàng `#fef9c3`. Đang chọn: `#eff6ff`.
-
-#### 1.2 Item
-
-##### 1.2.1 `#`
+##### 1. `#`
 
 STT 1…N. **Ghim:** icon Lucide `Star` vàng `#ca8a04` **thay số**. Không emoji. Không lọc cột.
 
-##### 1.2.2 Tên khách
+##### 2. Tên khách
 
 Tên đậm + hangtag trạng thái.  
 Dòng phụ: mã hồ sơ · SĐT.
 
-##### 1.2.3 Nhu cầu
+##### 3. Nhu cầu
 
 `needSummary`. Thiếu = `—`.
 
-##### 1.2.4 Lịch sử đang làm
+##### 4. Lịch sử đang làm
 
 Bước mới nhất **đậm** + ngày `D/M/YYYY`. Chưa có = `Chưa ghi tiến độ`.
 
-##### 1.2.5 Giá / Thu / Chi
+##### 5. Giá / Thu / Chi
 
 Ba dòng: Giá `crm-money` · Thu xanh `#047857` · Chi đỏ `#b91c1c`. Thiếu giá = `—`; thu/chi 0 = `0 đ`.
 
-##### 1.2.6 Tài liệu
+##### 6. Tài liệu
 
 `N file` hoặc `Chưa có`.
 
-##### 1.2.7 Số ngày
+##### 7. Số ngày
 
 Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 
-##### 1.2.8 Thao tác (chevron)
+##### 8. Thao tác (chevron)
 
 | Mục | Việc |
 |-----|------|
-| Xem chi tiết | Chọn + mở panel (PC). Route `[id]` vẫn placeholder |
+| Xem chi tiết | Chọn + mở panel. Route `[id]` vẫn placeholder |
 | Ghim / Bỏ ghim | `isPinned` |
 | Thêm tiến độ | Dialog mock |
 | Nhập thu | Dialog mock |
@@ -129,30 +133,45 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 | Sửa thông tin | Dialog mock (trạng thái, giá, nhu cầu) |
 | Xóa hồ sơ | Đỏ → confirm → gỡ list (mock) |
 
-#### 1.3 Footer
+#### 12.1.4 Footer
 
 `Hiển thị N / Tổng M hồ sơ sổ đỏ`.
 
----
-
-### 12.3 Panel phải — Chi tiết hồ sơ (PC)
+#### 12.1.5 Panel phải — Chi tiết hồ sơ
 
 **Một** tab (không 3 thanh như khách hàng).
 
 - Thu hẹp: thanh dọc, chữ xoay 90°, nhãn **Chi tiết hồ sơ**.
 - Mở: tên + mã · SĐT; lưới Trạng thái / Giá / Đã thu / Đã chi; hộp Nhu cầu; nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline tiến độ, file, thu/chi.
 - Chưa chọn: «Chọn một hồ sơ…»
-- **Mobile: ẩn panel.**
 
 ---
 
-### 12.4 Thẻ mobile
+### 12.2 Giao diện mobile
 
-Không bảng, không panel.
+```
+┌ Ô tìm ───────────────────────────────────────────────────────┐
+├ [Bộ lọc] [Tìm] ──────────────────────────────────────────────┤
+├ Thẻ xếp dọc ─────────────────────────────────────────────────┤
+├ Footer đếm ──────────────────────────────────────────────────┤
+└ Không bảng, không panel, không nút thêm ─────────────────────┘
+```
+
+**Bấm thẻ** (không phải menu) → chọn dòng. **Không** nhảy `[id]`.
+
+#### 12.2.1 Ô tìm + nút Tìm
+
+Placeholder và quy tắc field: **cùng 12.1.1**. Nút **Tìm** = đóng bàn phím.
+
+#### 12.2.2 Bộ lọc
+
+Nút **Bộ lọc** + **Tìm** — Trạng thái. Xoá lọc.
+
+#### 12.2.3 Item (thẻ)
 
 ##### 1. Đầu
 
-Sao nếu ghim + tên đậm + hangtag + chevron (cùng menu 1.2.8).
+Sao nếu ghim + tên đậm + hangtag + chevron (cùng menu 12.1.3 mục 8).
 
 ##### 2. Meta
 
@@ -164,19 +183,15 @@ Nhu cầu (2 dòng) · Giá / Thu / Chi · bước tiến độ · `N file` / Ch
 
 Ghim: nền vàng + viền trái `#ca8a04`.
 
-##### 4. Bấm thẻ (không phải menu)
+#### 12.2.4 Footer
 
-Chọn dòng. **Không** nhảy `[id]`.
-
-##### 5. Footer
-
-Cùng câu Hiển thị N / Tổng M.
+Cùng câu `Hiển thị N / Tổng M hồ sơ sổ đỏ`.
 
 ---
 
-### 12.5 Chi tiết `/dich-vu-so-do/[id]`
+### 12.3 Chi tiết `/dich-vu-so-do/[id]`
 
-Placeholder: mã + quay lại. Làm việc hàng ngày = list + panel / menu.
+Placeholder: mã + quay lại. Làm việc hàng ngày = list + panel (máy tính) / menu (cả hai).
 
 ---
 

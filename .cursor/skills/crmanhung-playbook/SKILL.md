@@ -9,7 +9,7 @@ Trước mọi feature: `docs/FOUNDATION.md` + `pnpm doctor` (FAIL → sửa n�
 
 Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng thứ tự**:
 
-1. **Docs** — `docs/domains/<domain>.md` (status ≥ Ready for mock)
+1. **Docs** — `docs/domains/<domain>.md` (status ≥ Ready for mock). List UI: máy tính → mobile → chi tiết thành phần (`customers.md` §12).
 2. **Skill** — cập nhật `.cursor/skills` nếu xuất hiện pattern mới
 3. **Contract** — Zod/types trong `packages/shared`
 4. **UI + mock** — `apps/web` với `NEXT_PUBLIC_USE_MOCK` / mock module

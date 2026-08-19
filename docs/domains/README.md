@@ -13,4 +13,4 @@
 
 Trước khi code UI/API: domain doc phải ở trạng thái **Ready for mock** trở lên.
 
-**Cách viết đặc tả màn:** đánh số, ngắn, một control một mục — mẫu [`customers.md`](./customers.md) §12.
+**Cách viết đặc tả màn:** mỗi trang chia **máy tính** rồi **mobile**, sau đó mới chi tiết từng thành phần — mẫu [`customers.md`](./customers.md) §12. Đánh số, ngắn; không trộn PC/mobile trong một mục.
