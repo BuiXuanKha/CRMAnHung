@@ -7,7 +7,7 @@
 | Customers | [customers.md](./customers.md) | Ready for mock — §12 theo CRM `/khach-hang` đang chạy |
 | Lodats | [lodats.md](./lodats.md) | Ready for mock — §12 list `/lo-dat` |
 | Addresses | _(tạo khi P2)_ | — |
-| Transactions | [transactions.md](./transactions.md) | Ready for mock (P3 list) |
+| Transactions | [transactions.md](./transactions.md) | Ready for mock — §12 list `/giao-dich` |
 | Title services | [title-services.md](./title-services.md) | Ready for mock (P3 list) |
 | Users / admin registry | _(tạo khi P4)_ | — |
 

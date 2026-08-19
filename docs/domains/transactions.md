@@ -2,108 +2,206 @@
 
 - **Slug:** `transactions`
 - **Status:** Ready for mock
-- **Owner:** An Hưng Land
-- **Liên quan hệ cũ:** màn Quản lý giao dịch (`/giao-dich`) — đối chiếu nghiệp vụ, không copy UI god-file
+- **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich`
+- **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
+- **Contract:** `packages/shared/src/transactions.ts`
+
+§12 = đặc tả list (đánh số, ngắn).
 
 ---
 
 ## 1. Mục đích
 
-Nhân viên theo dõi các giao dịch mua bán lô: loại (của tôi / ghi nhận), các bên, giá, hoa hồng, trạng thái cọc → công chứng → hoàn thành, hẹn công chứng.
+Theo dõi deal mua bán lô: loại, các bên, giá, hoa hồng, cọc → công chứng → hoàn thành, hẹn CC.
 
-## 2. Actors & quyền
+## 2. Actors
 
-| Actor | Được làm | Không được |
-|-------|----------|------------|
-| STAFF | Xem / tạo / sửa / xóa giao dịch mình tạo (P3 mock: xem list demo + xóa mock) | Sửa GD của NV khác |
-| ADMIN | Toàn bộ list, lọc theo NV (sau) | — |
+| Actor | List | Không |
+|-------|------|--------|
+| STAFF | GD mình tạo (CRM cũ). Mock mới: list demo + xóa mock | Sửa GD NV khác |
+| ADMIN | Tất cả; CRM cũ lọc theo NV | — |
 
-## 3. Khái niệm & trạng thái
+Không nút «Thêm GD» trên list — tạo từ lô / khách.
 
-| Thuật ngữ | Nghĩa |
-|-----------|--------|
-| Giao dịch của tôi (`OWN`) | Deal nhân viên đang phụ trách; có hoa hồng; hẹn công chứng khi còn Đã cọc |
-| Ghi nhận (`RECORD`) | Chỉ ghi nhận trên hệ; **không** hoa hồng; **không** đếm doanh thu / hoa hồng |
-| Hẹn CC | Ngày hẹn công chứng. Đếm ngược chỉ với `OWN` + `DA_COC` |
+## 3. Khái niệm
 
-**Loại (`TransactionType`)**
+| Loại | Enum | List |
+|------|------|------|
+| Của tôi | `OWN` | Có hoa hồng; đếm ngược hẹn CC khi Đã cọc |
+| Ghi nhận | `RECORD` | Hoa hồng = `—`; **không** vào thẻ doanh thu / hoa hồng |
 
-| Enum | Nhãn |
-|------|------|
-| `OWN` | Của tôi |
-| `RECORD` | Ghi nhận |
+| Trạng thái | Enum | Hangtag |
+|------------|------|---------|
+| Đã cọc | `DA_COC` | amber |
+| Đã công chứng | `DA_CONG_CHUNG` | blue |
+| Hoàn thành | `HOAN_TAT` | green |
+| Đã hủy | `HUY` | red |
 
-**Trạng thái (`TransactionStatus`)**
+**3 thẻ thống kê** (trên ô tìm):
 
-| Enum | Nhãn |
-|------|------|
-| `DA_COC` | Đã cọc |
-| `DA_CONG_CHUNG` | Đã công chứng |
-| `HOAN_TAT` | Hoàn thành |
-| `HUY` | Đã hủy |
+1. Số lô giao dịch = số dòng đang hiện
+2. Tổng doanh thu = `salePriceVnd` của **OWN + HOAN_TAT** trong cùng lọc
+3. Tổng hoa hồng = `commissionVnd` cùng điều kiện
 
-**Thống kê 3 thẻ**
+Gợi ý dưới số 2–3: «Chỉ giao dịch của tôi · Hoàn thành». Mobile: ẩn gợi ý; số rút gọn (tỷ / triệu). **Luôn 3 cột.**
 
-- **Số lô giao dịch** = số dòng đang hiện (theo bộ lọc).
-- **Tổng doanh thu / Tổng hoa hồng** = chỉ `OWN` + `HOAN_TAT` trong cùng bộ lọc. Hint: «Chỉ giao dịch của tôi · Hoàn thành».
+## 4–10.
 
-## 4. Use cases
+GET list: `keyword`, `type`, `status`. DELETE mock. Chi tiết / form sau. Không extension. Migrate `tblTransaction*`.
 
-1. Vào `/giao-dich` → 3 thẻ thống kê + ô tìm + bảng (desktop) / thẻ (mobile)
-2. Tìm theo mã GD / lô / người bán / người mua / ghi chú
-3. Desktop: lọc cột Loại, Trạng thái, và có/không dữ liệu các cột khác. Mobile: Bộ lọc Loại + Trạng thái
-4. Menu thao tác: Xem chi tiết (placeholder), Sửa (toast mock), Xóa (xác nhận)
-5. (Sau) Form tạo/sửa và chi tiết đầy đủ
+## 11. CRM cũ vs web mới
 
-## 5. Quan hệ dữ liệu
+- Cũ: tìm Code + tiêu đề lô snapshot + ghi chú (API **không** tìm tên bên). Mới: mock tìm thêm người bán / mua, nhãn loại / trạng thái.
+- Cũ ADMIN: lọc nhân viên. Mới: chưa mock cột NV.
+- Không `@` / `@@`.
 
-- Transaction → Lodat (snapshot tiêu đề lúc chốt)
-- Transaction n—n Customer (người bán / người mua)
-- Ownership: `createdByEmployeeId` (API thật). Mock P3: STAFF thấy mọi dòng demo.
+---
 
-## 6. UI
+## 12. List `/giao-dich`
 
-| Màn | Route | Hành vi |
-|-----|-------|---------|
-| List | `/giao-dich` | Desktop: 3 thẻ + ô tìm + bảng §4.5 / §4.3.6. Mobile: 3 thẻ (vẫn 3 cột) + ô tìm + Bộ lọc + Tìm; thẻ mã GD / hangtag / lô / các bên / giá / hẹn CC |
-| Detail | `/giao-dich/[id]` | Placeholder (mã GD + quay lại list) |
+### 12.1 Section tìm + thống kê
 
-Không H1 trùng menu header. Desktop: không dropdown loại/trạng thái trên thanh tìm (lọc bằng icon cột). Mobile: Bộ lọc Loại + Trạng thái inline. Không rail phải. Không nút «Thêm GD» trên list (chưa có trên ảnh mẫu). Cột NV (admin) để sau.
+#### 1. Ba thẻ (trên cùng)
 
-## 7. Contract / API dự kiến
+- Số lô giao dịch
+- Tổng doanh thu (`crm-money`)
+- Tổng hoa hồng (`crm-money`)
 
-Contract: `packages/shared/src/transactions.ts`  
-Prefix: `/api/v1/transactions`
+Đổi lọc / ô tìm → 3 thẻ đổi theo tập đang hiện.
 
-| Method | Path | Auth |
-|--------|------|------|
-| GET | `/transactions` | JWT — query `keyword`, `type`, `status` |
-| GET | `/transactions/:id` | JWT |
-| DELETE | `/transactions/:id` | JWT |
+#### 2. Ô tìm kiếm
 
-Response list: `{ items, total, stats: { totalRevenueVnd, totalCommissionVnd } }`.  
-`stats` luôn tính trên `OWN` + `HOAN_TAT` (API thật: cùng scope quyền + query). Mock UI tính lại trên dòng đang hiện sau lọc cột.
+Placeholder: `Tìm mã GD, lô đất, người bán, người mua, ghi chú...`
 
-## 8. Mock data cần có
+Gõ là lọc. Mobile **Tìm** = đóng bàn phím.
 
-- Cả `OWN` và `RECORD`
-- Đủ 4 trạng thái
-- RECORD không hoa hồng
-- OWN + Đã cọc: hẹn CC còn ngày / hôm nay / quá hạn
-- Thiếu người bán / người mua / ghi chú / giá → `—`
-- Ít nhất một `OWN` + `HOAN_TAT` để thẻ doanh thu / hoa hồng ≠ 0
-- Đủ dòng để cuộn bảng (~10+)
+##### 2.1 Tìm theo (web mới)
 
-## 9. Extension?
+- Mã GD
+- Tiêu đề lô
+- Người bán, người mua
+- Ghi chú
+- Nhãn loại / trạng thái
 
-- [x] Không
+Substring, không phân biệt hoa thường, giữ dấu. Không `@`.
 
-## 10. Migrate từ hệ cũ
+##### 2.2 Không nút thêm GD
 
-`tblTransaction*` → `Transaction*` (chi tiết `docs/MIGRATION.md`). Giữ `OWN` / `RECORD` và 4 status.
+##### 2.3 Bộ lọc
 
-## 11. Open questions
+**PC:** icon cột — Loại, Lô, Người bán, Người mua, Giá, Hoa hồng (có / chưa / ghi nhận), Trạng thái, Hẹn CC, Ghi chú. Không lọc cột Mã GD / Ngày tạo.
 
-- Form tạo/sửa và snapshot lô — làm sau list mock.
-- Cột NV / lọc nhân viên — chỉ ADMIN, chưa mock.
-- Xóa GD thật: có mở lại trạng thái rao bán của lô hay không — API P3.
+**Mobile:** **Bộ lọc** + **Tìm** — Loại, Trạng thái. Xoá lọc.
+
+Không rail.
+
+---
+
+### 12.2 Section bảng (PC)
+
+Tiêu đề: Mã GD · Loại · Lô đất · Người bán · Người mua · Giá bán · Hoa hồng · Trạng thái · Hẹn CC · Ghi chú · Ngày tạo · Thao tác.
+
+Bấm nền hàng → chọn. Chi tiết = menu (hoặc bấm thẻ mobile).
+
+Sort: `createdAt` mới → cũ.
+
+#### 1.2 Item
+
+##### 1.2.1 Mã GD
+
+`GD-…`
+
+##### 1.2.2 Loại
+
+Hangtag **Của tôi** xanh / **Ghi nhận** xám.
+
+##### 1.2.3 Lô đất
+
+Tiêu đề lô. Thiếu = `—`.
+
+##### 1.2.4 Người bán
+
+Mỗi tên một dòng. Rỗng = `—`.
+
+##### 1.2.5 Người mua
+
+Như người bán.
+
+##### 1.2.6 Giá bán
+
+`crm-money`. 0 / thiếu = `—`.
+
+##### 1.2.7 Hoa hồng
+
+`OWN`: `crm-money` hoặc `—`.  
+`RECORD`: luôn `—`.
+
+##### 1.2.8 Trạng thái
+
+Hangtag 1.3.
+
+##### 1.2.9 Hẹn CC
+
+Ngày `D/M/YYYY`.  
+Đếm ngược **chỉ** Của tôi + Đã cọc:
+
+- `Còn N ngày` xanh
+- `Hôm nay` vàng
+- `Quá N ngày` đỏ
+
+Ghi nhận / không ngày / không còn Đã cọc: chỉ ngày hoặc `—`.
+
+##### 1.2.10 Ghi chú
+
+Một dòng, cắt `…`. Thiếu = `—`.
+
+##### 1.2.11 Ngày tạo
+
+`HH:mm:ss D/M/YYYY`.
+
+##### 1.2.12 Thao tác (chevron)
+
+| Mục | Việc |
+|-----|------|
+| Xem chi tiết | `/giao-dich/[id]` (placeholder) |
+| Sửa | Toast — form sau |
+| Xóa | Đỏ → confirm → gỡ khỏi list (mock). API: xóa cứng? mở lại rao bán lô? — sau |
+
+#### 1.3 Footer
+
+`Hiển thị N / Tổng M giao dịch`.
+
+---
+
+### 12.3 Thẻ mobile
+
+3 thẻ thống kê **vẫn 3 cột**. Không bảng.
+
+##### 1. Đầu thẻ
+
+Mã GD + hangtag Loại + hangtag Trạng thái + chevron (cùng menu 1.2.12).
+
+##### 2. Thân
+
+- Tiêu đề lô đậm
+- Người bán / Người mua
+- Giá · Hoa hồng
+- Hẹn CC (kèm đếm ngược) · Ghi chú · Ngày tạo
+
+##### 3. Bấm thẻ (không phải menu)
+
+→ `/giao-dich/[id]`.
+
+##### 4. Footer
+
+Cùng câu Hiển thị N / Tổng M.
+
+---
+
+### 12.4 Chi tiết `/giao-dich/[id]`
+
+Placeholder: mã GD + quay lại.
+
+---
+
+*Hành vi list bám §12. Visual §4.3.6. Không copy god-file.*

@@ -299,7 +299,9 @@ Desktop giữ bảng §4.5 (cột phân loại, công tắc, menu thao tác, l�
 
 #### 4.3.6 Bảng dữ liệu — trang giao dịch (đã chốt cột)
 
-Mọi bảng list CRM tuân **§4.5**. Dưới đây là **cột / nội dung** riêng `/giao-dich` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** nút Xóa trên dòng).
+Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`transactions.md` §12](./domains/transactions.md) (màn [`/giao-dich`](https://anhungland.com/giao-dich)).
+
+Dưới đây là **cột / nội dung** riêng `/giao-dich` (đối chiếu nghiệp vụ ảnh CRM cũ; **không** nút Xóa trên dòng).
 
 **Ba thẻ thống kê** (trên thanh tìm — chốt theo ảnh mẫu, không phải card marketing):
 
@@ -616,6 +618,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **Chốt nghiệp vụ list `/khach-hang`:** ô tìm / cột / icon / menu / rail một panel / ẩn=`isHidden` — `domains/customers.md` §12; status domain → Ready for API (list) |
 | 2026-08-19 | **§12 theo CRM đang chạy** `crm.anhungland.com/khach-hang`: SĐT xanh/cam, không icon mess trên dòng, lô = icon Map, nhu cầu = NeedSummary |
 | 2026-08-19 | **Đặc tả list `/lo-dat`:** `domains/lodats.md` §12 — cùng format đánh số; nguồn anhungland.com/lo-dat |
+| 2026-08-19 | **Đặc tả list `/giao-dich`:** `domains/transactions.md` §12 — nguồn anhungland.com/giao-dich |
 
 ---
 
@@ -628,3 +631,4 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 - Skill dialog CRM: `.cursor/skills/crm-dialog`
 - Domain khách hàng: [`domains/customers.md`](./domains/customers.md)
 - Domain lô đất: [`domains/lodats.md`](./domains/lodats.md)
+- Domain giao dịch: [`domains/transactions.md`](./domains/transactions.md)
