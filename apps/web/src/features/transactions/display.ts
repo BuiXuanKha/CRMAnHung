@@ -16,6 +16,32 @@ export function formatStatMoneyVnd(n: number): string {
   return `${n.toLocaleString('vi-VN')} đ`;
 }
 
+/** Số tiền rút gọn trên thẻ thống kê mobile (2,6 tỷ / 26 triệu). */
+export function formatStatShortVnd(n: number): string {
+  if (!Number.isFinite(n) || n <= 0) return '0 đ';
+  if (n >= 1_000_000_000) {
+    const ty = n / 1_000_000_000;
+    const text = new Intl.NumberFormat('vi-VN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 3,
+    }).format(ty);
+    return `${text} tỷ`;
+  }
+  if (n >= 1_000_000) {
+    const trieu = n / 1_000_000;
+    const text = new Intl.NumberFormat('vi-VN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(trieu);
+    return `${text} triệu`;
+  }
+  return `${n.toLocaleString('vi-VN')} đ`;
+}
+
+export function countMobileTransactionFilters(type: string, status: string): number {
+  return (type ? 1 : 0) + (status ? 1 : 0);
+}
+
 export function formatCreatedAt(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return '—';

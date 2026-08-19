@@ -1,4 +1,4 @@
-import { formatStatMoneyVnd } from '../display';
+import { formatStatMoneyVnd, formatStatShortVnd } from '../display';
 
 type Props = {
   count: number;
@@ -16,12 +16,18 @@ export function TransactionStats({ count, totalRevenueVnd, totalCommissionVnd }:
       </article>
       <article className="tx-stat">
         <p className="tx-stat-label">Tổng doanh thu</p>
-        <p className="tx-stat-value crm-money">{formatStatMoneyVnd(totalRevenueVnd)}</p>
+        <p className="tx-stat-value crm-money">
+          <span className="tx-stat-full">{formatStatMoneyVnd(totalRevenueVnd)}</span>
+          <span className="tx-stat-short">{formatStatShortVnd(totalRevenueVnd)}</span>
+        </p>
         <p className="tx-stat-hint">Chỉ giao dịch của tôi · Hoàn thành</p>
       </article>
       <article className="tx-stat">
         <p className="tx-stat-label">Tổng hoa hồng</p>
-        <p className="tx-stat-value crm-money">{formatStatMoneyVnd(totalCommissionVnd)}</p>
+        <p className="tx-stat-value crm-money">
+          <span className="tx-stat-full">{formatStatMoneyVnd(totalCommissionVnd)}</span>
+          <span className="tx-stat-short">{formatStatShortVnd(totalCommissionVnd)}</span>
+        </p>
         <p className="tx-stat-hint">Chỉ giao dịch của tôi · Hoàn thành</p>
       </article>
     </section>

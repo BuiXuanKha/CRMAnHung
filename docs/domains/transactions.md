@@ -49,9 +49,9 @@ Nhân viên theo dõi các giao dịch mua bán lô: loại (của tôi / ghi nh
 
 ## 4. Use cases
 
-1. Vào `/giao-dich` → 3 thẻ thống kê + ô tìm + bảng list
+1. Vào `/giao-dich` → 3 thẻ thống kê + ô tìm + bảng (desktop) / thẻ (mobile)
 2. Tìm theo mã GD / lô / người bán / người mua / ghi chú
-3. Lọc cột Loại, Trạng thái, và có/không dữ liệu các cột khác
+3. Desktop: lọc cột Loại, Trạng thái, và có/không dữ liệu các cột khác. Mobile: Bộ lọc Loại + Trạng thái
 4. Menu thao tác: Xem chi tiết (placeholder), Sửa (toast mock), Xóa (xác nhận)
 5. (Sau) Form tạo/sửa và chi tiết đầy đủ
 
@@ -65,10 +65,10 @@ Nhân viên theo dõi các giao dịch mua bán lô: loại (của tôi / ghi nh
 
 | Màn | Route | Hành vi |
 |-----|-------|---------|
-| List | `/giao-dich` | 3 thẻ + ô tìm + bảng §4.5; cột theo §4.3.6 |
+| List | `/giao-dich` | Desktop: 3 thẻ + ô tìm + bảng §4.5 / §4.3.6. Mobile: 3 thẻ (vẫn 3 cột) + ô tìm + Bộ lọc + Tìm; thẻ mã GD / hangtag / lô / các bên / giá / hẹn CC |
 | Detail | `/giao-dich/[id]` | Placeholder (mã GD + quay lại list) |
 
-Không H1 trùng menu header. Không dropdown loại/trạng thái trên thanh tìm (lọc bằng icon cột). Không rail phải. Không nút «Thêm GD» trên list (chưa có trên ảnh mẫu). Cột NV (admin) để sau.
+Không H1 trùng menu header. Desktop: không dropdown loại/trạng thái trên thanh tìm (lọc bằng icon cột). Mobile: Bộ lọc Loại + Trạng thái inline. Không rail phải. Không nút «Thêm GD» trên list (chưa có trên ảnh mẫu). Cột NV (admin) để sau.
 
 ## 7. Contract / API dự kiến
 

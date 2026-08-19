@@ -134,6 +134,7 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 | Trang khách hàng: layout chính | Tìm/lọc trên + **bảng** trái + **rail phải** | §4.3.1–4.3.4 |
 | Thao tác trên dòng | **Menu hành động** (dropdown) | §4.3.3 |
 | Mobile `/khach-hang` | **Thẻ xếp dọc** + Bộ lọc + Tìm + nút Thêm SĐT đáy | Đã chốt theo ảnh mẫu |
+| Mobile `/giao-dich` | **Thẻ xếp dọc** + Bộ lọc + Tìm; 3 thẻ thống kê vẫn 3 cột | Đã chốt theo CRM cũ |
 | Mật độ thông tin | **Đặc** trên desktop | |
 | Tránh tuyệt đối | Invent style bảng khác §4.5; thiếu footer; scroll cắt header cột | |
 
@@ -320,7 +321,31 @@ Thẻ: nền trắng, viền `#e2e8f0`, bo 12px. Số tiền dùng `crm-money`.
 | `Ngày tạo` | `HH:mm:ss D/M/YYYY` — **không** icon lọc (timestamp) |
 | `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Sửa**, **Xóa** (đỏ + `CrmConfirmDialog`) |
 
-**Thanh tìm (§4.3.4, biến thể giao dịch):** chỉ ô tìm, **không** H1, **không** dropdown loại/trạng thái trên thanh (lọc bằng icon cột). Placeholder: `Tìm mã GD, lô đất, người bán, người mua, ghi chú...`. Không rail phải. Không nút «Thêm GD». Cột NV (admin) chưa mock.
+**Thanh tìm (§4.3.4, biến thể giao dịch):** desktop chỉ ô tìm, **không** H1, **không** dropdown loại/trạng thái trên thanh (lọc bằng icon cột). Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới. Placeholder: `Tìm mã GD, lô đất, người bán, người mua, ghi chú...`. Không rail phải. Không nút «Thêm GD». Cột NV (admin) chưa mock.
+
+**Mobile (≤767px) — đã chốt theo CRM cũ:** **thẻ xếp dọc**, không bảng cuộn ngang. Header CRM vẫn §4.2. Ba thẻ thống kê **giữ 3 cột** (không xếp dọc 1 cột).
+
+```
+┌─ Số lô · Doanh thu · Hoa hồng ───────┐
+┌─ ô tìm ───── [ Bộ lọc ] [ Tìm ] ─────┐
+│ (mở Bộ lọc: Loại · Trạng thái)       │
+│ thẻ: mã GD   [Loại] [Trạng thái] [▾] │
+│      tiêu đề lô                      │
+│      Người bán / Người mua           │
+│      Giá bán · Hoa hồng              │
+│      Hẹn CC · Ghi chú · Ngày tạo     │
+└─ Hiển thị N / Tổng M giao dịch ──────┘
+```
+
+| Hạng mục | Quy tắc |
+|----------|---------|
+| Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px. Đầu thẻ: **mã GD** + hangtag Loại + hangtag Trạng thái + chevron thao tác. **Tiêu đề lô** đậm. Meta 2 cột: người bán, người mua, giá `crm-money`, hoa hồng, hẹn CC (kèm đếm ngược), ghi chú (1 dòng `…`), ngày tạo. Ghi nhận / thiếu = `—`. **Không** nút Xóa riêng trên thẻ |
+| Thống kê | 3 cột như desktop; chữ nhỏ hơn; **ẩn** gợi ý dưới số; số tiền rút gọn (`2,6 tỷ`, `26 triệu`) |
+| Bấm thẻ | Mở chi tiết `/giao-dich/[id]`. Chevron → menu §4.3.6 (Xem chi tiết / Sửa / Xóa) |
+| Tìm / lọc | Cùng **một hàng**: ô tìm + nút **Bộ lọc** + nút **Tìm** (nền xanh). Bộ lọc bung panel **inline** dưới hàng (không `CrmDialog`): select Loại, select Trạng thái, nút Xoá lọc khi đang lọc. Nút Tìm đóng bàn phím; gõ ô tìm vẫn lọc. Desktop không hiện Bộ lọc / Tìm |
+| Footer | Cùng câu «Hiển thị N / Tổng M giao dịch», dính đáy vùng list |
+
+Desktop giữ bảng §4.5 (lọc cột, menu thao tác).
 
 #### 4.3.7 Bảng dữ liệu — trang dịch vụ sổ đỏ (đã chốt cột)
 
@@ -553,6 +578,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-18 | **Chốt §4.3.5 mobile `/lo-dat`:** thẻ xếp dọc + nút Bộ lọc (không bảng cuộn ngang) |
 | 2026-08-18 | **Chốt lại §4.3.5 mobile `/lo-dat`:** hàng ô tìm + Bộ lọc + Tìm; thẻ chỉ tiêu đề / ảnh / địa chỉ / giá / DT·MT·Hướng |
 | 2026-08-19 | **Chốt §4.3.1 mobile `/khach-hang`:** thẻ avatar + hangtag + Bộ lọc/Tìm + footer All/KN/KM + nút Thêm SĐT đáy |
+| 2026-08-19 | **Chốt §4.3.6 mobile `/giao-dich`:** thẻ mã GD + hangtag + meta cơ bản; Bộ lọc Loại/Trạng thái; 3 thẻ thống kê vẫn 3 cột |
 
 ---
 
