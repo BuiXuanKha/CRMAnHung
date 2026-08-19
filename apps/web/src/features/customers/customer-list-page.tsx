@@ -11,11 +11,13 @@ import { AddByPhoneModal } from './components/add-by-phone-modal';
 import { type CustomerAction } from './components/action-menu';
 import { CustomerTable } from './components/customer-table';
 import { FilterBar } from './components/filter-bar';
+import { CustomerCardList } from './components/customer-card-list';
 import { RightRail, type RailKey } from './components/right-rail';
-import { applyExtraFilters, parseSearchKeyword, type ExtraFilters } from './display';
+import { applyExtraFilters, countCustomerStats, countMobileCustomerFilters, parseSearchKeyword, type ExtraFilters } from './display';
 import './customers.css';
 import './customers-table.css';
 import './customers-chrome.css';
+import './customers-mobile.css';
 import '@/shared/ui/money.css';
 
 const DEFAULT_EXTRA: ExtraFilters = {
@@ -50,6 +52,7 @@ export function CustomerListPage() {
   const [rail, setRail] = useState<RailKey | null>(null);
   const [addOpen, setAddOpen] = useState(false);
   const [addError, setAddError] = useState<string | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<ConfirmState>(null);
   const [careEdit, setCareEdit] = useState<CareState>(null);
@@ -74,6 +77,8 @@ export function CustomerListPage() {
   );
 
   const selected = filtered.find((c) => c.id === selectedId) ?? null;
+  const mobileFilterCount = countMobileCustomerFilters(status, extra);
+  const stats = useMemo(() => countCustomerStats(filtered), [filtered]);
 
   const detail = useQuery({
     queryKey: ['customer', selectedId],
@@ -177,6 +182,17 @@ export function CustomerListPage() {
               keyword={keyword}
               onKeyword={setKeyword}
               onAdd={() => setAddOpen(true)}
+              filtersOpen={filterOpen}
+              onToggleFilters={() => setFilterOpen((v) => !v)}
+              status={status}
+              onStatus={setStatus}
+              extra={extra}
+              onExtra={setExtra}
+              hasActiveFilters={mobileFilterCount > 0}
+              onResetFilters={() => {
+                setStatus('');
+                setExtra(DEFAULT_EXTRA);
+              }}
             />
           </section>
 
@@ -205,6 +221,23 @@ export function CustomerListPage() {
                 }}
               />
             </section>
+          ) : null}
+
+          {!list.isLoading && !list.error ? (
+            <CustomerCardList
+              items={filtered}
+              total={list.data?.total ?? filtered.length}
+              selectedId={selectedId}
+              menuId={menuId}
+              stats={stats}
+              onSelect={setSelectedId}
+              onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+              onCloseMenu={() => setMenuId(null)}
+              onAction={(c, a) => {
+                void handleAction(c, a);
+              }}
+              onAdd={() => setAddOpen(true)}
+            />
           ) : null}
         </div>
 

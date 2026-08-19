@@ -51,7 +51,7 @@ Ownership: `customer.employeeId` = user tạo / được gán.
 
 | Màn | Route | Hành vi |
 |-----|-------|---------|
-| List | `/khach-hang` | Tìm/lọc, bảng, menu hành động, rail phải (UI-GUIDELINES §4.3); pin/ẩn; thêm SĐT |
+| List | `/khach-hang` | Desktop: tìm/lọc, bảng, menu, rail phải. Mobile: ô tìm + Bộ lọc + Tìm; thẻ; footer All/KN/KM; nút Thêm SĐT đáy |
 | Detail | `/khach-hang/[id]` | Tabs: thông tin, care; lodat (read count) |
 | Create | modal trên list | Form thủ công tên + SĐT |
 
