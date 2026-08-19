@@ -615,6 +615,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **Chốt §4.3.7 mobile `/dich-vu-so-do`:** thẻ tên/hangtag/nhu cầu/thu-chi/tiến độ; Bộ lọc Trạng thái; ẩn panel |
 | 2026-08-19 | **Chốt nghiệp vụ list `/khach-hang`:** ô tìm / cột / icon / menu / rail một panel / ẩn=`isHidden` — `domains/customers.md` §12; status domain → Ready for API (list) |
 | 2026-08-19 | **§12 theo CRM đang chạy** `crm.anhungland.com/khach-hang`: SĐT xanh/cam, không icon mess trên dòng, lô = icon Map, nhu cầu = NeedSummary |
+| 2026-08-19 | **Đặc tả list `/lo-dat`:** `domains/lodats.md` §12 — cùng format đánh số; nguồn anhungland.com/lo-dat |
 
 ---
 
@@ -626,3 +627,4 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 - Skill bảng list CRM: `.cursor/skills/crm-data-table`
 - Skill dialog CRM: `.cursor/skills/crm-dialog`
 - Domain khách hàng: [`domains/customers.md`](./domains/customers.md)
+- Domain lô đất: [`domains/lodats.md`](./domains/lodats.md)
