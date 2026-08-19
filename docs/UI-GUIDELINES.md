@@ -116,16 +116,16 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 
 | Cột | Nội dung ô |
 |-----|------------|
-| `#` | STT (1.2.1) |
-| `Tên khách` | Avatar + tên + bút sửa tên (1.2.2) + SĐT **xanh** copy/gọi (1.2.3) + SĐT **cam** thêm số (1.2.4) + Map đếm lô (1.2.6) + hangtag (1.2.7) + tên FB (1.2.8). **Không** icon mess trên dòng |
-| `Nhu cầu` | NeedSummary mới nhất (1.2.9) |
-| `Tài chính` | `crm-money` (1.2.10) |
-| `Kênh liên hệ` | Page FB NV hoặc hotline (1.2.11) |
-| `Thao tác` | Chevron menu (1.2.13) |
+| `#` | STT (§12.1.4 mục 1) |
+| `Tên khách` | Avatar + tên + bút sửa tên (mục 2) + SĐT **xanh** copy (mục 3) + SĐT **cam** thêm số (mục 4) + Map đếm lô (mục 6) + hangtag (mục 7) + tên FB (mục 8). **Không** icon mess trên dòng |
+| `Nhu cầu` | NeedSummary mới nhất (mục 9) |
+| `Tài chính` | `crm-money` (mục 10) |
+| `Kênh liên hệ` | Page FB NV hoặc hotline (mục 11) |
+| `Thao tác` | Chevron menu (mục 12) |
 
 Cột «Số lô đất» trên mock mới = **lệch CRM cũ** (cũ chỉ icon Map). Bám CRM cũ khi sửa.
 
-**Rail:** một panel (§12.3).
+**Rail:** một panel ([`customers.md` §12.1.6](./domains/customers.md)).
 
 | Hạng mục | Quyết định | Ghi chú |
 |----------|------------|---------|
@@ -199,7 +199,7 @@ Không phải sidebar điều hướng (nav chính nằm trên **header** §4.2)
 
 **Đã chốt:** chỉ **một** panel mở. Bấm thanh khác → **đổi** panel, không chồng. Bấm lại thanh đang mở → thu hẹp. Chưa chọn dòng → «Chọn một khách trên bảng để xem.» Mobile: ẩn rail.
 
-Implement: một component rail dùng lại được (không copy layout god-file CRM cũ); gắn vào layout nội dung `/khach-hang` (và màn list tương tự khi cần). Chi tiết dữ liệu từng panel: `customers.md` §12.10.
+Implement: một component rail dùng lại được (không copy layout god-file CRM cũ); gắn vào layout nội dung `/khach-hang` (và màn list tương tự khi cần). Chi tiết dữ liệu từng panel: [`customers.md` §12.1.6](./domains/customers.md).
 
 #### 4.3.3 Menu hành động (đã chốt — theo ảnh mẫu)
 
@@ -214,7 +214,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 
 **Menu (khi mở):** thẻ trắng nổi, bo góc, đổ bóng nhẹ; mỗi mục = icon trái + chữ tiếng Việt.
 
-**Mục — khách hàng:** [`customers.md` §12.2 mục 1.2.13](./domains/customers.md) (CRM đang chạy).
+**Mục — khách hàng:** [`customers.md` §12.1.4 mục 12](./domains/customers.md) (máy tính). Mobile: §12.2.4 mục 12.
 
 | Mục | Ghi chú UI |
 |-----|------------|
@@ -249,7 +249,7 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 Desktop: **không** lặp dropdown trên thanh này — trạng thái / nhu cầu / tài chính / kênh / **số lô đất** lọc bằng **icon cột** §4.5.5.  
 Mobile: ô tìm + Bộ lọc + Tìm; CTA thêm SĐT dính đáy — xem khối Mobile §4.3.1.
 
-**Tìm / `@` `@@` / nút thêm:** [`customers.md` §12.1](./domains/customers.md) — đúng CRM `crm.anhungland.com/khach-hang`.
+**Tìm / `@` `@@` / nút thêm:** máy tính [`§12.1.1–12.1.2`](./domains/customers.md); mobile [`§12.2.1–12.2.3`](./domains/customers.md) — đúng CRM `crm.anhungland.com/khach-hang`.
 
 Đổi ô tìm hoặc lọc → cập nhật bảng (mock: lọc client; API: query §7 domain).
 
@@ -622,6 +622,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **Đặc tả list `/lo-dat`:** `domains/lodats.md` §12 — cùng format đánh số; nguồn anhungland.com/lo-dat |
 | 2026-08-19 | **Đặc tả list `/giao-dich`:** `domains/transactions.md` §12 — nguồn anhungland.com/giao-dich |
 | 2026-08-19 | **Đặc tả list `/dich-vu-so-do`:** `domains/title-services.md` §12 — nguồn anhungland.com/dich-vu-so-do |
+| 2026-08-19 | **§12 chia máy tính / mobile trước**, rồi mới chi tiết thành phần — 4 domain list + skill `write-domain-doc` |
 
 ---
 

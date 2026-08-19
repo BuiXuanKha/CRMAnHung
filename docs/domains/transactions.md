@@ -6,7 +6,7 @@
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
 
-§12 = đặc tả list (đánh số, ngắn).
+§12 = đặc tả list. Mỗi trang: **máy tính** → **mobile** → rồi chi tiết từng phần.
 
 ---
 
@@ -59,23 +59,40 @@ GET list: `keyword`, `type`, `status`. DELETE mock. Chi tiết / form sau. Khôn
 
 ## 12. List `/giao-dich`
 
-### 12.1 Section tìm + thống kê
+Thứ tự mỗi trang: **12.1 máy tính** → **12.2 mobile** → trong từng khối mới chi tiết thành phần. Không ghi «PC: … Mobile: …» trong cùng một mục.
 
-#### 1. Ba thẻ (trên cùng)
+---
+
+### 12.1 Giao diện máy tính
+
+```
+┌ 3 thẻ thống kê ──────────────────────────────────────────────┐
+├ Ô tìm ───────────────────────────────────────────────────────┤
+├ Bảng: Mã · Loại · Lô · Bán · Mua · Giá · HH · TT · Hẹn CC    │
+│       · Ghi chú · Ngày tạo · Thao tác                        │
+├ Footer đếm ──────────────────────────────────────────────────┤
+└ Không rail, không nút thêm GD ───────────────────────────────┘
+```
+
+**Bấm nền hàng** → chọn. Chi tiết = menu.
+
+Sort: `createdAt` mới → cũ.
+
+#### 12.1.1 Ba thẻ thống kê
 
 - Số lô giao dịch
 - Tổng doanh thu (`crm-money`)
 - Tổng hoa hồng (`crm-money`)
 
-Đổi lọc / ô tìm → 3 thẻ đổi theo tập đang hiện.
+Doanh thu / hoa hồng: **OWN + HOAN_TAT** (mục 3). Đổi lọc / ô tìm → 3 thẻ đổi theo tập đang hiện.
 
-#### 2. Ô tìm kiếm
+#### 12.1.2 Ô tìm kiếm
 
 Placeholder: `Tìm mã GD, lô đất, người bán, người mua, ghi chú...`
 
-Gõ là lọc. Mobile **Tìm** = đóng bàn phím.
+Gõ là lọc. Không `@`.
 
-##### 2.1 Tìm theo (web mới)
+##### 1. Tìm theo (web mới)
 
 - Mã GD
 - Tiêu đề lô
@@ -83,64 +100,48 @@ Gõ là lọc. Mobile **Tìm** = đóng bàn phím.
 - Ghi chú
 - Nhãn loại / trạng thái
 
-Substring, không phân biệt hoa thường, giữ dấu. Không `@`.
+Substring, không phân biệt hoa thường, giữ dấu.
 
-##### 2.2 Không nút thêm GD
+#### 12.1.3 Bộ lọc
 
-##### 2.3 Bộ lọc
+Icon cột — Loại, Lô, Người bán, Người mua, Giá, Hoa hồng (có / chưa / ghi nhận), Trạng thái, Hẹn CC, Ghi chú. Không lọc cột Mã GD / Ngày tạo.
 
-**PC:** icon cột — Loại, Lô, Người bán, Người mua, Giá, Hoa hồng (có / chưa / ghi nhận), Trạng thái, Hẹn CC, Ghi chú. Không lọc cột Mã GD / Ngày tạo.
+#### 12.1.4 Item (dòng bảng)
 
-**Mobile:** **Bộ lọc** + **Tìm** — Loại, Trạng thái. Xoá lọc.
-
-Không rail.
-
----
-
-### 12.2 Section bảng (PC)
-
-Tiêu đề: Mã GD · Loại · Lô đất · Người bán · Người mua · Giá bán · Hoa hồng · Trạng thái · Hẹn CC · Ghi chú · Ngày tạo · Thao tác.
-
-Bấm nền hàng → chọn. Chi tiết = menu (hoặc bấm thẻ mobile).
-
-Sort: `createdAt` mới → cũ.
-
-#### 1.2 Item
-
-##### 1.2.1 Mã GD
+##### 1. Mã GD
 
 `GD-…`
 
-##### 1.2.2 Loại
+##### 2. Loại
 
 Hangtag **Của tôi** xanh / **Ghi nhận** xám.
 
-##### 1.2.3 Lô đất
+##### 3. Lô đất
 
 Tiêu đề lô. Thiếu = `—`.
 
-##### 1.2.4 Người bán
+##### 4. Người bán
 
 Mỗi tên một dòng. Rỗng = `—`.
 
-##### 1.2.5 Người mua
+##### 5. Người mua
 
 Như người bán.
 
-##### 1.2.6 Giá bán
+##### 6. Giá bán
 
 `crm-money`. 0 / thiếu = `—`.
 
-##### 1.2.7 Hoa hồng
+##### 7. Hoa hồng
 
 `OWN`: `crm-money` hoặc `—`.  
 `RECORD`: luôn `—`.
 
-##### 1.2.8 Trạng thái
+##### 8. Trạng thái
 
-Hangtag 1.3.
+Hangtag mục 3.
 
-##### 1.2.9 Hẹn CC
+##### 9. Hẹn CC
 
 Ngày `D/M/YYYY`.  
 Đếm ngược **chỉ** Của tôi + Đã cọc:
@@ -151,15 +152,15 @@ Ngày `D/M/YYYY`.
 
 Ghi nhận / không ngày / không còn Đã cọc: chỉ ngày hoặc `—`.
 
-##### 1.2.10 Ghi chú
+##### 10. Ghi chú
 
 Một dòng, cắt `…`. Thiếu = `—`.
 
-##### 1.2.11 Ngày tạo
+##### 11. Ngày tạo
 
 `HH:mm:ss D/M/YYYY`.
 
-##### 1.2.12 Thao tác (chevron)
+##### 12. Thao tác (chevron)
 
 | Mục | Việc |
 |-----|------|
@@ -167,19 +168,44 @@ Một dòng, cắt `…`. Thiếu = `—`.
 | Sửa | Toast — form sau |
 | Xóa | Đỏ → confirm → gỡ khỏi list (mock). API: xóa cứng? mở lại rao bán lô? — sau |
 
-#### 1.3 Footer
+#### 12.1.5 Footer
 
 `Hiển thị N / Tổng M giao dịch`.
 
 ---
 
-### 12.3 Thẻ mobile
+### 12.2 Giao diện mobile
 
-3 thẻ thống kê **vẫn 3 cột**. Không bảng.
+```
+┌ 3 thẻ thống kê (vẫn 3 cột) ──────────────────────────────────┐
+├ Ô tìm ───────────────────────────────────────────────────────┤
+├ [Bộ lọc] [Tìm] ──────────────────────────────────────────────┤
+├ Thẻ xếp dọc ─────────────────────────────────────────────────┤
+├ Footer đếm ──────────────────────────────────────────────────┤
+└ Không rail, không nút thêm GD ───────────────────────────────┘
+```
+
+Không bảng.
+
+**Bấm thẻ** (không phải menu) → `/giao-dich/[id]`.
+
+#### 12.2.1 Ba thẻ thống kê
+
+Cùng 12.1.1. Vẫn **3 cột**.
+
+#### 12.2.2 Ô tìm + nút Tìm
+
+Placeholder và quy tắc field: **cùng 12.1.2**. Nút **Tìm** = đóng bàn phím.
+
+#### 12.2.3 Bộ lọc
+
+Nút **Bộ lọc** + **Tìm** — Loại, Trạng thái. Xoá lọc.
+
+#### 12.2.4 Item (thẻ)
 
 ##### 1. Đầu thẻ
 
-Mã GD + hangtag Loại + hangtag Trạng thái + chevron (cùng menu 1.2.12).
+Mã GD + hangtag Loại + hangtag Trạng thái + chevron (cùng menu 12.1.4 mục 12).
 
 ##### 2. Thân
 
@@ -188,17 +214,17 @@ Mã GD + hangtag Loại + hangtag Trạng thái + chevron (cùng menu 1.2.12).
 - Giá · Hoa hồng
 - Hẹn CC (kèm đếm ngược) · Ghi chú · Ngày tạo
 
-##### 3. Bấm thẻ (không phải menu)
+##### 3. Hẹn CC / hoa hồng
 
-→ `/giao-dich/[id]`.
+Cùng quy tắc 12.1.4 mục 7 và 9.
 
-##### 4. Footer
+#### 12.2.5 Footer
 
-Cùng câu Hiển thị N / Tổng M.
+Cùng câu `Hiển thị N / Tổng M giao dịch`.
 
 ---
 
-### 12.4 Chi tiết `/giao-dich/[id]`
+### 12.3 Chi tiết `/giao-dich/[id]`
 
 Placeholder: mã GD + quay lại.
 
