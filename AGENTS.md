@@ -16,7 +16,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | Skill | Khi nào dùng |
 |-------|----------------|
 | `crmanhung-playbook` | Mọi task feature — nhắc thứ tự làm việc |
-| `write-domain-doc` | Viết / cập nhật `docs/domains/*` |
+| `write-domain-doc` | Viết / cập nhật `docs/domains/*` — **đánh số, ngắn, một control một mục** (mẫu `customers.md` §12) |
 | `add-shared-contract` | Thêm Zod/types vào `packages/shared` |
 | `ui-guidelines` | **Trước mọi UI** — đọc `docs/UI-GUIDELINES.md` |
 | `crm-data-table` | **Bảng list CRM** — hover/scroll/font theo §4.5 |

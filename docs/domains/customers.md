@@ -2,88 +2,194 @@
 
 - **Slug:** `customers`
 - **Status:** Ready for mock
-- **Liên quan hệ cũ:** `Web` khách hàng + `AnhunglandExtension` ingest + `API` `customer.*`
+- **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
+- **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
+- **Contract:** `packages/shared/src/customers.ts`
+
+§12 = đặc tả list (đánh số, ngắn). Hình thức (font, hangtag) không lặp ở đây.
 
 ---
 
 ## 1. Mục đích
 
-Quản lý lead/khách từ Facebook Messenger / Business Suite Inbox hoặc nhập tay (SĐT), để nhân viên chăm sóc, gắn lô đất, theo dõi lịch sử.
+Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, xem chat đã lưu.
 
-## 2. Actors & quyền
+## 2. Actors
 
-| Actor | Được làm | Không được |
-|-------|----------|------------|
-| STAFF | CRUD khách **của mình**; pin/hide; care notes; gắn lodat | Xem/xóa khách nhân viên khác; hard-delete |
-| ADMIN | Toàn bộ của STAFF + registry toàn hệ + soft/hard delete theo policy | — |
+| Actor | List | Không |
+|-------|------|--------|
+| STAFF | Khách của mình | Khách NV khác; tạo lô khi là admin; hard-delete |
+| ADMIN | Tất cả; sửa/xoá SĐT; không tạo lô từ menu | Hard-delete P1 |
 
-## 3. Khái niệm & trạng thái
+## 3. Khái niệm
 
-| Thuật ngữ | Nghĩa |
-|-----------|--------|
-| Customer | Hồ sơ khách (Person hệ cũ) |
-| CustomerFacebook | Metadata FB (uid, thread, avatar, scan source) |
-| Care note | Ghi chú chăm sóc append-only |
-| Source hotline | SĐT nóng của NV được gắn khi tạo khách |
+| Thứ | CRM cũ | List hiện |
+|-----|--------|-----------|
+| Nhu cầu | `NeedSummary` (care) | Cột Nhu cầu = bản mới nhất |
+| Ghi chú | `Note` (care) | Ô tìm; rail lịch sử |
+| Đã xoá | `isHidden` | Soft-hide |
+| Hangtag | KN / KM / CCS / Khác | Mục 3 UI-GUIDELINES |
 
-**Status:** `KHACH_MOI` | `KHACH_NET` | `KHACH_CAN_CHAM_SOC` | `KHAC`
+## 4–10. (API / mock / migrate)
 
-**Ẩn / xoá mềm (P1):** `isHidden = true` — không dùng `deletedAt` ở phase này (khớp Prisma hiện tại).
+Giữ contract hiện tại. Nest làm sau khi §12 ổn. Migrate `tblPerson*` — `MIGRATION.md`. Extension: có, phase sau.
 
-## 4. Use cases (P1 tối thiểu)
+## 11. Lệch mock mới vs CRM cũ (chỉnh theo CRM cũ)
 
-1. Đăng nhập → danh sách khách (filter status, ẩn/hiện, pin)
-2. Xem chi tiết: phones, FB info, care notes, lodat maps (read)
-3. Tạo khách thủ công (tên + SĐT)
-4. Sửa tên / phones / status / pin / hide / restore
-5. Thêm care note
-6. Ingest từ extension (`POST .../from-extension`) — phase 1b
+- Mock: icon Phone trang trí / `tel:`; CRM cũ: **xanh = copy (PC) / gọi (mobile)**; **cam = thêm SĐT**.
+- Mock: icon mess trên dòng; CRM cũ: **không** có icon mess trên item — chat nằm rail + menu.
+- Mock: cột «Số lô đất»; CRM cũ: **chỉ icon Map + số** cạnh tên.
+- Nhu cầu mock = `Customer.note`; CRM cũ = **NeedSummary** care.
 
-## 5. Quan hệ dữ liệu
+---
 
-- Customer 1—1 CustomerFacebook (optional)
-- Customer 1—n CustomerPhone, CareNote
-- Customer n—n Lodat qua LodatCustomerMap (P2 mới làm sâu UI)
+## 12. List `/khach-hang` — theo CRM đang chạy
 
-Ownership: `customer.employeeId` = user tạo / được gán.
+### 12.1 Section tìm kiếm
 
-## 6. UI
+#### 1. Ô tìm kiếm
 
-| Màn | Route | Hành vi |
-|-----|-------|---------|
-| List | `/khach-hang` | Desktop: tìm/lọc, bảng, menu, rail phải. Mobile: ô tìm + Bộ lọc + Tìm; thẻ; footer All/KN/KM; nút Thêm SĐT đáy |
-| Detail | `/khach-hang/[id]` | Tabs: thông tin, care; lodat (read count) |
-| Create | modal trên list | Form thủ công tên + SĐT |
+Placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)`
 
-## 7. Contract / API dự kiến
+Gõ → debounce ~250ms rồi lọc. Mobile nút **Tìm** = lọc ngay + đóng bàn phím.
 
-Contract: `packages/shared/src/customers.ts`
+`@` / `@@` trên ô: badge + viền vàng.
 
-| Method | Path | Auth |
-|--------|------|------|
-| GET | `/customers` | JWT |
-| GET | `/customers/:id` | JWT + ownership |
-| POST | `/customers` | JWT |
-| PATCH | `/customers/:id` | JWT + ownership |
-| POST | `/customers/:id/care-notes` | JWT + ownership |
-| POST | `/customers/from-extension` | JWT (extension) — 1b |
-| DELETE | `/customers/:id` | JWT — soft hide (`isHidden`) |
+##### 1.1 Tìm theo
 
-## 8. Mock data cần có
+- Tên CRM
+- Tên Facebook
+- Mọi SĐT
+- Nhu cầu (`NeedSummary`) **và** ghi chú (`Note`) trong **mọi** lần chăm sóc
 
-- 1 khách mới (`KHACH_MOI`) có FB
-- 1 khách nét có nhiều SĐT
-- 1 khách đang ẩn
-- 1 khách của “nhân viên khác” (để test 403 trên API)
+Substring, không phân biệt hoa thường (kể cả Á/á). **Giữ dấu** (`hung` ≠ `hùng`).
 
-## 9. Extension
+Không `@` → chỉ khách đang hiện.  
+`@` → hiện + đã xoá.  
+`@@` → chỉ đã xoá.
 
-- [x] Có — port scanner sau khi API ingest ổn
+STAFF không thấy khách người khác.
 
-## 10. Migrate
+##### 1.2 Nút Thêm khách hàng bằng SĐT
 
-`tblPerson*` → `Customer*` (xem MIGRATION.md)
+PC: cùng hàng ô tìm. Mobile: nút đáy.
 
-## 11. Open questions
+Bấm → modal **Thêm khách hàng bằng số điện**: hotline * (bắt buộc), tên *, SĐT * (`0` + 9 số), ghi chú. Trùng SĐT → modal xác nhận. Chưa có hotline → bảo vào Cài đặt SĐT.
 
-- ~~Soft-delete = `isHidden` hay `deletedAt`?~~ → **P1: `isHidden`**. Revisit hard-delete / `deletedAt` ở P4 nếu cần.
+##### 1.3 Bộ lọc
+
+PC CRM cũ: select trên thanh lọc. Mock mới: icon cột (cùng nghĩa).
+
+- Trạng thái
+- Tài chính: chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ
+- Kênh liên hệ: danh sách page FB + hotline của NV (API)
+- Lô đất: tất cả / chưa gắn
+- Nhu cầu: tất cả / chưa có nhu cầu
+
+Mobile: **Bộ lọc** + **Tìm**. Xoá lọc.
+
+---
+
+### 12.2 Section bảng
+
+PC: `#` · Tên khách · Nhu cầu · Tài chính · Kênh liên hệ · Thao tác.  
+**Không** cột Số lô — lô = icon trên tên.
+
+Mobile: thẻ. Ẩn rail.
+
+**Bấm nền dòng (PC)** → chọn (rail).  
+**Double-click dòng (PC)** → modal chăm sóc (trừ khách đã xoá / trừ khi bấm icon).  
+**Bấm thẻ (mobile)** → `/khach-hang/[id]`.
+
+#### 1.2 Item
+
+##### 1.2.1 STT
+
+`#` 1…N. Ghim trước, rồi mới cập nhật.
+
+##### 1.2.2 Tên
+
+Avatar (ảnh FB / trống). Tên đậm.  
+PC: icon bút → modal **Sửa tên khách**.
+
+##### 1.2.3 Icon SĐT **xanh** (`#047857`)
+
+Hiện khi **đã có** SĐT.
+
+- PC: copy số (tick tạm).
+- Mobile: `tel:`.
+
+##### 1.2.4 Icon SĐT **cam** (`#ea580c`)
+
+Hiện khi **chưa có** SĐT (và chưa xoá).  
+Bấm → modal **Thêm số điện thoại**. Trùng → modal trùng.
+
+##### 1.2.5 Icon thùng rác SĐT
+
+Chỉ **admin**, khách chưa xoá, đã có số.  
+Bấm → modal **Xoá số điện thoại**.
+
+##### 1.2.6 Icon Map + số lô
+
+Chỉ khi `lodatCount > 0`. Chỉ thể hiện, không điều hướng.
+
+##### 1.2.7 Hangtag trạng thái
+
+Khách nét / mới / cần chăm sóc / Khác.
+
+Đã xoá: thêm hangtag **Đã xoá**.
+
+##### 1.2.8 Tên Facebook (dòng phụ)
+
+Hiện nếu khác tên CRM, hoặc admin + có FB.  
+Admin: bút → modal **Sửa tên Facebook**.
+
+##### 1.2.9 Nhu cầu
+
+`latestNeedSummary`. Trống → `—` (PC) / ẩn (mobile).
+
+##### 1.2.10 Tài chính
+
+Khoảng ngân sách. Trống → `—` / ẩn.
+
+##### 1.2.11 Kênh liên hệ
+
+Page/nick FB của NV **hoặc** hotline (SĐT + nhãn). Mobile: chữ thuần, không link.
+
+##### 1.2.12 Nút sửa (mobile)
+
+`SquarePen` → cập nhật chăm sóc (trang `/khach-hang/[id]/cham-soc`). Ẩn nếu đã xoá.
+
+##### 1.2.13 Menu thao tác (chevron)
+
+Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
+
+| Mục | Việc |
+|-----|------|
+| Mở chat | PC + có URL Inbox: tab Facebook messages |
+| Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid) |
+| Cập nhật chăm sóc | PC: modal. Mobile: trang chăm sóc. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
+| Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat`. ADMIN: báo không được tạo |
+| Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` |
+| Ghim / Bỏ ghim | `isPinned` |
+| Xóa khách | Confirm ẩn mềm; tìm lại bằng `@` / `@@` |
+
+##### 1.2.14 Ghim / chọn / ẩn
+
+Ghim: nền vàng. Đang chọn: highlight. Đã xoá: hàng/thẻ kiểu ẩn.
+
+#### 1.3 Footer
+
+PC: Tổng N — hoặc Hiển thị n / Tổng N khi còn trang. Tải thêm ~50 dòng khi cuộn.  
+Mobile: All · KN · KM · CCS · KH · ĐG (trên trang đang nạp).
+
+---
+
+### 12.3 Rail phải (PC)
+
+Một panel: **Nội dung chat** (tin đã lưu) · **Lịch sử chăm sóc** · **Danh sách lô đất**.  
+Nhớ panel vừa mở (localStorage). Mobile: ẩn.
+
+---
+
+*Web mới: Lucide + CrmDialog, cùng hành vi trên. Không copy CSS/god-file CRM cũ.*

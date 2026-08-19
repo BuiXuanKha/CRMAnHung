@@ -57,6 +57,7 @@ Tham chiếu nhanh:
 
 - Tạo / cập nhật `docs/domains/<domain>.md` theo [template](./domains/_TEMPLATE.md).
 - Ghi rõ: actor (STAFF/ADMIN), use case, trạng thái, rule sở hữu dữ liệu, màn hình UI, endpoint dự kiến.
+- **Đặc tả màn (list/modal):** đánh số, ngắn, một control một mục — mẫu `customers.md` §12 (skill `write-domain-doc`). Không viết đoạn văn dài.
 - **Chưa code** cho đến khi docs đủ để người khác implement không cần hỏi lại ý chính.
 
 ### ② Viết / cập nhật skill

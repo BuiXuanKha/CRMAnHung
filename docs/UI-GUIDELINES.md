@@ -60,7 +60,7 @@ Phạm vi ưu tiên hiện tại: màn sau login, đặc biệt **Quản lý kh�
 - Không bắt buộc giống pixel CRM cũ từng chi tiết; **cấu trúc shell** theo mục 4.2 (đã chốt).
 - Admin UI: **chưa làm** cho đến khi STAFF ổn.
 - Mock được (`NEXT_PUBLIC_USE_MOCK`); không gọi API production CRM cũ.
-- **UI list `/khach-hang`:** mock theo **4.3.1–4.3.4** (tìm/lọc, bảng, menu hành động, rail phải). Chi tiết `[id]` vẫn placeholder.
+- **UI list `/khach-hang`:** visual §4.3.1–4.3.4. **Từng control (ô tìm, `@`/`@@`, icon SĐT đỏ → modal SĐT, mess xanh = có tin, đếm lô…):** [`domains/customers.md`](./domains/customers.md) **§12**. Modal chi tiết làm sau. Chi tiết `[id]` vẫn placeholder.
 
 ### 4.2 Shell CRM chung (đã chốt) — mọi trang sau login
 
@@ -112,19 +112,20 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 └──────────────────────────────────────────────────────────────┘
 ```
 
-**Cột mẫu — Danh sách khách hàng** (desktop):
+**Cột — Danh sách khách hàng** (desktop). **Hành vi = CRM đang chạy:** [`customers.md` §12](./domains/customers.md).
 
 | Cột | Nội dung ô |
 |-----|------------|
-| `#` | Số thứ tự hẹp |
-| `Tên khách` | Avatar tròn + **tên đậm** + badge trạng thái (vd. «Khách nét» xanh lá / «Khách mới» xanh dương) + icon kênh nhỏ (SĐT/chat) cạnh tên; có thể có dòng phụ nhạt dưới tên |
-| `Nhu cầu` | Mô tả ngắn hoặc `—` |
-| `Tài chính` | Khoảng ngân sách (vd. `1,5 tỷ - 2 tỷ`) hoặc `—` |
-| `Kênh liên hệ` | Link/chữ **xanh** (tên NV, SĐT+ghi chú Zalo, Page…) |
-| `Số lô đất` | Số nguyên (`lodatCount`); 0 nếu chưa gắn; icon lọc: tất cả / đã gắn / chưa gắn |
-| `Thao tác` | Nút vuông → **menu hành động** (§4.3.3) |
+| `#` | STT (1.2.1) |
+| `Tên khách` | Avatar + tên + bút sửa tên (1.2.2) + SĐT **xanh** copy/gọi (1.2.3) + SĐT **cam** thêm số (1.2.4) + Map đếm lô (1.2.6) + hangtag (1.2.7) + tên FB (1.2.8). **Không** icon mess trên dòng |
+| `Nhu cầu` | NeedSummary mới nhất (1.2.9) |
+| `Tài chính` | `crm-money` (1.2.10) |
+| `Kênh liên hệ` | Page FB NV hoặc hotline (1.2.11) |
+| `Thao tác` | Chevron menu (1.2.13) |
 
-**Chưa chốt (hỏi tiếp):** hành vi rail khi mở nhiều panel cùng lúc vs chỉ một.
+Cột «Số lô đất» trên mock mới = **lệch CRM cũ** (cũ chỉ icon Map). Bám CRM cũ khi sửa.
+
+**Rail:** một panel (§12.3).
 
 | Hạng mục | Quyết định | Ghi chú |
 |----------|------------|---------|
@@ -156,8 +157,8 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 | Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel lọc inline: trạng thái, tài chính, kênh, lô đất, nhu cầu. Ẩn nút «Thêm khách…» trên thanh (chuyển xuống đáy) |
 | Thẻ | Grid `48px / 1fr / auto`. Ghim: nền `#fef9c3` + viền trái `#ca8a04`. **Không** `<button>` chứa `<div>`. `flex-shrink: 0` |
 | Trái | Avatar tròn 48px (ảnh FB hoặc initials) |
-| Giữa | Tên đậm; icon gọi (`tel:`) nếu có SĐT; hangtag trạng thái; dòng kênh nhạt; ngân sách xanh `#2563eb`; nhu cầu 2 dòng |
-| Phải | Nút sửa = Cập nhật chăm sóc; chevron = menu §4.3.3 |
+| Giữa | Tên; SĐT **xanh** = gọi `tel:`; SĐT **cam** = thêm số; Map+số nếu có lô; hangtag; kênh; ngân sách; nhu cầu |
+| Phải | `SquarePen` = Cập nhật chăm sóc; chevron = menu §4.3.3 |
 | Bấm thẻ | Chọn dòng (không mở placeholder chi tiết) |
 | Footer | `All N / M` · `KN` · `KM` · `CCS` · `KH` · `ĐG` (ghim) |
 | CTA đáy | Nút full-width xanh lá `#16a34a`: **Thêm khách bằng SĐT** |
@@ -196,7 +197,9 @@ Không phải sidebar điều hướng (nav chính nằm trên **header** §4.2)
 
 **Khi mở rộng:** panel bung sang trái, hiện dữ liệu của đúng nhãn đó (chat / lịch sử / lô đất). Đóng lại thì thu về thanh dọc.
 
-Implement: một component rail dùng lại được (không copy layout god-file CRM cũ); gắn vào layout nội dung `/khach-hang` (và màn list tương tự khi cần).
+**Đã chốt:** chỉ **một** panel mở. Bấm thanh khác → **đổi** panel, không chồng. Bấm lại thanh đang mở → thu hẹp. Chưa chọn dòng → «Chọn một khách trên bảng để xem.» Mobile: ẩn rail.
+
+Implement: một component rail dùng lại được (không copy layout god-file CRM cũ); gắn vào layout nội dung `/khach-hang` (và màn list tương tự khi cần). Chi tiết dữ liệu từng panel: `customers.md` §12.10.
 
 #### 4.3.3 Menu hành động (đã chốt — theo ảnh mẫu)
 
@@ -211,17 +214,18 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 
 **Menu (khi mở):** thẻ trắng nổi, bo góc, đổ bóng nhẹ; mỗi mục = icon trái + chữ tiếng Việt.
 
-**Mục mẫu — khách hàng** (trên → dưới, theo ảnh):
+**Mục — khách hàng:** [`customers.md` §12.2 mục 1.2.13](./domains/customers.md) (CRM đang chạy).
 
-| Mục | Ghi chú |
-|-----|---------|
-| Mở chat | |
-| Mở Messenger | |
-| Cập nhật chăm sóc | |
-| Tạo lô đất | |
-| Dịch vụ sổ đỏ | |
-| Bỏ ghim khách | (hoặc «Ghim khách» tùy trạng thái — chưa tách rule) |
-| **Xóa khách** | **Màu đỏ** (icon + chữ) — hành động phá hủy |
+| Mục | Ghi chú UI |
+|-----|------------|
+| Mở chat | Mở rail «Nội dung chat» (desktop, một panel) |
+| Mở Messenger | Tab Facebook; thiếu thread → CrmAlert |
+| Cập nhật chăm sóc | CrmDialog; textarea **trống**; append care note |
+| Tạo lô đất | Chưa tạo bản ghi — toast |
+| Dịch vụ sổ đỏ | Điều hướng `/dich-vu-so-do` |
+| Ghim khách / Bỏ ghim khách | **Một chỗ**, đổi nhãn theo `isPinned` |
+| **Xóa khách** | Đỏ — confirm **ẩn** (`isHidden`), không hard-delete |
+| Hiện lại khách | Khi đang xem khách ẩn (`@`/`@@`); thay chỗ «Xóa khách» |
 
 Chỉ **một** menu mở tại một thời điểm. Bấm ra ngoài / chọn mục / bấm lại nút → đóng.
 
@@ -245,9 +249,9 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 Desktop: **không** lặp dropdown trên thanh này — trạng thái / nhu cầu / tài chính / kênh / **số lô đất** lọc bằng **icon cột** §4.5.5.  
 Mobile: ô tìm + Bộ lọc + Tìm; CTA thêm SĐT dính đáy — xem khối Mobile §4.3.1.
 
-Ô tìm lọc theo tên / SĐT / nhu cầu / ghi chú. `@` = gồm bản ghi đã xóa; `@@` = chỉ bản ghi đã xóa.
+**Tìm / `@` `@@` / nút thêm:** [`customers.md` §12.1](./domains/customers.md) — đúng CRM `crm.anhungland.com/khach-hang`.
 
-Đổi ô tìm hoặc lọc → cập nhật bảng (mock: lọc client; sau: API).
+Đổi ô tìm hoặc lọc → cập nhật bảng (mock: lọc client; API: query §7 domain).
 
 #### 4.3.5 Bảng dữ liệu — trang lô đất (đã chốt cột)
 
@@ -607,6 +611,8 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **Chốt §4.3.1 mobile `/khach-hang`:** thẻ avatar + hangtag + Bộ lọc/Tìm + footer All/KN/KM + nút Thêm SĐT đáy |
 | 2026-08-19 | **Chốt §4.3.6 mobile `/giao-dich`:** thẻ mã GD + hangtag + meta cơ bản; Bộ lọc Loại/Trạng thái; 3 thẻ thống kê vẫn 3 cột |
 | 2026-08-19 | **Chốt §4.3.7 mobile `/dich-vu-so-do`:** thẻ tên/hangtag/nhu cầu/thu-chi/tiến độ; Bộ lọc Trạng thái; ẩn panel |
+| 2026-08-19 | **Chốt nghiệp vụ list `/khach-hang`:** ô tìm / cột / icon / menu / rail một panel / ẩn=`isHidden` — `domains/customers.md` §12; status domain → Ready for API (list) |
+| 2026-08-19 | **§12 theo CRM đang chạy** `crm.anhungland.com/khach-hang`: SĐT xanh/cam, không icon mess trên dòng, lô = icon Map, nhu cầu = NeedSummary |
 
 ---
 
