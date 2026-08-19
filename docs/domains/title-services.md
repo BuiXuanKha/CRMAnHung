@@ -56,11 +56,11 @@ Hồ sơ **mới** tạo từ menu khách hàng «Dịch vụ sổ đỏ» — l
 
 ## 4. Use cases
 
-1. Vào `/dich-vu-so-do` → ô tìm + bảng; bấm dòng mở panel **Chi tiết hồ sơ**
+1. Vào `/dich-vu-so-do` → ô tìm + bảng (desktop) / thẻ (mobile); desktop bấm dòng mở panel **Chi tiết hồ sơ**
 2. Tìm mã hồ sơ / tên khách / SĐT
-3. Lọc cột trạng thái (trên Tên khách) và có/không nhu cầu, tiến độ, tài liệu
+3. Desktop: lọc cột trạng thái (trên Tên khách) và có/không nhu cầu, tiến độ, tài liệu. Mobile: Bộ lọc Trạng thái
 4. Ghim hồ sơ lên đầu; xóa (xác nhận)
-5. Panel: thêm tiến độ / thu / chi / tài liệu (mock dialog)
+5. Panel / menu: thêm tiến độ / thu / chi / tài liệu (mock dialog)
 6. (Sau) Tạo hồ sơ từ `/khach-hang`; trang đầy đủ `[id]`
 
 ## 5. Quan hệ dữ liệu
@@ -73,10 +73,10 @@ Hồ sơ **mới** tạo từ menu khách hàng «Dịch vụ sổ đỏ» — l
 
 | Màn | Route | Hành vi |
 |-----|-------|---------|
-| List + panel | `/dich-vu-so-do` | Ô tìm + bảng §4.5; cột theo §4.3.7; panel phải Chi tiết hồ sơ |
+| List + panel | `/dich-vu-so-do` | Desktop: ô tìm + bảng §4.5 / §4.3.7 + panel Chi tiết hồ sơ. Mobile: ô tìm + Bộ lọc + Tìm; thẻ tên / hangtag / nhu cầu / thu-chi / tiến độ; ẩn panel |
 | Detail | `/dich-vu-so-do/[id]` | Placeholder (mã + quay lại list) |
 
-Không H1 trùng menu. Không dropdown trạng thái / nút Tìm trên thanh (lọc cột + gõ là lọc). Cột `#` hiện sao Lucide nếu ghim, không emoji. Không rail nhiều tab kiểu khách hàng — **một** panel chi tiết (thu hẹp = thanh dọc §4.3.2).
+Không H1 trùng menu. Desktop: không dropdown trạng thái / nút Tìm trên thanh (lọc cột + gõ là lọc). Mobile: Bộ lọc Trạng thái inline. Cột `#` hiện sao Lucide nếu ghim, không emoji. Không rail nhiều tab kiểu khách hàng — **một** panel chi tiết (thu hẹp = thanh dọc §4.3.2; mobile ẩn). Không nút Thêm hồ sơ trên list.
 
 ## 7. Contract / API dự kiến
 

@@ -23,11 +23,13 @@ import { ActionDialogs, type DialogKind } from './components/action-dialogs';
 import { type TitleServiceAction } from './components/action-menu';
 import { DetailPanel } from './components/detail-panel';
 import { FilterBar } from './components/filter-bar';
+import { TitleServiceCardList } from './components/title-service-card-list';
 import { TitleServiceTable } from './components/title-service-table';
-import { applyExtraFilters, type ExtraFilters } from './display';
+import { applyExtraFilters, countMobileTitleServiceFilters, type ExtraFilters } from './display';
 import './title-services.css';
 import './title-services-table.css';
 import './title-services-panel.css';
+import './title-services-mobile.css';
 import '@/shared/ui/money.css';
 
 const DEFAULT_EXTRA: ExtraFilters = {
@@ -54,6 +56,7 @@ export function TitleServiceListPage() {
     null,
   );
   const [dialogError, setDialogError] = useState<string | null>(null);
+  const [filterOpen, setFilterOpen] = useState(false);
 
   const listQuery = {
     keyword: keyword.trim() || undefined,
@@ -71,6 +74,7 @@ export function TitleServiceListPage() {
   );
 
   const selected = filtered.find((row) => row.id === selectedId) ?? null;
+  const mobileFilterCount = countMobileTitleServiceFilters(status);
 
   useEffect(() => {
     if (selectedId || filtered.length === 0) return;
@@ -156,7 +160,16 @@ export function TitleServiceListPage() {
       <div className={`sd-layout${panelOpen ? ' is-panel-open' : ''}`}>
         <div className="sd-main">
           <section className="sd-filter-wrap" aria-label="Tìm kiếm hồ sơ sổ đỏ">
-            <FilterBar keyword={keyword} onKeyword={setKeyword} />
+            <FilterBar
+              keyword={keyword}
+              onKeyword={setKeyword}
+              filtersOpen={filterOpen}
+              onToggleFilters={() => setFilterOpen((v) => !v)}
+              status={status}
+              onStatus={setStatus}
+              hasActiveFilters={mobileFilterCount > 0}
+              onResetFilters={() => setStatus('')}
+            />
           </section>
 
           {list.isLoading ? <p className="sd-status">Đang tải danh sách…</p> : null}
@@ -181,6 +194,19 @@ export function TitleServiceListPage() {
                 onAction={handleAction}
               />
             </section>
+          ) : null}
+
+          {!list.isLoading && !list.error ? (
+            <TitleServiceCardList
+              items={filtered}
+              total={list.data?.total ?? filtered.length}
+              selectedId={selectedId}
+              menuId={menuId}
+              onSelect={selectRow}
+              onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+              onCloseMenu={() => setMenuId(null)}
+              onAction={handleAction}
+            />
           ) : null}
         </div>
 
