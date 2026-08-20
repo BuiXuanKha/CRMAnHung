@@ -53,7 +53,7 @@ Khách đã copy trước hotline (slice 2); slice này copy hotline rồi **g�
 | # | Việc | Map entity | Script | Trạng thái |
 |---|------|------------|--------|------------|
 | 1 | `tblUsers` → `User` | `user` | `pnpm users:migrate-legacy` | Xong |
-| 2 | `tblEmployeeHotline` → `EmployeeHotline` + gắn `Customer.sourceHotlineId` | `employee_hotline` | `pnpm hotlines:migrate-legacy` | Slice này |
+| 2 | `tblEmployeeHotline` → `EmployeeHotline` + gắn `Customer.sourceHotlineId` | `employee_hotline` | `pnpm hotlines:migrate-legacy` | Xong staging (3 hotline, 22 khách có nguồn) |
 | 3 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Xong staging (1401/1401). Nguồn gắn ở bước 2 |
 | 4 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | — | Todo — cần map `customer` |
 | 5 | `tblPersonFacebook` metadata → `CustomerFacebook` | `customer_facebook` | — | Todo — cần map `customer`. Chưa file avatar |
