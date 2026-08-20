@@ -29,6 +29,7 @@ function staffCustomer(
     employeeId: MOCK_STAFF.id,
     employeeName: MOCK_STAFF.fullName,
     ...partial,
+    latestNeedSummary: partial.latestNeedSummary ?? partial.note ?? null,
   };
 }
 

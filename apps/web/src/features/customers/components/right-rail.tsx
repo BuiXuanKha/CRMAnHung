@@ -83,7 +83,8 @@ function renderBody(open: RailKey, customer: CustomerListItem | null, detail: Cu
         {notes.map((n) => (
           <li key={n.id}>
             <strong>{n.employeeName}</strong>
-            <p>{n.note}</p>
+            {n.needSummary?.trim() ? <p>{n.needSummary}</p> : null}
+            {n.note.trim() ? <p className="kh-care-note">{n.note}</p> : null}
             <time>{new Date(n.createdAt).toLocaleString('vi-VN')}</time>
           </li>
         ))}

@@ -131,16 +131,18 @@ model CustomerMessengerImage {
 }
 
 model CustomerCareNote {
-  id         String   @id @default(cuid())
-  customerId String
-  employeeId String
-  note       String
-  createdAt  DateTime @default(now())
+  id          String   @id @default(cuid())
+  customerId  String
+  employeeId  String
+  needSummary String?
+  note        String   @default("")
+  createdAt   DateTime @default(now())
 
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
   employee User     @relation(fields: [employeeId], references: [id])
 
   @@index([customerId])
+  @@index([customerId, createdAt])
 }
 
 model EmployeeFacebookProfile {

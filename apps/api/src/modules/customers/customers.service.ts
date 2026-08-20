@@ -44,6 +44,20 @@ function toIso(value: Date | null | undefined): string | null {
   return value ? value.toISOString() : null;
 }
 
+type CareSummary = {
+  latestNeedSummary: string | null;
+  latestCareNote: string | null;
+};
+
+function emptyCareSummary(): CareSummary {
+  return { latestNeedSummary: null, latestCareNote: null };
+}
+
+function trimText(value: string | null | undefined): string | null {
+  const t = value?.trim();
+  return t ? t : null;
+}
+
 function profileByUid(profiles: ProfileLookup[]): Map<string, ProfileLookup> {
   const map = new Map<string, ProfileLookup>();
   for (const profile of profiles) {
@@ -82,6 +96,16 @@ export class CustomersService {
         { fullName: { contains: keyword, mode: 'insensitive' } },
         { note: { contains: keyword, mode: 'insensitive' } },
         { phones: { some: { phone: { contains: keyword } } } },
+        {
+          careNotes: {
+            some: {
+              OR: [
+                { needSummary: { contains: keyword, mode: 'insensitive' } },
+                { note: { contains: keyword, mode: 'insensitive' } },
+              ],
+            },
+          },
+        },
       ];
     }
 
@@ -96,7 +120,10 @@ export class CustomersService {
     });
 
     const profiles = await this.loadProfiles();
-    const items = rows.map((row) => this.toListItem(row, profiles));
+    const careByCustomer = await this.loadCareSummaries(rows.map((row) => row.id));
+    const items = rows.map((row) =>
+      this.toListItem(row, profiles, careByCustomer.get(row.id) ?? emptyCareSummary()),
+    );
     return { items, total: items.length };
   }
 
@@ -110,7 +137,18 @@ export class CustomersService {
     }
     this.assertCanAccess(user, row.employeeId);
     const profiles = await this.loadProfiles();
-    return { ...this.toListItem(row, profiles), careNotes: [] };
+    const [careSummary, careNotes] = await Promise.all([
+      this.loadCareSummaries([row.id]),
+      this.loadCareNotes(row.id),
+    ]);
+    return {
+      ...this.toListItem(
+        row,
+        profiles,
+        careSummary.get(row.id) ?? emptyCareSummary(),
+      ),
+      careNotes,
+    };
   }
 
   async update(
@@ -139,7 +177,18 @@ export class CustomersService {
       include: LIST_INCLUDE,
     });
     const profiles = await this.loadProfiles();
-    return { ...this.toListItem(row, profiles), careNotes: [] };
+    const [careSummary, careNotes] = await Promise.all([
+      this.loadCareSummaries([row.id]),
+      this.loadCareNotes(row.id),
+    ]);
+    return {
+      ...this.toListItem(
+        row,
+        profiles,
+        careSummary.get(row.id) ?? emptyCareSummary(),
+      ),
+      careNotes,
+    };
   }
 
   createNotReady(): never {
@@ -150,7 +199,7 @@ export class CustomersService {
 
   careNotReady(): never {
     throw new BadRequestException(
-      'Chưa ghi được chăm sóc — chưa copy lịch sử chăm sóc.',
+      'Chưa ghi được chăm sóc — form cập nhật (trạng thái, nhu cầu, tài chính) làm sau.',
     );
   }
 
@@ -164,6 +213,47 @@ export class CustomersService {
     const url = facebook.avatarUrl?.trim();
     if (url && /^https?:\/\//i.test(url)) return url;
     return null;
+  }
+
+  private async loadCareSummaries(
+    customerIds: string[],
+  ): Promise<Map<string, CareSummary>> {
+    const map = new Map<string, CareSummary>();
+    if (customerIds.length === 0) return map;
+
+    const rows = await this.prisma.customerCareNote.findMany({
+      where: { customerId: { in: customerIds } },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { customerId: true, needSummary: true, note: true },
+    });
+
+    for (const row of rows) {
+      const current = map.get(row.customerId) ?? emptyCareSummary();
+      if (!current.latestNeedSummary) {
+        current.latestNeedSummary = trimText(row.needSummary);
+      }
+      if (!current.latestCareNote) {
+        current.latestCareNote = trimText(row.note);
+      }
+      map.set(row.customerId, current);
+    }
+    return map;
+  }
+
+  private async loadCareNotes(customerId: string) {
+    const rows = await this.prisma.customerCareNote.findMany({
+      where: { customerId },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      include: { employee: { select: { fullName: true } } },
+    });
+    return rows.map((row) => ({
+      id: row.id,
+      note: row.note,
+      needSummary: row.needSummary,
+      employeeId: row.employeeId,
+      employeeName: row.employee.fullName,
+      createdAt: row.createdAt.toISOString(),
+    }));
   }
 
   private async loadProfiles(): Promise<Map<string, ProfileLookup>> {
@@ -181,7 +271,11 @@ export class CustomersService {
     }
   }
 
-  private toListItem(row: CustomerRow, profiles: Map<string, ProfileLookup>) {
+  private toListItem(
+    row: CustomerRow,
+    profiles: Map<string, ProfileLookup>,
+    care: CareSummary,
+  ) {
     const facebook = row.facebook
       ? {
           customerUid: row.facebook.customerUid,
@@ -232,8 +326,8 @@ export class CustomersService {
             nickname: sourceFacebookProfile.nickname,
           }
         : null,
-      latestNeedSummary: null,
-      latestCareNote: null,
+      latestNeedSummary: care.latestNeedSummary,
+      latestCareNote: care.latestCareNote,
       lodatCount: 0,
       createdAt: row.createdAt.toISOString(),
       updatedAt: row.updatedAt.toISOString(),
