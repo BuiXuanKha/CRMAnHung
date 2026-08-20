@@ -15,7 +15,7 @@ import type { CreateCustomerDto } from './dto/create-customer.dto';
 import type { AcknowledgePhoneDuplicateDto } from './dto/acknowledge-phone-duplicate.dto';
 import type { MergeFacebookDto } from './dto/merge-facebook.dto';
 import { normalizeCareBudget } from './care-budget';
-import { budgetFilterWhere, contactChannelWhere } from './customers-filters';
+import { budgetFilterWhere, contactChannelWhere, needFilterWhere } from './customers-filters';
 import {
   acknowledgePhoneDuplicate,
   addCustomerPhone,
@@ -96,18 +96,28 @@ export class CustomersService {
     if (budget) and.push(budget);
     const channel = contactChannelWhere(query.contactChannel);
     if (channel) and.push(channel);
+    const need = needFilterWhere(query.needFilter);
+    if (need) and.push(need);
 
     const where: Prisma.CustomerWhereInput = and.length ? { AND: and } : {};
+    const limit = Math.min(Math.max(query.limit ?? 50, 1), 200);
+    const offset = Math.max(query.offset ?? 0, 0);
+    const orderBy = [
+      { isPinned: 'desc' as const },
+      { pinnedAt: { sort: 'desc' as const, nulls: 'last' as const } },
+      { updatedAt: 'desc' as const },
+    ];
 
-    const rows = await this.prisma.customer.findMany({
-      where,
-      include: LIST_INCLUDE,
-      orderBy: [
-        { isPinned: 'desc' },
-        { pinnedAt: { sort: 'desc', nulls: 'last' } },
-        { updatedAt: 'desc' },
-      ],
-    });
+    const [total, rows] = await Promise.all([
+      this.prisma.customer.count({ where }),
+      this.prisma.customer.findMany({
+        where,
+        include: LIST_INCLUDE,
+        orderBy,
+        skip: offset,
+        take: limit,
+      }),
+    ]);
 
     const profiles = await loadProfiles(this.prisma);
     const careByCustomer = await loadCareSummaries(
@@ -122,7 +132,7 @@ export class CustomersService {
         careByCustomer.get(row.id) ?? emptyCareSummary(),
       ),
     );
-    return { items, total: items.length };
+    return { items, total };
   }
 
   async getById(user: RequestUser, id: string) {

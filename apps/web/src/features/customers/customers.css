@@ -33,12 +33,9 @@
 }
 
 /* §3.2.1 Cột trái */
-.kh-s321 {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  min-height: 0;
-  overflow: hidden;
+.kh-s321.is-restoring .kh-s3212,
+.kh-s321.is-restoring .kh-cards-shell {
+  opacity: 0;
 }
 
 /* §3.2.1.1 Lọc */

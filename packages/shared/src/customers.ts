@@ -1,6 +1,7 @@
 /**
  * Customers contract — P1
  * Soft-hide = `isHidden` (không dùng deletedAt ở phase này).
+ * List: `limit` mặc định 50, tối đa 200; `offset` từ 0.
  */
 import { z } from 'zod';
 import { CustomerStatus } from './enums.js';
@@ -106,6 +107,10 @@ export const customerListResponseSchema = z.object({
 
 export type CustomerListResponse = z.infer<typeof customerListResponseSchema>;
 
+export const CUSTOMER_LIST_PAGE_SIZE = 50;
+export const CUSTOMER_LIST_MAX_PAGE_SIZE = 200;
+export const CUSTOMER_LIST_LOAD_MORE_PX = 160;
+
 export const customerListQuerySchema = z.object({
   keyword: z.string().trim().optional(),
   status: z.nativeEnum(CustomerStatus).optional(),
@@ -113,6 +118,9 @@ export const customerListQuerySchema = z.object({
   hiddenOnly: z.boolean().optional(),
   budgetFilter: z.enum(['none', 'has', 'lt_1b', '1b_2b', 'gt_2b']).optional(),
   contactChannel: z.string().trim().min(1).optional(),
+  needFilter: z.enum(['has', 'empty']).optional(),
+  limit: z.coerce.number().int().min(1).max(CUSTOMER_LIST_MAX_PAGE_SIZE).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
 });
 
 export type CustomerListQuery = z.infer<typeof customerListQuerySchema>;
