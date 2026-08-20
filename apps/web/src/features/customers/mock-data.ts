@@ -645,12 +645,30 @@ export type MockLodatBrief = {
   title: string;
   area: string;
   price: string;
+  address?: string;
+  frontage?: string;
+  direction?: string;
 };
 
 export const mockLodatsByCustomer: Record<string, MockLodatBrief[]> = {
   cus_net_phones: [
-    { id: 'ld1', title: 'Lô 38 Quán Táo Đông', area: '80 m²', price: '1,85 tỷ' },
-    { id: 'ld2', title: 'Lô 12 đường 21m', area: '90 m²', price: '2,1 tỷ' },
+    {
+      id: 'ld1',
+      title: 'Lô 38 Quán Táo Đông',
+      area: '80 m²',
+      price: '1,85 tỷ',
+      address: 'Quán Táo Đông, Long Thành',
+      frontage: '5 m',
+      direction: 'Đông Nam',
+    },
+    {
+      id: 'ld2',
+      title: 'Lô 12 đường 21m',
+      area: '90 m²',
+      price: '2,1 tỷ',
+      address: 'Đường 21m, Long Thành',
+      frontage: '6 m',
+    },
   ],
   cus_pin_3: [{ id: 'ld3', title: 'Lô gần ĐT 296', area: '72 m²', price: '980 triệu' }],
   cus_6: [
@@ -663,3 +681,7 @@ export const mockLodatsByCustomer: Record<string, MockLodatBrief[]> = {
     { id: 'ld8', title: 'Liền kề A2', area: '120 m²', price: '3,2 tỷ' },
   ],
 };
+
+export function listMockLodatsForCustomer(customerId: string): MockLodatBrief[] {
+  return mockLodatsByCustomer[customerId] ?? [];
+}

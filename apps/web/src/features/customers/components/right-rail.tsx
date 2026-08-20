@@ -7,7 +7,7 @@ import type {
   CustomerMessengerMessage,
 } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
-import { mockLodatsByCustomer } from '../mock-data';
+import { listMockLodatsForCustomer } from '../mock-data';
 import { ChatThread } from './chat-thread';
 
 export type RailKey = 'chat' | 'care' | 'lodat';
@@ -107,7 +107,7 @@ function renderBody(
       </ul>
     );
   }
-  const lots = mockLodatsByCustomer[customer.id] ?? [];
+  const lots = listMockLodatsForCustomer(customer.id);
   if (lots.length === 0) {
     return <p className="kh-rail-empty">Chưa gắn lô đất.</p>;
   }

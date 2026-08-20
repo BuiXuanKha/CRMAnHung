@@ -185,13 +185,20 @@ export function CustomerListPage() {
     return () => window.clearTimeout(t);
   }, []);
 
-  function isMobileCare() {
+  function isMobileList() {
     return window.matchMedia('(max-width: 767px)').matches;
+  }
+
+  function selectCustomer(id: string) {
+    setSelectedId(id);
+    if (isMobileList()) {
+      router.push(`/khach-hang/${id}`);
+    }
   }
 
   function openCareEdit(customer: CustomerListItem) {
     if (customer.isHidden) return;
-    if (isMobileCare()) {
+    if (isMobileList()) {
       router.push(`/khach-hang/${customer.id}/cham-soc`);
       return;
     }
@@ -435,7 +442,7 @@ export function CustomerListPage() {
               selectedId={selectedId}
               menuId={menuId}
               stats={stats}
-              onSelect={setSelectedId}
+              onSelect={selectCustomer}
               onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
               onCloseMenu={() => setMenuId(null)}
               onAction={(c, a) => {
