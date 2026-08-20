@@ -4,12 +4,13 @@
 
 | Domain | File | Status |
 |--------|------|--------|
+| Users (login) | [users.md](./users.md) | Ready for API — đăng nhập trước; CRUD NV = P4 |
 | Customers | [customers.md](./customers.md) | Ready for mock — §12 theo CRM cũ; §11 backlog lệch mock |
 | Lodats | [lodats.md](./lodats.md) | Ready for mock — §12 list `/lo-dat` |
 | Addresses | _(tạo khi P2)_ | — |
 | Transactions | [transactions.md](./transactions.md) | Ready for mock — §12 list `/giao-dich` |
 | Title services | [title-services.md](./title-services.md) | Ready for mock — §12 list `/dich-vu-so-do` |
-| Users / admin registry | _(tạo khi P4)_ | — |
+| Users / admin registry | [users.md](./users.md) §11 mục 5 | P4 — CRUD NV, chưa làm |
 
 Trước khi code UI/API: domain doc phải ở trạng thái **Ready for mock** trở lên.
 

@@ -106,7 +106,8 @@ Tham chiếu nhanh:
 |-------|------|-------------------|
 | **P0** | Foundation + playbook + skills | Repo chạy local, auth, docs quy trình |
 | **P0b** | Staging Mắt Bão | `anhungland.com` song song CRM cũ |
-| **P1** | Customers (docs→mock UI→API→ext) | Quản lý khách + ingest stub |
+| **P0c** | **User / đăng nhập** | Tài khoản Postgres; `/login` — trước khi copy khách |
+| **P1** | Customers | Quản lý khách + ingest stub |
 | **P2** | Lodats + Addresses | Lô đất / địa chỉ |
 | **P3** | Transactions + Title services | Giao dịch / sổ đỏ |
 | **P4** | Admin registry + migrate data | Sẵn sàng cutover |
@@ -122,7 +123,7 @@ Trong mỗi phase domain: **luôn** đi ①→⑨, không code API trước docs
 |-----|---------|
 | Code / file / symbol | Tiếng Anh |
 | Copy UI, message lỗi user | Tiếng Việt |
-| Domain folder | `customers`, `lodats`, `addresses`, `transactions`, `title-services` |
+| Domain folder | `users`, `customers`, `lodats`, `addresses`, `transactions`, `title-services` |
 | API prefix | `/api/v1` |
 | Enum status | Giữ semantic gần hệ cũ (`KHACH_MOI`, `DANG_BAN`…) để migrate dễ |
 
