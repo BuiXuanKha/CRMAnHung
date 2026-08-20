@@ -97,6 +97,7 @@ model CustomerPhone {
   customerId String
   phone      String
   label      String?
+  sortOrder  Int      @default(0)
   createdAt  DateTime @default(now())
 
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)

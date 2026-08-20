@@ -65,7 +65,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 1 | `tblUsers` → `User` | `user` | `pnpm users:migrate-legacy` | Xong |
 | 2 | `tblEmployeeHotline` → `EmployeeHotline` + gắn `Customer.sourceHotlineId` | `employee_hotline` | `pnpm hotlines:migrate-legacy` | Xong staging (3 hotline, 22 khách có nguồn) |
 | 3 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Xong staging (1401/1401). Nguồn gắn ở bước 2 |
-| 4 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | — | Todo — cần map `customer` |
+| 4 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | `pnpm phones:migrate-legacy` | Script sẵn — chưa chạy staging (chưa deploy). Freeze: 152 số / 1401 khách |
 | 5 | `tblPersonFacebook` metadata → `CustomerFacebook` (UID NV, tên nick, thread; chưa file avatar / tin nhắn) | `customer_facebook` | `pnpm facebook-profiles:migrate-legacy` | Xong staging (cùng bước 7) |
 | 6 | `tblPersonCareHistory` → `CustomerCareNote` | `customer_care` | — | Todo — cần map `customer` + `user` |
 | 7 | `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` | `employee_facebook_profile` | `pnpm facebook-profiles:migrate-legacy` | Xong staging (cùng bước 5) |

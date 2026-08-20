@@ -18,6 +18,7 @@
     "hotlines:migrate-legacy": "tsx scripts/migrate-hotlines-from-legacy.ts",
     "facebook-profiles:migrate-legacy": "tsx scripts/migrate-facebook-profiles-from-legacy.ts",
     "avatars:migrate-legacy-r2": "tsx scripts/migrate-avatars-to-r2.ts",
+    "phones:migrate-legacy": "tsx scripts/migrate-phones-from-legacy.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

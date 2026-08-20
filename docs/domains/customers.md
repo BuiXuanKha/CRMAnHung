@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (kênh + avatar CDN; chưa SĐT / care)
+- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (kênh + avatar CDN + SĐT khi đã chạy script; chưa care)
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Hiện: tên, trạng thái, tài chính, ghim/ẩn, kênh (hotline hoặc profile FB NV). Nhu cầu / SĐT trống đến khi copy bảng phụ. Extension: phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Hiện: tên, trạng thái, tài chính, ghim/ẩn, kênh (hotline hoặc profile FB NV), avatar CDN, SĐT (`primaryPhone` / `phones`) sau khi chạy `pnpm phones:migrate-legacy`. Nhu cầu trống đến khi copy lịch sử chăm sóc. Extension: phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -41,15 +41,15 @@ Hành vi đích = **§12**. Làm dần theo số.
 
 Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, thêm khách (tên + SĐT), rail 3 panel (dữ liệu tĩnh), menu 7 mục.
 
-1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim). Chưa SĐT / FB / nhu cầu.
+1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim, kênh, avatar). SĐT khi đã chạy `phones:migrate-legacy` (chưa deploy / chưa chạy staging). Chưa nhu cầu.
 2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Hiện chỉ 1 ô ghi chú.
 3. **Double-click dòng (máy tính)** — mở modal chăm sóc.
 4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lô, lịch sử chăm sóc. Hiện placeholder.
 5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Chưa có route.
 6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. Hiện toast. ADMIN: không được tạo (ẩn / báo).
 7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
-8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Hiện icon trang trí.
-9. **SĐT xanh (điện thoại)** — bấm = `tel:`.
+8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Code sẵn; hiện icon sau khi copy bảng SĐT.
+9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Code sẵn; hiện sau khi copy bảng SĐT.
 10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT.
 11. **Xoá SĐT (admin)** — thùng rác + modal.
 12. **Sửa tên khách** — bút trên tên (máy tính).
@@ -341,7 +341,7 @@ Freeze: NV ngừng sửa CRM cũ; Extension tắt. Chỉ đọc SQLite.
 | `tblPerson.Note` | Cột dư. Copy vào `Customer.note` (5 khách lúc freeze). Cột Nhu cầu = lịch sử — **sau**. |
 | Trạng thái + tài chính | Snapshot trên khách. |
 | Hotline nguồn | Copy **hết** hotline (kể cả tắt) rồi gắn `sourceHotlineId`. 22 khách lúc freeze có nguồn. |
-| Trùng SĐT 2 NV | Giữ nguyên khi copy SĐT (todo). |
+| Trùng SĐT 2 NV | Giữ nguyên khi copy SĐT (cùng số trên 2 hồ sơ = 2 dòng). Lúc freeze: 0. |
 | Đã gộp trên CRM cũ | Copy trạng thái hiện tại. |
 | Chạy lại script | Idempotent. |
 
@@ -368,6 +368,18 @@ Cột `/khach-hang` hiện tên như CRM cũ: `Page Bùi Xuân Khả`, `Khả Kh
 CRM cũ mirror avatar Facebook xuống `/var/www/anhungland-crm/api/img/avatars` (1376 file local, 2 khách không ảnh, ~5,3 MB). Bucket public R2 `anhungland-crm` + CDN `cdn.anhungland.com`.
 
 Script **chỉ đọc** disk cũ → `customers/avatars/<tên file>` → `CustomerFacebook.avatarObjectKey`. List trả `avatarUrl` = URL CDN. Không xóa file cũ. Chưa copy ảnh chat (~409 MB) / ảnh lô (~451 MB).
+
+### 13.6 Slice này — số điện thoại
+
+`tblPersonPhone` → `CustomerPhone` + map `customer_phone`. Cần map `customer`.
+
+Lúc freeze: **152** số (152 khách; 1249 khách không SĐT). Mỗi khách tối đa 1 số. Label trống. Format `0` + 9 chữ số. Trùng 2 NV: 0.
+
+Copy nguyên số + `sortOrder`. Số chính trên list = `ORDER BY sortOrder ASC, createdAt ASC` (CRM cũ: `SortOrder, ID`). Ô tìm list cũng khớp `phones.phone`.
+
+Máy tính: icon Phone **xanh** `#047857` → copy + tick ~1,5s. Điện thoại: `tel:` (đã có). **Không** nối icon cam / thêm khách bằng SĐT / xoá số (mục 10–11, 14–15).
+
+Script: `pnpm phones:migrate-legacy`. **Chưa chạy staging — chưa deploy.**
 
 ---
 
