@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc, rail chat + ảnh. Slice SĐT cam + thêm khách SĐT / trùng-gộp / sửa tên / lọc tài chính-kênh: đã code, chờ deploy.
+- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc, rail chat + ảnh, thêm khách SĐT / trùng-gộp / sửa tên / lọc tài chính-kênh.
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -50,17 +50,17 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
-10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Code sẵn. Trùng số → modal mục 15.
+10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Có trên staging. Trùng số → modal mục 15.
 11. **Xoá SĐT (admin)** — thùng rác + modal.
-12. **Sửa tên khách** — bút trên tên (máy tính). Code sẵn.
+12. **Sửa tên khách** — bút trên tên (máy tính). Có trên staging.
 13. **Sửa tên Facebook (admin)** — bút trên tên FB (máy tính).
-14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Code sẵn.
-15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Code sẵn.
+14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Có trên staging.
+15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Có trên staging.
 16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách».
 17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care, không rỗng). Có trên staging (237 khách có lịch sử).
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
-19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Code sẵn.
-20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Code sẵn.
+19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
+20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Có trên staging.
 21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
 22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện list tĩnh.
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu).
@@ -456,7 +456,7 @@ Script: `pnpm chat:migrate-legacy`. **Xong staging (20 253/20 253 tin, 2 4
 
 Khách **chưa có** SĐT và **chưa ẩn**: icon Phone **cam** `#ea580c` trên list (máy tính + thẻ mobile). Bấm → modal **Thêm số điện thoại** (CrmDialog; 1 ô SĐT; Huỷ + Lưu số).
 
-`POST /api/v1/customers/:id/phones` `{ phone }` — 10 số, bắt đầu `0`. Ownership cùng GET/PATCH. Khách đã ẩn / đã có số: API từ chối. Số đã có trên hồ sơ khác: `400` «Số này đã có trên hồ sơ khác.» (chưa modal gộp — mục 15).
+`POST /api/v1/customers/:id/phones` `{ phone }` — 10 số, bắt đầu `0`. Ownership cùng GET/PATCH. Khách đã ẩn / đã có số: API từ chối. Số đã có trên hồ sơ khác: `409 PHONE_DUPLICATE` + modal mục 15 (gộp nếu được).
 
 Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam không gọi.
 
@@ -468,7 +468,7 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 - Sửa tên: bút Lucide trên máy tính → `PATCH /customers/:id` `{ fullName }`. Không bút trên thẻ mobile.
 - Lọc tài chính: `budgetFilter=none|has|lt_1b|1b_2b|gt_2b` (khoảng chồng). Lọc kênh: `contactChannel=fb:<uid>|hotline:<id>` từ **GET `/customers/contact-channels`**.
 
-**Chưa deploy** (cùng PR với các mục 12, 14, 15, 19, 20).
+**Xong staging (2026-08-20)** — `/khach-hang` trên `anhungland.com`.
 
 ---
 
