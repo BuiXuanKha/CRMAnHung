@@ -69,10 +69,11 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 5 | `tblPersonFacebook` metadata → `CustomerFacebook` (UID NV, tên nick, thread; chưa file avatar / tin nhắn) | `customer_facebook` | `pnpm facebook-profiles:migrate-legacy` | Xong staging (cùng bước 7) |
 | 6 | `tblPersonCareHistory` → `CustomerCareNote` | `customer_care` | — | Todo — cần map `customer` + `user` |
 | 7 | `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` | `employee_facebook_profile` | `pnpm facebook-profiles:migrate-legacy` | Xong staging (cùng bước 5) |
-| 8 | Tin nhắn + ảnh chat + avatar → R2 | — | — | Todo sau |
-| 9 | Lô đất + `tblLodatPersonMap` | `lodat` | — | Todo — cần map `customer` |
-| 10 | Giao dịch | `transaction` | — | Todo |
-| 11 | Sổ đỏ | `title_service` | — | Todo |
+| 8 | Avatar khách `/img/avatars` → R2 public (`avatarObjectKey`) | — | `pnpm avatars:migrate-legacy-r2` | Xong staging (1376 file, ~5 MB) |
+| 9 | Tin nhắn + ảnh chat `imgsmessenger` → R2 | — | — | Todo sau (~409 MB) |
+| 10 | Lô đất + ảnh `lodats` | `lodat` | — | Todo (~451 MB) |
+| 11 | Giao dịch | `transaction` | — | Todo |
+| 12 | Sổ đỏ | `title_service` | — | Todo |
 
 Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV copy cùng metadata `tblPersonFacebook` (UID NV) để cột Kênh liên hệ hiện tên page/nick.
 

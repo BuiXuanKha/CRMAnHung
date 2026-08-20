@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import {
   DeleteObjectCommand,
   GetObjectCommand,
+  HeadObjectCommand,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -110,6 +111,40 @@ export class StorageService {
       url: this.publicUrl(objectKey),
       visibility: 'public',
     };
+  }
+
+  async publicObjectExists(objectKey: string): Promise<boolean> {
+    if (!this.isConfigured()) return false;
+    try {
+      await this.getClient().send(
+        new HeadObjectCommand({
+          Bucket: this.publicBucket(),
+          Key: objectKey.replace(/^\//, ''),
+        }),
+      );
+      return true;
+    } catch (err) {
+      const name = (err as { name?: string }).name;
+      if (name === 'NotFound' || name === 'NoSuchKey') return false;
+      const status = (err as { $metadata?: { httpStatusCode?: number } }).$metadata
+        ?.httpStatusCode;
+      if (status === 404) return false;
+      throw err;
+    }
+  }
+
+  /** Idempotent public put with a chosen key (migrate avatars, keep filename). */
+  async uploadPublicAtKey(
+    objectKey: string,
+    input: Omit<UploadInput, 'folder' | 'originalName'>,
+  ): Promise<{ objectKey: string; url: string; visibility: 'public' }> {
+    const key = objectKey.replace(/^\//, '');
+    await this.putObject('public', key, {
+      folder: '',
+      buffer: input.buffer,
+      contentType: input.contentType,
+    });
+    return { objectKey: key, url: this.publicUrl(key), visibility: 'public' };
   }
 
   /**
