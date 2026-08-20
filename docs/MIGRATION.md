@@ -3,7 +3,7 @@
 ## Nguyên tắc
 
 1. **Hệ cũ tiếp tục chạy** (`crm.anhungland.com`) cho đến khi crmanhung đủ feature parity + data đã kiểm chứng.
-2. Migration là **one-shot có kiểm tra**, có thể chạy dry-run.
+2. Copy **từng bảng**. Idempotent: id cũ đã có trong `migrate.legacy_id_map` thì cập nhật, không tạo trùng. Freeze CRM cũ trước khi copy khách.
 3. Giữ **ID ổn định** khi có thể (map `tblPerson.id` → `Customer.id`) để liên kết nghiệp vụ không gãy.
 4. Đích CRMAnHung: **PostgreSQL** + file trên **Cloudflare R2** (không copy SQLite/`img/` sang disk VPS mới).
 
@@ -42,10 +42,27 @@
 
 Cột path ảnh cũ → field **`objectKey`** (key trong R2), không phải path local.
 
-Script migrate user (đầu tiên): `apps/api/scripts/migrate-users-from-legacy.ts` — đọc SQLite, ghi `User` + `migrate.legacy_id_map`.  
-Script full (P4): `apps/api/scripts/migrate-from-legacy.ts` (chưa viết): `img/` → R2.
+Mỗi bước **một PR**. Có map ID rồi mới copy bảng phụ (FK trỏ id mới). Script **chỉ đọc** SQLite. Idempotent.
 
-Copy data: **User trước** (có `employeeId`), rồi khách → lô → giao dịch → sổ đỏ. Map ID: schema `migrate` (xem mục dưới).
+### Todo copy
+
+| # | Việc | Map entity | Script | Trạng thái |
+|---|------|------------|--------|------------|
+| 1 | `tblUsers` → `User` | `user` | `pnpm users:migrate-legacy` | Xong |
+| 2 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Xong staging (1401/1401, 2026-08-20) |
+| 3 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | — | Todo — cần map `customer` |
+| 4 | `tblPersonFacebook` metadata → `CustomerFacebook` | `customer_facebook` | — | Todo — cần map `customer`. Chưa file avatar |
+| 5 | `tblPersonCareHistory` → `CustomerCareNote` | `customer_care` | — | Todo — cần map `customer` + `user` |
+| 6 | `tblEmployeeHotline` → `EmployeeHotline`, rồi gắn `Customer.sourceHotlineId` | `employee_hotline` | — | Todo — cần map `user` + `customer` |
+| 7 | `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` | `employee_facebook_profile` | — | Todo — cần map `user` |
+| 8 | Tin nhắn + ảnh chat + avatar → R2 | — | — | Todo sau |
+| 9 | Lô đất + `tblLodatPersonMap` | `lodat` | — | Todo — cần map `customer` |
+| 10 | Giao dịch | `transaction` | — | Todo |
+| 11 | Sổ đỏ | `title_service` | — | Todo |
+
+Slice 2 **không** copy SĐT, Facebook, lịch sử, hotline. `sourceHotlineId` để `null` đến bước 6.
+
+Freeze CRM cũ + tắt extension trước khi copy khách.
 
 ## Bảng map ID (không phải bảng nghiệp vụ)
 

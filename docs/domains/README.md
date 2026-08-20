@@ -5,7 +5,7 @@
 | Domain | File | Status |
 |--------|------|--------|
 | Users (login) | [users.md](./users.md) | Ready for API — `/login` = bảng User; list CRM vẫn mock |
-| Customers | [customers.md](./customers.md) | Ready for mock — §12 theo CRM cũ; §11 backlog lệch mock |
+| Customers | [customers.md](./customers.md) | Ready for mock — §12 list; §13 copy khách cơ bản trước bảng phụ |
 | Lodats | [lodats.md](./lodats.md) | Ready for mock — §12 list `/lo-dat` |
 | Addresses | _(tạo khi P2)_ | — |
 | Transactions | [transactions.md](./transactions.md) | Ready for mock — §12 list `/giao-dich` |

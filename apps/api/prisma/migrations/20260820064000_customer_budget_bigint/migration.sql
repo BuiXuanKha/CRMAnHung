@@ -1,0 +1,3 @@
+-- VND budgets exceed INT4 (2.5 tỷ > 2_147_483_647).
+ALTER TABLE "Customer" ALTER COLUMN "budgetMinVnd" SET DATA TYPE BIGINT;
+ALTER TABLE "Customer" ALTER COLUMN "budgetMaxVnd" SET DATA TYPE BIGINT;
