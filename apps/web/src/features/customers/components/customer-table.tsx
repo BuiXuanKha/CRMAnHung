@@ -37,6 +37,7 @@ type Props = {
   onToggleMenu: (id: string) => void;
   onCloseMenu: () => void;
   onAction: (customer: CustomerListItem, action: CustomerAction) => void;
+  onCare?: (customer: CustomerListItem) => void;
 };
 
 export function CustomerTable({
@@ -52,6 +53,7 @@ export function CustomerTable({
   onToggleMenu,
   onCloseMenu,
   onAction,
+  onCare,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -184,6 +186,12 @@ export function CustomerTable({
                 .filter(Boolean)
                 .join(' ')}
               onClick={() => onSelect(c.id)}
+              onDoubleClick={(event) => {
+                const target = event.target as HTMLElement | null;
+                if (target?.closest('button, a, [role="menu"]')) return;
+                if (c.isHidden) return;
+                onCare?.(c);
+              }}
             >
               <div className="col-idx kh-cell" role="cell">
                 {i + 1}

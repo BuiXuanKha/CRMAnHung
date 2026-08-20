@@ -10,7 +10,9 @@ import { StorageService } from '../../storage/storage.service';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import type { UpdateCustomerDto } from './dto/update-customer.dto';
 import type { ListCustomersQueryDto } from './dto/list-customers-query.dto';
+import type { UpdateCustomerCareDto } from './dto/update-customer-care.dto';
 import { CUSTOMER_STATUSES, type CustomerStatusValue } from './customer-status';
+import { normalizeCareBudget } from './care-budget';
 
 const LIST_INCLUDE = {
   employee: { select: { fullName: true } },
@@ -197,10 +199,71 @@ export class CustomersService {
     );
   }
 
-  careNotReady(): never {
-    throw new BadRequestException(
-      'Chưa ghi được chăm sóc — form cập nhật (trạng thái, nhu cầu, tài chính) làm sau.',
-    );
+  async addCare(user: RequestUser, id: string, dto: UpdateCustomerCareDto) {
+    const existing = await this.prisma.customer.findUnique({ where: { id } });
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy khách hàng');
+    }
+    this.assertCanAccess(user, existing.employeeId);
+    if (existing.isHidden) {
+      throw new BadRequestException(
+        'Không cập nhật chăm sóc cho khách đã ẩn. Hãy khôi phục trước.',
+      );
+    }
+
+    const budget = normalizeCareBudget(dto.budgetMinVnd, dto.budgetMaxVnd);
+    if (!budget.ok) {
+      throw new BadRequestException(
+        'Khoảng tài chính không hợp lệ. Hãy chọn 1 khoảng hoặc «Chưa xác định».',
+      );
+    }
+
+    const latest = await this.prisma.customerCareNote.findFirst({
+      where: { customerId: id },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      select: { needSummary: true, note: true },
+    });
+
+    const needSummary = (dto.needSummary ?? '').trim();
+    const note = (dto.note ?? '').trim();
+    const statusChanged = existing.status !== dto.status;
+    const budgetChanged =
+      toBudgetNumber(existing.budgetMinVnd) !== budget.min ||
+      toBudgetNumber(existing.budgetMaxVnd) !== budget.max;
+    const latestNeed = (latest?.needSummary ?? '').trim();
+    const latestNote = (latest?.note ?? '').trim();
+    const careChanged =
+      (Boolean(needSummary) || Boolean(note)) &&
+      (needSummary !== latestNeed || note !== latestNote);
+
+    if (!statusChanged && !budgetChanged && !careChanged) {
+      const current = await this.getById(user, id);
+      return { ...current, unchanged: true };
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.customer.update({
+        where: { id },
+        data: {
+          status: dto.status,
+          budgetMinVnd: budget.min == null ? null : BigInt(budget.min),
+          budgetMaxVnd: budget.max == null ? null : BigInt(budget.max),
+        },
+      });
+      if (careChanged) {
+        await tx.customerCareNote.create({
+          data: {
+            customerId: id,
+            employeeId: user.id,
+            needSummary: needSummary || null,
+            note,
+          },
+        });
+      }
+    });
+
+    const current = await this.getById(user, id);
+    return { ...current, unchanged: false };
   }
 
   private toPublicAvatarUrl(

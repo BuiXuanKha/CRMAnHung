@@ -105,15 +105,17 @@ export function CustomerCardList({
                   {demand !== '—' ? <span className="kh-card-need">{demand}</span> : null}
                 </div>
                 <div className="kh-card-actions" onClick={(e) => e.stopPropagation()}>
-                  <button
-                    type="button"
-                    className="kh-card-edit"
-                    title="Cập nhật chăm sóc"
-                    aria-label={`Cập nhật chăm sóc ${c.fullName}`}
-                    onClick={() => onAction(c, 'care')}
-                  >
-                    <Icon icon={SquarePen} size={16} />
-                  </button>
+                  {!c.isHidden ? (
+                    <button
+                      type="button"
+                      className="kh-card-edit"
+                      title="Cập nhật chăm sóc"
+                      aria-label={`Cập nhật chăm sóc ${c.fullName}`}
+                      onClick={() => onAction(c, 'care')}
+                    >
+                      <Icon icon={SquarePen} size={16} />
+                    </button>
+                  ) : null}
                   <ActionMenu
                     customer={c}
                     open={menuId === c.id}

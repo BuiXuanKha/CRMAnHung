@@ -1,12 +1,12 @@
 import {
   CustomerStatus,
-  createCareNoteSchema,
   createCustomerSchema,
-  type CreateCareNoteInput,
+  updateCustomerCareSchema,
   type CreateCustomerInput,
   type CustomerDetail,
   type CustomerListQuery,
   type CustomerListResponse,
+  type UpdateCustomerCareInput,
   type UpdateCustomerInput,
   UserRole,
   type AuthUser,
@@ -177,11 +177,11 @@ export async function updateCustomer(
   });
 }
 
-export async function addCareNote(
+export async function updateCustomerCare(
   id: string,
-  input: CreateCareNoteInput,
-): Promise<CustomerDetail> {
-  const parsed = createCareNoteSchema.parse(input);
+  input: UpdateCustomerCareInput,
+): Promise<CustomerDetail & { unchanged?: boolean }> {
+  const parsed = updateCustomerCareSchema.parse(input);
   if (isMockCustomers()) {
     const user = currentMockUser();
     const idx = mockStore.findIndex((c) => c.id === id);
@@ -190,24 +190,71 @@ export async function addCareNote(
     if (user.role !== UserRole.ADMIN && current.employeeId !== user.id) {
       throw new Error('Không có quyền');
     }
-    const note = {
-      id: `care_${Date.now()}`,
-      note: parsed.note,
-      employeeId: user.id,
-      employeeName: user.fullName,
-      createdAt: new Date().toISOString(),
-    };
+    if (current.isHidden) {
+      throw new Error('Không cập nhật chăm sóc cho khách đã ẩn. Hãy khôi phục trước.');
+    }
+    const needSummary = (parsed.needSummary ?? '').trim();
+    const noteText = (parsed.note ?? '').trim();
+    const statusChanged = current.status !== parsed.status;
+    const budgetChanged =
+      (current.budgetMinVnd ?? null) !== parsed.budgetMinVnd ||
+      (current.budgetMaxVnd ?? null) !== parsed.budgetMaxVnd;
+    const latestNeed = (current.latestNeedSummary ?? '').trim();
+    const latestNote = (current.latestCareNote ?? '').trim();
+    const careChanged =
+      (Boolean(needSummary) || Boolean(noteText)) &&
+      (needSummary !== latestNeed || noteText !== latestNote);
+    if (!statusChanged && !budgetChanged && !careChanged) {
+      return { ...current, unchanged: true };
+    }
+    const now = new Date().toISOString();
+    const careNotes = careChanged
+      ? [
+          {
+            id: `care_${Date.now()}`,
+            note: noteText,
+            needSummary: needSummary || null,
+            employeeId: user.id,
+            employeeName: user.fullName,
+            createdAt: now,
+          },
+          ...current.careNotes,
+        ]
+      : current.careNotes;
     const updated: CustomerDetail = {
       ...current,
-      latestCareNote: note.note,
-      careNotes: [note, ...current.careNotes],
-      updatedAt: note.createdAt,
+      status: parsed.status,
+      budgetMinVnd: parsed.budgetMinVnd,
+      budgetMaxVnd: parsed.budgetMaxVnd,
+      latestNeedSummary: careChanged
+        ? needSummary || current.latestNeedSummary
+        : current.latestNeedSummary,
+      latestCareNote: careChanged ? noteText || current.latestCareNote : current.latestCareNote,
+      careNotes,
+      updatedAt: now,
     };
     mockStore = mockStore.map((c, i) => (i === idx ? updated : c));
-    return updated;
+    return { ...updated, unchanged: false };
   }
-  return apiFetch<CustomerDetail>(`/customers/${id}/care-notes`, {
+  return apiFetch<CustomerDetail & { unchanged?: boolean }>(`/customers/${id}/care-notes`, {
     method: 'POST',
     body: JSON.stringify(parsed),
   });
+}
+
+const CARE_TOAST_KEY = 'crmanhung_care_toast';
+
+export function stashCareToast(unchanged?: boolean) {
+  if (typeof window === 'undefined') return;
+  sessionStorage.setItem(CARE_TOAST_KEY, unchanged ? 'unchanged' : 'saved');
+}
+
+export function consumeCareToast(): string | null {
+  if (typeof window === 'undefined') return null;
+  const value = sessionStorage.getItem(CARE_TOAST_KEY);
+  if (!value) return null;
+  sessionStorage.removeItem(CARE_TOAST_KEY);
+  return value === 'unchanged'
+    ? 'Không có thay đổi. Bỏ qua cập nhật.'
+    : 'Đã lưu cập nhật chăm sóc.';
 }
