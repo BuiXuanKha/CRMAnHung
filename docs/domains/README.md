@@ -6,7 +6,7 @@
 |--------|------|--------|
 | Users (login) | [users.md](./users.md) | Ready for API — `/login` = bảng User; `/khach-hang` = API khách |
 | Customers | [customers.md](./customers.md) | Ready for API — list + chi tiết `[id]` (lô đất trên chi tiết vẫn mock) |
-| Lodats | [lodats.md](./lodats.md) | Ready for mock — §12 list `/lo-dat` |
+| Lodats | [lodats.md](./lodats.md) | Ready for mock — **tạm dừng**, chủ bàn thêm |
 | Addresses | _(tạo khi P2)_ | — |
 | Transactions | [transactions.md](./transactions.md) | Ready for mock — §12 list `/giao-dich` |
 | Title services | [title-services.md](./title-services.md) | Ready for mock — §12 list `/dich-vu-so-do` |
