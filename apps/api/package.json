@@ -15,6 +15,7 @@
     "db:seed": "tsx prisma/seed.ts",
     "users:migrate-legacy": "tsx scripts/migrate-users-from-legacy.ts",
     "customers:migrate-legacy": "tsx scripts/migrate-customers-from-legacy.ts",
+    "hotlines:migrate-legacy": "tsx scripts/migrate-hotlines-from-legacy.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

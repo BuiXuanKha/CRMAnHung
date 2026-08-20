@@ -42,25 +42,29 @@
 
 Cột path ảnh cũ → field **`objectKey`** (key trong R2), không phải path local.
 
-Mỗi bước **một PR**. Có map ID rồi mới copy bảng phụ (FK trỏ id mới). Script **chỉ đọc** SQLite. Idempotent.
+Mỗi bước **một PR**. Bảng **được trỏ tới** (User, hotline nguồn) copy **trước**. Bảng **trỏ sang khách** (SĐT, FB, chăm sóc…) copy **sau** khi có map `customer`. Script **chỉ đọc** SQLite. Idempotent.
+
+Thứ tự đúng: **User → hotline nguồn → khách cơ bản → SĐT / Facebook / chăm sóc / …**
+
+Khách đã copy trước hotline (slice 2); slice này copy hotline rồi **gắn lại** `sourceHotlineId` (22 khách lúc freeze).
 
 ### Todo copy
 
 | # | Việc | Map entity | Script | Trạng thái |
 |---|------|------------|--------|------------|
 | 1 | `tblUsers` → `User` | `user` | `pnpm users:migrate-legacy` | Xong |
-| 2 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Xong staging (1401/1401, 2026-08-20) |
-| 3 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | — | Todo — cần map `customer` |
-| 4 | `tblPersonFacebook` metadata → `CustomerFacebook` | `customer_facebook` | — | Todo — cần map `customer`. Chưa file avatar |
-| 5 | `tblPersonCareHistory` → `CustomerCareNote` | `customer_care` | — | Todo — cần map `customer` + `user` |
-| 6 | `tblEmployeeHotline` → `EmployeeHotline`, rồi gắn `Customer.sourceHotlineId` | `employee_hotline` | — | Todo — cần map `user` + `customer` |
+| 2 | `tblEmployeeHotline` → `EmployeeHotline` + gắn `Customer.sourceHotlineId` | `employee_hotline` | `pnpm hotlines:migrate-legacy` | Slice này |
+| 3 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Xong staging (1401/1401). Nguồn gắn ở bước 2 |
+| 4 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | — | Todo — cần map `customer` |
+| 5 | `tblPersonFacebook` metadata → `CustomerFacebook` | `customer_facebook` | — | Todo — cần map `customer`. Chưa file avatar |
+| 6 | `tblPersonCareHistory` → `CustomerCareNote` | `customer_care` | — | Todo — cần map `customer` + `user` |
 | 7 | `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` | `employee_facebook_profile` | — | Todo — cần map `user` |
 | 8 | Tin nhắn + ảnh chat + avatar → R2 | — | — | Todo sau |
 | 9 | Lô đất + `tblLodatPersonMap` | `lodat` | — | Todo — cần map `customer` |
 | 10 | Giao dịch | `transaction` | — | Todo |
 | 11 | Sổ đỏ | `title_service` | — | Todo |
 
-Slice 2 **không** copy SĐT, Facebook, lịch sử, hotline. `sourceHotlineId` để `null` đến bước 6.
+Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV **không** chặn `sourceHotlineId` — để bước 7.
 
 Freeze CRM cũ + tắt extension trước khi copy khách.
 
