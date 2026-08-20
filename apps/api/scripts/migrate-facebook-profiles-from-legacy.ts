@@ -49,7 +49,6 @@ type LegacyPersonFacebook = {
   BusinessId: string | null;
   ScanSource: string | null;
   ScanSourceLabel: string | null;
-  ScanStatus: string | null;
   CreatedAtMs: number | null;
   UpdatedAtMs: number | null;
 };
@@ -57,6 +56,7 @@ type LegacyPersonFacebook = {
 function sqliteJson<T>(sqlitePath: string, sql: string): T[] {
   const json = execFileSync('sqlite3', ['-json', sqlitePath, sql], {
     encoding: 'utf8',
+    maxBuffer: 32 * 1024 * 1024,
   }).trim();
   if (!json) return [];
   return JSON.parse(json) as T[];
@@ -161,72 +161,83 @@ async function copyCustomerFacebook(
   sqlitePath: string,
   customerMap: Map<string, string>,
 ): Promise<void> {
-  const rows = sqliteJson<LegacyPersonFacebook>(
+  const totalRow = sqliteJson<{ c: number }>(
     sqlitePath,
-    `SELECT ID, PersonId, CustomerUid, CustomerName, AvatarUrl, AvatarSourceKey,
-            ThreadId, ThreadType, PageUrl, CapturedAt, EmployeeFacebookUid,
-            AssetId, MailboxId, BusinessId, ScanSource, ScanSourceLabel, ScanStatus,
-            CreatedAtMs, UpdatedAtMs
-     FROM tblPersonFacebook
-     ORDER BY ID`,
+    'SELECT COUNT(*) AS c FROM tblPersonFacebook',
   );
-  console.log(`Đọc ${rows.length} tblPersonFacebook từ SQLite (chỉ đọc).`);
+  const total = Number(totalRow[0]?.c ?? 0);
+  console.log(`Đọc ${total} tblPersonFacebook từ SQLite (từng lô, chỉ đọc).`);
 
   const facebookMap = await loadMap(prisma, FACEBOOK_ENTITY);
   let copied = 0;
   let skipped = 0;
+  const pageSize = 150;
+  let offset = 0;
 
-  for (const row of rows) {
-    const customerId = customerMap.get(String(row.PersonId));
-    if (!customerId) {
-      console.warn(`  Bỏ facebook ID=${row.ID}: không map customer ${row.PersonId}`);
-      skipped += 1;
-      continue;
+  while (offset < total) {
+    const rows = sqliteJson<LegacyPersonFacebook>(
+      sqlitePath,
+      `SELECT ID, PersonId, CustomerUid, CustomerName, AvatarUrl, AvatarSourceKey,
+              ThreadId, ThreadType, PageUrl, CapturedAt, EmployeeFacebookUid,
+              AssetId, MailboxId, BusinessId, ScanSource, ScanSourceLabel,
+              CreatedAtMs, UpdatedAtMs
+       FROM tblPersonFacebook
+       ORDER BY ID
+       LIMIT ${pageSize} OFFSET ${offset}`,
+    );
+    if (rows.length === 0) break;
+
+    for (const row of rows) {
+      const customerId = customerMap.get(String(row.PersonId));
+      if (!customerId) {
+        console.warn(`  Bỏ facebook ID=${row.ID}: không map customer ${row.PersonId}`);
+        skipped += 1;
+        continue;
+      }
+
+      const rawMeta = JSON.stringify({
+        avatarSourceKey: trimOrNull(row.AvatarSourceKey),
+        threadType: trimOrNull(row.ThreadType),
+        pageUrl: trimOrNull(row.PageUrl),
+        capturedAt: trimOrNull(row.CapturedAt),
+        assetId: trimOrNull(row.AssetId),
+        mailboxId: trimOrNull(row.MailboxId),
+        businessId: trimOrNull(row.BusinessId),
+      });
+
+      const data = {
+        customerId,
+        customerUid: trimOrNull(row.CustomerUid),
+        threadId: trimOrNull(row.ThreadId),
+        facebookName: trimOrNull(row.CustomerName),
+        avatarUrl: trimOrNull(row.AvatarUrl),
+        scanSource: trimOrNull(row.ScanSource),
+        scanSourceLabel: trimOrNull(row.ScanSourceLabel),
+        employeeFacebookUid: trimOrNull(row.EmployeeFacebookUid),
+        rawMeta,
+        createdAt: toDate(row.CreatedAtMs),
+        updatedAt: toDate(row.UpdatedAtMs ?? row.CreatedAtMs),
+      };
+
+      const mappedId = facebookMap.get(String(row.ID));
+      const existing = mappedId
+        ? await prisma.customerFacebook.findUnique({ where: { id: mappedId } })
+        : await prisma.customerFacebook.findUnique({ where: { customerId } });
+
+      const saved = existing
+        ? await prisma.customerFacebook.update({ where: { id: existing.id }, data })
+        : await prisma.customerFacebook.create({ data });
+
+      await upsertMap(prisma, FACEBOOK_ENTITY, row.ID, saved.id);
+      facebookMap.set(String(row.ID), saved.id);
+      copied += 1;
     }
 
-    const rawMeta = JSON.stringify({
-      avatarSourceKey: trimOrNull(row.AvatarSourceKey),
-      threadType: trimOrNull(row.ThreadType),
-      pageUrl: trimOrNull(row.PageUrl),
-      capturedAt: trimOrNull(row.CapturedAt),
-      assetId: trimOrNull(row.AssetId),
-      mailboxId: trimOrNull(row.MailboxId),
-      businessId: trimOrNull(row.BusinessId),
-      scanStatus: trimOrNull(row.ScanStatus),
-    });
-
-    const data = {
-      customerId,
-      customerUid: trimOrNull(row.CustomerUid),
-      threadId: trimOrNull(row.ThreadId),
-      facebookName: trimOrNull(row.CustomerName),
-      avatarUrl: trimOrNull(row.AvatarUrl),
-      scanSource: trimOrNull(row.ScanSource),
-      scanSourceLabel: trimOrNull(row.ScanSourceLabel),
-      employeeFacebookUid: trimOrNull(row.EmployeeFacebookUid),
-      rawMeta,
-      createdAt: toDate(row.CreatedAtMs),
-      updatedAt: toDate(row.UpdatedAtMs ?? row.CreatedAtMs),
-    };
-
-    const mappedId = facebookMap.get(String(row.ID));
-    const existing = mappedId
-      ? await prisma.customerFacebook.findUnique({ where: { id: mappedId } })
-      : await prisma.customerFacebook.findUnique({ where: { customerId } });
-
-    const saved = existing
-      ? await prisma.customerFacebook.update({ where: { id: existing.id }, data })
-      : await prisma.customerFacebook.create({ data });
-
-    await upsertMap(prisma, FACEBOOK_ENTITY, row.ID, saved.id);
-    facebookMap.set(String(row.ID), saved.id);
-    copied += 1;
-    if (copied % 200 === 0) {
-      console.log(`  … đã copy ${copied}/${rows.length}`);
-    }
+    offset += rows.length;
+    console.log(`  … đã copy ${copied}/${total}`);
   }
 
-  console.log(`Xong facebook khách: ${copied}/${rows.length} (bỏ ${skipped}).`);
+  console.log(`Xong facebook khách: ${copied}/${total} (bỏ ${skipped}).`);
 }
 
 async function main() {
