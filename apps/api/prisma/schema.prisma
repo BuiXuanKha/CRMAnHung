@@ -111,6 +111,10 @@ model CustomerMessengerMessage {
   customerFacebookId String
   externalMessageId  String?
   body               String?
+  sender             String?
+  senderUid          String?
+  dedupeKey          String?
+  sortOrder          Int      @default(0)
   direction          String?
   sentAt             DateTime?
   createdAt          DateTime @default(now())
@@ -119,15 +123,21 @@ model CustomerMessengerMessage {
   images           CustomerMessengerImage[]
 
   @@index([customerFacebookId])
+  @@index([customerFacebookId, sortOrder])
 }
 
 model CustomerMessengerImage {
-  id        String   @id @default(cuid())
-  messageId String
-  objectKey  String
-  createdAt DateTime @default(now())
+  id           String   @id @default(cuid())
+  messageId    String
+  objectKey    String
+  originalPath String?
+  sortOrder    Int      @default(0)
+  rotationDeg  Int      @default(0)
+  createdAt    DateTime @default(now())
 
   message CustomerMessengerMessage @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([messageId, sortOrder])
 }
 
 model CustomerCareNote {

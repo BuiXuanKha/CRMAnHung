@@ -70,7 +70,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 6 | `tblPersonCareHistory` → `CustomerCareNote` (`needSummary` + `note`) | `customer_care` | `pnpm care:migrate-legacy` | Xong staging (266/266 dòng, 237 khách) |
 | 7 | `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` | `employee_facebook_profile` | `pnpm facebook-profiles:migrate-legacy` | Xong staging (cùng bước 5) |
 | 8 | Avatar khách `/img/avatars` → R2 public (`avatarObjectKey`) | — | `pnpm avatars:migrate-legacy-r2` | Xong staging (1376 file, ~5 MB) |
-| 9 | Tin nhắn + ảnh chat `imgsmessenger` → R2 | — | — | Todo sau (~409 MB) |
+| 9 | Tin nhắn + ảnh chat `imgsmessenger` → R2 public | `customer_messenger`, `customer_messenger_image` | `pnpm chat:migrate-legacy` | Xong staging (20253 tin / 2448 ảnh, ~418 MB) |
 | 10 | Lô đất + ảnh `lodats` | `lodat` | — | Todo (~451 MB) |
 | 11 | Giao dịch | `transaction` | — | Todo |
 | 12 | Sổ đỏ | `title_service` | — | Todo |

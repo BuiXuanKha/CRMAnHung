@@ -1,9 +1,14 @@
 'use client';
 
 import { ChevronLeft } from 'lucide-react';
-import type { CustomerDetail, CustomerListItem } from '@crmanhung/shared';
+import type {
+  CustomerDetail,
+  CustomerListItem,
+  CustomerMessengerMessage,
+} from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
-import { mockChats, mockLodatsByCustomer } from '../mock-data';
+import { mockLodatsByCustomer } from '../mock-data';
+import { ChatThread } from './chat-thread';
 
 export type RailKey = 'chat' | 'care' | 'lodat';
 
@@ -18,9 +23,18 @@ type Props = {
   onToggle: (key: RailKey) => void;
   customer: CustomerListItem | null;
   detail: CustomerDetail | null;
+  messages: CustomerMessengerMessage[];
+  messagesLoading: boolean;
 };
 
-export function RightRail({ open, onToggle, customer, detail }: Props) {
+export function RightRail({
+  open,
+  onToggle,
+  customer,
+  detail,
+  messages,
+  messagesLoading,
+}: Props) {
   return (
     <aside className="kh-s322" aria-label="Panel phụ">
       {open ? (
@@ -31,7 +45,9 @@ export function RightRail({ open, onToggle, customer, detail }: Props) {
               Thu hẹp
             </button>
           </header>
-          <div className="kh-rail-body">{renderBody(open, customer, detail)}</div>
+          <div className="kh-rail-body">
+            {renderBody(open, customer, detail, messages, messagesLoading)}
+          </div>
         </div>
       ) : null}
       <div className="kh-rail-tabs">
@@ -54,23 +70,23 @@ export function RightRail({ open, onToggle, customer, detail }: Props) {
   );
 }
 
-function renderBody(open: RailKey, customer: CustomerListItem | null, detail: CustomerDetail | null) {
+function renderBody(
+  open: RailKey,
+  customer: CustomerListItem | null,
+  detail: CustomerDetail | null,
+  messages: CustomerMessengerMessage[],
+  messagesLoading: boolean,
+) {
   if (!customer) {
     return <p className="kh-rail-empty">Chọn một khách trên bảng để xem.</p>;
   }
   if (open === 'chat') {
-    const msgs = mockChats[customer.id] ?? [];
-    if (msgs.length === 0) {
-      return <p className="kh-rail-empty">Chưa có nội dung chat (mock).</p>;
-    }
     return (
-      <ul className="kh-chat">
-        {msgs.map((m) => (
-          <li key={m.id} className={m.from}>
-            <span>{m.text}</span>
-          </li>
-        ))}
-      </ul>
+      <ChatThread
+        customerName={customer.fullName}
+        messages={messages}
+        loading={messagesLoading}
+      />
     );
   }
   if (open === 'care') {

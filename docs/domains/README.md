@@ -5,7 +5,7 @@
 | Domain | File | Status |
 |--------|------|--------|
 | Users (login) | [users.md](./users.md) | Ready for API — `/login` = bảng User; `/khach-hang` = API khách |
-| Customers | [customers.md](./customers.md) | Ready for API — `/khach-hang` + form chăm sóc trên staging |
+| Customers | [customers.md](./customers.md) | Ready for API — `/khach-hang` + form chăm sóc + rail chat/ảnh trên staging |
 | Lodats | [lodats.md](./lodats.md) | Ready for mock — §12 list `/lo-dat` |
 | Addresses | _(tạo khi P2)_ | — |
 | Transactions | [transactions.md](./transactions.md) | Ready for mock — §12 list `/giao-dich` |
