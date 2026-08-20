@@ -5,6 +5,9 @@ import { ListCustomersQueryDto } from './dto/list-customers-query.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { UpdateCustomerCareDto } from './dto/update-customer-care.dto';
 import { AddCustomerPhoneDto } from './dto/add-customer-phone.dto';
+import { CreateCustomerDto } from './dto/create-customer.dto';
+import { AcknowledgePhoneDuplicateDto } from './dto/acknowledge-phone-duplicate.dto';
+import { MergeFacebookDto } from './dto/merge-facebook.dto';
 
 @Controller('customers')
 export class CustomersController {
@@ -13,6 +16,21 @@ export class CustomersController {
   @Get()
   list(@CurrentUser() user: RequestUser, @Query() query: ListCustomersQueryDto) {
     return this.customersService.list(user, query);
+  }
+
+  @Get('contact-channels')
+  listChannels(@CurrentUser() user: RequestUser) {
+    return this.customersService.listChannels(user);
+  }
+
+  @Post()
+  create(@CurrentUser() user: RequestUser, @Body() dto: CreateCustomerDto) {
+    return this.customersService.create(user, dto);
+  }
+
+  @Post('merge-facebook-into-phone-holder')
+  mergeFacebook(@CurrentUser() user: RequestUser, @Body() dto: MergeFacebookDto) {
+    return this.customersService.mergeFacebook(user, dto);
   }
 
   @Get(':id/messages')
@@ -34,9 +52,13 @@ export class CustomersController {
     return this.customersService.update(user, id, dto);
   }
 
-  @Post()
-  create() {
-    return this.customersService.createNotReady();
+  @Patch(':id/acknowledge-phone-duplicate')
+  acknowledgeDuplicate(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: AcknowledgePhoneDuplicateDto,
+  ) {
+    return this.customersService.acknowledgeDuplicate(user, id, dto);
   }
 
   @Post(':id/care-notes')

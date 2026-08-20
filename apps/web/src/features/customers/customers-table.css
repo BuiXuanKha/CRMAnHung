@@ -243,8 +243,18 @@
 }
 
 .kh-mini-icon.phone:active,
-.kh-mini-icon.phone-add:active {
+.kh-mini-icon.phone-add:active,
+.kh-mini-icon.rename:active {
   opacity: 0.75;
+}
+
+.kh-mini-icon.rename {
+  color: #64748b;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
 }
 
 .kh-mini-icon.chat {

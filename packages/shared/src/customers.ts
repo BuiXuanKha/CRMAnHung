@@ -10,6 +10,11 @@ const vnPhoneSchema = z
   .trim()
   .regex(/^0\d{9}$/, 'SĐT phải gồm 10 số, bắt đầu bằng 0');
 
+const vnPhoneInputSchema = z
+  .string()
+  .transform((v) => v.replace(/\D/g, ''))
+  .pipe(vnPhoneSchema);
+
 export const customerPhoneSchema = z.object({
   id: z.string(),
   phone: z.string(),
@@ -106,29 +111,120 @@ export const customerListQuerySchema = z.object({
   status: z.nativeEnum(CustomerStatus).optional(),
   includeHidden: z.boolean().optional(),
   hiddenOnly: z.boolean().optional(),
+  budgetFilter: z.enum(['none', 'has', 'lt_1b', '1b_2b', 'gt_2b']).optional(),
+  contactChannel: z.string().trim().min(1).optional(),
 });
 
 export type CustomerListQuery = z.infer<typeof customerListQuerySchema>;
 
+export const CUSTOMER_BUDGET_FILTER_OPTIONS = [
+  { value: 'all', label: 'Tất cả tài chính' },
+  { value: 'none', label: 'Chưa có tài chính' },
+  { value: 'has', label: 'Đã có tài chính' },
+  { value: 'lt_1b', label: 'Dưới 1 tỷ' },
+  { value: '1b_2b', label: '1 tỷ – 2 tỷ' },
+  { value: 'gt_2b', label: 'Trên 2 tỷ' },
+] as const;
+
 export const createCustomerSchema = z.object({
-  fullName: z.string().trim().min(1, 'Vui lòng nhập tên khách'),
-  phone: vnPhoneSchema,
-  note: z.string().trim().optional(),
+  fullName: z.string().trim().min(1, 'Vui lòng nhập tên khách').max(120),
+  phone: vnPhoneInputSchema,
+  sourceHotlineId: z.string().trim().min(1, 'Vui lòng chọn hotline khách đã liên hệ.'),
+  note: z.string().trim().max(500).optional(),
 });
 
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
 
 export const addCustomerPhoneSchema = z.object({
-  phone: z
-    .string()
-    .transform((v) => v.replace(/\D/g, ''))
-    .pipe(vnPhoneSchema),
+  phone: vnPhoneInputSchema,
 });
 
 export type AddCustomerPhoneInput = z.infer<typeof addCustomerPhoneSchema>;
 
+export const renameCustomerSchema = z.object({
+  fullName: z.string().trim().min(1, 'Tên khách không được để trống.').max(120),
+});
+
+export type RenameCustomerInput = z.infer<typeof renameCustomerSchema>;
+
+export const phoneDuplicateExistingSchema = z.object({
+  id: z.string(),
+  fullName: z.string(),
+  facebookName: z.string().nullable().optional(),
+  primaryPhone: z.string().nullable().optional(),
+  hasFacebook: z.boolean(),
+  isHidden: z.boolean(),
+  status: z.nativeEnum(CustomerStatus),
+});
+
+export type PhoneDuplicateExisting = z.infer<typeof phoneDuplicateExistingSchema>;
+
+export const PHONE_DUPLICATE_CODE = 'PHONE_DUPLICATE';
+
+export const acknowledgePhoneDuplicateSchema = z.object({
+  fullName: z.string().trim().min(1, 'Tên khách không được để trống.').max(120),
+});
+
+export type AcknowledgePhoneDuplicateInput = z.infer<
+  typeof acknowledgePhoneDuplicateSchema
+>;
+
+export const mergeFacebookIntoPhoneHolderSchema = z.object({
+  sourceCustomerId: z.string().min(1),
+  targetCustomerId: z.string().min(1),
+  phone: vnPhoneInputSchema,
+});
+
+export type MergeFacebookIntoPhoneHolderInput = z.infer<
+  typeof mergeFacebookIntoPhoneHolderSchema
+>;
+
+export const employeeHotlineSchema = z.object({
+  id: z.string(),
+  phone: z.string(),
+  label: z.string(),
+  isActive: z.boolean(),
+});
+
+export type EmployeeHotline = z.infer<typeof employeeHotlineSchema>;
+
+export const employeeHotlineListSchema = z.object({
+  items: z.array(employeeHotlineSchema),
+});
+
+export type EmployeeHotlineList = z.infer<typeof employeeHotlineListSchema>;
+
+export const createEmployeeHotlineSchema = z.object({
+  phone: vnPhoneInputSchema,
+  label: z.string().trim().min(1, 'Vui lòng nhập tên hiển thị.').max(80),
+});
+
+export type CreateEmployeeHotlineInput = z.infer<typeof createEmployeeHotlineSchema>;
+
+export const updateEmployeeHotlineSchema = z.object({
+  label: z.string().trim().min(1).max(80).optional(),
+  isActive: z.boolean().optional(),
+});
+
+export type UpdateEmployeeHotlineInput = z.infer<typeof updateEmployeeHotlineSchema>;
+
+export const contactChannelOptionSchema = z.object({
+  value: z.string(),
+  label: z.string(),
+  type: z.enum(['facebook', 'hotline']),
+  customerCount: z.number().int().nonnegative(),
+});
+
+export type ContactChannelOption = z.infer<typeof contactChannelOptionSchema>;
+
+export const contactChannelListSchema = z.object({
+  items: z.array(contactChannelOptionSchema),
+});
+
+export type ContactChannelList = z.infer<typeof contactChannelListSchema>;
+
 export const updateCustomerSchema = z.object({
-  fullName: z.string().trim().min(1).optional(),
+  fullName: z.string().trim().min(1, 'Tên khách không được để trống.').max(120).optional(),
   status: z.nativeEnum(CustomerStatus).optional(),
   note: z.string().trim().nullable().optional(),
   budgetMinVnd: z.number().int().nonnegative().nullable().optional(),

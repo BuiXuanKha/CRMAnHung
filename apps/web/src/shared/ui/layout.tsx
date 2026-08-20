@@ -7,6 +7,7 @@ import { CreditCard, FileText, Map, Menu, Users } from 'lucide-react';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from './icon';
 import { UserMenu } from './user-menu';
+import { HotlinesSettingsDialog } from '@/features/settings/hotlines-dialog';
 import './layout.css';
 
 const navItems = [
@@ -21,6 +22,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { user, loading, logout } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [hotlineOpen, setHotlineOpen] = useState(false);
   const mobileNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -93,6 +95,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <UserMenu
                 fullName={user.fullName}
                 roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+                onOpenSettings={() => setHotlineOpen(true)}
                 onLogout={() => {
                   void logout().then(() => router.replace('/login'));
                 }}
@@ -124,6 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </header>
 
       <main className="content">{children}</main>
+      <HotlinesSettingsDialog open={hotlineOpen} onClose={() => setHotlineOpen(false)} />
     </div>
   );
 }

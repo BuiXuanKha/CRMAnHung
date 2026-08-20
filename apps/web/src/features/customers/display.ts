@@ -74,8 +74,8 @@ export function statusTone(status: CustomerStatus): 'green' | 'blue' | 'amber' |
 }
 
 export type ExtraFilters = {
-  finance: 'all' | 'has' | 'empty';
-  channel: 'all' | 'facebook' | 'phone' | 'page';
+  finance: 'all' | 'none' | 'has' | 'lt_1b' | '1b_2b' | 'gt_2b';
+  channel: string;
   lodat: 'all' | 'has' | 'empty';
   demand: 'all' | 'has' | 'empty';
 };
@@ -96,16 +96,42 @@ export const DEMAND_FILTER_OPTIONS = [
 
 export const FINANCE_FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả tài chính' },
-  { value: 'has', label: 'Có ngân sách' },
-  { value: 'empty', label: 'Chưa nhập' },
+  { value: 'none', label: 'Chưa có tài chính' },
+  { value: 'has', label: 'Đã có tài chính' },
+  { value: 'lt_1b', label: 'Dưới 1 tỷ' },
+  { value: '1b_2b', label: '1 tỷ – 2 tỷ' },
+  { value: 'gt_2b', label: 'Trên 2 tỷ' },
 ];
 
-export const CHANNEL_FILTER_OPTIONS = [
-  { value: 'all', label: 'Tất cả kênh liên hệ' },
-  { value: 'facebook', label: 'Facebook / Messenger' },
-  { value: 'phone', label: 'SĐT / Zalo' },
-  { value: 'page', label: 'Page' },
-];
+export const CHANNEL_ALL_OPTION = { value: 'all', label: 'Tất cả kênh liên hệ' };
+
+export function matchesBudgetFilter(
+  c: CustomerListItem,
+  key: ExtraFilters['finance'],
+): boolean {
+  if (key === 'all') return true;
+  const min = c.budgetMinVnd ?? null;
+  const max = c.budgetMaxVnd ?? null;
+  if (key === 'none') return min == null && max == null;
+  if (key === 'has') return min != null || max != null;
+  const rangeMin = key === 'lt_1b' ? 0 : key === '1b_2b' ? 1_000_000_000 : 2_000_000_000;
+  const rangeMax =
+    key === 'lt_1b' ? 1_000_000_000 : key === '1b_2b' ? 2_000_000_000 : 9_000_000_000_000_000;
+  const lo = min ?? 0;
+  const hi = max ?? 9_000_000_000_000_000;
+  return lo <= rangeMax && hi >= rangeMin;
+}
+
+export function matchesChannel(c: CustomerListItem, channel: string): boolean {
+  if (!channel || channel === 'all') return true;
+  if (channel.startsWith('fb:')) {
+    return (c.facebook?.employeeFacebookUid ?? '') === channel.slice(3);
+  }
+  if (channel.startsWith('hotline:')) {
+    return c.sourceHotline?.id === channel.slice(8);
+  }
+  return true;
+}
 
 export const LODAT_FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả lô đất' },
@@ -146,14 +172,6 @@ export function applyExtraFilters(
   extra: ExtraFilters,
 ): CustomerListItem[] {
   return items.filter((c) => {
-    if (extra.finance === 'has' && c.budgetMinVnd == null && c.budgetMaxVnd == null) return false;
-    if (extra.finance === 'empty' && (c.budgetMinVnd != null || c.budgetMaxVnd != null)) return false;
-    if (extra.channel === 'facebook' && !c.facebook && !c.sourceFacebookProfile) return false;
-    if (extra.channel === 'phone' && c.phones.length === 0 && !c.sourceHotline) return false;
-    if (extra.channel === 'page') {
-      const s = c.facebook?.scanSource;
-      if (s !== 'page' && s !== 'business_suite') return false;
-    }
     if (extra.lodat === 'has' && c.lodatCount <= 0) return false;
     if (extra.lodat === 'empty' && c.lodatCount > 0) return false;
     const hasDemand = Boolean(c.latestNeedSummary?.trim());

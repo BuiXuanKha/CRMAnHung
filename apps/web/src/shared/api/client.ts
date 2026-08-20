@@ -33,19 +33,39 @@ export function clearTokens() {
 type ApiErrorBody = {
   message?: string | string[];
   statusCode?: number;
+  code?: string;
+  existing?: unknown;
+  mergeAllowed?: boolean;
+  phone?: string;
+  source?: unknown;
 };
 
 export class ApiError extends Error {
   status: number;
+  code?: string;
+  existing?: unknown;
+  mergeAllowed?: boolean;
+  phone?: string;
+  source?: unknown;
 
-  constructor(status: number, message: string) {
+  constructor(
+    status: number,
+    message: string,
+    extra?: Pick<ApiErrorBody, 'code' | 'existing' | 'mergeAllowed' | 'phone' | 'source'>,
+  ) {
     super(message);
     this.status = status;
+    this.code = extra?.code;
+    this.existing = extra?.existing;
+    this.mergeAllowed = extra?.mergeAllowed;
+    this.phone = extra?.phone;
+    this.source = extra?.source;
   }
 }
 
 async function parseError(res: Response): Promise<ApiError> {
   let message = res.statusText || 'Request failed';
+  let extra: Pick<ApiErrorBody, 'code' | 'existing' | 'mergeAllowed' | 'phone' | 'source'> = {};
   try {
     const body = (await res.json()) as ApiErrorBody;
     if (Array.isArray(body.message)) {
@@ -53,10 +73,17 @@ async function parseError(res: Response): Promise<ApiError> {
     } else if (typeof body.message === 'string') {
       message = body.message;
     }
+    extra = {
+      code: body.code,
+      existing: body.existing,
+      mergeAllowed: body.mergeAllowed,
+      phone: body.phone,
+      source: body.source,
+    };
   } catch {
     // ignore
   }
-  return new ApiError(res.status, message);
+  return new ApiError(res.status, message, extra);
 }
 
 let refreshPromise: Promise<boolean> | null = null;
