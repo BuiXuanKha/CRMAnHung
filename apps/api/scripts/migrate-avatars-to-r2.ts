@@ -78,6 +78,7 @@ async function main() {
     throw new Error(`Thiếu biến R2: ${missing.join(', ')}`);
   }
 
+  const force = process.env.FORCE_AVATAR_UPLOAD === '1';
   const prisma = new PrismaClient();
   const s3 = new S3Client({
     region: 'auto',
@@ -86,6 +87,8 @@ async function main() {
       accessKeyId: env.R2_ACCESS_KEY_ID,
       secretAccessKey: env.R2_SECRET_ACCESS_KEY,
     },
+    requestChecksumCalculation: 'WHEN_REQUIRED',
+    responseChecksumValidation: 'WHEN_REQUIRED',
   });
   const bucket = env.R2_BUCKET;
   const cdn = env.R2_PUBLIC_BASE_URL.replace(/\/$/, '');
@@ -119,7 +122,7 @@ async function main() {
     }
 
     const objectKey = `${KEY_PREFIX}${base}`;
-    if (row.avatarObjectKey === objectKey) {
+    if (!force && row.avatarObjectKey === objectKey) {
       try {
         await s3.send(new HeadObjectCommand({ Bucket: bucket, Key: objectKey }));
         skippedExists += 1;

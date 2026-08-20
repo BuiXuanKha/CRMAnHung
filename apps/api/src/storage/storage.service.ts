@@ -57,6 +57,9 @@ export class StorageService {
           accessKeyId: this.config.getOrThrow<string>('R2_ACCESS_KEY_ID'),
           secretAccessKey: this.config.getOrThrow<string>('R2_SECRET_ACCESS_KEY'),
         },
+        // R2 rejects AWS SDK default checksum headers and may store octet-stream.
+        requestChecksumCalculation: 'WHEN_REQUIRED',
+        responseChecksumValidation: 'WHEN_REQUIRED',
       });
     }
     return this.client;
