@@ -60,7 +60,7 @@ Phạm vi ưu tiên hiện tại: màn sau login, đặc biệt **Quản lý kh�
 - Không bắt buộc giống pixel CRM cũ từng chi tiết; **cấu trúc shell** theo mục 4.2 (đã chốt).
 - Admin UI: **chưa làm** cho đến khi STAFF ổn.
 - Mock được (`NEXT_PUBLIC_USE_MOCK`); không gọi API production CRM cũ.
-- **UI list `/khach-hang`:** visual §4.3.1–4.3.4. **Từng control (ô tìm, `@`/`@@`, icon SĐT đỏ → modal SĐT, mess xanh = có tin, đếm lô…):** [`domains/customers.md`](./domains/customers.md) **§12**. Modal chi tiết làm sau. Chi tiết `[id]` vẫn placeholder.
+- **UI list `/khach-hang`:** visual §4.3.1–4.3.4. **Từng control:** [`domains/customers.md`](./domains/customers.md) **§12**. Chi tiết `[id]`: §12.3.
 
 ### 4.2 Shell CRM chung (đã chốt) — mọi trang sau login
 
@@ -160,7 +160,7 @@ Cột «Số lô đất» trên mock mới = **lệch CRM cũ** (cũ chỉ icon 
 | Trái | Avatar tròn 48px (ảnh FB hoặc initials) |
 | Giữa | Tên; SĐT **xanh** = gọi `tel:`; SĐT **cam** = thêm số; Map+số nếu có lô; hangtag; kênh; ngân sách; nhu cầu |
 | Phải | `SquarePen` = Cập nhật chăm sóc; chevron = menu §4.3.3 |
-| Bấm thẻ | Chọn dòng (không mở placeholder chi tiết) |
+| Bấm thẻ | Mở `/khach-hang/[id]` |
 | Footer | `All N / M` · `KN` · `KM` · `CCS` · `KH` · `ĐG` (ghim) |
 | CTA đáy | Nút full-width xanh lá `#16a34a`: **Thêm khách bằng SĐT** |
 
@@ -631,6 +631,8 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-20 | Lọc tài chính (chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ) + lọc kênh (page FB / hotline thật) |
 | 2026-08-20 | Form chăm sóc: trạng thái + nhu cầu + chip tài chính + ghi chú (modal PC / trang mobile) |
 | 2026-08-20 | Rail Nội dung chat: tin đã lưu + thumbnail ảnh; bấm ảnh → CrmDialog gallery (prev/next) |
+| 2026-08-20 | Chi tiết `/khach-hang/[id]`: hero + SĐT + tài chính + lịch sử; lô đất mock. Mobile bấm thẻ → trang này |
+| 2026-08-20 | Mục 24 list khách: tải 50 dòng khi cuộn + nhớ lọc/scroll (sessionStorage) — `customers.md` §12.1.5 |
 
 ---
 

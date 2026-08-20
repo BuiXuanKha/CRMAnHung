@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc, rail chat + ảnh, thêm khách SĐT / trùng-gộp / sửa tên / lọc tài chính-kênh.
+- **Status:** Ready for API — list `/khach-hang` + trang chi tiết `[id]` (lô đất trên chi tiết vẫn mock).
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -41,12 +41,14 @@ Hành vi đích = **§12**. Làm dần theo số.
 
 Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, thêm khách (tên + SĐT), rail 3 panel (dữ liệu tĩnh), menu 7 mục.
 
+**Lô đất — tạm dừng.** Chủ sẽ bàn thêm (nhiều vấn đề riêng). Không làm / không copy: tạo lô từ khách (6), rail lô (22), icon Map + đếm lô (23), gắn khách↔lô trên chi tiết. UI lô trên khách **giữ mock**. Domain `/lo-dat` làm sau khi chốt.
+
 1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim, kênh, avatar, SĐT, nhu cầu). Staging đã copy.
 2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Có trên staging (modal PC / trang mobile).
 3. **Double-click dòng (máy tính)** — mở modal chăm sóc. Có trên staging.
-4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lô, lịch sử chăm sóc. Hiện placeholder.
+4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lịch sử chăm sóc (API). Lô đất trên trang này **vẫn mock**.
 5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Có trên staging.
-6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. Hiện toast. ADMIN: không được tạo (ẩn / báo).
+6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. Hiện toast. **Tạm dừng** (bàn thêm).
 7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
@@ -62,9 +64,9 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Có trên staging.
 21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
-22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện list tĩnh.
-23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu).
-24. **Tải thêm ~50 dòng khi cuộn** + nhớ vị trí/lọc khi quay lại list.
+22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện mock. **Tạm dừng** (bàn thêm).
+23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu). **Tạm dừng** (bàn thêm).
+24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Chưa code.
 25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn.
 26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder P4.
 
@@ -199,9 +201,42 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 Ghim: nền vàng. Đang chọn: highlight. Đã xoá: hàng kiểu ẩn.
 
-#### 12.1.5 Footer
+#### 12.1.5 Footer + cuộn tải thêm + nhớ vị trí (mục 24)
 
-Tổng N — hoặc Hiển thị n / Tổng N khi còn trang. Tải thêm ~50 dòng khi cuộn.
+**Footer**
+
+- Chỉ một trang (chưa hết): `Tổng N`.
+- Đã phân trang: `Hiển thị n / Tổng N` (`n` = số dòng đang có trên DOM, `N` = `total` API).
+
+**Tải thêm 50 dòng**
+
+1. API list nhận `limit` + `offset`. Mỗi lần **đúng 50** khách (`limit=50`). Lần đầu `offset=0`.
+2. Thứ tự luôn: ghim → `pinnedAt` → `updatedAt` (cùng `ORDER BY` hiện tại). Không xáo khi append.
+3. Cuộn vùng **thân bảng** (không phải window). Còn cách đáy **< 160px** và `n < N` và không đang tải → gọi tiếp `offset = n`, **nối** vào list (không thay trang).
+4. Đổi ô tìm / lọc / `@` `@@` → **reset**: `offset=0`, bỏ list cũ, cuộn lên đầu. Không giữ scroll lần trước.
+5. Ghim / ẩn / sửa một dòng: giữ `scrollTop` hiện tại; không tải lại từ đầu nếu không cần.
+
+**Nhớ vị trí + lọc khi rời list**
+
+Lưu **sessionStorage** (theo tab; đóng tab thì mất) ngay trước khi rời `/khach-hang`:
+
+| Lưu | Gồm |
+|-----|-----|
+| Lọc | Ô tìm (kể cả `@`/`@@`), trạng thái, tài chính, kênh, lô đất, nhu cầu |
+| Chọn | `selectedId` đang chọn |
+| Cuộn | `scrollTop` của thân list + `anchorId` = id dòng đầu tiên còn thấy |
+
+Khi nào lưu: bấm thẻ mobile → chi tiết; vào `/cham-soc`; vào `/lo-dat/[id]` từ rail; tạo lô / sổ đỏ từ menu.
+
+Khi **quay lại list** (Back / link «Danh sách khách»):
+
+1. Khôi phục đúng bộ lọc đã lưu, rồi gọi API với bộ lọc đó (`offset=0`, `limit=50`).
+2. Nếu `scrollTop` đã lưu **cao hơn** chiều cao list hiện có → **tải thêm 50** (lặp) cho đến khi đủ chiều cao hoặc hết `total`.
+3. Đặt lại `scrollTop` (và chọn lại `selectedId` nếu dòng còn trong kết quả).
+4. Trong lúc khôi phục: **không** nháy về đầu trang (che list ngắn; timeout an toàn ~4s).
+5. Snapshot dùng **một lần** rồi xóa. F5 / mở `/khach-hang` mới từ menu = list mặc định, không restore.
+
+Máy tính và điện thoại **cùng quy tắc**. Ô cuộn: bảng (PC) hoặc danh sách thẻ (mobile).
 
 #### 12.1.6 Rail phải
 
@@ -316,15 +351,41 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 Ghim: nền vàng. Đã xoá: thẻ kiểu ẩn.
 
-#### 12.2.5 Footer
+#### 12.2.5 Footer + cuộn
 
-All · KN · KM · CCS · KH · ĐG (trên trang đang nạp).
+All · KN · KM · CCS · KH · ĐG — đếm trên **trang đang nạp**. `All n / N` khi còn trang.
+
+Cuộn tải 50 + nhớ vị trí/lọc: **cùng 12.1.5**. Vùng cuộn = danh sách thẻ.
 
 ---
 
 ### 12.3 Chi tiết `/khach-hang/[id]`
 
-Placeholder. Chăm sóc = **§12.4**.
+Mở: **điện thoại bấm thẻ**. Máy tính: chọn dòng + rail (không bắt buộc vào trang này).
+
+Dữ liệu khách + lịch sử: `GET /customers/:id`. **Lô đất trên trang này = mock** (chưa copy; rail list cũng mock).
+
+Quay lại = `/khach-hang` (mục 24 sẽ khôi phục cuộn/lọc).
+
+#### 12.3.1 Máy tính
+
+Cùng khối 12.3.3. Cột nội dung hẹp (~720px). Nút quay lại trên cùng.
+
+#### 12.3.2 Mobile
+
+Cùng khối 12.3.3. SĐT bấm = `tel:`. Padding gọn.
+
+#### 12.3.3 Thành phần
+
+1. **Quay lại** — «← Danh sách khách»
+2. **Hero** — avatar (ảnh FB hoặc chữ tắt); tên; hangtag trạng thái; hangtag **Đã xoá** nếu ẩn
+3. **SĐT** — mọi số trên hồ sơ; trống `—`. Điện thoại: từng số là `tel:`
+4. **Tài chính** — khoảng ngân sách; trống `—`
+5. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú
+6. **Danh sách lô đất** — mock. Thẻ: tiêu đề, chỗ ảnh, DT · giá. Bấm → `/lo-dat/[id]` (placeholder). Không mock → «Chưa gắn lô đất.»
+7. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Không có → «Chưa có lịch sử chăm sóc.»
+
+Không form chăm sóc trên trang này (form = **§12.4**).
 
 ### 12.4 Cập nhật chăm sóc
 
@@ -469,6 +530,14 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 - Lọc tài chính: `budgetFilter=none|has|lt_1b|1b_2b|gt_2b` (khoảng chồng). Lọc kênh: `contactChannel=fb:<uid>|hotline:<id>` từ **GET `/customers/contact-channels`**.
 
 **Xong staging (2026-08-20)** — `/khach-hang` trên `anhungland.com`.
+
+### 13.12 Slice này — trang chi tiết khách
+
+`GET /customers/:id` (đã có): hero, SĐT, tài chính, thông tin hiện tại, lịch sử chăm sóc. Mobile bấm thẻ → `/khach-hang/[id]`.
+
+**Lô đất = mock** (`mockLodatsByCustomer`) — chưa copy map khách↔lô. Bấm thẻ mock → `/lo-dat/[id]` placeholder.
+
+Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **chưa code**.
 
 ---
 

@@ -167,6 +167,41 @@ export function countCustomerStats(items: CustomerListItem[]): {
   return counts;
 }
 
+export function formatCareTimestamp(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toLocaleString('vi-VN', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
+export function formatRelativeAgo(iso: string, nowMs = Date.now()): string {
+  const past = new Date(iso);
+  if (Number.isNaN(past.getTime())) return '';
+  const diffMs = nowMs - past.getTime();
+  if (diffMs < 0) return 'sắp tới';
+  const diffMin = Math.floor(diffMs / 60_000);
+  if (diffMin < 1) return 'vừa xong';
+  if (diffMin < 60) return `${diffMin} phút trước`;
+  const now = new Date(nowMs);
+  const sameDay =
+    past.getFullYear() === now.getFullYear() &&
+    past.getMonth() === now.getMonth() &&
+    past.getDate() === now.getDate();
+  if (sameDay) {
+    return `${Math.floor(diffMin / 60)} giờ trước`;
+  }
+  const diffDay = Math.floor(diffMs / 86_400_000);
+  if (diffDay < 30) return `${diffDay} ngày trước`;
+  const diffMonth = Math.floor(diffDay / 30);
+  if (diffMonth < 12) return `${diffMonth} tháng trước`;
+  return `${Math.floor(diffMonth / 12)} năm trước`;
+}
+
 export function applyExtraFilters(
   items: CustomerListItem[],
   extra: ExtraFilters,
