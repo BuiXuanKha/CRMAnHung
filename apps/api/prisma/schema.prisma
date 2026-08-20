@@ -70,22 +70,25 @@ model Customer {
 }
 
 model CustomerFacebook {
-  id          String   @id @default(cuid())
-  customerId  String   @unique
-  customerUid String?
-  threadId    String?
-  facebookName String?
-  avatarUrl   String?
-  scanSource  String?
-  rawMeta     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  customerId          String   @unique
+  customerUid         String?
+  threadId            String?
+  facebookName        String?
+  avatarUrl           String?
+  scanSource          String?
+  scanSourceLabel     String?
+  employeeFacebookUid String?
+  rawMeta             String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
   customer Customer                    @relation(fields: [customerId], references: [id], onDelete: Cascade)
   messages CustomerMessengerMessage[]
 
   @@index([customerUid])
   @@index([threadId])
+  @@index([employeeFacebookUid])
 }
 
 model CustomerPhone {
@@ -139,15 +142,18 @@ model CustomerCareNote {
 }
 
 model EmployeeFacebookProfile {
-  id         String   @id @default(cuid())
-  employeeId String
+  id          String   @id @default(cuid())
+  employeeId  String
   facebookUid String
-  nickname   String?
-  createdAt  DateTime @default(now())
+  nickname    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   employee User @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
   @@unique([employeeId, facebookUid])
+  @@index([facebookUid])
 }
 
 model EmployeeHotline {

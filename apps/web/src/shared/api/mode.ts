@@ -16,7 +16,7 @@ export function isMockAuth(): boolean {
 
 /**
  * List `/khach-hang`: mock chỉ khi login giả.
- * Login thật (staging) → API khách đã copy (tên, trạng thái, tài chính, ghim, hotline nguồn).
+ * Login thật (staging) → API khách đã copy (tên, trạng thái, tài chính, ghim, kênh hotline / profile FB).
  */
 export function isMockCustomers(): boolean {
   return isMockAuth();

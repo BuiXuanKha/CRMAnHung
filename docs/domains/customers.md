@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (chưa SĐT / FB / care)
+- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (kênh = hotline hoặc profile FB NV; chưa SĐT / care)
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Hiện: tên, trạng thái, tài chính, ghim/ẩn, hotline nguồn. Nhu cầu / SĐT / Facebook trống đến khi copy bảng phụ. Extension: phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Hiện: tên, trạng thái, tài chính, ghim/ẩn, kênh (hotline hoặc profile FB NV). Nhu cầu / SĐT trống đến khi copy bảng phụ. Extension: phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -352,7 +352,16 @@ Lúc freeze: 1401 khách (292 ẩn, 16 ghim, 8 tự khôi phục), 3 hotline.
 `tblEmployeeHotline` → `EmployeeHotline` + map `employee_hotline`.  
 Rồi `tblPerson.SourceHotlineId` → `Customer.sourceHotlineId` (map hotline + map khách).
 
-`sourceHotlineId` là FK optional → copy hotline sau khách rồi UPDATE vẫn hợp lệ. Copy cả hotline tắt. Chưa copy profile Facebook NV.
+`sourceHotlineId` là FK optional → copy hotline sau khách rồi UPDATE vẫn hợp lệ. Copy cả hotline tắt.
+
+### 13.4 Slice này — profile Facebook NV + metadata khách
+
+Kênh liên hệ trên list = **hotline nguồn** hoặc **tên profile/page NV** (`EmployeeFacebookUid` → `NameProfile`).
+
+`tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` (9 nick, map `employee_facebook_profile`).  
+`tblPersonFacebook` → `CustomerFacebook` (UID NV, tên nick khách, thread, scanSource; **không** tin nhắn / ảnh / file avatar). 1378 khách có FB; 22 chỉ hotline; 1 không kênh.
+
+Cột `/khach-hang` hiện tên như CRM cũ: `Page Bùi Xuân Khả`, `Khả Khánh Hà`, `Em Hà - BĐS Nam Sách 85`, …
 
 ---
 

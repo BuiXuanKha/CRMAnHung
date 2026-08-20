@@ -24,6 +24,8 @@ export const customerFacebookSchema = z.object({
   facebookName: z.string().nullable().optional(),
   avatarUrl: z.string().nullable().optional(),
   scanSource: z.string().nullable().optional(),
+  scanSourceLabel: z.string().nullable().optional(),
+  employeeFacebookUid: z.string().nullable().optional(),
 });
 
 export type CustomerFacebookMeta = z.infer<typeof customerFacebookSchema>;
@@ -46,6 +48,16 @@ export const customerSourceHotlineSchema = z.object({
 
 export type CustomerSourceHotline = z.infer<typeof customerSourceHotlineSchema>;
 
+export const customerSourceFacebookProfileSchema = z.object({
+  id: z.string(),
+  facebookUid: z.string(),
+  nickname: z.string().nullable(),
+});
+
+export type CustomerSourceFacebookProfile = z.infer<
+  typeof customerSourceFacebookProfileSchema
+>;
+
 export const customerListItemSchema = z.object({
   id: z.string(),
   employeeId: z.string(),
@@ -63,6 +75,8 @@ export const customerListItemSchema = z.object({
   phones: z.array(customerPhoneSchema).default([]),
   facebook: customerFacebookSchema.nullable().optional(),
   sourceHotline: customerSourceHotlineSchema.nullable().optional(),
+  /** Profile/page NV quét khách — cột Kênh liên hệ khi không có hotline. */
+  sourceFacebookProfile: customerSourceFacebookProfileSchema.nullable().optional(),
   /** Cột Nhu cầu = NeedSummary mới nhất (care). Chưa copy history → null. */
   latestNeedSummary: z.string().nullable().optional(),
   latestCareNote: z.string().nullable().optional(),

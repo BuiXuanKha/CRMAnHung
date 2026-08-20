@@ -14,9 +14,16 @@ import { CUSTOMER_STATUSES, type CustomerStatusValue } from './customer-status';
 const LIST_INCLUDE = {
   employee: { select: { fullName: true } },
   sourceHotline: { select: { id: true, phone: true, label: true } },
+  facebook: true,
 } as const;
 
 type CustomerRow = Prisma.CustomerGetPayload<{ include: typeof LIST_INCLUDE }>;
+
+type ProfileLookup = {
+  id: string;
+  facebookUid: string;
+  nickname: string | null;
+};
 
 const STATUS_VALUES = new Set<string>(CUSTOMER_STATUSES);
 
@@ -33,6 +40,14 @@ function toStatus(raw: string): CustomerStatusValue {
 
 function toIso(value: Date | null | undefined): string | null {
   return value ? value.toISOString() : null;
+}
+
+function profileByUid(profiles: ProfileLookup[]): Map<string, ProfileLookup> {
+  const map = new Map<string, ProfileLookup>();
+  for (const profile of profiles) {
+    map.set(profile.facebookUid, profile);
+  }
+  return map;
 }
 
 @Injectable()
@@ -74,7 +89,8 @@ export class CustomersService {
       ],
     });
 
-    const items = rows.map((row) => this.toListItem(row));
+    const profiles = await this.loadProfiles();
+    const items = rows.map((row) => this.toListItem(row, profiles));
     return { items, total: items.length };
   }
 
@@ -87,7 +103,8 @@ export class CustomersService {
       throw new NotFoundException('Không tìm thấy khách hàng');
     }
     this.assertCanAccess(user, row.employeeId);
-    return { ...this.toListItem(row), careNotes: [] };
+    const profiles = await this.loadProfiles();
+    return { ...this.toListItem(row, profiles), careNotes: [] };
   }
 
   async update(
@@ -115,7 +132,8 @@ export class CustomersService {
       data,
       include: LIST_INCLUDE,
     });
-    return { ...this.toListItem(row), careNotes: [] };
+    const profiles = await this.loadProfiles();
+    return { ...this.toListItem(row, profiles), careNotes: [] };
   }
 
   createNotReady(): never {
@@ -130,6 +148,14 @@ export class CustomersService {
     );
   }
 
+  private async loadProfiles(): Promise<Map<string, ProfileLookup>> {
+    const rows = await this.prisma.employeeFacebookProfile.findMany({
+      orderBy: { createdAt: 'asc' },
+      select: { id: true, facebookUid: true, nickname: true },
+    });
+    return profileByUid(rows);
+  }
+
   private assertCanAccess(user: RequestUser, employeeId: string) {
     if (user.role === 'ADMIN') return;
     if (employeeId !== user.id) {
@@ -137,7 +163,23 @@ export class CustomersService {
     }
   }
 
-  private toListItem(row: CustomerRow) {
+  private toListItem(row: CustomerRow, profiles: Map<string, ProfileLookup>) {
+    const facebook = row.facebook
+      ? {
+          customerUid: row.facebook.customerUid,
+          threadId: row.facebook.threadId,
+          facebookName: row.facebook.facebookName,
+          avatarUrl: row.facebook.avatarUrl,
+          scanSource: row.facebook.scanSource,
+          scanSourceLabel: row.facebook.scanSourceLabel,
+          employeeFacebookUid: row.facebook.employeeFacebookUid,
+        }
+      : null;
+    const sourceFacebookProfile =
+      (facebook?.employeeFacebookUid
+        ? profiles.get(facebook.employeeFacebookUid)
+        : null) ?? null;
+
     return {
       id: row.id,
       employeeId: row.employeeId,
@@ -153,12 +195,19 @@ export class CustomersService {
       autoRestoredAt: toIso(row.autoRestoredAt),
       primaryPhone: null,
       phones: [],
-      facebook: null,
+      facebook,
       sourceHotline: row.sourceHotline
         ? {
             id: row.sourceHotline.id,
             phone: row.sourceHotline.phone,
             label: row.sourceHotline.label,
+          }
+        : null,
+      sourceFacebookProfile: sourceFacebookProfile
+        ? {
+            id: sourceFacebookProfile.id,
+            facebookUid: sourceFacebookProfile.facebookUid,
+            nickname: sourceFacebookProfile.nickname,
           }
         : null,
       latestNeedSummary: null,

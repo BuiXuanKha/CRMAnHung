@@ -112,9 +112,10 @@ Sau freeze CRM cũ:
 
 1. ~~Nối `/login` → API + copy `tblUsers`~~
 2. ~~Copy khách cơ bản~~ (`customers.md` §13)
-3. Copy hotline nguồn + gắn `sourceHotlineId` — slice này
-4. Bảng phụ theo todo `MIGRATION.md` (SĐT, FB, chăm sóc, profile FB NV…)
-5. Tắt mock **list** khi API khách hàng sẵn
-6. P4: CRUD nhân viên như modal CRM cũ
+3. ~~Copy hotline nguồn + gắn `sourceHotlineId`~~
+4. Copy profile Facebook NV + metadata FB khách (cột Kênh liên hệ)
+5. Bảng phụ theo todo `MIGRATION.md` (SĐT, chăm sóc, …)
+6. Tắt mock **list** khi API khách hàng sẵn
+7. P4: CRUD nhân viên như modal CRM cũ
 
 Không làm CRUD user trước khi login + khách ổn.
