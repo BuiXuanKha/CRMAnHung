@@ -46,8 +46,8 @@ model Customer {
   employeeId      String
   fullName        String
   status          String   @default("KHACH_MOI")
-  budgetMinVnd    Int?
-  budgetMaxVnd    Int?
+  budgetMinVnd    BigInt?
+  budgetMaxVnd    BigInt?
   note            String?
   isPinned        Boolean  @default(false)
   isHidden        Boolean  @default(false)

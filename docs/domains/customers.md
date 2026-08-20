@@ -324,7 +324,7 @@ Chi tiết thứ tự: [`MIGRATION.md`](../MIGRATION.md) — **một bảng / m�
 
 `tblPerson` → `Customer` + map entity `customer`.
 
-Copy: `employeeId` (qua map `user`), tên, trạng thái, tài chính, `note` (cột dư trên khách), ẩn, ghim + `pinnedAt`, `autoRestoredAt`, ngày tạo/sửa.
+Copy: `employeeId` (qua map `user`), tên, trạng thái, tài chính (`BIGINT` — có khách 2,5 tỷ, vượt INT4), `note` (cột dư trên khách), ẩn, ghim + `pinnedAt`, `autoRestoredAt`, ngày tạo/sửa.
 
 **Không** copy: SĐT, Facebook, lịch sử chăm sóc, hotline (`sourceHotlineId` = null), tin nhắn, ảnh, lô.
 

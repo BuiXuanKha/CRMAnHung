@@ -48,11 +48,11 @@ function toDate(ms: number | null | undefined): Date | null {
   return new Date(n);
 }
 
-function toBudget(value: number | null): number | null {
+function toBudget(value: number | null): bigint | null {
   if (value == null) return null;
   const n = Number(value);
   if (!Number.isFinite(n)) return null;
-  return Math.trunc(n);
+  return BigInt(Math.trunc(n));
 }
 
 async function loadMap(
