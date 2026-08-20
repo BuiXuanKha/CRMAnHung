@@ -92,7 +92,7 @@ export function CustomerListPage() {
       await qc.invalidateQueries({ queryKey: ['customers'] });
       setAddOpen(false);
       setAddError(null);
-      flash('Đã thêm khách hàng (mock).');
+      flash('Đã thêm khách hàng.');
     },
     onError: (err: Error) => setAddError(err.message),
   });
@@ -138,6 +138,12 @@ export function CustomerListPage() {
       await qc.invalidateQueries({ queryKey: ['customers'] });
       return;
     }
+    if (action === 'restore') {
+      await updateCustomer(customer.id, { isHidden: false });
+      await qc.invalidateQueries({ queryKey: ['customers'] });
+      flash('Đã khôi phục khách.');
+      return;
+    }
     if (action === 'delete') {
       setConfirmDelete({ customer });
     }
@@ -166,6 +172,11 @@ export function CustomerListPage() {
       setRail('care');
       setCareEdit(null);
       flash('Đã thêm ghi chú chăm sóc.');
+    } catch (err) {
+      setAlertBox({
+        title: 'Chưa ghi được chăm sóc',
+        message: err instanceof Error ? err.message : 'Không lưu được.',
+      });
     } finally {
       setCareBusy(false);
     }

@@ -9,6 +9,7 @@ import {
   MessageSquare,
   NotebookPen,
   Pin,
+  RotateCcw,
   Trash2,
 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
@@ -22,7 +23,8 @@ export type CustomerAction =
   | 'lodat'
   | 'sodo'
   | 'pin'
-  | 'delete';
+  | 'delete'
+  | 'restore';
 
 type Props = {
   customer: CustomerListItem;
@@ -73,6 +75,14 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
           role="menu"
           style={{ top: pos.top, left: pos.left }}
         >
+          {customer.isHidden ? (
+            <li>
+              <button type="button" role="menuitem" onClick={() => onAction('restore')}>
+                <Icon icon={RotateCcw} /> Khôi phục khách
+              </button>
+            </li>
+          ) : (
+            <>
           <li>
             <button type="button" role="menuitem" onClick={() => onAction('chat')}>
               <Icon icon={MessageSquare} /> Mở chat
@@ -108,6 +118,8 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
               <Icon icon={Trash2} /> Xóa khách
             </button>
           </li>
+            </>
+          )}
         </ul>
       ) : null}
     </div>

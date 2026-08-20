@@ -31,6 +31,12 @@ function vndShort(n: number): string {
 }
 
 export function channelLabel(c: CustomerListItem): string {
+  if (c.sourceHotline) {
+    const label = c.sourceHotline.label?.trim();
+    return label
+      ? `${c.sourceHotline.phone} (${label})`
+      : c.sourceHotline.phone;
+  }
   const zalo = c.phones.find((p) => (p.label ?? '').toLowerCase().includes('zalo'));
   if (zalo) {
     return `${zalo.phone} (${zalo.label})`;
@@ -40,13 +46,14 @@ export function channelLabel(c: CustomerListItem): string {
     const page = c.facebook?.facebookName?.trim() || c.employeeName;
     return `Page ${page}`;
   }
-  return c.employeeName;
+  if (c.facebook) return c.facebook.facebookName?.trim() || 'Facebook';
+  return '—';
 }
 
 export function demandLabel(c: CustomerListItem): string {
-  const note = c.note?.trim();
-  if (!note || note === '—') return '—';
-  return note;
+  const need = c.latestNeedSummary?.trim();
+  if (need) return need;
+  return '—';
 }
 
 export function statusLabel(status: CustomerStatus): string {
@@ -136,14 +143,14 @@ export function applyExtraFilters(
     if (extra.finance === 'has' && c.budgetMinVnd == null && c.budgetMaxVnd == null) return false;
     if (extra.finance === 'empty' && (c.budgetMinVnd != null || c.budgetMaxVnd != null)) return false;
     if (extra.channel === 'facebook' && !c.facebook) return false;
-    if (extra.channel === 'phone' && c.phones.length === 0) return false;
+    if (extra.channel === 'phone' && c.phones.length === 0 && !c.sourceHotline) return false;
     if (extra.channel === 'page') {
       const s = c.facebook?.scanSource;
       if (s !== 'page' && s !== 'business_suite') return false;
     }
     if (extra.lodat === 'has' && c.lodatCount <= 0) return false;
     if (extra.lodat === 'empty' && c.lodatCount > 0) return false;
-    const hasDemand = Boolean(c.note?.trim() && c.note.trim() !== '—');
+    const hasDemand = Boolean(c.latestNeedSummary?.trim());
     if (extra.demand === 'has' && !hasDemand) return false;
     if (extra.demand === 'empty' && hasDemand) return false;
     return true;

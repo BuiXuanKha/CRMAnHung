@@ -13,3 +13,11 @@ export function isMockAuth(): boolean {
   if (auth === 'true') return true;
   return isMockMode();
 }
+
+/**
+ * List `/khach-hang`: mock chỉ khi login giả.
+ * Login thật (staging) → API khách đã copy (tên, trạng thái, tài chính, ghim, hotline nguồn).
+ */
+export function isMockCustomers(): boolean {
+  return isMockAuth();
+}
