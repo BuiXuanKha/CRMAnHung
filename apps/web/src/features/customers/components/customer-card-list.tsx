@@ -25,6 +25,7 @@ type Props = {
   onCloseMenu: () => void;
   onAction: (customer: CustomerListItem, action: CustomerAction) => void;
   onAdd: () => void;
+  onAddPhone?: (customer: CustomerListItem) => void;
 };
 
 export function CustomerCardList({
@@ -38,6 +39,7 @@ export function CustomerCardList({
   onCloseMenu,
   onAction,
   onAdd,
+  onAddPhone,
 }: Props) {
   return (
     <div className="kh-cards-shell">
@@ -84,6 +86,19 @@ export function CustomerCardList({
                       >
                         <Icon icon={Phone} size={12} />
                       </a>
+                    ) : !c.isHidden ? (
+                      <button
+                        type="button"
+                        className="kh-card-call kh-card-call-add"
+                        title="Thêm số điện thoại"
+                        aria-label={`Thêm số điện thoại cho ${c.fullName}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onAddPhone?.(c);
+                        }}
+                      >
+                        <Icon icon={Phone} size={12} />
+                      </button>
                     ) : null}
                     {c.facebook ? (
                       <span className="kh-card-chat" title="Có Facebook">

@@ -471,7 +471,7 @@ Icon trong bảng / menu: **chỉ Lucide** (§4.7). Avatar giữ quy tắc dư�
 | Phần | Quy tắc |
 |------|---------|
 | Avatar | Tròn **32×32**; ảnh hoặc chữ tắt; nền `#e2e8f0` |
-| Icon phụ cạnh tên | Lucide **12px**; SĐT `Phone` **xanh** `#047857` khi đã có số (bấm = copy + tick); **cam** `#ea580c` khi chưa có số (thêm SĐT — slice sau); chat/FB `MessageCircle` màu `#16a34a` — **cấm** emoji |
+| Icon phụ cạnh tên | Lucide **12px**; SĐT `Phone` **xanh** `#047857` khi đã có số (bấm = copy + tick); **cam** `#ea580c` khi chưa có số (bấm = modal thêm SĐT); chat/FB `MessageCircle` màu `#16a34a` — **cấm** emoji |
 | Hangtag | Component `CrmBadge` — pill bo tròn; padding `2px 10px`; **không** shadow |
 | Tone `green` | Nền `#dcfce7` / chữ `#166534` (vd. Khách nét) |
 | Tone `blue` | Nền `#dbeafe` / chữ `#1e3a8a` (vd. Khách mới) |
@@ -625,7 +625,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **Đặc tả list `/dich-vu-so-do`:** `domains/title-services.md` §12 — nguồn anhungland.com/dich-vu-so-do |
 | 2026-08-19 | **§12 chia máy tính / mobile trước**, rồi mới chi tiết thành phần — 4 domain list + skill `write-domain-doc` |
 | 2026-08-19 | **Mobile: ô nhập ≥ 16px** — tránh trình duyệt phóng to trang khi focus (iOS Safari) |
-| 2026-08-20 | Mini SĐT cạnh tên: xanh `#047857` khi đã có số (copy + tick); cam `#ea580c` khi chưa có (thêm số — slice sau) |
+| 2026-08-20 | Mini SĐT cạnh tên: xanh `#047857` khi đã có số (copy + tick); cam `#ea580c` khi chưa có (modal **Thêm số điện thoại**) |
 | 2026-08-20 | Form chăm sóc: trạng thái + nhu cầu + chip tài chính + ghi chú (modal PC / trang mobile) |
 | 2026-08-20 | Rail Nội dung chat: tin đã lưu + thumbnail ảnh; bấm ảnh → CrmDialog gallery (prev/next) |
 
