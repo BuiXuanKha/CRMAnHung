@@ -221,7 +221,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 |-----|------------|
 | Mở chat | Mở rail «Nội dung chat» (desktop, một panel) |
 | Mở Messenger | Tab Facebook; thiếu thread → CrmAlert |
-| Cập nhật chăm sóc | CrmDialog; textarea **trống**; append care note |
+| Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
 | Tạo lô đất | Chưa tạo bản ghi — toast |
 | Dịch vụ sổ đỏ | Điều hướng `/dich-vu-so-do` |
 | Ghim khách / Bỏ ghim khách | **Một chỗ**, đổi nhãn theo `isPinned` |
@@ -626,6 +626,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **§12 chia máy tính / mobile trước**, rồi mới chi tiết thành phần — 4 domain list + skill `write-domain-doc` |
 | 2026-08-19 | **Mobile: ô nhập ≥ 16px** — tránh trình duyệt phóng to trang khi focus (iOS Safari) |
 | 2026-08-20 | Mini SĐT cạnh tên: xanh `#047857` khi đã có số (copy + tick); cam `#ea580c` khi chưa có (thêm số — slice sau) |
+| 2026-08-20 | Form chăm sóc: trạng thái + nhu cầu + chip tài chính + ghi chú (modal PC / trang mobile) |
 
 ---
 

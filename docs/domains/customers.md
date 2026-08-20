@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` staging đọc khách đã copy (kênh, avatar CDN, SĐT, nhu cầu; form chăm sóc chưa)
+- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu; form chăm sóc đã deploy
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh (hotline hoặc profile FB NV), avatar CDN, SĐT (`primaryPhone` / `phones`), nhu cầu (`latestNeedSummary`). Form cập nhật chăm sóc chưa. Extension: phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh (hotline hoặc profile FB NV), avatar CDN, SĐT, nhu cầu. **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách trên khách; append `NeedSummary`/`Note` nếu khác lần gần nhất. Extension: phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -42,10 +42,10 @@ Hành vi đích = **§12**. Làm dần theo số.
 Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, thêm khách (tên + SĐT), rail 3 panel (dữ liệu tĩnh), menu 7 mục.
 
 1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim, kênh, avatar, SĐT, nhu cầu). Staging đã copy.
-2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Hiện chỉ 1 ô ghi chú.
-3. **Double-click dòng (máy tính)** — mở modal chăm sóc.
+2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Có trên staging (modal PC / trang mobile).
+3. **Double-click dòng (máy tính)** — mở modal chăm sóc. Có trên staging.
 4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lô, lịch sử chăm sóc. Hiện placeholder.
-5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Chưa có route.
+5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Có trên staging.
 6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. Hiện toast. ADMIN: không được tạo (ẩn / báo).
 7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
@@ -310,7 +310,28 @@ All · KN · KM · CCS · KH · ĐG (trên trang đang nạp).
 
 ### 12.3 Chi tiết `/khach-hang/[id]`
 
-Placeholder. Trang chăm sóc `/cham-soc` — form modal chăm sóc làm sau.
+Placeholder. Chăm sóc = **§12.4**.
+
+### 12.4 Cập nhật chăm sóc
+
+Cùng form. Máy tính = modal; điện thoại = trang `/khach-hang/[id]/cham-soc`. Không mở với khách đã ẩn.
+
+#### 12.4.1 Máy tính
+
+Double-click dòng (trừ icon/nút) hoặc menu **Cập nhật chăm sóc** → CrmDialog. Tiêu đề `Cập nhật chăm sóc — {tên}`.
+
+#### 12.4.2 Mobile
+
+Nút bút trên thẻ / menu → `/khach-hang/[id]/cham-soc`. Huỷ = về list.
+
+#### 12.4.3 Field
+
+1. Trạng thái — KN / KM / CCS / Khác
+2. Nhu cầu — textarea, prefill `latestNeedSummary`, tối đa 500
+3. Tài chính — chip `500tr–1 tỷ` / `1–1,5` / `1,5–2` / `2–2,5 tỷ` + **Chưa xác định**. Khoảng lẻ (không khớp chip) hiện thêm 1 chip đúng số đang có.
+4. Ghi chú — textarea, prefill `latestCareNote`, tối đa 1000
+
+Lưu: ghi đè status + budget trên khách. Need/Note chỉ **thêm dòng** lịch sử nếu khác lần gần nhất. Không đổi gì → không ghi, toast «Không có thay đổi».
 
 ---
 
@@ -389,9 +410,20 @@ Lúc freeze: **266** dòng / **237** khách có lịch sử (215 một lần, 18
 
 Cột Nhu cầu list = `NeedSummary` mới nhất **không rỗng** (`CreatedAtMs DESC, ID DESC`) — cùng CRM cũ. Ghi chú mới nhất (`Note`) → `latestCareNote` (rail). Ô tìm khớp mọi `NeedSummary` + `Note`.
 
-Rail **Lịch sử chăm sóc** đọc `GET /customers/:id` (nhu cầu + ghi chú). **Không** bật form cập nhật chăm sóc (mục 2).
+Rail **Lịch sử chăm sóc** đọc `GET /customers/:id` (nhu cầu + ghi chú). Slice copy **không** bật form cập nhật (mục 2) — form = **§13.8**.
 
 Script: `pnpm care:migrate-legacy`. **Xong staging (266/266 dòng, 237 khách).**
+
+### 13.8 Slice này — form cập nhật chăm sóc
+
+`POST /api/v1/customers/:id/care-notes` `{ status, budgetMinVnd, budgetMaxVnd, needSummary?, note? }`. Ownership cùng GET/PATCH. Khách đã ẩn: không mở form / API từ chối.
+
+- Ghi đè `Customer.status` + `budgetMin`/`MaxVnd`.
+- Append `CustomerCareNote` **chỉ khi** nhu cầu hoặc ghi chú khác lần gần nhất **và** ít nhất một trong hai không rỗng. Ô trống không xóa lịch sử cũ.
+- Không đổi gì → `{ unchanged: true }`, toast «Không có thay đổi. Bỏ qua cập nhật.»
+- Chip tài chính: 4 khoảng + **Chưa xác định**. Khoảng lẻ (không khớp chip) hiện thêm 1 chip đúng số đang có — lưu không bị ghi đè chip chuẩn.
+
+Máy tính: double-click dòng / menu → CrmDialog. Điện thoại (`max-width: 767px`): `/khach-hang/[id]/cham-soc`. **Xong staging (2026-08-20).**
 
 ---
 

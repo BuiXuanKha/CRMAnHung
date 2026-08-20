@@ -130,8 +130,51 @@ export const updateCustomerSchema = z.object({
 
 export type UpdateCustomerInput = z.infer<typeof updateCustomerSchema>;
 
-export const createCareNoteSchema = z.object({
-  note: z.string().trim().min(1, 'Vui lòng nhập ghi chú'),
+export const CUSTOMER_BUDGET_UNSET_KEY = 'none';
+export const CUSTOMER_BUDGET_CUSTOM_KEY = 'custom';
+
+export const CUSTOMER_BUDGET_BRACKETS = [
+  { key: '500m_1b', min: 500_000_000, max: 1_000_000_000, label: '500tr – 1 tỷ' },
+  { key: '1b_15b', min: 1_000_000_000, max: 1_500_000_000, label: '1 tỷ – 1,5 tỷ' },
+  { key: '15b_2b', min: 1_500_000_000, max: 2_000_000_000, label: '1,5 tỷ – 2 tỷ' },
+  { key: '2b_25b', min: 2_000_000_000, max: 2_500_000_000, label: '2 tỷ – 2,5 tỷ' },
+] as const;
+
+export function findCustomerBudgetBracketKey(
+  min?: number | null,
+  max?: number | null,
+): string {
+  if (min == null && max == null) return CUSTOMER_BUDGET_UNSET_KEY;
+  const found = CUSTOMER_BUDGET_BRACKETS.find(
+    (b) => b.min === Number(min) && b.max === Number(max),
+  );
+  return found ? found.key : CUSTOMER_BUDGET_CUSTOM_KEY;
+}
+
+export const updateCustomerCareSchema = z
+  .object({
+    status: z.nativeEnum(CustomerStatus),
+    budgetMinVnd: z.number().int().nonnegative().nullable(),
+    budgetMaxVnd: z.number().int().nonnegative().nullable(),
+    needSummary: z.string().max(500).optional(),
+    note: z.string().max(1000).optional(),
+  })
+  .superRefine((val, ctx) => {
+    const min = val.budgetMinVnd;
+    const max = val.budgetMaxVnd;
+    if (min == null && max == null) return;
+    if (min == null || max == null || max < min) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Khoảng tài chính không hợp lệ. Hãy chọn 1 khoảng hoặc «Chưa xác định».',
+      });
+    }
+  });
+
+export type UpdateCustomerCareInput = z.infer<typeof updateCustomerCareSchema>;
+
+export const customerCareUpdateResultSchema = customerDetailSchema.extend({
+  unchanged: z.boolean().optional(),
 });
 
-export type CreateCareNoteInput = z.infer<typeof createCareNoteSchema>;
+export type CustomerCareUpdateResult = z.infer<typeof customerCareUpdateResultSchema>;

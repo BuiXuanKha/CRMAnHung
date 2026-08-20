@@ -1,13 +1,21 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, NotebookPen, Trash2 } from 'lucide-react';
-import { CustomerStatus, type CustomerListItem } from '@crmanhung/shared';
-import { CrmAlertDialog, CrmConfirmDialog, CrmDialog, CrmToast } from '@/shared/ui/dialog';
-import { addCareNote, createCustomer, getCustomer, listCustomers, updateCustomer } from './api';
+import { AlertTriangle, Trash2 } from 'lucide-react';
+import { CustomerStatus, type CustomerListItem, type UpdateCustomerCareInput } from '@crmanhung/shared';
+import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
+import {
+  consumeCareToast,
+  createCustomer,
+  getCustomer,
+  listCustomers,
+  updateCustomer,
+  updateCustomerCare,
+} from './api';
 import { AddByPhoneModal } from './components/add-by-phone-modal';
+import { CustomerCareEditModal } from './components/care-edit-modal';
 import { type CustomerAction } from './components/action-menu';
 import { CustomerTable } from './components/customer-table';
 import { FilterBar } from './components/filter-bar';
@@ -33,7 +41,6 @@ type ConfirmState = {
 
 type CareState = {
   customer: CustomerListItem;
-  note: string;
 } | null;
 
 type AlertState = {
@@ -59,6 +66,7 @@ export function CustomerListPage() {
   const [alertBox, setAlertBox] = useState<AlertState>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [careBusy, setCareBusy] = useState(false);
+  const [careError, setCareError] = useState<string | null>(null);
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
@@ -102,6 +110,28 @@ export function CustomerListPage() {
     window.setTimeout(() => setToast(null), 2800);
   }
 
+  useEffect(() => {
+    const msg = consumeCareToast();
+    if (!msg) return;
+    setToast(msg);
+    const t = window.setTimeout(() => setToast(null), 2800);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  function isMobileCare() {
+    return window.matchMedia('(max-width: 767px)').matches;
+  }
+
+  function openCareEdit(customer: CustomerListItem) {
+    if (customer.isHidden) return;
+    if (isMobileCare()) {
+      router.push(`/khach-hang/${customer.id}/cham-soc`);
+      return;
+    }
+    setCareError(null);
+    setCareEdit({ customer });
+  }
+
   async function handleAction(customer: CustomerListItem, action: CustomerAction) {
     setMenuId(null);
     setSelectedId(customer.id);
@@ -122,7 +152,7 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'care') {
-      setCareEdit({ customer, note: customer.latestCareNote ?? '' });
+      openCareEdit(customer);
       return;
     }
     if (action === 'lodat') {
@@ -162,21 +192,23 @@ export function CustomerListPage() {
     }
   }
 
-  async function submitCareNote() {
-    if (!careEdit || !careEdit.note.trim()) return;
+  async function submitCare(input: UpdateCustomerCareInput) {
+    if (!careEdit) return;
     setCareBusy(true);
+    setCareError(null);
     try {
-      await addCareNote(careEdit.customer.id, { note: careEdit.note.trim() });
+      const result = await updateCustomerCare(careEdit.customer.id, input);
       await qc.invalidateQueries({ queryKey: ['customers'] });
       await qc.invalidateQueries({ queryKey: ['customer', careEdit.customer.id] });
       setRail('care');
       setCareEdit(null);
-      flash('Đã thêm ghi chú chăm sóc.');
+      flash(
+        result.unchanged
+          ? 'Không có thay đổi. Bỏ qua cập nhật.'
+          : 'Đã lưu cập nhật chăm sóc.',
+      );
     } catch (err) {
-      setAlertBox({
-        title: 'Chưa ghi được chăm sóc',
-        message: err instanceof Error ? err.message : 'Không lưu được.',
-      });
+      setCareError(err instanceof Error ? err.message : 'Không lưu được.');
     } finally {
       setCareBusy(false);
     }
@@ -230,6 +262,7 @@ export function CustomerListPage() {
                 onAction={(c, a) => {
                   void handleAction(c, a);
                 }}
+                onCare={(c) => openCareEdit(c)}
               />
             </section>
           ) : null}
@@ -295,46 +328,18 @@ export function CustomerListPage() {
         }}
       />
 
-      <CrmDialog
-        open={Boolean(careEdit)}
-        title="Cập nhật chăm sóc"
-        icon={NotebookPen}
-        onClose={() => {
-          if (!careBusy) setCareEdit(null);
-        }}
+      <CustomerCareEditModal
+        customer={careEdit?.customer ?? null}
         busy={careBusy}
-      >
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submitCareNote();
-          }}
-        >
-          <label>
-            Ghi chú
-            <textarea
-              value={careEdit?.note ?? ''}
-              onChange={(e) =>
-                setCareEdit((cur) => (cur ? { ...cur, note: e.target.value } : cur))
-              }
-              required
-            />
-          </label>
-          <div className="crm-dialog-actions">
-            <button
-              type="button"
-              className="crm-btn"
-              disabled={careBusy}
-              onClick={() => setCareEdit(null)}
-            >
-              Huỷ
-            </button>
-            <button type="submit" className="crm-btn primary" disabled={careBusy}>
-              {careBusy ? 'Đang lưu…' : 'Lưu ghi chú'}
-            </button>
-          </div>
-        </form>
-      </CrmDialog>
+        error={careError}
+        onClose={() => {
+          if (!careBusy) {
+            setCareEdit(null);
+            setCareError(null);
+          }
+        }}
+        onSubmit={submitCare}
+      />
 
       <CrmAlertDialog
         open={Boolean(alertBox)}

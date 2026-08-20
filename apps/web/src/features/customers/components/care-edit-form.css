@@ -1,0 +1,103 @@
+.kh-care-form {
+  display: grid;
+  gap: 12px;
+}
+
+.kh-care-form label,
+.kh-care-chips legend {
+  display: grid;
+  gap: 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.kh-care-form input,
+.kh-care-form textarea,
+.kh-care-form select {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: #0f172a;
+  font-family: inherit;
+  background: #fff;
+}
+
+.kh-care-form textarea {
+  min-height: 72px;
+  resize: vertical;
+}
+
+.kh-care-chips {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-width: 0;
+}
+
+.kh-care-chips div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.kh-care-chips button {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+}
+
+.kh-care-chips button.is-active {
+  border-color: #2563eb;
+  background: #eff6ff;
+  color: #1d4ed8;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+
+.kh-care-chips button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.kh-care-page {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px 12px 24px;
+  max-width: 560px;
+}
+
+.kh-care-page header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.kh-care-page h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.kh-care-page .kh-care-back {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: #2563eb;
+  font-weight: 600;
+  font-size: 0.86rem;
+  cursor: pointer;
+  text-align: left;
+}
+
+.crm-dialog.kh-care-dialog {
+  width: min(520px, 100%);
+}
