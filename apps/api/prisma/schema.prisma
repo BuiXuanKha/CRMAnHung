@@ -137,11 +137,13 @@ model CustomerCareNote {
 }
 
 model EmployeeFacebookProfile {
-  id         String   @id @default(cuid())
-  employeeId String
+  id          String   @id @default(cuid())
+  employeeId  String
   facebookUid String
-  nickname   String?
-  createdAt  DateTime @default(now())
+  nickname    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   employee User @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 
@@ -152,12 +154,16 @@ model EmployeeHotline {
   id         String   @id @default(cuid())
   employeeId String
   phone      String
-  label      String?
+  label      String
+  isActive   Boolean  @default(true)
+  sortOrder  Int      @default(0)
   createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   employee  User       @relation(fields: [employeeId], references: [id], onDelete: Cascade)
   customers Customer[]
 
+  @@unique([employeeId, phone])
   @@index([employeeId])
 }
 

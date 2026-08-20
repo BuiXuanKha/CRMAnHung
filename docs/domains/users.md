@@ -8,7 +8,7 @@
 
 Slice này **chỉ đăng nhập / đăng xuất**. Tạo-sửa-xoá NV (modal admin CRM cũ) = P4, chưa làm.
 
-**Thứ tự đã chốt với chủ sở hữu:** User (login) → Khách hàng → Lô đất → Giao dịch → Sổ đỏ.
+**Thứ tự đã chốt với chủ sở hữu:** User (login) → **kênh liên hệ** (hotline + profile FB) → Khách hàng → Lô đất → Giao dịch → Sổ đỏ.
 
 ---
 
@@ -46,7 +46,7 @@ Mật khẩu: bcrypt cost ≥ 12. Không lưu plaintext.
 
 `User` 1–n `Customer` (owner), hotline, page FB, care note, refresh token.
 
-Copy data: **User trước**, rồi mới khách (FK `employeeId`).
+Copy data: **User trước**, rồi kênh liên hệ (`docs/domains/contact-channels.md`), rồi mới khách (`employeeId` + `sourceHotlineId`).
 
 ## 6. UI
 
@@ -108,10 +108,11 @@ Sau freeze CRM cũ:
 3. Giữ `username`, `role`, `isActive`, **passwordHash** nếu cùng bcrypt
 4. Rồi mới copy khách (`employeeId` = id mới)
 
-## 11. Việc tiếp theo (login → khách)
+## 11. Việc tiếp theo (login → kênh → khách)
 
-1. ~~Nối `/login` → API + copy `tblUsers`~~ (slice này)
-2. Tắt mock **list** khi API khách hàng sẵn (`NEXT_PUBLIC_USE_MOCK=false`)
-3. P4: CRUD nhân viên như modal CRM cũ
+1. ~~Nối `/login` → API + copy `tblUsers`~~
+2. Copy hotline + profile Facebook — `contact-channels.md`
+3. Tắt mock **list** khi API khách hàng sẵn (`NEXT_PUBLIC_USE_MOCK=false`)
+4. P4: CRUD nhân viên như modal CRM cũ
 
 Không làm CRUD user trước khi login + khách ổn.

@@ -14,6 +14,7 @@
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
     "users:migrate-legacy": "tsx scripts/migrate-users-from-legacy.ts",
+    "channels:migrate-legacy": "tsx scripts/migrate-contact-channels-from-legacy.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

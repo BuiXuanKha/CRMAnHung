@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract hiện tại. Nest làm sau khi §12 ổn. Migrate `tblPerson*` — `MIGRATION.md`. Extension: có, phase sau.
+Giữ contract hiện tại. Nest làm sau khi §12 ổn. Migrate `tblPerson*` — `MIGRATION.md` + §13. Extension: có, phase sau. Copy **sau** User và kênh liên hệ.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -311,6 +311,34 @@ All · KN · KM · CCS · KH · ĐG (trên trang đang nạp).
 ### 12.3 Chi tiết `/khach-hang/[id]`
 
 Placeholder. Trang chăm sóc `/cham-soc` — form modal chăm sóc làm sau.
+
+---
+
+## 13. Copy dữ liệu (đã chốt 2026-08-20)
+
+Freeze: NV **ngừng sửa** CRM cũ; Extension **tắt**. Chỉ đọc SQLite.
+
+Thứ tự: User → **hotline + profile FB** → khách (+ SĐT + FB metadata + lịch sử chăm sóc) → lô → …  
+**Chưa** copy tin nhắn, ảnh chat, file avatar, lô đất.
+
+| # | Quyết định |
+|---|----------------|
+| Chủ hồ sơ | `tblPerson.EmployeeId` → `User` qua map. SQLite lúc freeze: **0** khách gắn NV không có trong `tblUsers`. Nếu sau này có → **bỏ khách + log**, không gán lung tung. |
+| Care `EmployeeId` trống | SQLite lúc freeze: **0** dòng. Nếu có → ghi là **chủ khách**. |
+| Khách ẩn | Copy cả `IsHidden = 1`. |
+| Ghim | Copy `IsPinned` + `PinnedAtMs` (thêm cột `pinnedAt`). |
+| Tự khôi phục | Copy `AutoRestoredAtMs` (cột `autoRestoredAt`). |
+| Lịch sử chăm sóc | Copy **mọi** dòng: `NeedSummary` + `Note` + giờ + NV. List = NeedSummary mới nhất. |
+| `tblPerson.Note` | Cột dư. List/form dùng lịch sử (`latestNeedSummary` / `latestNote`). Lúc freeze còn **5** khách có chữ ở đây — copy vào `Customer.note` để không mất; **không** hiện làm cột Nhu cầu. |
+| Trạng thái + tài chính | Lấy **snapshot trên khách** (`Status`, `MinBudgetVnd`, `MaxBudgetVnd`). History **không** lưu budget. |
+| Hotline tắt | Copy cả (`isActive = false`) để `SourceHotlineId` không gãy. |
+| Profile FB NV | Copy hết. |
+| Trùng SĐT 2 NV | Copy nguyên, **không gộp**. |
+| Hồ sơ đã gộp trên CRM cũ | Chỉ copy **trạng thái hiện tại** (hồ sơ nguồn đã xóa). Không replay bước gộp. |
+| Ảnh | Avatar / ảnh chat → R2 **sau**. Slice khách: URL trống. |
+| Chạy lại script | Idempotent: id đã map thì cập nhật, không tạo trùng. Freeze nên một lần là đủ; chạy lại an toàn. |
+
+Kiểm tra SQLite (đọc, 2026-08-20): 1401 khách, 292 ẩn, 16 ghim, 8 tự khôi phục, 266 dòng care, 3 hotline, 9 profile FB.
 
 ---
 

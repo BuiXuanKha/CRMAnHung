@@ -3,7 +3,7 @@
 ## Nguyên tắc
 
 1. **Hệ cũ tiếp tục chạy** (`crm.anhungland.com`) cho đến khi crmanhung đủ feature parity + data đã kiểm chứng.
-2. Migration là **one-shot có kiểm tra**, có thể chạy dry-run.
+2. Migration **idempotent**: id cũ đã có trong `migrate.legacy_id_map` thì cập nhật, không tạo trùng. Freeze CRM cũ trước khi copy khách.
 3. Giữ **ID ổn định** khi có thể (map `tblPerson.id` → `Customer.id`) để liên kết nghiệp vụ không gãy.
 4. Đích CRMAnHung: **PostgreSQL** + file trên **Cloudflare R2** (không copy SQLite/`img/` sang disk VPS mới).
 
@@ -42,10 +42,16 @@
 
 Cột path ảnh cũ → field **`objectKey`** (key trong R2), không phải path local.
 
-Script migrate user (đầu tiên): `apps/api/scripts/migrate-users-from-legacy.ts` — đọc SQLite, ghi `User` + `migrate.legacy_id_map`.  
-Script full (P4): `apps/api/scripts/migrate-from-legacy.ts` (chưa viết): `img/` → R2.
+Copy data: **User → kênh liên hệ (hotline + profile FB) → khách → lô → giao dịch → sổ đỏ.**  
+Khách cần `employeeId` và `sourceHotlineId`. Map ID: schema `migrate` (xem mục dưới).
 
-Copy data: **User trước** (có `employeeId`), rồi khách → lô → giao dịch → sổ đỏ. Map ID: schema `migrate` (xem mục dưới).
+| Script | Việc |
+|--------|------|
+| `apps/api/scripts/migrate-users-from-legacy.ts` | `tblUsers` → `User` (`pnpm users:migrate-legacy`) |
+| `apps/api/scripts/migrate-contact-channels-from-legacy.ts` | hotline + profile FB (`pnpm channels:migrate-legacy`) |
+| `apps/api/scripts/migrate-from-legacy.ts` (chưa viết) | khách + `img/` → R2 |
+
+Cả script copy **chỉ đọc** SQLite.
 
 ## Bảng map ID (không phải bảng nghiệp vụ)
 
