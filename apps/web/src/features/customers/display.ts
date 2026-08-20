@@ -37,6 +37,12 @@ export function channelLabel(c: CustomerListItem): string {
       ? `${c.sourceHotline.phone} (${label})`
       : c.sourceHotline.phone;
   }
+  const profileName = c.sourceFacebookProfile?.nickname?.trim();
+  if (profileName) return profileName;
+  const profileUid = c.sourceFacebookProfile?.facebookUid?.trim();
+  if (profileUid) return profileUid;
+  const scanLabel = c.facebook?.scanSourceLabel?.trim();
+  if (scanLabel) return scanLabel;
   const zalo = c.phones.find((p) => (p.label ?? '').toLowerCase().includes('zalo'));
   if (zalo) {
     return `${zalo.phone} (${zalo.label})`;
@@ -142,7 +148,7 @@ export function applyExtraFilters(
   return items.filter((c) => {
     if (extra.finance === 'has' && c.budgetMinVnd == null && c.budgetMaxVnd == null) return false;
     if (extra.finance === 'empty' && (c.budgetMinVnd != null || c.budgetMaxVnd != null)) return false;
-    if (extra.channel === 'facebook' && !c.facebook) return false;
+    if (extra.channel === 'facebook' && !c.facebook && !c.sourceFacebookProfile) return false;
     if (extra.channel === 'phone' && c.phones.length === 0 && !c.sourceHotline) return false;
     if (extra.channel === 'page') {
       const s = c.facebook?.scanSource;
