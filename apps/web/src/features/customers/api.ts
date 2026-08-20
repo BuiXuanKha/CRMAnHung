@@ -12,7 +12,7 @@ import {
   type AuthUser,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
-import { isMockMode } from '@/shared/api/mode';
+import { isMockAuth, isMockMode } from '@/shared/api/mode';
 import { mockCustomers } from './mock-data';
 
 let mockStore: CustomerDetail[] = structuredClone(mockCustomers);
@@ -26,7 +26,9 @@ function currentMockUser(): AuthUser {
       role: UserRole.STAFF,
     };
   }
-  const raw = sessionStorage.getItem('crmanhung_mock_user');
+  const raw =
+    sessionStorage.getItem('crmanhung_session_user') ??
+    sessionStorage.getItem('crmanhung_mock_user');
   if (raw) {
     try {
       return JSON.parse(raw) as AuthUser;
@@ -43,6 +45,8 @@ function currentMockUser(): AuthUser {
 }
 
 function visibleFor(user: AuthUser, items: CustomerDetail[]) {
+  // Real login + mock list: demo data is not keyed by new User ids yet.
+  if (isMockMode() && !isMockAuth()) return items;
   if (user.role === UserRole.ADMIN) return items;
   return items.filter((c) => c.employeeId === user.id);
 }

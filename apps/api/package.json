@@ -13,6 +13,7 @@
     "db:migrate": "prisma migrate dev",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:seed": "tsx prisma/seed.ts",
+    "users:migrate-legacy": "tsx scripts/migrate-users-from-legacy.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

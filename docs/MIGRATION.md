@@ -42,7 +42,8 @@
 
 Cột path ảnh cũ → field **`objectKey`** (key trong R2), không phải path local.
 
-Script migrate sẽ nằm tại `apps/api/scripts/migrate-from-legacy.ts` (implement ở giai đoạn P4): đọc SQLite + `img/` → ghi Postgres + `PutObject` R2.
+Script migrate user (đầu tiên): `apps/api/scripts/migrate-users-from-legacy.ts` — đọc SQLite, ghi `User` + `migrate.legacy_id_map`.  
+Script full (P4): `apps/api/scripts/migrate-from-legacy.ts` (chưa viết): `img/` → R2.
 
 Copy data: **User trước** (có `employeeId`), rồi khách → lô → giao dịch → sổ đỏ. Map ID: schema `migrate` (xem mục dưới).
 

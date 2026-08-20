@@ -1,4 +1,15 @@
-/** Bật UI mock khi chưa có / chưa nối API thật. */
+/** Bật UI mock khi chưa có / chưa nối API thật (list khách, lô, …). */
 export function isMockMode(): boolean {
   return process.env.NEXT_PUBLIC_USE_MOCK === 'true';
+}
+
+/**
+ * Login giả staff/admin123. Mặc định: theo mock data.
+ * Staging/prod: `NEXT_PUBLIC_USE_MOCK_AUTH=false` → `/login` gọi API + bảng User.
+ */
+export function isMockAuth(): boolean {
+  const auth = process.env.NEXT_PUBLIC_USE_MOCK_AUTH;
+  if (auth === 'false') return false;
+  if (auth === 'true') return true;
+  return isMockMode();
 }
