@@ -38,6 +38,7 @@ type Props = {
   onCloseMenu: () => void;
   onAction: (customer: CustomerListItem, action: CustomerAction) => void;
   onCare?: (customer: CustomerListItem) => void;
+  onAddPhone?: (customer: CustomerListItem) => void;
 };
 
 export function CustomerTable({
@@ -54,6 +55,7 @@ export function CustomerTable({
   onCloseMenu,
   onAction,
   onCare,
+  onAddPhone,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -230,6 +232,19 @@ export function CustomerTable({
                           }}
                         >
                           <Icon icon={copiedId === c.id ? Check : Phone} size="mini" />
+                        </button>
+                      ) : !c.isHidden ? (
+                        <button
+                          type="button"
+                          className="kh-mini-icon phone-add"
+                          title="Thêm số điện thoại"
+                          aria-label={`Thêm số điện thoại cho ${c.fullName}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onAddPhone?.(c);
+                          }}
+                        >
+                          <Icon icon={Phone} size="mini" />
                         </button>
                       ) : null}
                       {c.facebook ? (

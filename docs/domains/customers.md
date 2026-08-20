@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc, rail chat + ảnh
+- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc, rail chat + ảnh. Slice SĐT cam (thêm số) đã code, chưa deploy.
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (rail). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. Extension: phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (rail). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). Extension: phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -50,7 +50,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
-10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT.
+10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Code sẵn (chưa deploy). Trùng số → lỗi tiếng Việt; modal gộp = mục 15.
 11. **Xoá SĐT (admin)** — thùng rác + modal.
 12. **Sửa tên khách** — bút trên tên (máy tính).
 13. **Sửa tên Facebook (admin)** — bút trên tên FB (máy tính).
@@ -147,7 +147,7 @@ Hiện khi **đã có** SĐT. Bấm → copy số (tick tạm).
 ##### 4. Icon SĐT **cam** (`#ea580c`)
 
 Hiện khi **chưa có** SĐT (và chưa xoá).  
-Bấm → modal **Thêm số điện thoại**. Trùng → modal trùng.
+Bấm → modal **Thêm số điện thoại**. Trùng số hiện lỗi; modal gộp = mục 15.
 
 ##### 5. Icon thùng rác SĐT
 
@@ -412,7 +412,7 @@ Lúc freeze: **152** số (152 khách; 1249 khách không SĐT). Mỗi khách t�
 
 Copy nguyên số + `sortOrder`. Số chính trên list = `ORDER BY sortOrder ASC, createdAt ASC` (CRM cũ: `SortOrder, ID`). Ô tìm list cũng khớp `phones.phone`.
 
-Máy tính: icon Phone **xanh** `#047857` → copy + tick ~1,5s. Điện thoại: `tel:` (đã có). **Không** nối icon cam / thêm khách bằng SĐT / xoá số (mục 10–11, 14–15).
+Máy tính: icon Phone **xanh** `#047857` → copy + tick ~1,5s. Điện thoại: `tel:` (đã có). Icon cam / thêm khách bằng SĐT / xoá số = mục 10–11, 14–15.
 
 Script: `pnpm phones:migrate-legacy`. **Xong staging (152/152).**
 
@@ -451,6 +451,14 @@ Lúc freeze: **20 253** tin / **1 366** thread; **2 448** ảnh DB (1 68
 Script **chỉ đọc** SQLite + disk cũ. Không xóa file cũ. Ảnh chat = bucket public + CDN (cùng avatar; nhân viên đã login mới thấy rail). Hợp đồng / giấy tờ vẫn private bucket.
 
 Script: `pnpm chat:migrate-legacy`. **Xong staging (20 253/20 253 tin, 2 448/2 448 ảnh, 0 thiếu).**
+
+### 13.10 Slice này — SĐT cam (thêm số)
+
+Khách **chưa có** SĐT và **chưa ẩn**: icon Phone **cam** `#ea580c` trên list (máy tính + thẻ mobile). Bấm → modal **Thêm số điện thoại** (CrmDialog; 1 ô SĐT; Huỷ + Lưu số).
+
+`POST /api/v1/customers/:id/phones` `{ phone }` — 10 số, bắt đầu `0`. Ownership cùng GET/PATCH. Khách đã ẩn / đã có số: API từ chối. Số đã có trên hồ sơ khác: `400` «Số này đã có trên hồ sơ khác.» (chưa modal gộp — mục 15).
+
+Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam không gọi. **Chưa deploy.**
 
 ---
 

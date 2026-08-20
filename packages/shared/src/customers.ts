@@ -118,6 +118,15 @@ export const createCustomerSchema = z.object({
 
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
 
+export const addCustomerPhoneSchema = z.object({
+  phone: z
+    .string()
+    .transform((v) => v.replace(/\D/g, ''))
+    .pipe(vnPhoneSchema),
+});
+
+export type AddCustomerPhoneInput = z.infer<typeof addCustomerPhoneSchema>;
+
 export const updateCustomerSchema = z.object({
   fullName: z.string().trim().min(1).optional(),
   status: z.nativeEnum(CustomerStatus).optional(),

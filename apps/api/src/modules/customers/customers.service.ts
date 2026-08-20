@@ -10,6 +10,7 @@ import type { RequestUser } from '../../common/decorators/current-user.decorator
 import type { UpdateCustomerDto } from './dto/update-customer.dto';
 import type { ListCustomersQueryDto } from './dto/list-customers-query.dto';
 import type { UpdateCustomerCareDto } from './dto/update-customer-care.dto';
+import type { AddCustomerPhoneDto } from './dto/add-customer-phone.dto';
 import { normalizeCareBudget } from './care-budget';
 import {
   LIST_INCLUDE,
@@ -281,5 +282,45 @@ export class CustomersService {
 
     const current = await this.getById(user, id);
     return { ...current, unchanged: false };
+  }
+
+  async addPhone(user: RequestUser, id: string, dto: AddCustomerPhoneDto) {
+    const phone = dto.phone.trim();
+    const existing = await this.prisma.customer.findUnique({
+      where: { id },
+      include: { phones: { select: { id: true } } },
+    });
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy khách hàng');
+    }
+    assertCanAccess(user, existing.employeeId);
+    if (existing.isHidden) {
+      throw new BadRequestException(
+        'Không thêm số điện thoại cho khách đã ẩn. Hãy khôi phục trước.',
+      );
+    }
+    if (existing.phones.length > 0) {
+      throw new BadRequestException('Khách này đã có số điện thoại.');
+    }
+
+    const taken = await this.prisma.customerPhone.findFirst({
+      where: { phone },
+      select: { id: true },
+    });
+    if (taken) {
+      throw new BadRequestException('Số này đã có trên hồ sơ khác.');
+    }
+
+    await this.prisma.$transaction(async (tx) => {
+      await tx.customerPhone.create({
+        data: { customerId: id, phone, sortOrder: 0 },
+      });
+      await tx.customer.update({
+        where: { id },
+        data: { updatedAt: new Date() },
+      });
+    });
+
+    return this.getById(user, id);
   }
 }

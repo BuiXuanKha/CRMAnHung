@@ -4,6 +4,7 @@ import { CurrentUser, type RequestUser } from '../../common/decorators/current-u
 import { ListCustomersQueryDto } from './dto/list-customers-query.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
 import { UpdateCustomerCareDto } from './dto/update-customer-care.dto';
+import { AddCustomerPhoneDto } from './dto/add-customer-phone.dto';
 
 @Controller('customers')
 export class CustomersController {
@@ -45,5 +46,14 @@ export class CustomersController {
     @Body() dto: UpdateCustomerCareDto,
   ) {
     return this.customersService.addCare(user, id, dto);
+  }
+
+  @Post(':id/phones')
+  addPhone(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: AddCustomerPhoneDto,
+  ) {
+    return this.customersService.addPhone(user, id, dto);
   }
 }

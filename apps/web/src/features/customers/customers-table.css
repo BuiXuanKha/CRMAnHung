@@ -225,8 +225,8 @@
   line-height: 1;
 }
 
-.kh-mini-icon.phone {
-  color: #047857;
+.kh-mini-icon.phone,
+.kh-mini-icon.phone-add {
   background: none;
   border: 0;
   padding: 0;
@@ -234,7 +234,16 @@
   font: inherit;
 }
 
-.kh-mini-icon.phone:active {
+.kh-mini-icon.phone {
+  color: #047857;
+}
+
+.kh-mini-icon.phone-add {
+  color: #ea580c;
+}
+
+.kh-mini-icon.phone:active,
+.kh-mini-icon.phone-add:active {
   opacity: 0.75;
 }
 

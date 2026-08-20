@@ -8,6 +8,7 @@ import { CustomerStatus, type CustomerListItem, type UpdateCustomerCareInput } f
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import {
   consumeCareToast,
+  addCustomerPhone,
   createCustomer,
   getCustomer,
   listCustomerMessages,
@@ -16,6 +17,7 @@ import {
   updateCustomerCare,
 } from './api';
 import { AddByPhoneModal } from './components/add-by-phone-modal';
+import { AddCustomerPhoneModal } from './components/add-customer-phone-modal';
 import { CustomerCareEditModal } from './components/care-edit-modal';
 import { type CustomerAction } from './components/action-menu';
 import { CustomerTable } from './components/customer-table';
@@ -64,10 +66,13 @@ export function CustomerListPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<ConfirmState>(null);
   const [careEdit, setCareEdit] = useState<CareState>(null);
+  const [addPhone, setAddPhone] = useState<CareState>(null);
   const [alertBox, setAlertBox] = useState<AlertState>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [careBusy, setCareBusy] = useState(false);
   const [careError, setCareError] = useState<string | null>(null);
+  const [addPhoneBusy, setAddPhoneBusy] = useState(false);
+  const [addPhoneError, setAddPhoneError] = useState<string | null>(null);
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
@@ -137,6 +142,12 @@ export function CustomerListPage() {
     }
     setCareError(null);
     setCareEdit({ customer });
+  }
+
+  function openAddPhone(customer: CustomerListItem) {
+    if (customer.isHidden || customer.primaryPhone) return;
+    setAddPhoneError(null);
+    setAddPhone({ customer });
   }
 
   async function handleAction(customer: CustomerListItem, action: CustomerAction) {
@@ -221,6 +232,25 @@ export function CustomerListPage() {
     }
   }
 
+  async function submitAddPhone(phone: string) {
+    if (!addPhone) return;
+    setAddPhoneBusy(true);
+    setAddPhoneError(null);
+    try {
+      await addCustomerPhone(addPhone.customer.id, { phone });
+      await qc.invalidateQueries({ queryKey: ['customers'] });
+      await qc.invalidateQueries({ queryKey: ['customer', addPhone.customer.id] });
+      setAddPhone(null);
+      flash('Đã thêm số điện thoại.');
+    } catch (err) {
+      setAddPhoneError(
+        err instanceof Error ? err.message : 'Không lưu được số điện thoại.',
+      );
+    } finally {
+      setAddPhoneBusy(false);
+    }
+  }
+
   return (
     <div className="kh-page">
       <div className={`kh-s32${rail ? ' is-rail-open' : ''}`}>
@@ -270,6 +300,7 @@ export function CustomerListPage() {
                   void handleAction(c, a);
                 }}
                 onCare={(c) => openCareEdit(c)}
+                onAddPhone={(c) => openAddPhone(c)}
               />
             </section>
           ) : null}
@@ -288,6 +319,7 @@ export function CustomerListPage() {
                 void handleAction(c, a);
               }}
               onAdd={() => setAddOpen(true)}
+              onAddPhone={(c) => openAddPhone(c)}
             />
           ) : null}
         </div>
@@ -348,6 +380,19 @@ export function CustomerListPage() {
           }
         }}
         onSubmit={submitCare}
+      />
+
+      <AddCustomerPhoneModal
+        customer={addPhone?.customer ?? null}
+        busy={addPhoneBusy}
+        error={addPhoneError}
+        onClose={() => {
+          if (!addPhoneBusy) {
+            setAddPhone(null);
+            setAddPhoneError(null);
+          }
+        }}
+        onSubmit={submitAddPhone}
       />
 
       <CrmAlertDialog

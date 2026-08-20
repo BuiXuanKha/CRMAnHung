@@ -1,7 +1,9 @@
 import {
   CustomerStatus,
+  addCustomerPhoneSchema,
   createCustomerSchema,
   updateCustomerCareSchema,
+  type AddCustomerPhoneInput,
   type CreateCustomerInput,
   type CustomerDetail,
   type CustomerListQuery,
@@ -189,6 +191,47 @@ export async function updateCustomer(
   return apiFetch<CustomerDetail>(`/customers/${id}`, {
     method: 'PATCH',
     body: JSON.stringify(input),
+  });
+}
+
+export async function addCustomerPhone(
+  id: string,
+  input: AddCustomerPhoneInput,
+): Promise<CustomerDetail> {
+  const parsed = addCustomerPhoneSchema.parse(input);
+  if (isMockCustomers()) {
+    const user = currentMockUser();
+    const idx = mockStore.findIndex((c) => c.id === id);
+    if (idx < 0) throw new Error('Không tìm thấy khách hàng');
+    const current = mockStore[idx];
+    if (user.role !== UserRole.ADMIN && current.employeeId !== user.id) {
+      throw new Error('Không có quyền');
+    }
+    if (current.isHidden) {
+      throw new Error('Không thêm số điện thoại cho khách đã ẩn. Hãy khôi phục trước.');
+    }
+    if (current.primaryPhone || current.phones.length > 0) {
+      throw new Error('Khách này đã có số điện thoại.');
+    }
+    const taken = mockStore.some((c) =>
+      c.phones.some((p) => p.phone === parsed.phone),
+    );
+    if (taken) {
+      throw new Error('Số này đã có trên hồ sơ khác.');
+    }
+    const now = new Date().toISOString();
+    const updated: CustomerDetail = {
+      ...current,
+      primaryPhone: parsed.phone,
+      phones: [{ id: `ph_${Date.now()}`, phone: parsed.phone, label: null }],
+      updatedAt: now,
+    };
+    mockStore = mockStore.map((c, i) => (i === idx ? updated : c));
+    return updated;
+  }
+  return apiFetch<CustomerDetail>(`/customers/${id}/phones`, {
+    method: 'POST',
+    body: JSON.stringify(parsed),
   });
 }
 
