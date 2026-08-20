@@ -4,7 +4,7 @@
 
 | Domain | File | Status |
 |--------|------|--------|
-| Customers | [customers.md](./customers.md) | Ready for mock — §12 theo CRM `/khach-hang` đang chạy |
+| Customers | [customers.md](./customers.md) | Ready for mock — §12 theo CRM cũ; §11 backlog lệch mock |
 | Lodats | [lodats.md](./lodats.md) | Ready for mock — §12 list `/lo-dat` |
 | Addresses | _(tạo khi P2)_ | — |
 | Transactions | [transactions.md](./transactions.md) | Ready for mock — §12 list `/giao-dich` |

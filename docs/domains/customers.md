@@ -34,12 +34,39 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 Giữ contract hiện tại. Nest làm sau khi §12 ổn. Migrate `tblPerson*` — `MIGRATION.md`. Extension: có, phase sau.
 
-## 11. Lệch mock mới vs CRM cũ (chỉnh theo CRM cũ)
+## 11. Còn thiếu / chưa đúng so với CRM cũ
 
-- Mock: icon Phone trang trí / `tel:`; CRM cũ: **xanh = copy (PC) / gọi (mobile)**; **cam = thêm SĐT**.
-- Mock: icon mess trên dòng; CRM cũ: **không** có icon mess trên item — chat nằm rail + menu.
-- Mock: cột «Số lô đất»; CRM cũ: **chỉ icon Map + số** cạnh tên.
-- Nhu cầu mock = `Customer.note`; CRM cũ = **NeedSummary** care.
+Đối chiếu mock [`anhungland.com/khach-hang`](https://anhungland.com/khach-hang) với CRM đang chạy [`crm.anhungland.com/khach-hang`](https://crm.anhungland.com/khach-hang).  
+Hành vi đích = **§12**. Làm dần theo số.
+
+Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, thêm khách (tên + SĐT), rail 3 panel (dữ liệu tĩnh), menu 7 mục.
+
+1. **Dữ liệu thật** — API khách hàng + Postgres. Mock F5 là mất.
+2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Hiện chỉ 1 ô ghi chú.
+3. **Double-click dòng (máy tính)** — mở modal chăm sóc.
+4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lô, lịch sử chăm sóc. Hiện placeholder.
+5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Chưa có route.
+6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. Hiện toast. ADMIN: không được tạo (ẩn / báo).
+7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
+8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Hiện icon trang trí.
+9. **SĐT xanh (điện thoại)** — bấm = `tel:`.
+10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT.
+11. **Xoá SĐT (admin)** — thùng rác + modal.
+12. **Sửa tên khách** — bút trên tên (máy tính).
+13. **Sửa tên Facebook (admin)** — bút trên tên FB (máy tính).
+14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT.
+15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ.
+16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách».
+17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care). Hiện lấy `Customer.note`.
+18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Hiện tìm nông (tên, SĐT, note hiện tại).
+19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Hiện chỉ có / chưa nhập.
+20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Hiện Facebook / SĐT / Page giả.
+21. **Mở chat** — tab Facebook Inbox (máy tính). Hiện chỉ mở rail, chat mock.
+22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện list tĩnh.
+23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu).
+24. **Tải thêm ~50 dòng khi cuộn** + nhớ vị trí/lọc khi quay lại list.
+25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn.
+26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder P4.
 
 ---
 
