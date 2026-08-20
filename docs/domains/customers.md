@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (kênh = hotline hoặc profile FB NV; chưa SĐT / care)
+- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (kênh + avatar CDN; chưa SĐT / care)
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -359,9 +359,15 @@ Rồi `tblPerson.SourceHotlineId` → `Customer.sourceHotlineId` (map hotline + 
 Kênh liên hệ trên list = **hotline nguồn** hoặc **tên profile/page NV** (`EmployeeFacebookUid` → `NameProfile`).
 
 `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` (9 nick, map `employee_facebook_profile`).  
-`tblPersonFacebook` → `CustomerFacebook` (UID NV, tên nick khách, thread, scanSource; **không** tin nhắn / ảnh / file avatar). 1378 khách có FB; 22 chỉ hotline; 1 không kênh.
+`tblPersonFacebook` → `CustomerFacebook` (UID NV, tên nick khách, thread, scanSource). 1378 khách có FB; 22 chỉ hotline; 1 không kênh.
 
 Cột `/khach-hang` hiện tên như CRM cũ: `Page Bùi Xuân Khả`, `Khả Khánh Hà`, `Em Hà - BĐS Nam Sách 85`, …
+
+### 13.5 Slice này — avatar khách lên R2
+
+CRM cũ mirror avatar Facebook xuống `/var/www/anhungland-crm/api/img/avatars` (1376 file local, 2 khách không ảnh, ~5,3 MB). Bucket public R2 `anhungland-crm` + CDN `cdn.anhungland.com`.
+
+Script **chỉ đọc** disk cũ → `customers/avatars/<tên file>` → `CustomerFacebook.avatarObjectKey`. List trả `avatarUrl` = URL CDN. Không xóa file cũ. Chưa copy ảnh chat (~409 MB) / ảnh lô (~451 MB).
 
 ---
 

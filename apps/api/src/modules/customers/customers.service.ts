@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../../storage/storage.service';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import type { UpdateCustomerDto } from './dto/update-customer.dto';
 import type { ListCustomersQueryDto } from './dto/list-customers-query.dto';
@@ -52,7 +53,10 @@ function profileByUid(profiles: ProfileLookup[]): Map<string, ProfileLookup> {
 
 @Injectable()
 export class CustomersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async list(user: RequestUser, query: ListCustomersQueryDto) {
     const where: Prisma.CustomerWhereInput = {};
@@ -148,6 +152,18 @@ export class CustomersService {
     );
   }
 
+  private toPublicAvatarUrl(
+    facebook: CustomerRow['facebook'],
+  ): string | null {
+    if (!facebook) return null;
+    if (facebook.avatarObjectKey && this.storage.isConfigured()) {
+      return this.storage.publicUrl(facebook.avatarObjectKey);
+    }
+    const url = facebook.avatarUrl?.trim();
+    if (url && /^https?:\/\//i.test(url)) return url;
+    return null;
+  }
+
   private async loadProfiles(): Promise<Map<string, ProfileLookup>> {
     const rows = await this.prisma.employeeFacebookProfile.findMany({
       orderBy: { createdAt: 'asc' },
@@ -169,7 +185,7 @@ export class CustomersService {
           customerUid: row.facebook.customerUid,
           threadId: row.facebook.threadId,
           facebookName: row.facebook.facebookName,
-          avatarUrl: row.facebook.avatarUrl,
+          avatarUrl: this.toPublicAvatarUrl(row.facebook),
           scanSource: row.facebook.scanSource,
           scanSourceLabel: row.facebook.scanSourceLabel,
           employeeFacebookUid: row.facebook.employeeFacebookUid,

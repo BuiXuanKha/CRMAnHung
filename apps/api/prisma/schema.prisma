@@ -79,6 +79,7 @@ model CustomerFacebook {
   scanSource          String?
   scanSourceLabel     String?
   employeeFacebookUid String?
+  avatarObjectKey     String?
   rawMeta             String?
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
