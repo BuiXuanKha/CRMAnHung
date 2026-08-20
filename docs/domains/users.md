@@ -8,7 +8,7 @@
 
 Slice này **chỉ đăng nhập / đăng xuất**. Tạo-sửa-xoá NV (modal admin CRM cũ) = P4, chưa làm.
 
-**Thứ tự copy:** User → **hotline nguồn** → khách cơ bản → bảng phụ (SĐT, FB, chăm sóc…) theo map. Mỗi bước một PR — `MIGRATION.md`.
+**Thứ tự copy:** User **trước** (FK `employeeId` bắt buộc). Hotline nguồn **trước hoặc sau** khách (`sourceHotlineId` cho phép trống). SĐT / FB / chăm sóc **sau** map khách. `MIGRATION.md`.
 
 ---
 
@@ -46,7 +46,7 @@ Mật khẩu: bcrypt cost ≥ 12. Không lưu plaintext.
 
 `User` 1–n `Customer` (owner), hotline, page FB, care note, refresh token.
 
-Copy data: **User → hotline nguồn → khách cơ bản**. Bảng phụ (SĐT, FB, chăm sóc) sau khi có map `customer`.
+Copy data: **User trước** (`employeeId` bắt buộc). Hotline nguồn có thể sau khách rồi gắn `sourceHotlineId`. Bảng phụ (SĐT, FB, chăm sóc) sau map `customer`.
 
 ## 6. UI
 

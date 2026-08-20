@@ -42,11 +42,21 @@
 
 Cột path ảnh cũ → field **`objectKey`** (key trong R2), không phải path local.
 
-Mỗi bước **một PR**. Bảng **được trỏ tới** (User, hotline nguồn) copy **trước**. Bảng **trỏ sang khách** (SĐT, FB, chăm sóc…) copy **sau** khi có map `customer`. Script **chỉ đọc** SQLite. Idempotent.
+Mỗi bước **một PR**. Script **chỉ đọc** SQLite. Idempotent.
 
-Thứ tự đúng: **User → hotline nguồn → khách cơ bản → SĐT / Facebook / chăm sóc / …**
+### Khóa — cái nào bắt buộc trước?
 
-Khách đã copy trước hotline (slice 2); slice này copy hotline rồi **gắn lại** `sourceHotlineId` (22 khách lúc freeze).
+| Cột trên khách | Loại khóa | Bắt buộc lúc tạo khách? |
+|----------------|-----------|-------------------------|
+| `id` | **PK** của khách | Tự sinh |
+| `employeeId` | **FK** → `User.id` | **Có** — chưa có User thì không insert được |
+| `sourceHotlineId` | **FK** → `EmployeeHotline.id`, **cho phép NULL** | **Không** — để trống rồi gắn sau được |
+
+`sourceHotlineId` **không phải PK**. Nó chỉ trỏ sang PK của bảng hotline. Postgres chặn khi ghi một id hotline **chưa tồn tại**; ghi `NULL` thì không sao.
+
+Vì vậy: tạo bảng hotline **sau** khách cũng được (đúng như đã làm: 1401 khách → 3 hotline → gắn 22 nguồn). Làm hotline trước chỉ tiện hơn nếu muốn ghi nguồn ngay lúc insert khách.
+
+Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** map `customer` — `customerId` của chúng là FK NOT NULL.
 
 ### Todo copy
 

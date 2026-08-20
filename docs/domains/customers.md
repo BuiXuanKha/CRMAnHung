@@ -324,7 +324,7 @@ Chi tiết thứ tự: [`MIGRATION.md`](../MIGRATION.md) — **một bảng / m�
 
 Copy: `employeeId` (qua map `user`), tên, trạng thái, tài chính (`BIGINT` — có khách 2,5 tỷ, vượt INT4), `note` (cột dư trên khách), ẩn, ghim + `pinnedAt`, `autoRestoredAt`, ngày tạo/sửa.
 
-Lúc copy: `sourceHotlineId` = null. Gắn nguồn ở **§13.3** (cần bảng hotline trước).
+Lúc copy: `sourceHotlineId` = null (FK cho phép trống). Gắn nguồn ở **§13.3** sau khi có bảng hotline.
 
 **Không** copy cùng lúc: SĐT, Facebook, lịch sử chăm sóc, tin nhắn, ảnh, lô.
 
@@ -352,7 +352,7 @@ Lúc freeze: 1401 khách (292 ẩn, 16 ghim, 8 tự khôi phục), 3 hotline.
 `tblEmployeeHotline` → `EmployeeHotline` + map `employee_hotline`.  
 Rồi `tblPerson.SourceHotlineId` → `Customer.sourceHotlineId` (map hotline + map khách).
 
-Copy cả hotline tắt. Chưa copy profile Facebook NV.
+`sourceHotlineId` là FK optional → copy hotline sau khách rồi UPDATE vẫn hợp lệ. Copy cả hotline tắt. Chưa copy profile Facebook NV.
 
 ---
 
