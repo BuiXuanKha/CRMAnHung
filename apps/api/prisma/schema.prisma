@@ -51,6 +51,8 @@ model Customer {
   note            String?
   isPinned        Boolean  @default(false)
   isHidden        Boolean  @default(false)
+  pinnedAt        DateTime?
+  autoRestoredAt  DateTime?
   sourceHotlineId String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

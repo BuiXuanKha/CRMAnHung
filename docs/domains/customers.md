@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract hiện tại. Nest làm sau khi §12 ổn. Migrate `tblPerson*` — `MIGRATION.md`. Extension: có, phase sau.
+Giữ contract hiện tại. Nest làm sau khi §12 ổn. Copy data: `MIGRATION.md` (khách cơ bản trước, bảng liên quan sau). Extension: có, phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -311,6 +311,40 @@ All · KN · KM · CCS · KH · ĐG (trên trang đang nạp).
 ### 12.3 Chi tiết `/khach-hang/[id]`
 
 Placeholder. Trang chăm sóc `/cham-soc` — form modal chăm sóc làm sau.
+
+---
+
+---
+
+## 13. Copy dữ liệu
+
+Chi tiết thứ tự: [`MIGRATION.md`](../MIGRATION.md) — **một bảng / một PR**.
+
+### 13.1 Slice này — khách cơ bản
+
+`tblPerson` → `Customer` + map entity `customer`.
+
+Copy: `employeeId` (qua map `user`), tên, trạng thái, tài chính, `note` (cột dư trên khách), ẩn, ghim + `pinnedAt`, `autoRestoredAt`, ngày tạo/sửa.
+
+**Không** copy: SĐT, Facebook, lịch sử chăm sóc, hotline (`sourceHotlineId` = null), tin nhắn, ảnh, lô.
+
+### 13.2 Đã chốt (2026-08-20)
+
+Freeze: NV ngừng sửa CRM cũ; Extension tắt. Chỉ đọc SQLite.
+
+| # | Quyết định |
+|---|----------------|
+| Chủ hồ sơ | `EmployeeId` → map `user`. Lúc freeze: 0 khách mồ côi. Nếu có → bỏ + log. |
+| Khách ẩn | Copy cả. |
+| Ghim | `IsPinned` + `PinnedAtMs` → `isPinned` + `pinnedAt`. |
+| Tự khôi phục | `AutoRestoredAtMs` → `autoRestoredAt`. |
+| `tblPerson.Note` | Cột dư. Copy vào `Customer.note` (5 khách lúc freeze). Cột Nhu cầu = lịch sử — **sau**. |
+| Trạng thái + tài chính | Snapshot trên khách. |
+| Trùng SĐT 2 NV | Giữ nguyên khi copy SĐT (todo). |
+| Đã gộp trên CRM cũ | Copy trạng thái hiện tại. |
+| Chạy lại script | Idempotent. |
+
+Lúc freeze: 1401 khách (292 ẩn, 16 ghim, 8 tự khôi phục).
 
 ---
 

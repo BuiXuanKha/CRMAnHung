@@ -8,7 +8,7 @@
 
 Slice này **chỉ đăng nhập / đăng xuất**. Tạo-sửa-xoá NV (modal admin CRM cũ) = P4, chưa làm.
 
-**Thứ tự đã chốt với chủ sở hữu:** User (login) → Khách hàng → Lô đất → Giao dịch → Sổ đỏ.
+**Thứ tự copy:** User → **khách cơ bản** → bảng liên quan (SĐT, FB, chăm sóc, hotline…) theo map → lô → giao dịch → sổ đỏ. Mỗi bước một PR — `MIGRATION.md`.
 
 ---
 
@@ -46,7 +46,7 @@ Mật khẩu: bcrypt cost ≥ 12. Không lưu plaintext.
 
 `User` 1–n `Customer` (owner), hotline, page FB, care note, refresh token.
 
-Copy data: **User trước**, rồi mới khách (FK `employeeId`).
+Copy data: **User trước**, rồi khách cơ bản (`employeeId` = id mới). Bảng phụ sau khi có map `customer`.
 
 ## 6. UI
 
@@ -110,8 +110,10 @@ Sau freeze CRM cũ:
 
 ## 11. Việc tiếp theo (login → khách)
 
-1. ~~Nối `/login` → API + copy `tblUsers`~~ (slice này)
-2. Tắt mock **list** khi API khách hàng sẵn (`NEXT_PUBLIC_USE_MOCK=false`)
-3. P4: CRUD nhân viên như modal CRM cũ
+1. ~~Nối `/login` → API + copy `tblUsers`~~
+2. Copy khách cơ bản — `customers.md` §13
+3. Bảng liên quan theo todo `MIGRATION.md` (SĐT, FB, chăm sóc, hotline…)
+4. Tắt mock **list** khi API khách hàng sẵn
+5. P4: CRUD nhân viên như modal CRM cũ
 
 Không làm CRUD user trước khi login + khách ổn.
