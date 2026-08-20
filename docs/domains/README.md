@@ -4,7 +4,7 @@
 
 | Domain | File | Status |
 |--------|------|--------|
-| Users (login) | [users.md](./users.md) | Ready for API — đăng nhập trước; CRUD NV = P4 |
+| Users (login) | [users.md](./users.md) | Ready for API — `/login` = bảng User; list CRM vẫn mock |
 | Customers | [customers.md](./customers.md) | Ready for mock — §12 theo CRM cũ; §11 backlog lệch mock |
 | Lodats | [lodats.md](./lodats.md) | Ready for mock — §12 list `/lo-dat` |
 | Addresses | _(tạo khi P2)_ | — |

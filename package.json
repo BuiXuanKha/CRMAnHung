@@ -25,6 +25,7 @@
     "db:generate": "pnpm --filter @crmanhung/api db:generate",
     "db:migrate": "pnpm --filter @crmanhung/api db:migrate",
     "db:seed": "pnpm --filter @crmanhung/api db:seed",
+    "users:migrate-legacy": "pnpm --filter @crmanhung/api users:migrate-legacy",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "doctor": "node ./scripts/doctor.mjs"

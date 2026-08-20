@@ -1,7 +1,7 @@
 # Domain: Users (Đăng nhập / nhân viên)
 
 - **Slug:** `users`
-- **Status:** Ready for API — login đã có Nest + contract; Web staging còn mock
+- **Status:** Ready for API — `/login` nối bảng User; list CRM vẫn mock
 - **Nguồn:** CRM cũ `/login` + quản trị user (đọc hiểu, không copy god-file)
 - **UI:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) login; shell avatar
 - **Contract:** `packages/shared/src/auth.ts`
@@ -93,7 +93,7 @@ Zod: `packages/shared/src/auth.ts`.
 ## 8. Seed / mock
 
 - Seed Prisma: `admin` / `admin123`, `staff` / `staff123` — **đổi trên môi trường thật**
-- Web mock: cùng 2 tài khoản khi `NEXT_PUBLIC_USE_MOCK=true`
+- Web mock auth: `NEXT_PUBLIC_USE_MOCK_AUTH=true` (dev). Staging: `false` → login API.
 
 ## 9. Extension?
 
@@ -110,10 +110,8 @@ Sau freeze CRM cũ:
 
 ## 11. Việc tiếp theo (login → khách)
 
-1. Seed / copy User lên Postgres VPS
-2. Tắt mock **chỉ khi** API khách hàng sẵn — hiện list `/khach-hang` vẫn mock
-3. Nối `/login` → API thật (code Web đã có nhánh `isMockMode() === false`)
-4. Đổi mật khẩu mặc định seed
-5. P4: CRUD nhân viên như modal CRM cũ
+1. ~~Nối `/login` → API + copy `tblUsers`~~ (slice này)
+2. Tắt mock **list** khi API khách hàng sẵn (`NEXT_PUBLIC_USE_MOCK=false`)
+3. P4: CRUD nhân viên như modal CRM cũ
 
 Không làm CRUD user trước khi login + khách ổn.

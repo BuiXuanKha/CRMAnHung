@@ -49,8 +49,10 @@ pnpm run build
 echo "==> Build Web (Next.js standalone)"
 cd "$WEB"
 if [[ ! -f .env.production ]]; then
-  # FE mock trước khi API public/auth sẵn sàng — đổi false khi nối API thật
-  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=true\n' > .env.production
+  # List CRM vẫn mock; đăng nhập = API + bảng User
+  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=true\nNEXT_PUBLIC_USE_MOCK_AUTH=false\n' > .env.production
+elif ! grep -q '^NEXT_PUBLIC_USE_MOCK_AUTH=' .env.production; then
+  echo 'NEXT_PUBLIC_USE_MOCK_AUTH=false' >> .env.production
 fi
 pnpm run build
 

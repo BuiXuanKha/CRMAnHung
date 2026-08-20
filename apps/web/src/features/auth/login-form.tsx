@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './auth-context';
 import { ApiError } from '@/shared/api/client';
-import { isMockMode } from '@/shared/api/mode';
+import { isMockAuth } from '@/shared/api/mode';
 import { ANHUNG_BRAND } from '@/features/public/brand';
 import './login.css';
 
@@ -21,7 +21,7 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const mock = isMockMode();
+  const mockAuth = isMockAuth();
 
   useEffect(() => {
     if (!loading && user) {
@@ -79,7 +79,7 @@ export function LoginForm() {
           <h1>Đăng nhập CRM</h1>
           <p className="login-sub">Dành cho nhân viên An Hưng Land — quản lý khách hàng và lô đất.</p>
 
-          {mock ? (
+          {mockAuth ? (
             <div className="login-mock">
               <p className="login-mock-title">Demo (mock — chưa nối API)</p>
               <div className="login-mock-actions">
@@ -103,7 +103,7 @@ export function LoginForm() {
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               autoComplete="username"
-              placeholder={mock ? 'staff hoặc admin' : undefined}
+              placeholder={mockAuth ? 'staff hoặc admin' : undefined}
               required
             />
           </label>
@@ -115,7 +115,7 @@ export function LoginForm() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
-              placeholder={mock ? 'staff123 hoặc admin123' : undefined}
+              placeholder={mockAuth ? 'staff123 hoặc admin123' : undefined}
               required
             />
           </label>

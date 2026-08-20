@@ -18,9 +18,10 @@ import {
   getRefreshToken,
   setTokens,
 } from '@/shared/api/client';
-import { isMockMode } from '@/shared/api/mode';
+import { isMockAuth } from '@/shared/api/mode';
 import { MOCK_ADMIN, MOCK_STAFF } from '@/features/customers/mock-data';
 
+const SESSION_USER_KEY = 'crmanhung_session_user';
 const MOCK_USER_KEY = 'crmanhung_mock_user';
 
 type AuthContextValue = {
@@ -32,9 +33,10 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function readMockUser(): AuthUser | null {
+function readSessionUser(): AuthUser | null {
   if (typeof window === 'undefined') return null;
-  const raw = sessionStorage.getItem(MOCK_USER_KEY);
+  const raw =
+    sessionStorage.getItem(SESSION_USER_KEY) ?? sessionStorage.getItem(MOCK_USER_KEY);
   if (!raw) return null;
   try {
     return JSON.parse(raw) as AuthUser;
@@ -43,13 +45,16 @@ function readMockUser(): AuthUser | null {
   }
 }
 
-function writeMockUser(user: AuthUser | null) {
+function writeSessionUser(user: AuthUser | null) {
   if (typeof window === 'undefined') return;
   if (!user) {
+    sessionStorage.removeItem(SESSION_USER_KEY);
     sessionStorage.removeItem(MOCK_USER_KEY);
     return;
   }
-  sessionStorage.setItem(MOCK_USER_KEY, JSON.stringify(user));
+  const json = JSON.stringify(user);
+  sessionStorage.setItem(SESSION_USER_KEY, json);
+  sessionStorage.setItem(MOCK_USER_KEY, json);
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -58,8 +63,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const boot = async () => {
-      if (isMockMode()) {
-        setUser(readMockUser());
+      if (isMockAuth()) {
+        setUser(readSessionUser());
         setLoading(false);
         return;
       }
@@ -70,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       try {
         const me = await apiFetch<AuthUser>('/auth/me');
+        writeSessionUser(me);
         setUser(me);
       } catch {
         clearTokens();
@@ -82,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
-    if (isMockMode()) {
+    if (isMockAuth()) {
       const u = username.trim().toLowerCase();
       let mock: AuthUser | null = null;
       if (u === 'admin' && password === 'admin123') mock = MOCK_ADMIN;
@@ -90,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!mock) {
         throw new ApiError(401, 'Sai tài khoản hoặc mật khẩu (mock)');
       }
-      writeMockUser(mock);
+      writeSessionUser(mock);
       setTokens('mock-access', 'mock-refresh');
       setUser(mock);
       return;
@@ -101,12 +107,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       body: JSON.stringify({ username, password }),
     });
     setTokens(data.accessToken, data.refreshToken);
+    writeSessionUser(data.user);
     setUser(data.user);
   }, []);
 
   const logout = useCallback(async () => {
-    if (isMockMode()) {
-      writeMockUser(null);
+    if (isMockAuth()) {
+      writeSessionUser(null);
       clearTokens();
       setUser(null);
       return;
@@ -123,6 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // ignore network errors on logout
     } finally {
+      writeSessionUser(null);
       clearTokens();
       setUser(null);
     }
