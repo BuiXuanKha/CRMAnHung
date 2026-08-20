@@ -136,6 +136,90 @@
   font-weight: 400;
 }
 
+.crm-form-hint {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 400;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.crm-form-hint-box {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+  font-size: 0.85rem;
+  font-weight: 400;
+  line-height: 1.45;
+}
+
+.crm-link-btn {
+  border: 0;
+  padding: 0;
+  background: none;
+  color: #2563eb;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.crm-dialog-section {
+  margin: 0;
+}
+
+.crm-dialog-section h3 {
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.crm-dialog-section ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.crm-care-mini {
+  font-size: 0.82rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.crm-hotline-list {
+  list-style: none;
+  margin: 0 0 4px;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+  max-height: 220px;
+  overflow: auto;
+}
+
+.crm-hotline-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+
+.crm-hotline-list strong {
+  display: block;
+}
+
+.crm-hotline-list span {
+  display: block;
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
 .crm-toast {
   position: fixed;
   bottom: 20px;

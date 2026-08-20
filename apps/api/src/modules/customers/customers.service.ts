@@ -11,7 +11,18 @@ import type { UpdateCustomerDto } from './dto/update-customer.dto';
 import type { ListCustomersQueryDto } from './dto/list-customers-query.dto';
 import type { UpdateCustomerCareDto } from './dto/update-customer-care.dto';
 import type { AddCustomerPhoneDto } from './dto/add-customer-phone.dto';
+import type { CreateCustomerDto } from './dto/create-customer.dto';
+import type { AcknowledgePhoneDuplicateDto } from './dto/acknowledge-phone-duplicate.dto';
+import type { MergeFacebookDto } from './dto/merge-facebook.dto';
 import { normalizeCareBudget } from './care-budget';
+import { budgetFilterWhere, contactChannelWhere } from './customers-filters';
+import {
+  acknowledgePhoneDuplicate,
+  addCustomerPhone,
+  createManualCustomer,
+  listContactChannels,
+  mergeFacebookIntoPhoneHolder,
+} from './customers-phone';
 import {
   LIST_INCLUDE,
   assertCanAccess,
@@ -44,40 +55,49 @@ export class CustomersService {
   ) {}
 
   async list(user: RequestUser, query: ListCustomersQueryDto) {
-    const where: Prisma.CustomerWhereInput = {};
+    const and: Prisma.CustomerWhereInput[] = [];
 
     if (user.role !== 'ADMIN') {
-      where.employeeId = user.id;
+      and.push({ employeeId: user.id });
     }
 
     if (query.hiddenOnly) {
-      where.isHidden = true;
+      and.push({ isHidden: true });
     } else if (!query.includeHidden) {
-      where.isHidden = false;
+      and.push({ isHidden: false });
     }
 
     if (query.status) {
-      where.status = query.status;
+      and.push({ status: query.status });
     }
 
     const keyword = query.keyword?.trim();
     if (keyword) {
-      where.OR = [
-        { fullName: { contains: keyword, mode: 'insensitive' } },
-        { note: { contains: keyword, mode: 'insensitive' } },
-        { phones: { some: { phone: { contains: keyword } } } },
-        {
-          careNotes: {
-            some: {
-              OR: [
-                { needSummary: { contains: keyword, mode: 'insensitive' } },
-                { note: { contains: keyword, mode: 'insensitive' } },
-              ],
+      and.push({
+        OR: [
+          { fullName: { contains: keyword, mode: 'insensitive' } },
+          { note: { contains: keyword, mode: 'insensitive' } },
+          { phones: { some: { phone: { contains: keyword } } } },
+          {
+            careNotes: {
+              some: {
+                OR: [
+                  { needSummary: { contains: keyword, mode: 'insensitive' } },
+                  { note: { contains: keyword, mode: 'insensitive' } },
+                ],
+              },
             },
           },
-        },
-      ];
+        ],
+      });
     }
+
+    const budget = budgetFilterWhere(query.budgetFilter);
+    if (budget) and.push(budget);
+    const channel = contactChannelWhere(query.contactChannel);
+    if (channel) and.push(channel);
+
+    const where: Prisma.CustomerWhereInput = and.length ? { AND: and } : {};
 
     const rows = await this.prisma.customer.findMany({
       where,
@@ -211,9 +231,27 @@ export class CustomersService {
     };
   }
 
-  createNotReady(): never {
-    throw new BadRequestException(
-      'Chưa thêm được khách bằng SĐT — form tạo (hotline, trùng số) làm sau.',
+  create(user: RequestUser, dto: CreateCustomerDto) {
+    return createManualCustomer(this.prisma, user, dto, (id) => this.getById(user, id));
+  }
+
+  listChannels(user: RequestUser) {
+    return listContactChannels(this.prisma, user);
+  }
+
+  acknowledgeDuplicate(
+    user: RequestUser,
+    id: string,
+    dto: AcknowledgePhoneDuplicateDto,
+  ) {
+    return acknowledgePhoneDuplicate(this.prisma, user, id, dto, (cid) =>
+      this.getById(user, cid),
+    );
+  }
+
+  mergeFacebook(user: RequestUser, dto: MergeFacebookDto) {
+    return mergeFacebookIntoPhoneHolder(this.prisma, user, dto, (id) =>
+      this.getById(user, id),
     );
   }
 
@@ -285,42 +323,6 @@ export class CustomersService {
   }
 
   async addPhone(user: RequestUser, id: string, dto: AddCustomerPhoneDto) {
-    const phone = dto.phone.trim();
-    const existing = await this.prisma.customer.findUnique({
-      where: { id },
-      include: { phones: { select: { id: true } } },
-    });
-    if (!existing) {
-      throw new NotFoundException('Không tìm thấy khách hàng');
-    }
-    assertCanAccess(user, existing.employeeId);
-    if (existing.isHidden) {
-      throw new BadRequestException(
-        'Không thêm số điện thoại cho khách đã ẩn. Hãy khôi phục trước.',
-      );
-    }
-    if (existing.phones.length > 0) {
-      throw new BadRequestException('Khách này đã có số điện thoại.');
-    }
-
-    const taken = await this.prisma.customerPhone.findFirst({
-      where: { phone },
-      select: { id: true },
-    });
-    if (taken) {
-      throw new BadRequestException('Số này đã có trên hồ sơ khác.');
-    }
-
-    await this.prisma.$transaction(async (tx) => {
-      await tx.customerPhone.create({
-        data: { customerId: id, phone, sortOrder: 0 },
-      });
-      await tx.customer.update({
-        where: { id },
-        data: { updatedAt: new Date() },
-      });
-    });
-
-    return this.getById(user, id);
+    return addCustomerPhone(this.prisma, user, id, dto, (cid) => this.getById(user, cid));
   }
 }

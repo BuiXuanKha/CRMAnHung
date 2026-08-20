@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc, rail chat + ảnh. Slice SĐT cam (thêm số) đã code, chưa deploy.
+- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc, rail chat + ảnh. Slice SĐT cam + thêm khách SĐT / trùng-gộp / sửa tên / lọc tài chính-kênh: đã code, chờ deploy.
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (rail). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). Extension: phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (rail). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). **POST `/api/v1/customers`** — thêm khách bằng SĐT (hotline + tên + số + ghi chú). **GET `/api/v1/customers/contact-channels`** — lọc kênh. Extension: phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -50,17 +50,17 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
-10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Code sẵn (chưa deploy). Trùng số → lỗi tiếng Việt; modal gộp = mục 15.
+10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Code sẵn. Trùng số → modal mục 15.
 11. **Xoá SĐT (admin)** — thùng rác + modal.
-12. **Sửa tên khách** — bút trên tên (máy tính).
+12. **Sửa tên khách** — bút trên tên (máy tính). Code sẵn.
 13. **Sửa tên Facebook (admin)** — bút trên tên FB (máy tính).
-14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT.
-15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ.
+14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Code sẵn.
+15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Code sẵn.
 16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách».
 17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care, không rỗng). Có trên staging (237 khách có lịch sử).
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
-19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Hiện chỉ có / chưa nhập.
-20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Hiện Facebook / SĐT / Page giả.
+19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Code sẵn.
+20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Code sẵn.
 21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
 22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện list tĩnh.
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu).
@@ -147,7 +147,7 @@ Hiện khi **đã có** SĐT. Bấm → copy số (tick tạm).
 ##### 4. Icon SĐT **cam** (`#ea580c`)
 
 Hiện khi **chưa có** SĐT (và chưa xoá).  
-Bấm → modal **Thêm số điện thoại**. Trùng số hiện lỗi; modal gộp = mục 15.
+Bấm → modal **Thêm số điện thoại**. Trùng số → modal mục 15.
 
 ##### 5. Icon thùng rác SĐT
 
@@ -458,7 +458,17 @@ Khách **chưa có** SĐT và **chưa ẩn**: icon Phone **cam** `#ea580c` trên
 
 `POST /api/v1/customers/:id/phones` `{ phone }` — 10 số, bắt đầu `0`. Ownership cùng GET/PATCH. Khách đã ẩn / đã có số: API từ chối. Số đã có trên hồ sơ khác: `400` «Số này đã có trên hồ sơ khác.» (chưa modal gộp — mục 15).
 
-Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam không gọi. **Chưa deploy.**
+Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam không gọi.
+
+### 13.11 Slice này — thêm khách SĐT, trùng/gộp, sửa tên, lọc
+
+- **POST `/api/v1/customers`** `{ fullName, phone, sourceHotlineId, note? }`. Hotline phải của NV đang bật. Trùng SĐT cùng NV → `409 PHONE_DUPLICATE`; OK = cập nhật tên + khôi phục nếu đang ẩn (`PATCH .../acknowledge-phone-duplicate`).
+- **GET `/api/v1/users/me/hotlines`**. Chưa có hotline → Cài đặt → Quản lý SĐT (thêm / bật-tắt).
+- Thêm SĐT cam trùng: `409` kèm `mergeAllowed`. Gộp Facebook → khách chỉ có SĐT: **POST `/customers/merge-facebook-into-phone-holder`**.
+- Sửa tên: bút Lucide trên máy tính → `PATCH /customers/:id` `{ fullName }`. Không bút trên thẻ mobile.
+- Lọc tài chính: `budgetFilter=none|has|lt_1b|1b_2b|gt_2b` (khoảng chồng). Lọc kênh: `contactChannel=fb:<uid>|hotline:<id>` từ **GET `/customers/contact-channels`**.
+
+**Chưa deploy** (cùng PR với các mục 12, 14, 15, 19, 20).
 
 ---
 

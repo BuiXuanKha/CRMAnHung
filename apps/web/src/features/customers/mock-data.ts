@@ -4,6 +4,7 @@ import {
   type AuthUser,
   type CustomerDetail,
   type CustomerMessengerMessage,
+  type EmployeeHotline,
 } from '@crmanhung/shared';
 
 export const MOCK_STAFF: AuthUser = {
@@ -21,6 +22,11 @@ export const MOCK_ADMIN: AuthUser = {
 };
 
 const OTHER_EMPLOYEE_ID = 'user_staff_other';
+
+export const mockHotlines: EmployeeHotline[] = [
+  { id: 'hl_zalo', phone: '0977656280', label: 'Zalo Khả', isActive: true },
+  { id: 'hl_vp', phone: '0898524117', label: 'Máy văn phòng', isActive: true },
+];
 
 function staffCustomer(
   partial: Omit<CustomerDetail, 'employeeId' | 'employeeName'> &
@@ -51,6 +57,7 @@ export const mockCustomers: CustomerDetail[] = [
       { id: 'ph3', phone: '0987654321', label: 'Phụ' },
     ],
     facebook: null,
+    sourceHotline: { id: 'hl_zalo', phone: '0977656280', label: 'Zalo Khả' },
     latestCareNote: 'Hẹn xem đất cuối tuần',
     lodatCount: 2,
     createdAt: '2026-06-15T08:00:00.000Z',
@@ -82,6 +89,12 @@ export const mockCustomers: CustomerDetail[] = [
       facebookName: 'Nguyen Van An FB',
       avatarUrl: null,
       scanSource: 'business_suite',
+      employeeFacebookUid: 'uid_page_kha',
+    },
+    sourceFacebookProfile: {
+      id: 'prof_kha',
+      facebookUid: 'uid_page_kha',
+      nickname: 'Page Bùi Xuân Khả',
     },
     latestCareNote: 'Vừa inbox hỏi lô mặt tiền',
     lodatCount: 0,
@@ -356,6 +369,12 @@ export const mockCustomers: CustomerDetail[] = [
       facebookName: 'Dang Thu Trang',
       avatarUrl: null,
       scanSource: 'page',
+      employeeFacebookUid: 'uid_page_kha',
+    },
+    sourceFacebookProfile: {
+      id: 'prof_kha',
+      facebookUid: 'uid_page_kha',
+      nickname: 'Page Bùi Xuân Khả',
     },
     latestCareNote: null,
     lodatCount: 0,

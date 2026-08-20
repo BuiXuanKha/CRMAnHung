@@ -4,20 +4,34 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
-import { CustomerStatus, type CustomerListItem, type UpdateCustomerCareInput } from '@crmanhung/shared';
+import {
+  CustomerStatus,
+  type CreateCustomerInput,
+  type CustomerListItem,
+  type PhoneDuplicateExisting,
+  type UpdateCustomerCareInput,
+} from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
+import { HotlinesSettingsDialog } from '@/features/settings/hotlines-dialog';
 import {
   consumeCareToast,
+  acknowledgePhoneDuplicate,
   addCustomerPhone,
   createCustomer,
   getCustomer,
+  isPhoneDuplicateError,
+  listContactChannels,
   listCustomerMessages,
   listCustomers,
+  listMyHotlines,
+  mergeFacebookIntoPhoneHolder,
   updateCustomer,
   updateCustomerCare,
 } from './api';
 import { AddByPhoneModal } from './components/add-by-phone-modal';
 import { AddCustomerPhoneModal } from './components/add-customer-phone-modal';
+import { PhoneDuplicateModal } from './components/phone-duplicate-modal';
+import { RenameCustomerModal } from './components/rename-customer-modal';
 import { CustomerCareEditModal } from './components/care-edit-modal';
 import { type CustomerAction } from './components/action-menu';
 import { CustomerTable } from './components/customer-table';
@@ -44,6 +58,15 @@ type ConfirmState = {
 
 type CareState = {
   customer: CustomerListItem;
+} | null;
+
+type DupState = {
+  mode: 'create' | 'merge' | 'info';
+  existing: PhoneDuplicateExisting;
+  phone?: string;
+  fullName?: string;
+  sourceId?: string;
+  sourceName?: string;
 } | null;
 
 type AlertState = {
@@ -73,16 +96,39 @@ export function CustomerListPage() {
   const [careError, setCareError] = useState<string | null>(null);
   const [addPhoneBusy, setAddPhoneBusy] = useState(false);
   const [addPhoneError, setAddPhoneError] = useState<string | null>(null);
+  const [rename, setRename] = useState<CareState>(null);
+  const [renameBusy, setRenameBusy] = useState(false);
+  const [renameError, setRenameError] = useState<string | null>(null);
+  const [dup, setDup] = useState<DupState>(null);
+  const [dupBusy, setDupBusy] = useState(false);
+  const [dupError, setDupError] = useState<string | null>(null);
+  const [hotlineOpen, setHotlineOpen] = useState(false);
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
     ...search,
     status: (status || undefined) as CustomerStatus | undefined,
+    budgetFilter:
+      extra.finance === 'all'
+        ? undefined
+        : extra.finance,
+    contactChannel: extra.channel === 'all' ? undefined : extra.channel,
   };
 
   const list = useQuery({
     queryKey: ['customers', listQuery],
     queryFn: () => listCustomers(listQuery),
+  });
+
+  const channels = useQuery({
+    queryKey: ['contact-channels'],
+    queryFn: listContactChannels,
+  });
+
+  const hotlines = useQuery({
+    queryKey: ['my-hotlines'],
+    queryFn: () => listMyHotlines(true),
+    enabled: addOpen || hotlineOpen,
   });
 
   const filtered = useMemo(
@@ -93,6 +139,14 @@ export function CustomerListPage() {
   const selected = filtered.find((c) => c.id === selectedId) ?? null;
   const mobileFilterCount = countMobileCustomerFilters(status, extra);
   const stats = useMemo(() => countCustomerStats(filtered), [filtered]);
+  const channelOptions = useMemo(
+    () =>
+      (channels.data?.items ?? []).map((item) => ({
+        value: item.value,
+        label: `${item.label} (${item.customerCount})`,
+      })),
+    [channels.data?.items],
+  );
 
   const detail = useQuery({
     queryKey: ['customer', selectedId],
@@ -107,14 +161,15 @@ export function CustomerListPage() {
   });
 
   const createMut = useMutation({
-    mutationFn: (input: { fullName: string; phone: string }) => createCustomer(input),
-    onSuccess: async () => {
+    mutationFn: (input: CreateCustomerInput) => createCustomer(input),
+    onSuccess: async (created) => {
       await qc.invalidateQueries({ queryKey: ['customers'] });
+      await qc.invalidateQueries({ queryKey: ['contact-channels'] });
       setAddOpen(false);
       setAddError(null);
+      setSelectedId(created.id);
       flash('Đã thêm khách hàng.');
     },
-    onError: (err: Error) => setAddError(err.message),
   });
 
   function flash(msg: string) {
@@ -148,6 +203,11 @@ export function CustomerListPage() {
     if (customer.isHidden || customer.primaryPhone) return;
     setAddPhoneError(null);
     setAddPhone({ customer });
+  }
+
+  function openRename(customer: CustomerListItem) {
+    setRenameError(null);
+    setRename({ customer });
   }
 
   async function handleAction(customer: CustomerListItem, action: CustomerAction) {
@@ -243,11 +303,71 @@ export function CustomerListPage() {
       setAddPhone(null);
       flash('Đã thêm số điện thoại.');
     } catch (err) {
+      if (isPhoneDuplicateError(err)) {
+        setDup({
+          mode: err.mergeAllowed ? 'merge' : 'info',
+          existing: err.existing,
+          phone: typeof err.phone === 'string' ? err.phone : phone,
+          sourceId: addPhone.customer.id,
+          sourceName: addPhone.customer.fullName,
+        });
+        return;
+      }
       setAddPhoneError(
         err instanceof Error ? err.message : 'Không lưu được số điện thoại.',
       );
     } finally {
       setAddPhoneBusy(false);
+    }
+  }
+
+  async function submitRename(fullName: string) {
+    if (!rename) return;
+    setRenameBusy(true);
+    setRenameError(null);
+    try {
+      await updateCustomer(rename.customer.id, { fullName });
+      await qc.invalidateQueries({ queryKey: ['customers'] });
+      await qc.invalidateQueries({ queryKey: ['customer', rename.customer.id] });
+      setRename(null);
+      flash('Đã đổi tên khách.');
+    } catch (err) {
+      setRenameError(err instanceof Error ? err.message : 'Không đổi được tên khách.');
+    } finally {
+      setRenameBusy(false);
+    }
+  }
+
+  async function submitDuplicate() {
+    if (!dup) return;
+    setDupBusy(true);
+    setDupError(null);
+    try {
+      if (dup.mode === 'create') {
+        await acknowledgePhoneDuplicate(dup.existing.id, {
+          fullName: dup.fullName?.trim() || dup.existing.fullName,
+        });
+        setAddOpen(false);
+        flash('Đã cập nhật khách.');
+      } else if (dup.mode === 'merge' && dup.sourceId && dup.phone) {
+        await mergeFacebookIntoPhoneHolder({
+          sourceCustomerId: dup.sourceId,
+          targetCustomerId: dup.existing.id,
+          phone: dup.phone,
+        });
+        setAddPhone(null);
+        flash('Đã gộp khách Facebook vào hồ sơ có số điện thoại.');
+      } else {
+        setAddPhone(null);
+      }
+      setSelectedId(dup.existing.id);
+      setDup(null);
+      await qc.invalidateQueries({ queryKey: ['customers'] });
+      await qc.invalidateQueries({ queryKey: ['contact-channels'] });
+    } catch (err) {
+      setDupError(err instanceof Error ? err.message : 'Không xử lý được.');
+    } finally {
+      setDupBusy(false);
     }
   }
 
@@ -268,6 +388,7 @@ export function CustomerListPage() {
               onStatus={setStatus}
               extra={extra}
               onExtra={setExtra}
+              channelOptions={channelOptions}
               hasActiveFilters={mobileFilterCount > 0}
               onResetFilters={() => {
                 setStatus('');
@@ -301,6 +422,8 @@ export function CustomerListPage() {
                 }}
                 onCare={(c) => openCareEdit(c)}
                 onAddPhone={(c) => openAddPhone(c)}
+                onRename={(c) => openRename(c)}
+                channelOptions={channelOptions}
               />
             </section>
           ) : null}
@@ -339,13 +462,32 @@ export function CustomerListPage() {
         open={addOpen}
         busy={createMut.isPending}
         error={addError}
+        hotlines={hotlines.data?.items ?? []}
+        hotlinesLoading={hotlines.isLoading}
         onClose={() => {
           setAddOpen(false);
           setAddError(null);
         }}
-        onSubmit={async (fullName, phone) => {
+        onOpenHotlines={() => {
+          setAddOpen(false);
+          setHotlineOpen(true);
+        }}
+        onSubmit={async (input) => {
           setAddError(null);
-          await createMut.mutateAsync({ fullName, phone });
+          try {
+            await createMut.mutateAsync(input);
+          } catch (err) {
+            if (isPhoneDuplicateError(err)) {
+              setDup({
+                mode: 'create',
+                existing: err.existing,
+                phone: input.phone,
+                fullName: input.fullName,
+              });
+              return;
+            }
+            setAddError(err instanceof Error ? err.message : 'Không thêm được khách.');
+          }
         }}
       />
 
@@ -393,6 +535,45 @@ export function CustomerListPage() {
           }
         }}
         onSubmit={submitAddPhone}
+      />
+
+      <RenameCustomerModal
+        customer={rename?.customer ?? null}
+        busy={renameBusy}
+        error={renameError}
+        onClose={() => {
+          if (!renameBusy) {
+            setRename(null);
+            setRenameError(null);
+          }
+        }}
+        onSubmit={submitRename}
+      />
+
+      <PhoneDuplicateModal
+        open={Boolean(dup)}
+        mode={dup?.mode ?? 'create'}
+        existing={dup?.existing ?? null}
+        phone={dup?.phone}
+        fullName={dup?.fullName}
+        sourceName={dup?.sourceName}
+        busy={dupBusy}
+        error={dupError}
+        onClose={() => {
+          if (!dupBusy) {
+            setDup(null);
+            setDupError(null);
+          }
+        }}
+        onConfirm={submitDuplicate}
+      />
+
+      <HotlinesSettingsDialog
+        open={hotlineOpen}
+        onClose={() => {
+          setHotlineOpen(false);
+          void qc.invalidateQueries({ queryKey: ['my-hotlines'] });
+        }}
       />
 
       <CrmAlertDialog

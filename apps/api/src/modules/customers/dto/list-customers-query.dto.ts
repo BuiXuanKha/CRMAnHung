@@ -8,6 +8,8 @@ function toOptionalBoolean(value: unknown): boolean | undefined {
   return undefined;
 }
 
+const BUDGET_FILTERS = ['none', 'has', 'lt_1b', '1b_2b', 'gt_2b'] as const;
+
 export class ListCustomersQueryDto {
   @IsOptional()
   @IsString()
@@ -26,4 +28,12 @@ export class ListCustomersQueryDto {
   @Transform(({ value }) => toOptionalBoolean(value))
   @IsBoolean()
   hiddenOnly?: boolean;
+
+  @IsOptional()
+  @IsIn(BUDGET_FILTERS)
+  budgetFilter?: (typeof BUDGET_FILTERS)[number];
+
+  @IsOptional()
+  @IsString()
+  contactChannel?: string;
 }

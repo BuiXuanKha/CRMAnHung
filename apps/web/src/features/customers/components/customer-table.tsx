@@ -1,13 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Check, MessageCircle, Phone } from 'lucide-react';
+import { Check, MessageCircle, Pencil, Phone } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
-import { ColumnFilter } from '@/shared/ui/column-filter';
+import { ColumnFilter, type ColumnFilterOption } from '@/shared/ui/column-filter';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 import {
-  CHANNEL_FILTER_OPTIONS,
   DEMAND_FILTER_OPTIONS,
   FINANCE_FILTER_OPTIONS,
   LODAT_FILTER_OPTIONS,
@@ -39,6 +38,8 @@ type Props = {
   onAction: (customer: CustomerListItem, action: CustomerAction) => void;
   onCare?: (customer: CustomerListItem) => void;
   onAddPhone?: (customer: CustomerListItem) => void;
+  onRename?: (customer: CustomerListItem) => void;
+  channelOptions: ColumnFilterOption[];
 };
 
 export function CustomerTable({
@@ -56,6 +57,8 @@ export function CustomerTable({
   onAction,
   onCare,
   onAddPhone,
+  onRename,
+  channelOptions,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -144,7 +147,7 @@ export function CustomerTable({
             <ColumnFilter
               label="Kênh liên hệ"
               value={extra.channel}
-              options={CHANNEL_FILTER_OPTIONS}
+              options={[{ value: 'all', label: 'Tất cả kênh liên hệ' }, ...channelOptions]}
               open={headerFilter === 'channel'}
               onToggle={() => toggleFilter('channel')}
               onClose={() => setHeaderFilter(null)}
@@ -211,6 +214,18 @@ export function CustomerTable({
                   <div className="kh-name-text">
                     <div className="kh-name-row">
                       <strong>{c.fullName}</strong>
+                      <button
+                        type="button"
+                        className="kh-mini-icon rename"
+                        title="Sửa tên khách"
+                        aria-label={`Sửa tên ${c.fullName}`}
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          onRename?.(c);
+                        }}
+                      >
+                        <Icon icon={Pencil} size="mini" />
+                      </button>
                       {c.primaryPhone ? (
                         <button
                           type="button"

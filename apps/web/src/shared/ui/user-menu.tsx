@@ -9,6 +9,7 @@ type Props = {
   fullName: string;
   roleLabel: string;
   onLogout: () => void;
+  onOpenSettings?: () => void;
 };
 
 function initials(name: string): string {
@@ -18,7 +19,7 @@ function initials(name: string): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export function UserMenu({ fullName, roleLabel, onLogout }: Props) {
+export function UserMenu({ fullName, roleLabel, onLogout, onOpenSettings }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -55,6 +56,7 @@ export function UserMenu({ fullName, roleLabel, onLogout }: Props) {
             role="menuitem"
             onClick={() => {
               setOpen(false);
+              onOpenSettings?.();
             }}
           >
             <Icon icon={Settings} size="sm" /> Cài đặt

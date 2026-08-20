@@ -625,7 +625,10 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-19 | **Đặc tả list `/dich-vu-so-do`:** `domains/title-services.md` §12 — nguồn anhungland.com/dich-vu-so-do |
 | 2026-08-19 | **§12 chia máy tính / mobile trước**, rồi mới chi tiết thành phần — 4 domain list + skill `write-domain-doc` |
 | 2026-08-19 | **Mobile: ô nhập ≥ 16px** — tránh trình duyệt phóng to trang khi focus (iOS Safari) |
-| 2026-08-20 | Mini SĐT cạnh tên: xanh `#047857` khi đã có số (copy + tick); cam `#ea580c` khi chưa có (modal **Thêm số điện thoại**) |
+| 2026-08-20 | Mini SĐT cạnh tên: xanh `#047857` khi đã có số (copy + tick); cam `#ea580c` khi chưa có (modal **Thêm số điện thoại**; trùng → modal gộp/xác nhận) |
+| 2026-08-20 | Thêm khách bằng SĐT: hotline bắt buộc + tên + số + ghi chú; Cài đặt Quản lý SĐT |
+| 2026-08-20 | Sửa tên khách: bút Lucide trên máy tính |
+| 2026-08-20 | Lọc tài chính (chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ) + lọc kênh (page FB / hotline thật) |
 | 2026-08-20 | Form chăm sóc: trạng thái + nhu cầu + chip tài chính + ghi chú (modal PC / trang mobile) |
 | 2026-08-20 | Rail Nội dung chat: tin đã lưu + thumbnail ảnh; bấm ảnh → CrmDialog gallery (prev/next) |
 

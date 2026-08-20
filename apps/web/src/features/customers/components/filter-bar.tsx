@@ -1,10 +1,11 @@
 'use client';
 
 import { useRef } from 'react';
+import type { ColumnFilterOption } from '@/shared/ui/column-filter';
 import { Plus } from 'lucide-react';
 import { Icon } from '@/shared/ui/icon';
 import {
-  CHANNEL_FILTER_OPTIONS,
+  CHANNEL_ALL_OPTION,
   DEMAND_FILTER_OPTIONS,
   FINANCE_FILTER_OPTIONS,
   LODAT_FILTER_OPTIONS,
@@ -22,6 +23,7 @@ type Props = {
   onStatus: (v: string) => void;
   extra: ExtraFilters;
   onExtra: (next: ExtraFilters) => void;
+  channelOptions: ColumnFilterOption[];
   hasActiveFilters: boolean;
   onResetFilters: () => void;
 };
@@ -36,6 +38,7 @@ export function FilterBar({
   onStatus,
   extra,
   onExtra,
+  channelOptions,
   hasActiveFilters,
   onResetFilters,
 }: Props) {
@@ -112,7 +115,7 @@ export function FilterBar({
           onChange={(e) => onExtra({ ...extra, channel: e.target.value as ExtraFilters['channel'] })}
           aria-label="Lọc theo kênh liên hệ"
         >
-          {CHANNEL_FILTER_OPTIONS.map((opt) => (
+          { [CHANNEL_ALL_OPTION, ...channelOptions].map((opt) => (
             <option key={opt.value} value={opt.value}>
               {opt.label}
             </option>
