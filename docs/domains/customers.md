@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc; rail chat + ảnh (chưa deploy slice này)
+- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc, rail chat + ảnh
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -61,7 +61,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Hiện chỉ có / chưa nhập.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Hiện Facebook / SĐT / Page giả.
-21. **Rail Nội dung chat** — tin đã lưu + ảnh. Code sẵn; chưa deploy / chưa copy `imgsmessenger`. Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
+21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
 22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện list tĩnh.
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu).
 24. **Tải thêm ~50 dòng khi cuộn** + nhớ vị trí/lọc khi quay lại list.
@@ -450,7 +450,7 @@ Lúc freeze: **20 253** tin / **1 366** thread; **2 448** ảnh DB (1 68
 
 Script **chỉ đọc** SQLite + disk cũ. Không xóa file cũ. Ảnh chat = bucket public + CDN (cùng avatar; nhân viên đã login mới thấy rail). Hợp đồng / giấy tờ vẫn private bucket.
 
-Script: `pnpm chat:migrate-legacy`. **Chưa chạy staging.**
+Script: `pnpm chat:migrate-legacy`. **Xong staging (20 253/20 253 tin, 2 448/2 448 ảnh, 0 thiếu).**
 
 ---
 
