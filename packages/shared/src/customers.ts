@@ -38,6 +38,14 @@ export const customerCareNoteSchema = z.object({
 
 export type CustomerCareNote = z.infer<typeof customerCareNoteSchema>;
 
+export const customerSourceHotlineSchema = z.object({
+  id: z.string(),
+  phone: z.string(),
+  label: z.string(),
+});
+
+export type CustomerSourceHotline = z.infer<typeof customerSourceHotlineSchema>;
+
 export const customerListItemSchema = z.object({
   id: z.string(),
   employeeId: z.string(),
@@ -49,9 +57,14 @@ export const customerListItemSchema = z.object({
   note: z.string().nullable().optional(),
   isPinned: z.boolean(),
   isHidden: z.boolean(),
+  pinnedAt: z.string().nullable().optional(),
+  autoRestoredAt: z.string().nullable().optional(),
   primaryPhone: z.string().nullable().optional(),
   phones: z.array(customerPhoneSchema).default([]),
   facebook: customerFacebookSchema.nullable().optional(),
+  sourceHotline: customerSourceHotlineSchema.nullable().optional(),
+  /** Cột Nhu cầu = NeedSummary mới nhất (care). Chưa copy history → null. */
+  latestNeedSummary: z.string().nullable().optional(),
   latestCareNote: z.string().nullable().optional(),
   lodatCount: z.number().int().nonnegative().default(0),
   createdAt: z.string(),

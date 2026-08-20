@@ -12,7 +12,7 @@ import {
   type AuthUser,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
-import { isMockAuth, isMockMode } from '@/shared/api/mode';
+import { isMockCustomers } from '@/shared/api/mode';
 import { mockCustomers } from './mock-data';
 
 let mockStore: CustomerDetail[] = structuredClone(mockCustomers);
@@ -45,8 +45,6 @@ function currentMockUser(): AuthUser {
 }
 
 function visibleFor(user: AuthUser, items: CustomerDetail[]) {
-  // Real login + mock list: demo data is not keyed by new User ids yet.
-  if (isMockMode() && !isMockAuth()) return items;
   if (user.role === UserRole.ADMIN) return items;
   return items.filter((c) => c.employeeId === user.id);
 }
@@ -89,7 +87,7 @@ function applyQuery(
 export async function listCustomers(
   query: CustomerListQuery = {},
 ): Promise<CustomerListResponse> {
-  if (isMockMode()) {
+  if (isMockCustomers()) {
     const user = currentMockUser();
     const items = applyQuery(visibleFor(user, mockStore), query);
     return { items, total: items.length };
@@ -104,7 +102,7 @@ export async function listCustomers(
 }
 
 export async function getCustomer(id: string): Promise<CustomerDetail> {
-  if (isMockMode()) {
+  if (isMockCustomers()) {
     const user = currentMockUser();
     const found = visibleFor(user, mockStore).find((c) => c.id === id);
     if (!found) {
@@ -119,7 +117,7 @@ export async function createCustomer(
   input: CreateCustomerInput,
 ): Promise<CustomerDetail> {
   const parsed = createCustomerSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockCustomers()) {
     const user = currentMockUser();
     const now = new Date().toISOString();
     const created: CustomerDetail = {
@@ -155,7 +153,7 @@ export async function updateCustomer(
   id: string,
   input: UpdateCustomerInput,
 ): Promise<CustomerDetail> {
-  if (isMockMode()) {
+  if (isMockCustomers()) {
     const user = currentMockUser();
     const idx = mockStore.findIndex((c) => c.id === id);
     if (idx < 0) throw new Error('Không tìm thấy khách hàng');
@@ -182,7 +180,7 @@ export async function addCareNote(
   input: CreateCareNoteInput,
 ): Promise<CustomerDetail> {
   const parsed = createCareNoteSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockCustomers()) {
     const user = currentMockUser();
     const idx = mockStore.findIndex((c) => c.id === id);
     if (idx < 0) throw new Error('Không tìm thấy khách hàng');

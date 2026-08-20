@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for mock
+- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (chưa SĐT / FB / care)
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract hiện tại. Nest làm sau khi §12 ổn. Copy data: `MIGRATION.md` (khách cơ bản trước, bảng liên quan sau). Extension: có, phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Hiện: tên, trạng thái, tài chính, ghim/ẩn, hotline nguồn. Nhu cầu / SĐT / Facebook trống đến khi copy bảng phụ. Extension: phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -41,7 +41,7 @@ Hành vi đích = **§12**. Làm dần theo số.
 
 Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, thêm khách (tên + SĐT), rail 3 panel (dữ liệu tĩnh), menu 7 mục.
 
-1. **Dữ liệu thật** — API khách hàng + Postgres. Mock F5 là mất.
+1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim). Chưa SĐT / FB / nhu cầu.
 2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Hiện chỉ 1 ô ghi chú.
 3. **Double-click dòng (máy tính)** — mở modal chăm sóc.
 4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lô, lịch sử chăm sóc. Hiện placeholder.
