@@ -42,25 +42,39 @@
 
 Cột path ảnh cũ → field **`objectKey`** (key trong R2), không phải path local.
 
-Mỗi bước **một PR**. Có map ID rồi mới copy bảng phụ (FK trỏ id mới). Script **chỉ đọc** SQLite. Idempotent.
+Mỗi bước **một PR**. Script **chỉ đọc** SQLite. Idempotent.
+
+### Khóa — cái nào bắt buộc trước?
+
+| Cột trên khách | Loại khóa | Bắt buộc lúc tạo khách? |
+|----------------|-----------|-------------------------|
+| `id` | **PK** của khách | Tự sinh |
+| `employeeId` | **FK** → `User.id` | **Có** — chưa có User thì không insert được |
+| `sourceHotlineId` | **FK** → `EmployeeHotline.id`, **cho phép NULL** | **Không** — để trống rồi gắn sau được |
+
+`sourceHotlineId` **không phải PK**. Nó chỉ trỏ sang PK của bảng hotline. Postgres chặn khi ghi một id hotline **chưa tồn tại**; ghi `NULL` thì không sao.
+
+Vì vậy: tạo bảng hotline **sau** khách cũng được (đúng như đã làm: 1401 khách → 3 hotline → gắn 22 nguồn). Làm hotline trước chỉ tiện hơn nếu muốn ghi nguồn ngay lúc insert khách.
+
+Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** map `customer` — `customerId` của chúng là FK NOT NULL.
 
 ### Todo copy
 
 | # | Việc | Map entity | Script | Trạng thái |
 |---|------|------------|--------|------------|
 | 1 | `tblUsers` → `User` | `user` | `pnpm users:migrate-legacy` | Xong |
-| 2 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Xong staging (1401/1401, 2026-08-20) |
-| 3 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | — | Todo — cần map `customer` |
-| 4 | `tblPersonFacebook` metadata → `CustomerFacebook` | `customer_facebook` | — | Todo — cần map `customer`. Chưa file avatar |
-| 5 | `tblPersonCareHistory` → `CustomerCareNote` | `customer_care` | — | Todo — cần map `customer` + `user` |
-| 6 | `tblEmployeeHotline` → `EmployeeHotline`, rồi gắn `Customer.sourceHotlineId` | `employee_hotline` | — | Todo — cần map `user` + `customer` |
+| 2 | `tblEmployeeHotline` → `EmployeeHotline` + gắn `Customer.sourceHotlineId` | `employee_hotline` | `pnpm hotlines:migrate-legacy` | Xong staging (3 hotline, 22 khách có nguồn) |
+| 3 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Xong staging (1401/1401). Nguồn gắn ở bước 2 |
+| 4 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | — | Todo — cần map `customer` |
+| 5 | `tblPersonFacebook` metadata → `CustomerFacebook` | `customer_facebook` | — | Todo — cần map `customer`. Chưa file avatar |
+| 6 | `tblPersonCareHistory` → `CustomerCareNote` | `customer_care` | — | Todo — cần map `customer` + `user` |
 | 7 | `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` | `employee_facebook_profile` | — | Todo — cần map `user` |
 | 8 | Tin nhắn + ảnh chat + avatar → R2 | — | — | Todo sau |
 | 9 | Lô đất + `tblLodatPersonMap` | `lodat` | — | Todo — cần map `customer` |
 | 10 | Giao dịch | `transaction` | — | Todo |
 | 11 | Sổ đỏ | `title_service` | — | Todo |
 
-Slice 2 **không** copy SĐT, Facebook, lịch sử, hotline. `sourceHotlineId` để `null` đến bước 6.
+Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV **không** chặn `sourceHotlineId` — để bước 7.
 
 Freeze CRM cũ + tắt extension trước khi copy khách.
 

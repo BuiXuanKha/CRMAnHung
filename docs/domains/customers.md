@@ -314,19 +314,19 @@ Placeholder. Trang chăm sóc `/cham-soc` — form modal chăm sóc làm sau.
 
 ---
 
----
-
 ## 13. Copy dữ liệu
 
 Chi tiết thứ tự: [`MIGRATION.md`](../MIGRATION.md) — **một bảng / một PR**.
 
-### 13.1 Slice này — khách cơ bản
+### 13.1 Khách cơ bản — đã copy staging
 
 `tblPerson` → `Customer` + map entity `customer`.
 
 Copy: `employeeId` (qua map `user`), tên, trạng thái, tài chính (`BIGINT` — có khách 2,5 tỷ, vượt INT4), `note` (cột dư trên khách), ẩn, ghim + `pinnedAt`, `autoRestoredAt`, ngày tạo/sửa.
 
-**Không** copy: SĐT, Facebook, lịch sử chăm sóc, hotline (`sourceHotlineId` = null), tin nhắn, ảnh, lô.
+Lúc copy: `sourceHotlineId` = null (FK cho phép trống). Gắn nguồn ở **§13.3** sau khi có bảng hotline.
+
+**Không** copy cùng lúc: SĐT, Facebook, lịch sử chăm sóc, tin nhắn, ảnh, lô.
 
 ### 13.2 Đã chốt (2026-08-20)
 
@@ -340,11 +340,19 @@ Freeze: NV ngừng sửa CRM cũ; Extension tắt. Chỉ đọc SQLite.
 | Tự khôi phục | `AutoRestoredAtMs` → `autoRestoredAt`. |
 | `tblPerson.Note` | Cột dư. Copy vào `Customer.note` (5 khách lúc freeze). Cột Nhu cầu = lịch sử — **sau**. |
 | Trạng thái + tài chính | Snapshot trên khách. |
+| Hotline nguồn | Copy **hết** hotline (kể cả tắt) rồi gắn `sourceHotlineId`. 22 khách lúc freeze có nguồn. |
 | Trùng SĐT 2 NV | Giữ nguyên khi copy SĐT (todo). |
 | Đã gộp trên CRM cũ | Copy trạng thái hiện tại. |
 | Chạy lại script | Idempotent. |
 
-Lúc freeze: 1401 khách (292 ẩn, 16 ghim, 8 tự khôi phục).
+Lúc freeze: 1401 khách (292 ẩn, 16 ghim, 8 tự khôi phục), 3 hotline.
+
+### 13.3 Slice này — hotline nguồn
+
+`tblEmployeeHotline` → `EmployeeHotline` + map `employee_hotline`.  
+Rồi `tblPerson.SourceHotlineId` → `Customer.sourceHotlineId` (map hotline + map khách).
+
+`sourceHotlineId` là FK optional → copy hotline sau khách rồi UPDATE vẫn hợp lệ. Copy cả hotline tắt. Chưa copy profile Facebook NV.
 
 ---
 
