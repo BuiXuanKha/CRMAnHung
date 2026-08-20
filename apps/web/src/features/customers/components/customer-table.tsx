@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { MessageCircle, Phone } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { Check, MessageCircle, Phone } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
 import { ColumnFilter } from '@/shared/ui/column-filter';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -54,10 +54,41 @@ export function CustomerTable({
   onAction,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
+  const [copiedId, setCopiedId] = useState<string | null>(null);
+  const copyResetRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(
+    () => () => {
+      if (copyResetRef.current) clearTimeout(copyResetRef.current);
+    },
+    [],
+  );
 
   function toggleFilter(key: HeaderFilter) {
     setHeaderFilter((cur) => (cur === key ? null : key));
     onCloseMenu();
+  }
+
+  async function copyPhone(phone: string, id: string) {
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(phone);
+      } else {
+        const el = document.createElement('textarea');
+        el.value = phone;
+        el.style.position = 'fixed';
+        el.style.opacity = '0';
+        document.body.appendChild(el);
+        el.select();
+        document.execCommand('copy');
+        document.body.removeChild(el);
+      }
+      setCopiedId(id);
+      if (copyResetRef.current) clearTimeout(copyResetRef.current);
+      copyResetRef.current = setTimeout(() => setCopiedId(null), 1500);
+    } catch {
+      /* ignore copy failures */
+    }
   }
 
   return (
@@ -171,9 +202,27 @@ export function CustomerTable({
                     <div className="kh-name-row">
                       <strong>{c.fullName}</strong>
                       {c.primaryPhone ? (
-                        <span className="kh-mini-icon phone" title="Có số điện thoại">
-                          <Icon icon={Phone} size="mini" />
-                        </span>
+                        <button
+                          type="button"
+                          className="kh-mini-icon phone"
+                          title={
+                            copiedId === c.id
+                              ? 'Đã copy số điện thoại'
+                              : `Copy ${c.primaryPhone}`
+                          }
+                          aria-label={
+                            copiedId === c.id
+                              ? 'Đã copy số điện thoại'
+                              : `Copy số điện thoại ${c.primaryPhone}`
+                          }
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            const phone = c.primaryPhone;
+                            if (phone) void copyPhone(phone, c.id);
+                          }}
+                        >
+                          <Icon icon={copiedId === c.id ? Check : Phone} size="mini" />
+                        </button>
                       ) : null}
                       {c.facebook ? (
                         <span className="kh-mini-icon chat" title="Có Facebook">

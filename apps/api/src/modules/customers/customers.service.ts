@@ -16,7 +16,8 @@ const LIST_INCLUDE = {
   employee: { select: { fullName: true } },
   sourceHotline: { select: { id: true, phone: true, label: true } },
   facebook: true,
-} as const;
+  phones: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }] },
+} satisfies Prisma.CustomerInclude;
 
 type CustomerRow = Prisma.CustomerGetPayload<{ include: typeof LIST_INCLUDE }>;
 
@@ -80,6 +81,7 @@ export class CustomersService {
       where.OR = [
         { fullName: { contains: keyword, mode: 'insensitive' } },
         { note: { contains: keyword, mode: 'insensitive' } },
+        { phones: { some: { phone: { contains: keyword } } } },
       ];
     }
 
@@ -142,7 +144,7 @@ export class CustomersService {
 
   createNotReady(): never {
     throw new BadRequestException(
-      'Chưa thêm được khách bằng SĐT — chưa copy bảng số điện thoại.',
+      'Chưa thêm được khách bằng SĐT — form tạo (hotline, trùng số) làm sau.',
     );
   }
 
@@ -209,8 +211,12 @@ export class CustomersService {
       isHidden: row.isHidden,
       pinnedAt: toIso(row.pinnedAt),
       autoRestoredAt: toIso(row.autoRestoredAt),
-      primaryPhone: null,
-      phones: [],
+      primaryPhone: row.phones[0]?.phone ?? null,
+      phones: row.phones.map((p) => ({
+        id: p.id,
+        phone: p.phone,
+        label: p.label,
+      })),
       facebook,
       sourceHotline: row.sourceHotline
         ? {
