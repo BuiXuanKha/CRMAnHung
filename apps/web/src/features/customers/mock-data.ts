@@ -3,6 +3,7 @@ import {
   UserRole,
   type AuthUser,
   type CustomerDetail,
+  type CustomerMessengerMessage,
 } from '@crmanhung/shared';
 
 export const MOCK_STAFF: AuthUser = {
@@ -576,24 +577,47 @@ export const mockCustomers: CustomerDetail[] = [
   },
 ];
 
-export type MockChatMessage = {
-  id: string;
-  from: 'staff' | 'customer';
-  text: string;
-  at: string;
-};
-
-export const mockChats: Record<string, MockChatMessage[]> = {
+export const mockChats: Record<string, CustomerMessengerMessage[]> = {
   cus_moi_fb: [
-    { id: 'm1', from: 'customer', text: 'Anh ơi lô mặt tiền còn không?', at: '2026-08-16T09:40:00.000Z' },
-    { id: 'm2', from: 'staff', text: 'Em gửi ảnh và giá ạ, anh xem giúp.', at: '2026-08-16T09:42:00.000Z' },
+    {
+      id: 'm1',
+      sender: 'customer',
+      body: 'Anh ơi lô mặt tiền còn không?',
+      sortOrder: 0,
+      images: [],
+    },
+    {
+      id: 'm2',
+      sender: 'me',
+      body: 'Em gửi ảnh và giá ạ, anh xem giúp.',
+      sortOrder: 1,
+      images: [],
+    },
   ],
   cus_net_phones: [
-    { id: 'm3', from: 'staff', text: 'Chị Bích ơi, chủ nhật mình xem lô 38 nhé.', at: '2026-08-16T14:00:00.000Z' },
-    { id: 'm4', from: 'customer', text: 'Ok anh, 9h em ra.', at: '2026-08-16T14:05:00.000Z' },
+    {
+      id: 'm3',
+      sender: 'me',
+      body: 'Chị Bích ơi, chủ nhật mình xem lô 38 nhé.',
+      sortOrder: 0,
+      images: [],
+    },
+    {
+      id: 'm4',
+      sender: 'customer',
+      body: 'Ok anh, 9h em ra.',
+      sortOrder: 1,
+      images: [],
+    },
   ],
   cus_6: [
-    { id: 'm5', from: 'customer', text: 'Lô góc còn không anh?', at: '2026-08-11T10:00:00.000Z' },
+    {
+      id: 'm5',
+      sender: 'customer',
+      body: 'Lô góc còn không anh?',
+      sortOrder: 0,
+      images: [],
+    },
   ],
 };
 

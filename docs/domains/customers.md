@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu; form chăm sóc đã deploy
+- **Status:** Ready for API — list `/khach-hang` staging có kênh, avatar, SĐT, nhu cầu, form chăm sóc; rail chat + ảnh (chưa deploy slice này)
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh (hotline hoặc profile FB NV), avatar CDN, SĐT, nhu cầu. **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách trên khách; append `NeedSummary`/`Note` nếu khác lần gần nhất. Extension: phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (rail). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. Extension: phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -61,7 +61,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Hiện chỉ có / chưa nhập.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Hiện Facebook / SĐT / Page giả.
-21. **Mở chat** — tab Facebook Inbox (máy tính). Hiện chỉ mở rail, chat mock.
+21. **Rail Nội dung chat** — tin đã lưu + ảnh. Code sẵn; chưa deploy / chưa copy `imgsmessenger`. Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
 22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện list tĩnh.
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu).
 24. **Tải thêm ~50 dòng khi cuộn** + nhớ vị trí/lọc khi quay lại list.
@@ -187,7 +187,7 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 | Mục | Việc |
 |-----|------|
-| Mở chat | Có URL Inbox: tab Facebook messages |
+| Mở chat | Mở rail **Nội dung chat** (tin + ảnh đã lưu) |
 | Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid) |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat`. ADMIN: báo không được tạo |
@@ -207,6 +207,20 @@ Tổng N — hoặc Hiển thị n / Tổng N khi còn trang. Tải thêm ~50 d�
 
 Một panel: **Nội dung chat** (tin đã lưu) · **Lịch sử chăm sóc** · **Danh sách lô đất**.  
 Nhớ panel vừa mở (localStorage).
+
+##### Nội dung chat
+
+`GET /customers/:id/messages`. Ownership cùng GET khách.
+
+Thứ tự `SortOrder ASC, id ASC` (CRM cũ). Bong bóng: Khách / Tôi / Page / Không rõ.
+
+1. Meta `#n · người gửi`
+2. Chữ `MessageText`. Trống + có ảnh → `[Ảnh]`. Trống không ảnh → `—`
+3. Ảnh: thumbnail; bấm → gallery (CrmDialog, prev/next). `RotationDeg` chỉ xoay CSS — chưa lưu xoay mới.
+4. Chưa chọn khách → «Chọn một khách trên bảng để xem.»
+5. Không tin → «Không có tin nhắn trong bản quét này.»
+
+Ảnh = file `imgsmessenger` đã copy R2 public (CDN), không disk VPS. **Không** copy god-file gallery CRM cũ (zoom / kéo Zalo / lưu xoay — sau).
 
 ---
 
@@ -424,6 +438,19 @@ Script: `pnpm care:migrate-legacy`. **Xong staging (266/266 dòng, 237 khách).*
 - Chip tài chính: 4 khoảng + **Chưa xác định**. Khoảng lẻ (không khớp chip) hiện thêm 1 chip đúng số đang có — lưu không bị ghi đè chip chuẩn.
 
 Máy tính: double-click dòng / menu → CrmDialog. Điện thoại (`max-width: 767px`): `/khach-hang/[id]/cham-soc`. **Xong staging (2026-08-20).**
+
+### 13.9 Slice này — tin nhắn + ảnh chat
+
+`tblPersonMessenger` → `CustomerMessengerMessage` (map `customer_messenger`).  
+`tblPersonMessengerImages` + file disk `img/imgsmessenger` → R2 public `customers/chat/<personId>/<file>` + `CustomerMessengerImage.objectKey` (map `customer_messenger_image`).
+
+Cần map `customer_facebook` (PersonFacebookId) + `customer` (folder personId trên disk).
+
+Lúc freeze: **20 253** tin / **1 366** thread; **2 448** ảnh DB (1 685 tin có ảnh); disk **~418 MB / 2 454 file**. Sender: khách 7341 · unknown 5496 · page 4708 · tôi 2708. `RotationDeg` ≠ 0: **6**.
+
+Script **chỉ đọc** SQLite + disk cũ. Không xóa file cũ. Ảnh chat = bucket public + CDN (cùng avatar; nhân viên đã login mới thấy rail). Hợp đồng / giấy tờ vẫn private bucket.
+
+Script: `pnpm chat:migrate-legacy`. **Chưa chạy staging.**
 
 ---
 

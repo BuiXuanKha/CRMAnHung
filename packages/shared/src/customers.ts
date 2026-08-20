@@ -178,3 +178,37 @@ export const customerCareUpdateResultSchema = customerDetailSchema.extend({
 });
 
 export type CustomerCareUpdateResult = z.infer<typeof customerCareUpdateResultSchema>;
+
+export const CUSTOMER_MESSAGE_SENDERS = ['customer', 'me', 'page', 'unknown'] as const;
+export type CustomerMessageSender = (typeof CUSTOMER_MESSAGE_SENDERS)[number];
+
+export const CUSTOMER_MESSAGE_SENDER_LABELS: Record<CustomerMessageSender, string> = {
+  customer: 'Khách',
+  me: 'Tôi',
+  page: 'Page',
+  unknown: 'Không rõ',
+};
+
+export const customerMessengerImageSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  rotationDeg: z.number().int().default(0),
+});
+
+export type CustomerMessengerImage = z.infer<typeof customerMessengerImageSchema>;
+
+export const customerMessengerMessageSchema = z.object({
+  id: z.string(),
+  body: z.string().nullable(),
+  sender: z.enum(CUSTOMER_MESSAGE_SENDERS),
+  sortOrder: z.number().int(),
+  images: z.array(customerMessengerImageSchema).default([]),
+});
+
+export type CustomerMessengerMessage = z.infer<typeof customerMessengerMessageSchema>;
+
+export const customerMessengerThreadSchema = z.object({
+  messages: z.array(customerMessengerMessageSchema),
+});
+
+export type CustomerMessengerThread = z.infer<typeof customerMessengerThreadSchema>;

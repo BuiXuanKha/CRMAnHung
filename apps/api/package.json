@@ -20,6 +20,7 @@
     "avatars:migrate-legacy-r2": "tsx scripts/migrate-avatars-to-r2.ts",
     "phones:migrate-legacy": "tsx scripts/migrate-phones-from-legacy.ts",
     "care:migrate-legacy": "tsx scripts/migrate-care-from-legacy.ts",
+    "chat:migrate-legacy": "tsx scripts/migrate-chat-from-legacy.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

@@ -137,10 +137,79 @@
   border: 1px solid var(--kh-line);
 }
 
+.kh-chat li.me,
 .kh-chat li.staff {
   margin-left: auto;
   background: var(--kh-blue-100);
   border: 1px solid #bfdbfe;
+}
+
+.kh-chat li.page {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+}
+
+.kh-chat li.unknown {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+}
+
+.kh-chat-meta {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.kh-chat-imgs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.kh-chat-imgs button {
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  padding: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  cursor: pointer;
+  width: 72px;
+  height: 72px;
+}
+
+.kh-chat-imgs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.crm-dialog.kh-chat-gallery-dialog {
+  width: min(720px, 100%);
+}
+
+.kh-chat-gallery {
+  display: grid;
+  gap: 12px;
+}
+
+.kh-chat-gallery img {
+  width: 100%;
+  max-height: min(70vh, 520px);
+  object-fit: contain;
+  background: #0f172a;
+  border-radius: 8px;
+}
+
+.kh-chat-gallery-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.86rem;
+  color: #475569;
 }
 
 .kh-care li,

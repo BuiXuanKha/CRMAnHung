@@ -8,12 +8,13 @@ import {
   type CustomerListResponse,
   type UpdateCustomerCareInput,
   type UpdateCustomerInput,
+  type CustomerMessengerThread,
   UserRole,
   type AuthUser,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 import { isMockCustomers } from '@/shared/api/mode';
-import { mockCustomers } from './mock-data';
+import { mockChats, mockCustomers } from './mock-data';
 
 let mockStore: CustomerDetail[] = structuredClone(mockCustomers);
 
@@ -113,6 +114,20 @@ export async function getCustomer(id: string): Promise<CustomerDetail> {
     return found;
   }
   return apiFetch<CustomerDetail>(`/customers/${id}`);
+}
+
+export async function listCustomerMessages(
+  id: string,
+): Promise<CustomerMessengerThread> {
+  if (isMockCustomers()) {
+    const user = currentMockUser();
+    const found = visibleFor(user, mockStore).find((c) => c.id === id);
+    if (!found) {
+      throw new Error('Không tìm thấy khách hàng');
+    }
+    return { messages: mockChats[id] ?? [] };
+  }
+  return apiFetch<CustomerMessengerThread>(`/customers/${id}/messages`);
 }
 
 export async function createCustomer(

@@ -10,6 +10,7 @@ import {
   consumeCareToast,
   createCustomer,
   getCustomer,
+  listCustomerMessages,
   listCustomers,
   updateCustomer,
   updateCustomerCare,
@@ -92,6 +93,12 @@ export function CustomerListPage() {
     queryKey: ['customer', selectedId],
     queryFn: () => getCustomer(selectedId as string),
     enabled: Boolean(selectedId) && rail === 'care',
+  });
+
+  const thread = useQuery({
+    queryKey: ['customer-messages', selectedId],
+    queryFn: () => listCustomerMessages(selectedId as string),
+    enabled: Boolean(selectedId) && rail === 'chat',
   });
 
   const createMut = useMutation({
@@ -291,6 +298,8 @@ export function CustomerListPage() {
           onToggle={(key) => setRail((cur) => (cur === key ? null : key))}
           customer={selected}
           detail={detail.data ?? null}
+          messages={thread.data?.messages ?? []}
+          messagesLoading={thread.isLoading}
         />
       </div>
 

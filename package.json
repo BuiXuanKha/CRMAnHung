@@ -28,6 +28,7 @@
     "users:migrate-legacy": "pnpm --filter @crmanhung/api users:migrate-legacy",
     "phones:migrate-legacy": "pnpm --filter @crmanhung/api phones:migrate-legacy",
     "care:migrate-legacy": "pnpm --filter @crmanhung/api care:migrate-legacy",
+    "chat:migrate-legacy": "pnpm --filter @crmanhung/api chat:migrate-legacy",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "doctor": "node ./scripts/doctor.mjs"
