@@ -41,12 +41,14 @@ Hành vi đích = **§12**. Làm dần theo số.
 
 Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, thêm khách (tên + SĐT), rail 3 panel (dữ liệu tĩnh), menu 7 mục.
 
+**Lô đất — tạm dừng.** Chủ sẽ bàn thêm (nhiều vấn đề riêng). Không làm / không copy: tạo lô từ khách (6), rail lô (22), icon Map + đếm lô (23), gắn khách↔lô trên chi tiết. UI lô trên khách **giữ mock**. Domain `/lo-dat` làm sau khi chốt.
+
 1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim, kênh, avatar, SĐT, nhu cầu). Staging đã copy.
 2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Có trên staging (modal PC / trang mobile).
 3. **Double-click dòng (máy tính)** — mở modal chăm sóc. Có trên staging.
 4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lịch sử chăm sóc (API). Lô đất trên trang này **vẫn mock**.
 5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Có trên staging.
-6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. Hiện toast. ADMIN: không được tạo (ẩn / báo).
+6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. Hiện toast. **Tạm dừng** (bàn thêm).
 7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
@@ -62,8 +64,8 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Có trên staging.
 21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
-22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện list tĩnh.
-23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu).
+22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện mock. **Tạm dừng** (bàn thêm).
+23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu). **Tạm dừng** (bàn thêm).
 24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Chưa code.
 25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn.
 26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder P4.
