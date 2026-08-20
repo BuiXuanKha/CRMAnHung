@@ -1,6 +1,6 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsEnum, IsOptional, IsString } from 'class-validator';
-import { CustomerStatus } from '@crmanhung/shared';
+import { IsBoolean, IsIn, IsOptional, IsString } from 'class-validator';
+import { CUSTOMER_STATUSES, type CustomerStatusValue } from '../customer-status';
 
 function toOptionalBoolean(value: unknown): boolean | undefined {
   if (value === true || value === 'true' || value === '1') return true;
@@ -14,8 +14,8 @@ export class ListCustomersQueryDto {
   keyword?: string;
 
   @IsOptional()
-  @IsEnum(CustomerStatus)
-  status?: CustomerStatus;
+  @IsIn(CUSTOMER_STATUSES)
+  status?: CustomerStatusValue;
 
   @IsOptional()
   @Transform(({ value }) => toOptionalBoolean(value))

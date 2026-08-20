@@ -4,16 +4,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import {
-  CustomerStatus,
-  type CustomerDetail,
-  type CustomerListItem,
-  type CustomerListQuery,
-} from '@crmanhung/shared';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import type { UpdateCustomerDto } from './dto/update-customer.dto';
+import type { ListCustomersQueryDto } from './dto/list-customers-query.dto';
+import { CUSTOMER_STATUSES, type CustomerStatusValue } from './customer-status';
 
 const LIST_INCLUDE = {
   employee: { select: { fullName: true } },
@@ -22,7 +18,7 @@ const LIST_INCLUDE = {
 
 type CustomerRow = Prisma.CustomerGetPayload<{ include: typeof LIST_INCLUDE }>;
 
-const STATUS_VALUES = new Set<string>(Object.values(CustomerStatus));
+const STATUS_VALUES = new Set<string>(CUSTOMER_STATUSES);
 
 function toBudgetNumber(value: bigint | number | null | undefined): number | null {
   if (value == null) return null;
@@ -30,9 +26,9 @@ function toBudgetNumber(value: bigint | number | null | undefined): number | nul
   return Number.isFinite(n) ? n : null;
 }
 
-function toStatus(raw: string): CustomerStatus {
-  if (STATUS_VALUES.has(raw)) return raw as CustomerStatus;
-  return CustomerStatus.KHAC;
+function toStatus(raw: string): CustomerStatusValue {
+  if (STATUS_VALUES.has(raw)) return raw as CustomerStatusValue;
+  return 'KHAC';
 }
 
 function toIso(value: Date | null | undefined): string | null {
@@ -43,7 +39,7 @@ function toIso(value: Date | null | undefined): string | null {
 export class CustomersService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async list(user: RequestUser, query: CustomerListQuery) {
+  async list(user: RequestUser, query: ListCustomersQueryDto) {
     const where: Prisma.CustomerWhereInput = {};
 
     if (user.role !== 'ADMIN') {
@@ -82,7 +78,7 @@ export class CustomersService {
     return { items, total: items.length };
   }
 
-  async getById(user: RequestUser, id: string): Promise<CustomerDetail> {
+  async getById(user: RequestUser, id: string) {
     const row = await this.prisma.customer.findUnique({
       where: { id },
       include: LIST_INCLUDE,
@@ -98,7 +94,7 @@ export class CustomersService {
     user: RequestUser,
     id: string,
     dto: UpdateCustomerDto,
-  ): Promise<CustomerDetail> {
+  ) {
     const existing = await this.prisma.customer.findUnique({ where: { id } });
     if (!existing) {
       throw new NotFoundException('Không tìm thấy khách hàng');
@@ -141,7 +137,7 @@ export class CustomersService {
     }
   }
 
-  private toListItem(row: CustomerRow): CustomerListItem {
+  private toListItem(row: CustomerRow) {
     return {
       id: row.id,
       employeeId: row.employeeId,

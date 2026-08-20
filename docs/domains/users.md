@@ -1,7 +1,7 @@
 # Domain: Users (Đăng nhập / nhân viên)
 
 - **Slug:** `users`
-- **Status:** Ready for API — `/login` nối bảng User; list CRM vẫn mock
+- **Status:** Ready for API — `/login` nối bảng User; `/khach-hang` đọc khách đã copy
 - **Nguồn:** CRM cũ `/login` + quản trị user (đọc hiểu, không copy god-file)
 - **UI:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) login; shell avatar
 - **Contract:** `packages/shared/src/auth.ts`
