@@ -70,8 +70,10 @@ function applyQuery(
         c.primaryPhone ?? '',
         c.facebook?.facebookName ?? '',
         c.note ?? '',
+        c.latestNeedSummary ?? '',
         c.latestCareNote ?? '',
         ...c.phones.map((p) => p.phone),
+        ...c.careNotes.flatMap((n) => [n.note, n.needSummary ?? '']),
       ]
         .join(' ')
         .toLowerCase();

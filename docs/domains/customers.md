@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (kênh + avatar CDN + SĐT khi đã chạy script; chưa care)
+- **Status:** Ready for API — list `/khach-hang` đọc khách đã copy (kênh + avatar + SĐT + nhu cầu khi đã chạy script; form chăm sóc chưa)
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Hiện: tên, trạng thái, tài chính, ghim/ẩn, kênh (hotline hoặc profile FB NV), avatar CDN, SĐT (`primaryPhone` / `phones`) sau khi chạy `pnpm phones:migrate-legacy`. Nhu cầu trống đến khi copy lịch sử chăm sóc. Extension: phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. Hiện: tên, trạng thái, tài chính, ghim/ẩn, kênh (hotline hoặc profile FB NV), avatar CDN, SĐT (`primaryPhone` / `phones`) sau `pnpm phones:migrate-legacy`, nhu cầu (`latestNeedSummary`) sau `pnpm care:migrate-legacy`. Form cập nhật chăm sóc chưa. Extension: phase sau.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -41,7 +41,7 @@ Hành vi đích = **§12**. Làm dần theo số.
 
 Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, thêm khách (tên + SĐT), rail 3 panel (dữ liệu tĩnh), menu 7 mục.
 
-1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim, kênh, avatar). SĐT khi đã chạy `phones:migrate-legacy` (chưa deploy / chưa chạy staging). Chưa nhu cầu.
+1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim, kênh, avatar, SĐT, nhu cầu). Script SĐT / care sẵn — chưa deploy / chưa chạy staging.
 2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Hiện chỉ 1 ô ghi chú.
 3. **Double-click dòng (máy tính)** — mở modal chăm sóc.
 4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lô, lịch sử chăm sóc. Hiện placeholder.
@@ -57,8 +57,8 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT.
 15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ.
 16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách».
-17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care). Hiện lấy `Customer.note`.
-18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Hiện tìm nông (tên, SĐT, note hiện tại).
+17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care, không rỗng). Code sẵn; hiện sau `care:migrate-legacy`.
+18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Code sẵn; hiện sau khi copy care.
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Hiện chỉ có / chưa nhập.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Hiện Facebook / SĐT / Page giả.
 21. **Mở chat** — tab Facebook Inbox (máy tính). Hiện chỉ mở rail, chat mock.
@@ -380,6 +380,18 @@ Copy nguyên số + `sortOrder`. Số chính trên list = `ORDER BY sortOrder AS
 Máy tính: icon Phone **xanh** `#047857` → copy + tick ~1,5s. Điện thoại: `tel:` (đã có). **Không** nối icon cam / thêm khách bằng SĐT / xoá số (mục 10–11, 14–15).
 
 Script: `pnpm phones:migrate-legacy`. **Chưa chạy staging — chưa deploy.**
+
+### 13.7 Slice này — nhu cầu (lịch sử chăm sóc)
+
+`tblPersonCareHistory` → `CustomerCareNote` + map `customer_care`. Cần map `customer` + `user`.
+
+Lúc freeze: **266** dòng / **237** khách có lịch sử (215 một lần, 18 hai lần, 4 nhiều hơn). Mọi dòng đều có `NeedSummary` (max 94 ký tự). 86 dòng có `Note`. 0 NV trống. Bảng cũ **không** có cột ngân sách / Source trên history — ngân sách list vẫn lấy snapshot trên `Customer`.
+
+Cột Nhu cầu list = `NeedSummary` mới nhất **không rỗng** (`CreatedAtMs DESC, ID DESC`) — cùng CRM cũ. Ghi chú mới nhất (`Note`) → `latestCareNote` (rail). Ô tìm khớp mọi `NeedSummary` + `Note`.
+
+Rail **Lịch sử chăm sóc** đọc `GET /customers/:id` (nhu cầu + ghi chú). **Không** bật form cập nhật chăm sóc (mục 2).
+
+Script: `pnpm care:migrate-legacy`. **Chưa chạy staging — chưa deploy.**
 
 ---
 

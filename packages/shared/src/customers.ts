@@ -33,6 +33,7 @@ export type CustomerFacebookMeta = z.infer<typeof customerFacebookSchema>;
 export const customerCareNoteSchema = z.object({
   id: z.string(),
   note: z.string(),
+  needSummary: z.string().nullable().optional(),
   employeeId: z.string(),
   employeeName: z.string(),
   createdAt: z.string(),
@@ -77,7 +78,7 @@ export const customerListItemSchema = z.object({
   sourceHotline: customerSourceHotlineSchema.nullable().optional(),
   /** Profile/page NV quét khách — cột Kênh liên hệ khi không có hotline. */
   sourceFacebookProfile: customerSourceFacebookProfileSchema.nullable().optional(),
-  /** Cột Nhu cầu = NeedSummary mới nhất (care). Chưa copy history → null. */
+  /** Cột Nhu cầu = NeedSummary mới nhất (care, không rỗng). */
   latestNeedSummary: z.string().nullable().optional(),
   latestCareNote: z.string().nullable().optional(),
   lodatCount: z.number().int().nonnegative().default(0),
