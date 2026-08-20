@@ -49,7 +49,7 @@ Mỗi bước **một PR**. Có map ID rồi mới copy bảng phụ (FK trỏ i
 | # | Việc | Map entity | Script | Trạng thái |
 |---|------|------------|--------|------------|
 | 1 | `tblUsers` → `User` | `user` | `pnpm users:migrate-legacy` | Xong |
-| 2 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Slice này |
+| 2 | `tblPerson` cơ bản → `Customer` | `customer` | `pnpm customers:migrate-legacy` | Xong staging (1401/1401, 2026-08-20) |
 | 3 | `tblPersonPhone` → `CustomerPhone` | `customer_phone` | — | Todo — cần map `customer` |
 | 4 | `tblPersonFacebook` metadata → `CustomerFacebook` | `customer_facebook` | — | Todo — cần map `customer`. Chưa file avatar |
 | 5 | `tblPersonCareHistory` → `CustomerCareNote` | `customer_care` | — | Todo — cần map `customer` + `user` |
