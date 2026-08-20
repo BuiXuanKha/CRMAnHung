@@ -44,6 +44,28 @@ Cột path ảnh cũ → field **`objectKey`** (key trong R2), không phải pat
 
 Script migrate sẽ nằm tại `apps/api/scripts/migrate-from-legacy.ts` (implement ở giai đoạn P4): đọc SQLite + `img/` → ghi Postgres + `PutObject` R2.
 
+## Bảng map ID (không phải bảng nghiệp vụ)
+
+**Không** tạo bảng map trên SQLite CRM cũ. **Không** trộn vào schema `public` cùng `User` / `Customer`.
+
+Toàn bộ nhật ký copy ID để trong Postgres **schema `migrate`** (ví dụ `migrate.legacy_id_map`: entity, old_id, new_id, copied_at).
+
+Cách nhận ra 3–6 tháng sau: **mọi thứ trong schema `migrate` = bảng nháp copy**. App CRM không đọc schema này hàng ngày.
+
+### Khi nào xoá
+
+1. Bản mới chạy ổn (gợi ý **≥ 3 tháng** sau cutover).
+2. Không còn tra «ID cũ sang ID mới».
+3. Backup hệ cũ vẫn còn (tối thiểu 30 ngày; thực tế giữ đến lúc chắc).
+
+Trước khi xoá: `pg_dump` schema `migrate` ra file (cất cùng backup). Rồi:
+
+```sql
+DROP SCHEMA migrate CASCADE;
+```
+
+Chưa dump thì **không** DROP.
+
 ## Checklist cutover
 
 - [ ] Feature parity P1–P3
@@ -53,3 +75,4 @@ Script migrate sẽ nằm tại `apps/api/scripts/migrate-from-legacy.ts` (imple
 - [ ] Deploy crmanhung trên `anhungland.com` (CRM cũ giữ `crm`)
 - [ ] Chuyển nginx → crmanhung
 - [ ] Giữ backup hệ cũ tối thiểu 30 ngày
+- [ ] Schema `migrate` (bảng map ID) — giữ ≥ 3 tháng sau cutover; dump rồi mới `DROP SCHEMA migrate CASCADE` (xem mục trên)
