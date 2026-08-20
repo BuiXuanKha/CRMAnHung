@@ -1,5 +1,5 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsIn, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsIn, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
 import { CUSTOMER_STATUSES, type CustomerStatusValue } from '../customer-status';
 
 function toOptionalBoolean(value: unknown): boolean | undefined {
@@ -8,7 +8,14 @@ function toOptionalBoolean(value: unknown): boolean | undefined {
   return undefined;
 }
 
+function toOptionalInt(value: unknown): number | undefined {
+  if (value == null || value === '') return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.trunc(n) : undefined;
+}
+
 const BUDGET_FILTERS = ['none', 'has', 'lt_1b', '1b_2b', 'gt_2b'] as const;
+const NEED_FILTERS = ['has', 'empty'] as const;
 
 export class ListCustomersQueryDto {
   @IsOptional()
@@ -36,4 +43,21 @@ export class ListCustomersQueryDto {
   @IsOptional()
   @IsString()
   contactChannel?: string;
+
+  @IsOptional()
+  @IsIn(NEED_FILTERS)
+  needFilter?: (typeof NEED_FILTERS)[number];
+
+  @IsOptional()
+  @Transform(({ value }) => toOptionalInt(value))
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  limit?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => toOptionalInt(value))
+  @IsInt()
+  @Min(0)
+  offset?: number;
 }

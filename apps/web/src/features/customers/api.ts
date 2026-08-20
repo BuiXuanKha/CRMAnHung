@@ -114,6 +114,11 @@ function applyQuery(
   if (query.contactChannel) {
     next = next.filter((c) => matchesChannel(c, query.contactChannel ?? 'all'));
   }
+  if (query.needFilter === 'has') {
+    next = next.filter((c) => Boolean(c.latestNeedSummary?.trim()));
+  } else if (query.needFilter === 'empty') {
+    next = next.filter((c) => !c.latestNeedSummary?.trim());
+  }
   return [...next].sort((a, b) => {
     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
     return b.updatedAt.localeCompare(a.updatedAt);
@@ -126,7 +131,9 @@ export async function listCustomers(
   if (isMockCustomers()) {
     const user = currentMockUser();
     const items = applyQuery(visibleFor(user, mockStore), query);
-    return { items, total: items.length };
+    const offset = query.offset ?? 0;
+    const limit = query.limit ?? 50;
+    return { items: items.slice(offset, offset + limit), total: items.length };
   }
   const params = new URLSearchParams();
   if (query.keyword) params.set('keyword', query.keyword);
@@ -135,6 +142,9 @@ export async function listCustomers(
   if (query.hiddenOnly) params.set('hiddenOnly', 'true');
   if (query.budgetFilter) params.set('budgetFilter', query.budgetFilter);
   if (query.contactChannel) params.set('contactChannel', query.contactChannel);
+  if (query.needFilter) params.set('needFilter', query.needFilter);
+  if (query.limit != null) params.set('limit', String(query.limit));
+  if (query.offset != null) params.set('offset', String(query.offset));
   const qs = params.toString();
   return apiFetch<CustomerListResponse>(`/customers${qs ? `?${qs}` : ''}`);
 }

@@ -632,6 +632,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-20 | Form chăm sóc: trạng thái + nhu cầu + chip tài chính + ghi chú (modal PC / trang mobile) |
 | 2026-08-20 | Rail Nội dung chat: tin đã lưu + thumbnail ảnh; bấm ảnh → CrmDialog gallery (prev/next) |
 | 2026-08-20 | Chi tiết `/khach-hang/[id]`: hero + SĐT + tài chính + lịch sử; lô đất mock. Mobile bấm thẻ → trang này |
+| 2026-08-20 | List `/khach-hang`: lần đầu 50 dòng, cuộn gần đáy tải thêm 50; nhớ lọc/scroll khi vào chi tiết |
 | 2026-08-20 | Mục 24 list khách: tải 50 dòng khi cuộn + nhớ lọc/scroll (sessionStorage) — `customers.md` §12.1.5 |
 
 ---

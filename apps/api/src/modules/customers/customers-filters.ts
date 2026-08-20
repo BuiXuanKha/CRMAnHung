@@ -36,6 +36,21 @@ export function budgetFilterWhere(
   }
 }
 
+export function needFilterWhere(
+  key: string | undefined,
+): Prisma.CustomerWhereInput | null {
+  const hasNeed: Prisma.CustomerWhereInput = {
+    careNotes: {
+      some: {
+        AND: [{ needSummary: { not: null } }, { needSummary: { not: '' } }],
+      },
+    },
+  };
+  if (key === 'has') return hasNeed;
+  if (key === 'empty') return { NOT: hasNeed };
+  return null;
+}
+
 export function contactChannelWhere(
   raw: string | undefined,
 ): Prisma.CustomerWhereInput | null {

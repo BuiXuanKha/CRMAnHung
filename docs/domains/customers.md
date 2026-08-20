@@ -66,7 +66,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
 22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện mock. **Tạm dừng** (bàn thêm).
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu). **Tạm dừng** (bàn thêm).
-24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Chưa code.
+24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Đã code (list `limit`/`offset`).
 25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn.
 26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder P4.
 
@@ -537,7 +537,11 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 
 **Lô đất = mock** (`mockLodatsByCustomer`) — chưa copy map khách↔lô. Bấm thẻ mock → `/lo-dat/[id]` placeholder.
 
-Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **chưa code**.
+Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /customers?limit=50&offset=`).
+
+### 13.13 Slice này — list tải 50 dòng
+
+`GET /customers` nhận `limit` (mặc định 50, tối đa 200) + `offset`. `total` = COUNT cùng filter. UI: lần đầu 50; cuộn thân bảng/thẻ < 160px đáy thì nối thêm. Đổi tìm/lọc → offset 0. Rời sang chi tiết/chăm sóc: sessionStorage lọc + scroll; quay lại khôi phục (một lần). F5 / vào từ menu = mặc định.
 
 ---
 

@@ -1,10 +1,12 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
+  CUSTOMER_LIST_LOAD_MORE_PX,
+  CUSTOMER_LIST_PAGE_SIZE,
   CustomerStatus,
   type CreateCustomerInput,
   type CustomerListItem,
@@ -39,6 +41,15 @@ import { FilterBar } from './components/filter-bar';
 import { CustomerCardList } from './components/customer-card-list';
 import { RightRail, type RailKey } from './components/right-rail';
 import { applyExtraFilters, countCustomerStats, countMobileCustomerFilters, parseSearchKeyword, type ExtraFilters } from './display';
+import {
+  clearCustomerListState,
+  getActiveListScrollEl,
+  needsMoreListScrollHeight,
+  peekCustomerListState,
+  restoreListScroll,
+  saveCustomerListState,
+  type CustomerListSavedState,
+} from './list-state';
 import './customers.css';
 import './customers-table.css';
 import './customers-chrome.css';
@@ -103,22 +114,44 @@ export function CustomerListPage() {
   const [dupBusy, setDupBusy] = useState(false);
   const [dupError, setDupError] = useState<string | null>(null);
   const [hotlineOpen, setHotlineOpen] = useState(false);
+  const [restoreReady, setRestoreReady] = useState(false);
+  const [listConcealed, setListConcealed] = useState(false);
+  const restoreSnap = useRef<CustomerListSavedState | null>(null);
+  const restoreDone = useRef(false);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const cardsScrollRef = useRef<HTMLDivElement>(null);
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
     ...search,
     status: (status || undefined) as CustomerStatus | undefined,
-    budgetFilter:
-      extra.finance === 'all'
-        ? undefined
-        : extra.finance,
+    budgetFilter: extra.finance === 'all' ? undefined : extra.finance,
     contactChannel: extra.channel === 'all' ? undefined : extra.channel,
+    needFilter: extra.demand === 'all' ? undefined : extra.demand,
   };
 
-  const list = useQuery({
+  const list = useInfiniteQuery({
     queryKey: ['customers', listQuery],
-    queryFn: () => listCustomers(listQuery),
+    queryFn: ({ pageParam }) =>
+      listCustomers({
+        ...listQuery,
+        limit: CUSTOMER_LIST_PAGE_SIZE,
+        offset: pageParam,
+      }),
+    initialPageParam: 0,
+    enabled: restoreReady,
+    getNextPageParam: (lastPage, allPages) => {
+      const loaded = allPages.reduce((n, page) => n + page.items.length, 0);
+      if (loaded >= lastPage.total || lastPage.items.length === 0) return undefined;
+      return loaded;
+    },
   });
+
+  const items = useMemo(
+    () => applyExtraFilters(list.data?.pages.flatMap((page) => page.items) ?? [], extra),
+    [list.data?.pages, extra],
+  );
+  const total = list.data?.pages[0]?.total ?? 0;
 
   const channels = useQuery({
     queryKey: ['contact-channels'],
@@ -131,14 +164,9 @@ export function CustomerListPage() {
     enabled: addOpen || hotlineOpen,
   });
 
-  const filtered = useMemo(
-    () => applyExtraFilters(list.data?.items ?? [], extra),
-    [list.data?.items, extra],
-  );
-
-  const selected = filtered.find((c) => c.id === selectedId) ?? null;
+  const selected = items.find((c) => c.id === selectedId) ?? null;
   const mobileFilterCount = countMobileCustomerFilters(status, extra);
-  const stats = useMemo(() => countCustomerStats(filtered), [filtered]);
+  const stats = useMemo(() => countCustomerStats(items), [items]);
   const channelOptions = useMemo(
     () =>
       (channels.data?.items ?? []).map((item) => ({
@@ -160,6 +188,11 @@ export function CustomerListPage() {
     enabled: Boolean(selectedId) && rail === 'chat',
   });
 
+  function flash(msg: string) {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2800);
+  }
+
   const createMut = useMutation({
     mutationFn: (input: CreateCustomerInput) => createCustomer(input),
     onSuccess: async (created) => {
@@ -172,10 +205,94 @@ export function CustomerListPage() {
     },
   });
 
-  function flash(msg: string) {
-    setToast(msg);
-    window.setTimeout(() => setToast(null), 2800);
+  useLayoutEffect(() => {
+    const snap = peekCustomerListState();
+    restoreSnap.current = snap;
+    if (snap) {
+      setKeyword(snap.searchKeyword);
+      setStatus(snap.statusFilter);
+      setExtra(snap.extra);
+      setSelectedId(snap.selectedId);
+      setListConcealed(true);
+    }
+    setRestoreReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!listConcealed) return undefined;
+    const timer = window.setTimeout(() => {
+      restoreDone.current = true;
+      restoreSnap.current = null;
+      clearCustomerListState();
+      setListConcealed(false);
+    }, 4000);
+    return () => window.clearTimeout(timer);
+  }, [listConcealed]);
+
+  function getListScrollEl() {
+    return getActiveListScrollEl(tableScrollRef.current, cardsScrollRef.current);
   }
+
+  function loadMoreIfNearEnd() {
+    if (!list.hasNextPage || list.isFetchingNextPage || list.isLoading) return;
+    const root = getListScrollEl();
+    if (!root) return;
+    const nearBottom =
+      root.scrollHeight - root.scrollTop - root.clientHeight < CUSTOMER_LIST_LOAD_MORE_PX;
+    const notScrollable = root.scrollHeight <= root.clientHeight + 2;
+    if (nearBottom || notScrollable) {
+      void list.fetchNextPage();
+    }
+  }
+
+  useLayoutEffect(() => {
+    if (!restoreReady || list.isLoading || list.isFetchingNextPage) return;
+    if (restoreDone.current) return;
+    const snap = restoreSnap.current;
+    if (!snap) {
+      restoreDone.current = true;
+      return;
+    }
+    if (items.length === 0) {
+      restoreDone.current = true;
+      restoreSnap.current = null;
+      clearCustomerListState();
+      setListConcealed(false);
+      return;
+    }
+    const root = getListScrollEl();
+    if (items.length < total && needsMoreListScrollHeight(root, snap.scrollTop)) {
+      if (list.hasNextPage) {
+        void list.fetchNextPage();
+        return;
+      }
+    }
+    restoreListScroll(root, snap);
+    restoreDone.current = true;
+    restoreSnap.current = null;
+    clearCustomerListState();
+    setListConcealed(false);
+  }, [restoreReady, items.length, total, list.isLoading, list.isFetchingNextPage, list.hasNextPage]);
+
+  useEffect(() => {
+    if (!restoreReady || listConcealed || list.isLoading) return;
+    loadMoreIfNearEnd();
+  }, [restoreReady, listConcealed, list.isLoading, items.length, list.hasNextPage]);
+
+  function saveListBeforeLeave(selectedOverride?: string | null) {
+    saveCustomerListState(getListScrollEl(), {
+      searchKeyword: keyword,
+      statusFilter: status,
+      extra,
+      selectedId: selectedOverride ?? selectedId,
+    });
+  }
+
+  useEffect(() => {
+    if (!restoreReady || restoreSnap.current) return;
+    const root = getListScrollEl();
+    if (root) root.scrollTop = 0;
+  }, [keyword, status, extra.finance, extra.channel, extra.demand, extra.lodat, restoreReady]);
 
   useEffect(() => {
     const msg = consumeCareToast();
@@ -192,6 +309,7 @@ export function CustomerListPage() {
   function selectCustomer(id: string) {
     setSelectedId(id);
     if (isMobileList()) {
+      saveListBeforeLeave(id);
       router.push(`/khach-hang/${id}`);
     }
   }
@@ -199,6 +317,7 @@ export function CustomerListPage() {
   function openCareEdit(customer: CustomerListItem) {
     if (customer.isHidden) return;
     if (isMobileList()) {
+      saveListBeforeLeave(customer.id);
       router.push(`/khach-hang/${customer.id}/cham-soc`);
       return;
     }
@@ -245,6 +364,7 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'sodo') {
+      saveListBeforeLeave(customer.id);
       router.push('/dich-vu-so-do');
       return;
     }
@@ -382,7 +502,7 @@ export function CustomerListPage() {
     <div className="kh-page">
       <div className={`kh-s32${rail ? ' is-rail-open' : ''}`}>
         {/* §3.2.1 */}
-        <div className="kh-s321">
+        <div className={`kh-s321${listConcealed ? ' is-restoring' : ''}`}>
           {/* §3.2.1.1 */}
           <section className="kh-s3211" aria-label="Tìm kiếm và lọc">
             <FilterBar
@@ -404,17 +524,18 @@ export function CustomerListPage() {
             />
           </section>
 
-          {list.isLoading ? <p className="kh-status">Đang tải danh sách…</p> : null}
+          {!restoreReady || list.isLoading ? <p className="kh-status">Đang tải danh sách…</p> : null}
           {list.error ? (
             <p className="kh-status error">{(list.error as Error).message}</p>
           ) : null}
 
           {/* §3.2.1.2 */}
-          {!list.isLoading && !list.error ? (
+          {restoreReady && !list.isLoading && !list.error ? (
             <section className="kh-s3212" aria-label="Danh sách khách hàng">
               <CustomerTable
-                items={filtered}
-                total={list.data?.total ?? filtered.length}
+                items={items}
+                total={total}
+                loadingMore={list.isFetchingNextPage}
                 selectedId={selectedId}
                 menuId={menuId}
                 status={status}
@@ -431,14 +552,17 @@ export function CustomerListPage() {
                 onAddPhone={(c) => openAddPhone(c)}
                 onRename={(c) => openRename(c)}
                 channelOptions={channelOptions}
+                scrollRef={tableScrollRef}
+                onScroll={loadMoreIfNearEnd}
               />
             </section>
           ) : null}
 
-          {!list.isLoading && !list.error ? (
+          {restoreReady && !list.isLoading && !list.error ? (
             <CustomerCardList
-              items={filtered}
-              total={list.data?.total ?? filtered.length}
+              items={items}
+              total={total}
+              loadingMore={list.isFetchingNextPage}
               selectedId={selectedId}
               menuId={menuId}
               stats={stats}
@@ -450,6 +574,8 @@ export function CustomerListPage() {
               }}
               onAdd={() => setAddOpen(true)}
               onAddPhone={(c) => openAddPhone(c)}
+              scrollRef={cardsScrollRef}
+              onScroll={loadMoreIfNearEnd}
             />
           ) : null}
         </div>

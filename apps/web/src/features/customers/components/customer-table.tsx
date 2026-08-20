@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type Ref } from 'react';
 import { Check, MessageCircle, Pencil, Phone } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
 import { ColumnFilter, type ColumnFilterOption } from '@/shared/ui/column-filter';
@@ -26,6 +26,7 @@ type HeaderFilter = 'name' | 'demand' | 'finance' | 'channel' | 'lodat' | null;
 type Props = {
   items: CustomerListItem[];
   total: number;
+  loadingMore?: boolean;
   selectedId: string | null;
   menuId: string | null;
   status: string;
@@ -40,11 +41,14 @@ type Props = {
   onAddPhone?: (customer: CustomerListItem) => void;
   onRename?: (customer: CustomerListItem) => void;
   channelOptions: ColumnFilterOption[];
+  scrollRef?: Ref<HTMLDivElement>;
+  onScroll?: () => void;
 };
 
 export function CustomerTable({
   items,
   total,
+  loadingMore = false,
   selectedId,
   menuId,
   status,
@@ -59,6 +63,8 @@ export function CustomerTable({
   onAddPhone,
   onRename,
   channelOptions,
+  scrollRef,
+  onScroll,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -172,7 +178,12 @@ export function CustomerTable({
         </div>
       </div>
 
-      <div className="kh-table-scroll" role="rowgroup">
+      <div
+        className="kh-table-scroll"
+        role="rowgroup"
+        ref={scrollRef}
+        onScroll={onScroll}
+      >
         {items.length === 0 ? (
           <div className="kh-empty" role="row">
             Không có khách hàng phù hợp.
@@ -182,6 +193,7 @@ export function CustomerTable({
             <div
               key={c.id}
               role="row"
+              data-customer-row-id={c.id}
               className={[
                 'kh-grid-row',
                 c.isPinned ? 'is-hot' : '',
@@ -309,7 +321,16 @@ export function CustomerTable({
       </div>
 
       <div className="kh-table-foot">
-        Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> khách hàng
+        {items.length < total ? (
+          <>
+            Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> khách hàng
+            {loadingMore ? ' — Đang tải thêm…' : ''}
+          </>
+        ) : (
+          <>
+            Tổng <strong>{total}</strong> khách hàng
+          </>
+        )}
       </div>
     </div>
   );

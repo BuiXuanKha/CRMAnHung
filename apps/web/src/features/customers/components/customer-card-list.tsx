@@ -1,5 +1,6 @@
 'use client';
 
+import type { Ref } from 'react';
 import { Map, MessageCircle, Phone, Plus, SquarePen } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -17,6 +18,7 @@ import { ActionMenu, type CustomerAction } from './action-menu';
 type Props = {
   items: CustomerListItem[];
   total: number;
+  loadingMore?: boolean;
   selectedId: string | null;
   menuId: string | null;
   stats: { KN: number; KM: number; CCS: number; KH: number; pinned: number };
@@ -26,11 +28,14 @@ type Props = {
   onAction: (customer: CustomerListItem, action: CustomerAction) => void;
   onAdd: () => void;
   onAddPhone?: (customer: CustomerListItem) => void;
+  scrollRef?: Ref<HTMLDivElement>;
+  onScroll?: () => void;
 };
 
 export function CustomerCardList({
   items,
   total,
+  loadingMore = false,
   selectedId,
   menuId,
   stats,
@@ -40,10 +45,18 @@ export function CustomerCardList({
   onAction,
   onAdd,
   onAddPhone,
+  scrollRef,
+  onScroll,
 }: Props) {
   return (
     <div className="kh-cards-shell">
-      <div className="kh-cards" role="list" aria-label="Danh sách khách hàng">
+      <div
+        className="kh-cards"
+        role="list"
+        aria-label="Danh sách khách hàng"
+        ref={scrollRef}
+        onScroll={onScroll}
+      >
         {items.length === 0 ? (
           <p className="kh-empty">Không có khách hàng phù hợp.</p>
         ) : (
@@ -54,6 +67,7 @@ export function CustomerCardList({
               <article
                 key={c.id}
                 role="listitem"
+                data-customer-row-id={c.id}
                 className={[
                   'kh-card',
                   selectedId === c.id ? 'is-selected' : '',
@@ -150,6 +164,7 @@ export function CustomerCardList({
           <strong>
             {items.length}
             {total > items.length ? ` / ${total}` : ''}
+            {loadingMore ? '…' : ''}
           </strong>
         </span>
         <span>
