@@ -218,7 +218,7 @@ Ghim: nền vàng. Đang chọn: highlight. Đã xoá: hàng kiểu ẩn.
 
 **Nhớ vị trí + lọc khi rời list**
 
-Lưu **sessionStorage** (theo tab; đóng tab thì mất) ngay trước khi rời `/khach-hang`:
+Lưu **sessionStorage** (theo tab; đóng tab thì mất):
 
 | Lưu | Gồm |
 |-----|-----|
@@ -226,15 +226,15 @@ Lưu **sessionStorage** (theo tab; đóng tab thì mất) ngay trước khi rờ
 | Chọn | `selectedId` đang chọn |
 | Cuộn | `scrollTop` của thân list + `anchorId` = id dòng đầu tiên còn thấy |
 
-Khi nào lưu: bấm thẻ mobile → chi tiết; vào `/cham-soc`; vào `/lo-dat/[id]` từ rail; tạo lô / sổ đỏ từ menu.
+**Khi nào lưu:** đổi lọc; cuộn; rời `/khach-hang` mọi lối (thẻ chi tiết, chăm sóc, sổ đỏ, menu header, Back, F5).
 
-Khi **quay lại list** (Back / link «Danh sách khách»):
+Khi **vào lại list** (Back, «Danh sách khách», menu Quản lý khách hàng, F5 cùng tab):
 
 1. Khôi phục đúng bộ lọc đã lưu, rồi gọi API với bộ lọc đó (`offset=0`, `limit=50`).
 2. Nếu `scrollTop` đã lưu **cao hơn** chiều cao list hiện có → **tải thêm 50** (lặp) cho đến khi đủ chiều cao hoặc hết `total`.
 3. Đặt lại `scrollTop` (và chọn lại `selectedId` nếu dòng còn trong kết quả).
 4. Trong lúc khôi phục: **không** nháy về đầu trang (che list ngắn; timeout an toàn ~4s).
-5. Snapshot dùng **một lần** rồi xóa. F5 / mở `/khach-hang` mới từ menu = list mặc định, không restore.
+5. Giữ snapshot trong tab cho lần vào sau. Đăng xuất thì xóa.
 
 Máy tính và điện thoại **cùng quy tắc**. Ô cuộn: bảng (PC) hoặc danh sách thẻ (mobile).
 
@@ -541,7 +541,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 
 ### 13.13 Slice này — list tải 50 dòng
 
-`GET /customers` nhận `limit` (mặc định 50, tối đa 200) + `offset`. `total` = COUNT cùng filter. UI: lần đầu 50; cuộn thân bảng/thẻ < 160px đáy thì nối thêm. Đổi tìm/lọc → offset 0. Rời sang chi tiết/chăm sóc: sessionStorage lọc + scroll; quay lại khôi phục (một lần). F5 / vào từ menu = mặc định.
+`GET /customers` nhận `limit` (mặc định 50, tối đa 200) + `offset`. `total` = COUNT cùng filter. UI: lần đầu 50; cuộn thân bảng/thẻ < 160px đáy thì nối thêm. Đổi tìm/lọc → offset 0. Lọc + vị trí cuộn giữ trong sessionStorage khi rời list (chi tiết, menu, Back, F5 cùng tab); đăng xuất thì xóa.
 
 ---
 

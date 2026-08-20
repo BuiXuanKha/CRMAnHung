@@ -42,7 +42,6 @@ import { CustomerCardList } from './components/customer-card-list';
 import { RightRail, type RailKey } from './components/right-rail';
 import { applyExtraFilters, countCustomerStats, countMobileCustomerFilters, parseSearchKeyword, type ExtraFilters } from './display';
 import {
-  clearCustomerListState,
   getActiveListScrollEl,
   needsMoreListScrollHeight,
   peekCustomerListState,
@@ -120,6 +119,18 @@ export function CustomerListPage() {
   const restoreDone = useRef(false);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const cardsScrollRef = useRef<HTMLDivElement>(null);
+  const persistRef = useRef({
+    searchKeyword: keyword,
+    statusFilter: status,
+    extra,
+    selectedId,
+  });
+  persistRef.current = {
+    searchKeyword: keyword,
+    statusFilter: status,
+    extra,
+    selectedId,
+  };
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
@@ -223,7 +234,6 @@ export function CustomerListPage() {
     const timer = window.setTimeout(() => {
       restoreDone.current = true;
       restoreSnap.current = null;
-      clearCustomerListState();
       setListConcealed(false);
     }, 4000);
     return () => window.clearTimeout(timer);
@@ -231,6 +241,14 @@ export function CustomerListPage() {
 
   function getListScrollEl() {
     return getActiveListScrollEl(tableScrollRef.current, cardsScrollRef.current);
+  }
+
+  function persistListState(selectedOverride?: string | null) {
+    if (!restoreDone.current) return;
+    saveCustomerListState(getListScrollEl(), {
+      ...persistRef.current,
+      selectedId: selectedOverride ?? persistRef.current.selectedId,
+    });
   }
 
   function loadMoreIfNearEnd() {
@@ -245,6 +263,11 @@ export function CustomerListPage() {
     }
   }
 
+  function onListScroll() {
+    loadMoreIfNearEnd();
+    persistListState();
+  }
+
   useLayoutEffect(() => {
     if (!restoreReady || list.isLoading || list.isFetchingNextPage) return;
     if (restoreDone.current) return;
@@ -256,7 +279,6 @@ export function CustomerListPage() {
     if (items.length === 0) {
       restoreDone.current = true;
       restoreSnap.current = null;
-      clearCustomerListState();
       setListConcealed(false);
       return;
     }
@@ -270,7 +292,6 @@ export function CustomerListPage() {
     restoreListScroll(root, snap);
     restoreDone.current = true;
     restoreSnap.current = null;
-    clearCustomerListState();
     setListConcealed(false);
   }, [restoreReady, items.length, total, list.isLoading, list.isFetchingNextPage, list.hasNextPage]);
 
@@ -280,19 +301,31 @@ export function CustomerListPage() {
   }, [restoreReady, listConcealed, list.isLoading, items.length, list.hasNextPage]);
 
   function saveListBeforeLeave(selectedOverride?: string | null) {
-    saveCustomerListState(getListScrollEl(), {
-      searchKeyword: keyword,
-      statusFilter: status,
-      extra,
-      selectedId: selectedOverride ?? selectedId,
-    });
+    restoreDone.current = true;
+    persistListState(selectedOverride);
   }
 
-  useEffect(() => {
-    if (!restoreReady || restoreSnap.current) return;
+  useLayoutEffect(() => {
+    if (!restoreReady || restoreSnap.current || !restoreDone.current) return;
     const root = getListScrollEl();
     if (root) root.scrollTop = 0;
   }, [keyword, status, extra.finance, extra.channel, extra.demand, extra.lodat, restoreReady]);
+
+  useEffect(() => {
+    if (!restoreReady || listConcealed || !restoreDone.current) return;
+    persistListState();
+  }, [keyword, status, extra, selectedId, restoreReady, listConcealed]);
+
+  useEffect(() => {
+    function persist() {
+      persistListState();
+    }
+    window.addEventListener('pagehide', persist);
+    return () => {
+      persist();
+      window.removeEventListener('pagehide', persist);
+    };
+  }, []);
 
   useEffect(() => {
     const msg = consumeCareToast();
@@ -553,7 +586,7 @@ export function CustomerListPage() {
                 onRename={(c) => openRename(c)}
                 channelOptions={channelOptions}
                 scrollRef={tableScrollRef}
-                onScroll={loadMoreIfNearEnd}
+                onScroll={onListScroll}
               />
             </section>
           ) : null}
@@ -575,7 +608,7 @@ export function CustomerListPage() {
               onAdd={() => setAddOpen(true)}
               onAddPhone={(c) => openAddPhone(c)}
               scrollRef={cardsScrollRef}
-              onScroll={loadMoreIfNearEnd}
+              onScroll={onListScroll}
             />
           ) : null}
         </div>
