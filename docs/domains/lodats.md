@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Draft — đã chốt kho dự án trỏ + ảnh theo dự án/ảnh lô thường + quyền đổi chủ theo NV; **chưa bàn** phần list ADMIN
+- **Status:** Draft — model STAFF đã chốt; lịch DB §13; **chưa bàn** list ADMIN
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (list mock — sẽ chỉnh khi model chốt)
