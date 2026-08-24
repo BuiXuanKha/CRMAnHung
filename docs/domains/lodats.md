@@ -101,8 +101,8 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 | Nguồn | Ai | Ghi chú |
 |-------|----|---------|
 | Ảnh **dự án** (trên địa chỉ PROJECT) | Chỉ **Admin** thêm/sửa/xoá | Mọi lô thuộc dự án A (tức `Lodat` trỏ `ProjectLot` của A) đều hiển thị **ảnh chung** của dự án A |
-| Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | NV thêm/cập nhật ảnh riêng cho lô đất thường; có thể gỡ/bổ sung theo quyền |
-| Ảnh riêng cho **lô dự án** | (không áp dụng giai đoạn này) | Chỉ hiển thị ảnh dự án (không có ảnh lô riêng cho phần trỏ kho) |
+| Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng **hoặc** gắn path ảnh chat (reuse file, không nhân bản) |
+| Ảnh riêng cho **lô dự án** (theo luồng NV) | NV gắn khi tạo/sửa lô trong luồng mình | Giống CRM cũ: ghép **ảnh dự án** + **ảnh riêng thửa** trên `Lodat` stream; messenger = reuse objectKey chat |
 
 Hangtag Nhà/Đất trên list = trục khác (nhà vs đất trống), **không** phải dự án vs dân. Copy data: chưa chốt.
 
@@ -350,7 +350,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **7** | Sửa schema **`Lodat` + `LodatCustomerMap`** | List `/lo-dat` đọc Lodat + map | Cùng migration `20260824120000` |
 | **8** | Copy **lô dân** `tblLodats` REGULAR → `Lodat` + map | List dân | 1 lodat cũ + maps |
 | **9** | Copy **map NV–khách** PROJECT: mỗi map active → 1 `Lodat` trỏ `ProjectLot` + `LodatCustomerMap` | Luồng độc lập theo NV | Cũ: 1 `tblLodats` + nhiều map. Mới: nhiều `Lodat` cùng `projectLotId` |
-| **10** | Copy **ảnh lô dân** → R2 + `LodatImage` | Ảnh dự án đã ở bước 2 | Lô dự án **không** copy ảnh lô riêng (chốt: chỉ ảnh dự án) |
+| **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | REGULAR: `/img/lodats` + reuse messenger; PROJECT: ảnh riêng thửa → Lodat stream (`pnpm lodats:migrate-images-supplement`) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | Lọc luồng `createdBy = NV`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | Form + picker địa chỉ bước 3 |
 | **13** | Đổi chủ trong luồng NV + ảnh lô dân (upload) | Đã chốt quyền | Chi tiết `/lo-dat/[id]` còn placeholder — làm đủ để đổi chủ |

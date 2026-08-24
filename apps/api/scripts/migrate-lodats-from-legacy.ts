@@ -7,7 +7,8 @@
  *   - `lodat` — REGULAR: old_id = tblLodats.ID
  *                PROJECT stream: old_id = `p:{lodatId}:{employeeId}`
  *   - `lodat_customer_map` — old_id = tblLodatPersonMap.ID
- *   - `lodat_image` — old_id = tblLodatImages.ID (chỉ REGULAR)
+ *   - `lodat_image` — old_id = tblLodatImages.ID (REGULAR `/img/lodats` only trong script này)
+ *     Messenger + ảnh riêng PROJECT: `pnpm lodats:migrate-images-supplement`
  *
  * Needs: `user`, `customer`, `address`, `project_lot`.
  * Giữ luồng NV (kha / buinam) — createdBy từ map/lodat cũ, không gán admin.

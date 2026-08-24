@@ -35,7 +35,9 @@
 | `tblLodats` (Address PROJECT) | `ProjectLot` (kho) |
 | `tblLodats` (Address REGULAR) + maps | `Lodat` + `LodatCustomerMap` |
 | `tblLodatPersonMap` trên lô PROJECT | Mỗi map → `Lodat` (trỏ `projectLotId`) + `LodatCustomerMap` |
-| `tblLodatImages` (chỉ lô dân) | `LodatImage` (`objectKey`) |
+| `tblLodatImages` REGULAR (`/img/lodats`) | `LodatImage` (`objectKey` `lodats/…`) |
+| `tblLodatImages` path `imgsmessenger` | `LodatImage` reuse `customers/chat/…` (không copy file lần 2) |
+| `tblLodatImages` trên lô PROJECT | `LodatImage` trên Lodat stream NV (ảnh riêng thửa) |
 | `tblAddresses` + admin units | `Address`, `Province`, `District`, `Ward` |
 | `tblTransaction*` | `Transaction*` |
 | `tblTitleService*` | `TitleService*` |
@@ -77,7 +79,8 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 10a | Tỉnh / Huyện / Xã `tblAddr*` | `province`, `district`, `ward` | `pnpm addresses:migrate-legacy` | Xong staging (1 tỉnh, 1 huyện, 23 xã) |
 | 10b | `tblAddresses` + ảnh dự án R2 | `address`, `address_image` | `pnpm addresses:migrate-legacy` | Xong staging (110 địa chỉ, 9 ảnh) |
 | 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
-| 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Todo — chạy VPS; PROJECT stream `p:{lodatId}:{empId}`; giữ kha/buinam; `SKIP_LODAT_IMAGES=1` nếu chỉ text |
+| 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân `/img/lodats` R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Xong staging: Lodat 182, map 190, ảnh 217/322 path lodats (thiếu messenger + PROJECT → 10e) |
+| 10e | Ảnh messenger lô dân + ảnh riêng thửa PROJECT | `lodat_image` | `pnpm lodats:migrate-images-supplement` | Todo — reuse R2 chat; PROJECT → stream `p:{id}:{emp}`; ~105 + ~81 |
 | 11 | Giao dịch | `transaction` | — | Todo |
 | 12 | Sổ đỏ | `title_service` | — | Todo |
 

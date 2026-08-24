@@ -98,8 +98,8 @@ Mới (chốt `lodats.md` §0.4):
 | `tblLodats` + Address `PROJECT` | **`ProjectLot`** (1:1), kể cả chưa có chủ |
 | Mỗi **luồng** NV trên lô PROJECT (`LodatId`+`CreatedByEmployeeId`) | **`Lodat`** (trỏ `projectLotId`) + mọi map của luồng → `LodatCustomerMap` |
 | `tblLodats` + Address `REGULAR` | **`Lodat`** (tự DT/MT) + maps |
-| `tblLodatImages` trên PROJECT | **Không copy** (chỉ ảnh dự án trên Address) |
-| `tblLodatImages` trên REGULAR | R2 + `LodatImage` |
+| `tblLodatImages` trên PROJECT | `LodatImage` trên **Lodat stream** `p:{lodatId}:{CreatedByEmployeeId}` (ảnh riêng thửa; ảnh dự án vẫn ở Address) |
+| `tblLodatImages` trên REGULAR | `LodatImage`: `/img/lodats` → R2 `lodats/…`; path `imgsmessenger` → **reuse** objectKey `customers/chat/…` (không nhân bản file) |
 
 **Cấm** copy 1:1 toàn bộ `tblLodats` → `Lodat` (phá model pointer + nhân bản kho).
 
