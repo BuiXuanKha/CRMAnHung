@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Draft — đã chốt kho dự án trỏ + ảnh theo dự án/ảnh lô thường + quyền đổi chủ theo NV; còn chờ quyết định hiển thị list ADMIN
+- **Status:** Draft — đã chốt kho dự án trỏ + ảnh theo dự án/ảnh lô thường + quyền đổi chủ theo NV; **chưa bàn** phần list ADMIN
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (list mock — sẽ chỉnh khi model chốt)
@@ -154,9 +154,9 @@ Quyền đã siết so với cũ: **chỉ Admin** tạo địa chỉ và import 
 
 Đã chốt: 4 cấp địa chỉ; nhiều NV / nhiều chủ độc lập trên cùng dòng kho; **`Lodat` trỏ `ProjectLot`**, không copy DT/MT (§0.4). Admin xoá kho khi còn NV đang trỏ = **cấm**.
 
-Tạm hoãn (chủ chưa trả lời):
+Tạm hoãn (chưa bàn):
 
-1. List **ADMIN** `/lo-dat`: hiển thị **tách theo NV/luồng** hay **gộp** thành 1 dòng cho mỗi LK12?
+1. List **ADMIN** `/lo-dat`: hiển thị theo cách nào (tách theo NV/luồng hay gộp theo LK12)? — **chờ bàn sau**.
 
 Nhẹ hơn (mặc định nếu không bác): hangtag Nhà/Đất copy = `DAT`; số lô trùng trong kho = cấm; admin được bổ sung lô vào dự án đã import; `DAT_COC`/`DA_BAN` cũ giữ khi copy, list chỉ hiện Mở bán/Tạm dừng. Giá `BIGINT`; hoa hồng chữ.
 
