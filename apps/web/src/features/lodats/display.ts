@@ -1,9 +1,16 @@
 import { LodatKind, LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
 import type { BadgeTone } from '@/shared/ui/badge';
 
-export function formatPriceVnd(n?: number | null): string {
-  if (n == null) return '—';
-  return `${n.toLocaleString('vi-VN')} đ`;
+function toPriceNumber(n?: number | string | null): number | null {
+  if (n == null || n === '') return null;
+  const v = typeof n === 'string' ? Number(n) : n;
+  return Number.isFinite(v) ? v : null;
+}
+
+export function formatPriceVnd(n?: number | string | null): string {
+  const v = toPriceNumber(n);
+  if (v == null) return '—';
+  return `${v.toLocaleString('vi-VN')} đ`;
 }
 
 export function formatArea(n?: number | null): string {
@@ -118,8 +125,11 @@ export function applyPriceBracket(
   return items.filter((p) => matchesPriceBracket(p.priceVnd, bracket));
 }
 
-function matchesPriceBracket(price: number | null | undefined, bracket: PriceBracket): boolean {
-  const n = price == null ? null : price;
+function matchesPriceBracket(
+  price: number | string | null | undefined,
+  bracket: PriceBracket,
+): boolean {
+  const n = toPriceNumber(price);
   if (bracket === 'no_price') return n == null || n <= 0;
   if (n == null || n <= 0) return false;
   if (bracket === 'lt_500m') return n > 0 && n < 500_000_000;
