@@ -71,11 +71,15 @@ export class AddressesService {
       province?: { name: string; isHidden: boolean } | null;
       district?: { name: string; isHidden: boolean } | null;
       ward?: { name: string; isHidden: boolean } | null;
-      _count?: { lodats: number; images: number };
+      _count?: { lodats: number; images: number; projectLots?: number };
       images?: { objectKey: string }[];
     },
   ) {
     const coverKey = row.images?.[0]?.objectKey ?? null;
+    const isProject = row.kind === 'PROJECT';
+    const lodatCount = isProject
+      ? (row._count?.projectLots ?? 0)
+      : (row._count?.lodats ?? 0);
     return {
       id: row.id,
       kind: row.kind as 'REGULAR' | 'PROJECT',
@@ -88,7 +92,7 @@ export class AddressesService {
       district: row.district && !row.district.isHidden ? row.district.name : null,
       ward: row.ward && !row.ward.isHidden ? row.ward.name : null,
       isHidden: row.isHidden,
-      lodatCount: row._count?.lodats ?? 0,
+      lodatCount,
       imageCount: row._count?.images ?? 0,
       coverImageUrl: this.publicUrl(coverKey),
       createdAt: row.createdAt.toISOString(),
@@ -122,7 +126,7 @@ export class AddressesService {
         province: true,
         district: true,
         ward: true,
-        _count: { select: { lodats: true, images: true } },
+        _count: { select: { lodats: true, images: true, projectLots: true } },
         images: {
           orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
           take: 1,
@@ -144,7 +148,7 @@ export class AddressesService {
         province: true,
         district: true,
         ward: true,
-        _count: { select: { lodats: true, images: true } },
+        _count: { select: { lodats: true, images: true, projectLots: true } },
         images: {
           orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
         },
@@ -184,7 +188,7 @@ export class AddressesService {
         province: true,
         district: true,
         ward: true,
-        _count: { select: { lodats: true, images: true } },
+        _count: { select: { lodats: true, images: true, projectLots: true } },
         images: { take: 1, select: { objectKey: true } },
       },
     });
@@ -243,7 +247,7 @@ export class AddressesService {
         province: true,
         district: true,
         ward: true,
-        _count: { select: { lodats: true, images: true } },
+        _count: { select: { lodats: true, images: true, projectLots: true } },
         images: {
           orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
           take: 1,
@@ -265,7 +269,7 @@ export class AddressesService {
         province: true,
         district: true,
         ward: true,
-        _count: { select: { lodats: true, images: true } },
+        _count: { select: { lodats: true, images: true, projectLots: true } },
         images: { take: 1, select: { objectKey: true } },
       },
     });

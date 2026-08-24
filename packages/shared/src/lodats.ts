@@ -21,14 +21,18 @@ export const lodatListItemSchema = z.object({
   areaM2: z.number().nullable().optional(),
   frontageM: z.number().nullable().optional(),
   direction: z.string().nullable().optional(),
-  priceVnd: z.number().int().nullable().optional(),
+  /** Giá trên map — DB BigInt; JSON number hoặc string */
+  priceVnd: z.union([z.number(), z.string()]).nullable().optional(),
   priceNote: z.string().nullable().optional(),
+  brokerFeeNote: z.string().nullable().optional(),
   commissionPercent: z.number().nullable().optional(),
   kind: z.nativeEnum(LodatKind),
   status: lodatListingStatusSchema,
   coverImageUrl: z.string().nullable().optional(),
   extraPhotoCount: z.number().int().nonnegative().default(0),
   customerHint: z.string().nullable().optional(),
+  /** Có projectLotId = lô dự án (trỏ kho); không = đất dân */
+  projectLotId: z.string().nullable().optional(),
   updatedAt: z.string(),
 });
 

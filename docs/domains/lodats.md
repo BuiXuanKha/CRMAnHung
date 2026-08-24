@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Draft — model STAFF đã chốt; lịch DB §13; **chưa bàn** list ADMIN
+- **Status:** Draft — schema `ProjectLot`/`Lodat`/map đã align; lịch copy §13; **chưa bàn** list ADMIN
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (list mock — sẽ chỉnh khi model chốt)
@@ -316,7 +316,7 @@ Placeholder: tên lô + quay lại. Ảnh / chủ / ghi chú — sau.
 
 ## 13. Lịch làm — thứ tự DB (STAFF trước)
 
-**Có: phải có sổ địa chỉ trước lô.** Prisma đang có stub `Province` / `Address` / `Lodat` — **chưa khớp** model đã chốt (thiếu `ProjectLot`, map chủ sai UNIQUE, giá `Int`, không FK ward).
+**Có: phải có sổ địa chỉ trước lô.** Prisma: `ProjectLot` + `Lodat`/`LodatCustomerMap` đã align (`20260824120000`). Copy kho / map / ảnh dân còn Todo (skill `migrate-legacy-data`).
 
 Khách (`Customer`) **đã có** — map chủ mới gắn được.
 
@@ -341,13 +341,13 @@ Map chủ (giá, mở bán, lịch sử)
 
 | # | Việc | Vì sao thứ tự này | Ghi chú Prisma / copy |
 |---|------|-------------------|------------------------|
-| **1** | Sửa schema **Tỉnh / Huyện / Xã** + copy từ `tblAddr*` | Address bắt buộc `wardId` | Schema đã align (`20260824100000`). **Copy data** còn Todo |
-| **2** | Sửa schema **Address** + **AddressImage** chỉ PROJECT | NV chọn địa chỉ khi tạo lô | Schema + API + UI Admin **đã có**. Copy `tblAddresses` còn Todo |
-| **3** | UI + API **sổ địa chỉ (Admin)** + picker (STAFF đọc) | Không có sổ thì không tạo/gắn lô | **Done** — `/cai-dat/dia-chi` + `AddressPicker` |
-| **4** | Schema **`ProjectLot`** (kho: số lô, DT, MT, hướng, `addressId` PROJECT) | Lodat dự án **trỏ** kho, không copy | Bảng mới — stub hiện không có |
-| **5** | Admin **import/sửa kho** trên địa chỉ dự án | Kho phải có sẵn trước khi NV gắn chủ | Excel như CRM cũ |
-| **6** | Copy **lô PROJECT** cũ `tblLodats` → `ProjectLot` | Data kho thật | 1 dòng `tblLodats` PROJECT = 1 `ProjectLot` |
-| **7** | Sửa schema **`Lodat` + `LodatCustomerMap`** | List `/lo-dat` đọc Lodat + map | Bỏ `isForSale` trên Lodat; giá `BigInt` trên map; `isActive` + `endedAt`; **bỏ** UNIQUE(lodat, customer) — đổi chủ cần nhiều dòng; thêm `createdByEmployeeId`; dân: DT/MT trên Lodat; dự án: `projectLotId` NOT NULL, không lưu DT/MT |
+| **1** | Sửa schema **Tỉnh / Huyện / Xã** + copy từ `tblAddr*` | Address bắt buộc `wardId` | Schema + copy **xong staging** |
+| **2** | Sửa schema **Address** + **AddressImage** chỉ PROJECT | NV chọn địa chỉ khi tạo lô | Schema + API + UI + copy **xong staging** |
+| **3** | UI + API **sổ địa chỉ (Admin)** + picker (STAFF đọc) | Không có sổ thì không tạo/gắn lô | **Done** |
+| **4** | Schema **`ProjectLot`** (kho: số lô, DT, MT, hướng, `addressId` PROJECT) | Lodat dự án **trỏ** kho, không copy | Migration `20260824120000` |
+| **5** | Admin **import/sửa kho** trên địa chỉ dự án | Kho phải có sẵn trước khi NV gắn chủ | Todo |
+| **6** | Copy **lô PROJECT** cũ `tblLodats` → `ProjectLot` | Data kho thật | Todo — ~3608 dòng |
+| **7** | Sửa schema **`Lodat` + `LodatCustomerMap`** | List `/lo-dat` đọc Lodat + map | Cùng migration `20260824120000` |
 | **8** | Copy **lô dân** `tblLodats` REGULAR → `Lodat` + map | List dân | 1 lodat cũ + maps |
 | **9** | Copy **map NV–khách** PROJECT: mỗi map active → 1 `Lodat` trỏ `ProjectLot` + `LodatCustomerMap` | Luồng độc lập theo NV | Cũ: 1 `tblLodats` + nhiều map. Mới: nhiều `Lodat` cùng `projectLotId` |
 | **10** | Copy **ảnh lô dân** → R2 + `LodatImage` | Ảnh dự án đã ở bước 2 | Lô dự án **không** copy ảnh lô riêng (chốt: chỉ ảnh dự án) |

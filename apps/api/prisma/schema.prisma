@@ -29,6 +29,9 @@ model User {
   createdDistricts  District[]             @relation("DistrictCreator")
   createdWards      Ward[]                 @relation("WardCreator")
   createdAddresses  Address[]              @relation("AddressCreator")
+  createdProjectLots ProjectLot[]          @relation("ProjectLotCreator")
+  createdLodats     Lodat[]                @relation("LodatCreator")
+  createdLodatMaps  LodatCustomerMap[]     @relation("LodatMapCreator")
 }
 
 model RefreshToken {
@@ -260,8 +263,9 @@ model Address {
   district  District       @relation(fields: [districtId], references: [id])
   ward      Ward           @relation(fields: [wardId], references: [id])
   createdBy User?          @relation("AddressCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
-  lodats    Lodat[]
-  images    AddressImage[]
+  lodats      Lodat[]
+  projectLots ProjectLot[]
+  images      AddressImage[]
 
   @@index([kind])
   @@index([provinceId])
@@ -282,59 +286,106 @@ model AddressImage {
   @@index([addressId, sortOrder])
 }
 
-/// Lô đất
-model Lodat {
-  id         String   @id @default(cuid())
-  title      String
-  areaM2     Float?
-  frontageM  Float?
-  direction  String?
-  note       String?
-  addressId  String?
-  isForSale  Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+/// Kho lô dự án — Admin import/sửa. STAFF chỉ trỏ qua Lodat.projectLotId.
+model ProjectLot {
+  id                  String   @id @default(cuid())
+  addressId           String
+  title               String
+  areaM2              Float?
+  frontageM           Float?
+  direction           String?
+  note                String?
+  isHidden            Boolean  @default(false)
+  createdByEmployeeId String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  address Address?           @relation(fields: [addressId], references: [id])
-  images  LodatImage[]
-  maps    LodatCustomerMap[]
+  address   Address @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  createdBy User?   @relation("ProjectLotCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+  lodats    Lodat[]
+
+  @@index([addressId])
+  @@index([isHidden])
+  @@index([title])
+}
+
+/// Lô trên /lo-dat: dân (addressId + DT/MT) hoặc dự án (projectLotId trỏ kho).
+model Lodat {
+  id                  String   @id @default(cuid())
+  /// REGULAR: tiêu đề NV đặt. PROJECT: null — đọc từ ProjectLot.title
+  title               String?
+  areaM2              Float?
+  frontageM           Float?
+  direction           String?
+  note                String?
+  /// REGULAR: bắt buộc. PROJECT: null (địa chỉ qua ProjectLot)
+  addressId           String?
+  /// PROJECT: bắt buộc. REGULAR: null
+  projectLotId        String?
+  /// Hangtag Nhà/Đất (web mới) — mặc định DAT khi copy
+  propertyKind        String   @default("DAT") // NHA | DAT
+  createdByEmployeeId String
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  address    Address?           @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  projectLot ProjectLot?        @relation(fields: [projectLotId], references: [id], onDelete: Restrict)
+  createdBy  User               @relation("LodatCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+  images     LodatImage[]
+  maps       LodatCustomerMap[]
+
+  @@index([addressId])
+  @@index([projectLotId])
+  @@index([createdByEmployeeId])
+  @@index([propertyKind])
 }
 
 model LodatImage {
   id        String   @id @default(cuid())
   lodatId   String
-  objectKey  String
+  objectKey String
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 
   lodat Lodat @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+
+  @@index([lodatId, sortOrder])
 }
 
 model LodatTempImage {
   id        String   @id @default(cuid())
   sessionId String
-  objectKey  String
+  objectKey String
   createdAt DateTime @default(now())
 
   @@index([sessionId])
 }
 
+/// Map NV–khách–lô: giá, mở bán, lịch sử chủ (isActive / endedAt).
 model LodatCustomerMap {
-  id         String   @id @default(cuid())
-  lodatId    String
-  customerId String
-  priceVnd   Int?
-  status     String   @default("DANG_BAN")
-  note       String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                  String    @id @default(cuid())
+  lodatId             String
+  customerId          String
+  priceVnd            BigInt?
+  priceNote           String?
+  brokerFeeNote       String?
+  status              String    @default("TAM_DUNG") // DANG_BAN | TAM_DUNG | DAT_COC | DA_BAN
+  note                String?
+  isActive            Boolean   @default(true)
+  endedAt             DateTime?
+  createdByEmployeeId String?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  lodat    Lodat     @relation(fields: [lodatId], references: [id], onDelete: Cascade)
-  customer Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  lodat     Lodat     @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+  customer  Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  createdBy User?     @relation("LodatMapCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
   transactions Transaction[]
 
-  @@unique([lodatId, customerId])
+  @@index([lodatId, isActive])
   @@index([customerId])
+  @@index([createdByEmployeeId])
+  @@index([status])
 }
 
 model Transaction {
