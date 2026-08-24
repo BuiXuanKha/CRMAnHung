@@ -27,7 +27,7 @@ Hai loại địa chỉ (`kind`):
 | Loại | `kind` | Cấp 4 (`detail`) | Ảnh trên địa chỉ | Lô gắn vào |
 |------|--------|------------------|------------------|------------|
 | Đất dân | `REGULAR` | Thôn / tổ — tuỳ chọn | **Không** | NV tạo thửa dân |
-| Dự án | `PROJECT` | Tên dự án — bắt buộc | **Có** — chỉ Admin | Kho lô admin import |
+| Dự án | `PROJECT` | Tên dự án — bắt buộc | **Có** — chỉ Admin | Admin import `ProjectLot`; NV tạo `Lodat` **trỏ** kho |
 
 **4 cấp như DB cũ (chốt 2026-08-24):**
 
@@ -52,9 +52,11 @@ Hai loại địa chỉ (`kind`):
 
 ## 5. Quan hệ dữ liệu
 
-- 1 địa chỉ → nhiều lô (`Lodat.addressId`).
-- Xoá mềm địa chỉ (`isHidden`); không cascade xoá lô (`ON DELETE SET NULL` — lô mới nên **bắt buộc** địa chỉ lúc tạo).
-- Ảnh dự án: `AddressImage.objectKey` (R2). Không có `AddressImage` cho `REGULAR`.
+- 1 địa chỉ dự án → nhiều `ProjectLot` (kho).
+- 1 `ProjectLot` → nhiều `Lodat` (mỗi NV một luồng khi gắn chủ).
+- 1 địa chỉ đất dân → nhiều `Lodat` dân (`projectLotId` trống).
+- Xoá mềm địa chỉ (`isHidden`); không cascade xoá lô. Lô mới **bắt buộc** địa chỉ lúc tạo (dân: trên `Lodat`; dự án: trên `ProjectLot`).
+- Ảnh dự án: `AddressImage.objectKey` (R2). Không có ảnh địa chỉ cho `REGULAR`.
 
 Ownership: sổ **dùng chung** toàn công ty (không theo NV).
 

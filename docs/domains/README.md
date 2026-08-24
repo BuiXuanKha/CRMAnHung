@@ -6,7 +6,7 @@
 |--------|------|--------|
 | Users (login) | [users.md](./users.md) | Ready for API — `/login` = bảng User; `/khach-hang` = API khách |
 | Customers | [customers.md](./customers.md) | Ready for API — list + chi tiết `[id]` (lô đất trên chi tiết vẫn mock) |
-| Lodats | [lodats.md](./lodats.md) | Draft — 4 cấp chốt; đang bàn lô kho dùng chung vs luồng NV |
+| Lodats | [lodats.md](./lodats.md) | Draft — chốt `Lodat` trỏ `ProjectLot`; còn ảnh lô / đổi chủ |
 | Addresses | [addresses.md](./addresses.md) | Draft — 4 cấp như DB cũ; Admin tạo sổ |
 | Transactions | [transactions.md](./transactions.md) | Ready for mock — §12 list `/giao-dich` |
 | Title services | [title-services.md](./title-services.md) | Ready for mock — §12 list `/dich-vu-so-do` |

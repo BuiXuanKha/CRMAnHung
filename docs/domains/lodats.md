@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Draft — 4 cấp địa chỉ đã chốt; đang bàn kho dự án dùng chung vs luồng NV
+- **Status:** Draft — đã chốt 2 bảng (lô + kho dự án, trỏ); còn ảnh lô / quyền đổi chủ
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (list mock — sẽ chỉnh khi model chốt)
@@ -14,9 +14,10 @@
 ## 0. Model 3 lớp (chốt 2026-08-24)
 
 ```
-① Sổ địa chỉ     — Admin tạo trước. STAFF chỉ chọn.
-② Thửa đất       — Kho dự án (admin) hoặc đất dân (NV tạo từ khách).
-③ Rao bán / chủ  — Map NV–khách–lô: giá, mở bán, chủ hiện tại. Đổi chủ = đóng map cũ, mở map mới.
+① Sổ địa chỉ          — Admin tạo trước. STAFF chỉ chọn.
+②a Kho lô dự án       — ProjectLot: số lô, DT, MT, hướng. Chỉ Admin.
+②b Bảng lô đất        — Lodat: lô dân (tự có thông số) hoặc lô dự án (trỏ ②a).
+③ Rao bán / chủ       — Map NV–khách–lô: giá, mở bán, chủ. Đổi chủ trong luồng NV.
 ```
 
 Chi tiết địa chỉ: [`addresses.md`](./addresses.md).
@@ -63,35 +64,35 @@ Lô **đất dân** không dùng chung kho: thửa do NV tạo, NV khác không 
 
 Trong **một luồng NV**, chủ có thể chuyển nhượng (đóng map cũ, mở map mới). Giá/trạng thái map mới: như CRM cũ — `TAM_DUNG`, giá trống (chốt lại nếu muốn copy giá).
 
-### 0.4 Kho vs lô của NV — trỏ, không copy (đề xuất, chờ chủ)
+### 0.4 Hai bảng lô — trỏ kho, không copy (chốt)
 
-Bạn gợi ý: bảng kho dự án riêng; NV gắn chủ thì **copy** sang bảng lô.
+Đúng như chủ mô tả:
 
-Hai cách:
-
-| | **Copy** (gợi ý ban đầu) | **Trỏ kho** (đề xuất) |
-|--|--------------------------|------------------------|
-| NV gắn chủ LK12 | Nhân bản DT/MT/tên vào bảng lô | Tạo luồng NV, `projectLotId` → LK12 |
-| Admin sửa DT kho 80 → 82 | Bản copy của A và B **cũ** (lệch) | A và B **cùng thấy 82** |
-| Đếm số lô trong dự án | Dễ đếm nhầm (2 copy = 2 LK12) | Đếm bảng kho = 1 |
-| Đổi chủ | Sửa copy hoặc copy thêm | Chỉ đóng/mở map trong luồng NV |
-| Ảnh dự án | Phải nhớ lấy từ kho, không từ copy | Luôn từ địa chỉ/kho |
-
-**Đề xuất:** tách **bảng kho dự án** (đúng ý bạn) nhưng NV gắn chủ thì **trỏ**, không nhân bản thông số.
+- **`ProjectLot`** (lô đất dự án / kho): thông số cơ bản do **Admin** nhập (số lô, DT, MT, hướng, ghi chú, `addressId` dự án). Admin thêm / sửa / xoá kho. Sửa DT trên kho → **mọi** `Lodat` đang trỏ sang đều thấy số mới (JOIN, không nhân bản).
+- **`Lodat`** (bảng lô đất, `/lo-dat`): gồm **lô dân** và **lô dự án**.
+  - Lô dân: tự lưu tiêu đề, DT, MT, hướng, `addressId` đất dân. `projectLotId` trống.
+  - Lô dự án: `projectLotId` trỏ `ProjectLot`. **Không** lưu lại DT/MT/số lô. Đọc từ kho.
 
 ```
-Address (dự án)
-  └── ProjectLot     kho — LK12, DT, MT, hướng (admin)
-        └── Lodat    lô của NV — chỉ với dự án: projectLotId + người tạo
-              └── Map chủ  khách / giá / mở bán / lịch sử đổi chủ
-Address (đất dân)
-  └── Lodat          NV tạo thẳng, không qua kho
+Address PROJECT
+  └── ProjectLot          kho — LK12, 82 m² (admin)
+        └── Lodat         lô dự án của NV A — chỉ projectLotId
+        └── Lodat         lô dự án của NV B — cùng projectLotId
+              └── Map chủ
+Address REGULAR
+  └── Lodat               lô dân — tự có DT/MT
         └── Map chủ
 ```
 
-`/lo-dat` đọc **Lodat của NV** (đã có map). Kho chưa ai gắn = không hiện.
+Luật:
 
-Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng) — **không** gộp 1 dòng như CRM cũ (cũ che hai chủ). **Chưa chốt** — xem §11.
+- NV gắn chủ lô kho = **tạo `Lodat` trỏ** `ProjectLot` (không copy cột). Tối đa 1 `Lodat` active / NV / 1 dòng kho.
+- NV **không** sửa thông số `ProjectLot`.
+- Admin sửa kho: mọi list đang trỏ đổi theo.
+- Admin **xoá** dòng kho: **cấm** nếu còn `Lodat` đang trỏ (tránh list NV mất DT/số lô). Muốn ẩn kho → ẩn mềm, hoặc gỡ hết luồng NV trước.
+- `/lo-dat` đọc `Lodat`. Kho chưa ai gắn = không hiện trên list NV.
+
+Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa chốt** có gộp 1 dòng không — xem §11.
 
 ### 0.5 Ảnh
 
@@ -122,7 +123,7 @@ Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo
 
 | Thứ | Enum / field | List |
 |-----|----------------|------|
-| Loại thửa | suy từ `Address.kind`: PROJECT = kho, REGULAR = dân | Không phải hangtag Nhà/Đất |
+| Loại thửa | `Lodat.projectLotId` trống = dân; có FK = dự án (đọc thông số từ `ProjectLot`) | Không phải hangtag Nhà/Đất |
 | Rao bán | `DANG_BAN` / `TAM_DUNG` trên **map** | Công tắc **Mở bán** ↔ **Tạm dừng** |
 | Phân loại | `NHA` / `DAT` | Hangtag Nhà / Đất — **web mới**; CRM cũ không có |
 | Đã cọc / Đã bán | — | **Không** trên list; thuộc giao dịch |
@@ -134,7 +135,7 @@ Mặc định **ẩn** lô tạm dừng. Giá / hoa hồng / ghi chú giá nằm
 
 List mock §12 đã có. Nest + Prisma **sau** khi §11 chốt. Không extension.
 
-Copy: đơn vị hành chính → địa chỉ (+ ảnh dự án) → lô kho/dân → map chủ → ảnh lô → R2. Giá `BIGINT`. Hoa hồng CRM cũ = chữ (`BrokerFeeNote`).
+Copy: đơn vị hành chính → địa chỉ (+ ảnh dự án) → **`ProjectLot` kho** → `Lodat` (+ map chủ) → ảnh lô → R2. Giá `BIGINT`. Hoa hồng CRM cũ = chữ (`BrokerFeeNote`).
 
 ## 11. CRM cũ vs web mới + còn phải chốt
 
@@ -149,9 +150,7 @@ Quyền đã siết so với cũ: **chỉ Admin** tạo địa chỉ và import 
 
 ### Còn phải chốt (trước khi sửa Prisma)
 
-Đã chốt: 4 cấp địa chỉ; **nhiều NV / nhiều chủ độc lập** trên cùng lô kho (không gộp 1 chủ toàn công ty).
-
-**Đang bàn:** gắn chủ lô kho = **trỏ** kho (đề xuất, §0.4) hay **copy** thông số sang bảng lô.
+Đã chốt: 4 cấp địa chỉ; nhiều NV / nhiều chủ độc lập trên cùng dòng kho; **`Lodat` trỏ `ProjectLot`**, không copy DT/MT (§0.4). Admin xoá kho khi còn NV đang trỏ = **cấm**.
 
 Tạm hoãn (chủ chưa trả lời):
 
