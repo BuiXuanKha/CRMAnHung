@@ -12,7 +12,7 @@ import {
   type UpdateAddressInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
-import { isMockMode } from '@/shared/api/mode';
+import { isMockAddresses } from '@/shared/api/mode';
 import {
   mockAddresses,
   mockDistricts,
@@ -27,7 +27,7 @@ let districtStore = structuredClone(mockDistricts);
 let wardStore = structuredClone(mockWards);
 
 export async function listProvinces(includeHidden = false): Promise<AdminUnitListResponse> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     return {
       items: provinceStore.filter((p) => includeHidden || !p.isHidden),
     };
@@ -37,7 +37,7 @@ export async function listProvinces(includeHidden = false): Promise<AdminUnitLis
 }
 
 export async function createProvince(input: CreateAdminUnitInput): Promise<{ item: AdminUnitItem }> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     const item: AdminUnitItem = {
       id: nextMockId('prov'),
       name: input.name.trim(),
@@ -57,7 +57,7 @@ export async function listDistricts(
   provinceId: string,
   includeHidden = false,
 ): Promise<AdminUnitListResponse> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     return {
       items: districtStore.filter(
         (d) => d.parentId === provinceId && (includeHidden || !d.isHidden),
@@ -73,7 +73,7 @@ export async function createDistrict(
   provinceId: string,
   name: string,
 ): Promise<{ item: AdminUnitItem }> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     const item: AdminUnitItem = {
       id: nextMockId('dist'),
       name: name.trim(),
@@ -93,7 +93,7 @@ export async function listWards(
   districtId: string,
   includeHidden = false,
 ): Promise<AdminUnitListResponse> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     return {
       items: wardStore.filter(
         (w) => w.parentId === districtId && (includeHidden || !w.isHidden),
@@ -109,7 +109,7 @@ export async function createWard(
   districtId: string,
   name: string,
 ): Promise<{ item: AdminUnitItem }> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     const item: AdminUnitItem = {
       id: nextMockId('ward'),
       name: name.trim(),
@@ -128,7 +128,7 @@ export async function createWard(
 export async function listAddresses(
   query: AddressListQuery = {},
 ): Promise<AddressListResponse> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     let items = addressStore.slice();
     if (!query.includeHidden) items = items.filter((a) => !a.isHidden);
     if (query.kind) items = items.filter((a) => a.kind === query.kind);
@@ -162,7 +162,7 @@ export async function listAddresses(
 export async function createAddress(
   input: CreateAddressInput,
 ): Promise<{ item: AddressListItem }> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     const ward = wardStore.find((w) => w.id === input.wardId);
     const district = ward
       ? districtStore.find((d) => d.id === ward.parentId)
@@ -208,7 +208,7 @@ export async function updateAddress(
   id: string,
   input: UpdateAddressInput,
 ): Promise<{ item: AddressListItem }> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     const idx = addressStore.findIndex((a) => a.id === id);
     if (idx < 0) throw new Error('Không tìm thấy địa chỉ.');
     const prev = addressStore[idx];
@@ -265,7 +265,7 @@ export async function updateAddress(
 }
 
 export async function hideAddress(id: string): Promise<{ item: AddressListItem }> {
-  if (isMockMode()) {
+  if (isMockAddresses()) {
     return updateAddress(id, { isHidden: true });
   }
   return apiFetch(`/addresses/${id}`, { method: 'DELETE' });

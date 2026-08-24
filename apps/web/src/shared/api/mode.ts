@@ -21,3 +21,10 @@ export function isMockAuth(): boolean {
 export function isMockCustomers(): boolean {
   return isMockAuth();
 }
+
+/**
+ * Sổ địa chỉ: API đã có. Staging login thật → Postgres; chỉ mock khi login giả.
+ */
+export function isMockAddresses(): boolean {
+  return isMockAuth();
+}
