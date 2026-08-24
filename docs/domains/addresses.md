@@ -1,7 +1,7 @@
 # Domain: Addresses (Sổ địa chỉ)
 
 - **Slug:** `addresses`
-- **Status:** Draft — chốt quyền + 2 loại; còn chỗ «dự án vs xã»
+- **Status:** Draft — chốt 4 cấp như DB cũ; quyền Admin tạo sổ
 - **Nguồn:** CRM cũ Cài đặt → Quản lý địa chỉ (`tblAddresses` + `tblAddr*`)
 - **Liên quan:** [`lodats.md`](./lodats.md) — địa chỉ tạo **trước** lô
 
@@ -29,19 +29,19 @@ Hai loại địa chỉ (`kind`):
 | Đất dân | `REGULAR` | Thôn / tổ — tuỳ chọn | **Không** | NV tạo thửa dân |
 | Dự án | `PROJECT` | Tên dự án — bắt buộc | **Có** — chỉ Admin | Kho lô admin import |
 
-Đơn vị hành chính (master, như DB cũ):
+**4 cấp như DB cũ (chốt 2026-08-24):**
 
 ```
-Tỉnh (tblAddrProvinces)
-  → Huyện (tblAddrDistricts)
-    → Xã (tblAddrWards)
+1. Tỉnh
+2. Huyện
+3. Xã
+4. Địa chỉ trong xã  →  đất dân: thôn/tổ (tuỳ chọn)
+                     →  dự án:   tên dự án (bắt buộc)  ← vẫn thuộc xã, không thay xã
 ```
 
 `tblAddresses` trỏ 3 FK: `provinceId`, `districtId`, `wardId`. BE nhận `wardId`, tự suy huyện/tỉnh.
 
-**Hiển thị dự án (DB cũ):** `Tên dự án (N lô) · Xã, Huyện, Tỉnh`.
-
-Chốt chủ: «Tỉnh, Huyện, Xã (Dự án) — dự án tương đương xã». **DB cũ không làm vậy** — dự án không nằm trong bảng xã; đó là địa chỉ `PROJECT` **dưới một xã**, tên dự án = `detail`. Xem §11.
+**Hiển thị dự án:** `Tên dự án (N lô) · Xã, Huyện, Tỉnh`.
 
 ## 4. Use cases
 
@@ -66,11 +66,11 @@ Ownership: sổ **dùng chung** toàn công ty (không theo NV).
 | Picker | Form tạo/sửa lô | STAFF chọn; không nút thêm địa chỉ |
 | Import kho | Từ địa chỉ dự án | Excel; chỉ Admin |
 
-Đặc tả control: làm khi chốt §11 (dự án vs xã).
+Đặc tả control: làm khi mock sổ địa chỉ (cascade 4 cấp đã chốt).
 
 ## 7. Contract / API dự kiến
 
-Prefix `/api/v1`. Schema Zod sau khi §11 chốt.
+Prefix `/api/v1`. Schema Zod khi làm mock/API sổ địa chỉ.
 
 | Method | Path | Ai |
 |--------|------|-----|
@@ -102,9 +102,5 @@ Thứ tự: master hành chính → địa chỉ → ảnh dự án → lô.
 
 ## 11. Open questions
 
-1. **Dự án «tương đương xã»** — chọn một:
-   - **A (đề xuất, khớp DB cũ):** cascade luôn Tỉnh → Huyện → Xã. Dự án = địa chỉ loại PROJECT dưới xã đó + tên dự án. Copy 1–1. List có thể hiện `Tỉnh · Huyện · Tên dự án` (ẩn xã) nếu muốn nói ngắn.
-   - **B:** form dự án **bỏ chọn xã** (Tỉnh → Huyện → Tên dự án). `wardId` cho phép trống với PROJECT. Data cũ vẫn giữ xã nếu đã có.
-   - **C:** đưa tên dự án vào bảng xã (trộn master hành chính với kho BĐS). **Không đề xuất** — copy khó, lọc xã nhà nước gãy.
-
+1. ~~Dự án = xã~~ — **chốt:** 4 cấp như DB cũ; dự án thuộc xã (cấp 4), không thay xã.
 2. Địa chỉ đất dân trùng (cùng xã + cùng thôn): cấm hay cho phép?
