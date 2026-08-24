@@ -96,7 +96,7 @@ Mới (chốt `lodats.md` §0.4):
 | Nguồn cũ | Đích mới |
 |----------|----------|
 | `tblLodats` + Address `PROJECT` | **`ProjectLot`** (1:1), kể cả chưa có chủ |
-| Mỗi `tblLodatPersonMap` trên lô PROJECT | **`Lodat`** (trỏ `projectLotId`) + **`LodatCustomerMap`** — 1 map → 1 Lodat pointer |
+| Mỗi **luồng** NV trên lô PROJECT (`LodatId`+`CreatedByEmployeeId`) | **`Lodat`** (trỏ `projectLotId`) + mọi map của luồng → `LodatCustomerMap` |
 | `tblLodats` + Address `REGULAR` | **`Lodat`** (tự DT/MT) + maps |
 | `tblLodatImages` trên PROJECT | **Không copy** (chỉ ảnh dự án trên Address) |
 | `tblLodatImages` trên REGULAR | R2 + `LodatImage` |
