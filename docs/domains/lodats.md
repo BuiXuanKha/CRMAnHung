@@ -1,12 +1,62 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for mock — **tạm dừng** (chủ bàn thêm; không làm slice lô cho đến khi chốt)
+- **Status:** Draft — đang chốt model (list mock §12 đã có; **chưa** code API / copy data)
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
-- **Contract:** `packages/shared/src/lodats.ts`
+- **Contract:** `packages/shared/src/lodats.ts` (list mock — sẽ chỉnh khi model chốt)
+- **Địa chỉ:** [`addresses.md`](./addresses.md)
 
 §12 = đặc tả list. Mỗi trang: **máy tính** → **mobile** → rồi chi tiết từng phần.
+
+---
+
+## 0. Model 3 lớp (chốt 2026-08-24)
+
+```
+① Sổ địa chỉ     — Admin tạo trước. STAFF chỉ chọn.
+② Thửa đất       — Kho dự án (admin) hoặc đất dân (NV tạo từ khách).
+③ Rao bán / chủ  — Map NV–khách–lô: giá, mở bán, chủ hiện tại. Đổi chủ = đóng map cũ, mở map mới.
+```
+
+Chi tiết địa chỉ: [`addresses.md`](./addresses.md).
+
+### 0.1 Hai loại thửa
+
+| | **Lô kho (dự án)** | **Lô đất dân** |
+|--|-------------------|----------------|
+| Địa chỉ | Bắt buộc loại **Dự án** | Bắt buộc loại **Đất dân** |
+| Ai tạo thửa | **Admin** — import Excel (hoặc form kho) | **STAFF** — từ hồ sơ khách |
+| Chủ lúc tạo | **Chưa có** (nằm kho) | **Gắn ngay** khách đang tạo |
+| Số lô / tiêu đề | Có sẵn, ổn định | NV đặt |
+| DT · MT · hướng | Khoá với NV | NV tạo được sửa |
+| Số lượng trong khu | Không đổi theo thời gian; NV **cấm** thêm lô | Mỗi lần tạo = thêm 1 thửa |
+| `/lo-dat` NV | Chỉ hiện khi **đã gắn chủ** của NV đó | Hiện vì luôn có chủ lúc tạo |
+
+Luật:
+
+- Chọn địa chỉ dự án → bắt buộc chọn 1 lô trong kho, **không** tạo bản sao.
+- Chọn địa chỉ đất dân → tạo `Lodat` mới + map chủ.
+- Admin **không** tạo lô từ menu khách.
+- Gỡ chủ lô dự án = xoá/đóng map, **giữ** thửa trong kho.
+
+### 0.2 Đổi chủ
+
+Chủ **luôn có thể** chuyển nhượng. Không gắn cứng 1 khách suốt đời thửa.
+
+- Lô kho: admin tạo → NV gắn chủ sau → đổi chủ khi chuyển nhượng.
+- Lô dân: gắn chủ lúc tạo → vẫn đổi chủ được về sau.
+- Kỹ thuật: `LodatCustomerMap.isActive` + `endedAt`; map mới = chủ hiện tại. Giá/trạng thái map mới: như CRM cũ — `TAM_DUNG`, giá trống (chốt lại nếu muốn copy giá).
+
+### 0.3 Ảnh
+
+| Nguồn | Ai | Ghi chú |
+|-------|----|---------|
+| Ảnh **dự án** (trên địa chỉ PROJECT) | Chỉ **Admin** thêm/sửa/xoá | STAFF xem trên lô; không đụng |
+| Địa chỉ đất dân | **Không** có ảnh địa chỉ | — |
+| Ảnh **riêng của lô** (upload / chat) | **Chưa chốt** — xem §11 |
+
+Hangtag Nhà/Đất trên list = trục khác (nhà vs đất trống), **không** phải dự án vs dân. Copy data: chưa chốt.
 
 ---
 
@@ -16,33 +66,53 @@ Nhân viên xem / tìm lô đang rao: ảnh, địa chỉ, DT·MT·hướng, gi�
 
 ## 2. Actors
 
-| Actor | List | Không |
+| Actor | Được | Không |
 |-------|------|--------|
-| STAFF | Lô gắn khách mình tạo (CRM cũ); mock mới: list demo | Hard-delete |
-| ADMIN | Tất cả; CRM cũ: cột NV, xoá lô admin tạo | Tạo lô từ menu khách (CRM cũ) |
+| STAFF | List lô đã gắn chủ của mình; tạo lô dân từ khách; gắn chủ lô kho; đổi chủ (khi đã chốt quyền); sửa DT·MT lô dân mình tạo; công tắc Mở bán/Tạm dừng trên map mình | Tạo địa chỉ; import kho; sửa/xoá ảnh dự án; thêm lô vào dự án; hard-delete thửa |
+| ADMIN | Sổ địa chỉ; import/sửa kho dự án; ảnh dự án; xem mọi lô đã gắn chủ; dọn lô kho tạo nhầm | Tạo lô từ menu khách |
 
-Tạo lô: từ khách → «Tạo lô đất», không có nút thêm trên `/lo-dat`.
+Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo-dat`.
 
 ## 3. Khái niệm
 
 | Thứ | Enum / field | List |
 |-----|----------------|------|
-| Rao bán | `DANG_BAN` / `TAM_DUNG` | Công tắc **Mở bán** ↔ **Tạm dừng** |
-| Phân loại | `NHA` / `DAT` | Hangtag Nhà / Đất — **web mới**; CRM cũ không có cột này |
+| Loại thửa | suy từ `Address.kind`: PROJECT = kho, REGULAR = dân | Không phải hangtag Nhà/Đất |
+| Rao bán | `DANG_BAN` / `TAM_DUNG` trên **map** | Công tắc **Mở bán** ↔ **Tạm dừng** |
+| Phân loại | `NHA` / `DAT` | Hangtag Nhà / Đất — **web mới**; CRM cũ không có |
 | Đã cọc / Đã bán | — | **Không** trên list; thuộc giao dịch |
+| Chủ hiện tại | map `isActive` | Gợi ý tên khách (`customerHint`) |
 
-Mặc định **ẩn** lô tạm dừng.
+Mặc định **ẩn** lô tạm dừng. Giá / hoa hồng / ghi chú giá nằm trên **map**, không trên thửa.
 
 ## 4–10.
 
-Contract + mock đã có. Nest list sau khi §12 ổn. Không extension. Migrate: Title, địa chỉ, AreaM2, FrontageM, Direction, Price, hoa hồng, SaleStatus, ảnh.
+List mock §12 đã có. Nest + Prisma **sau** khi §11 chốt. Không extension.
 
-## 11. CRM cũ vs web mới
+Copy: đơn vị hành chính → địa chỉ (+ ảnh dự án) → lô kho/dân → map chủ → ảnh lô → R2. Giá `BIGINT`. Hoa hồng CRM cũ = chữ (`BrokerFeeNote`).
+
+## 11. CRM cũ vs web mới + còn phải chốt
+
+List:
 
 - Cũ: chỉ `@` (gồm tạm dừng). Mới: thêm `@@` = chỉ tạm dừng.
-- Cũ: tìm Title + địa chỉ (placeholder ghi «khách» nhưng API **không** tìm tên khách). Mới: mock tìm thêm `customerHint`.
+- Cũ: tìm Title + địa chỉ (API **không** tìm tên khách). Mới: mock tìm thêm `customerHint`.
 - Cũ: bấm hàng → chi tiết; nút **GD** / **Sửa** trên dòng. Mới: menu chevron; bấm hàng PC = chọn.
-- Cũ: lọc trạng thái gồm Đang bán / Đã cọc / Đã bán / Tạm dừng. Mới: **chỉ** Mở bán / Tạm dừng.
+- Cũ: lọc gồm Đang bán / Đã cọc / Đã bán / Tạm dừng. Mới: **chỉ** Mở bán / Tạm dừng.
+
+Quyền đã siết so với cũ: **chỉ Admin** tạo địa chỉ và import kho (cũ: mọi user đăng nhập CRUD địa chỉ).
+
+### Còn phải chốt (trước khi sửa Prisma)
+
+1. **Một lô kho, mấy chủ cùng lúc?** Cũ: mỗi NV một map active trên cùng thửa (2 NV có thể gắn 2 khách khác nhau vào cùng số lô). **Đề xuất:** 1 thửa = **1 chủ đang active toàn hệ thống**. NV khác muốn gắn → báo đang thuộc khách X / NV Y; muốn thì **đổi chủ**.
+2. **Ảnh riêng trên lô** (không phải ảnh dự án): NV được thêm/gỡ (upload + chat) như cũ, hay lô dự án chỉ hiện ảnh dự án?
+3. **Ai được đổi chủ?** NV đang giữ map; Admin; hay NV khác nếu khách mới thuộc họ?
+4. **Hangtag Nhà/Đất** khi copy lô cũ: mặc định `DAT` / đoán tiêu đề / bỏ đến khi nhập tay?
+5. **Số lô (title) trùng trong cùng dự án:** cấm (đề xuất) hay cho phép?
+6. **Admin bổ sung lô vào dự án đã import** (thiếu dòng Excel): cho phép, NV vẫn không?
+7. **Đặt cọc / Đã bán** trên map cũ khi copy: giữ 4 giá trị (list vẫn chỉ hiện Mở bán/Tạm dừng) hay gom thành `TAM_DUNG`?
+
+Mặc định kỹ thuật (không cần bàn trừ khi bác): giá `BIGINT`; hoa hồng giữ **chữ**; map mới khi đổi chủ = tạm dừng + giá trống như CRM cũ.
 
 ---
 
