@@ -1,11 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { MapPin, Phone } from 'lucide-react';
 import { CrmDialog } from '@/shared/ui/dialog';
 import { Icon } from '@/shared/ui/icon';
 import { useAuth } from '@/features/auth/auth-context';
+import { AddressesManageDialog } from '../addresses/addresses-manage-dialog';
 import { HotlinesSettingsDialog } from './hotlines-dialog';
 import './settings-hub.css';
 
@@ -17,12 +17,27 @@ type Props = {
 /** Hub Cài đặt: hotline cho mọi NV; sổ địa chỉ chỉ Admin. */
 export function SettingsHubDialog({ open, onClose }: Props) {
   const { user } = useAuth();
-  const router = useRouter();
   const [hotlineOpen, setHotlineOpen] = useState(false);
+  const [addressOpen, setAddressOpen] = useState(false);
 
   useEffect(() => {
-    if (!open) setHotlineOpen(false);
+    if (!open) {
+      setHotlineOpen(false);
+      setAddressOpen(false);
+    }
   }, [open]);
+
+  if (addressOpen) {
+    return (
+      <AddressesManageDialog
+        open
+        onClose={() => {
+          setAddressOpen(false);
+          onClose();
+        }}
+      />
+    );
+  }
 
   if (hotlineOpen) {
     return (
@@ -54,10 +69,7 @@ export function SettingsHubDialog({ open, onClose }: Props) {
           <button
             type="button"
             className="settings-hub-item"
-            onClick={() => {
-              onClose();
-              router.push('/cai-dat/dia-chi');
-            }}
+            onClick={() => setAddressOpen(true)}
           >
             <Icon icon={MapPin} size="sm" />
             <span>

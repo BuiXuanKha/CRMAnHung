@@ -30,10 +30,46 @@
 
 .crm-dialog-head h2 {
   margin: 0;
+  flex: 1;
+  min-width: 0;
   font-size: 1rem;
   font-weight: 600;
   color: #0f172a;
   line-height: 1.35;
+}
+
+.crm-dialog-close {
+  flex-shrink: 0;
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #64748b;
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.crm-dialog-close:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+.crm-dialog.crm-dialog--wide {
+  width: min(720px, 100%);
+  max-height: min(92vh, 900px);
+  display: flex;
+  flex-direction: column;
+}
+
+.crm-dialog.crm-dialog--wide .crm-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .crm-dialog-icon {

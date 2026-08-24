@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, type ReactNode } from 'react';
-import type { LucideIcon } from 'lucide-react';
+import { X, type LucideIcon } from 'lucide-react';
 import { Icon } from './icon';
 import './dialog.css';
 
@@ -54,6 +54,16 @@ export function CrmDialog({
         <header className="crm-dialog-head">
           {icon ? <Icon icon={icon} size="md" className="crm-dialog-icon" /> : null}
           <h2 id="crm-dialog-title">{title}</h2>
+          {!busy ? (
+            <button
+              type="button"
+              className="crm-dialog-close"
+              aria-label="Đóng"
+              onClick={onClose}
+            >
+              <Icon icon={X} size="sm" />
+            </button>
+          ) : null}
         </header>
         <div className="crm-dialog-body">{children}</div>
       </div>

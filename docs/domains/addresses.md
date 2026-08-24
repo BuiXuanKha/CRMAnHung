@@ -1,12 +1,12 @@
 # Domain: Addresses (Sổ địa chỉ)
 
 - **Slug:** `addresses`
-- **Status:** Ready for API — schema + Nest + trang Admin `/cai-dat/dia-chi`; STAFF picker sẵn; copy data sau
+- **Status:** Ready — schema + Nest + modal Admin (Cài đặt); STAFF picker sẵn; copy data: `pnpm addresses:migrate-legacy` trên VPS
 - **Nguồn:** CRM cũ Cài đặt → Quản lý địa chỉ (`tblAddresses` + `tblAddr*`)
 - **Liên quan:** [`lodats.md`](./lodats.md) — địa chỉ tạo **trước** lô
 - **Contract:** `packages/shared/src/addresses.ts`
 - **API:** `/api/v1/addresses`, `/api/v1/admin-units/*`
-- **UI:** Cài đặt → Quản lý địa chỉ (Admin) · `AddressPicker` (STAFF chọn)
+- **UI:** Cài đặt → Quản lý địa chỉ (modal giống CRM cũ) · route `/cai-dat/dia-chi` · `AddressPicker` (STAFF chọn)
 
 ---
 
@@ -67,7 +67,7 @@ Ownership: sổ **dùng chung** toàn công ty (không theo NV).
 
 | Màn | Route / chỗ | Hành vi |
 |-----|-------------|---------|
-| Sổ địa chỉ | Cài đặt — chỉ Admin | List + form 2 loại; gallery ảnh khi dự án |
+| Sổ địa chỉ | Cài đặt → modal (Admin); `/cai-dat/dia-chi` | Tìm kiếm + tab Tất cả/Thường/Dự án + list + form cascade; giống CRM cũ |
 | Picker | Form tạo/sửa lô | STAFF chọn; không nút thêm địa chỉ |
 | Import kho | Từ địa chỉ dự án | Excel; chỉ Admin |
 
