@@ -64,5 +64,5 @@ pnpm dev             # API :5050 + Web :5001
 2. ~~Postgres local trên máy~~ — tạm bỏ; không chặn làm UI mock / deploy VPS.
 3. **Cấu hình `anhungland.com`:** làm theo [`ANHUNGLAND-SETUP.md`](./ANHUNGLAND-SETUP.md)
    - DNS A `@` + `www` → `103.15.51.19` (Cloudflare) — bạn cần bấm
-   - Secrets GitHub: `DEPLOY_SSH_HOST=103.15.51.19` + `DEPLOY_SSH_KEY` (lần deploy sau)
+   - ~~Secrets GitHub `DEPLOY_SSH_HOST` + `DEPLOY_SSH_KEY`~~ — đã gắn; deploy = skill `deploy-staging` (gộp `main` rồi Actions)
    - ~~bootstrap + deploy lần đầu~~ — đã xong trên VPS mới

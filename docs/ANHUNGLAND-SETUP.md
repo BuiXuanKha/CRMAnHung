@@ -38,14 +38,16 @@ Tài khoản seed (đổi ngay): `admin` / `admin123` hoặc `staff` / `staff123
 
 ---
 
-## GitHub secrets (để Deploy Actions sau này)
+## GitHub secrets (Actions)
 
-Repo CRMAnHung → Settings → Secrets → Actions:
+Repo CRMAnHung → Settings → **Secrets and variables** → **Actions** (không phải Deploy keys):
 
 | Secret | Giá trị |
 |--------|---------|
 | `DEPLOY_SSH_HOST` | `103.15.51.19` |
-| `DEPLOY_SSH_KEY` | Private key deploy (ed25519) — agent đã gắn public key trên server; nhờ agent gửi lại private key nếu cần |
+| `DEPLOY_SSH_KEY` | Private key user `deploy` |
+
+Đã gắn. Deploy: skill **`deploy-staging`** — gộp `main` rồi bấm Actions **Run workflow**.
 
 ---
 

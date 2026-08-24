@@ -17,7 +17,7 @@ Trước khi viết code feature, đọc `docs/PLAYBOOK.md` và làm **đúng th
 6. **Nối UI → API**
 7. **Extension** chỉ nếu domain cần ingest Meta
 8. Smoke test + cập nhật docs nếu cần
-9. Staging deploy chỉ khi được yêu cầu (`anhungland.com`, không đụng `crm.anhungland.com`)
+9. Staging deploy **chỉ khi được yêu cầu** — skill `deploy-staging`: gộp `main` rồi GitHub Actions (không rsync agent; không đụng `crm.anhungland.com`)
 10. **Web công khai** — áp dụng skill `web-public-seo` / `docs/PUBLIC-SEO.md`
 11. **UI** — đọc `docs/UI-GUIDELINES.md` (skill `ui-guidelines`) trước khi làm/sửa giao diện; bảng list → `crm-data-table` / §4.5; icon Lucide §4.6; dialog → `crm-dialog` / §4.7
 

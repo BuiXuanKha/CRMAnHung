@@ -174,15 +174,23 @@ Settings → Secrets → Actions:
 
 ---
 
-## Deploy tự động
+## Deploy (đường chính thức)
+
+Skill Cursor: **`deploy-staging`**. Khi chủ bảo deploy:
+
+1. Sửa trên nhánh feature (`cursor/…`) — commit + push  
+2. Ổn thì **gộp vào `main`**  
+3. GitHub → Actions → **Deploy CRMAnHung (staging)** → **Run workflow** → chọn **`main`**
 
 Workflow: [`.github/workflows/deploy-staging.yml`](../.github/workflows/deploy-staging.yml)
 
-- Trigger: **workflow_dispatch** (bấm tay) — chưa auto-deploy mỗi push `main`.
+- Trigger: **workflow_dispatch** (bấm tay) — không auto-deploy mỗi push `main`.
 - Rsync monorepo → `/var/www/crmanhung/repo/` (giữ `.env` trên server)
 - Chạy `scripts/remote_deploy.sh`: `pnpm install` → Prisma migrate → build Nest + Next standalone → `pm2 restart crmanhung-api` + `crmanhung-web`
 
-Sau khi DNS + nginx + Postgres + R2 + `.env` sẵn sàng: Actions → **Deploy CRMAnHung (staging)** → Run workflow.
+Agent **không** bấm Run workflow hộ (`gh` chỉ đọc). Chỉ deploy **`main`**. Không đụng `crm.anhungland.com`.
+
+Secrets (đã gắn): `DEPLOY_SSH_HOST`, `DEPLOY_SSH_KEY` — repo Settings → Secrets and variables → Actions.
 
 ---
 
