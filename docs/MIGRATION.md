@@ -80,7 +80,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 10b | `tblAddresses` + ảnh dự án R2 | `address`, `address_image` | `pnpm addresses:migrate-legacy` | Xong staging (110 địa chỉ, 9 ảnh) |
 | 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
 | 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân `/img/lodats` R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Xong staging: Lodat 182, map 190, ảnh 217/322 path lodats (thiếu messenger + PROJECT → 10e) |
-| 10e | Ảnh messenger lô dân + ảnh riêng thửa PROJECT | `lodat_image` | `pnpm lodats:migrate-images-supplement` | Todo — reuse R2 chat; PROJECT → stream `p:{id}:{emp}`; ~105 + ~81 |
+| 10e | Ảnh messenger lô dân + ảnh riêng thửa PROJECT | `lodat_image` | `pnpm lodats:migrate-images-supplement` | Xong staging: +186 (105 messenger REGULAR + 81 PROJECT); LodatImage tổng **403**; reuse chat R2; 0 skip/lỗi |
 | 11 | Giao dịch | `transaction` | — | Todo |
 | 12 | Sổ đỏ | `title_service` | — | Todo |
 
