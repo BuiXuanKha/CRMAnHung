@@ -71,7 +71,10 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 7 | `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` | `employee_facebook_profile` | `pnpm facebook-profiles:migrate-legacy` | Xong staging (cùng bước 5) |
 | 8 | Avatar khách `/img/avatars` → R2 public (`avatarObjectKey`) | — | `pnpm avatars:migrate-legacy-r2` | Xong staging (1376 file, ~5 MB) |
 | 9 | Tin nhắn + ảnh chat `imgsmessenger` → R2 public | `customer_messenger`, `customer_messenger_image` | `pnpm chat:migrate-legacy` | Xong staging (20253 tin / 2448 ảnh, ~418 MB) |
-| 10 | Lô đất + ảnh `lodats` | `lodat` | — | Todo (~451 MB) |
+| 10a | Tỉnh / Huyện / Xã `tblAddr*` | `province`, `district`, `ward` | — | Todo — **trước** địa chỉ |
+| 10b | `tblAddresses` + ảnh dự án | `address`, `address_image` | — | Todo |
+| 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | — | Todo |
+| 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | — | Todo (~451 MB). Chi tiết thứ tự: `lodats.md` §13 |
 | 11 | Giao dịch | `transaction` | — | Todo |
 | 12 | Sổ đỏ | `title_service` | — | Todo |
 
