@@ -154,7 +154,7 @@ Quyền đã siết so với cũ: **chỉ Admin** tạo địa chỉ và import 
 
 Đã chốt: 4 cấp địa chỉ; nhiều NV / nhiều chủ độc lập trên cùng dòng kho; **`Lodat` trỏ `ProjectLot`**, không copy DT/MT (§0.4). Admin xoá kho khi còn NV đang trỏ = **cấm**.
 
-Tạm hoãn (chưa bàn):
+Tạm hoãn (chưa bàn — trước mắt chỉ làm UI cho STAFF):
 
 1. List **ADMIN** `/lo-dat`: hiển thị theo cách nào (tách theo NV/luồng hay gộp theo LK12)? — **chờ bàn sau**.
 
