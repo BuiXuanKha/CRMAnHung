@@ -76,7 +76,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 9 | Tin nhắn + ảnh chat `imgsmessenger` → R2 public | `customer_messenger`, `customer_messenger_image` | `pnpm chat:migrate-legacy` | Xong staging (20253 tin / 2448 ảnh, ~418 MB) |
 | 10a | Tỉnh / Huyện / Xã `tblAddr*` | `province`, `district`, `ward` | `pnpm addresses:migrate-legacy` | Xong staging (1 tỉnh, 1 huyện, 23 xã) |
 | 10b | `tblAddresses` + ảnh dự án R2 | `address`, `address_image` | `pnpm addresses:migrate-legacy` | Xong staging (110 địa chỉ, 9 ảnh) |
-| 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Todo — chạy VPS sau deploy schema (~3608); old_id = `tblLodats.ID` |
+| 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
 | 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | — | Todo (~452 MB). PROJECT maps → Lodat pointer. Giữ luồng **kha** / **buinam**. Chi tiết: `lodats.md` §13 + skill `migrate-legacy-data` |
 | 11 | Giao dịch | `transaction` | — | Todo |
 | 12 | Sổ đỏ | `title_service` | — | Todo |
