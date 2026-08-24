@@ -32,9 +32,10 @@
 | `tblPersonCareHistory` | `CustomerCareNote` |
 | `tblEmployeeFacebookProfiles` | `EmployeeFacebookProfile` |
 | `tblEmployeeHotline` | `EmployeeHotline` |
-| `tblLodats` | `Lodat` |
-| `tblLodatPersonMap` | `LodatCustomerMap` |
-| `tblLodatImages` / temp | `LodatImage` / `LodatTempImage` |
+| `tblLodats` (Address PROJECT) | `ProjectLot` (kho) |
+| `tblLodats` (Address REGULAR) + maps | `Lodat` + `LodatCustomerMap` |
+| `tblLodatPersonMap` trên lô PROJECT | Mỗi map → `Lodat` (trỏ `projectLotId`) + `LodatCustomerMap` |
+| `tblLodatImages` (chỉ lô dân) | `LodatImage` (`objectKey`) |
 | `tblAddresses` + admin units | `Address`, `Province`, `District`, `Ward` |
 | `tblTransaction*` | `Transaction*` |
 | `tblTitleService*` | `TitleService*` |
@@ -43,6 +44,8 @@
 Cột path ảnh cũ → field **`objectKey`** (key trong R2), không phải path local.
 
 Mỗi bước **một PR**. Script **chỉ đọc** SQLite. Idempotent.
+
+**Agent:** khi viết/chạy copy → skill [`.cursor/skills/migrate-legacy-data`](../.cursor/skills/migrate-legacy-data/SKILL.md) (preflight FK, luồng NV, reshape lô).
 
 ### Khóa — cái nào bắt buộc trước?
 
@@ -71,10 +74,10 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 7 | `tblEmployeeFacebookProfiles` → `EmployeeFacebookProfile` | `employee_facebook_profile` | `pnpm facebook-profiles:migrate-legacy` | Xong staging (cùng bước 5) |
 | 8 | Avatar khách `/img/avatars` → R2 public (`avatarObjectKey`) | — | `pnpm avatars:migrate-legacy-r2` | Xong staging (1376 file, ~5 MB) |
 | 9 | Tin nhắn + ảnh chat `imgsmessenger` → R2 public | `customer_messenger`, `customer_messenger_image` | `pnpm chat:migrate-legacy` | Xong staging (20253 tin / 2448 ảnh, ~418 MB) |
-| 10a | Tỉnh / Huyện / Xã `tblAddr*` | `province`, `district`, `ward` | `pnpm addresses:migrate-legacy` | Todo — chạy trên VPS (cùng bước 10b) |
-| 10b | `tblAddresses` + ảnh dự án R2 | `address`, `address_image` | `pnpm addresses:migrate-legacy` | Todo — `LEGACY_ADDRESS_IMG_DIR=…/api/img/addresses`; `SKIP_ADDRESS_IMAGES=1` nếu chỉ copy text |
-| 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | — | Todo |
-| 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | — | Todo (~451 MB). Chi tiết thứ tự: `lodats.md` §13 |
+| 10a | Tỉnh / Huyện / Xã `tblAddr*` | `province`, `district`, `ward` | `pnpm addresses:migrate-legacy` | Xong staging (1 tỉnh, 1 huyện, 23 xã) |
+| 10b | `tblAddresses` + ảnh dự án R2 | `address`, `address_image` | `pnpm addresses:migrate-legacy` | Xong staging (110 địa chỉ, 9 ảnh) |
+| 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | — | Todo — schema `ProjectLot` trước; ~3608 dòng |
+| 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | — | Todo (~452 MB). PROJECT maps → Lodat pointer. Giữ luồng **kha** / **buinam**. Chi tiết: `lodats.md` §13 + skill `migrate-legacy-data` |
 | 11 | Giao dịch | `transaction` | — | Todo |
 | 12 | Sổ đỏ | `title_service` | — | Todo |
 

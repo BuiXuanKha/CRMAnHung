@@ -27,6 +27,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | `cloudflare-r2` | **R2 đã chốt** — credentials + StorageService; không hỏi lại owner |
 | `web-public-seo` | **Web công khai** — metadata, sitemap, robots, OG; xem `docs/PUBLIC-SEO.md` |
 | `deploy-staging` | **Khi bảo deploy** — gộp vào `main`; Actions tự lên `anhungland.com` (không đụng CRM cũ) |
+| `migrate-legacy-data` | **Copy DB cũ → Postgres/R2** — idempotent, preflight FK, không lệch NV (kha/buinam); xem `docs/MIGRATION.md` |
 
 Gọi skill bằng `/skill-name` hoặc để agent tự chọn theo `description`.
 
