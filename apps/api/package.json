@@ -22,6 +22,7 @@
     "care:migrate-legacy": "tsx scripts/migrate-care-from-legacy.ts",
     "chat:migrate-legacy": "tsx scripts/migrate-chat-from-legacy.ts",
     "addresses:migrate-legacy": "tsx scripts/migrate-addresses-from-legacy.ts",
+    "project-lots:migrate-legacy": "tsx scripts/migrate-project-lots-from-legacy.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {
