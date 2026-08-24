@@ -92,6 +92,11 @@ export const LODAT_KIND_LABELS: Record<LodatKind, string> = {
   [LodatKind.DAT]: 'Đất',
 };
 
+export const ADDRESS_KIND_LABELS: Record<AddressKind, string> = {
+  [AddressKind.REGULAR]: 'Đất dân',
+  [AddressKind.PROJECT]: 'Dự án',
+};
+
 /** Cột list /lo-dat: chỉ Mở bán ↔ Tạm dừng. Đặt cọc / Đã bán thuộc giao dịch (P3). */
 export const LODAT_LISTING_STATUSES = [
   LodatSaleStatus.DANG_BAN,

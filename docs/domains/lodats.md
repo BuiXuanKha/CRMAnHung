@@ -341,9 +341,9 @@ Map chủ (giá, mở bán, lịch sử)
 
 | # | Việc | Vì sao thứ tự này | Ghi chú Prisma / copy |
 |---|------|-------------------|------------------------|
-| **1** | Sửa schema **Tỉnh / Huyện / Xã** + copy từ `tblAddr*` | Address bắt buộc `wardId` | Stub có `code` unique — DB cũ lưu **tên**, không mã. Copy theo tên + map id |
-| **2** | Sửa schema **Address** (FK 3 cấp, `kind`, `detail`, ẩn mềm, người tạo) + **AddressImage** chỉ PROJECT | NV chọn địa chỉ khi tạo lô; kho dự án thuộc địa chỉ PROJECT | Copy `tblAddresses` → `Address`; ảnh `tblAddressImages` → R2 |
-| **3** | UI + API **sổ địa chỉ (Admin)** + picker (STAFF đọc) | Không có sổ thì không tạo/gắn lô | STAFF không CRUD địa chỉ |
+| **1** | Sửa schema **Tỉnh / Huyện / Xã** + copy từ `tblAddr*` | Address bắt buộc `wardId` | Schema đã align (`20260824100000`). **Copy data** còn Todo |
+| **2** | Sửa schema **Address** + **AddressImage** chỉ PROJECT | NV chọn địa chỉ khi tạo lô | Schema + API + UI Admin **đã có**. Copy `tblAddresses` còn Todo |
+| **3** | UI + API **sổ địa chỉ (Admin)** + picker (STAFF đọc) | Không có sổ thì không tạo/gắn lô | **Done** — `/cai-dat/dia-chi` + `AddressPicker` |
 | **4** | Schema **`ProjectLot`** (kho: số lô, DT, MT, hướng, `addressId` PROJECT) | Lodat dự án **trỏ** kho, không copy | Bảng mới — stub hiện không có |
 | **5** | Admin **import/sửa kho** trên địa chỉ dự án | Kho phải có sẵn trước khi NV gắn chủ | Excel như CRM cũ |
 | **6** | Copy **lô PROJECT** cũ `tblLodats` → `ProjectLot` | Data kho thật | 1 dòng `tblLodats` PROJECT = 1 `ProjectLot` |

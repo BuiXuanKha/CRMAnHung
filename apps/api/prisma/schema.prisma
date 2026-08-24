@@ -25,6 +25,10 @@ model User {
   facebookProfiles  EmployeeFacebookProfile[]
   hotlines          EmployeeHotline[]
   careNotes         CustomerCareNote[]
+  createdProvinces  Province[]             @relation("ProvinceCreator")
+  createdDistricts  District[]             @relation("DistrictCreator")
+  createdWards      Ward[]                 @relation("WardCreator")
+  createdAddresses  Address[]              @relation("AddressCreator")
 }
 
 model RefreshToken {
@@ -187,57 +191,95 @@ model EmployeeHotline {
   @@index([employeeId])
 }
 
+/// Đơn vị hành chính — copy từ tblAddr* (theo tên, không dùng mã nhà nước).
 model Province {
-  id        String     @id @default(cuid())
-  code      String     @unique
-  name      String
+  id                  String   @id @default(cuid())
+  name                String
+  isHidden            Boolean  @default(false)
+  createdByEmployeeId String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
   districts District[]
+  addresses Address[]
+  createdBy User?      @relation("ProvinceCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+
+  @@index([isHidden])
 }
 
 model District {
-  id         String   @id @default(cuid())
-  provinceId String
-  code       String
-  name       String
-  wards      Ward[]
-  province   Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+  id                  String   @id @default(cuid())
+  provinceId          String
+  name                String
+  isHidden            Boolean  @default(false)
+  createdByEmployeeId String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  @@unique([provinceId, code])
+  wards     Ward[]
+  addresses Address[]
+  province  Province @relation(fields: [provinceId], references: [id], onDelete: Cascade)
+  createdBy User?    @relation("DistrictCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+
+  @@index([provinceId])
+  @@index([isHidden])
 }
 
 model Ward {
-  id         String   @id @default(cuid())
-  districtId String
-  code       String
-  name       String
-  district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  id                  String   @id @default(cuid())
+  districtId          String
+  name                String
+  isHidden            Boolean  @default(false)
+  createdByEmployeeId String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  @@unique([districtId, code])
+  addresses Address[]
+  district  District  @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  createdBy User?     @relation("WardCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+
+  @@index([districtId])
+  @@index([isHidden])
 }
 
+/// Sổ địa chỉ dùng chung. REGULAR = đất dân; PROJECT = dự án (có ảnh).
 model Address {
-  id         String   @id @default(cuid())
-  kind       String   @default("REGULAR") // REGULAR | PROJECT
-  name       String?
-  detail     String?
-  provinceId String?
-  districtId String?
-  wardId     String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                  String   @id @default(cuid())
+  kind                String   @default("REGULAR") // REGULAR | PROJECT
+  detail              String?
+  description         String?
+  provinceId          String
+  districtId          String
+  wardId              String
+  isHidden            Boolean  @default(false)
+  createdByEmployeeId String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  lodats Lodat[]
-  images AddressImage[]
+  province  Province       @relation(fields: [provinceId], references: [id])
+  district  District       @relation(fields: [districtId], references: [id])
+  ward      Ward           @relation(fields: [wardId], references: [id])
+  createdBy User?          @relation("AddressCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+  lodats    Lodat[]
+  images    AddressImage[]
+
+  @@index([kind])
+  @@index([provinceId])
+  @@index([districtId])
+  @@index([wardId])
+  @@index([isHidden])
 }
 
 model AddressImage {
   id        String   @id @default(cuid())
   addressId String
-  objectKey  String
+  objectKey String
   sortOrder Int      @default(0)
   createdAt DateTime @default(now())
 
   address Address @relation(fields: [addressId], references: [id], onDelete: Cascade)
+
+  @@index([addressId, sortOrder])
 }
 
 /// Lô đất

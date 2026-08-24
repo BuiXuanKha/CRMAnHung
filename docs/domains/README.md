@@ -7,7 +7,7 @@
 | Users (login) | [users.md](./users.md) | Ready for API — `/login` = bảng User; `/khach-hang` = API khách |
 | Customers | [customers.md](./customers.md) | Ready for API — list + chi tiết `[id]` (lô đất trên chi tiết vẫn mock) |
 | Lodats | [lodats.md](./lodats.md) | Draft — model chốt; lịch làm §13 (địa chỉ → kho → lô STAFF) |
-| Addresses | [addresses.md](./addresses.md) | Draft — 4 cấp như DB cũ; Admin tạo sổ |
+| Addresses | [addresses.md](./addresses.md) | Ready for API — Admin `/cai-dat/dia-chi`; copy data sau |
 | Transactions | [transactions.md](./transactions.md) | Ready for mock — §12 list `/giao-dich` |
 | Title services | [title-services.md](./title-services.md) | Ready for mock — §12 list `/dich-vu-so-do` |
 | Users / admin registry | [users.md](./users.md) §11 mục 5 | P4 — CRUD NV, chưa làm |

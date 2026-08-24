@@ -1,9 +1,12 @@
 # Domain: Addresses (Sổ địa chỉ)
 
 - **Slug:** `addresses`
-- **Status:** Draft — chốt 4 cấp như DB cũ; quyền Admin tạo sổ
+- **Status:** Ready for API — schema + Nest + trang Admin `/cai-dat/dia-chi`; STAFF picker sẵn; copy data sau
 - **Nguồn:** CRM cũ Cài đặt → Quản lý địa chỉ (`tblAddresses` + `tblAddr*`)
 - **Liên quan:** [`lodats.md`](./lodats.md) — địa chỉ tạo **trước** lô
+- **Contract:** `packages/shared/src/addresses.ts`
+- **API:** `/api/v1/addresses`, `/api/v1/admin-units/*`
+- **UI:** Cài đặt → Quản lý địa chỉ (Admin) · `AddressPicker` (STAFF chọn)
 
 ---
 
