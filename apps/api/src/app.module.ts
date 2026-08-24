@@ -10,6 +10,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { CustomersModule } from './modules/customers/customers.module';
 import { AddressesModule } from './modules/addresses/addresses.module';
+import { LodatsModule } from './modules/lodats/lodats.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -31,6 +32,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     UsersModule,
     CustomersModule,
     AddressesModule,
+    LodatsModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

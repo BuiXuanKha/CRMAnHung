@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Draft — schema `ProjectLot`/`Lodat`/map đã align; lịch copy §13; **chưa bàn** list ADMIN
+- **Status:** Ready for API — list `/lo-dat` STAFF (mock §12 + API); schema/copy data xong staging; **chưa bàn** list ADMIN
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (list mock — sẽ chỉnh khi model chốt)
@@ -316,7 +316,7 @@ Placeholder: tên lô + quay lại. Ảnh / chủ / ghi chú — sau.
 
 ## 13. Lịch làm — thứ tự DB (STAFF trước)
 
-**Có: phải có sổ địa chỉ trước lô.** Prisma: `ProjectLot` + `Lodat`/`LodatCustomerMap` đã align (`20260824120000`). Copy kho / map / ảnh dân còn Todo (skill `migrate-legacy-data`).
+**Có: phải có sổ địa chỉ trước lô.** Prisma + copy kho/map/ảnh **xong staging**. API list `/lo-dat` STAFF trong PR này. Còn: Admin import kho, tạo lô, đổi chủ, list ADMIN.
 
 Khách (`Customer`) **đã có** — map chủ mới gắn được.
 
@@ -350,8 +350,8 @@ Map chủ (giá, mở bán, lịch sử)
 | **7** | Sửa schema **`Lodat` + `LodatCustomerMap`** | List `/lo-dat` đọc Lodat + map | Cùng migration `20260824120000` |
 | **8** | Copy **lô dân** `tblLodats` REGULAR → `Lodat` + map | List dân | 1 lodat cũ + maps |
 | **9** | Copy **map NV–khách** PROJECT: mỗi map active → 1 `Lodat` trỏ `ProjectLot` + `LodatCustomerMap` | Luồng độc lập theo NV | Cũ: 1 `tblLodats` + nhiều map. Mới: nhiều `Lodat` cùng `projectLotId` |
-| **10** | Copy **ảnh lô dân** → R2 + `LodatImage` | Ảnh dự án đã ở bước 2 | Lô dự án **không** copy ảnh lô riêng (chốt: chỉ ảnh dự án) |
-| **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | Lọc luồng `createdBy = NV`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
+| **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
+| **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | Form + picker địa chỉ bước 3 |
 | **13** | Đổi chủ trong luồng NV + ảnh lô dân (upload) | Đã chốt quyền | Chi tiết `/lo-dat/[id]` còn placeholder — làm đủ để đổi chủ |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
