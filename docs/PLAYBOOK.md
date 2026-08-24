@@ -96,7 +96,7 @@ Tham chiếu nhanh:
 ### ⑧–⑨ Kiểm thử & staging
 
 - Ít nhất: happy path tay + 1–2 case quyền (STAFF vs ADMIN).
-- Deploy staging theo skill **`deploy-staging`** + `DEPLOYMENT.md`: nhánh feature → gộp `main` → Actions Run workflow (không đụng `crm.anhungland.com`).
+- Deploy staging theo skill **`deploy-staging`**: nhánh feature → gộp `main` → Actions tự lên VPS (không đụng `crm.anhungland.com`).
 
 ---
 

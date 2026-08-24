@@ -10,6 +10,8 @@ name: Deploy CRMAnHung (staging)
 #   DEPLOY_SSH_USER — không dùng; user cố định `deploy`
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
 
 concurrency:

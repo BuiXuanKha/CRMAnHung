@@ -26,7 +26,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | `security-baseline` | Auth, authz, secrets, CORS, upload |
 | `cloudflare-r2` | **R2 đã chốt** — credentials + StorageService; không hỏi lại owner |
 | `web-public-seo` | **Web công khai** — metadata, sitemap, robots, OG; xem `docs/PUBLIC-SEO.md` |
-| `deploy-staging` | **Khi bảo deploy** — nhánh abc → gộp `main` → Actions Run workflow (`anhungland.com`; không đụng CRM cũ) |
+| `deploy-staging` | **Khi bảo deploy** — gộp vào `main`; Actions tự lên `anhungland.com` (không đụng CRM cũ) |
 
 Gọi skill bằng `/skill-name` hoặc để agent tự chọn theo `description`.
 

@@ -1,47 +1,48 @@
 ---
 name: deploy-staging
-description: Deploy CRMAnHung to anhungland.com via GitHub Actions from main. Use when the user says deploy, đẩy lên server/VPS/staging, lên anhungland.com, or GitHub Action deploy.
+description: Deploy CRMAnHung to anhungland.com by merging to main (GitHub Actions auto-runs). Use when the user says deploy, đẩy lên server/VPS/staging, lên anhungland.com, or GitHub Action deploy.
 ---
 
 # Deploy staging — CRMAnHung
 
-Khi chủ sở hữu bảo **deploy** (sau khi sửa code xong), làm **đúng 3 bước** dưới. Không rsync từ máy agent trừ khi Action gãy và họ đồng ý đường dự phòng.
+Khi chủ sở hữu bảo **deploy** (sau khi sửa code xong), làm **đúng 2 bước agent** dưới. Push lên `main` thì GitHub Actions **tự** lên VPS — không nhờ chủ bấm Run workflow, không rsync từ máy agent (trừ khi Action gãy và họ đồng ý đường dự phòng).
 
 Site mới: **https://anhungland.com**  
 **Cấm** đụng `crm.anhungland.com`, `/var/www/anhungland-crm`, PM2 `anhungland-api`.
 
-Chi tiết server: `docs/DEPLOYMENT.md`. Workflow: `.github/workflows/deploy-staging.yml`.
+Chi tiết: `docs/DEPLOYMENT.md`. Workflow: `.github/workflows/deploy-staging.yml`.
 
 ## Quy trình (bắt buộc)
 
 ```
 ① Nhánh abc (cursor/…) — sửa, commit, push
-    ↓ ổn
+    ↓ chủ bảo deploy / đã ổn
 ② Gộp abc vào main
-    ↓
-③ Actions: Deploy CRMAnHung (staging) — Run workflow, chọn main
+    ↓ GitHub tự chạy
+③ Actions Deploy CRMAnHung (staging) trên commit main mới
 ```
 
 ### ① Nhánh đang làm
 
 - Commit + push trên nhánh feature (`cursor/<ten>-2b02`).
 - Không sửa trực tiếp trên VPS.
+- Push nhánh `abc` **không** lên server.
 
-### ② Gộp vào `main`
+### ② Gộp vào `main` (đây là “bấm deploy”)
 
-- PR **vào `main`** (không gộp nhầm PR đang trỏ nhánh `cursor` cha).
-- Gộp xong: `main` = bản sắp lên VPS.
-- Có thể xoá nhánh `abc` sau khi đã trên `main`. **Không xoá `main`.**
+- PR **vào `main`** rồi merge (hoặc fast-forward `main` tới tip nhánh đã review).
+- Không gộp nhầm PR đang trỏ nhánh `cursor` cha.
+- Sau merge: `main` = bản lên VPS. Có thể xoá nhánh `abc`. **Không xoá `main`.**
+- Agent **không** `gh workflow run` (token chỉ đọc). Không cần — `push` lên `main` đã trigger workflow.
 
-### ③ GitHub Actions
+### ③ Theo dõi Actions (không nhờ chủ bấm)
 
 - URL: https://github.com/BuiXuanKha/CRMAnHung/actions/workflows/deploy-staging.yml
-- **Run workflow** → **Use workflow from = `main`** → **Run workflow**.
-- Agent **không** `gh workflow run` (GitHub CLI chỉ đọc / 403). Nhờ chủ bấm nút; đưa đúng URL.
-- **Chỉ deploy `main`.** Không Run workflow trên nhánh đang làm dở.
-- Không auto-deploy mỗi lần push.
+- `gh run list --workflow=deploy-staging.yml --branch main --limit 1`
+- Chờ job xong; nếu không tự chạy: nhờ chủ **Run workflow** một lần (dự phòng `workflow_dispatch`).
+- **Chỉ `main` lên VPS.** Không deploy nhánh đang làm dở.
 
-Job xanh ≈ `rsync` (giữ `.env`) + `scripts/remote_deploy.sh` (pnpm, Prisma migrate, build, `pm2 restart crmanhung-api` + `crmanhung-web`).
+Job xanh ≈ `rsync` (giữ `.env`) + `scripts/remote_deploy.sh`.
 
 ### Kiểm tra sau job
 
@@ -52,11 +53,11 @@ Job xanh ≈ `rsync` (giữ `.env`) + `scripts/remote_deploy.sh` (pnpm, Prisma m
 
 ## Rollback
 
-Chạy lại workflow trên **commit `main` cũ** (hoặc revert rồi Run workflow). Migration Prisma **không** tự hoàn tác.
+Revert (hoặc reset có kiểm soát) trên `main` rồi **push** — Actions chạy lại. Migration Prisma **không** tự hoàn tác. Có thể Run workflow tay trên commit cũ.
 
 ## Secrets (đã gắn — không hỏi lại)
 
-Repo → Settings → Secrets and variables → Actions (không phải Deploy keys, không phải SSH keys tài khoản):
+Repo → Settings → Secrets and variables → Actions:
 
 | Secret | Ý nghĩa |
 |--------|---------|
@@ -72,6 +73,7 @@ Không dán private key / mật khẩu root vào chat. Không commit `.env`.
 - Đụng CRM cũ / port 5000 / cây `anhungland-crm`
 - Ghi đè `.env` trên server
 - `gh secret set` / `gh workflow run` khi token chỉ đọc
+- Nhờ chủ bấm Run workflow **khi merge `main` đã trigger được**
 
 ## Dự phòng (chỉ khi Action gãy)
 

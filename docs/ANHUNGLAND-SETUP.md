@@ -47,7 +47,7 @@ Repo CRMAnHung → Settings → **Secrets and variables** → **Actions** (khôn
 | `DEPLOY_SSH_HOST` | `103.15.51.19` |
 | `DEPLOY_SSH_KEY` | Private key user `deploy` |
 
-Đã gắn. Deploy: skill **`deploy-staging`** — gộp `main` rồi bấm Actions **Run workflow**.
+Đã gắn. Deploy: skill **`deploy-staging`** — gộp `main`, Actions tự chạy.
 
 ---
 
