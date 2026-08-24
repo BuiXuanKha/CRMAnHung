@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Copy, Phone, SquarePen, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, Phone, SquarePen } from 'lucide-react';
 import {
   LodatSaleStatus,
   UserRole,
@@ -15,6 +15,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, updateLodatSaleStatus } from './api';
+import { LodatImageGallery } from './components/lodat-image-gallery';
 import { SaleToggle } from './components/sale-toggle';
 import { buildLodatCopyText, copyTextToClipboard } from './copy-text';
 import {
@@ -329,61 +330,16 @@ export function LodatDetailPage() {
         </footer>
       ) : null}
 
-      {galleryOpen && imageCount ? (
-        <div
-          className="ld-gallery-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Thư viện ảnh"
-          onClick={() => setGalleryOpen(false)}
-        >
-          <button
-            type="button"
-            className="ld-gallery-close"
-            aria-label="Đóng"
-            onClick={() => setGalleryOpen(false)}
-          >
-            <X size={22} />
-          </button>
-          {imageCount > 1 ? (
-            <>
-              <button
-                type="button"
-                className="ld-gallery-nav prev"
-                aria-label="Ảnh trước"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goPrev();
-                }}
-              >
-                <ChevronLeft size={28} />
-              </button>
-              <button
-                type="button"
-                className="ld-gallery-nav next"
-                aria-label="Ảnh sau"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goNext();
-                }}
-              >
-                <ChevronRight size={28} />
-              </button>
-            </>
-          ) : null}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={heroUrl}
-            alt=""
-            className="ld-gallery-img"
-            onClick={(e) => e.stopPropagation()}
-          />
-          {imageCount > 1 ? (
-            <span className="ld-gallery-count">
-              {heroIdx + 1}/{imageCount}
-            </span>
-          ) : null}
-        </div>
+      {galleryOpen && detail && imageCount ? (
+        <LodatImageGallery
+          title={detail.title}
+          urls={images}
+          startIndex={heroIdx}
+          onClose={() => setGalleryOpen(false)}
+          onIndexChange={setHeroIdx}
+          onToast={flash}
+          onError={setAlertMsg}
+        />
       ) : null}
 
       <CrmAlertDialog

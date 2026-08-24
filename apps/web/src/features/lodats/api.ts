@@ -14,12 +14,32 @@ import { mockLodats } from './mock-data';
 
 let mockStore: LodatListItem[] = structuredClone(mockLodats);
 
+const MOCK_IMAGE_POOL = [
+  '/mock/lodats/p1.svg',
+  '/mock/lodats/p2.svg',
+  '/mock/lodats/p3.svg',
+  '/mock/lodats/p4.svg',
+  '/mock/lodats/p5.svg',
+  '/mock/lodats/p6.svg',
+];
+
+function mockImageUrls(item: LodatListItem): string[] {
+  const cover = item.coverImageUrl;
+  if (!cover) return [];
+  const extra = Math.max(0, item.extraPhotoCount ?? 0);
+  const urls = [cover];
+  for (let i = 0; i < extra; i += 1) {
+    const next = MOCK_IMAGE_POOL[(MOCK_IMAGE_POOL.indexOf(cover) + i + 1) % MOCK_IMAGE_POOL.length];
+    if (next && !urls.includes(next)) urls.push(next);
+  }
+  return urls;
+}
+
 function toDetail(item: LodatListItem): LodatDetail {
-  const urls = item.coverImageUrl ? [item.coverImageUrl] : [];
   return {
     ...item,
     note: null,
-    imageUrls: urls,
+    imageUrls: mockImageUrls(item),
     owner: item.customerHint
       ? { customerId: 'mock', fullName: item.customerHint, phones: [] }
       : null,

@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list + chi tiết đọc `/lo-dat/[id]`; **chưa bàn** list ADMIN / form sửa / đổi chủ
+- **Status:** Ready for API — list + chi tiết đọc `/lo-dat/[id]` + gallery view (tải/xoay phiên); **chưa bàn** list ADMIN / form sửa / đổi chủ / lưu xoay
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
@@ -324,9 +324,13 @@ Nút Giao dịch / Sửa (placeholder toast)
 
 Cùng nội dung; footer dính đáy: **Giao dịch** · **Sửa lô đất**.
 
-#### 12.3.3 Để sau
+#### 12.3.3 Gallery ảnh (đã làm)
 
-Lịch sử chủ / đổi chủ · lịch sử GD · lô cùng xã · upload/xoay ảnh · form sửa đầy đủ.
+Full-screen giống CRM cũ: tiêu đề + `N / M` · đóng · prev/next · vuốt · chấm · **Tải về** · **Xoay trái/phải** (CSS trong phiên; chưa lưu DB) · icon mở ảnh gốc.
+
+#### 12.3.4 Để sau
+
+Lịch sử chủ / đổi chủ · lịch sử GD · lô cùng xã · **upload ảnh** / **lưu xoay** · form sửa đầy đủ.
 
 ---
 
@@ -373,7 +377,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | Form + picker địa chỉ bước 3 |
-| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Slice đọc + gallery + toggle **trong PR này**; đổi chủ / form sửa Todo |
+| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Slice đọc + gallery view (tải/xoay phiên) **xong**; đổi chủ / form sửa / lưu xoay / upload Todo |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
 
 Copy data: script **chỉ đọc** SQLite, idempotent, map id trong schema `migrate` — như khách. Skill agent: **`migrate-legacy-data`** (preflight FK, giữ luồng kha/buinam, reshape PROJECT → `ProjectLot`).
