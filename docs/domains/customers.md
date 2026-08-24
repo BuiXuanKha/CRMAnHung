@@ -18,8 +18,8 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 | Actor | List | Không |
 |-------|------|--------|
-| STAFF | Khách của mình | Khách NV khác; tạo lô khi là admin; hard-delete |
-| ADMIN | Tất cả; sửa/xoá SĐT; không tạo lô từ menu | Hard-delete P1 |
+| STAFF | Khách của mình; **sửa/xoá SĐT** và **sửa tên Facebook** của khách mình | Khách NV khác; tạo lô khi là admin; hard-delete |
+| ADMIN | Tất cả khách (cùng thao tác SĐT / tên FB trên khách đang xem) | Hard-delete / registry — **chưa làm** |
 
 ## 3. Khái niệm
 
@@ -43,32 +43,44 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 
 **Lô đất — tạm dừng.** Chủ sẽ bàn thêm (nhiều vấn đề riêng). Không làm / không copy: tạo lô từ khách (6), rail lô (22), icon Map + đếm lô (23), gắn khách↔lô trên chi tiết. UI lô trên khách **giữ mock**. Domain `/lo-dat` làm sau khi chốt.
 
+**Hàng đợi còn lại (chốt 2026-08-24)** — không làm cho đến khi chủ bảo:
+
+| TT | Việc | Quyết định |
+|----|------|------------|
+| 1 | Khôi phục khách ẩn (§11 mục 16) | **Chưa làm.** Phụ thuộc extension kéo khách cũ. |
+| 2 | Tạo hồ sơ sổ đỏ từ khách (§11 mục 7) | **Chưa làm.** |
+| 3 | Xoá SĐT (§11 mục 11) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
+| 4 | Sửa tên Facebook (§11 mục 13) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
+| 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Sau** khi đã xong mục 1 (khôi phục ẩn). |
+| 6 | Inbox Facebook sống (§11 mục 21) | **Cần bàn rõ hơn.** |
+| 7 | Quản trị khách / hard-delete (§11 mục 26) | **Chưa làm** (phần admin). |
+
 1. **Dữ liệu thật** — list `/khach-hang` đọc Postgres (tên, trạng thái, tài chính, ghim, kênh, avatar, SĐT, nhu cầu). Staging đã copy.
 2. **Form cập nhật chăm sóc** — trạng thái, nhu cầu, tài chính (chip), ghi chú. Có trên staging (modal PC / trang mobile).
 3. **Double-click dòng (máy tính)** — mở modal chăm sóc. Có trên staging.
 4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lịch sử chăm sóc (API). Có trên staging. Lô đất trên trang này **vẫn mock**.
 5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Có trên staging.
 6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. Hiện toast. **Tạm dừng** (bàn thêm).
-7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung.
+7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung. **Chưa làm** (chốt 2026-08-24).
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
 10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Có trên staging. Trùng số → modal mục 15.
-11. **Xoá SĐT (admin)** — thùng rác + modal.
+11. **Xoá SĐT** — thùng rác + modal. **NV phụ trách khách** (không chỉ admin). Chưa làm UI/API.
 12. **Sửa tên khách** — bút trên tên (máy tính). Có trên staging.
-13. **Sửa tên Facebook (admin)** — bút trên tên FB (máy tính).
+13. **Sửa tên Facebook** — bút trên tên FB (máy tính). **NV phụ trách khách** (không chỉ admin). Chưa làm UI/API.
 14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Có trên staging.
 15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Có trên staging.
-16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách».
+16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách». **Chưa làm** — phụ thuộc extension (chốt 2026-08-24).
 17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care, không rỗng). Có trên staging (237 khách có lịch sử).
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Có trên staging.
-21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook (`facebook.com/messages`) làm sau; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
+21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook sống (`facebook.com/messages`) — **cần bàn rõ hơn**; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
 22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. Hiện mock. **Tạm dừng** (bàn thêm).
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; **không** icon mess trên item (chat = rail + menu). **Tạm dừng** (bàn thêm).
 24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Có trên staging.
-25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn.
-26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder P4.
+25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn. **Sau** mục 16 / hàng đợi mục 1.
+26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder. **Chưa làm** (chốt 2026-08-24).
 
 ---
 
@@ -153,8 +165,8 @@ Bấm → modal **Thêm số điện thoại**. Trùng số → modal mục 15.
 
 ##### 5. Icon thùng rác SĐT
 
-Chỉ **admin**, khách chưa xoá, đã có số.  
-Bấm → modal **Xoá số điện thoại**.
+Khách chưa xoá, đã có số. **NV phụ trách khách** (STAFF = khách mình; ADMIN = khách đang xem). Không phải thao tác chỉ admin.  
+Bấm → modal **Xoá số điện thoại**. Chưa làm.
 
 ##### 6. Icon Map + số lô
 
@@ -168,8 +180,8 @@ Khách nét / mới / cần chăm sóc / Khác.
 
 ##### 8. Tên Facebook (dòng phụ)
 
-Hiện nếu khác tên CRM, hoặc admin + có FB.  
-Admin: bút → modal **Sửa tên Facebook**.
+Hiện nếu khác tên CRM, hoặc có hồ sơ FB.  
+**NV phụ trách khách:** bút (máy tính) → modal **Sửa tên Facebook**. Không phải thao tác chỉ admin. Chưa làm.
 
 ##### 9. Nhu cầu
 
@@ -303,19 +315,19 @@ Cùng 12.1.4 mục 4 (modal thêm số).
 
 ##### 4. Icon thùng rác SĐT
 
-Cùng 12.1.4 mục 5 (admin).
+Cùng 12.1.3 mục 5 (NV phụ trách khách, không chỉ admin).
 
 ##### 5. Icon Map + số lô
 
-Cùng 12.1.4 mục 6.
+Cùng 12.1.3 mục 6.
 
 ##### 6. Hangtag trạng thái
 
-Cùng 12.1.4 mục 7.
+Cùng 12.1.3 mục 7.
 
 ##### 7. Tên Facebook (dòng phụ)
 
-Cùng điều kiện 12.1.4 mục 8. **Không** bút sửa FB trên thẻ.
+Cùng điều kiện 12.1.3 mục 8. **Không** bút sửa FB trên thẻ.
 
 ##### 8. Nhu cầu
 
