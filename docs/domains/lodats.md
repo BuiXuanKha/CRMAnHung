@@ -1,10 +1,10 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list `/lo-dat` STAFF (mock §12 + API); schema/copy data xong staging; **chưa bàn** list ADMIN
-- **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
+- **Status:** Ready for API — list + chi tiết đọc `/lo-dat/[id]`; **chưa bàn** list ADMIN / form sửa / đổi chủ
+- **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
-- **Contract:** `packages/shared/src/lodats.ts` (list mock — sẽ chỉnh khi model chốt)
+- **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
 - **Địa chỉ:** [`addresses.md`](./addresses.md)
 
 §12 = đặc tả list. Mỗi trang: **máy tính** → **mobile** → rồi chi tiết từng phần.
@@ -100,11 +100,11 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 
 | Nguồn | Ai | Ghi chú |
 |-------|----|---------|
-| Ảnh **dự án** (trên địa chỉ PROJECT) | Chỉ **Admin** thêm/sửa/xoá | Mọi lô thuộc dự án A (tức `Lodat` trỏ `ProjectLot` của A) đều hiển thị **ảnh chung** của dự án A |
-| Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | NV thêm/cập nhật ảnh riêng cho lô đất thường; có thể gỡ/bổ sung theo quyền |
-| Ảnh riêng cho **lô dự án** | (không áp dụng giai đoạn này) | Chỉ hiển thị ảnh dự án (không có ảnh lô riêng cho phần trỏ kho) |
+| Ảnh **dự án** (trên địa chỉ PROJECT) | Chỉ **Admin** thêm/sửa/xoá | Mọi lô thuộc dự án A đều hiện **ảnh chung** dự án |
+| Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng hoặc gắn path ảnh chat (reuse) |
+| Ảnh riêng thửa **dự án** (theo luồng NV) | NV gắn khi tạo/sửa | Ghép với ảnh dự án trên chi tiết (giống CRM cũ) |
 
-Hangtag Nhà/Đất trên list = trục khác (nhà vs đất trống), **không** phải dự án vs dân. Copy data: chưa chốt.
+Hangtag Nhà/Đất trên list = trục khác (nhà vs đất trống), **không** phải dự án vs dân.
 
 ---
 
@@ -306,7 +306,27 @@ Cùng câu `Hiển thị N / Tổng M lô đất`.
 
 ### 12.3 Chi tiết `/lo-dat/[id]`
 
-Placeholder: tên lô + quay lại. Ảnh / chủ / ghi chú — sau.
+Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + toggle):
+
+#### 12.3.1 Máy tính
+
+```
+← Danh sách
+Header: tiêu đề · địa chỉ · hangtag Nhà/Đất · Dự án|Đất dân
+        STAFF: công tắc Mở bán | ADMIN: badge · Copy thông tin
+Hero ảnh (prev/next, bấm → gallery)
+Specs: DT · MT·hướng · giá · ghi chú giá · hoa hồng · chủ (tên+SĐT)
+Ghi chú lô (nếu có)
+Nút Giao dịch / Sửa (placeholder toast)
+```
+
+#### 12.3.2 Mobile
+
+Cùng nội dung; footer dính đáy: **Giao dịch** · **Sửa lô đất**.
+
+#### 12.3.3 Để sau
+
+Lịch sử chủ / đổi chủ · lịch sử GD · lô cùng xã · upload/xoay ảnh · form sửa đầy đủ.
 
 ---
 
@@ -353,7 +373,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | Form + picker địa chỉ bước 3 |
-| **13** | Đổi chủ trong luồng NV + ảnh lô dân (upload) | Đã chốt quyền | Chi tiết `/lo-dat/[id]` còn placeholder — làm đủ để đổi chủ |
+| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Slice đọc + gallery + toggle **trong PR này**; đổi chủ / form sửa Todo |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
 
 Copy data: script **chỉ đọc** SQLite, idempotent, map id trong schema `migrate` — như khách. Skill agent: **`migrate-legacy-data`** (preflight FK, giữ luồng kha/buinam, reshape PROJECT → `ProjectLot`).

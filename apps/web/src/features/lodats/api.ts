@@ -2,6 +2,7 @@ import {
   LODAT_KIND_LABELS,
   LodatSaleStatus,
   updateLodatSaleStatusSchema,
+  type LodatDetail,
   type LodatListItem,
   type LodatListQuery,
   type LodatListResponse,
@@ -12,6 +13,18 @@ import { isMockLodats } from '@/shared/api/mode';
 import { mockLodats } from './mock-data';
 
 let mockStore: LodatListItem[] = structuredClone(mockLodats);
+
+function toDetail(item: LodatListItem): LodatDetail {
+  const urls = item.coverImageUrl ? [item.coverImageUrl] : [];
+  return {
+    ...item,
+    note: null,
+    imageUrls: urls,
+    owner: item.customerHint
+      ? { customerId: 'mock', fullName: item.customerHint, phones: [] }
+      : null,
+  };
+}
 
 function applyQuery(items: LodatListItem[], query: LodatListQuery = {}): LodatListItem[] {
   let next = items;
@@ -59,21 +72,21 @@ export async function listLodats(query: LodatListQuery = {}): Promise<LodatListR
   return apiFetch<LodatListResponse>(`/lodats${qs ? `?${qs}` : ''}`);
 }
 
-export async function getLodat(id: string): Promise<LodatListItem> {
+export async function getLodat(id: string): Promise<LodatDetail> {
   if (isMockLodats()) {
     const found = mockStore.find((p) => p.id === id);
     if (!found) {
       throw new Error('Không tìm thấy lô đất');
     }
-    return found;
+    return toDetail(found);
   }
-  return apiFetch<LodatListItem>(`/lodats/${id}`);
+  return apiFetch<LodatDetail>(`/lodats/${id}`);
 }
 
 export async function updateLodatSaleStatus(
   id: string,
   input: UpdateLodatSaleStatusInput,
-): Promise<LodatListItem> {
+): Promise<LodatDetail> {
   const parsed = updateLodatSaleStatusSchema.parse(input);
   if (isMockLodats()) {
     const idx = mockStore.findIndex((p) => p.id === id);
@@ -85,9 +98,9 @@ export async function updateLodatSaleStatus(
       updatedAt: new Date().toISOString(),
     };
     mockStore = mockStore.map((p, i) => (i === idx ? updated : p));
-    return updated;
+    return toDetail(updated);
   }
-  return apiFetch<LodatListItem>(`/lodats/${id}/sale-status`, {
+  return apiFetch<LodatDetail>(`/lodats/${id}/sale-status`, {
     method: 'PATCH',
     body: JSON.stringify(parsed),
   });
