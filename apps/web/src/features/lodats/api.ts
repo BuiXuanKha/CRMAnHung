@@ -8,7 +8,7 @@ import {
   type UpdateLodatSaleStatusInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
-import { isMockMode } from '@/shared/api/mode';
+import { isMockLodats } from '@/shared/api/mode';
 import { mockLodats } from './mock-data';
 
 let mockStore: LodatListItem[] = structuredClone(mockLodats);
@@ -45,7 +45,7 @@ function applyQuery(items: LodatListItem[], query: LodatListQuery = {}): LodatLi
 }
 
 export async function listLodats(query: LodatListQuery = {}): Promise<LodatListResponse> {
-  if (isMockMode()) {
+  if (isMockLodats()) {
     const items = applyQuery(mockStore, query);
     return { items, total: items.length };
   }
@@ -60,7 +60,7 @@ export async function listLodats(query: LodatListQuery = {}): Promise<LodatListR
 }
 
 export async function getLodat(id: string): Promise<LodatListItem> {
-  if (isMockMode()) {
+  if (isMockLodats()) {
     const found = mockStore.find((p) => p.id === id);
     if (!found) {
       throw new Error('Không tìm thấy lô đất');
@@ -75,7 +75,7 @@ export async function updateLodatSaleStatus(
   input: UpdateLodatSaleStatusInput,
 ): Promise<LodatListItem> {
   const parsed = updateLodatSaleStatusSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockLodats()) {
     const idx = mockStore.findIndex((p) => p.id === id);
     if (idx < 0) throw new Error('Không tìm thấy lô đất');
     const current = mockStore[idx];

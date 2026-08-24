@@ -28,3 +28,10 @@ export function isMockCustomers(): boolean {
 export function isMockAddresses(): boolean {
   return isMockAuth();
 }
+
+/**
+ * List `/lo-dat`: API đã có. Staging login thật → Lodat + map; chỉ mock khi login giả.
+ */
+export function isMockLodats(): boolean {
+  return isMockAuth();
+}
