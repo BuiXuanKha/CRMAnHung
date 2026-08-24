@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Draft — đã chốt 2 bảng (lô + kho dự án, trỏ); còn ảnh lô / quyền đổi chủ
+- **Status:** Draft — đã chốt kho dự án trỏ + ảnh theo dự án/ảnh lô thường + quyền đổi chủ theo NV; còn chờ quyết định hiển thị list ADMIN
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (đọc hiểu, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (list mock — sẽ chỉnh khi model chốt)
@@ -62,7 +62,9 @@ Lô **đất dân** không dùng chung kho: thửa do NV tạo, NV khác không 
 
 ### 0.3 Đổi chủ
 
-Trong **một luồng NV**, chủ có thể chuyển nhượng (đóng map cũ, mở map mới). Giá/trạng thái map mới: như CRM cũ — `TAM_DUNG`, giá trống (chốt lại nếu muốn copy giá).
+Trong **một luồng NV**, chủ có thể chuyển nhượng (đóng map cũ, mở map mới).
+
+Quyền đổi chủ thuộc **nhân viên đang giữ luồng đó** (là người tạo `Lodat` trỏ `ProjectLot` và gắn chủ cho lô thuộc dự án). ADMIN có quyền tương tự.
 
 ### 0.4 Hai bảng lô — trỏ kho, không copy (chốt)
 
@@ -98,9 +100,9 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 
 | Nguồn | Ai | Ghi chú |
 |-------|----|---------|
-| Ảnh **dự án** (trên địa chỉ PROJECT) | Chỉ **Admin** thêm/sửa/xoá | STAFF xem trên lô; không đụng |
-| Địa chỉ đất dân | **Không** có ảnh địa chỉ | — |
-| Ảnh **riêng của lô** (upload / chat) | **Tạm hoãn** — chủ chưa trả lời |
+| Ảnh **dự án** (trên địa chỉ PROJECT) | Chỉ **Admin** thêm/sửa/xoá | Mọi lô thuộc dự án A (tức `Lodat` trỏ `ProjectLot` của A) đều hiển thị **ảnh chung** của dự án A |
+| Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | NV thêm/cập nhật ảnh riêng cho lô đất thường; có thể gỡ/bổ sung theo quyền |
+| Ảnh riêng cho **lô dự án** | (không áp dụng giai đoạn này) | Chỉ hiển thị ảnh dự án (không có ảnh lô riêng cho phần trỏ kho) |
 
 Hangtag Nhà/Đất trên list = trục khác (nhà vs đất trống), **không** phải dự án vs dân. Copy data: chưa chốt.
 
@@ -154,9 +156,7 @@ Quyền đã siết so với cũ: **chỉ Admin** tạo địa chỉ và import 
 
 Tạm hoãn (chủ chưa trả lời):
 
-1. **Ảnh riêng trên lô** (không phải ảnh dự án): NV thêm/gỡ được không?
-2. **Ai được đổi chủ** trong luồng của mình / admin / NV khác?
-3. List **admin** `/lo-dat`: 1 dòng / NV / LK12 (hai luồng hiện đủ) hay gộp 1 dòng như CRM cũ?
+1. List **ADMIN** `/lo-dat`: hiển thị **tách theo NV/luồng** hay **gộp** thành 1 dòng cho mỗi LK12?
 
 Nhẹ hơn (mặc định nếu không bác): hangtag Nhà/Đất copy = `DAT`; số lô trùng trong kho = cấm; admin được bổ sung lô vào dự án đã import; `DAT_COC`/`DA_BAN` cũ giữ khi copy, list chỉ hiện Mở bán/Tạm dừng. Giá `BIGINT`; hoa hồng chữ.
 
