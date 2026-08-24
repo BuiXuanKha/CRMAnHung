@@ -60,3 +60,26 @@ export const updateLodatSaleStatusSchema = z.object({
 });
 
 export type UpdateLodatSaleStatusInput = z.infer<typeof updateLodatSaleStatusSchema>;
+
+/** Chủ hiện tại trên chi tiết (map active). */
+export const lodatOwnerSchema = z.object({
+  customerId: z.string(),
+  fullName: z.string(),
+  phones: z.array(
+    z.object({
+      phone: z.string(),
+      label: z.string().nullable().optional(),
+    }),
+  ),
+});
+
+export type LodatOwner = z.infer<typeof lodatOwnerSchema>;
+
+/** Chi tiết `/lo-dat/[id]` — mở rộng list item. */
+export const lodatDetailSchema = lodatListItemSchema.extend({
+  note: z.string().nullable().optional(),
+  imageUrls: z.array(z.string()).default([]),
+  owner: lodatOwnerSchema.nullable().optional(),
+});
+
+export type LodatDetail = z.infer<typeof lodatDetailSchema>;

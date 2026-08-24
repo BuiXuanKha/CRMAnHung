@@ -35,7 +35,16 @@ const LIST_INCLUDE = {
     take: 1,
     orderBy: [{ updatedAt: 'desc' as const }],
     include: {
-      customer: { select: { id: true, fullName: true } },
+      customer: {
+        select: {
+          id: true,
+          fullName: true,
+          phones: {
+            orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
+            select: { phone: true, label: true },
+          },
+        },
+      },
     },
   },
 } satisfies Prisma.LodatInclude;
@@ -147,6 +156,32 @@ export class LodatsService {
       customerHint: activeMap?.customer?.fullName ?? null,
       projectLotId: row.projectLotId ?? null,
       updatedAt: updatedAt.toISOString(),
+    };
+  }
+
+  private mapDetail(row: LodatRow) {
+    const base = this.mapRow(row);
+    const keys = this.coverKeys(row);
+    const activeMap = row.maps[0] ?? null;
+    const customer = activeMap?.customer;
+    const note =
+      (row.projectLotId ? row.projectLot?.note : null) || row.note || null;
+    return {
+      ...base,
+      note: note?.trim() || null,
+      imageUrls: keys
+        .map((k) => this.publicUrl(k))
+        .filter((u): u is string => Boolean(u)),
+      owner: customer
+        ? {
+            customerId: customer.id,
+            fullName: customer.fullName,
+            phones: (customer.phones ?? []).map((ph) => ({
+              phone: ph.phone,
+              label: ph.label ?? null,
+            })),
+          }
+        : null,
     };
   }
 
@@ -283,7 +318,7 @@ export class LodatsService {
     if (!row.maps.length) {
       throw new NotFoundException('Lô đất chưa gắn chủ.');
     }
-    return this.mapRow(row);
+    return this.mapDetail(row);
   }
 
   async updateSaleStatus(
@@ -313,6 +348,6 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
-    return this.mapRow(refreshed);
+    return this.mapDetail(refreshed);
   }
 }
