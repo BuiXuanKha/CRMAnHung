@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import {
-  ADDRESS_KIND_LABELS,
   AddressKind,
   formatAddressLabel,
   type AddressListItem,
@@ -72,14 +71,29 @@ export function AddressPicker({
   const label = useMemo(() => {
     if (selected) return formatAddressLabel(selected);
     if (labelHint?.trim()) return labelHint.trim();
-    return 'Chọn địa chỉ…';
+    return 'Chọn Tỉnh / Huyện / Xã / Thôn hoặc Dự án…';
   }, [selected, labelHint]);
+
+  /** Dòng item như CRM cũ: tên đậm + phụ «Xã · Huyện · Tỉnh». */
+  function itemParts(item: AddressListItem): { title: string; sub: string } {
+    const detail = String(item.detail || '').trim();
+    const isProject = item.kind === AddressKind.PROJECT;
+    let title = detail || item.ward || '—';
+    if (isProject) {
+      const count = Number(item.lodatCount) || 0;
+      title = `${title} (${count} lô)`;
+    }
+    const subParts = detail
+      ? [item.ward, item.district, item.province]
+      : [item.district, item.province];
+    return { title, sub: subParts.filter(Boolean).join(' · ') };
+  }
 
   return (
     <div className="addr-picker">
       <button
         type="button"
-        className="addr-picker-trigger"
+        className={selected ? 'addr-picker-trigger' : 'addr-picker-trigger is-empty'}
         disabled={disabled}
         onClick={() => setOpen((v) => !v)}
       >
@@ -95,29 +109,35 @@ export function AddressPicker({
           {loading ? <p className="crm-form-hint">Đang tải…</p> : null}
           {error ? <p className="crm-form-error">{error}</p> : null}
           <ul>
-            {items.map((item) => (
-              <li key={item.id}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelected(item);
-                    onChange(item);
-                    setOpen(false);
-                  }}
-                >
-                  <span
-                    className={
-                      item.kind === AddressKind.PROJECT
-                        ? 'addr-kind-tag is-project'
-                        : 'addr-kind-tag'
-                    }
+            {items.map((item) => {
+              const { title, sub } = itemParts(item);
+              const isProject = item.kind === AddressKind.PROJECT;
+              return (
+                <li key={item.id}>
+                  <button
+                    type="button"
+                    className="addr-picker-item"
+                    onClick={() => {
+                      setSelected(item);
+                      onChange(item);
+                      setOpen(false);
+                    }}
                   >
-                    {ADDRESS_KIND_LABELS[item.kind]}
-                  </span>
-                  {formatAddressLabel(item)}
-                </button>
-              </li>
-            ))}
+                    <span
+                      className={
+                        isProject ? 'addr-kind-tag is-project' : 'addr-kind-tag'
+                      }
+                    >
+                      {isProject ? 'Dự án' : 'Thường'}
+                    </span>
+                    <span className="addr-picker-item-text">
+                      <strong>{title}</strong>
+                      {sub ? <span className="addr-picker-item-sub">{sub}</span> : null}
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
           </ul>
           <button
             type="button"
