@@ -1,0 +1,147 @@
+/* Modal chọn lô kho dự án — theo CRM cũ (lodats.md §12.5) */
+
+.ld-lot-modal-lead {
+  margin: 0 0 12px;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ld-lot-modal-search {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.ld-lot-modal-search span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.ld-lot-modal-search input {
+  font: inherit;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+}
+
+.ld-lot-modal-search input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.ld-lot-modal-list-head {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.ld-lot-modal-list-head span {
+  color: #2563eb;
+}
+
+.ld-lot-modal-state {
+  margin: 0;
+  padding: 16px 0;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.ld-lot-modal-list {
+  list-style: none;
+  margin: 0;
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(46vh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ld-lot-modal-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  font: inherit;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.ld-lot-modal-item:hover:not(:disabled) {
+  border-color: #bfdbfe;
+  background: #f8fafc;
+}
+
+.ld-lot-modal-item:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ld-lot-modal-thumb {
+  flex-shrink: 0;
+  width: 56px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: cover;
+  background: #e2e8f0;
+}
+
+.ld-lot-modal-thumb.empty {
+  display: inline-block;
+}
+
+.ld-lot-modal-badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+  color: #047857;
+  white-space: nowrap;
+}
+
+.ld-lot-modal-badge.taken {
+  background: #fffbeb;
+  border-color: #fde68a;
+  color: #b45309;
+}
+
+.ld-lot-modal-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ld-lot-modal-text strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ld-lot-modal-text .sub {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+@media (max-width: 640px) {
+  .ld-lot-modal-item {
+    flex-wrap: wrap;
+  }
+}

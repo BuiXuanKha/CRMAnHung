@@ -439,7 +439,7 @@ Layout 2 cột như §12.4.1: trái form; phải Hình ảnh + Xem nhanh sticky;
 └ Hình ảnh (chỉ đất dân, tối đa 5) — upload sau khi tạo xong ────┘
 ```
 
-- Lô **dự án**: thông số đọc từ kho (hiện DT·MT·hướng cạnh từng lô trong picker); không nhập specs; không thêm ảnh lô (ảnh dự án chung).
+- Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs; không thêm ảnh lô (ảnh dự án chung).
 - Lô **dân**: bắt buộc tiêu đề + địa chỉ REGULAR; specs như trang sửa; chip hướng/ghi chú giá/hoa hồng §12.4.3.
 - Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ (nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`.
 - 1 luồng active / NV / lô kho — API chặn, picker cũng khoá («Bạn đang giữ»).

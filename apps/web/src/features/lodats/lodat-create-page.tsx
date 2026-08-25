@@ -18,6 +18,7 @@ import {
   type AddressListItem,
   type CreateLodatInput,
   type LodatImage,
+  type ProjectLotOption,
 } from '@crmanhung/shared';
 import { AddressPicker } from '@/features/addresses/components/address-picker';
 import { useAuth } from '@/features/auth/auth-context';
@@ -32,6 +33,7 @@ import {
   uploadLodatImage,
 } from './api';
 import { LodatEditPreview } from './components/lodat-edit-preview';
+import { ProjectLotModal } from './components/project-lot-modal';
 import './lodat-edit.css';
 
 /** Hàng ảnh chờ tạo: ảnh chat reuse hoặc file chọn từ máy. */
@@ -54,6 +56,8 @@ export function LodatCreatePage() {
 
   const [address, setAddress] = useState<AddressListItem | null>(null);
   const [projectLotId, setProjectLotId] = useState('');
+  const [selectedLot, setSelectedLot] = useState<ProjectLotOption | null>(null);
+  const [lotModalOpen, setLotModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [areaM2, setAreaM2] = useState('');
   const [frontageM, setFrontageM] = useState('');
@@ -307,45 +311,46 @@ export function LodatCreatePage() {
                     onChange={(item) => {
                       setAddress(item);
                       setProjectLotId('');
+                      setSelectedLot(null);
+                      // CRM cũ: chọn dự án → mở luôn modal chọn lô kho
+                      if (item?.kind === AddressKind.PROJECT) setLotModalOpen(true);
                     }}
                   />
                 </label>
 
                 {isProject ? (
-                  <label className="ld-edit-field">
+                  <div className="ld-edit-field">
                     <span>Lô trong kho *</span>
-                    {lotsQ.isLoading ? (
-                      <p className="ld-edit-hint">Đang tải kho lô…</p>
-                    ) : lotOptions.length === 0 ? (
-                      <p className="ld-edit-hint muted">
-                        Dự án này chưa có lô trong kho. Liên hệ Admin import kho.
+                    {selectedLot ? (
+                      <p className="ld-edit-hint">
+                        Đã chọn: <strong>{selectedLot.title}</strong>
+                        {[
+                          selectedLot.areaM2 != null
+                            ? `${selectedLot.areaM2.toLocaleString('vi-VN')} m²`
+                            : null,
+                          selectedLot.frontageM != null
+                            ? `MT ${selectedLot.frontageM.toLocaleString('vi-VN')} m`
+                            : null,
+                          selectedLot.direction || null,
+                        ]
+                          .filter(Boolean)
+                          .map((s) => ` · ${s}`)
+                          .join('')}
                       </p>
                     ) : (
-                      <select
-                        value={projectLotId}
-                        onChange={(e) => setProjectLotId(e.target.value)}
-                        disabled={saving}
-                      >
-                        <option value="">— Chọn lô —</option>
-                        {lotOptions.map((lot) => {
-                          const specs = [
-                            lot.areaM2 != null ? `${lot.areaM2} m²` : null,
-                            lot.frontageM != null ? `MT ${lot.frontageM} m` : null,
-                            lot.direction || null,
-                          ]
-                            .filter(Boolean)
-                            .join(' · ');
-                          return (
-                            <option key={lot.id} value={lot.id} disabled={lot.takenByMe}>
-                              {lot.title}
-                              {specs ? ` — ${specs}` : ''}
-                              {lot.takenByMe ? ' (bạn đang giữ)' : ''}
-                            </option>
-                          );
-                        })}
-                      </select>
+                      <p className="ld-edit-hint muted">Chưa chọn lô trong kho.</p>
                     )}
-                  </label>
+                    <div className="ld-edit-chips">
+                      <button
+                        type="button"
+                        className="ld-edit-chip"
+                        disabled={saving}
+                        onClick={() => setLotModalOpen(true)}
+                      >
+                        {selectedLot ? 'Đổi lô khác' : 'Chọn lô trong kho'}
+                      </button>
+                    </div>
+                  </div>
                 ) : (
                   <>
                     <label className="ld-edit-field">
@@ -683,6 +688,25 @@ export function LodatCreatePage() {
           </div>
         </form>
       ) : null}
+
+      <ProjectLotModal
+        open={lotModalOpen && Boolean(address) && isProject}
+        address={address}
+        lots={lotOptions}
+        loading={lotsQ.isLoading}
+        onPick={(lot) => {
+          setProjectLotId(lot.id);
+          setSelectedLot(lot);
+          setLotModalOpen(false);
+        }}
+        onCancelProject={() => {
+          setAddress(null);
+          setProjectLotId('');
+          setSelectedLot(null);
+          setLotModalOpen(false);
+        }}
+        onClose={() => setLotModalOpen(false)}
+      />
 
       <CrmAlertDialog
         open={Boolean(alertMsg)}
