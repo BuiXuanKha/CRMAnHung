@@ -22,19 +22,28 @@ export function ActionMenu({ plot, open, onToggle, onClose, onAction }: Props) {
   const menuRef = useRef<HTMLUListElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
+  /* Chỉ hiện menu khi nút của instance này đang nhìn thấy (bảng/thẻ cùng render). */
+  const [triggerVisible, setTriggerVisible] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setTriggerVisible(false);
+      return;
+    }
     const btn = wrapRef.current?.querySelector('button');
-    if (!btn) return;
+    if (!btn || btn.getClientRects().length === 0) {
+      setTriggerVisible(false);
+      return;
+    }
     const r = btn.getBoundingClientRect();
     const width = 196;
     const left = Math.min(r.right - width, window.innerWidth - width - 8);
     setPos({ top: r.bottom + 4, left: Math.max(8, left) });
+    setTriggerVisible(true);
   }, [open]);
 
   useEffect(() => {
@@ -49,7 +58,7 @@ export function ActionMenu({ plot, open, onToggle, onClose, onAction }: Props) {
   }, [open, onClose]);
 
   const menu =
-    open && mounted
+    open && mounted && triggerVisible
       ? createPortal(
           <ul
             ref={menuRef}

@@ -37,6 +37,8 @@ export function ColumnFilter({
   const menuRef = useRef<HTMLUListElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
+  /* Chỉ hiện menu khi nút lọc đang nhìn thấy (header bảng ẩn trên mobile). */
+  const [triggerVisible, setTriggerVisible] = useState(false);
   const active = value !== allValue && value !== '';
 
   useEffect(() => {
@@ -44,13 +46,20 @@ export function ColumnFilter({
   }, []);
 
   useLayoutEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setTriggerVisible(false);
+      return;
+    }
     const btn = wrapRef.current?.querySelector('button');
-    if (!btn) return;
+    if (!btn || btn.getClientRects().length === 0) {
+      setTriggerVisible(false);
+      return;
+    }
     const r = btn.getBoundingClientRect();
     const width = 220;
     const left = Math.min(r.left, window.innerWidth - width - 8);
     setPos({ top: r.bottom + 4, left: Math.max(8, left) });
+    setTriggerVisible(true);
   }, [open]);
 
   useEffect(() => {
@@ -65,7 +74,7 @@ export function ColumnFilter({
   }, [open, onClose]);
 
   const menu =
-    open && mounted
+    open && mounted && triggerVisible
       ? createPortal(
           <ul
             ref={menuRef}
