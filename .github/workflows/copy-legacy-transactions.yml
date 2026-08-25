@@ -1,0 +1,71 @@
+name: Copy legacy transactions
+
+# One-shot: SSH VPS, copy tblTransaction* → Postgres.
+# Không đụng CRM cũ (SQLite chỉ đọc). Không restart PM2.
+#
+# Chạy khi file workflow này được đẩy lên main (hoặc Run workflow).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/copy-legacy-transactions.yml'
+  workflow_dispatch:
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+      SSH_USER: deploy
+      REMOTE_ROOT: '/var/www/crmanhung'
+    steps:
+      - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${SSH_HOST:-}" || { echo "Missing secret DEPLOY_SSH_HOST"; exit 1; }
+          test -n "${SSH_KEY:-}" || { echo "Missing secret DEPLOY_SSH_KEY"; exit 1; }
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          KEY_TRIMMED=$(printf '%s' "$SSH_KEY" | tr -d '\r')
+          if printf '%s' "$KEY_TRIMMED" | grep -q "BEGIN .*PRIVATE KEY"; then
+            printf '%s\n' "$KEY_TRIMMED" > ~/.ssh/deploy_key
+          else
+            printf '%s' "$KEY_TRIMMED" | base64 -d > ~/.ssh/deploy_key
+          fi
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh-keyscan -H "$SSH_HOST" > ~/.ssh/known_hosts 2>/tmp/keyscan.err || true
+          test -s ~/.ssh/known_hosts || { cat /tmp/keyscan.err; exit 1; }
+
+          printf '%s\n' \
+            '#!/bin/bash' \
+            'exec ssh -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" "$@"' \
+            > "$HOME/.ssh/rsh.sh"
+          chmod +x "$HOME/.ssh/rsh.sh"
+          echo "REMOTE=${SSH_USER}@${SSH_HOST}" > "$HOME/.ssh/deploy.env"
+          "$HOME/.ssh/rsh.sh" "${SSH_USER}@${SSH_HOST}" "echo SSH_OK"
+
+      - name: Run transactions migrate
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          "$RSH" "$REMOTE" bash -s <<'REMOTE'
+          set -euo pipefail
+          cd /var/www/crmanhung/repo/apps/api
+          export LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db
+          echo "==> Preflight sqlite (read-only)"
+          sqlite3 "$LEGACY_SQLITE" "SELECT COUNT(*) AS tx FROM tblTransaction;"
+          echo "==> Copy transactions"
+          if ! pnpm transactions:migrate-legacy; then
+            echo "==> Có thể thiếu bước 10d — chạy lodats rồi copy lại"
+            pnpm lodats:migrate-legacy
+            pnpm transactions:migrate-legacy
+          fi
+          echo "==> Done copy (CRM cũ không bị ghi)"
+          REMOTE
