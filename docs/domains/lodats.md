@@ -312,17 +312,20 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 
 ```
 ← Danh sách
-Header: tiêu đề · địa chỉ · hangtag Nhà/Đất · Dự án|Đất dân
-        STAFF: công tắc Mở bán | ADMIN: badge · Copy thông tin
-Hero ảnh (prev/next, bấm → gallery)
-Specs: DT · MT·hướng · giá · ghi chú giá · hoa hồng · chủ (tên+SĐT)
-Ghi chú lô (nếu có)
-Nút Giao dịch / Sửa (placeholder toast)
+┌ detailLayout (grid 2fr | 1fr, ≥1024px) ────────────────────────────┐
+│ ┌ content (trái) ──────────────┐  ┌ relatedAside sticky phải ───┐ │
+│ │ Header: tiêu đề · địa chỉ ·  │  │ Lô đất cùng xã              │ │
+│ │   hangtag · Mở bán · Copy    │  │ {tên xã}                    │ │
+│ │ Hero ảnh (prev/next→gallery) │  │ list scroll độc lập         │ │
+│ │ Specs · chủ · ghi chú        │  │ (thumb · title · giá · TT)  │ │
+│ │ Nút Giao dịch / Sửa          │  └─────────────────────────────┘ │
+│ └──────────────────────────────┘                                  │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 12.3.2 Mobile
 
-Cùng nội dung; footer dính đáy: **Giao dịch** · **Sửa lô đất**.
+Xếp dọc: content → **Lô đất cùng xã** dưới specs; footer dính đáy: **Giao dịch** · **Sửa lô đất**.
 
 #### 12.3.3 Gallery ảnh (đã làm)
 
@@ -333,7 +336,7 @@ Full-screen giống CRM cũ: tiêu đề + `N / M` · đóng · prev/next · vu�
 
 #### 12.3.4 Lô cùng xã (đã làm)
 
-Dưới specs / ghi chú: danh sách lô **cùng `wardId`** (địa chỉ dân hoặc địa chỉ dự án), cùng quyền list (STAFF chỉ luồng mình), trừ lô đang xem. Thẻ bấm → `/lo-dat/[id]`. Không có xã → ẩn khối.
+CRM cũ `relatedAside`: desktop **cột phải sticky** (`max-height` + scroll thân); mobile dưới content. Danh sách lô **cùng `wardId`**, cùng quyền list (STAFF chỉ luồng mình), trừ lô đang xem. Thẻ bấm → `/lo-dat/[id]`. Không có xã → ẩn khối.
 
 #### 12.3.5 Để sau
 

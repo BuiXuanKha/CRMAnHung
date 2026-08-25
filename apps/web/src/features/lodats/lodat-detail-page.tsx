@@ -134,6 +134,15 @@ export function LodatDetailPage() {
   const heroUrl = hero?.url ?? '';
   const heroRotation = hero?.rotationDeg ?? 0;
 
+  const sameWardName = sameWardQ.data?.wardName ?? detail?.wardName ?? null;
+  const sameWardItems = sameWardQ.data?.items ?? [];
+  const sameWardError =
+    sameWardQ.error instanceof Error ? sameWardQ.error.message : null;
+  /** Hiện panel khi đã biết có xã (API trả wardName hoặc detail.wardName). */
+  const sameWardVisible = Boolean(
+    sameWardName || sameWardQ.isLoading || sameWardItems.length || sameWardError,
+  );
+
   return (
     <div className={['ld-detail-page', detail ? 'has-mobile-footer' : ''].filter(Boolean).join(' ')}>
       <Link href="/lo-dat" className="ld-detail-back">
@@ -145,202 +154,226 @@ export function LodatDetailPage() {
 
       {detail ? (
         <div className="ld-detail-layout">
-          <header className="ld-detail-header">
-            <div className="ld-detail-header-text">
-              <h1 className="ld-detail-title">{detail.title}</h1>
-              {detail.address ? (
-                <p className="ld-detail-address">{detail.address}</p>
-              ) : null}
-              <div className="ld-detail-kind">
-                <CrmBadge tone={kindTone(detail.kind)}>{kindLabel(detail.kind)}</CrmBadge>
-                {detail.projectLotId ? (
-                  <CrmBadge tone="gray">Dự án</CrmBadge>
+          <div className="ld-detail-content">
+            <header className="ld-detail-header">
+              <div className="ld-detail-header-text">
+                <h1 className="ld-detail-title">{detail.title}</h1>
+                {detail.address ? (
+                  <p className="ld-detail-address">{detail.address}</p>
+                ) : null}
+                <div className="ld-detail-kind">
+                  <CrmBadge tone={kindTone(detail.kind)}>{kindLabel(detail.kind)}</CrmBadge>
+                  {detail.projectLotId ? (
+                    <CrmBadge tone="gray">Dự án</CrmBadge>
+                  ) : (
+                    <CrmBadge tone="gray">Đất dân</CrmBadge>
+                  )}
+                </div>
+              </div>
+              <div className="ld-detail-header-actions">
+                {!isAdmin ? (
+                  <SaleToggle
+                    title={detail.title}
+                    status={detail.status}
+                    busy={toggleMut.isPending}
+                    onToggle={() => {
+                      if (!toggleMut.isPending) void toggleMut.mutateAsync(detail);
+                    }}
+                  />
                 ) : (
-                  <CrmBadge tone="gray">Đất dân</CrmBadge>
-                )}
-              </div>
-            </div>
-            <div className="ld-detail-header-actions">
-              {!isAdmin ? (
-                <SaleToggle
-                  title={detail.title}
-                  status={detail.status}
-                  busy={toggleMut.isPending}
-                  onToggle={() => {
-                    if (!toggleMut.isPending) void toggleMut.mutateAsync(detail);
-                  }}
-                />
-              ) : (
-                <CrmBadge tone={detail.status === LodatSaleStatus.DANG_BAN ? 'green' : 'gray'}>
-                  {detail.status === LodatSaleStatus.DANG_BAN ? 'Mở bán' : 'Tạm dừng'}
-                </CrmBadge>
-              )}
-              <button type="button" className="ld-detail-copy-btn" onClick={() => void handleCopy()}>
-                <Copy size={14} aria-hidden />
-                Copy thông tin
-              </button>
-            </div>
-          </header>
-
-          {imageCount ? (
-            <section className="ld-detail-media" aria-label="Ảnh lô đất">
-              <div
-                className="ld-detail-hero"
-                onTouchStart={(e) => {
-                  const t = e.touches[0];
-                  setTouchStart({ x: t.clientX, y: t.clientY });
-                }}
-                onTouchEnd={(e) => {
-                  if (!touchStart || imageCount < 2) return;
-                  const t = e.changedTouches[0];
-                  const dx = t.clientX - touchStart.x;
-                  const dy = t.clientY - touchStart.y;
-                  setTouchStart(null);
-                  if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy)) return;
-                  if (dx < 0) goNext();
-                  else goPrev();
-                }}
-              >
-                {imageCount > 1 ? (
-                  <>
-                    <button
-                      type="button"
-                      className="ld-detail-hero-nav prev"
-                      aria-label="Ảnh trước"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        goPrev();
-                      }}
-                    >
-                      <ChevronLeft size={20} />
-                    </button>
-                    <button
-                      type="button"
-                      className="ld-detail-hero-nav next"
-                      aria-label="Ảnh sau"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        goNext();
-                      }}
-                    >
-                      <ChevronRight size={20} />
-                    </button>
-                  </>
-                ) : null}
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={heroUrl}
-                  alt=""
-                  className="ld-detail-hero-img"
-                  style={heroRotation ? { transform: `rotate(${heroRotation}deg)` } : undefined}
-                  onClick={() => setGalleryOpen(true)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setGalleryOpen(true);
-                    }
-                  }}
-                  aria-label="Mở xem ảnh phóng to"
-                />
-                {imageCount > 1 ? (
-                  <span className="ld-detail-hero-badge" aria-hidden>
-                    {heroIdx + 1}/{imageCount}
-                  </span>
-                ) : null}
-              </div>
-            </section>
-          ) : (
-            <div className="ld-detail-no-images">Chưa có ảnh nào</div>
-          )}
-
-          <section className="ld-detail-specs" aria-label="Thông tin lô đất">
-            <dl className="ld-detail-spec-grid">
-              <div>
-                <dt>Diện tích</dt>
-                <dd>{formatArea(detail.areaM2)}</dd>
-              </div>
-              <div>
-                <dt>Mặt tiền · Hướng</dt>
-                <dd>{formatFrontageDir(detail.frontageM, detail.direction)}</dd>
-              </div>
-              <div>
-                <dt>Giá bán</dt>
-                <dd className="crm-money">{formatPriceVnd(detail.priceVnd)}</dd>
-              </div>
-              {detail.priceNote ? (
-                <div>
-                  <dt>Ghi chú giá</dt>
-                  <dd>{detail.priceNote}</dd>
-                </div>
-              ) : null}
-              {detail.brokerFeeNote ? (
-                <div>
-                  <dt>Hoa hồng</dt>
-                  <dd>{detail.brokerFeeNote}</dd>
-                </div>
-              ) : null}
-            </dl>
-
-            {detail.owner ? (
-              <footer className="ld-detail-owner">
-                <span className="ld-detail-owner-label">Tên chủ đất</span>
-                <div className="ld-detail-owner-body">
-                  <Link
-                    href={`/khach-hang/${detail.owner.customerId}`}
-                    className="ld-detail-owner-name"
+                  <CrmBadge
+                    tone={detail.status === LodatSaleStatus.DANG_BAN ? 'green' : 'gray'}
                   >
-                    {detail.owner.fullName}
-                  </Link>
-                  {detail.owner.phones.length ? (
-                    <ul className="ld-detail-owner-phones">
-                      {detail.owner.phones.map((ph) => (
-                        <li key={ph.phone}>
-                          <a href={`tel:${ph.phone}`}>
-                            <Phone size={12} aria-hidden />
-                            {ph.phone}
-                            {ph.label ? ` (${ph.label})` : ''}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
+                    {detail.status === LodatSaleStatus.DANG_BAN ? 'Mở bán' : 'Tạm dừng'}
+                  </CrmBadge>
+                )}
+                <button
+                  type="button"
+                  className="ld-detail-copy-btn"
+                  onClick={() => void handleCopy()}
+                >
+                  <Copy size={14} aria-hidden />
+                  Copy thông tin
+                </button>
+              </div>
+            </header>
+
+            {imageCount ? (
+              <section className="ld-detail-media" aria-label="Ảnh lô đất">
+                <div
+                  className="ld-detail-hero"
+                  onTouchStart={(e) => {
+                    const t = e.touches[0];
+                    setTouchStart({ x: t.clientX, y: t.clientY });
+                  }}
+                  onTouchEnd={(e) => {
+                    if (!touchStart || imageCount < 2) return;
+                    const t = e.changedTouches[0];
+                    const dx = t.clientX - touchStart.x;
+                    const dy = t.clientY - touchStart.y;
+                    setTouchStart(null);
+                    if (Math.abs(dx) < SWIPE_PX || Math.abs(dx) < Math.abs(dy)) return;
+                    if (dx < 0) goNext();
+                    else goPrev();
+                  }}
+                >
+                  {imageCount > 1 ? (
+                    <>
+                      <button
+                        type="button"
+                        className="ld-detail-hero-nav prev"
+                        aria-label="Ảnh trước"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goPrev();
+                        }}
+                      >
+                        <ChevronLeft size={20} />
+                      </button>
+                      <button
+                        type="button"
+                        className="ld-detail-hero-nav next"
+                        aria-label="Ảnh sau"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goNext();
+                        }}
+                      >
+                        <ChevronRight size={20} />
+                      </button>
+                    </>
+                  ) : null}
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={heroUrl}
+                    alt=""
+                    className="ld-detail-hero-img"
+                    style={
+                      heroRotation
+                        ? { transform: `rotate(${heroRotation}deg)` }
+                        : undefined
+                    }
+                    onClick={() => setGalleryOpen(true)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setGalleryOpen(true);
+                      }
+                    }}
+                    aria-label="Mở xem ảnh phóng to"
+                  />
+                  {imageCount > 1 ? (
+                    <span className="ld-detail-hero-badge" aria-hidden>
+                      {heroIdx + 1}/{imageCount}
+                    </span>
                   ) : null}
                 </div>
-              </footer>
-            ) : null}
-          </section>
+              </section>
+            ) : (
+              <div className="ld-detail-no-images">Chưa có ảnh nào</div>
+            )}
 
-          {detail.note ? (
-            <section className="ld-detail-note" aria-label="Ghi chú">
-              <h2>Ghi chú chung (lô đất)</h2>
-              <p>{detail.note}</p>
+            <section className="ld-detail-specs" aria-label="Thông tin lô đất">
+              <dl className="ld-detail-spec-grid">
+                <div>
+                  <dt>Diện tích</dt>
+                  <dd>{formatArea(detail.areaM2)}</dd>
+                </div>
+                <div>
+                  <dt>Mặt tiền · Hướng</dt>
+                  <dd>{formatFrontageDir(detail.frontageM, detail.direction)}</dd>
+                </div>
+                <div>
+                  <dt>Giá bán</dt>
+                  <dd className="crm-money">{formatPriceVnd(detail.priceVnd)}</dd>
+                </div>
+                {detail.priceNote ? (
+                  <div>
+                    <dt>Ghi chú giá</dt>
+                    <dd>{detail.priceNote}</dd>
+                  </div>
+                ) : null}
+                {detail.brokerFeeNote ? (
+                  <div>
+                    <dt>Hoa hồng</dt>
+                    <dd>{detail.brokerFeeNote}</dd>
+                  </div>
+                ) : null}
+              </dl>
+
+              {detail.owner ? (
+                <footer className="ld-detail-owner">
+                  <span className="ld-detail-owner-label">Tên chủ đất</span>
+                  <div className="ld-detail-owner-body">
+                    <Link
+                      href={`/khach-hang/${detail.owner.customerId}`}
+                      className="ld-detail-owner-name"
+                    >
+                      {detail.owner.fullName}
+                    </Link>
+                    {detail.owner.phones.length ? (
+                      <ul className="ld-detail-owner-phones">
+                        {detail.owner.phones.map((ph) => (
+                          <li key={ph.phone}>
+                            <a href={`tel:${ph.phone}`}>
+                              <Phone size={12} aria-hidden />
+                              {ph.phone}
+                              {ph.label ? ` (${ph.label})` : ''}
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
+                  </div>
+                </footer>
+              ) : null}
             </section>
-          ) : null}
+
+            {detail.note ? (
+              <section className="ld-detail-note" aria-label="Ghi chú">
+                <h2>Ghi chú chung (lô đất)</h2>
+                <p>{detail.note}</p>
+              </section>
+            ) : null}
+
+            <SameWardList
+              placement="mobile"
+              visible={sameWardVisible}
+              wardName={sameWardName}
+              items={sameWardItems}
+              loading={sameWardQ.isLoading}
+              error={sameWardError}
+            />
+
+            <div className="ld-detail-desktop-actions">
+              <button
+                type="button"
+                className="ld-detail-action-btn"
+                onClick={() => flash('Giao dịch — sẽ làm ở màn giao dịch.')}
+              >
+                Giao dịch
+              </button>
+              <button
+                type="button"
+                className="ld-detail-action-btn secondary"
+                onClick={() => router.push(`/lo-dat/${detail.id}/sua`)}
+              >
+                <SquarePen size={14} aria-hidden />
+                Sửa lô đất
+              </button>
+            </div>
+          </div>
 
           <SameWardList
-            wardName={sameWardQ.data?.wardName ?? detail.wardName}
-            items={sameWardQ.data?.items ?? []}
+            placement="desktop"
+            visible={sameWardVisible}
+            wardName={sameWardName}
+            items={sameWardItems}
             loading={sameWardQ.isLoading}
+            error={sameWardError}
           />
-
-          <div className="ld-detail-desktop-actions">
-            <button
-              type="button"
-              className="ld-detail-action-btn"
-              onClick={() => flash('Giao dịch — sẽ làm ở màn giao dịch.')}
-            >
-              Giao dịch
-            </button>
-            <button
-              type="button"
-              className="ld-detail-action-btn secondary"
-              onClick={() => router.push(`/lo-dat/${detail.id}/sua`)}
-            >
-              <SquarePen size={14} aria-hidden />
-              Sửa lô đất
-            </button>
-          </div>
         </div>
       ) : null}
 
