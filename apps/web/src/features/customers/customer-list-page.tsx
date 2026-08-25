@@ -23,6 +23,7 @@ import {
   getCustomer,
   isPhoneDuplicateError,
   listContactChannels,
+  listCustomerLodats,
   listCustomerMessages,
   listCustomers,
   listMyHotlines,
@@ -139,6 +140,7 @@ export function CustomerListPage() {
     budgetFilter: extra.finance === 'all' ? undefined : extra.finance,
     contactChannel: extra.channel === 'all' ? undefined : extra.channel,
     needFilter: extra.demand === 'all' ? undefined : extra.demand,
+    lodatFilter: extra.lodat === 'all' ? undefined : extra.lodat,
   };
 
   const list = useInfiniteQuery({
@@ -197,6 +199,12 @@ export function CustomerListPage() {
     queryKey: ['customer-messages', selectedId],
     queryFn: () => listCustomerMessages(selectedId as string),
     enabled: Boolean(selectedId) && rail === 'chat',
+  });
+
+  const customerLodats = useQuery({
+    queryKey: ['customer-lodats', selectedId],
+    queryFn: () => listCustomerLodats(selectedId as string),
+    enabled: Boolean(selectedId) && rail === 'lodat',
   });
 
   function flash(msg: string) {
@@ -393,7 +401,10 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'lodat') {
-      flash('Tạo lô đất — sẽ làm ở màn lô đất.');
+      setAlertBox({
+        title: 'Chức năng đang phát triển',
+        message: `Tạo lô đất cho «${customer.fullName}» sẽ sớm có trên trang khách.`,
+      });
       return;
     }
     if (action === 'sodo') {
@@ -621,6 +632,8 @@ export function CustomerListPage() {
           detail={detail.data ?? null}
           messages={thread.data?.messages ?? []}
           messagesLoading={thread.isLoading}
+          lodats={customerLodats.data?.items ?? []}
+          lodatsLoading={customerLodats.isLoading}
         />
       </div>
 

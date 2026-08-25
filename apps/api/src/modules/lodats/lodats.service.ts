@@ -374,6 +374,42 @@ export class LodatsService {
     return { items, total: items.length };
   }
 
+  /**
+   * Lô đang gắn khách (map active) — rail / chi tiết khách.
+   * ADMIN xem mọi lô của khách; STAFF chỉ lô mình tạo.
+   */
+  async listForCustomer(user: RequestUser, customerId: string) {
+    const and: Prisma.LodatWhereInput[] = [
+      this.ownershipWhere(user),
+      {
+        maps: {
+          some: { customerId, isActive: true },
+        },
+      },
+    ];
+    const rows = await this.prisma.lodat.findMany({
+      where: { AND: and },
+      include: LIST_INCLUDE,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+      take: 100,
+    });
+    const items = rows.map((row) => {
+      const mapped = this.mapRow(row);
+      return {
+        id: mapped.id,
+        title: mapped.title,
+        address: mapped.address,
+        areaM2: mapped.areaM2,
+        frontageM: mapped.frontageM,
+        direction: mapped.direction,
+        priceVnd: mapped.priceVnd,
+        coverImageUrl: mapped.coverImageUrl,
+        status: mapped.status,
+      };
+    });
+    return { items };
+  }
+
   async getById(user: RequestUser, id: string) {
     const row = await this.prisma.lodat.findUnique({
       where: { id },

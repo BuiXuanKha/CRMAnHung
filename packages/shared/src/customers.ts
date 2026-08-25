@@ -119,6 +119,7 @@ export const customerListQuerySchema = z.object({
   budgetFilter: z.enum(['none', 'has', 'lt_1b', '1b_2b', 'gt_2b']).optional(),
   contactChannel: z.string().trim().min(1).optional(),
   needFilter: z.enum(['has', 'empty']).optional(),
+  lodatFilter: z.enum(['has', 'empty']).optional(),
   limit: z.coerce.number().int().min(1).max(CUSTOMER_LIST_MAX_PAGE_SIZE).optional(),
   offset: z.coerce.number().int().min(0).optional(),
 });
@@ -325,3 +326,23 @@ export const customerMessengerThreadSchema = z.object({
 });
 
 export type CustomerMessengerThread = z.infer<typeof customerMessengerThreadSchema>;
+
+/** Lô gắn khách (rail / chi tiết) — tái dùng shape list lô. */
+export const customerLodatListResponseSchema = z.object({
+  items: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      address: z.string().nullable().optional(),
+      areaM2: z.number().nullable().optional(),
+      frontageM: z.number().nullable().optional(),
+      direction: z.string().nullable().optional(),
+      priceVnd: z.union([z.number(), z.string()]).nullable().optional(),
+      coverImageUrl: z.string().nullable().optional(),
+      status: z.string(),
+    }),
+  ),
+});
+
+export type CustomerLodatListResponse = z.infer<typeof customerLodatListResponseSchema>;
+export type CustomerLodatBrief = CustomerLodatListResponse['items'][number];

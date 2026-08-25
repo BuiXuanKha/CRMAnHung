@@ -127,11 +127,29 @@ export async function loadProfiles(
   return map;
 }
 
+export async function loadLodatCounts(
+  prisma: PrismaService,
+  customerIds: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (customerIds.length === 0) return map;
+  const rows = await prisma.lodatCustomerMap.groupBy({
+    by: ['customerId'],
+    where: { customerId: { in: customerIds }, isActive: true },
+    _count: { _all: true },
+  });
+  for (const row of rows) {
+    map.set(row.customerId, row._count._all);
+  }
+  return map;
+}
+
 export function toListItem(
   storage: StorageService,
   row: CustomerRow,
   profiles: Map<string, ProfileLookup>,
   care: CareSummary,
+  lodatCount = 0,
 ) {
   const facebook = row.facebook
     ? {
@@ -185,7 +203,7 @@ export function toListItem(
       : null,
     latestNeedSummary: care.latestNeedSummary,
     latestCareNote: care.latestCareNote,
-    lodatCount: 0,
+    lodatCount,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

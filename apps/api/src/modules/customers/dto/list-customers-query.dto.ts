@@ -16,6 +16,7 @@ function toOptionalInt(value: unknown): number | undefined {
 
 const BUDGET_FILTERS = ['none', 'has', 'lt_1b', '1b_2b', 'gt_2b'] as const;
 const NEED_FILTERS = ['has', 'empty'] as const;
+const LODAT_FILTERS = ['has', 'empty'] as const;
 
 export class ListCustomersQueryDto {
   @IsOptional()
@@ -47,6 +48,10 @@ export class ListCustomersQueryDto {
   @IsOptional()
   @IsIn(NEED_FILTERS)
   needFilter?: (typeof NEED_FILTERS)[number];
+
+  @IsOptional()
+  @IsIn(LODAT_FILTERS)
+  lodatFilter?: (typeof LODAT_FILTERS)[number];
 
   @IsOptional()
   @Transform(({ value }) => toOptionalInt(value))

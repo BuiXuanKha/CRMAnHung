@@ -228,6 +228,23 @@
   font-size: 0.78rem;
 }
 
+.kh-lot-link {
+  display: grid;
+  gap: 4px;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+}
+
+.kh-lot-link:hover strong {
+  color: #2563eb;
+}
+
 .kh-care p {
   margin: 0;
   font-size: 0.86rem;

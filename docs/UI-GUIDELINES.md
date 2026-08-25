@@ -118,13 +118,13 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 | Cột | Nội dung ô |
 |-----|------------|
 | `#` | STT (§12.1.4 mục 1) |
-| `Tên khách` | Avatar + tên + bút sửa tên (mục 2) + SĐT **xanh** copy (mục 3) + SĐT **cam** thêm số (mục 4) + Map đếm lô (mục 6) + hangtag (mục 7) + tên FB (mục 8). **Không** icon mess trên dòng |
+| `Tên khách` | Avatar + tên + bút sửa tên (mục 2) + SĐT **xanh** copy (mục 3) + SĐT **cam** thêm số (mục 4) + Map đếm lô (mục 6) + hangtag (mục 7) + tên FB (mục 8). Lọc cột: trạng thái + lô đất (có/chưa). **Không** icon mess trên dòng; **không** cột «Số lô đất» |
 | `Nhu cầu` | NeedSummary mới nhất (mục 9) |
 | `Tài chính` | `crm-money` (mục 10) |
 | `Kênh liên hệ` | Page FB NV hoặc hotline (mục 11) |
 | `Thao tác` | Chevron menu (mục 12) |
 
-Cột «Số lô đất» trên mock mới = **lệch CRM cũ** (cũ chỉ icon Map). Bám CRM cũ khi sửa.
+Cột «Số lô đất» đã bỏ — lô = icon Map + số cạnh tên; lọc lô gắn icon cột Tên.
 
 **Rail:** một panel ([`customers.md` §12.1.6](./domains/customers.md)).
 
@@ -222,7 +222,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 | Mở chat | Mở rail «Nội dung chat» (desktop) — tin + ảnh đã lưu |
 | Mở Messenger | Tab Facebook; thiếu thread → CrmAlert |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
-| Tạo lô đất | Chưa tạo bản ghi — toast |
+| Tạo lô đất | Đang phát triển (CrmAlert) — form `/them-lo-dat` sau |
 | Dịch vụ sổ đỏ | Điều hướng `/dich-vu-so-do` |
 | Ghim khách / Bỏ ghim khách | **Một chỗ**, đổi nhãn theo `isPinned` |
 | **Xóa khách** | Đỏ — confirm **ẩn** (`isHidden`), không hard-delete |
@@ -636,6 +636,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-20 | List `/khach-hang`: lần đầu 50 dòng, cuộn gần đáy tải thêm 50; nhớ lọc/scroll khi rời trang (mọi lối, cùng tab) |
 | 2026-08-20 | Mục 24 list khách: tải 50 dòng khi cuộn + nhớ lọc/scroll (sessionStorage) — `customers.md` §12.1.5 |
 | 2026-08-25 | Helper chung nhớ list (`shared/list-state` + skill `crm-list-state`): `/khach-hang` refactor; `/lo-dat` nhớ tìm/lọc/cuộn; logout xóa mọi `*-list-state` |
+| 2026-08-25 | Khách: `lodatCount` API + Map cạnh tên; bỏ cột Số lô; rail/chi tiết lô từ `GET /customers/:id/lodats` |
 | 2026-08-24 | Khách: xoá SĐT + sửa tên FB = **NV phụ trách khách** (không chỉ admin). Khôi phục ẩn / sổ đỏ từ khách / hangtag / inbox FB / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |
 
 ---

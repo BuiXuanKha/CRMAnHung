@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type Ref } from 'react';
-import { Check, MessageCircle, Pencil, Phone } from 'lucide-react';
+import { Check, Map, MessageCircle, Pencil, Phone } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
 import { ColumnFilter, type ColumnFilterOption } from '@/shared/ui/column-filter';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -123,6 +123,15 @@ export function CustomerTable({
               onClose={() => setHeaderFilter(null)}
               onChange={onStatus}
             />
+            <ColumnFilter
+              label="Lô đất"
+              value={extra.lodat}
+              options={LODAT_FILTER_OPTIONS}
+              open={headerFilter === 'lodat'}
+              onToggle={() => toggleFilter('lodat')}
+              onClose={() => setHeaderFilter(null)}
+              onChange={(v) => onExtra({ ...extra, lodat: v as ExtraFilters['lodat'] })}
+            />
           </div>
           <div className="kh-col-head" role="columnheader">
             <span>Nhu cầu</span>
@@ -158,18 +167,6 @@ export function CustomerTable({
               onToggle={() => toggleFilter('channel')}
               onClose={() => setHeaderFilter(null)}
               onChange={(v) => onExtra({ ...extra, channel: v as ExtraFilters['channel'] })}
-            />
-          </div>
-          <div className="kh-col-head" role="columnheader">
-            <span>Số lô đất</span>
-            <ColumnFilter
-              label="Số lô đất"
-              value={extra.lodat}
-              options={LODAT_FILTER_OPTIONS}
-              open={headerFilter === 'lodat'}
-              onToggle={() => toggleFilter('lodat')}
-              onClose={() => setHeaderFilter(null)}
-              onChange={(v) => onExtra({ ...extra, lodat: v as ExtraFilters['lodat'] })}
             />
           </div>
           <div className="col-act" role="columnheader">
@@ -274,6 +271,16 @@ export function CustomerTable({
                           <Icon icon={Phone} size="mini" />
                         </button>
                       ) : null}
+                      {c.lodatCount > 0 ? (
+                        <span
+                          className="kh-mini-icon lodat"
+                          title={`${c.lodatCount} lô đất`}
+                          aria-label={`${c.lodatCount} lô đất`}
+                        >
+                          <Icon icon={Map} size="mini" />
+                          <span className="kh-lodat-count">{c.lodatCount}</span>
+                        </span>
+                      ) : null}
                       {c.facebook ? (
                         <span className="kh-mini-icon chat" title="Có Facebook">
                           <Icon icon={MessageCircle} size="mini" />
@@ -295,9 +302,6 @@ export function CustomerTable({
               </div>
               <div className="kh-cell" role="cell">
                 <span className="kh-channel">{channelLabel(c)}</span>
-              </div>
-              <div className="col-lodat kh-cell" role="cell">
-                {c.lodatCount}
               </div>
               <div
                 className="col-act kh-cell"

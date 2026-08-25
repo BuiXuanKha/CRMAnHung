@@ -14,11 +14,10 @@
 .kh-table-wrap {
   --kh-cols:
     50px
-    minmax(200px, 280px)
+    minmax(220px, 300px)
     minmax(0, 1fr)
     110px
     160px
-    118px
     80px;
   --kh-chrome: #f1f5f9;
   display: flex;
@@ -144,13 +143,6 @@
   justify-content: center;
 }
 
-.col-lodat {
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  justify-content: center;
-  color: #0f172a;
-}
-
 .col-act {
   justify-content: center;
 }
@@ -259,6 +251,20 @@
 
 .kh-mini-icon.chat {
   color: #16a34a;
+}
+
+.kh-mini-icon.lodat {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: #0369a1;
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.kh-lodat-count {
+  line-height: 1;
 }
 
 .kh-demand {

@@ -2,9 +2,8 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { getCustomer } from './api';
+import { getCustomer, listCustomerLodats } from './api';
 import { DetailLodatList } from './components/detail-lodat-list';
-import { listMockLodatsForCustomer } from './mock-data';
 import {
   formatBudget,
   formatCareTimestamp,
@@ -25,6 +24,12 @@ export function CustomerDetailPage() {
   const detail = useQuery({
     queryKey: ['customer', id],
     queryFn: () => getCustomer(id),
+    enabled: Boolean(id),
+  });
+
+  const lodats = useQuery({
+    queryKey: ['customer-lodats', id],
+    queryFn: () => listCustomerLodats(id),
     enabled: Boolean(id),
   });
 
@@ -68,7 +73,7 @@ export function CustomerDetailPage() {
   const note = customer.latestCareNote?.trim() ?? '';
   const hasSummary = Boolean(need || note);
   const budget = formatBudget(customer.budgetMinVnd, customer.budgetMaxVnd);
-  const lots = listMockLodatsForCustomer(customer.id);
+  const lots = lodats.data?.items ?? [];
   const careNotes = customer.careNotes ?? [];
 
   return (
@@ -137,7 +142,7 @@ export function CustomerDetailPage() {
 
       <section className="kh-detail-section">
         <h2>Danh sách lô đất{lots.length ? ` (${lots.length})` : ''}</h2>
-        <DetailLodatList lots={lots} />
+        <DetailLodatList lots={lots} loading={lodats.isLoading} />
       </section>
 
       <section className="kh-detail-section">

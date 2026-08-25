@@ -38,6 +38,11 @@ export class CustomersController {
     return this.customersService.listMessages(user, id);
   }
 
+  @Get(':id/lodats')
+  listLodats(@CurrentUser() user: RequestUser, @Param('id') id: string) {
+    return this.customersService.listLodats(user, id);
+  }
+
   @Get(':id')
   getById(@CurrentUser() user: RequestUser, @Param('id') id: string) {
     return this.customersService.getById(user, id);

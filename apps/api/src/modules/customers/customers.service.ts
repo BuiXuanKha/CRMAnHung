@@ -15,7 +15,7 @@ import type { CreateCustomerDto } from './dto/create-customer.dto';
 import type { AcknowledgePhoneDuplicateDto } from './dto/acknowledge-phone-duplicate.dto';
 import type { MergeFacebookDto } from './dto/merge-facebook.dto';
 import { normalizeCareBudget } from './care-budget';
-import { budgetFilterWhere, contactChannelWhere, needFilterWhere } from './customers-filters';
+import { budgetFilterWhere, contactChannelWhere, lodatFilterWhere, needFilterWhere } from './customers-filters';
 import {
   acknowledgePhoneDuplicate,
   addCustomerPhone,
@@ -29,9 +29,11 @@ import {
   emptyCareSummary,
   loadCareNotes,
   loadCareSummaries,
+  loadLodatCounts,
   loadProfiles,
   toListItem,
 } from './customers-view';
+import { LodatsService } from '../lodats/lodats.service';
 
 const MESSAGE_SENDERS = new Set(['customer', 'me', 'page', 'unknown']);
 
@@ -52,6 +54,7 @@ export class CustomersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly lodats: LodatsService,
   ) {}
 
   async list(user: RequestUser, query: ListCustomersQueryDto) {
@@ -98,6 +101,8 @@ export class CustomersService {
     if (channel) and.push(channel);
     const need = needFilterWhere(query.needFilter);
     if (need) and.push(need);
+    const lodat = lodatFilterWhere(query.lodatFilter);
+    if (lodat) and.push(lodat);
 
     const where: Prisma.CustomerWhereInput = and.length ? { AND: and } : {};
     const limit = Math.min(Math.max(query.limit ?? 50, 1), 200);
@@ -119,17 +124,19 @@ export class CustomersService {
       }),
     ]);
 
-    const profiles = await loadProfiles(this.prisma);
-    const careByCustomer = await loadCareSummaries(
-      this.prisma,
-      rows.map((row) => row.id),
-    );
+    const ids = rows.map((row) => row.id);
+    const [profiles, careByCustomer, lodatCounts] = await Promise.all([
+      loadProfiles(this.prisma),
+      loadCareSummaries(this.prisma, ids),
+      loadLodatCounts(this.prisma, ids),
+    ]);
     const items = rows.map((row) =>
       toListItem(
         this.storage,
         row,
         profiles,
         careByCustomer.get(row.id) ?? emptyCareSummary(),
+        lodatCounts.get(row.id) ?? 0,
       ),
     );
     return { items, total };
@@ -145,9 +152,10 @@ export class CustomersService {
     }
     assertCanAccess(user, row.employeeId);
     const profiles = await loadProfiles(this.prisma);
-    const [careSummary, careNotes] = await Promise.all([
+    const [careSummary, careNotes, lodatCounts] = await Promise.all([
       loadCareSummaries(this.prisma, [row.id]),
       loadCareNotes(this.prisma, row.id),
+      loadLodatCounts(this.prisma, [row.id]),
     ]);
     return {
       ...toListItem(
@@ -155,9 +163,22 @@ export class CustomersService {
         row,
         profiles,
         careSummary.get(row.id) ?? emptyCareSummary(),
+        lodatCounts.get(row.id) ?? 0,
       ),
       careNotes,
     };
+  }
+
+  async listLodats(user: RequestUser, id: string) {
+    const row = await this.prisma.customer.findUnique({
+      where: { id },
+      select: { id: true, employeeId: true },
+    });
+    if (!row) {
+      throw new NotFoundException('Không tìm thấy khách hàng');
+    }
+    assertCanAccess(user, row.employeeId);
+    return this.lodats.listForCustomer(user, row.id);
   }
 
   async listMessages(user: RequestUser, id: string) {
@@ -226,9 +247,10 @@ export class CustomersService {
       include: LIST_INCLUDE,
     });
     const profiles = await loadProfiles(this.prisma);
-    const [careSummary, careNotes] = await Promise.all([
+    const [careSummary, careNotes, lodatCounts] = await Promise.all([
       loadCareSummaries(this.prisma, [row.id]),
       loadCareNotes(this.prisma, row.id),
+      loadLodatCounts(this.prisma, [row.id]),
     ]);
     return {
       ...toListItem(
@@ -236,6 +258,7 @@ export class CustomersService {
         row,
         profiles,
         careSummary.get(row.id) ?? emptyCareSummary(),
+        lodatCounts.get(row.id) ?? 0,
       ),
       careNotes,
     };

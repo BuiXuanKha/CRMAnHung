@@ -1,13 +1,15 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { ChevronLeft } from 'lucide-react';
 import type {
   CustomerDetail,
   CustomerListItem,
+  CustomerLodatBrief,
   CustomerMessengerMessage,
 } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
-import { listMockLodatsForCustomer } from '../mock-data';
+import { formatPriceVnd } from '@/features/lodats/display';
 import { ChatThread } from './chat-thread';
 
 export type RailKey = 'chat' | 'care' | 'lodat';
@@ -25,6 +27,8 @@ type Props = {
   detail: CustomerDetail | null;
   messages: CustomerMessengerMessage[];
   messagesLoading: boolean;
+  lodats: CustomerLodatBrief[];
+  lodatsLoading: boolean;
 };
 
 export function RightRail({
@@ -34,6 +38,8 @@ export function RightRail({
   detail,
   messages,
   messagesLoading,
+  lodats,
+  lodatsLoading,
 }: Props) {
   return (
     <aside className="kh-s322" aria-label="Panel phụ">
@@ -46,7 +52,15 @@ export function RightRail({
             </button>
           </header>
           <div className="kh-rail-body">
-            {renderBody(open, customer, detail, messages, messagesLoading)}
+            {renderBody(
+              open,
+              customer,
+              detail,
+              messages,
+              messagesLoading,
+              lodats,
+              lodatsLoading,
+            )}
           </div>
         </div>
       ) : null}
@@ -76,6 +90,8 @@ function renderBody(
   detail: CustomerDetail | null,
   messages: CustomerMessengerMessage[],
   messagesLoading: boolean,
+  lodats: CustomerLodatBrief[],
+  lodatsLoading: boolean,
 ) {
   if (!customer) {
     return <p className="kh-rail-empty">Chọn một khách trên bảng để xem.</p>;
@@ -107,20 +123,41 @@ function renderBody(
       </ul>
     );
   }
-  const lots = listMockLodatsForCustomer(customer.id);
-  if (lots.length === 0) {
+  if (lodatsLoading) {
+    return <p className="kh-rail-empty">Đang tải lô đất…</p>;
+  }
+  if (lodats.length === 0) {
     return <p className="kh-rail-empty">Chưa gắn lô đất.</p>;
   }
+  return <RailLodatList lots={lodats} />;
+}
+
+function RailLodatList({ lots }: { lots: CustomerLodatBrief[] }) {
+  const router = useRouter();
   return (
     <ul className="kh-lots">
-      {lots.map((l) => (
-        <li key={l.id}>
-          <strong>{l.title}</strong>
-          <span>
-            {l.area} · <span className="crm-money">{l.price}</span>
-          </span>
-        </li>
-      ))}
+      {lots.map((l) => {
+        const spec = [
+          l.areaM2 != null ? `${l.areaM2.toLocaleString('vi-VN')} m²` : null,
+          l.frontageM != null ? `MT ${l.frontageM.toLocaleString('vi-VN')} m` : null,
+          l.direction?.trim() || null,
+        ]
+          .filter(Boolean)
+          .join(' · ');
+        return (
+          <li key={l.id}>
+            <button
+              type="button"
+              className="kh-lot-link"
+              onClick={() => router.push(`/lo-dat/${l.id}`)}
+            >
+              <strong>{l.title}</strong>
+              {spec ? <span>{spec}</span> : null}
+              <span className="crm-money">{formatPriceVnd(l.priceVnd)}</span>
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 }

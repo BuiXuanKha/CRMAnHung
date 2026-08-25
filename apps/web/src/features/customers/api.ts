@@ -16,6 +16,7 @@ import {
   type CustomerDetail,
   type CustomerListQuery,
   type CustomerListResponse,
+  type CustomerLodatListResponse,
   type EmployeeHotline,
   type EmployeeHotlineList,
   type MergeFacebookIntoPhoneHolderInput,
@@ -30,7 +31,7 @@ import {
 import { ApiError, apiFetch } from '@/shared/api/client';
 import { isMockCustomers } from '@/shared/api/mode';
 import { matchesBudgetFilter, matchesChannel } from './display';
-import { mockChats, mockCustomers, mockHotlines } from './mock-data';
+import { listMockLodatsForCustomer, mockChats, mockCustomers, mockHotlines } from './mock-data';
 
 export function isPhoneDuplicateError(
   err: unknown,
@@ -119,6 +120,11 @@ function applyQuery(
   } else if (query.needFilter === 'empty') {
     next = next.filter((c) => !c.latestNeedSummary?.trim());
   }
+  if (query.lodatFilter === 'has') {
+    next = next.filter((c) => c.lodatCount > 0);
+  } else if (query.lodatFilter === 'empty') {
+    next = next.filter((c) => c.lodatCount <= 0);
+  }
   return [...next].sort((a, b) => {
     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
     return b.updatedAt.localeCompare(a.updatedAt);
@@ -143,6 +149,7 @@ export async function listCustomers(
   if (query.budgetFilter) params.set('budgetFilter', query.budgetFilter);
   if (query.contactChannel) params.set('contactChannel', query.contactChannel);
   if (query.needFilter) params.set('needFilter', query.needFilter);
+  if (query.lodatFilter) params.set('lodatFilter', query.lodatFilter);
   if (query.limit != null) params.set('limit', String(query.limit));
   if (query.offset != null) params.set('offset', String(query.offset));
   const qs = params.toString();
@@ -159,6 +166,42 @@ export async function getCustomer(id: string): Promise<CustomerDetail> {
     return found;
   }
   return apiFetch<CustomerDetail>(`/customers/${id}`);
+}
+
+export async function listCustomerLodats(
+  id: string,
+): Promise<CustomerLodatListResponse> {
+  if (isMockCustomers()) {
+    const user = currentMockUser();
+    const found = visibleFor(user, mockStore).find((c) => c.id === id);
+    if (!found) {
+      throw new Error('Không tìm thấy khách hàng');
+    }
+    return {
+      items: listMockLodatsForCustomer(id).map((lot) => ({
+        id: lot.id,
+        title: lot.title,
+        address: lot.address ?? null,
+        areaM2: null,
+        frontageM: null,
+        direction: [lot.area, lot.frontage ? `MT ${lot.frontage}` : null, lot.direction]
+          .filter(Boolean)
+          .join(' · ') || null,
+        priceVnd: null,
+        coverImageUrl: null,
+        status: 'DANG_BAN',
+        // Mock price kept as free text in broker-style note via address line when no address
+        ...(lot.price
+          ? {
+              address: lot.address
+                ? `${lot.address} · ${lot.price}`
+                : lot.price,
+            }
+          : {}),
+      })),
+    };
+  }
+  return apiFetch<CustomerLodatListResponse>(`/customers/${id}/lodats`);
 }
 
 export async function listCustomerMessages(

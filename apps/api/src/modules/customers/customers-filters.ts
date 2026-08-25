@@ -51,6 +51,17 @@ export function needFilterWhere(
   return null;
 }
 
+export function lodatFilterWhere(
+  key: string | undefined,
+): Prisma.CustomerWhereInput | null {
+  const hasLodat: Prisma.CustomerWhereInput = {
+    lodatMaps: { some: { isActive: true } },
+  };
+  if (key === 'has') return hasLodat;
+  if (key === 'empty') return { NOT: hasLodat };
+  return null;
+}
+
 export function contactChannelWhere(
   raw: string | undefined,
 ): Prisma.CustomerWhereInput | null {
