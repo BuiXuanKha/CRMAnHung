@@ -24,9 +24,13 @@ import {
   getLodat,
   parsePriceInput,
   updateLodat,
+  updateLodatImageRotation,
   uploadLodatImage,
 } from './api';
 import { LodatEditImages } from './components/lodat-edit-images';
+import { LodatEditOwnerHistory } from './components/lodat-edit-owner-history';
+import { LodatEditPreview } from './components/lodat-edit-preview';
+import { LodatImageGallery } from './components/lodat-image-gallery';
 import './lodat-edit.css';
 
 type SpecForm = {
@@ -69,6 +73,10 @@ function toMapForm(d: LodatDetail): MapForm {
   };
 }
 
+function normalizeDeg(deg: number): number {
+  return ((deg % 360) + 360) % 360;
+}
+
 export function LodatEditPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -80,6 +88,8 @@ export function LodatEditPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [selectedIndex, setSelectedIndex] = useState(0);
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
   const q = useQuery({
     queryKey: ['lodat', id],
@@ -95,11 +105,22 @@ export function LodatEditPage() {
     setMapForm(toMapForm(detail));
   }, [detail]);
 
+  useEffect(() => {
+    if (!detail) return;
+    const n = detail.images.length;
+    if (!n) {
+      setSelectedIndex(0);
+      return;
+    }
+    setSelectedIndex((cur) => Math.min(cur, n - 1));
+  }, [detail]);
+
   const isProject = Boolean(detail?.projectLotId);
   const canEditSpecs = detail?.canEditSpecs ?? false;
   const canEditMap = detail?.canEditMap ?? false;
   const canEditImages = detail?.canEditImages ?? false;
-  const lodatImageCount = (detail?.images ?? []).filter((i) => i.source === 'lodat').length;
+  const images = detail?.images ?? [];
+  const lodatImageCount = images.filter((i) => i.source === 'lodat').length;
 
   const saveMut = useMutation({
     mutationFn: (input: UpdateLodatInput) => updateLodat(id, input),
@@ -117,6 +138,8 @@ export function LodatEditPage() {
     onSuccess: async (updated) => {
       qc.setQueryData(['lodat', id], updated);
       await qc.invalidateQueries({ queryKey: ['lodats'] });
+      const nextIdx = Math.max(0, updated.images.length - 1);
+      setSelectedIndex(nextIdx);
       flash('Đã thêm ảnh.');
     },
     onError: (err: Error) => setAlertMsg(err.message),
@@ -128,6 +151,20 @@ export function LodatEditPage() {
       qc.setQueryData(['lodat', id], updated);
       await qc.invalidateQueries({ queryKey: ['lodats'] });
       flash('Đã gỡ ảnh.');
+    },
+    onError: (err: Error) => setAlertMsg(err.message),
+  });
+
+  const rotateMut = useMutation({
+    mutationFn: ({
+      imageId,
+      rotationDeg,
+    }: {
+      imageId: string;
+      rotationDeg: number;
+    }) => updateLodatImageRotation(id, imageId, { rotationDeg }),
+    onSuccess: (updated) => {
+      qc.setQueryData(['lodat', id], updated);
     },
     onError: (err: Error) => setAlertMsg(err.message),
   });
@@ -182,17 +219,30 @@ export function LodatEditPage() {
     void saveMut.mutateAsync(input);
   }
 
-  async function onPickFiles(files: FileList | null) {
-    if (!files?.length || !canEditImages) return;
+  async function onPickFiles(files: FileList | File[] | null) {
+    if (!files || !canEditImages) return;
     const list = Array.from(files);
+    let remaining = LODAT_MAX_UPLOAD_IMAGES - lodatImageCount;
     for (const file of list) {
-      if (lodatImageCount >= LODAT_MAX_UPLOAD_IMAGES) break;
+      if (remaining <= 0) break;
       await uploadMut.mutateAsync(file);
+      remaining -= 1;
     }
   }
 
+  async function onRotate(delta: number) {
+    const img = images[selectedIndex];
+    if (!img?.id || img.source !== 'lodat') return;
+    const nextDeg = normalizeDeg((img.rotationDeg ?? 0) + delta);
+    await rotateMut.mutateAsync({ imageId: img.id, rotationDeg: nextDeg });
+  }
+
   const busy =
-    saveMut.isPending || uploadMut.isPending || deleteMut.isPending || q.isLoading;
+    saveMut.isPending ||
+    uploadMut.isPending ||
+    deleteMut.isPending ||
+    rotateMut.isPending ||
+    q.isLoading;
 
   return (
     <div className="ld-edit-page">
@@ -200,14 +250,12 @@ export function LodatEditPage() {
         <Link href={`/lo-dat/${id}`} className="ld-edit-back">
           ← Chi tiết lô
         </Link>
-        <div className="ld-edit-title-row">
-          <h1>Sửa lô đất</h1>
-          {detail ? (
-            <span className="ld-edit-kind-badge">
-              {isProject ? 'Lô dự án' : 'Lô thường'}
-            </span>
-          ) : null}
-        </div>
+        <h1>Sửa lô đất</h1>
+        {detail ? (
+          <span className="ld-edit-kind-badge">
+            {isProject ? 'Lô dự án' : 'Lô thường'}
+          </span>
+        ) : null}
       </div>
 
       {q.isLoading ? <p className="ld-edit-state">Đang tải…</p> : null}
@@ -216,246 +264,303 @@ export function LodatEditPage() {
 
       {detail && spec && mapForm ? (
         <form className="ld-edit-form" onSubmit={handleSubmit}>
-          <section className="ld-edit-card">
-            <h2>Thông số lô</h2>
-            {isProject ? (
-              <p className="ld-edit-hint">
-                Lô thuộc dự án — thông số lô chỉ xem, không sửa tại đây.
-              </p>
-            ) : !canEditSpecs ? (
-              <p className="ld-edit-hint">Bạn không có quyền sửa thông số lô này.</p>
-            ) : null}
+          <div className="ld-edit-body">
+            <div className="ld-edit-area-info">
+              <section className="ld-edit-card">
+                <h2 className="ld-edit-section-title">Thông số lô</h2>
+                {isProject ? (
+                  <p className="ld-edit-hint">
+                    Lô thuộc dự án — thông số lô chỉ xem, không sửa tại đây.
+                  </p>
+                ) : !canEditSpecs ? (
+                  <p className="ld-edit-hint muted">
+                    Bạn không có quyền sửa thông số lô này.
+                  </p>
+                ) : null}
 
-            {isProject && detail.address ? (
-              <p className="ld-edit-address-line">{detail.address}</p>
-            ) : null}
+                {isProject && detail.address ? (
+                  <p className="ld-edit-address-line">{detail.address}</p>
+                ) : null}
 
-            {canEditSpecs ? (
-              <label className="ld-edit-field">
-                <span>Địa chỉ tổng quát *</span>
-                <AddressPicker
-                  value={spec.addressId || null}
-                  labelHint={detail.address}
-                  kindFilter={AddressKind.REGULAR}
-                  disabled={busy}
-                  onChange={(item) => patchSpec('addressId', item?.id ?? '')}
-                />
-              </label>
-            ) : null}
+                {canEditSpecs ? (
+                  <label className="ld-edit-field">
+                    <span>Địa chỉ tổng quát *</span>
+                    <AddressPicker
+                      value={spec.addressId || null}
+                      labelHint={detail.address}
+                      kindFilter={AddressKind.REGULAR}
+                      disabled={busy}
+                      onChange={(item) => patchSpec('addressId', item?.id ?? '')}
+                    />
+                  </label>
+                ) : null}
 
-            <label className="ld-edit-field">
-              <span>Tiêu đề *</span>
-              <input
-                value={spec.title}
-                onChange={(e) => patchSpec('title', e.target.value)}
-                disabled={busy || !canEditSpecs}
-              />
-            </label>
+                <label className="ld-edit-field">
+                  <span>Tiêu đề *</span>
+                  <input
+                    value={spec.title}
+                    onChange={(e) => patchSpec('title', e.target.value)}
+                    disabled={busy || !canEditSpecs}
+                  />
+                </label>
 
-            <div className="ld-edit-row2">
-              <label className="ld-edit-field">
-                <span>Diện tích (m²)</span>
-                <input
-                  value={spec.areaM2}
-                  onChange={(e) =>
-                    patchSpec('areaM2', e.target.value.replace(/[^\d.]/g, ''))
-                  }
-                  disabled={busy || !canEditSpecs}
-                />
-              </label>
-              <label className="ld-edit-field">
-                <span>Mặt tiền (m)</span>
-                <input
-                  value={spec.frontageM}
-                  onChange={(e) =>
-                    patchSpec('frontageM', e.target.value.replace(/[^\d.]/g, ''))
-                  }
-                  disabled={busy || !canEditSpecs}
-                />
-              </label>
+                <div className="ld-edit-row2">
+                  <label className="ld-edit-field">
+                    <span>Diện tích (m²)</span>
+                    <input
+                      value={spec.areaM2}
+                      onChange={(e) =>
+                        patchSpec('areaM2', e.target.value.replace(/[^\d.]/g, ''))
+                      }
+                      disabled={busy || !canEditSpecs}
+                    />
+                  </label>
+                  <label className="ld-edit-field">
+                    <span>Mặt tiền (m)</span>
+                    <input
+                      value={spec.frontageM}
+                      onChange={(e) =>
+                        patchSpec(
+                          'frontageM',
+                          e.target.value.replace(/[^\d.]/g, ''),
+                        )
+                      }
+                      disabled={busy || !canEditSpecs}
+                    />
+                  </label>
+                </div>
+
+                <label className="ld-edit-field">
+                  <span>Hướng lô đất</span>
+                  <select
+                    value={spec.direction}
+                    onChange={(e) => patchSpec('direction', e.target.value)}
+                    disabled={busy || !canEditSpecs}
+                  >
+                    <option value="">—</option>
+                    {LODAT_DIRECTION_OPTIONS.map((d) => (
+                      <option key={d} value={d}>
+                        {d}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="ld-edit-field">
+                  <span>Phân loại</span>
+                  <select
+                    value={spec.kind}
+                    onChange={(e) =>
+                      patchSpec('kind', e.target.value as LodatKind)
+                    }
+                    disabled={busy || !canEditSpecs}
+                  >
+                    <option value={LodatKind.DAT}>
+                      {LODAT_KIND_LABELS[LodatKind.DAT]}
+                    </option>
+                    <option value={LodatKind.NHA}>
+                      {LODAT_KIND_LABELS[LodatKind.NHA]}
+                    </option>
+                  </select>
+                </label>
+
+                <label className="ld-edit-field">
+                  <span>Ghi chú chung (lô đất)</span>
+                  <textarea
+                    rows={3}
+                    value={spec.note}
+                    onChange={(e) => patchSpec('note', e.target.value)}
+                    disabled={busy || !canEditSpecs}
+                  />
+                </label>
+              </section>
+
+              <section className="ld-edit-card">
+                <div className="ld-edit-section-head">
+                  <h2 className="ld-edit-section-title">Chủ đất & giá bán</h2>
+                  <button
+                    type="button"
+                    className="ld-edit-change-owner"
+                    onClick={() => flash('Đổi chủ — sẽ làm ở slice sau.')}
+                    disabled={busy}
+                  >
+                    Đổi chủ
+                  </button>
+                </div>
+                {detail.owner ? (
+                  <p className="ld-edit-owner">
+                    Chủ hiện tại: <strong>{detail.owner.fullName}</strong>
+                  </p>
+                ) : (
+                  <p className="ld-edit-hint muted">
+                    Chưa có liên kết chủ active.
+                  </p>
+                )}
+                {!canEditMap ? (
+                  <p className="ld-edit-hint muted">
+                    Bạn không có quyền sửa giá/trạng thái trên lô này.
+                  </p>
+                ) : null}
+
+                <div className="ld-edit-row2">
+                  <label className="ld-edit-field">
+                    <span>Trạng thái</span>
+                    <select
+                      value={mapForm.status}
+                      onChange={(e) =>
+                        patchMap(
+                          'status',
+                          e.target.value as MapForm['status'],
+                        )
+                      }
+                      disabled={busy || !canEditMap}
+                    >
+                      <option value={LodatSaleStatus.DANG_BAN}>Mở bán</option>
+                      <option value={LodatSaleStatus.TAM_DUNG}>Tạm dừng</option>
+                    </select>
+                  </label>
+                  <label className="ld-edit-field">
+                    <span>Giá (VND)</span>
+                    <input
+                      value={mapForm.priceVnd}
+                      placeholder="VD: 1.234.567"
+                      onChange={(e) =>
+                        patchMap(
+                          'priceVnd',
+                          formatPriceInput(parsePriceInput(e.target.value)),
+                        )
+                      }
+                      disabled={busy || !canEditMap}
+                    />
+                  </label>
+                </div>
+
+                <label className="ld-edit-field">
+                  <span>Ghi chú giá</span>
+                  <input
+                    value={mapForm.priceNote}
+                    onChange={(e) => patchMap('priceNote', e.target.value)}
+                    disabled={busy || !canEditMap}
+                  />
+                  <div className="ld-edit-chips">
+                    {LODAT_PRICE_NOTE_CHIPS.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        className={
+                          mapForm.priceNote === chip
+                            ? 'ld-edit-chip active'
+                            : 'ld-edit-chip'
+                        }
+                        onClick={() => patchMap('priceNote', chip)}
+                        disabled={busy || !canEditMap}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </label>
+
+                <label className="ld-edit-field">
+                  <span>Hoa hồng</span>
+                  <input
+                    value={mapForm.brokerFeeNote}
+                    onChange={(e) => patchMap('brokerFeeNote', e.target.value)}
+                    disabled={busy || !canEditMap}
+                  />
+                  <div className="ld-edit-chips">
+                    {LODAT_BROKER_FEE_CHIPS.map((chip) => (
+                      <button
+                        key={chip}
+                        type="button"
+                        className={
+                          mapForm.brokerFeeNote === chip
+                            ? 'ld-edit-chip active'
+                            : 'ld-edit-chip'
+                        }
+                        onClick={() => patchMap('brokerFeeNote', chip)}
+                        disabled={busy || !canEditMap}
+                      >
+                        {chip}
+                      </button>
+                    ))}
+                  </div>
+                </label>
+
+                <label className="ld-edit-field">
+                  <span>Ghi chú liên kết chủ</span>
+                  <textarea
+                    rows={2}
+                    value={mapForm.mapNote}
+                    onChange={(e) => patchMap('mapNote', e.target.value)}
+                    disabled={busy || !canEditMap}
+                  />
+                </label>
+              </section>
+
+              <LodatEditOwnerHistory detail={detail} />
             </div>
 
-            <label className="ld-edit-field">
-              <span>Hướng lô đất</span>
-              <select
-                value={spec.direction}
-                onChange={(e) => patchSpec('direction', e.target.value)}
-                disabled={busy || !canEditSpecs}
-              >
-                <option value="">—</option>
-                {LODAT_DIRECTION_OPTIONS.map((d) => (
-                  <option key={d} value={d}>
-                    {d}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <LodatEditImages
+              images={images}
+              selectedIndex={selectedIndex}
+              canEditImages={canEditImages}
+              isProject={isProject}
+              busy={busy}
+              uploading={uploadMut.isPending}
+              onSelect={setSelectedIndex}
+              onUpload={(files) => void onPickFiles(files)}
+              onDelete={(imageId) => void deleteMut.mutateAsync(imageId)}
+            />
 
-            <label className="ld-edit-field">
-              <span>Phân loại</span>
-              <select
-                value={spec.kind}
-                onChange={(e) => patchSpec('kind', e.target.value as LodatKind)}
-                disabled={busy || !canEditSpecs}
-              >
-                <option value={LodatKind.DAT}>{LODAT_KIND_LABELS[LodatKind.DAT]}</option>
-                <option value={LodatKind.NHA}>{LODAT_KIND_LABELS[LodatKind.NHA]}</option>
-              </select>
-            </label>
+            <LodatEditPreview
+              images={images}
+              selectedIndex={selectedIndex}
+              busy={busy}
+              onOpenGallery={() => setGalleryOpen(true)}
+              onRotate={(delta) => void onRotate(delta)}
+            />
 
-            <label className="ld-edit-field">
-              <span>Ghi chú chung (lô đất)</span>
-              <textarea
-                rows={3}
-                value={spec.note}
-                onChange={(e) => patchSpec('note', e.target.value)}
-                disabled={busy || !canEditSpecs}
-              />
-            </label>
-          </section>
-
-          <section className="ld-edit-card">
-            <div className="ld-edit-section-head">
-              <h2>Chủ đất & giá bán</h2>
+            <footer className="ld-edit-actions">
               <button
                 type="button"
-                className="ld-edit-change-owner"
-                onClick={() => flash('Đổi chủ — sẽ làm ở slice sau.')}
+                className="ld-edit-cancel"
                 disabled={busy}
+                onClick={() => router.push(`/lo-dat/${id}`)}
               >
-                Đổi chủ
+                Huỷ
               </button>
-            </div>
-            {detail.owner ? (
-              <p className="ld-edit-owner">
-                Chủ hiện tại: <strong>{detail.owner.fullName}</strong>
-              </p>
-            ) : (
-              <p className="ld-edit-hint">Chưa có liên kết chủ active.</p>
-            )}
-            {!canEditMap ? (
-              <p className="ld-edit-hint">Bạn không có quyền sửa giá/trạng thái trên lô này.</p>
-            ) : null}
-
-            <div className="ld-edit-row2">
-              <label className="ld-edit-field">
-                <span>Trạng thái</span>
-                <select
-                  value={mapForm.status}
-                  onChange={(e) =>
-                    patchMap(
-                      'status',
-                      e.target.value as MapForm['status'],
-                    )
-                  }
-                  disabled={busy || !canEditMap}
-                >
-                  <option value={LodatSaleStatus.DANG_BAN}>Mở bán</option>
-                  <option value={LodatSaleStatus.TAM_DUNG}>Tạm dừng</option>
-                </select>
-              </label>
-              <label className="ld-edit-field">
-                <span>Giá (VND)</span>
-                <input
-                  value={mapForm.priceVnd}
-                  placeholder="VD: 1.234.567"
-                  onChange={(e) =>
-                    patchMap('priceVnd', formatPriceInput(parsePriceInput(e.target.value)))
-                  }
-                  disabled={busy || !canEditMap}
-                />
-              </label>
-            </div>
-
-            <label className="ld-edit-field">
-              <span>Ghi chú giá</span>
-              <input
-                value={mapForm.priceNote}
-                onChange={(e) => patchMap('priceNote', e.target.value)}
-                disabled={busy || !canEditMap}
-              />
-              <div className="ld-edit-chips">
-                {LODAT_PRICE_NOTE_CHIPS.map((chip) => (
-                  <button
-                    key={chip}
-                    type="button"
-                    className={
-                      mapForm.priceNote === chip ? 'ld-edit-chip active' : 'ld-edit-chip'
-                    }
-                    onClick={() => patchMap('priceNote', chip)}
-                    disabled={busy || !canEditMap}
-                  >
-                    {chip}
-                  </button>
-                ))}
-              </div>
-            </label>
-
-            <label className="ld-edit-field">
-              <span>Hoa hồng</span>
-              <input
-                value={mapForm.brokerFeeNote}
-                onChange={(e) => patchMap('brokerFeeNote', e.target.value)}
-                disabled={busy || !canEditMap}
-              />
-              <div className="ld-edit-chips">
-                {LODAT_BROKER_FEE_CHIPS.map((chip) => (
-                  <button
-                    key={chip}
-                    type="button"
-                    className={
-                      mapForm.brokerFeeNote === chip
-                        ? 'ld-edit-chip active'
-                        : 'ld-edit-chip'
-                    }
-                    onClick={() => patchMap('brokerFeeNote', chip)}
-                    disabled={busy || !canEditMap}
-                  >
-                    {chip}
-                  </button>
-                ))}
-              </div>
-            </label>
-
-            <label className="ld-edit-field">
-              <span>Ghi chú liên kết chủ</span>
-              <textarea
-                rows={2}
-                value={mapForm.mapNote}
-                onChange={(e) => patchMap('mapNote', e.target.value)}
-                disabled={busy || !canEditMap}
-              />
-            </label>
-          </section>
-
-          <LodatEditImages
-            images={detail.images}
-            canEditImages={canEditImages}
-            isProject={isProject}
-            busy={busy}
-            uploading={uploadMut.isPending}
-            onUpload={(files) => void onPickFiles(files)}
-            onDelete={(imageId) => void deleteMut.mutateAsync(imageId)}
-          />
-
-          <footer className="ld-edit-actions">
-            <button
-              type="button"
-              className="crm-btn"
-              disabled={busy}
-              onClick={() => router.push(`/lo-dat/${id}`)}
-            >
-              Huỷ
-            </button>
-            <button
-              type="submit"
-              className="crm-btn primary"
-              disabled={busy || (!canEditSpecs && !canEditMap)}
-            >
-              {saveMut.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
-            </button>
-          </footer>
+              <button
+                type="submit"
+                className="ld-edit-save"
+                disabled={busy || (!canEditSpecs && !canEditMap)}
+              >
+                {saveMut.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
+              </button>
+            </footer>
+          </div>
         </form>
+      ) : null}
+
+      {galleryOpen && images.length ? (
+        <LodatImageGallery
+          title={detail?.title?.trim() || 'Ảnh lô đất'}
+          images={images}
+          startIndex={selectedIndex}
+          onClose={() => setGalleryOpen(false)}
+          onIndexChange={setSelectedIndex}
+          onRotate={async (image, nextDeg) => {
+            if (!image.id || image.source !== 'lodat') return nextDeg;
+            const updated = await updateLodatImageRotation(id, image.id, {
+              rotationDeg: nextDeg,
+            });
+            qc.setQueryData(['lodat', id], updated);
+            const saved = updated.images.find((i) => i.id === image.id);
+            return saved?.rotationDeg ?? nextDeg;
+          }}
+          onToast={flash}
+          onError={(msg) => setAlertMsg(msg)}
+        />
       ) : null}
 
       <CrmAlertDialog

@@ -347,30 +347,29 @@ Học CRM cũ `LodatEditPage` (route `/lo-dat/:id/sua`) — **không** copy god-
 
 #### 12.4.1 Máy tính
 
+Layout CRM cũ (`bodyGrid`): **2 cột** — trái form, phải gallery sticky; **Huỷ/Lưu dưới form** (không sticky/fixed).
+
 ```
-← Chi tiết lô
-H1 Sửa lô đất · badge Lô dự án|Lô thường (Đất dân)
-┌ Thông số lô ─────────────────────────────────────────┐
-│ PROJECT: hint chỉ xem; hiện địa chỉ dự án            │
-│ Đất dân: picker Địa chỉ tổng quát * (REGULAR)        │
-│ Tiêu đề * · DT (m²) · MT (m) · Hướng (select)        │
-│ Phân loại Nhà/Đất (web mới) · Ghi chú chung (lô)     │
-└──────────────────────────────────────────────────────┘
-┌ Chủ đất & giá bán ───────────────────────────────────┐
-│ Chủ hiện tại (đọc) · nút Đổi chủ = toast (slice sau) │
-│ Trạng thái Mở bán|Tạm dừng · Giá (VND)               │
-│ Ghi chú giá + chip · Hoa hồng + chip · Ghi chú map   │
-└──────────────────────────────────────────────────────┘
-┌ Hình ảnh ────────────────────────────────────────────┐
-│ PROJECT: ảnh dự án chỉ xem                           │
-│ Đất dân: xem ảnh lô; thêm/gỡ LodatImage (max 5)      │
-└──────────────────────────────────────────────────────┘
-Footer: Huỷ → chi tiết · Lưu thay đổi
+← Chi tiết lô · H1 Sửa lô đất · badge
+┌ bodyGrid ──────────────────────────────────────────────────────────┐
+│ ┌ areaInfo ─────────────────────┐  ┌ areaGallery (sticky top) ──┐ │
+│ │ Thông số lô                   │  │ Xem nhanh hình ảnh N/M     │ │
+│ │ Chủ đất & giá bán · Đổi chủ   │  │ [xoay trái/phải]           │ │
+│ │ Lịch sử chủ đất (nếu có)      │  │ preview → mở gallery full  │ │
+│ └───────────────────────────────┘  └────────────────────────────┘ │
+│ ┌ areaImages ───────────────────┐        (gallery rowspan)        │
+│ │ Hình ảnh · dán/kéo thả / file │                                 │
+│ │ thumb + × (ảnh lodat)         │                                 │
+│ └───────────────────────────────┘                                 │
+│ ┌ areaActions (full width) ─────────────────────────────────────┐ │
+│ │                         Huỷ · Lưu thay đổi                    │ │
+│ └───────────────────────────────────────────────────────────────┘ │
+└────────────────────────────────────────────────────────────────────┘
 ```
 
 #### 12.4.2 Mobile
 
-Cùng form xếp dọc; footer dính đáy Huỷ / Lưu.
+Xếp dọc: thông số → chủ/giá → lịch sử → hình ảnh → xem nhanh → Huỷ/Lưu **ở cuối form** (không nổi fixed). Desktop paste-zone; mobile nút «Thêm ảnh».
 
 #### 12.4.3 Chip / hướng (CRM cũ)
 
@@ -382,7 +381,9 @@ Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thôn
 
 #### 12.4.4 Để sau trên trang sửa
 
-Đổi chủ (modal) · lịch sử chủ · gắn ảnh chat.
+Đổi chủ (modal) · lịch sử chủ **đầy đủ** (mọi map đã kết thúc) · gắn ảnh chat.
+
+Hiện tại: card «Lịch sử chủ đất» chỉ hiện **chủ active** từ detail (UI khớp CRM cũ).
 
 ---
 
