@@ -13,6 +13,7 @@ import {
   Trash2,
 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { CustomerListItem } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 
@@ -34,11 +35,21 @@ type Props = {
   onAction: (action: CustomerAction) => void;
 };
 
+/**
+ * Menu Thao tác portal ra document.body — tránh bị .kh-table-scroll /
+ * .kh-page (overflow hidden|auto) cắt mất hit-test khi position:fixed.
+ */
 export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const hasFacebook = Boolean(customer.facebook);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const mq = window.matchMedia('(max-width: 767px)');
@@ -61,11 +72,85 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) onClose();
+      const t = e.target as Node;
+      if (wrapRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+      onClose();
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open, onClose]);
+
+  function run(action: CustomerAction) {
+    onAction(action);
+  }
+
+  const menu =
+    open && mounted
+      ? createPortal(
+          <ul
+            ref={menuRef}
+            className="kh-action-menu"
+            role="menu"
+            style={{ top: pos.top, left: pos.left }}
+          >
+            {customer.isHidden ? (
+              <li>
+                <button type="button" role="menuitem" onClick={() => run('restore')}>
+                  <Icon icon={RotateCcw} /> Khôi phục khách
+                </button>
+              </li>
+            ) : (
+              <>
+                {hasFacebook && !isMobile ? (
+                  <li>
+                    <button type="button" role="menuitem" onClick={() => run('chat')}>
+                      <Icon icon={MessageSquare} /> Mở chat
+                    </button>
+                  </li>
+                ) : null}
+                {hasFacebook ? (
+                  <li>
+                    <button type="button" role="menuitem" onClick={() => run('messenger')}>
+                      <Icon icon={MessageCircle} /> Mở Messenger
+                    </button>
+                  </li>
+                ) : null}
+                <li>
+                  <button type="button" role="menuitem" onClick={() => run('care')}>
+                    <Icon icon={NotebookPen} /> Cập nhật chăm sóc
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => run('lodat')}>
+                    <Icon icon={Map} /> Tạo lô đất
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => run('sodo')}>
+                    <Icon icon={FileText} /> Dịch vụ sổ đỏ
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => run('pin')}>
+                    <Icon icon={Pin} /> {customer.isPinned ? 'Bỏ ghim khách' : 'Ghim khách'}
+                  </button>
+                </li>
+                <li>
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="danger"
+                    onClick={() => run('delete')}
+                  >
+                    <Icon icon={Trash2} /> Xóa khách
+                  </button>
+                </li>
+              </>
+            )}
+          </ul>,
+          document.body,
+        )
+      : null;
 
   return (
     <div className="kh-action" ref={wrapRef}>
@@ -79,68 +164,7 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
       >
         <Icon icon={open ? ChevronUp : ChevronDown} size={14} strokeWidth={2.4} />
       </button>
-      {open ? (
-        <ul
-          className="kh-action-menu"
-          role="menu"
-          style={{ top: pos.top, left: pos.left }}
-        >
-          {customer.isHidden ? (
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('restore')}>
-                <Icon icon={RotateCcw} /> Khôi phục khách
-              </button>
-            </li>
-          ) : (
-            <>
-              {hasFacebook && !isMobile ? (
-                <li>
-                  <button type="button" role="menuitem" onClick={() => onAction('chat')}>
-                    <Icon icon={MessageSquare} /> Mở chat
-                  </button>
-                </li>
-              ) : null}
-              {hasFacebook ? (
-                <li>
-                  <button type="button" role="menuitem" onClick={() => onAction('messenger')}>
-                    <Icon icon={MessageCircle} /> Mở Messenger
-                  </button>
-                </li>
-              ) : null}
-              <li>
-                <button type="button" role="menuitem" onClick={() => onAction('care')}>
-                  <Icon icon={NotebookPen} /> Cập nhật chăm sóc
-                </button>
-              </li>
-              <li>
-                <button type="button" role="menuitem" onClick={() => onAction('lodat')}>
-                  <Icon icon={Map} /> Tạo lô đất
-                </button>
-              </li>
-              <li>
-                <button type="button" role="menuitem" onClick={() => onAction('sodo')}>
-                  <Icon icon={FileText} /> Dịch vụ sổ đỏ
-                </button>
-              </li>
-              <li>
-                <button type="button" role="menuitem" onClick={() => onAction('pin')}>
-                  <Icon icon={Pin} /> {customer.isPinned ? 'Bỏ ghim khách' : 'Ghim khách'}
-                </button>
-              </li>
-              <li>
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="danger"
-                  onClick={() => onAction('delete')}
-                >
-                  <Icon icon={Trash2} /> Xóa khách
-                </button>
-              </li>
-            </>
-          )}
-        </ul>
-      ) : null}
+      {menu}
     </div>
   );
 }

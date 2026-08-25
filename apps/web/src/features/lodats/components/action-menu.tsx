@@ -2,6 +2,7 @@
 
 import { ChevronDown, ChevronUp, CreditCard, Eye, Pencil } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { LodatListItem } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 
@@ -15,9 +16,16 @@ type Props = {
   onAction: (action: LodatAction) => void;
 };
 
+/** Menu portal body — tránh overflow bảng cắt hit-test (cùng pattern /khach-hang). */
 export function ActionMenu({ plot, open, onToggle, onClose, onAction }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -32,11 +40,42 @@ export function ActionMenu({ plot, open, onToggle, onClose, onAction }: Props) {
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) onClose();
+      const t = e.target as Node;
+      if (wrapRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+      onClose();
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open, onClose]);
+
+  const menu =
+    open && mounted
+      ? createPortal(
+          <ul
+            ref={menuRef}
+            className="ld-action-menu"
+            role="menu"
+            style={{ top: pos.top, left: pos.left }}
+          >
+            <li>
+              <button type="button" role="menuitem" onClick={() => onAction('detail')}>
+                <Icon icon={Eye} /> Xem chi tiết
+              </button>
+            </li>
+            <li>
+              <button type="button" role="menuitem" onClick={() => onAction('deal')}>
+                <Icon icon={CreditCard} /> Giao dịch
+              </button>
+            </li>
+            <li>
+              <button type="button" role="menuitem" onClick={() => onAction('edit')}>
+                <Icon icon={Pencil} /> Sửa
+              </button>
+            </li>
+          </ul>,
+          document.body,
+        )
+      : null;
 
   return (
     <div className="ld-action" ref={wrapRef}>
@@ -50,29 +89,7 @@ export function ActionMenu({ plot, open, onToggle, onClose, onAction }: Props) {
       >
         <Icon icon={open ? ChevronUp : ChevronDown} size={14} strokeWidth={2.4} />
       </button>
-      {open ? (
-        <ul
-          className="ld-action-menu"
-          role="menu"
-          style={{ top: pos.top, left: pos.left }}
-        >
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('detail')}>
-              <Icon icon={Eye} /> Xem chi tiết
-            </button>
-          </li>
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('deal')}>
-              <Icon icon={CreditCard} /> Giao dịch
-            </button>
-          </li>
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('edit')}>
-              <Icon icon={Pencil} /> Sửa
-            </button>
-          </li>
-        </ul>
-      ) : null}
+      {menu}
     </div>
   );
 }

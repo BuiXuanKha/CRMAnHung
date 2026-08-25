@@ -2,6 +2,7 @@
 
 import { Check, ListFilter, X } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { Icon } from './icon';
 import './column-filter.css';
 
@@ -33,8 +34,14 @@ export function ColumnFilter({
   onChange,
 }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [mounted, setMounted] = useState(false);
   const active = value !== allValue && value !== '';
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -49,11 +56,43 @@ export function ColumnFilter({
   useEffect(() => {
     if (!open) return;
     const onDoc = (e: MouseEvent) => {
-      if (!wrapRef.current?.contains(e.target as Node)) onClose();
+      const t = e.target as Node;
+      if (wrapRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+      onClose();
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
   }, [open, onClose]);
+
+  const menu =
+    open && mounted
+      ? createPortal(
+          <ul
+            ref={menuRef}
+            className="crm-col-filter-menu"
+            role="menu"
+            style={{ top: pos.top, left: pos.left }}
+          >
+            {options.map((opt) => (
+              <li key={opt.value || 'all'}>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className={value === opt.value ? 'is-selected' : undefined}
+                  onClick={() => {
+                    onChange(opt.value);
+                    onClose();
+                  }}
+                >
+                  <span>{opt.label}</span>
+                  {value === opt.value ? <Icon icon={Check} size={14} /> : null}
+                </button>
+              </li>
+            ))}
+          </ul>,
+          document.body,
+        )
+      : null;
 
   return (
     <div className="crm-col-filter" ref={wrapRef}>
@@ -88,30 +127,7 @@ export function ColumnFilter({
           <Icon icon={X} size={14} />
         </button>
       ) : null}
-      {open ? (
-        <ul
-          className="crm-col-filter-menu"
-          role="menu"
-          style={{ top: pos.top, left: pos.left }}
-        >
-          {options.map((opt) => (
-            <li key={opt.value || 'all'}>
-              <button
-                type="button"
-                role="menuitem"
-                className={value === opt.value ? 'is-selected' : undefined}
-                onClick={() => {
-                  onChange(opt.value);
-                  onClose();
-                }}
-              >
-                <span>{opt.label}</span>
-                {value === opt.value ? <Icon icon={Check} size={14} /> : null}
-              </button>
-            </li>
-          ))}
-        </ul>
-      ) : null}
+      {menu}
     </div>
   );
 }

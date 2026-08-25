@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import { X, type LucideIcon } from 'lucide-react';
 import { Icon } from './icon';
@@ -27,8 +27,6 @@ export function CrmDialog({
   className,
 }: DialogBaseProps) {
   const [mounted, setMounted] = useState(false);
-  /** Chặn click/mousedown mở dialog xuyên xuống backdrop (menu unmount → portal). */
-  const ignoreBackdropUntil = useRef(0);
 
   useEffect(() => {
     setMounted(true);
@@ -36,7 +34,6 @@ export function CrmDialog({
 
   useEffect(() => {
     if (!open) return;
-    ignoreBackdropUntil.current = Date.now() + 400;
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && !busy) onClose();
     };
@@ -53,21 +50,15 @@ export function CrmDialog({
     };
   }, [open]);
 
-  function closeFromBackdrop() {
-    if (busy) return;
-    if (Date.now() < ignoreBackdropUntil.current) return;
-    onClose();
-  }
-
   if (!open || !mounted) return null;
 
   return createPortal(
     <div
       className="crm-dialog-backdrop"
       role="presentation"
-      /* mousedown: click mở menu không «rơi» xuống backdrop sau khi portal gắn */
+      /* Đóng bằng mousedown trên nền — tránh cùng click mở menu «rơi» xuống backdrop */
       onMouseDown={(e) => {
-        if (e.target === e.currentTarget) closeFromBackdrop();
+        if (e.target === e.currentTarget && !busy) onClose();
       }}
     >
       <div

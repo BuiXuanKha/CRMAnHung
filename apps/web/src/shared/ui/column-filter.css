@@ -52,7 +52,7 @@
 
 .crm-col-filter-menu {
   position: fixed;
-  z-index: 40;
+  z-index: 100;
   margin: 0;
   padding: 4px;
   list-style: none;
