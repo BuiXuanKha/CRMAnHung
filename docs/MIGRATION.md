@@ -81,7 +81,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 10b | `tblAddresses` + ảnh dự án R2 | `address`, `address_image` | `pnpm addresses:migrate-legacy` | Xong staging (110 địa chỉ, 9 ảnh) |
 | 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
 | 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Todo — chạy VPS; PROJECT stream `p:{lodatId}:{empId}`; giữ kha/buinam; `SKIP_LODAT_IMAGES=1` nếu chỉ text |
-| 11 | Giao dịch | `transaction` | — | Schema Prisma **xong** (PR transaction-db). Script copy Todo — sau Nest + sau bước 10d |
+| 11 | Giao dịch | `transaction` (+ party/snapshot/ảnh/đính kèm) | `pnpm transactions:migrate-legacy` | Script xong — chạy VPS sau 10d. Live cũ: 2 GD OWN+HOAN_TAT (buinam), 0 file |
 | 12 | Sổ đỏ | `title_service` | — | Todo |
 
 Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV copy cùng metadata `tblPersonFacebook` (UID NV) để cột Kênh liên hệ hiện tên page/nick.
@@ -108,6 +108,14 @@ Live SQLite (2026-08-25): **2** GD, cả `OWN` + `HOAN_TAT`, tạo bởi **buina
 | Snapshot ảnh / đính kèm `StoredPath` | R2 `objectKey` (giống ảnh lô) |
 
 Cần bước 10d xong (map `lodat` + `lodat_customer_map` + `user` + `customer`). Unique 1 GD mở / lô: dữ liệu live hiện không có GD mở.
+
+```bash
+cd /var/www/crmanhung/repo/apps/api
+LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db \
+  pnpm transactions:migrate-legacy
+```
+
+`SKIP_TX_FILES=1` nếu chỉ copy text (bỏ R2). Idempotent qua `migrate.legacy_id_map` entity `transaction`.
 
 ## Bảng map ID (không phải bảng nghiệp vụ)
 

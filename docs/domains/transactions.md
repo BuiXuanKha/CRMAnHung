@@ -136,7 +136,7 @@ Chi tiết cột: [`MIGRATION.md`](../MIGRATION.md) bước 11. Tóm tắt:
 
 **PROJECT:** `lodatId` mới = `Lodat` của **map** (`lodat_customer_map`), không map `tblLodats.ID` kho. Live cũ: 2 GD `OWN`+`HOAN_TAT` (buinam), 0 file đính kèm.
 
-Script copy: **chưa viết** (sau Nest + sau khi copy lô xong).
+Script copy: `pnpm transactions:migrate-legacy` (cần bước 10d). Live cũ: 2 GD `OWN`+`HOAN_TAT` (buinam), 0 file đính kèm.
 
 ## 11. CRM cũ vs web mới
 
