@@ -206,6 +206,14 @@
     border-radius: 8px;
     overflow: hidden;
     background: #f1f5f9;
+    padding: 0;
+    border: none;
+    display: block;
+    cursor: default;
+  }
+
+  .ld-card-thumb.is-clickable {
+    cursor: zoom-in;
   }
 
   .ld-card-thumb img {

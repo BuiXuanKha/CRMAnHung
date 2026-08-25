@@ -144,6 +144,23 @@
   overflow: hidden;
   background: #e2e8f0;
   flex: 0 0 52px;
+  padding: 0;
+  border: none;
+  display: block;
+  cursor: default;
+}
+
+.ld-thumb.is-clickable {
+  cursor: zoom-in;
+}
+
+.ld-thumb.is-clickable:hover {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+}
+
+.ld-thumb:disabled {
+  cursor: default;
 }
 
 .ld-thumb img {

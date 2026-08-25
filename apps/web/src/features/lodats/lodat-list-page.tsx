@@ -1,12 +1,19 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, type LucideIcon } from 'lucide-react';
-import { LodatKind, LodatSaleStatus, type LodatListItem, type LodatListingStatus } from '@crmanhung/shared';
+import {
+  LodatKind,
+  LodatSaleStatus,
+  type LodatDetail,
+  type LodatImage,
+  type LodatListItem,
+  type LodatListingStatus,
+} from '@crmanhung/shared';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
-import { listLodats, updateLodatSaleStatus } from './api';
+import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import {
   COMING_SOON_CONFIRM,
   COMING_SOON_ICON,
@@ -16,6 +23,7 @@ import {
 import { type LodatAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
 import { LodatCardList } from './components/lodat-card-list';
+import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTable } from './components/lodat-table';
 import {
   applyExtraFilters,
@@ -45,6 +53,29 @@ type AlertState = {
   confirmLabel?: string;
 } | null;
 
+function galleryImagesFromDetail(detail: LodatDetail): LodatImage[] {
+  if (detail.images?.length) return detail.images;
+  if (detail.imageUrls?.length) {
+    return detail.imageUrls.map((url) => ({
+      id: null,
+      url,
+      rotationDeg: 0,
+      source: 'lodat' as const,
+    }));
+  }
+  if (detail.coverImageUrl) {
+    return [
+      {
+        id: null,
+        url: detail.coverImageUrl,
+        rotationDeg: 0,
+        source: 'lodat' as const,
+      },
+    ];
+  }
+  return [];
+}
+
 export function LodatListPage() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -58,6 +89,8 @@ export function LodatListPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<AlertState>(null);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [galleryLodatId, setGalleryLodatId] = useState<string | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
@@ -70,6 +103,37 @@ export function LodatListPage() {
     queryKey: ['lodats', listQuery],
     queryFn: () => listLodats(listQuery),
   });
+
+  const galleryQ = useQuery({
+    queryKey: ['lodat', galleryLodatId],
+    queryFn: () => getLodat(galleryLodatId!),
+    enabled: Boolean(galleryLodatId),
+  });
+
+  const galleryImages = useMemo(
+    () => (galleryQ.data ? galleryImagesFromDetail(galleryQ.data) : []),
+    [galleryQ.data],
+  );
+
+  useEffect(() => {
+    if (!galleryLodatId || !galleryQ.isError) return;
+    setAlertBox({
+      title: 'Không mở được ảnh',
+      message: (galleryQ.error as Error).message || 'Không tải được ảnh lô đất.',
+    });
+    setGalleryLodatId(null);
+  }, [galleryLodatId, galleryQ.isError, galleryQ.error]);
+
+  useEffect(() => {
+    if (!galleryLodatId || galleryQ.isLoading || galleryQ.isError) return;
+    if (galleryImages.length === 0) {
+      setAlertBox({
+        title: 'Chưa có ảnh',
+        message: 'Lô đất này chưa có hình ảnh để xem.',
+      });
+      setGalleryLodatId(null);
+    }
+  }, [galleryLodatId, galleryQ.isLoading, galleryQ.isError, galleryImages.length]);
 
   const filtered = useMemo(
     () => applyPriceBracket(applyExtraFilters(list.data?.items ?? [], extra), priceBracket),
@@ -132,6 +196,13 @@ export function LodatListPage() {
     void toggleMut.mutateAsync(plot);
   }
 
+  function openGallery(plot: LodatListItem) {
+    setMenuId(null);
+    setSelectedId(plot.id);
+    setGalleryIndex(0);
+    setGalleryLodatId(plot.id);
+  }
+
   return (
     <div className="ld-page">
       <div className="ld-main">
@@ -177,6 +248,7 @@ export function LodatListPage() {
               onCloseMenu={() => setMenuId(null)}
               onAction={(p, a) => handleAction(p.id, a, p.title)}
               onToggleSale={handleToggleSale}
+              onOpenGallery={openGallery}
             />
           </section>
         ) : null}
@@ -188,9 +260,36 @@ export function LodatListPage() {
             selectedId={selectedId}
             onSelect={setSelectedId}
             onOpen={(id) => router.push(`/lo-dat/${id}`)}
+            onOpenGallery={openGallery}
           />
         ) : null}
       </div>
+
+      {galleryLodatId && galleryImages.length ? (
+        <LodatImageGallery
+          title={galleryQ.data?.title?.trim() || 'Ảnh lô đất'}
+          images={galleryImages}
+          startIndex={galleryIndex}
+          onClose={() => setGalleryLodatId(null)}
+          onIndexChange={setGalleryIndex}
+          onRotate={async (image, nextDeg) => {
+            if (!image.id || image.source !== 'lodat') {
+              throw new Error('Ảnh dự án chung không lưu xoay tại đây.');
+            }
+            const updated = await updateLodatImageRotation(galleryLodatId, image.id, {
+              rotationDeg: nextDeg,
+            });
+            qc.setQueryData(['lodat', galleryLodatId], updated);
+            await qc.invalidateQueries({ queryKey: ['lodats'] });
+            const saved = updated.images.find((i) => i.id === image.id);
+            return saved?.rotationDeg ?? nextDeg;
+          }}
+          onToast={flash}
+          onError={(msg) =>
+            setAlertBox({ title: 'Không thực hiện được', message: msg })
+          }
+        />
+      ) : null}
 
       <CrmAlertDialog
         open={Boolean(alertBox)}

@@ -222,7 +222,7 @@ Biên DT: `1–100` = 1≤DT≤100; `100–200` = 100&lt;DT≤200; `Trên 200` =
 
 ##### 1. Ảnh
 
-Thumbnail. Thiếu = ô trống. `+N` nếu còn ảnh.
+Thumbnail. Thiếu = ô trống. `+N` nếu còn ảnh. **Bấm ảnh** → mở gallery full (cùng modal chi tiết); không có ảnh → không mở.
 
 ##### 2. Tiêu đề / Địa chỉ
 
@@ -281,7 +281,7 @@ CRM cũ: nút GD / Sửa / Xóa (admin, lô admin tạo) trên dòng.
 
 Không bảng, không menu, không công tắc, không hangtag Nhà/Đất.
 
-**Bấm thẻ** → `/lo-dat/[id]`.
+**Bấm thẻ** → `/lo-dat/[id]`. **Bấm ảnh** trên thẻ → gallery (không điều hướng).
 
 #### 12.2.1 Ô tìm + nút Tìm
 

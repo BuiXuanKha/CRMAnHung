@@ -43,6 +43,7 @@ type Props = {
   onAction: (plot: LodatListItem, action: LodatAction) => void;
   togglingId: string | null;
   onToggleSale: (plot: LodatListItem) => void;
+  onOpenGallery: (plot: LodatListItem) => void;
 };
 
 export function LodatTable({
@@ -62,6 +63,7 @@ export function LodatTable({
   onAction,
   togglingId,
   onToggleSale,
+  onOpenGallery,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
 
@@ -176,7 +178,22 @@ export function LodatTable({
               onClick={() => onSelect(p.id)}
             >
               <div className="ld-cell" role="cell">
-                <div className="ld-thumb">
+                <button
+                  type="button"
+                  className={['ld-thumb', p.coverImageUrl ? 'is-clickable' : '']
+                    .filter(Boolean)
+                    .join(' ')}
+                  aria-label={
+                    p.coverImageUrl
+                      ? `Xem ảnh «${p.title}»`
+                      : `«${p.title}» chưa có ảnh`
+                  }
+                  disabled={!p.coverImageUrl}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (p.coverImageUrl) onOpenGallery(p);
+                  }}
+                >
                   {p.coverImageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={p.coverImageUrl} alt="" />
@@ -188,7 +205,7 @@ export function LodatTable({
                   {p.extraPhotoCount > 0 ? (
                     <span className="ld-thumb-more">+{p.extraPhotoCount}</span>
                   ) : null}
-                </div>
+                </button>
               </div>
               <div className="ld-cell" role="cell">
                 <div className="ld-stack">

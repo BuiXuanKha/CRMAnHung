@@ -12,9 +12,17 @@ type Props = {
   selectedId: string | null;
   onSelect: (id: string) => void;
   onOpen: (id: string) => void;
+  onOpenGallery: (plot: LodatListItem) => void;
 };
 
-export function LodatCardList({ items, total, selectedId, onSelect, onOpen }: Props) {
+export function LodatCardList({
+  items,
+  total,
+  selectedId,
+  onSelect,
+  onOpen,
+  onOpenGallery,
+}: Props) {
   return (
     <div className="ld-cards-shell">
       <div className="ld-cards" role="list" aria-label="Danh sách lô đất">
@@ -47,7 +55,25 @@ export function LodatCardList({ items, total, selectedId, onSelect, onOpen }: Pr
                   <strong>{p.title}</strong>
                 </header>
                 <div className="ld-card-body">
-                  <div className="ld-card-thumb">
+                  <button
+                    type="button"
+                    className={[
+                      'ld-card-thumb',
+                      p.coverImageUrl ? 'is-clickable' : '',
+                    ]
+                      .filter(Boolean)
+                      .join(' ')}
+                    aria-label={
+                      p.coverImageUrl
+                        ? `Xem ảnh «${p.title}»`
+                        : `«${p.title}» chưa có ảnh`
+                    }
+                    disabled={!p.coverImageUrl}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (p.coverImageUrl) onOpenGallery(p);
+                    }}
+                  >
                     {p.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={p.coverImageUrl} alt="" />
@@ -62,7 +88,7 @@ export function LodatCardList({ items, total, selectedId, onSelect, onOpen }: Pr
                     {p.extraPhotoCount > 0 ? (
                       <span className="ld-thumb-more">+{p.extraPhotoCount}</span>
                     ) : null}
-                  </div>
+                  </button>
                   <div className="ld-card-meta">
                     <span className="ld-card-address">{p.address?.trim() || '—'}</span>
                     <span className="crm-money">{formatPriceVnd(p.priceVnd)}</span>
