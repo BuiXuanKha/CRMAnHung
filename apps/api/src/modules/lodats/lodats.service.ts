@@ -9,6 +9,7 @@ import type { RequestUser } from '../../common/decorators/current-user.decorator
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type {
+  CreateLodatDto,
   ListLodatsQueryDto,
   UpdateLodatDto,
   UpdateLodatImageRotationDto,
@@ -560,6 +561,154 @@ export class LodatsService {
     } catch {
       throw new BadRequestException('Giá không hợp lệ.');
     }
+  }
+
+  /** Kho lô của một địa chỉ PROJECT — picker form tạo lô (§12.5). */
+  async listProjectLots(user: RequestUser, addressId: string) {
+    const addr = await this.prisma.address.findUnique({
+      where: { id: addressId },
+      select: { id: true, kind: true, isHidden: true },
+    });
+    if (!addr || addr.isHidden) {
+      throw new NotFoundException('Không tìm thấy địa chỉ.');
+    }
+    if (addr.kind !== 'PROJECT') {
+      throw new BadRequestException('Địa chỉ này không phải dự án.');
+    }
+    const lots = await this.prisma.projectLot.findMany({
+      where: { addressId, isHidden: false },
+      orderBy: [{ title: 'asc' }, { createdAt: 'asc' }],
+      include: {
+        lodats: {
+          where: {
+            createdByEmployeeId: user.id,
+            maps: { some: { isActive: true } },
+          },
+          select: { id: true },
+        },
+      },
+    });
+    return {
+      addressId,
+      items: lots.map((lot) => ({
+        id: lot.id,
+        title: lot.title,
+        areaM2: lot.areaM2 ?? null,
+        frontageM: lot.frontageM ?? null,
+        direction: lot.direction?.trim() || null,
+        note: lot.note?.trim() || null,
+        takenByMe: lot.lodats.length > 0,
+      })),
+    };
+  }
+
+  /**
+   * Tạo lô từ khách (§12.5): dân (addressId REGULAR + specs)
+   * hoặc dự án (projectLotId trỏ kho). Khách = chủ gắn ngay (map active).
+   */
+  async create(user: RequestUser, dto: CreateLodatDto) {
+    if (user.role === 'ADMIN') {
+      throw new ForbiddenException(
+        'Admin không tạo lô đất từ menu khách. Nhân viên tạo lô từ hồ sơ khách của mình.',
+      );
+    }
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: dto.customerId },
+      select: { id: true, employeeId: true, isHidden: true },
+    });
+    if (!customer || customer.isHidden) {
+      throw new NotFoundException('Không tìm thấy khách hàng.');
+    }
+    if (customer.employeeId !== user.id) {
+      throw new ForbiddenException('Khách này không thuộc hồ sơ của bạn.');
+    }
+
+    const isProject = Boolean(dto.projectLotId);
+    if (isProject === Boolean(dto.addressId)) {
+      throw new BadRequestException(
+        'Chọn địa chỉ đất dân hoặc lô kho dự án (một trong hai).',
+      );
+    }
+
+    let lodatData: Prisma.LodatCreateInput;
+    if (isProject) {
+      const lot = await this.prisma.projectLot.findUnique({
+        where: { id: dto.projectLotId! },
+        select: { id: true, isHidden: true },
+      });
+      if (!lot || lot.isHidden) {
+        throw new NotFoundException('Không tìm thấy lô trong kho dự án.');
+      }
+      // 1 luồng active / NV / lô kho (§0.2)
+      const existing = await this.prisma.lodat.findFirst({
+        where: {
+          projectLotId: lot.id,
+          createdByEmployeeId: user.id,
+          maps: { some: { isActive: true } },
+        },
+        select: { id: true },
+      });
+      if (existing) {
+        throw new BadRequestException(
+          'Bạn đang giữ một luồng mở trên lô kho này. Đổi chủ trong luồng đó thay vì tạo mới.',
+        );
+      }
+      lodatData = {
+        projectLot: { connect: { id: lot.id } },
+        propertyKind: dto.kind ?? 'DAT',
+        createdBy: { connect: { id: user.id } },
+      };
+    } else {
+      const title = String(dto.title ?? '').trim();
+      if (!title) {
+        throw new BadRequestException('Cần nhập tiêu đề lô đất.');
+      }
+      const addrTarget = await this.prisma.address.findUnique({
+        where: { id: dto.addressId! },
+        select: { id: true, kind: true, isHidden: true },
+      });
+      if (!addrTarget || addrTarget.isHidden) {
+        throw new NotFoundException('Không tìm thấy địa chỉ.');
+      }
+      if (addrTarget.kind !== 'REGULAR') {
+        throw new BadRequestException('Lô đất dân chỉ chọn địa chỉ loại Đất dân.');
+      }
+      lodatData = {
+        title,
+        address: { connect: { id: addrTarget.id } },
+        areaM2: this.parseOptionalNumber(dto.areaM2) ?? null,
+        frontageM: this.parseOptionalNumber(dto.frontageM) ?? null,
+        direction: dto.direction?.trim() || null,
+        note: dto.note?.trim() || null,
+        propertyKind: dto.kind ?? 'DAT',
+        createdBy: { connect: { id: user.id } },
+      };
+    }
+
+    const created = await this.prisma.lodat.create({
+      data: {
+        ...lodatData,
+        maps: {
+          create: {
+            customer: { connect: { id: customer.id } },
+            priceVnd: this.parsePrice(dto.priceVnd) ?? null,
+            priceNote: dto.priceNote?.trim() || null,
+            brokerFeeNote: dto.brokerFeeNote?.trim() || null,
+            note: dto.mapNote?.trim() || null,
+            status: dto.status ?? 'DANG_BAN',
+            isActive: true,
+            createdBy: { connect: { id: user.id } },
+          },
+        },
+      },
+      select: { id: true },
+    });
+
+    const refreshed = await this.prisma.lodat.findUniqueOrThrow({
+      where: { id: created.id },
+      include: LIST_INCLUDE,
+    });
+    return this.mapDetail(refreshed, user);
   }
 
   async update(user: RequestUser, id: string, dto: UpdateLodatDto) {

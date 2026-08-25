@@ -17,7 +17,9 @@ import {
   type RequestUser,
 } from '../../common/decorators/current-user.decorator';
 import {
+  CreateLodatDto,
   ListLodatsQueryDto,
+  ListProjectLotsQueryDto,
   UpdateLodatDto,
   UpdateLodatImageRotationDto,
   UpdateLodatSaleStatusDto,
@@ -31,6 +33,20 @@ export class LodatsController {
   @Get()
   list(@CurrentUser() user: RequestUser, @Query() query: ListLodatsQueryDto) {
     return this.lodats.list(user, query);
+  }
+
+  /** Kho lô theo địa chỉ dự án — phải đứng trước các route `:id`. */
+  @Get('project-lots')
+  listProjectLots(
+    @CurrentUser() user: RequestUser,
+    @Query() query: ListProjectLotsQueryDto,
+  ) {
+    return this.lodats.listProjectLots(user, query.addressId);
+  }
+
+  @Post()
+  create(@CurrentUser() user: RequestUser, @Body() dto: CreateLodatDto) {
+    return this.lodats.create(user, dto);
   }
 
   @Get(':id/same-ward')

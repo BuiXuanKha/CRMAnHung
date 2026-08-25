@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list + chi tiết + gallery + lô cùng xã + **trang sửa** `/sua`; **chưa bàn** list ADMIN / đổi chủ / tạo lô từ khách
+- **Status:** Ready for API — list + chi tiết + gallery + lô cùng xã + **trang sửa** `/sua` + **form tạo lô từ khách** (§12.5); **chưa bàn** list ADMIN / đổi chủ
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
@@ -421,6 +421,42 @@ Hiện tại: card «Lịch sử chủ đất» chỉ hiện **chủ active** t�
 
 ---
 
+### 12.5 Form tạo lô từ khách `/khach-hang/[id]/them-lo-dat`
+
+Học form tạo của CRM cũ (cùng chrome trang sửa §12.4) — **chỉ STAFF**, vào từ menu Thao tác khách «Tạo lô đất». ADMIN → CrmAlert không tạo từ khách. Khách đang mở = **chủ gắn ngay** (map active), không đổi trên form.
+
+#### 12.5.1 Máy tính
+
+Layout 2 cột như §12.4.1: trái form; phải Hình ảnh + Xem nhanh sticky; Huỷ/Tạo dưới form.
+
+```
+← Khách hàng · H1 Tạo lô đất · «tên khách»
+┌ Loại thửa: (•) Đất dân   ( ) Lô dự án ─────────────────────────┐
+│ Đất dân: địa chỉ REGULAR + tiêu đề* + DT/MT/hướng/phân loại/ghi chú
+│ Dự án:  địa chỉ PROJECT → chọn lô kho (ẩn/khoá lô NV đã giữ)  │
+│ Giá bán: trạng thái (mặc định Mở bán) · giá · chip ghi chú giá │
+│          · chip hoa hồng · ghi chú liên kết chủ                │
+└ Hình ảnh (chỉ đất dân, tối đa 5) — upload sau khi tạo xong ────┘
+```
+
+- Lô **dự án**: thông số đọc từ kho (hiện DT·MT·hướng cạnh từng lô trong picker); không nhập specs; không thêm ảnh lô (ảnh dự án chung).
+- Lô **dân**: bắt buộc tiêu đề + địa chỉ REGULAR; specs như trang sửa; chip hướng/ghi chú giá/hoa hồng §12.4.3.
+- Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ (nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`.
+- 1 luồng active / NV / lô kho — API chặn, picker cũng khoá («Bạn đang giữ»).
+
+#### 12.5.2 Mobile
+
+Xếp dọc như §12.4.2 (một cột; Huỷ/Tạo cuối form; nút «Thêm ảnh» thay paste-zone).
+
+#### 12.5.3 API
+
+| Endpoint | Việc |
+|----------|------|
+| `GET /lodats/project-lots?addressId=` | Kho lô của địa chỉ PROJECT + cờ `takenByMe` |
+| `POST /lodats` | Tạo lô dân (addressId REGULAR + specs) hoặc lô dự án (projectLotId) + map chủ; chặn ADMIN; khách phải thuộc NV |
+
+---
+
 ## 13. Lịch làm — thứ tự DB (STAFF trước)
 
 **Có: phải có sổ địa chỉ trước lô.** Prisma + copy kho/map/ảnh **xong staging**. API list `/lo-dat` STAFF trong PR này. Còn: Admin import kho, tạo lô, đổi chủ, list ADMIN.
@@ -459,7 +495,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **9** | Copy **map NV–khách** PROJECT: mỗi map active → 1 `Lodat` trỏ `ProjectLot` + `LodatCustomerMap` | Luồng độc lập theo NV | Cũ: 1 `tblLodats` + nhiều map. Mới: nhiều `Lodat` cùng `projectLotId` |
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
-| **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | Form + picker địa chỉ bước 3 |
+| **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | **Done** — §12.5; `POST /lodats` + picker kho |
 | **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + **form sửa** (PATCH + upload LodatImage) **xong**; đổi chủ Todo |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
 

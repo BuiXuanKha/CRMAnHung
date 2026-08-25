@@ -160,3 +160,68 @@ export const lodatSameWardResponseSchema = z.object({
 });
 
 export type LodatSameWardResponse = z.infer<typeof lodatSameWardResponseSchema>;
+
+/** Một lô trong kho dự án — picker form tạo lô (lodats.md §12.5). */
+export const projectLotOptionSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  areaM2: z.number().nullable().optional(),
+  frontageM: z.number().nullable().optional(),
+  direction: z.string().nullable().optional(),
+  note: z.string().nullable().optional(),
+  /** NV hiện tại đã có luồng active trên lô kho này */
+  takenByMe: z.boolean().default(false),
+});
+
+export type ProjectLotOption = z.infer<typeof projectLotOptionSchema>;
+
+export const projectLotOptionsResponseSchema = z.object({
+  addressId: z.string(),
+  items: z.array(projectLotOptionSchema),
+});
+
+export type ProjectLotOptionsResponse = z.infer<typeof projectLotOptionsResponseSchema>;
+
+/**
+ * Tạo lô từ khách (lodats.md §12.5) — một trong hai:
+ * - Đất dân: `addressId` (REGULAR) + `title` bắt buộc, specs tuỳ chọn
+ * - Lô dự án: `projectLotId` (kho) — không specs, không title
+ * Khách `customerId` = chủ gắn ngay (map active).
+ */
+export const createLodatSchema = z
+  .object({
+    customerId: z.string().min(1, 'Thiếu khách hàng.'),
+    addressId: z.string().nullable().optional(),
+    projectLotId: z.string().nullable().optional(),
+    title: z.string().trim().max(200).nullable().optional(),
+    areaM2: z.number().nonnegative().nullable().optional(),
+    frontageM: z.number().nonnegative().nullable().optional(),
+    direction: z.string().trim().max(40).nullable().optional(),
+    kind: z.nativeEnum(LodatKind).optional(),
+    note: z.string().trim().max(4000).nullable().optional(),
+    status: lodatListingStatusSchema.optional(),
+    priceVnd: z.union([z.number().nonnegative(), z.string()]).nullable().optional(),
+    priceNote: z.string().trim().max(200).nullable().optional(),
+    brokerFeeNote: z.string().trim().max(200).nullable().optional(),
+    mapNote: z.string().trim().max(4000).nullable().optional(),
+  })
+  .superRefine((v, ctx) => {
+    const hasAddress = Boolean(v.addressId);
+    const hasLot = Boolean(v.projectLotId);
+    if (hasAddress === hasLot) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Chọn địa chỉ đất dân hoặc lô kho dự án (một trong hai).',
+      });
+      return;
+    }
+    if (hasAddress && !v.title?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['title'],
+        message: 'Cần nhập tiêu đề lô đất.',
+      });
+    }
+  });
+
+export type CreateLodatInput = z.infer<typeof createLodatSchema>;

@@ -58,6 +58,106 @@ export class UpdateLodatImageRotationDto {
   rotationDeg!: number;
 }
 
+export class ListProjectLotsQueryDto {
+  @IsString()
+  @MaxLength(60)
+  addressId!: string;
+}
+
+export class CreateLodatDto {
+  @IsString()
+  @MaxLength(60)
+  customerId!: string;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(60)
+  addressId?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(60)
+  projectLotId?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(200)
+  title?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === '' || value === null) return null;
+    if (value === undefined) return undefined;
+    return Number(value);
+  })
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsNumber()
+  areaM2?: number | null;
+
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === '' || value === null) return null;
+    if (value === undefined) return undefined;
+    return Number(value);
+  })
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsNumber()
+  frontageM?: number | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(40)
+  direction?: string | null;
+
+  @IsOptional()
+  @IsIn(['NHA', 'DAT'])
+  kind?: 'NHA' | 'DAT';
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(4000)
+  note?: string | null;
+
+  @IsOptional()
+  @IsIn(['DANG_BAN', 'TAM_DUNG'])
+  status?: 'DANG_BAN' | 'TAM_DUNG';
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  priceVnd?: number | string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(200)
+  priceNote?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(200)
+  brokerFeeNote?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(4000)
+  mapNote?: string | null;
+}
+
 export class UpdateLodatDto {
   @IsOptional()
   @IsString()

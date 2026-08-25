@@ -60,7 +60,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 3. **Double-click dòng (máy tính)** — mở modal chăm sóc. Có trên staging.
 4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lịch sử chăm sóc, **danh sách lô** (API). Có trên staging.
 5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Có trên staging.
-6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat`. «Đang phát triển». **Chưa làm form.**
+6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat` (**form đã có** — lodats.md §12.5). ADMIN: CrmAlert không tạo từ khách.
 7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung. **Chưa làm** (chốt 2026-08-24).
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
@@ -204,7 +204,7 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 | Mở chat | Tab `facebook.com/messages/t/{threadId}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert; **ẩn mobile**. Tin đã lưu xem qua rail «Nội dung chat» |
 | Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
-| Tạo lô đất | STAFF → form sau (`/them-lo-dat`). Hiện alert đang phát triển. ADMIN: báo không được tạo |
+| Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (lodats.md §12.5). ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | Form từ khách sau. Hiện alert đang phát triển |
 | Ghim / Bỏ ghim | `isPinned` |
 | Xóa khách | Confirm ẩn mềm; tìm lại bằng `@` / `@@` |

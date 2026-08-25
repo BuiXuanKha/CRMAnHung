@@ -435,12 +435,8 @@ export function CustomerListPage() {
         });
         return;
       }
-      setAlertBox({
-        title: COMING_SOON_TITLE,
-        message: comingSoonMessage(`Tạo lô đất cho «${customer.fullName}»`),
-        icon: COMING_SOON_ICON,
-        confirmLabel: COMING_SOON_CONFIRM,
-      });
+      saveListBeforeLeave(customer.id);
+      router.push(`/khach-hang/${customer.id}/them-lo-dat`);
       return;
     }
     if (action === 'sodo') {

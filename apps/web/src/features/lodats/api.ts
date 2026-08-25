@@ -2,15 +2,18 @@ import {
   LODAT_KIND_LABELS,
   LodatKind,
   LodatSaleStatus,
+  createLodatSchema,
   updateLodatImageRotationSchema,
   updateLodatSaleStatusSchema,
   updateLodatSchema,
+  type CreateLodatInput,
   type LodatDetail,
   type LodatImage,
   type LodatListItem,
   type LodatListQuery,
   type LodatListResponse,
   type LodatSameWardResponse,
+  type ProjectLotOptionsResponse,
   type UpdateLodatImageRotationInput,
   type UpdateLodatInput,
   type UpdateLodatSaleStatusInput,
@@ -292,6 +295,56 @@ export async function deleteLodatImage(
   }
   return apiFetch<LodatDetail>(`/lodats/${lodatId}/images/${imageId}`, {
     method: 'DELETE',
+  });
+}
+
+/** Kho lô của địa chỉ PROJECT — picker form tạo lô (§12.5). */
+export async function listProjectLotOptions(
+  addressId: string,
+): Promise<ProjectLotOptionsResponse> {
+  if (isMockLodats()) {
+    return {
+      addressId,
+      items: [
+        { id: 'plot-lk12', title: 'LK12', areaM2: 82, frontageM: 5, direction: 'Đông Nam', note: null, takenByMe: false },
+        { id: 'plot-lk13', title: 'LK13', areaM2: 90, frontageM: 5, direction: 'Nam', note: null, takenByMe: true },
+      ],
+    };
+  }
+  const params = new URLSearchParams({ addressId });
+  return apiFetch<ProjectLotOptionsResponse>(`/lodats/project-lots?${params}`);
+}
+
+/** Tạo lô từ khách (§12.5) — dân hoặc dự án + map chủ active. */
+export async function createLodat(input: CreateLodatInput): Promise<LodatDetail> {
+  const parsed = createLodatSchema.parse(input);
+  if (isMockLodats()) {
+    const id = `lodat-${Date.now()}`;
+    const item: LodatListItem = {
+      id,
+      title: parsed.title?.trim() || 'LK12',
+      address: null,
+      areaM2: parsed.areaM2 ?? null,
+      frontageM: parsed.frontageM ?? null,
+      direction: parsed.direction ?? null,
+      priceVnd: parsed.priceVnd ?? null,
+      priceNote: parsed.priceNote ?? null,
+      brokerFeeNote: parsed.brokerFeeNote ?? null,
+      commissionPercent: null,
+      kind: parsed.kind ?? LodatKind.DAT,
+      status: parsed.status ?? LodatSaleStatus.DANG_BAN,
+      coverImageUrl: null,
+      extraPhotoCount: 0,
+      customerHint: null,
+      projectLotId: parsed.projectLotId ?? null,
+      updatedAt: new Date().toISOString(),
+    };
+    mockStore = [item, ...mockStore];
+    return toDetail(item);
+  }
+  return apiFetch<LodatDetail>('/lodats', {
+    method: 'POST',
+    body: JSON.stringify(parsed),
   });
 }
 

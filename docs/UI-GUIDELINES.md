@@ -222,7 +222,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 | Mở chat | Tab `facebook.com/messages/t/…` (thread số); ẩn mobile; thiếu mã → CrmAlert |
 | Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu mã → CrmAlert |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
-| Tạo lô đất | Đang phát triển (CrmAlert). ADMIN: báo không tạo từ menu khách |
+| Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (form §12.5 lodats). ADMIN: CrmAlert không tạo từ menu khách |
 | Dịch vụ sổ đỏ | Đang phát triển (CrmAlert) |
 | Ghim khách / Bỏ ghim khách | **Một chỗ**, đổi nhãn theo `isPinned` |
 | **Xóa khách** | Đỏ — confirm **ẩn** (`isHidden`), không hard-delete |
