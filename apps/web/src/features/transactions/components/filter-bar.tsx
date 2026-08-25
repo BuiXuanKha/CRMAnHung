@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import { CrmSearchField } from '@/shared/ui/search-field';
 import { STATUS_FILTER_OPTIONS, TYPE_FILTER_OPTIONS } from '../display';
 
 type Props = {
@@ -37,11 +38,11 @@ export function FilterBar({
   return (
     <div className="tx-filter">
       <div className="tx-search-wrap">
-        <input
+        <CrmSearchField
           ref={searchRef}
           className="tx-search"
           value={keyword}
-          onChange={(e) => onKeyword(e.target.value)}
+          onValueChange={onKeyword}
           onKeyDown={(e) => {
             if (e.key === 'Enter') submitSearch();
           }}

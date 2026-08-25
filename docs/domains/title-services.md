@@ -78,6 +78,8 @@ Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`
 
 Gõ là lọc. Không `@`. (`TAM_DUNG` vẫn hiện trên list — khác `/lo-dat`.)
 
+Hangtag **Clear** (`CrmBadge` gray) **ngay sau con trỏ** khi ô không trống. Bấm → xoá hết từ khoá, giữ focus. Chữ tràn → hangtag dính mép phải phần đang thấy.
+
 ##### 1. Tìm theo (web mới)
 
 - Mã hồ sơ (`SD-…`)

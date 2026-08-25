@@ -15,6 +15,7 @@ description: Read and enforce CRMAnHung shared UI rules in docs/UI-GUIDELINES.md
 6. Bảng list CRM: skill **`crm-data-table`** + `UI-GUIDELINES.md` §4.5.
 7. Icon CRM: **Lucide** (§4.6). Hangtag: tone chuẩn §4.5.4 (`CrmBadge`).
 8. Alert / confirm / form: skill **`crm-dialog`** + §4.7 — không `window.alert/confirm/prompt`.
+9. Ô tìm list CRM: `CrmSearchField` — hangtag **Clear** gray **ngay sau caret**; không invent nút × mép phải.
 
 ## Cấm
 

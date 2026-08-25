@@ -4,6 +4,7 @@ import { useRef } from 'react';
 import type { ColumnFilterOption } from '@/shared/ui/column-filter';
 import { Plus } from 'lucide-react';
 import { Icon } from '@/shared/ui/icon';
+import { CrmSearchField } from '@/shared/ui/search-field';
 import {
   CHANNEL_ALL_OPTION,
   DEMAND_FILTER_OPTIONS,
@@ -52,11 +53,11 @@ export function FilterBar({
   return (
     <div className="kh-filter">
       <div className="kh-search-wrap">
-        <input
+        <CrmSearchField
           ref={searchRef}
           className={['kh-search', includeHidden ? 'is-at-mode' : ''].filter(Boolean).join(' ')}
           value={keyword}
-          onChange={(e) => onKeyword(e.target.value)}
+          onValueChange={onKeyword}
           onKeyDown={(e) => {
             if (e.key === 'Enter') submitSearch();
           }}

@@ -243,6 +243,7 @@ Một **hàng ngang** phía **trên bảng**, trong khung trắng bo góc, viề
 | Phần | Quy tắc |
 |------|---------|
 | **Ô tìm** (trái, chiếm phần lớn hàng) | Input một dòng; placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)` |
+| **Hangtag Clear** | Ô không trống → hangtag **Clear** (`CrmBadge` gray) **ngay sau con trỏ**; bấm xoá hết từ khoá, giữ focus. Chữ tràn → hangtag dính mép phải phần đang thấy. Component `CrmSearchField` — mọi ô tìm list CRM (`/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`). **Không** nút × mép phải riêng. |
 | Focus | Viền **xanh** |
 | **CTA** | Nút xanh «Thêm khách hàng bằng số điện thoại» **cùng hàng**, bên phải |
 
@@ -637,6 +638,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-20 | Chi tiết `/khach-hang/[id]`: hero + SĐT + tài chính + lịch sử; lô đất mock. Mobile bấm thẻ → trang này |
 | 2026-08-20 | List `/khach-hang`: lần đầu 50 dòng, cuộn gần đáy tải thêm 50; nhớ lọc/scroll khi rời trang (mọi lối, cùng tab) |
 | 2026-08-20 | Mục 24 list khách: tải 50 dòng khi cuộn + nhớ lọc/scroll (sessionStorage) — `customers.md` §12.1.5 |
+| 2026-08-25 | Ô tìm list CRM: hangtag **Clear** (`CrmBadge` gray) ngay sau con trỏ — `CrmSearchField` |
 | 2026-08-25 | Helper chung nhớ list (`shared/list-state` + skill `crm-list-state`): `/khach-hang` refactor; `/lo-dat` nhớ tìm/lọc/cuộn; logout xóa mọi `*-list-state` |
 | 2026-08-25 | Khách: `lodatCount` API + Map cạnh tên; bỏ cột Số lô; rail/chi tiết lô từ `GET /customers/:id/lodats` |
 | 2026-08-24 | Khách: xoá SĐT + sửa tên FB = **NV phụ trách khách** (không chỉ admin). Khôi phục ẩn / sổ đỏ từ khách / hangtag / inbox FB / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |

@@ -1,6 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
+import { CrmSearchField } from '@/shared/ui/search-field';
 import {
   PRICE_BRACKET_OPTIONS,
   STATUS_FILTER_OPTIONS,
@@ -43,11 +44,11 @@ export function FilterBar({
   return (
     <div className="ld-filter">
       <div className="ld-search-wrap">
-        <input
+        <CrmSearchField
           ref={searchRef}
           className={['ld-search', includePaused ? 'is-at-mode' : ''].filter(Boolean).join(' ')}
           value={keyword}
-          onChange={(e) => onKeyword(e.target.value)}
+          onValueChange={onKeyword}
           onKeyDown={(e) => {
             if (e.key === 'Enter') submitSearch();
           }}

@@ -1,0 +1,55 @@
+/* Inline Clear hangtag after the caret — UI-GUIDELINES §4.3.4 */
+
+.crm-search-field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+}
+
+.crm-search-field__input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.crm-search-field__mirror {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 0;
+  overflow: hidden;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: pre;
+}
+
+.crm-search-field__clear {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.crm-search-field__clear .crm-badge {
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.crm-search-field__clear:hover .crm-badge--gray {
+  background: #cbd5e1;
+  color: #334155;
+}
+
+.crm-search-field__clear:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  border-radius: 999px;
+}

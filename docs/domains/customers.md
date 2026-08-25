@@ -110,7 +110,9 @@ Placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ ch�
 
 Gõ → debounce ~250ms rồi lọc.
 
-`@` / `@@` trên ô: badge + viền vàng.
+Hangtag **Clear** (`CrmBadge` gray) hiện **ngay sau con trỏ** khi ô không trống. Bấm → xoá hết từ khoá, giữ focus. Chữ tràn → hangtag dính mép phải phần đang thấy.
+
+`@` / `@@` trên ô: badge + viền vàng (vẫn hiện Clear).
 
 ##### 1. Tìm theo
 
