@@ -536,7 +536,7 @@ Component: `shared/ui/column-filter.tsx`.
 - Header: nền `#f1f5f9`, chữ **600**, có thể kèm icon Lucide 18px.
 - Body: padding `16–18px`; chữ `#334155`.
 - Footer actions: căn phải; secondary viền `#cbd5e1`; primary `#2563eb`; danger `#b91c1c`.
-- Escape / click backdrop = Huỷ (trừ khi `busy`).
+- Escape / click backdrop = Huỷ (trừ khi `busy`). Backdrop đóng bằng **mousedown** + chặn ~400ms sau khi mở (tránh click mở menu «xuyên» đóng modal ngay).
 
 Skill: `crm-dialog`. Tham chiếu: `apps/web/src/shared/ui/dialog.tsx`.
 
