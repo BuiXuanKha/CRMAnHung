@@ -508,25 +508,27 @@ export function LodatEditPage() {
               <LodatEditOwnerHistory detail={detail} />
             </div>
 
-            <LodatEditImages
-              images={images}
-              selectedIndex={selectedIndex}
-              canEditImages={canEditImages}
-              isProject={isProject}
-              busy={busy}
-              uploading={uploadMut.isPending}
-              onSelect={setSelectedIndex}
-              onUpload={(files) => void onPickFiles(files)}
-              onDelete={(imageId) => void deleteMut.mutateAsync(imageId)}
-            />
+            <div className="ld-edit-area-side">
+              <LodatEditImages
+                images={images}
+                selectedIndex={selectedIndex}
+                canEditImages={canEditImages}
+                isProject={isProject}
+                busy={busy}
+                uploading={uploadMut.isPending}
+                onSelect={setSelectedIndex}
+                onUpload={(files) => void onPickFiles(files)}
+                onDelete={(imageId) => void deleteMut.mutateAsync(imageId)}
+              />
 
-            <LodatEditPreview
-              images={images}
-              selectedIndex={selectedIndex}
-              busy={busy}
-              onOpenGallery={() => setGalleryOpen(true)}
-              onRotate={(delta) => void onRotate(delta)}
-            />
+              <LodatEditPreview
+                images={images}
+                selectedIndex={selectedIndex}
+                busy={busy}
+                onOpenGallery={() => setGalleryOpen(true)}
+                onRotate={(delta) => void onRotate(delta)}
+              />
+            </div>
 
             <footer className="ld-edit-actions">
               <button
