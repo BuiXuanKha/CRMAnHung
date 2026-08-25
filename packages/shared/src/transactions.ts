@@ -1,8 +1,9 @@
 /**
- * Transactions contract — list mock + entity DB (P3).
+ * Transactions contract — list + entity + Nest CRUD.
  *
  * `type` = Của tôi / Ghi nhận. `status` = cọc → công chứng → hoàn thành / hủy.
  * RECORD không có hoa hồng; doanh thu / hoa hồng chỉ đếm OWN + HOAN_TAT.
+ * Tạo: gửi `lodatId` hoặc `lodatCustomerMapId`.
  * Tiền: DB BigInt; JSON number hoặc string (giống lodats).
  */
 import { z } from 'zod';
@@ -132,7 +133,9 @@ export type TransactionPartyInput = z.infer<typeof transactionPartyInputSchema>;
 
 export const createTransactionSchema = z
   .object({
-    lodatCustomerMapId: z.string().min(1, 'Thiếu map lô–khách.'),
+    /** Ưu tiên: API lấy map active của lô. */
+    lodatId: z.string().trim().min(1).optional(),
+    lodatCustomerMapId: z.string().trim().min(1).optional(),
     type: z.nativeEnum(TransactionType),
     notaryAppointmentAt: z.string().nullable().optional(),
     salePriceVnd: transactionVndSchema,
@@ -143,6 +146,13 @@ export const createTransactionSchema = z
     buyers: z.array(transactionPartyInputSchema).min(1, 'Cần ít nhất một người mua.'),
   })
   .superRefine((v, ctx) => {
+    if (!v.lodatId && !v.lodatCustomerMapId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['lodatId'],
+        message: 'Thiếu lô đất.',
+      });
+    }
     if (v.type === TransactionType.OWN && !v.notaryAppointmentAt) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

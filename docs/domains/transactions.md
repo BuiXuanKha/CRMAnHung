@@ -1,7 +1,7 @@
 # Domain: Transactions (Giao dịch)
 
 - **Slug:** `transactions`
-- **Status:** Ready for API — Prisma + contract; UI mock list + chi tiết + form + tạo từ lô; Nest **sau**
+- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI mock (list / chi tiết / form / tạo từ lô). Copy CRM cũ **sau**.
 - **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich` (SQLite `tblTransaction*`, 2026-08-25)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
@@ -51,8 +51,8 @@ Gợi ý dưới số 2–3: «Chỉ giao dịch của tôi · Hoàn thành». M
 1. **Tạo GD từ lô** — nếu lô đã có GD mở (`DA_COC` / `DA_CONG_CHUNG`) → mở sửa GD đó (`OPEN_TRANSACTION_EXISTS`). Không thì tạo mới, status luôn **Đã cọc**. Snapshot lô + map đóng băng lúc tạo.
 2. **List `/giao-dich`** — tìm / lọc; STAFF chỉ GD mình; ADMIN tất cả.
 3. **Sửa** — đổi status, giá, thuế, hoa hồng, hẹn CC, bên, ghi chú. Hủy bắt buộc `cancelReason`.
-4. **Xóa cứng** — CRM cũ: xóa hàng + mở lại rao bán map nếu cần. API làm sau.
-5. **Lịch sử trên chi tiết lô** — list GD của lô (làm sau, cùng Nest).
+4. **Xóa cứng** — xóa hàng + nếu GD đang mở (`DA_COC` / `DA_CONG_CHUNG`) thì đưa map về **Mở bán**.
+5. **Lịch sử trên chi tiết lô** — list GD của lô (làm sau).
 
 Tạo GD: **OWN** bắt buộc ngày hẹn CC; **RECORD** hẹn CC tuỳ chọn, hoa hồng = 0, **không** vào thẻ doanh thu.
 
@@ -97,19 +97,19 @@ Ownership: theo `createdByEmployeeId` (người **tạo GD**), không theo `Loda
 | Tạo | `/giao-dich/tao` | `?lodatId=` khoá lô; trùng GD mở → sửa GD đó |
 | Sửa | `/giao-dich/[id]/sua` | Cùng form; thêm trạng thái + lý do hủy |
 
-Không nút thêm trên list. Nút **Giao dịch** trên `/lo-dat` (menu PC) và chi tiết (desktop + footer mobile) = open-or-create mock (`?lodatId=`). Nest API sau.
+Không nút thêm trên list. Nút **Giao dịch** trên `/lo-dat` (menu PC) và chi tiết (desktop + footer mobile) = open-or-create (`?lodatId=`).
 
 ## 7. Contract / API dự kiến
 
-Prefix `/api/v1`. Zod: `packages/shared/src/transactions.ts`. **Nest module = PR sau.**
+Prefix `/api/v1`. Zod: `packages/shared/src/transactions.ts`. Nest: `apps/api/src/modules/transactions/`.
 
 | Method | Path | Ai | Ghi chú |
 |--------|------|----|---------|
 | GET | `/transactions` | STAFF (mình) / ADMIN (tất cả) | `keyword` `type` `status` `createdByEmployeeId` |
 | GET | `/transactions/:id` | owner / ADMIN | `TransactionDetail` |
-| POST | `/transactions` | owner map / ADMIN | body `CreateTransactionInput`; trùng mở → `OPEN_TRANSACTION_EXISTS` |
+| POST | `/transactions` | owner lô / ADMIN | `lodatId` hoặc `lodatCustomerMapId`; trùng mở → `OPEN_TRANSACTION_EXISTS` |
 | PATCH | `/transactions/:id` | owner / ADMIN | `UpdateTransactionInput`; `HUY` cần `cancelReason` |
-| DELETE | `/transactions/:id` | owner / ADMIN | xóa cứng; mở lại rao bán — chốt lúc API |
+| DELETE | `/transactions/:id` | owner / ADMIN | xóa cứng; GD mở → map `DANG_BAN` |
 | GET | `/transactions/lodat/:lodatId/open` | owner lô / ADMIN | `{ id }` hoặc `id: null` |
 
 Tạo: status = `DA_COC`; sinh `code`; copy snapshot từ lô + map active. RECORD: `commissionVnd = 0`.
@@ -259,7 +259,7 @@ Một dòng, cắt `…`. Thiếu = `—`.
 |-----|------|
 | Xem chi tiết | `/giao-dich/[id]` |
 | Sửa | `/giao-dich/[id]/sua` |
-| Xóa | Đỏ → confirm → gỡ khỏi list (mock). API: xóa cứng; mở lại rao bán map nếu cần — chốt lúc Nest |
+| Xóa | Đỏ → confirm → xóa cứng. GD đang mở → map về Mở bán |
 
 #### 12.1.5 Footer
 

@@ -134,6 +134,7 @@ export async function listTransactions(
   if (query.keyword) params.set('keyword', query.keyword);
   if (query.type) params.set('type', query.type);
   if (query.status) params.set('status', query.status);
+  if (query.createdByEmployeeId) params.set('createdByEmployeeId', query.createdByEmployeeId);
   const qs = params.toString();
   return apiFetch<TransactionListResponse>(`/transactions${qs ? `?${qs}` : ''}`);
 }
@@ -162,8 +163,12 @@ export async function getOpenTransaction(lodatId: string): Promise<OpenTransacti
 export async function createTransaction(input: CreateTransactionInput): Promise<TransactionDetail> {
   const parsed = createTransactionSchema.parse(input);
   if (isMockMode()) {
-    const lodat = mockLodats.find((l) => `map_${l.id}` === parsed.lodatCustomerMapId);
-    const lodatId = lodat?.id ?? parsed.lodatCustomerMapId.replace(/^map_/, '');
+    const lodatId =
+      parsed.lodatId ||
+      mockLodats.find((l) => `map_${l.id}` === parsed.lodatCustomerMapId)?.id ||
+      parsed.lodatCustomerMapId?.replace(/^map_/, '') ||
+      '';
+    const lodat = mockLodats.find((l) => l.id === lodatId);
     const open = mockStore.find((item) => item.lodatId === lodatId && isOpenStatus(item.status));
     if (open) {
       throw new ApiError(409, 'Lô này đã có giao dịch đang mở.', {
@@ -181,7 +186,7 @@ export async function createTransaction(input: CreateTransactionInput): Promise<
       type: parsed.type,
       status: TransactionStatus.DA_COC,
       lodatId,
-      lodatCustomerMapId: parsed.lodatCustomerMapId,
+      lodatCustomerMapId: parsed.lodatCustomerMapId ?? `map_${lodatId}`,
       lodatTitle: lodat?.title ?? null,
       sellerNames: parsed.sellers.map((p) => p.freeTextName),
       buyerNames: parsed.buyers.map((p) => p.freeTextName),

@@ -176,7 +176,7 @@ export function TransactionFormPage({ mode }: Props) {
         const lodatId = queryLodatId || values.lodatId;
         if (!lodatId) throw new Error('Chọn lô đất.');
         const body: CreateTransactionInput = {
-          lodatCustomerMapId: `map_${lodatId}`,
+          lodatId,
           type: values.type,
           notaryAppointmentAt: notary,
           salePriceVnd: vndOrEmpty(values.salePrice) ?? '0',
