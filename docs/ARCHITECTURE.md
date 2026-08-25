@@ -125,6 +125,17 @@ apps/extension/src/
 
 Vai trò: `STAFF` (dữ liệu theo `employeeId`) · `ADMIN` (toàn cục + cấu hình).
 
+### List CRM — nhớ tìm / lọc / cuộn
+
+Các màn list (`/khach-hang`, `/lo-dat`, …) dùng helper chung `apps/web/src/shared/list-state`:
+
+- **sessionStorage** theo tab (key `crmanhung:<feature>-list-state`)
+- Lưu: ô tìm, bộ lọc, `selectedId`, `scrollTop` + `anchorId`
+- Đăng xuất → xóa mọi key `*-list-state`
+- Feature bọc thin store (`createListStateStore`) — xem skill `crm-list-state`
+
+Không nhớ panel rail (chỉ list). Chi tiết domain: `customers.md` §12.1.5, `lodats.md` §12.1.5.
+
 ---
 
 ## 5. Bảo mật (baseline)

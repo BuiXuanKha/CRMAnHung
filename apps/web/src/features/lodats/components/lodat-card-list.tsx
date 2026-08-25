@@ -1,5 +1,6 @@
 'use client';
 
+import type { Ref } from 'react';
 import { ImageOff } from 'lucide-react';
 import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -13,6 +14,8 @@ type Props = {
   onSelect: (id: string) => void;
   onOpen: (id: string) => void;
   onOpenGallery: (plot: LodatListItem) => void;
+  scrollRef?: Ref<HTMLDivElement>;
+  onScroll?: () => void;
 };
 
 export function LodatCardList({
@@ -22,10 +25,18 @@ export function LodatCardList({
   onSelect,
   onOpen,
   onOpenGallery,
+  scrollRef,
+  onScroll,
 }: Props) {
   return (
     <div className="ld-cards-shell">
-      <div className="ld-cards" role="list" aria-label="Danh sách lô đất">
+      <div
+        className="ld-cards"
+        role="list"
+        aria-label="Danh sách lô đất"
+        ref={scrollRef}
+        onScroll={onScroll}
+      >
         {items.length === 0 ? (
           <p className="ld-empty">Không có lô đất phù hợp.</p>
         ) : (
@@ -39,6 +50,7 @@ export function LodatCardList({
               <article
                 key={p.id}
                 role="listitem"
+                data-list-row-id={p.id}
                 className={['ld-card', selectedId === p.id ? 'is-selected' : '']
                   .filter(Boolean)
                   .join(' ')}

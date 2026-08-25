@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, type LucideIcon } from 'lucide-react';
@@ -33,6 +33,13 @@ import {
   type ExtraFilters,
   type PriceBracket,
 } from './display';
+import {
+  getActiveListScrollEl,
+  peekLodatListState,
+  restoreLodatListScroll,
+  saveLodatListState,
+  type LodatListSavedState,
+} from './list-state';
 import './lodats.css';
 import './lodats-table.css';
 import './lodats-mobile.css';
@@ -90,6 +97,28 @@ export function LodatListPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [galleryLodatId, setGalleryLodatId] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [restoreReady, setRestoreReady] = useState(false);
+  const [listConcealed, setListConcealed] = useState(false);
+  const restoreSnap = useRef<LodatListSavedState | null>(null);
+  const restoreDone = useRef(false);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const cardsScrollRef = useRef<HTMLDivElement>(null);
+  const persistRef = useRef({
+    searchKeyword: keyword,
+    status,
+    kind,
+    extra,
+    priceBracket,
+    selectedId,
+  });
+  persistRef.current = {
+    searchKeyword: keyword,
+    status,
+    kind,
+    extra,
+    priceBracket,
+    selectedId,
+  };
 
   const search = parseSearchKeyword(keyword);
   const listQuery = {
@@ -101,6 +130,7 @@ export function LodatListPage() {
   const list = useQuery({
     queryKey: ['lodats', listQuery],
     queryFn: () => listLodats(listQuery),
+    enabled: restoreReady,
   });
 
   const galleryQ = useQuery({
@@ -170,10 +200,110 @@ export function LodatListPage() {
     window.setTimeout(() => setToast(null), 2800);
   }
 
+  useLayoutEffect(() => {
+    const snap = peekLodatListState();
+    restoreSnap.current = snap;
+    if (snap) {
+      setKeyword(snap.searchKeyword);
+      setStatus(snap.status);
+      setKind(snap.kind);
+      setExtra(snap.extra);
+      setPriceBracket(snap.priceBracket);
+      setSelectedId(snap.selectedId);
+      setListConcealed(true);
+    }
+    setRestoreReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!listConcealed) return undefined;
+    const timer = window.setTimeout(() => {
+      restoreDone.current = true;
+      restoreSnap.current = null;
+      setListConcealed(false);
+    }, 4000);
+    return () => window.clearTimeout(timer);
+  }, [listConcealed]);
+
+  function getListScrollEl() {
+    return getActiveListScrollEl(tableScrollRef.current, cardsScrollRef.current);
+  }
+
+  function persistListState(selectedOverride?: string | null) {
+    if (!restoreDone.current) return;
+    saveLodatListState(getListScrollEl(), {
+      ...persistRef.current,
+      selectedId: selectedOverride ?? persistRef.current.selectedId,
+    });
+  }
+
+  function onListScroll() {
+    persistListState();
+  }
+
+  useLayoutEffect(() => {
+    if (!restoreReady || list.isLoading) return;
+    if (restoreDone.current) return;
+    const snap = restoreSnap.current;
+    if (!snap) {
+      restoreDone.current = true;
+      return;
+    }
+    if (filtered.length === 0) {
+      restoreDone.current = true;
+      restoreSnap.current = null;
+      setListConcealed(false);
+      return;
+    }
+    const root = getListScrollEl();
+    restoreLodatListScroll(root, snap);
+    restoreDone.current = true;
+    restoreSnap.current = null;
+    setListConcealed(false);
+  }, [restoreReady, filtered.length, list.isLoading]);
+
+  function saveListBeforeLeave(selectedOverride?: string | null) {
+    restoreDone.current = true;
+    persistListState(selectedOverride);
+  }
+
+  useLayoutEffect(() => {
+    if (!restoreReady || restoreSnap.current || !restoreDone.current) return;
+    const root = getListScrollEl();
+    if (root) root.scrollTop = 0;
+  }, [
+    keyword,
+    status,
+    kind,
+    extra.photo,
+    extra.address,
+    extra.area,
+    extra.direction,
+    priceBracket,
+    restoreReady,
+  ]);
+
+  useEffect(() => {
+    if (!restoreReady || listConcealed || !restoreDone.current) return;
+    persistListState();
+  }, [keyword, status, kind, extra, priceBracket, selectedId, restoreReady, listConcealed]);
+
+  useEffect(() => {
+    function persist() {
+      persistListState();
+    }
+    window.addEventListener('pagehide', persist);
+    return () => {
+      persist();
+      window.removeEventListener('pagehide', persist);
+    };
+  }, []);
+
   function handleAction(id: string, action: LodatAction, title: string) {
     setMenuId(null);
     setSelectedId(id);
     if (action === 'detail') {
+      saveListBeforeLeave(id);
       router.push(`/lo-dat/${id}`);
       return;
     }
@@ -186,6 +316,7 @@ export function LodatListPage() {
       });
       return;
     }
+    saveListBeforeLeave(id);
     router.push(`/lo-dat/${id}/sua`);
   }
 
@@ -200,6 +331,11 @@ export function LodatListPage() {
     setSelectedId(plot.id);
     setGalleryIndex(0);
     setGalleryLodatId(plot.id);
+  }
+
+  function openLodat(id: string) {
+    saveListBeforeLeave(id);
+    router.push(`/lo-dat/${id}`);
   }
 
   return (
@@ -223,47 +359,53 @@ export function LodatListPage() {
           />
         </section>
 
-        {list.isLoading ? <p className="ld-status">Đang tải danh sách…</p> : null}
+        {!restoreReady || list.isLoading ? <p className="ld-status">Đang tải danh sách…</p> : null}
         {list.error ? (
           <p className="ld-status error">{(list.error as Error).message}</p>
         ) : null}
 
-        {!list.isLoading && !list.error ? (
-          <section className="ld-table-shell" aria-label="Danh sách lô đất">
-            <LodatTable
+        <div className={listConcealed ? 'ld-list-restore is-restoring' : 'ld-list-restore'}>
+          {restoreReady && !list.isLoading && !list.error ? (
+            <section className="ld-table-shell" aria-label="Danh sách lô đất">
+              <LodatTable
+                items={filtered}
+                total={list.data?.total ?? filtered.length}
+                selectedId={selectedId}
+                menuId={menuId}
+                status={status}
+                kind={kind}
+                extra={extra}
+                priceBracket={priceBracket}
+                togglingId={toggleMut.isPending ? (toggleMut.variables?.id ?? null) : null}
+                onStatus={setStatus}
+                onKind={setKind}
+                onExtra={setExtra}
+                onPriceBracket={setPriceBracket}
+                onSelect={setSelectedId}
+                onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+                onCloseMenu={() => setMenuId(null)}
+                onAction={(p, a) => handleAction(p.id, a, p.title)}
+                onToggleSale={handleToggleSale}
+                onOpenGallery={openGallery}
+                scrollRef={tableScrollRef}
+                onScroll={onListScroll}
+              />
+            </section>
+          ) : null}
+
+          {restoreReady && !list.isLoading && !list.error ? (
+            <LodatCardList
               items={filtered}
               total={list.data?.total ?? filtered.length}
               selectedId={selectedId}
-              menuId={menuId}
-              status={status}
-              kind={kind}
-              extra={extra}
-              priceBracket={priceBracket}
-              togglingId={toggleMut.isPending ? (toggleMut.variables?.id ?? null) : null}
-              onStatus={setStatus}
-              onKind={setKind}
-              onExtra={setExtra}
-              onPriceBracket={setPriceBracket}
               onSelect={setSelectedId}
-              onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
-              onCloseMenu={() => setMenuId(null)}
-              onAction={(p, a) => handleAction(p.id, a, p.title)}
-              onToggleSale={handleToggleSale}
+              onOpen={openLodat}
               onOpenGallery={openGallery}
+              scrollRef={cardsScrollRef}
+              onScroll={onListScroll}
             />
-          </section>
-        ) : null}
-
-        {!list.isLoading && !list.error ? (
-          <LodatCardList
-            items={filtered}
-            total={list.data?.total ?? filtered.length}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onOpen={(id) => router.push(`/lo-dat/${id}`)}
-            onOpenGallery={openGallery}
-          />
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       {galleryLodatId && galleryImages.length ? (

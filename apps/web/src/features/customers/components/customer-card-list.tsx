@@ -67,7 +67,7 @@ export function CustomerCardList({
               <article
                 key={c.id}
                 role="listitem"
-                data-customer-row-id={c.id}
+                data-list-row-id={c.id}
                 className={[
                   'kh-card',
                   selectedId === c.id ? 'is-selected' : '',

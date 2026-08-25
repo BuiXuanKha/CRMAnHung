@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type Ref } from 'react';
 import { ImageOff } from 'lucide-react';
 import type { LodatListItem } from '@crmanhung/shared';
 import { ColumnFilter } from '@/shared/ui/column-filter';
@@ -46,6 +46,8 @@ type Props = {
   togglingId: string | null;
   onToggleSale: (plot: LodatListItem) => void;
   onOpenGallery: (plot: LodatListItem) => void;
+  scrollRef?: Ref<HTMLDivElement>;
+  onScroll?: () => void;
 };
 
 export function LodatTable({
@@ -68,6 +70,8 @@ export function LodatTable({
   togglingId,
   onToggleSale,
   onOpenGallery,
+  scrollRef,
+  onScroll,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
 
@@ -162,7 +166,12 @@ export function LodatTable({
         </div>
       </div>
 
-      <div className="ld-table-scroll" role="rowgroup">
+      <div
+        className="ld-table-scroll"
+        role="rowgroup"
+        ref={scrollRef}
+        onScroll={onScroll}
+      >
         {items.length === 0 ? (
           <div className="ld-empty" role="row">
             Không có lô đất phù hợp.
@@ -172,6 +181,7 @@ export function LodatTable({
             <div
               key={p.id}
               role="row"
+              data-list-row-id={p.id}
               className={[
                 'ld-grid-row',
                 selectedId === p.id ? 'is-selected' : '',

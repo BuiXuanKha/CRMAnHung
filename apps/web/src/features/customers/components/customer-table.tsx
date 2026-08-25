@@ -193,7 +193,7 @@ export function CustomerTable({
             <div
               key={c.id}
               role="row"
-              data-customer-row-id={c.id}
+              data-list-row-id={c.id}
               className={[
                 'kh-grid-row',
                 c.isPinned ? 'is-hot' : '',

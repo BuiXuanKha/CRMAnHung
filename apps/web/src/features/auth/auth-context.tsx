@@ -20,7 +20,7 @@ import {
 } from '@/shared/api/client';
 import { isMockAuth } from '@/shared/api/mode';
 import { MOCK_ADMIN, MOCK_STAFF } from '@/features/customers/mock-data';
-import { clearCustomerListState } from '@/features/customers/list-state';
+import { clearAllListStates } from '@/shared/list-state';
 
 const SESSION_USER_KEY = 'crmanhung_session_user';
 const MOCK_USER_KEY = 'crmanhung_mock_user';
@@ -116,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (isMockAuth()) {
     writeSessionUser(null);
     clearTokens();
-    clearCustomerListState();
+    clearAllListStates();
     setUser(null);
     return;
     }
@@ -134,7 +134,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       writeSessionUser(null);
       clearTokens();
-      clearCustomerListState();
+      clearAllListStates();
       setUser(null);
     }
   }, []);
