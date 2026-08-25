@@ -49,12 +49,20 @@
 .ld-detail-layout {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 16px;
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: 0 12px;
+  padding: 0 8px;
   box-sizing: border-box;
+}
+
+.ld-detail-content {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  width: 100%;
+  min-width: 0;
 }
 
 .ld-detail-header {
@@ -362,5 +370,15 @@
 
   .ld-detail-spec-grid {
     grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .ld-detail-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    max-width: min(1080px, calc(100% - 16px));
   }
 }

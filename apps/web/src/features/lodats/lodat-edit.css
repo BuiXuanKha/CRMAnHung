@@ -1,39 +1,39 @@
+/* Lodat edit — layout theo CRM cũ LodatEditPage (bodyGrid). */
+
 .ld-edit-page {
   flex: 1 1 0%;
   min-height: 0;
   overflow-y: auto;
-  padding: 8px 12px 88px;
-  max-width: 720px;
-  margin: 0 auto;
+  overscroll-behavior: contain;
+  padding: 12px;
   width: 100%;
   box-sizing: border-box;
 }
 
 .ld-edit-head {
-  margin-bottom: 12px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto 12px;
+  padding: 0 2px;
 }
 
 .ld-edit-back {
   display: inline-block;
   color: #2563eb;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
-  font-size: 0.9rem;
-  margin-bottom: 6px;
+  font-size: 0.88rem;
 }
 
 .ld-edit-back:hover {
   text-decoration: underline;
 }
 
-.ld-edit-title-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.ld-edit-title-row h1 {
+.ld-edit-head h1 {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 700;
@@ -41,32 +41,47 @@
 }
 
 .ld-edit-kind-badge {
-  display: inline-flex;
-  padding: 3px 10px;
+  flex-shrink: 0;
+  display: inline-block;
+  padding: 2px 8px;
   border-radius: 999px;
   background: #e2e8f0;
   color: #334155;
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .ld-edit-state {
   color: #64748b;
   text-align: center;
   padding: 24px 0;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
 .ld-edit-error {
-  margin: 0 0 10px;
+  max-width: 1100px;
+  margin: 0 auto 10px;
   padding: 10px 12px;
   background: #fef2f2;
   color: #b91c1c;
   border: 1px solid #fecaca;
-  border-radius: 8px;
-  font-weight: 600;
+  border-radius: 10px;
+  font-weight: 800;
 }
 
 .ld-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.ld-edit-body {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -76,17 +91,21 @@
   background: #fff;
   border: 1px solid #e2e8f0;
   border-radius: 12px;
-  padding: 14px;
+  padding: 12px 14px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  min-width: 0;
 }
 
-.ld-edit-card h2 {
+.ld-edit-card h2,
+.ld-edit-section-title {
   margin: 0;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #0f172a;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
 }
 
 .ld-edit-section-head {
@@ -98,9 +117,22 @@
 
 .ld-edit-hint {
   margin: 0;
-  font-size: 0.85rem;
-  color: #64748b;
+  color: #b45309;
+  font-weight: 700;
+  font-size: 0.86rem;
   line-height: 1.4;
+}
+
+.ld-edit-hint.muted {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.ld-edit-limit-hint {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.35;
 }
 
 .ld-edit-address-line,
@@ -114,21 +146,35 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: #334155;
+}
+
+.ld-edit-field > span,
+.ld-edit-label {
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.04em;
 }
 
 .ld-edit-field input,
 .ld-edit-field select,
 .ld-edit-field textarea {
+  width: 100%;
+  box-sizing: border-box;
   font: inherit;
+  font-size: 16px;
   font-weight: 500;
   border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 9px 10px;
+  border-radius: 10px;
+  padding: 10px 12px;
   background: #fff;
   color: #0f172a;
+}
+
+.ld-edit-field textarea {
+  resize: vertical;
+  min-height: 72px;
 }
 
 .ld-edit-field input:disabled,
@@ -140,7 +186,7 @@
 
 .ld-edit-row2 {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
@@ -152,12 +198,12 @@
 
 .ld-edit-chip {
   border: 1px solid #cbd5e1;
-  background: #f8fafc;
+  background: #fff;
   color: #334155;
   border-radius: 999px;
-  padding: 5px 10px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+  font-weight: 800;
   cursor: pointer;
 }
 
@@ -165,6 +211,7 @@
   border-color: #2563eb;
   background: #eff6ff;
   color: #1d4ed8;
+  box-shadow: 0 0 0 2px #2563eb2e;
 }
 
 .ld-edit-chip:disabled {
@@ -175,17 +222,208 @@
 .ld-edit-change-owner {
   border: 1px solid #cbd5e1;
   background: #fff;
+  color: #0f172a;
   border-radius: 8px;
-  padding: 6px 10px;
-  font-weight: 600;
+  padding: 6px 12px;
+  font-weight: 800;
   font-size: 0.82rem;
-  color: #2563eb;
   cursor: pointer;
+}
+
+.ld-edit-change-owner:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Owner history */
+.ld-edit-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ld-edit-history-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+}
+
+.ld-edit-history-item.active {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.ld-edit-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ld-edit-history-owner {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ld-edit-history-badge {
+  font-size: 11px;
+  font-weight: 800;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.ld-edit-history-badge.ended {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.ld-edit-history-meta {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+  font-size: 13px;
+  color: #475569;
+  font-weight: 700;
+}
+
+.ld-edit-history-dates {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #64748b;
+}
+
+/* Paste / drag-drop zone (desktop) */
+.ld-edit-paste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.ld-edit-paste-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ld-edit-paste-title {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ld-edit-paste-counter {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #475569;
+  font-variant-numeric: tabular-nums;
+}
+
+.ld-edit-paste-hint {
+  margin: 0;
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.ld-edit-paste-zone {
+  min-height: 112px;
+  padding: 16px 12px;
+  border: 2px dashed #94a3b8;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.15s ease,
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.ld-edit-paste-zone:focus-visible {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px #2563eb33;
+}
+
+.ld-edit-paste-zone.drag-over {
+  border-color: #2563eb;
+  background: #eff6ff;
+}
+
+.ld-edit-paste-zone.disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.ld-edit-paste-zone.at-limit {
+  border-style: solid;
+  border-color: #e2e8f0;
+  background: #f1f5f9;
+}
+
+.ld-edit-paste-lead {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #334155;
+}
+
+.ld-edit-paste-sub,
+.ld-edit-paste-text {
+  margin: 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.ld-edit-paste-text {
+  font-size: 0.86rem;
+  font-weight: 700;
+  color: #475569;
+}
+
+.ld-edit-paste-footer {
+  display: flex;
+  justify-content: center;
+}
+
+.ld-edit-pick-link {
+  border: 0;
+  background: transparent;
+  color: #2563eb;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.ld-edit-pick-link:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .ld-edit-upload-row {
   display: flex;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 10px;
   align-items: center;
 }
 
@@ -198,37 +436,57 @@
   align-items: center;
   gap: 6px;
   border: 1px solid #2563eb;
-  background: #2563eb;
-  color: #fff;
-  border-radius: 8px;
-  padding: 8px 12px;
-  font-weight: 700;
-  font-size: 0.88rem;
+  background: #eff6ff;
+  color: #1d4ed8;
+  border-radius: 12px;
+  padding: 10px 14px;
+  font-weight: 900;
   cursor: pointer;
 }
 
 .ld-edit-upload-btn:disabled {
-  opacity: 0.65;
+  opacity: 0.55;
   cursor: not-allowed;
+}
+
+.ld-edit-upload-btn-mobile {
+  /* shown on mobile; hidden on desktop */
 }
 
 .ld-edit-thumbs {
   display: flex;
-  flex-wrap: wrap;
   gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  -webkit-overflow-scrolling: touch;
 }
 
 .ld-edit-thumb {
   position: relative;
-  width: 88px;
-  height: 72px;
+  flex: 0 0 64px;
+  width: 64px;
+  height: 64px;
   border-radius: 8px;
   overflow: hidden;
-  background: #f1f5f9;
   border: 1px solid #e2e8f0;
+  background: #f1f5f9;
 }
 
-.ld-edit-thumb img {
+.ld-edit-thumb.active {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px #2563eb33;
+}
+
+.ld-edit-thumb-btn {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.ld-edit-thumb-btn img {
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -249,46 +507,246 @@
 
 .ld-edit-thumb-del {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: 4px;
+  right: 4px;
   width: 22px;
   height: 22px;
-  border: none;
+  border: 0;
   border-radius: 999px;
-  background: rgba(185, 28, 28, 0.9);
+  background: #0f172ac7;
   color: #fff;
-  display: grid;
-  place-items: center;
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Quick preview (sticky on desktop) */
+.ld-edit-gallery {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ld-edit-gallery-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ld-edit-gallery-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 900;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.ld-edit-gallery-counter {
+  font-weight: 800;
+  color: #64748b;
+  font-size: 0.86rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.ld-edit-gallery-rotate {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.ld-edit-gallery-rotate-btn {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #334155;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ld-edit-gallery-rotate-btn:hover {
+  background: #f8fafc;
+}
+
+.ld-edit-gallery-rotate-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ld-edit-preview-box {
+  width: 100%;
+  min-height: 140px;
+  max-height: min(52vh, 280px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.ld-edit-preview-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  min-height: 140px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   cursor: pointer;
 }
 
-.ld-edit-actions {
-  position: sticky;
-  bottom: 0;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  padding: 10px 0;
-  background: linear-gradient(180deg, transparent, #f8f9fa 30%);
+.ld-edit-preview-open:hover img {
+  opacity: 0.92;
 }
 
-@media (max-width: 767px) {
+.ld-edit-preview-img {
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  display: block;
+}
+
+.ld-edit-gallery-empty {
+  padding: 20px 12px;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+/* Actions — in document flow, not sticky/fixed */
+.ld-edit-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+}
+
+.ld-edit-cancel,
+.ld-edit-save {
+  border-radius: 12px;
+  padding: 12px;
+  font-weight: 900;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.ld-edit-cancel {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+}
+
+.ld-edit-save {
+  border: 1px solid #2563eb;
+  background: #2563eb;
+  color: #fff;
+}
+
+.ld-edit-cancel:disabled,
+.ld-edit-save:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+  .ld-edit-paste {
+    display: none;
+  }
+}
+
+@media (min-width: 641px) {
   .ld-edit-page {
-    padding-bottom: 96px;
+    padding: 16px 20px;
   }
 
   .ld-edit-row2 {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ld-edit-field input,
+  .ld-edit-field select,
+  .ld-edit-field textarea {
+    font-size: 0.95rem;
+  }
+
+  .ld-edit-body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) min(360px, 34%);
+    grid-template-areas:
+      'info gallery'
+      'images gallery'
+      'actions actions';
+    gap: 12px;
+    align-items: start;
+  }
+
+  .ld-edit-area-info {
+    grid-area: info;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .ld-edit-area-images {
+    grid-area: images;
+  }
+
+  .ld-edit-area-gallery {
+    grid-area: gallery;
+    position: sticky;
+    top: 12px;
+    align-self: start;
   }
 
   .ld-edit-actions {
-    position: fixed;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
-    background: #fff;
-    border-top: 1px solid #e2e8f0;
-    z-index: 20;
+    grid-area: actions;
+    display: flex;
+    justify-content: flex-end;
+    grid-template-columns: unset;
+    gap: 10px;
+    padding-bottom: 16px;
+  }
+
+  .ld-edit-cancel,
+  .ld-edit-save {
+    min-width: 140px;
+  }
+
+  .ld-edit-upload-btn-mobile {
+    display: none;
+  }
+
+  .ld-edit-preview-box {
+    min-height: 180px;
+    max-height: min(58vh, 400px);
+  }
+
+  .ld-edit-thumb {
+    flex: 0 0 72px;
+    width: 72px;
+    height: 72px;
+    border-radius: 10px;
   }
 }
