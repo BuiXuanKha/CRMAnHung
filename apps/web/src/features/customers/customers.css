@@ -32,7 +32,16 @@
   grid-template-columns: minmax(0, 7fr) minmax(260px, 3fr);
 }
 
-/* §3.2.1 Cột trái */
+/* §3.2.1 Cột trái — flex + min-height:0 để bảng cuộn trong khung shell */
+.kh-s321 {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
 .kh-s321.is-restoring .kh-s3212,
 .kh-s321.is-restoring .kh-cards-shell {
   opacity: 0;
