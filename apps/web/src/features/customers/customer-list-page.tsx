@@ -3,17 +3,19 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import { AlertTriangle, type LucideIcon, Trash2 } from 'lucide-react';
 import {
   CUSTOMER_LIST_LOAD_MORE_PX,
   CUSTOMER_LIST_PAGE_SIZE,
   CustomerStatus,
+  UserRole,
   type CreateCustomerInput,
   type CustomerListItem,
   type PhoneDuplicateExisting,
   type UpdateCustomerCareInput,
 } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
+import { useAuth } from '@/features/auth/auth-context';
 import { HotlinesSettingsDialog } from '@/features/settings/hotlines-dialog';
 import {
   consumeCareToast,
@@ -42,6 +44,13 @@ import { FilterBar } from './components/filter-bar';
 import { CustomerCardList } from './components/customer-card-list';
 import { RightRail, type RailKey } from './components/right-rail';
 import { applyExtraFilters, countCustomerStats, countMobileCustomerFilters, parseSearchKeyword, type ExtraFilters } from './display';
+import {
+  COMING_SOON_CONFIRM,
+  COMING_SOON_ICON,
+  COMING_SOON_TITLE,
+  comingSoonMessage,
+} from './coming-soon';
+import { openCustomerMessenger } from './messenger';
 import {
   getActiveListScrollEl,
   needsMoreListScrollHeight,
@@ -83,11 +92,14 @@ type DupState = {
 type AlertState = {
   title: string;
   message: string;
+  icon?: LucideIcon;
+  confirmLabel?: string;
 } | null;
 
 export function CustomerListPage() {
   const router = useRouter();
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
@@ -381,17 +393,23 @@ export function CustomerListPage() {
     setMenuId(null);
     setSelectedId(customer.id);
     if (action === 'chat') {
+      if (isMobileList()) {
+        setAlertBox({
+          title: 'Mở chat',
+          message: 'Nội dung chat đã lưu xem trên máy tính (panel phải). Điện thoại dùng «Mở Messenger» để vào hội thoại Facebook.',
+        });
+        return;
+      }
       setRail('chat');
       return;
     }
     if (action === 'messenger') {
-      const thread = customer.facebook?.threadId;
-      if (thread) {
-        window.open(`https://www.facebook.com/messages/t/${thread}`, '_blank', 'noopener,noreferrer');
-      } else {
+      if (!openCustomerMessenger(customer)) {
         setAlertBox({
           title: 'Không mở được Messenger',
-          message: 'Khách này chưa có thread Messenger.',
+          message: customer.facebook
+            ? 'Khách này chưa có thread / UID Messenger để mở hội thoại.'
+            : 'Khách này chưa gắn Facebook — không mở được Messenger.',
         });
       }
       return;
@@ -401,20 +419,34 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'lodat') {
+      if (user?.role === UserRole.ADMIN) {
+        setAlertBox({
+          title: 'Không tạo lô từ khách',
+          message: 'Admin không tạo lô đất từ menu khách. Nhân viên tạo lô từ hồ sơ khách của mình.',
+        });
+        return;
+      }
       setAlertBox({
-        title: 'Chức năng đang phát triển',
-        message: `Tạo lô đất cho «${customer.fullName}» sẽ sớm có trên trang khách.`,
+        title: COMING_SOON_TITLE,
+        message: comingSoonMessage(`Tạo lô đất cho «${customer.fullName}»`),
+        icon: COMING_SOON_ICON,
+        confirmLabel: COMING_SOON_CONFIRM,
       });
       return;
     }
     if (action === 'sodo') {
-      saveListBeforeLeave(customer.id);
-      router.push('/dich-vu-so-do');
+      setAlertBox({
+        title: COMING_SOON_TITLE,
+        message: comingSoonMessage(`Dịch vụ sổ đỏ cho «${customer.fullName}»`),
+        icon: COMING_SOON_ICON,
+        confirmLabel: COMING_SOON_CONFIRM,
+      });
       return;
     }
     if (action === 'pin') {
       await updateCustomer(customer.id, { isPinned: !customer.isPinned });
       await qc.invalidateQueries({ queryKey: ['customers'] });
+      flash(customer.isPinned ? 'Đã bỏ ghim khách.' : 'Đã ghim khách.');
       return;
     }
     if (action === 'restore') {
@@ -758,8 +790,9 @@ export function CustomerListPage() {
       <CrmAlertDialog
         open={Boolean(alertBox)}
         title={alertBox?.title ?? ''}
-        icon={AlertTriangle}
+        icon={alertBox?.icon ?? AlertTriangle}
         message={alertBox?.message ?? ''}
+        confirmLabel={alertBox?.confirmLabel}
         onClose={() => setAlertBox(null)}
       />
 

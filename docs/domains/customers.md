@@ -202,10 +202,10 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 | Mục | Việc |
 |-----|------|
 | Mở chat | Mở rail **Nội dung chat** (tin + ảnh đã lưu) |
-| Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid) |
+| Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid khách) |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
-| Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat`. ADMIN: báo không được tạo |
-| Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` |
+| Tạo lô đất | STAFF → form sau (`/them-lo-dat`). Hiện alert đang phát triển. ADMIN: báo không được tạo |
+| Dịch vụ sổ đỏ | Form từ khách sau. Hiện alert đang phát triển |
 | Ghim / Bỏ ghim | `isPinned` |
 | Xóa khách | Confirm ẩn mềm; tìm lại bằng `@` / `@@` |
 

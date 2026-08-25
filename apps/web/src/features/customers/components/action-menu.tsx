@@ -37,6 +37,15 @@ type Props = {
 export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [pos, setPos] = useState({ top: 0, left: 0 });
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const apply = () => setIsMobile(mq.matches);
+    apply();
+    mq.addEventListener('change', apply);
+    return () => mq.removeEventListener('change', apply);
+  }, []);
 
   useLayoutEffect(() => {
     if (!open) return;
@@ -83,41 +92,48 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
             </li>
           ) : (
             <>
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('chat')}>
-              <Icon icon={MessageSquare} /> Mở chat
-            </button>
-          </li>
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('messenger')}>
-              <Icon icon={MessageCircle} /> Mở Messenger
-            </button>
-          </li>
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('care')}>
-              <Icon icon={NotebookPen} /> Cập nhật chăm sóc
-            </button>
-          </li>
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('lodat')}>
-              <Icon icon={Map} /> Tạo lô đất
-            </button>
-          </li>
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('sodo')}>
-              <Icon icon={FileText} /> Dịch vụ sổ đỏ
-            </button>
-          </li>
-          <li>
-            <button type="button" role="menuitem" onClick={() => onAction('pin')}>
-              <Icon icon={Pin} /> {customer.isPinned ? 'Bỏ ghim khách' : 'Ghim khách'}
-            </button>
-          </li>
-          <li>
-            <button type="button" role="menuitem" className="danger" onClick={() => onAction('delete')}>
-              <Icon icon={Trash2} /> Xóa khách
-            </button>
-          </li>
+              {!isMobile ? (
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('chat')}>
+                    <Icon icon={MessageSquare} /> Mở chat
+                  </button>
+                </li>
+              ) : null}
+              <li>
+                <button type="button" role="menuitem" onClick={() => onAction('messenger')}>
+                  <Icon icon={MessageCircle} /> Mở Messenger
+                </button>
+              </li>
+              <li>
+                <button type="button" role="menuitem" onClick={() => onAction('care')}>
+                  <Icon icon={NotebookPen} /> Cập nhật chăm sóc
+                </button>
+              </li>
+              <li>
+                <button type="button" role="menuitem" onClick={() => onAction('lodat')}>
+                  <Icon icon={Map} /> Tạo lô đất
+                </button>
+              </li>
+              <li>
+                <button type="button" role="menuitem" onClick={() => onAction('sodo')}>
+                  <Icon icon={FileText} /> Dịch vụ sổ đỏ
+                </button>
+              </li>
+              <li>
+                <button type="button" role="menuitem" onClick={() => onAction('pin')}>
+                  <Icon icon={Pin} /> {customer.isPinned ? 'Bỏ ghim khách' : 'Ghim khách'}
+                </button>
+              </li>
+              <li>
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="danger"
+                  onClick={() => onAction('delete')}
+                >
+                  <Icon icon={Trash2} /> Xóa khách
+                </button>
+              </li>
             </>
           )}
         </ul>
