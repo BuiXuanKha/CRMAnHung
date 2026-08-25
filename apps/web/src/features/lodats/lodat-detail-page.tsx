@@ -15,6 +15,12 @@ import { useAuth } from '@/features/auth/auth-context';
 import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, listSameWardLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
+import {
+  COMING_SOON_CONFIRM,
+  COMING_SOON_ICON,
+  COMING_SOON_TITLE,
+  comingSoonMessage,
+} from './coming-soon';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { SameWardList } from './components/same-ward-list';
 import { SaleToggle } from './components/sale-toggle';
@@ -44,6 +50,7 @@ export function LodatDetailPage() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [comingSoon, setComingSoon] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
 
   const q = useQuery({
@@ -138,9 +145,9 @@ export function LodatDetailPage() {
   const sameWardItems = sameWardQ.data?.items ?? [];
   const sameWardError =
     sameWardQ.error instanceof Error ? sameWardQ.error.message : null;
-  /** Hiện panel khi đã biết có xã (API trả wardName hoặc detail.wardName). */
+  /** Ẩn khi không có xã (CRM cũ: wardId không hợp lệ → null). */
   const sameWardVisible = Boolean(
-    sameWardName || sameWardQ.isLoading || sameWardItems.length || sameWardError,
+    sameWardName || sameWardItems.length || sameWardError,
   );
 
   return (
@@ -351,7 +358,7 @@ export function LodatDetailPage() {
               <button
                 type="button"
                 className="ld-detail-action-btn"
-                onClick={() => flash('Giao dịch — sẽ làm ở màn giao dịch.')}
+                onClick={() => setComingSoon(comingSoonMessage('Giao dịch lô đất'))}
               >
                 Giao dịch
               </button>
@@ -381,7 +388,7 @@ export function LodatDetailPage() {
         <footer className="ld-detail-mobile-footer">
           <button
             type="button"
-            onClick={() => flash('Giao dịch — sẽ làm ở màn giao dịch.')}
+            onClick={() => setComingSoon(comingSoonMessage('Giao dịch lô đất'))}
           >
             Giao dịch
           </button>
@@ -418,6 +425,14 @@ export function LodatDetailPage() {
         />
       ) : null}
 
+      <CrmAlertDialog
+        open={Boolean(comingSoon)}
+        title={COMING_SOON_TITLE}
+        message={comingSoon ?? ''}
+        icon={COMING_SOON_ICON}
+        confirmLabel={COMING_SOON_CONFIRM}
+        onClose={() => setComingSoon(null)}
+      />
       <CrmAlertDialog
         open={Boolean(alertMsg)}
         title="Không thực hiện được"

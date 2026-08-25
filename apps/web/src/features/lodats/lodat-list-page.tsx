@@ -3,10 +3,16 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, type LucideIcon } from 'lucide-react';
 import { LodatKind, LodatSaleStatus, type LodatListItem, type LodatListingStatus } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { listLodats, updateLodatSaleStatus } from './api';
+import {
+  COMING_SOON_CONFIRM,
+  COMING_SOON_ICON,
+  COMING_SOON_TITLE,
+  comingSoonMessage,
+} from './coming-soon';
 import { type LodatAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
 import { LodatCardList } from './components/lodat-card-list';
@@ -34,6 +40,8 @@ const DEFAULT_EXTRA: ExtraFilters = {
 type AlertState = {
   title: string;
   message: string;
+  icon?: LucideIcon;
+  confirmLabel?: string;
 } | null;
 
 export function LodatListPage() {
@@ -106,7 +114,12 @@ export function LodatListPage() {
       return;
     }
     if (action === 'deal') {
-      flash(`Giao dịch «${title}» — sẽ làm ở màn giao dịch.`);
+      setAlertBox({
+        title: COMING_SOON_TITLE,
+        message: comingSoonMessage(`Giao dịch «${title}»`),
+        icon: COMING_SOON_ICON,
+        confirmLabel: COMING_SOON_CONFIRM,
+      });
       return;
     }
     router.push(`/lo-dat/${id}/sua`);
@@ -181,8 +194,9 @@ export function LodatListPage() {
       <CrmAlertDialog
         open={Boolean(alertBox)}
         title={alertBox?.title ?? ''}
-        icon={AlertTriangle}
+        icon={alertBox?.icon ?? AlertTriangle}
         message={alertBox?.message ?? ''}
+        confirmLabel={alertBox?.confirmLabel}
         onClose={() => setAlertBox(null)}
       />
 
