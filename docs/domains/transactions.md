@@ -1,7 +1,7 @@
 # Domain: Transactions (Giao dịch)
 
 - **Slug:** `transactions`
-- **Status:** Ready for API — Prisma + contract; UI mock list + chi tiết + form; Nest **sau**
+- **Status:** Ready for API — Prisma + contract; UI mock list + chi tiết + form + tạo từ lô; Nest **sau**
 - **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich` (SQLite `tblTransaction*`, 2026-08-25)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
@@ -97,7 +97,7 @@ Ownership: theo `createdByEmployeeId` (người **tạo GD**), không theo `Loda
 | Tạo | `/giao-dich/tao` | `?lodatId=` khoá lô; trùng GD mở → sửa GD đó |
 | Sửa | `/giao-dich/[id]/sua` | Cùng form; thêm trạng thái + lý do hủy |
 
-Không nút thêm trên list. Nút **Giao dịch** trên lô = open-or-create (API sau).
+Không nút thêm trên list. Nút **Giao dịch** trên `/lo-dat` (menu PC) và chi tiết (desktop + footer mobile) = open-or-create mock (`?lodatId=`). Nest API sau.
 
 ## 7. Contract / API dự kiến
 

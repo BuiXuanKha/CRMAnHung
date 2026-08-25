@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list + chi tiết + gallery + lô cùng xã + **trang sửa** `/sua` (kể **đổi chủ**) + **form tạo lô từ khách** (§12.5); **chưa bàn** list ADMIN
+- **Status:** Ready for API — list + chi tiết + gallery + lô cùng xã + **trang sửa** `/sua` (kể **đổi chủ**) + **form tạo lô từ khách** (§12.5) + **tạo GD từ list/chi tiết**; **chưa bàn** list ADMIN
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
@@ -265,9 +265,9 @@ Không phải đã bán / đặt cọc.
 
 | Mục | Việc hiện tại |
 |-----|----------------|
-| Xem chi tiết | `/lo-dat/[id]` (placeholder) |
-| Giao dịch | Toast — form sau |
-| Sửa | Toast — form sau |
+| Xem chi tiết | `/lo-dat/[id]` |
+| Giao dịch | `/giao-dich/tao?lodatId=` — không GD mở → form tạo (khoá lô); có GD `DA_COC`/`DA_CONG_CHUNG` → `/giao-dich/[id]/sua` |
+| Sửa | `/lo-dat/[id]/sua` |
 
 CRM cũ: nút GD / Sửa / Xóa (admin, lô admin tạo) trên dòng.
 
@@ -342,7 +342,7 @@ Nút **Bộ lọc** + **Tìm** — Trạng thái, khoảng giá (bước 500tr +
 
 Thumbnail. Hangtag **Mở bán** / **Tạm dừng** trên ảnh. `+N` ảnh thêm.
 
-CRM cũ: bấm ảnh → gallery. Web mới: bấm cả thẻ → chi tiết.
+CRM cũ: bấm ảnh → gallery. Web mới: bấm cả thẻ → chi tiết. Thẻ **không** menu Thao tác; **Giao dịch** / **Sửa** = footer chi tiết.
 
 ##### 3. Phải ảnh
 
@@ -373,9 +373,11 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 └────────────────────────────────────────────────────────────────────┘
 ```
 
+**Giao dịch** → `/giao-dich/tao?lodatId=` (open-or-create, cùng §12.1.3 mục 7). **Sửa lô đất** → `/lo-dat/[id]/sua`.
+
 #### 12.3.2 Mobile
 
-Xếp dọc: content → **Lô đất cùng xã** dưới specs; footer dính đáy: **Giao dịch** · **Sửa lô đất**.
+Xếp dọc: content → **Lô đất cùng xã** dưới specs; footer dính đáy: **Giao dịch** (cùng open-or-create) · **Sửa lô đất**.
 
 #### 12.3.3 Gallery ảnh (đã làm)
 

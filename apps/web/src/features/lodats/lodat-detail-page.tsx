@@ -15,16 +15,11 @@ import { useAuth } from '@/features/auth/auth-context';
 import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, listSameWardLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
-import {
-  COMING_SOON_CONFIRM,
-  COMING_SOON_ICON,
-  COMING_SOON_TITLE,
-  comingSoonMessage,
-} from './coming-soon';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { SameWardList } from './components/same-ward-list';
 import { SaleToggle } from './components/sale-toggle';
 import { buildLodatCopyText, copyTextToClipboard } from './copy-text';
+import { createTransactionHref } from './transaction-href';
 import {
   formatArea,
   formatFrontageDir,
@@ -50,7 +45,6 @@ export function LodatDetailPage() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
-  const [comingSoon, setComingSoon] = useState<string | null>(null);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
 
   const q = useQuery({
@@ -358,7 +352,7 @@ export function LodatDetailPage() {
               <button
                 type="button"
                 className="ld-detail-action-btn"
-                onClick={() => setComingSoon(comingSoonMessage('Giao dịch lô đất'))}
+                onClick={() => router.push(createTransactionHref(detail.id))}
               >
                 Giao dịch
               </button>
@@ -388,7 +382,7 @@ export function LodatDetailPage() {
         <footer className="ld-detail-mobile-footer">
           <button
             type="button"
-            onClick={() => setComingSoon(comingSoonMessage('Giao dịch lô đất'))}
+            onClick={() => router.push(createTransactionHref(detail.id))}
           >
             Giao dịch
           </button>
@@ -425,14 +419,6 @@ export function LodatDetailPage() {
         />
       ) : null}
 
-      <CrmAlertDialog
-        open={Boolean(comingSoon)}
-        title={COMING_SOON_TITLE}
-        message={comingSoon ?? ''}
-        icon={COMING_SOON_ICON}
-        confirmLabel={COMING_SOON_CONFIRM}
-        onClose={() => setComingSoon(null)}
-      />
       <CrmAlertDialog
         open={Boolean(alertMsg)}
         title="Không thực hiện được"

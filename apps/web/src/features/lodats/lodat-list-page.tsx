@@ -16,13 +16,8 @@ import {
 import { needsMoreListScrollHeight, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
-import {
-  COMING_SOON_CONFIRM,
-  COMING_SOON_ICON,
-  COMING_SOON_TITLE,
-  comingSoonMessage,
-} from './coming-soon';
 import { type LodatAction } from './components/action-menu';
+import { createTransactionHref } from './transaction-href';
 import { FilterBar } from './components/filter-bar';
 import { LodatCardList } from './components/lodat-card-list';
 import { LodatImageGallery } from './components/lodat-image-gallery';
@@ -329,24 +324,18 @@ export function LodatListPage() {
     };
   }, []);
 
-  function handleAction(id: string, action: LodatAction, title: string) {
+  function handleAction(id: string, action: LodatAction) {
     setMenuId(null);
     setSelectedId(id);
+    saveListBeforeLeave(id);
     if (action === 'detail') {
-      saveListBeforeLeave(id);
       router.push(`/lo-dat/${id}`);
       return;
     }
     if (action === 'deal') {
-      setAlertBox({
-        title: COMING_SOON_TITLE,
-        message: comingSoonMessage(`Giao dịch «${title}»`),
-        icon: COMING_SOON_ICON,
-        confirmLabel: COMING_SOON_CONFIRM,
-      });
+      router.push(createTransactionHref(id));
       return;
     }
-    saveListBeforeLeave(id);
     router.push(`/lo-dat/${id}/sua`);
   }
 
@@ -415,7 +404,7 @@ export function LodatListPage() {
                 onSelect={setSelectedId}
                 onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
                 onCloseMenu={() => setMenuId(null)}
-                onAction={(p, a) => handleAction(p.id, a, p.title)}
+                onAction={(p, a) => handleAction(p.id, a)}
                 onToggleSale={handleToggleSale}
                 onOpenGallery={openGallery}
                 scrollRef={tableScrollRef}
