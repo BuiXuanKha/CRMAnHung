@@ -219,8 +219,8 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 
 | Mục | Ghi chú UI |
 |-----|------------|
-| Mở chat | Tab `facebook.com/messages/t/…` (thread số); ẩn mobile / thiếu thread |
-| Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu → ẩn mục (hoặc CrmAlert) |
+| Mở chat | Tab `facebook.com/messages/t/…` (thread số); ẩn mobile; thiếu mã → CrmAlert |
+| Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu mã → CrmAlert |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
 | Tạo lô đất | Đang phát triển (CrmAlert). ADMIN: báo không tạo từ menu khách |
 | Dịch vụ sổ đỏ | Đang phát triển (CrmAlert) |
@@ -531,7 +531,8 @@ Component: `shared/ui/column-filter.tsx`.
 
 **Khung chung** (`CrmDialog` / `shared/ui/dialog`):
 
-- Backdrop `#0f172a` / 50%; panel trắng, bo **12px**, shadow nhẹ, rộng max **460px**.
+- Render bằng **portal tới `document.body`** (tránh bị `overflow: hidden` của shell/list cắt mất).
+- Backdrop `#0f172a` / 50%; **z-index 200**; panel trắng, bo **12px**, shadow nhẹ, rộng max **460px**.
 - Header: nền `#f1f5f9`, chữ **600**, có thể kèm icon Lucide 18px.
 - Body: padding `16–18px`; chữ `#334155`.
 - Footer actions: căn phải; secondary viền `#cbd5e1`; primary `#2563eb`; danger `#b91c1c`.

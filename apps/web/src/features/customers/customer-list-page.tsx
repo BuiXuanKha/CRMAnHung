@@ -390,20 +390,24 @@ export function CustomerListPage() {
   }
 
   async function handleAction(customer: CustomerListItem, action: CustomerAction) {
-    setMenuId(null);
-    setSelectedId(customer.id);
+    // Mở URL / alert TRƯỚC setState đóng menu — giữ user-gesture cho tab ngoài
     if (action === 'chat') {
-      // CRM cũ: tab facebook.com/messages (không phải rail tin đã lưu)
-      if (!openExternalUrl(facebookInboxChatUrl(customer))) {
+      const url = facebookInboxChatUrl(customer);
+      if (!openExternalUrl(url)) {
         setAlertBox({
           title: 'Không mở được chat',
-          message: 'Khách này chưa có thread Facebook Inbox (mã số) để mở hội thoại.',
+          message: customer.facebook?.threadId
+            ? 'Thread Facebook của khách không phải mã số Inbox hợp lệ để mở hội thoại.'
+            : 'Khách này chưa có thread Facebook Inbox để mở hội thoại.',
         });
       }
+      setMenuId(null);
+      setSelectedId(customer.id);
       return;
     }
     if (action === 'messenger') {
-      if (!openExternalUrl(messengerComUrl(customer))) {
+      const url = messengerComUrl(customer);
+      if (!openExternalUrl(url)) {
         setAlertBox({
           title: 'Không mở được Messenger',
           message: customer.facebook
@@ -411,8 +415,14 @@ export function CustomerListPage() {
             : 'Khách này chưa gắn Facebook — không mở được Messenger.',
         });
       }
+      setMenuId(null);
+      setSelectedId(customer.id);
       return;
     }
+
+    setMenuId(null);
+    setSelectedId(customer.id);
+
     if (action === 'care') {
       openCareEdit(customer);
       return;

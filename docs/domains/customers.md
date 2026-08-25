@@ -201,8 +201,8 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 | Mục | Việc |
 |-----|------|
-| Mở chat | Tab `facebook.com/messages/t/{threadId}` (CRM cũ). Chỉ hiện khi có thread số; **ẩn mobile**. Tin đã lưu xem qua rail «Nội dung chat» |
-| Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Chỉ hiện khi có id số hợp lệ |
+| Mở chat | Tab `facebook.com/messages/t/{threadId}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert; **ẩn mobile**. Tin đã lưu xem qua rail «Nội dung chat» |
+| Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
 | Tạo lô đất | STAFF → form sau (`/them-lo-dat`). Hiện alert đang phát triển. ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | Form từ khách sau. Hiện alert đang phát triển |
@@ -353,8 +353,8 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 | Mục | Việc |
 |-----|------|
-| Mở chat | Tab `facebook.com/messages/t/…` (ẩn mobile; cần thread số) |
-| Mở Messenger | Tab `messenger.com/t/…` |
+| Mở chat | Tab `facebook.com/messages/t/…` (ẩn mobile; có FB; thiếu mã → CrmAlert) |
+| Mở Messenger | Tab `messenger.com/t/…` (có FB; thiếu mã → CrmAlert) |
 | Cập nhật chăm sóc | Trang `/khach-hang/[id]/cham-soc`. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat`. ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` |

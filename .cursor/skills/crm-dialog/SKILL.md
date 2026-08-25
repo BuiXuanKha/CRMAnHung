@@ -11,6 +11,7 @@ Thông báo và xác nhận dùng **một** khung modal. **Không** `window.aler
 
 1. Đọc [`docs/UI-GUIDELINES.md`](../../../docs/UI-GUIDELINES.md) **§4.7** (+ §4.6 icon Lucide).
 2. Dùng `CrmDialog` / `CrmConfirmDialog` / `CrmAlertDialog` / `CrmToast` trong `apps/web/src/shared/ui/`.
+   Dialog/toast **portal tới `document.body`** (z-index 200) — không để nằm trong shell `overflow: hidden`.
 3. Form ngắn (thêm SĐT, ghi chú…) = `CrmDialog` + body form — cùng chrome với confirm.
 
 ## Đã chốt (tóm tắt)
