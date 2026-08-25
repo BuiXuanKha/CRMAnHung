@@ -173,7 +173,7 @@ Thứ tự mỗi trang: **12.1 máy tính** → **12.2 mobile** → trong từng
 ```
 ┌ Ô tìm ───────────────────────────────────────────────────────┐
 ├ Bảng: Ảnh · Tiêu đề/Địa chỉ · Phân loại · DT·MT·Hướng · Giá ─┤
-│       · Trạng thái · Cập nhật · Thao tác                     │
+│       · Trạng thái · Thao tác                                │
 ├ Footer đếm ──────────────────────────────────────────────────┤
 └ Không rail phải ─────────────────────────────────────────────┘
 ```
@@ -259,11 +259,7 @@ Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
 Bật = Mở bán. Tắt = Tạm dừng → lô biến khỏi list mặc định (gõ `@` để thấy).  
 Không phải đã bán / đặt cọc.
 
-##### 7. Cập nhật
-
-`HH:mm:ss D/M/YYYY`. Không lọc cột.
-
-##### 8. Thao tác (chevron)
+##### 7. Thao tác (chevron)
 
 | Mục | Việc hiện tại |
 |-----|----------------|
@@ -273,9 +269,7 @@ Không phải đã bán / đặt cọc.
 
 CRM cũ: nút GD / Sửa / Xóa (admin, lô admin tạo) trên dòng.
 
-##### 9. Sort
-
-`updatedAt` mới → cũ.
+**Không** hiện cột Cập nhật trên list (vẫn sort theo `updatedAt` mới → cũ ở API/query).
 
 #### 12.1.4 Footer
 

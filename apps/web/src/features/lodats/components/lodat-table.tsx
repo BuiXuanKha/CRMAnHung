@@ -15,7 +15,6 @@ import {
   formatArea,
   formatFrontageDir,
   formatPriceVnd,
-  formatUpdatedAt,
   kindLabel,
   kindTone,
   type ExtraFilters,
@@ -157,7 +156,6 @@ export function LodatTable({
               onChange={onStatus}
             />
           </div>
-          <div role="columnheader">Cập nhật</div>
           <div className="col-act" role="columnheader">
             Thao tác
           </div>
@@ -246,9 +244,6 @@ export function LodatTable({
                   busy={togglingId === p.id}
                   onToggle={() => onToggleSale(p)}
                 />
-              </div>
-              <div className="ld-cell ld-updated" role="cell">
-                {formatUpdatedAt(p.updatedAt)}
               </div>
               <div
                 className="col-act ld-cell"

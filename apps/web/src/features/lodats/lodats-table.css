@@ -19,7 +19,6 @@
     minmax(120px, 0.85fr)
     minmax(160px, 1.1fr)
     168px
-    132px
     80px;
   --ld-chrome: #f1f5f9;
   display: flex;
@@ -211,12 +210,6 @@
   color: #64748b;
   font-style: italic;
   line-height: 1.2;
-}
-
-.ld-updated {
-  color: #475569;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
 }
 
 .ld-table-foot {
