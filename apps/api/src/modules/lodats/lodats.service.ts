@@ -569,7 +569,7 @@ export class LodatsService {
 
   /**
    * Đổi chủ trong luồng NV (lodats.md §0.3 / §12.4.4):
-   * đóng map active → tạo map mới (copy giá/trạng thái).
+   * đóng map active → tạo map mới (giá/trạng thái từ form, thiếu thì copy).
    */
   async changeOwner(user: RequestUser, id: string, dto: ChangeLodatOwnerDto) {
     const customerId = String(dto.customerId || '').trim();
@@ -612,11 +612,23 @@ export class LodatsService {
         data: {
           lodatId: id,
           customerId: customer.id,
-          priceVnd: activeMap?.priceVnd ?? null,
-          priceNote: activeMap?.priceNote ?? null,
-          brokerFeeNote: activeMap?.brokerFeeNote ?? null,
-          note: activeMap?.note ?? null,
-          status: activeMap?.status ?? 'DANG_BAN',
+          priceVnd:
+            dto.priceVnd !== undefined
+              ? this.parsePrice(dto.priceVnd) ?? null
+              : (activeMap?.priceVnd ?? null),
+          priceNote:
+            dto.priceNote !== undefined
+              ? dto.priceNote?.trim() || null
+              : (activeMap?.priceNote ?? null),
+          brokerFeeNote:
+            dto.brokerFeeNote !== undefined
+              ? dto.brokerFeeNote?.trim() || null
+              : (activeMap?.brokerFeeNote ?? null),
+          note:
+            dto.mapNote !== undefined
+              ? dto.mapNote?.trim() || null
+              : (activeMap?.note ?? null),
+          status: dto.status ?? activeMap?.status ?? 'DANG_BAN',
           isActive: true,
           createdByEmployeeId: user.id,
         },

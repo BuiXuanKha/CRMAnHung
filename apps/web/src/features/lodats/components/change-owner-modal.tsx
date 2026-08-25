@@ -2,23 +2,50 @@
 
 import { useEffect, useState } from 'react';
 import { UserRound } from 'lucide-react';
-import type { CustomerListItem, LodatOwner } from '@crmanhung/shared';
+import {
+  LODAT_BROKER_FEE_CHIPS,
+  LODAT_PRICE_NOTE_CHIPS,
+  LodatSaleStatus,
+  type ChangeLodatOwnerInput,
+  type CustomerListItem,
+  type LodatOwner,
+} from '@crmanhung/shared';
 import { listCustomers } from '@/features/customers/api';
 import { CrmDialog } from '@/shared/ui/dialog';
+import { formatPriceInput, parsePriceInput } from '../api';
+import '../lodat-edit.css';
 import './change-owner-modal.css';
+
+export type ChangeOwnerMapDraft = {
+  status: typeof LodatSaleStatus.DANG_BAN | typeof LodatSaleStatus.TAM_DUNG;
+  priceVnd: string;
+  priceNote: string;
+  brokerFeeNote: string;
+  mapNote: string;
+};
 
 type Props = {
   open: boolean;
   currentOwner: LodatOwner | null;
+  initialMap: ChangeOwnerMapDraft;
   busy: boolean;
   error: string | null;
   onClose: () => void;
-  onSubmit: (customerId: string) => Promise<void>;
+  onSubmit: (input: ChangeLodatOwnerInput) => Promise<void>;
+};
+
+const EMPTY_MAP: ChangeOwnerMapDraft = {
+  status: LodatSaleStatus.DANG_BAN,
+  priceVnd: '',
+  priceNote: '',
+  brokerFeeNote: '',
+  mapNote: '',
 };
 
 export function ChangeOwnerModal({
   open,
   currentOwner,
+  initialMap,
   busy,
   error,
   onClose,
@@ -30,6 +57,7 @@ export function ChangeOwnerModal({
   const [items, setItems] = useState<CustomerListItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [mapDraft, setMapDraft] = useState<ChangeOwnerMapDraft>(EMPTY_MAP);
 
   useEffect(() => {
     if (!open) return;
@@ -38,6 +66,15 @@ export function ChangeOwnerModal({
     setPicked(null);
     setItems([]);
     setLoadError(null);
+    setMapDraft({
+      status: initialMap.status,
+      priceVnd: initialMap.priceVnd,
+      priceNote: initialMap.priceNote,
+      brokerFeeNote: initialMap.brokerFeeNote,
+      mapNote: initialMap.mapNote,
+    });
+    // Snapshot when the dialog opens — ignore later parent form edits.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   useEffect(() => {
@@ -70,6 +107,13 @@ export function ChangeOwnerModal({
     };
   }, [open, debounced, currentOwner?.customerId]);
 
+  function patchMap<K extends keyof ChangeOwnerMapDraft>(
+    key: K,
+    value: ChangeOwnerMapDraft[K],
+  ) {
+    setMapDraft((cur) => ({ ...cur, [key]: value }));
+  }
+
   return (
     <CrmDialog
       open={open}
@@ -82,8 +126,7 @@ export function ChangeOwnerModal({
       <p className="ld-change-owner-lead">
         Chủ hiện tại:{' '}
         <strong>{currentOwner?.fullName?.trim() || 'Chưa có chủ'}</strong>
-        . Chọn khách mới trong hồ sơ của bạn — map cũ sẽ đóng, map mới giữ giá và
-        trạng thái rao bán.
+        . Chọn khách mới và chỉnh giá / trạng thái cho map mới nếu cần.
       </p>
 
       <label className="ld-change-owner-search">
@@ -145,6 +188,99 @@ export function ChangeOwnerModal({
         </p>
       ) : null}
 
+      <div className="ld-change-owner-map">
+        <p className="ld-change-owner-map-title">Thông tin map mới</p>
+        <div className="ld-edit-row2">
+          <label className="ld-edit-field">
+            <span>Trạng thái</span>
+            <select
+              value={mapDraft.status}
+              disabled={busy}
+              onChange={(e) =>
+                patchMap('status', e.target.value as ChangeOwnerMapDraft['status'])
+              }
+            >
+              <option value={LodatSaleStatus.DANG_BAN}>Mở bán</option>
+              <option value={LodatSaleStatus.TAM_DUNG}>Tạm dừng</option>
+            </select>
+          </label>
+          <label className="ld-edit-field">
+            <span>Giá (VND)</span>
+            <input
+              value={mapDraft.priceVnd}
+              placeholder="VD: 1.234.567"
+              disabled={busy}
+              onChange={(e) =>
+                patchMap(
+                  'priceVnd',
+                  formatPriceInput(parsePriceInput(e.target.value)),
+                )
+              }
+            />
+          </label>
+        </div>
+
+        <label className="ld-edit-field">
+          <span>Ghi chú giá</span>
+          <input
+            value={mapDraft.priceNote}
+            disabled={busy}
+            onChange={(e) => patchMap('priceNote', e.target.value)}
+          />
+          <div className="ld-edit-chips">
+            {LODAT_PRICE_NOTE_CHIPS.map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                className={
+                  mapDraft.priceNote === chip ? 'ld-edit-chip active' : 'ld-edit-chip'
+                }
+                disabled={busy}
+                onClick={() => patchMap('priceNote', chip)}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        </label>
+
+        <label className="ld-edit-field">
+          <span>Hoa hồng</span>
+          <input
+            value={mapDraft.brokerFeeNote}
+            disabled={busy}
+            onChange={(e) => patchMap('brokerFeeNote', e.target.value)}
+          />
+          <div className="ld-edit-chips">
+            {LODAT_BROKER_FEE_CHIPS.map((chip) => (
+              <button
+                key={chip}
+                type="button"
+                className={
+                  mapDraft.brokerFeeNote === chip
+                    ? 'ld-edit-chip active'
+                    : 'ld-edit-chip'
+                }
+                disabled={busy}
+                onClick={() => patchMap('brokerFeeNote', chip)}
+              >
+                {chip}
+              </button>
+            ))}
+          </div>
+        </label>
+
+        <label className="ld-edit-field">
+          <span>Ghi chú liên kết chủ</span>
+          <textarea
+            rows={2}
+            value={mapDraft.mapNote}
+            disabled={busy}
+            onChange={(e) => patchMap('mapNote', e.target.value)}
+          />
+        </label>
+      </div>
+
       {error ? <p className="crm-form-error">{error}</p> : null}
 
       <div className="crm-dialog-actions">
@@ -157,7 +293,14 @@ export function ChangeOwnerModal({
           disabled={busy || !picked}
           onClick={() => {
             if (!picked) return;
-            void onSubmit(picked.id);
+            void onSubmit({
+              customerId: picked.id,
+              status: mapDraft.status,
+              priceVnd: parsePriceInput(mapDraft.priceVnd) || null,
+              priceNote: mapDraft.priceNote.trim() || null,
+              brokerFeeNote: mapDraft.brokerFeeNote.trim() || null,
+              mapNote: mapDraft.mapNote.trim() || null,
+            });
           }}
         >
           {busy ? 'Đang đổi…' : 'Đổi chủ'}

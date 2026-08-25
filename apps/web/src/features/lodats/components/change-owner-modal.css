@@ -66,7 +66,7 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: min(40vh, 360px);
+  max-height: min(28vh, 220px);
   overflow-y: auto;
   overscroll-behavior: contain;
 }
@@ -122,4 +122,22 @@
   margin: 10px 0 0;
   font-size: 0.88rem;
   color: #334155;
+}
+
+.ld-change-owner-map {
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ld-change-owner-map-title {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #0f172a;
 }

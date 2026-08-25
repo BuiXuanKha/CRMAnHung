@@ -109,6 +109,35 @@ export class ChangeLodatOwnerDto {
   @MinLength(1, { message: 'Chọn khách làm chủ mới.' })
   @MaxLength(60)
   customerId!: string;
+
+  @IsOptional()
+  @IsIn(['DANG_BAN', 'TAM_DUNG'])
+  status?: 'DANG_BAN' | 'TAM_DUNG';
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  priceVnd?: number | string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(200)
+  priceNote?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(200)
+  brokerFeeNote?: string | null;
+
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  @MaxLength(4000)
+  mapNote?: string | null;
 }
 
 export class UpdateLodatImageRotationDto {

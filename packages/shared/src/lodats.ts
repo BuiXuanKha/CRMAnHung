@@ -276,9 +276,14 @@ export const createLodatSchema = z
 
 export type CreateLodatInput = z.infer<typeof createLodatSchema>;
 
-/** Đổi chủ trên trang sửa (§12.4.4). */
+/** Đổi chủ trên trang sửa (§12.4.4) — map mới nhận giá/trạng thái từ form. */
 export const changeLodatOwnerSchema = z.object({
   customerId: z.string().trim().min(1, 'Chọn khách làm chủ mới.'),
+  status: lodatListingStatusSchema.optional(),
+  priceVnd: z.union([z.number().nonnegative(), z.string()]).nullable().optional(),
+  priceNote: z.string().trim().max(200).nullable().optional(),
+  brokerFeeNote: z.string().trim().max(200).nullable().optional(),
+  mapNote: z.string().trim().max(4000).nullable().optional(),
 });
 
 export type ChangeLodatOwnerInput = z.infer<typeof changeLodatOwnerSchema>;

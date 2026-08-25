@@ -13,6 +13,7 @@ import {
   LODAT_PRICE_NOTE_CHIPS,
   LodatKind,
   LodatSaleStatus,
+  type ChangeLodatOwnerInput,
   type LodatDetail,
   type UpdateLodatInput,
 } from '@crmanhung/shared';
@@ -138,7 +139,7 @@ export function LodatEditPage() {
   });
 
   const ownerMut = useMutation({
-    mutationFn: (customerId: string) => changeLodatOwner(id, { customerId }),
+    mutationFn: (input: ChangeLodatOwnerInput) => changeLodatOwner(id, input),
     onSuccess: async (updated) => {
       qc.setQueryData(['lodat', id], updated);
       await qc.invalidateQueries({ queryKey: ['lodats'] });
@@ -591,13 +592,22 @@ export function LodatEditPage() {
       <ChangeOwnerModal
         open={ownerOpen}
         currentOwner={detail?.owner ?? null}
+        initialMap={
+          mapForm ?? {
+            status: LodatSaleStatus.DANG_BAN,
+            priceVnd: '',
+            priceNote: '',
+            brokerFeeNote: '',
+            mapNote: '',
+          }
+        }
         busy={ownerMut.isPending}
         error={ownerError}
         onClose={() => {
           setOwnerOpen(false);
           setOwnerError(null);
         }}
-        onSubmit={(customerId) => ownerMut.mutateAsync(customerId).then(() => undefined)}
+        onSubmit={(input) => ownerMut.mutateAsync(input).then(() => undefined)}
       />
       <CrmAlertDialog
         open={Boolean(alertMsg)}

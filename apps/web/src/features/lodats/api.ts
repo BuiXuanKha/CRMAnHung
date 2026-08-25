@@ -261,14 +261,30 @@ export async function changeLodatOwner(
         ? [{ phone: found.primaryPhone, label: null }]
         : found.phones.map((p) => ({ phone: p.phone, label: p.label ?? null })),
     };
+    const nextStatus = parsed.status ?? current.status;
+    const nextPrice =
+      parsed.priceVnd === undefined
+        ? (current.priceVnd ?? null)
+        : parsed.priceVnd == null || parsed.priceVnd === ''
+          ? null
+          : Number(String(parsed.priceVnd).replace(/[^\d]/g, '')) || null;
+    const nextPriceNote =
+      parsed.priceNote !== undefined ? parsed.priceNote : (current.priceNote ?? null);
+    const nextBroker =
+      parsed.brokerFeeNote !== undefined
+        ? parsed.brokerFeeNote
+        : (current.brokerFeeNote ?? null);
+    const extras = mockExtras.get(id) ?? {};
+    const nextMapNote =
+      parsed.mapNote !== undefined ? parsed.mapNote : (extras.mapNote ?? null);
     const nextHistory: LodatOwnerHistoryItem[] = [
       {
         id: `hist-${id}-${now}`,
         customerId: found.id,
         fullName: found.fullName,
         isActive: true,
-        status: current.status,
-        priceVnd: current.priceVnd ?? null,
+        status: nextStatus,
+        priceVnd: nextPrice,
         startedAt: now,
         endedAt: null,
       },
@@ -277,11 +293,19 @@ export async function changeLodatOwner(
     const updated: LodatListItem = {
       ...current,
       customerHint: found.fullName,
+      status: nextStatus,
+      priceVnd: nextPrice,
+      priceNote: nextPriceNote,
+      brokerFeeNote: nextBroker,
       updatedAt: now,
     };
     mockStore = mockStore.map((p, i) => (i === idx ? updated : p));
-    const extras = mockExtras.get(id) ?? {};
-    mockExtras.set(id, { ...extras, owner: nextOwner, ownerHistory: nextHistory });
+    mockExtras.set(id, {
+      ...extras,
+      owner: nextOwner,
+      ownerHistory: nextHistory,
+      mapNote: nextMapNote,
+    });
     return toDetail(updated);
   }
   return apiFetch<LodatDetail>(`/lodats/${id}/change-owner`, {

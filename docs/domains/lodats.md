@@ -437,9 +437,10 @@ Bấm → **CrmDialog** form «Đổi chủ đất»:
 1. Dòng chủ hiện tại (tên).
 2. Ô tìm khách (tên / SĐT) — debounce ~250ms; STAFF chỉ khách của mình; ADMIN mọi khách đang hiện (`isHidden=false`). **Không** liệt kê chủ đang active.
 3. Danh sách: tên đậm + SĐT; bấm một dòng = chọn (viền xanh).
-4. Huỷ · **Đổi chủ** (primary). Chưa chọn / trùng chủ hiện tại → không gửi.
+4. Khối **map mới** (điền sẵn từ form/map đang mở, sửa được): trạng thái · giá · ghi chú giá (+ chip) · hoa hồng (+ chip) · ghi chú liên kết chủ.
+5. Huỷ · **Đổi chủ** (primary). Chưa chọn khách / trùng chủ hiện tại → không gửi.
 
-**Nghiệp vụ:** đóng map active (`isActive=false`, `endedAt=now`) → tạo map mới (cùng lô, khách mới). Copy giá / ghi chú giá / hoa hồng / trạng thái rao bán / ghi chú liên kết từ map cũ để tin rao không mất số. Toast «Đã đổi chủ sang …». Card lịch sử hiện map đã kết thúc + map active.
+**Nghiệp vụ:** đóng map active (`isActive=false`, `endedAt=now`) → tạo map mới (cùng lô, khách mới) với giá / ghi chú giá / hoa hồng / trạng thái / ghi chú liên kết **lấy từ form modal**. Field không gửi → copy từ map cũ. Toast «Đã đổi chủ sang …». Card lịch sử hiện map đã kết thúc + map active.
 
 Không đổi `Lodat.createdByEmployeeId` (luồng NV giữ nguyên).
 
@@ -482,7 +483,7 @@ Xếp dọc như §12.4.2 (một cột; Huỷ/Tạo cuối form; nút «Thêm �
 |----------|------|
 | `GET /lodats/project-lots?addressId=` | Kho lô của địa chỉ PROJECT + cờ `takenByMe` |
 | `POST /lodats` | Tạo lô dân (addressId REGULAR + specs) hoặc lô dự án (projectLotId) + map chủ; chặn ADMIN; khách phải thuộc NV |
-| `POST /lodats/:id/change-owner` | Đổi chủ: đóng map active, mở map mới. Body `{ customerId }`. STAFF: lô mình + khách mình. ADMIN: mọi lô / khách đang hiện. |
+| `POST /lodats/:id/change-owner` | Đổi chủ: đóng map active, mở map mới. Body `{ customerId, status?, priceVnd?, priceNote?, brokerFeeNote?, mapNote? }`. STAFF: lô mình + khách mình. ADMIN: mọi lô / khách đang hiện. |
 
 ---
 
