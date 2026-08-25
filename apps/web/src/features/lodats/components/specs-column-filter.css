@@ -1,0 +1,51 @@
+.ld-specs-filter-menu {
+  min-width: 220px;
+  max-height: min(70vh, 420px);
+  overflow-y: auto;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.ld-specs-filter-group-label {
+  margin: 4px 8px 2px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+}
+
+.ld-specs-filter-group-label:first-child {
+  margin-top: 0;
+}
+
+.ld-specs-filter-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ld-specs-filter-menu .ld-specs-filter-list button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  width: 100%;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.ld-specs-filter-menu .ld-specs-filter-list button:hover,
+.ld-specs-filter-menu .ld-specs-filter-list button.is-selected {
+  background: #eff6ff;
+  color: #1d4ed8;
+}

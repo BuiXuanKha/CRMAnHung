@@ -207,7 +207,16 @@ Lọc cột Trạng thái = Tạm dừng vẫn hiện lô tạm dừng (không c
 
 #### 12.1.2 Bộ lọc
 
-Icon cột: ảnh / địa chỉ / phân loại / thông số / giá có-chưa / trạng thái.
+Icon cột: ảnh / địa chỉ / phân loại / **DT (khoảng) + hướng** / giá có-chưa / trạng thái.
+
+Cột **DT · MT · Hướng** — menu lọc 2 nhóm (AND):
+
+| Nhóm | Lựa chọn |
+|------|----------|
+| Diện tích | Tất cả · 1–100 m² · 100–200 m² · Trên 200 m² |
+| Hướng | Tất cả · Đông · Tây · Nam · Bắc · Đông Bắc · Đông Nam · Tây Bắc · Tây Nam · Mặt nước · Khác |
+
+Biên DT: `1–100` = 1≤DT≤100; `100–200` = 100&lt;DT≤200; `Trên 200` = DT&gt;200. Thiếu DT không khớp khoảng.
 
 #### 12.1.3 Item (dòng bảng)
 

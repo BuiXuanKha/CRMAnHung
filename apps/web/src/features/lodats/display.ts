@@ -1,4 +1,9 @@
-import { LodatKind, LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
+import {
+  LodatKind,
+  LodatSaleStatus,
+  LODAT_DIRECTION_OPTIONS,
+  type LodatListItem,
+} from '@crmanhung/shared';
 import type { BadgeTone } from '@/shared/ui/badge';
 
 function toPriceNumber(n?: number | string | null): number | null {
@@ -46,9 +51,16 @@ export function hasSpecs(p: LodatListItem): boolean {
 export type ExtraFilters = {
   photo: 'all' | 'has' | 'empty';
   address: 'all' | 'has' | 'empty';
-  specs: 'all' | 'has' | 'empty';
+  /** Khoảng diện tích (m²) — cột DT · MT · Hướng */
+  area: AreaBracket;
+  /** Hướng lô — khớp `Lodat.direction` */
+  direction: DirectionFilter;
   price: 'all' | 'has' | 'empty';
 };
+
+export type AreaBracket = 'all' | '1_100' | '100_200' | 'gt_200';
+
+export type DirectionFilter = 'all' | (typeof LODAT_DIRECTION_OPTIONS)[number];
 
 export const PHOTO_FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả ảnh' },
@@ -62,10 +74,16 @@ export const ADDRESS_FILTER_OPTIONS = [
   { value: 'empty', label: 'Chưa có địa chỉ' },
 ];
 
-export const SPECS_FILTER_OPTIONS = [
-  { value: 'all', label: 'Tất cả thông số' },
-  { value: 'has', label: 'Đã có thông số' },
-  { value: 'empty', label: 'Thiếu thông số' },
+export const AREA_FILTER_OPTIONS: { value: AreaBracket; label: string }[] = [
+  { value: 'all', label: 'Tất cả diện tích' },
+  { value: '1_100', label: '1–100 m²' },
+  { value: '100_200', label: '100–200 m²' },
+  { value: 'gt_200', label: 'Trên 200 m²' },
+];
+
+export const DIRECTION_FILTER_OPTIONS: { value: DirectionFilter; label: string }[] = [
+  { value: 'all', label: 'Tất cả hướng' },
+  ...LODAT_DIRECTION_OPTIONS.map((d) => ({ value: d as DirectionFilter, label: d })),
 ];
 
 export const PRICE_FILTER_OPTIONS = [
@@ -152,7 +170,8 @@ export function countActiveLodatFilters(
   if (kind) n += 1;
   if (extra.photo !== 'all') n += 1;
   if (extra.address !== 'all') n += 1;
-  if (extra.specs !== 'all') n += 1;
+  if (extra.area !== 'all') n += 1;
+  if (extra.direction !== 'all') n += 1;
   if (extra.price !== 'all') n += 1;
   return n;
 }
@@ -172,14 +191,28 @@ export function applyExtraFilters(
     const hasAddr = Boolean(p.address?.trim());
     if (extra.address === 'has' && !hasAddr) return false;
     if (extra.address === 'empty' && hasAddr) return false;
-    const specs = hasSpecs(p);
-    if (extra.specs === 'has' && !specs) return false;
-    if (extra.specs === 'empty' && specs) return false;
+    if (!matchesAreaBracket(p.areaM2, extra.area)) return false;
+    if (extra.direction !== 'all') {
+      if ((p.direction?.trim() || '') !== extra.direction) return false;
+    }
     const hasPrice = p.priceVnd != null;
     if (extra.price === 'has' && !hasPrice) return false;
     if (extra.price === 'empty' && hasPrice) return false;
     return true;
   });
+}
+
+/** 1–100: 1≤DT≤100; 100–200: 100&lt;DT≤200; trên 200: DT&gt;200. */
+export function matchesAreaBracket(
+  areaM2: number | null | undefined,
+  bracket: AreaBracket,
+): boolean {
+  if (bracket === 'all') return true;
+  if (areaM2 == null || !Number.isFinite(areaM2)) return false;
+  if (bracket === '1_100') return areaM2 >= 1 && areaM2 <= 100;
+  if (bracket === '100_200') return areaM2 > 100 && areaM2 <= 200;
+  if (bracket === 'gt_200') return areaM2 > 200;
+  return true;
 }
 
 /** `@` gồm tạm dừng; `@@` chỉ tạm dừng — theo placeholder §4.3.5. */
