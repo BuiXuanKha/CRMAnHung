@@ -266,6 +266,83 @@ export class LodatsService {
     }
   }
 
+  /** Lọc cột chạy trên API để phân trang đúng (lodats.md §12.1.2). */
+  private columnFilterWhere(query: ListLodatsQueryDto): Prisma.LodatWhereInput[] {
+    const and: Prisma.LodatWhereInput[] = [];
+
+    if (query.priceBracket) {
+      const pb = query.priceBracket;
+      const M = 1_000_000;
+      const priceCond: Prisma.LodatCustomerMapWhereInput =
+        pb === 'no_price'
+          ? { OR: [{ priceVnd: null }, { priceVnd: { lte: 0 } }] }
+          : pb === 'lt_500m'
+            ? { priceVnd: { gt: 0, lt: 500 * M } }
+            : pb === '500m_1b'
+              ? { priceVnd: { gte: 500 * M, lt: 1000 * M } }
+              : pb === '1b_15b'
+                ? { priceVnd: { gte: 1000 * M, lt: 1500 * M } }
+                : pb === '15b_2b'
+                  ? { priceVnd: { gte: 1500 * M, lt: 2000 * M } }
+                  : pb === '2b_25b'
+                    ? { priceVnd: { gte: 2000 * M, lt: 2500 * M } }
+                    : pb === '25b_3b'
+                      ? { priceVnd: { gte: 2500 * M, lt: 3000 * M } }
+                      : { priceVnd: { gte: 3000 * M } };
+      and.push({ maps: { some: { isActive: true, ...priceCond } } });
+    }
+
+    if (query.areaBracket) {
+      const range: Prisma.FloatNullableFilter =
+        query.areaBracket === '1_100'
+          ? { gte: 1, lte: 100 }
+          : query.areaBracket === '100_200'
+            ? { gt: 100, lte: 200 }
+            : { gt: 200 };
+      and.push({
+        OR: [
+          { AND: [{ projectLotId: null }, { areaM2: range }] },
+          { projectLot: { areaM2: range } },
+        ],
+      });
+    }
+
+    const direction = query.direction?.trim();
+    if (direction) {
+      and.push({
+        OR: [
+          {
+            AND: [
+              { projectLotId: null },
+              { direction: { equals: direction, mode: 'insensitive' } },
+            ],
+          },
+          { projectLot: { direction: { equals: direction, mode: 'insensitive' } } },
+        ],
+      });
+    }
+
+    if (query.photo) {
+      const hasPhoto: Prisma.LodatWhereInput = {
+        OR: [
+          { images: { some: {} } },
+          { projectLot: { address: { images: { some: {} } } } },
+        ],
+      };
+      and.push(query.photo === 'has' ? hasPhoto : { NOT: hasPhoto });
+    }
+
+    if (query.addressFilter === 'has') {
+      and.push({
+        OR: [{ addressId: { not: null } }, { projectLotId: { not: null } }],
+      });
+    } else if (query.addressFilter === 'empty') {
+      and.push({ addressId: null, projectLotId: null });
+    }
+
+    return and;
+  }
+
   async list(user: RequestUser, query: ListLodatsQueryDto) {
     const and: Prisma.LodatWhereInput[] = [this.ownershipWhere(user)];
     // Chỉ hiện lô đã gắn chủ (có map active)
@@ -288,6 +365,8 @@ export class LodatsService {
         maps: { some: { isActive: true, status: 'DANG_BAN' } },
       });
     }
+
+    and.push(...this.columnFilterWhere(query));
 
     const keyword = String(query.keyword || '').trim();
     if (keyword) {
@@ -361,18 +440,22 @@ export class LodatsService {
       });
     }
 
-    const rows = await this.prisma.lodat.findMany({
-      where: { AND: and },
-      include: LIST_INCLUDE,
-      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
-      take: 500,
-    });
+    const take = Math.min(Math.max(query.limit ?? 50, 1), 200);
+    const skip = Math.max(query.offset ?? 0, 0);
+    const where: Prisma.LodatWhereInput = { AND: and };
 
-    const items = rows
-      .map((row) => this.mapRow(row))
-      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+    const [rows, total] = await Promise.all([
+      this.prisma.lodat.findMany({
+        where,
+        include: LIST_INCLUDE,
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+        skip,
+        take,
+      }),
+      this.prisma.lodat.count({ where }),
+    ]);
 
-    return { items, total: items.length };
+    return { items: rows.map((row) => this.mapRow(row)), total };
   }
 
   /**
@@ -447,6 +530,11 @@ export class LodatsService {
     await this.prisma.lodatCustomerMap.update({
       where: { id: activeMap.id },
       data: { status: dto.status },
+    });
+    // DB sort theo lodat.updatedAt — chạm khi chỉ map đổi để lô nổi lên đầu list
+    await this.prisma.lodat.update({
+      where: { id },
+      data: { updatedAt: new Date() },
     });
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({
@@ -823,6 +911,13 @@ export class LodatsService {
         where: { id: activeMap.id },
         data: mapData,
       });
+      if (!Object.keys(lodatData).length) {
+        // DB sort theo lodat.updatedAt — chạm khi chỉ map đổi
+        await this.prisma.lodat.update({
+          where: { id },
+          data: { updatedAt: new Date() },
+        });
+      }
     }
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({

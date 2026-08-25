@@ -14,6 +14,7 @@ type Props = {
   onSelect: (id: string) => void;
   onOpen: (id: string) => void;
   onOpenGallery: (plot: LodatListItem) => void;
+  loadingMore?: boolean;
   scrollRef?: Ref<HTMLDivElement>;
   onScroll?: () => void;
 };
@@ -25,6 +26,7 @@ export function LodatCardList({
   onSelect,
   onOpen,
   onOpenGallery,
+  loadingMore = false,
   scrollRef,
   onScroll,
 }: Props) {
@@ -113,7 +115,16 @@ export function LodatCardList({
         )}
       </div>
       <div className="ld-cards-count">
-        Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> lô đất
+        {items.length < total ? (
+          <>
+            Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> lô đất
+            {loadingMore ? ' — Đang tải thêm…' : ''}
+          </>
+        ) : (
+          <>
+            Tổng <strong>{total}</strong> lô đất
+          </>
+        )}
       </div>
     </div>
   );

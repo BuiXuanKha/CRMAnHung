@@ -133,6 +133,7 @@ Các màn list (`/khach-hang`, `/lo-dat`, …) dùng helper chung `apps/web/src/
 - Lưu: ô tìm, bộ lọc, `selectedId`, `scrollTop` + `anchorId`
 - Đăng xuất → xóa mọi key `*-list-state`
 - Feature bọc thin store (`createListStateStore`) — xem skill `crm-list-state`
+- **Cuộn tải thêm:** `useCrmInfiniteList` — mỗi lần 50 dòng, gần đáy 160px thì nối trang (`/khach-hang`, `/lo-dat`)
 
 Không nhớ panel rail (chỉ list). Chi tiết domain: `customers.md` §12.1.5, `lodats.md` §12.1.5.
 

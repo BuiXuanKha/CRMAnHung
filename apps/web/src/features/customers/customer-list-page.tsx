@@ -2,10 +2,9 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, type LucideIcon, Trash2 } from 'lucide-react';
 import {
-  CUSTOMER_LIST_LOAD_MORE_PX,
   CUSTOMER_LIST_PAGE_SIZE,
   CustomerStatus,
   UserRole,
@@ -14,6 +13,7 @@ import {
   type PhoneDuplicateExisting,
   type UpdateCustomerCareInput,
 } from '@crmanhung/shared';
+import { useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
 import { HotlinesSettingsDialog } from '@/features/settings/hotlines-dialog';
@@ -155,28 +155,22 @@ export function CustomerListPage() {
     lodatFilter: extra.lodat === 'all' ? undefined : extra.lodat,
   };
 
-  const list = useInfiniteQuery({
+  const {
+    query: list,
+    rawItems,
+    total,
+    loadMoreIfNearEnd: loadMoreAt,
+  } = useCrmInfiniteList<CustomerListItem>({
     queryKey: ['customers', listQuery],
-    queryFn: ({ pageParam }) =>
-      listCustomers({
-        ...listQuery,
-        limit: CUSTOMER_LIST_PAGE_SIZE,
-        offset: pageParam,
-      }),
-    initialPageParam: 0,
     enabled: restoreReady,
-    getNextPageParam: (lastPage, allPages) => {
-      const loaded = allPages.reduce((n, page) => n + page.items.length, 0);
-      if (loaded >= lastPage.total || lastPage.items.length === 0) return undefined;
-      return loaded;
-    },
+    pageSize: CUSTOMER_LIST_PAGE_SIZE,
+    fetchPage: ({ limit, offset }) => listCustomers({ ...listQuery, limit, offset }),
   });
 
   const items = useMemo(
-    () => applyExtraFilters(list.data?.pages.flatMap((page) => page.items) ?? [], extra),
-    [list.data?.pages, extra],
+    () => applyExtraFilters(rawItems, extra),
+    [rawItems, extra],
   );
-  const total = list.data?.pages[0]?.total ?? 0;
 
   const channels = useQuery({
     queryKey: ['contact-channels'],
@@ -272,15 +266,7 @@ export function CustomerListPage() {
   }
 
   function loadMoreIfNearEnd() {
-    if (!list.hasNextPage || list.isFetchingNextPage || list.isLoading) return;
-    const root = getListScrollEl();
-    if (!root) return;
-    const nearBottom =
-      root.scrollHeight - root.scrollTop - root.clientHeight < CUSTOMER_LIST_LOAD_MORE_PX;
-    const notScrollable = root.scrollHeight <= root.clientHeight + 2;
-    if (nearBottom || notScrollable) {
-      void list.fetchNextPage();
-    }
+    loadMoreAt(getListScrollEl());
   }
 
   function onListScroll() {

@@ -46,6 +46,7 @@ type Props = {
   togglingId: string | null;
   onToggleSale: (plot: LodatListItem) => void;
   onOpenGallery: (plot: LodatListItem) => void;
+  loadingMore?: boolean;
   scrollRef?: Ref<HTMLDivElement>;
   onScroll?: () => void;
 };
@@ -70,6 +71,7 @@ export function LodatTable({
   togglingId,
   onToggleSale,
   onOpenGallery,
+  loadingMore = false,
   scrollRef,
   onScroll,
 }: Props) {
@@ -277,7 +279,16 @@ export function LodatTable({
       </div>
 
       <div className="ld-table-foot">
-        Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> lô đất
+        {items.length < total ? (
+          <>
+            Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> lô đất
+            {loadingMore ? ' — Đang tải thêm…' : ''}
+          </>
+        ) : (
+          <>
+            Tổng <strong>{total}</strong> lô đất
+          </>
+        )}
       </div>
     </div>
   );

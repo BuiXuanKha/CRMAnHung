@@ -135,7 +135,7 @@ Mặc định **ẩn** lô tạm dừng. Giá / hoa hồng / ghi chú giá nằm
 
 ## 4–10.
 
-List mock §12 đã có. Nest + Prisma **sau** khi §11 chốt. Không extension.
+List mock §12 đã có. **GET `/lodats`**: `limit` mặc định 50, tối đa 200, `offset` từ 0, `total` = COUNT cùng filter (kể cả lọc cột). Nest + Prisma **sau** khi §11 chốt. Không extension.
 
 Copy: đơn vị hành chính → địa chỉ (+ ảnh dự án) → **`ProjectLot` kho** → `Lodat` (+ map chủ) → ảnh lô → R2. Giá `BIGINT`. Hoa hồng CRM cũ = chữ (`BrokerFeeNote`).
 
@@ -275,11 +275,24 @@ CRM cũ: nút GD / Sửa / Xóa (admin, lô admin tạo) trên dòng.
 
 #### 12.1.4 Footer
 
-`Hiển thị N / Tổng M lô đất`.
+Cùng `/khach-hang` §12.1.5:
 
-#### 12.1.5 Nhớ tìm / lọc / cuộn khi rời list
+- Chưa hết trang: `Hiển thị n / Tổng N lô đất` (`n` = số dòng đang có, `N` = `total` API). Đang nối: thêm `— Đang tải thêm…`.
+- Đã tải hết: `Tổng N lô đất`.
 
-Cùng quy tắc shared list-state (`apps/web/src/shared/list-state`) như `/khach-hang` §12.1.5:
+#### 12.1.5 Cuộn tải thêm + nhớ tìm / lọc / cuộn
+
+**Tải thêm 50 dòng** — helper `useCrmInfiniteList` (`apps/web/src/shared/list-state`), cùng `/khach-hang`:
+
+1. API list nhận `limit` + `offset`. Mỗi lần **đúng 50**. Lần đầu `offset=0`.
+2. Sort `updatedAt` mới → cũ (đổi trạng thái / giá map cũng **chạm** `lodat.updatedAt` để lô nổi lên đầu).
+3. Cuộn vùng **thân bảng** (không phải window). Còn cách đáy **< 160px** và `n < N` và không đang tải → gọi tiếp `offset = n`, **nối** vào list.
+4. Đổi ô tìm / lọc / `@` `@@` / lọc cột → **reset**: `offset=0`, bỏ list cũ, cuộn lên đầu.
+5. Lọc cột (ảnh, địa chỉ, DT, hướng, khoảng giá) **chạy trên API** để `total` đúng.
+
+**Nhớ vị trí + lọc khi rời list**
+
+Cùng quy tắc shared list-state (`createListStateStore`, key `crmanhung:lodat-list-state`):
 
 | Lưu | Gồm |
 |-----|-----|
@@ -289,7 +302,7 @@ Cùng quy tắc shared list-state (`apps/web/src/shared/list-state`) như `/khac
 
 - Storage: **sessionStorage** key `crmanhung:lodat-list-state` (theo tab; đóng tab / đăng xuất → mất).
 - Lưu khi: đổi lọc, cuộn, rời list (chi tiết, sửa, Back, F5 cùng tab).
-- Vào lại: khôi phục lọc → fetch → đặt lại scroll; che list ngắn lúc restore (~4s an toàn).
+- Vào lại: khôi phục lọc → fetch `offset=0`; nếu `scrollTop` cao hơn list hiện có → **tải thêm 50** đến khi đủ hoặc hết `total`; đặt lại scroll; che list ngắn lúc restore (~4s).
 - Đổi tìm/lọc → scroll về đầu.
 - **Không** nhớ panel (list lô không có rail phải).
 
@@ -337,7 +350,7 @@ CRM cũ: bấm ảnh → gallery. Web mới: bấm cả thẻ → chi tiết.
 
 #### 12.2.4 Footer
 
-Cùng câu `Hiển thị N / Tổng M lô đất`.
+Cùng 12.1.4. Vùng cuộn = danh sách thẻ.
 
 ---
 

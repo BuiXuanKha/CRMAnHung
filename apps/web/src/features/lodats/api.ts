@@ -20,6 +20,11 @@ import {
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 import { isMockLodats } from '@/shared/api/mode';
+import {
+  applyExtraFilters,
+  applyPriceBracket,
+  type ExtraFilters,
+} from './display';
 import { mockLodats } from './mock-data';
 
 let mockStore: LodatListItem[] = structuredClone(mockLodats);
@@ -113,13 +118,25 @@ function applyQuery(items: LodatListItem[], query: LodatListQuery = {}): LodatLi
       return hay.includes(q);
     });
   }
+  const extra: ExtraFilters = {
+    photo: query.photo ?? 'all',
+    address: query.addressFilter ?? 'all',
+    area: query.areaBracket ?? 'all',
+    direction: (query.direction?.trim() || 'all') as ExtraFilters['direction'],
+  };
+  next = applyExtraFilters(next, extra);
+  if (query.priceBracket) {
+    next = applyPriceBracket(next, query.priceBracket);
+  }
   return [...next].sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
 }
 
 export async function listLodats(query: LodatListQuery = {}): Promise<LodatListResponse> {
   if (isMockLodats()) {
-    const items = applyQuery(mockStore, query);
-    return { items, total: items.length };
+    const all = applyQuery(mockStore, query);
+    const offset = Math.max(0, query.offset ?? 0);
+    const items = query.limit != null ? all.slice(offset, offset + query.limit) : all;
+    return { items, total: all.length };
   }
   const params = new URLSearchParams();
   if (query.keyword) params.set('keyword', query.keyword);
@@ -127,6 +144,13 @@ export async function listLodats(query: LodatListQuery = {}): Promise<LodatListR
   if (query.kind) params.set('kind', query.kind);
   if (query.includePaused) params.set('includePaused', 'true');
   if (query.pausedOnly) params.set('pausedOnly', 'true');
+  if (query.priceBracket) params.set('priceBracket', query.priceBracket);
+  if (query.areaBracket) params.set('areaBracket', query.areaBracket);
+  if (query.direction) params.set('direction', query.direction);
+  if (query.photo) params.set('photo', query.photo);
+  if (query.addressFilter) params.set('addressFilter', query.addressFilter);
+  if (query.limit != null) params.set('limit', String(query.limit));
+  if (query.offset != null) params.set('offset', String(query.offset));
   const qs = params.toString();
   return apiFetch<LodatListResponse>(`/lodats${qs ? `?${qs}` : ''}`);
 }

@@ -7,7 +7,9 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
+  Min,
   ValidateIf,
 } from 'class-validator';
 
@@ -21,6 +23,12 @@ function toBool(value: unknown): boolean | undefined {
 function emptyToNull(value: unknown): unknown {
   if (value === '') return null;
   return value;
+}
+
+function toOptionalInt(value: unknown): number | undefined {
+  if (value == null || value === '') return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.trunc(n) : undefined;
 }
 
 export class ListLodatsQueryDto {
@@ -46,6 +54,48 @@ export class ListLodatsQueryDto {
   @Transform(({ value }) => toBool(value))
   @IsBoolean()
   pausedOnly?: boolean;
+
+  @IsOptional()
+  @IsIn(['no_price', 'lt_500m', '500m_1b', '1b_15b', '15b_2b', '2b_25b', '25b_3b', 'gt_3b'])
+  priceBracket?:
+    | 'no_price'
+    | 'lt_500m'
+    | '500m_1b'
+    | '1b_15b'
+    | '15b_2b'
+    | '2b_25b'
+    | '25b_3b'
+    | 'gt_3b';
+
+  @IsOptional()
+  @IsIn(['1_100', '100_200', 'gt_200'])
+  areaBracket?: '1_100' | '100_200' | 'gt_200';
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(40)
+  direction?: string;
+
+  @IsOptional()
+  @IsIn(['has', 'empty'])
+  photo?: 'has' | 'empty';
+
+  @IsOptional()
+  @IsIn(['has', 'empty'])
+  addressFilter?: 'has' | 'empty';
+
+  @IsOptional()
+  @Transform(({ value }) => toOptionalInt(value))
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  limit?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => toOptionalInt(value))
+  @IsInt()
+  @Min(0)
+  offset?: number;
 }
 
 export class UpdateLodatSaleStatusDto {

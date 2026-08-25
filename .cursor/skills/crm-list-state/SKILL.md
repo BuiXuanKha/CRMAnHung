@@ -24,10 +24,12 @@ Nhớ **ô tìm + lọc + selectedId + vị trí cuộn** khi rời list (chi ti
 1. Import từ `@/shared/list-state`:
    - `createListStateStore` — thin store per feature
    - `getActiveListScrollEl`, `needsMoreListScrollHeight` (nếu infinite scroll)
+   - `useCrmInfiniteList` — tải 50, cuộn gần đáy 160px thì nối thêm (`CRM_LIST_PAGE_SIZE` / `CRM_LIST_LOAD_MORE_PX`)
 2. Feature file ví dụ: `features/lodats/list-state.ts`, `features/customers/list-state.ts`
 3. Trên list page: peek → restore filters trước fetch; save khi scroll / đổi lọc / `pagehide` / trước `router.push`
-4. Gắn `scrollRef` + `onScroll` vào vùng cuộn (bảng desktop / thẻ mobile)
+4. Gắn `scrollRef` + `onScroll` vào vùng cuộn (bảng desktop / thẻ mobile); `onScroll` gọi `loadMoreIfNearEnd(el)`
 5. Che list lúc restore (`is-restoring` opacity 0, timeout ~4s) nếu cần tránh nháy đầu trang
+6. Footer: `Hiển thị n / Tổng N` khi chưa hết; `Tổng N` khi đã tải hết; `— Đang tải thêm…` khi `isFetchingNextPage`
 
 ## Docs
 

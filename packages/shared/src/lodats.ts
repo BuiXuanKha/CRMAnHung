@@ -38,12 +38,45 @@ export const lodatListItemSchema = z.object({
 
 export type LodatListItem = z.infer<typeof lodatListItemSchema>;
 
+export const LODAT_LIST_PAGE_SIZE = 50;
+export const LODAT_LIST_MAX_PAGE_SIZE = 200;
+
+/** Khoảng giá bước 500tr (§12.1.2) — dùng chung lọc cột + mobile. */
+export const lodatPriceBracketSchema = z.enum([
+  'no_price',
+  'lt_500m',
+  '500m_1b',
+  '1b_15b',
+  '15b_2b',
+  '2b_25b',
+  '25b_3b',
+  'gt_3b',
+]);
+
+export type LodatPriceBracket = z.infer<typeof lodatPriceBracketSchema>;
+
+export const lodatAreaBracketSchema = z.enum(['1_100', '100_200', 'gt_200']);
+
+export type LodatAreaBracket = z.infer<typeof lodatAreaBracketSchema>;
+
+export const lodatHasFilterSchema = z.enum(['has', 'empty']);
+
+export type LodatHasFilter = z.infer<typeof lodatHasFilterSchema>;
+
 export const lodatListQuerySchema = z.object({
   keyword: z.string().trim().optional(),
   status: lodatListingStatusSchema.optional(),
   kind: z.nativeEnum(LodatKind).optional(),
   includePaused: z.boolean().optional(),
   pausedOnly: z.boolean().optional(),
+  /** Lọc cột — chạy trên API để phân trang đúng (§12.1.2) */
+  priceBracket: lodatPriceBracketSchema.optional(),
+  areaBracket: lodatAreaBracketSchema.optional(),
+  direction: z.string().trim().max(40).optional(),
+  photo: lodatHasFilterSchema.optional(),
+  addressFilter: lodatHasFilterSchema.optional(),
+  limit: z.coerce.number().int().min(1).max(LODAT_LIST_MAX_PAGE_SIZE).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
 });
 
 export type LodatListQuery = z.infer<typeof lodatListQuerySchema>;

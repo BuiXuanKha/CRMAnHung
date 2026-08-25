@@ -10,8 +10,10 @@ import {
   type LodatDetail,
   type LodatImage,
   type LodatListItem,
+  type LodatListQuery,
   type LodatListingStatus,
 } from '@crmanhung/shared';
+import { needsMoreListScrollHeight, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import {
@@ -26,8 +28,6 @@ import { LodatCardList } from './components/lodat-card-list';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTable } from './components/lodat-table';
 import {
-  applyExtraFilters,
-  applyPriceBracket,
   countMobileLodatFilters,
   parseSearchKeyword,
   type ExtraFilters,
@@ -121,16 +121,27 @@ export function LodatListPage() {
   };
 
   const search = parseSearchKeyword(keyword);
-  const listQuery = {
+  // Lọc cột đẩy xuống API để phân trang đúng (§12.1.2)
+  const listQuery: LodatListQuery = {
     ...search,
     status: (status || undefined) as LodatListingStatus | undefined,
     kind: (kind || undefined) as LodatKind | undefined,
+    priceBracket: priceBracket || undefined,
+    areaBracket: extra.area !== 'all' ? extra.area : undefined,
+    direction: extra.direction !== 'all' ? extra.direction : undefined,
+    photo: extra.photo !== 'all' ? extra.photo : undefined,
+    addressFilter: extra.address !== 'all' ? extra.address : undefined,
   };
 
-  const list = useQuery({
+  const {
+    query: list,
+    rawItems,
+    total,
+    loadMoreIfNearEnd,
+  } = useCrmInfiniteList<LodatListItem>({
     queryKey: ['lodats', listQuery],
-    queryFn: () => listLodats(listQuery),
     enabled: restoreReady,
+    fetchPage: ({ limit, offset }) => listLodats({ ...listQuery, limit, offset }),
   });
 
   const galleryQ = useQuery({
@@ -164,11 +175,7 @@ export function LodatListPage() {
     }
   }, [galleryLodatId, galleryQ.isLoading, galleryQ.isError, galleryImages.length]);
 
-  const filtered = useMemo(
-    () => applyPriceBracket(applyExtraFilters(list.data?.items ?? [], extra), priceBracket),
-    [list.data?.items, extra, priceBracket],
-  );
-
+  const items = rawItems;
   const mobileFilterCount = countMobileLodatFilters(status, priceBracket);
 
   const toggleMut = useMutation({
@@ -238,29 +245,52 @@ export function LodatListPage() {
   }
 
   function onListScroll() {
+    loadMoreIfNearEnd(getListScrollEl());
     persistListState();
   }
 
   useLayoutEffect(() => {
-    if (!restoreReady || list.isLoading) return;
+    if (!restoreReady || list.isLoading || list.isFetchingNextPage) return;
     if (restoreDone.current) return;
     const snap = restoreSnap.current;
     if (!snap) {
       restoreDone.current = true;
       return;
     }
-    if (filtered.length === 0) {
+    if (items.length === 0) {
       restoreDone.current = true;
       restoreSnap.current = null;
       setListConcealed(false);
       return;
     }
     const root = getListScrollEl();
+    // Chưa đủ chiều cao cho vị trí đã lưu → nạp thêm trang rồi mới đặt scroll
+    if (
+      items.length < total &&
+      needsMoreListScrollHeight(root, snap.scrollTop) &&
+      list.hasNextPage
+    ) {
+      void list.fetchNextPage();
+      return;
+    }
     restoreLodatListScroll(root, snap);
     restoreDone.current = true;
     restoreSnap.current = null;
     setListConcealed(false);
-  }, [restoreReady, filtered.length, list.isLoading]);
+  }, [
+    restoreReady,
+    items.length,
+    total,
+    list.isLoading,
+    list.isFetchingNextPage,
+    list.hasNextPage,
+  ]);
+
+  // List ngắn hơn khung (màn cao / lọc chặt) → tự nạp thêm cho đủ cuộn
+  useEffect(() => {
+    if (!restoreReady || listConcealed || list.isLoading) return;
+    loadMoreIfNearEnd(getListScrollEl());
+  }, [restoreReady, listConcealed, list.isLoading, items.length, list.hasNextPage]);
 
   function saveListBeforeLeave(selectedOverride?: string | null) {
     restoreDone.current = true;
@@ -368,8 +398,9 @@ export function LodatListPage() {
           {restoreReady && !list.isLoading && !list.error ? (
             <section className="ld-table-shell" aria-label="Danh sách lô đất">
               <LodatTable
-                items={filtered}
-                total={list.data?.total ?? filtered.length}
+                items={items}
+                total={total || items.length}
+                loadingMore={list.isFetchingNextPage}
                 selectedId={selectedId}
                 menuId={menuId}
                 status={status}
@@ -395,8 +426,9 @@ export function LodatListPage() {
 
           {restoreReady && !list.isLoading && !list.error ? (
             <LodatCardList
-              items={filtered}
-              total={list.data?.total ?? filtered.length}
+              items={items}
+              total={total || items.length}
+              loadingMore={list.isFetchingNextPage}
               selectedId={selectedId}
               onSelect={setSelectedId}
               onOpen={openLodat}
