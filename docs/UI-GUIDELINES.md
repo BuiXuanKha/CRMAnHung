@@ -268,7 +268,7 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 | `Tiêu đề / Địa chỉ` | **Tiêu đề đậm**; dòng phụ nhạt = địa chỉ / khu |
 | `Phân loại` | Hangtag `CrmBadge`: **Nhà** `blue` · **Đất** `amber`; lọc cột Tất cả / Nhà / Đất |
 | `DT · MT · Hướng` | Dòng 1: diện tích (`90 m²`); dòng 2: `MT 4,5 m · Bắc` — thiếu = `—`. Lọc cột: **khoảng DT** (1–100 / 100–200 / &gt;200) + **hướng** (Đông…Khác), AND |
-| `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng `%` |
+| `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng `%`. Lọc cột: khoảng giá bước **500tr** + «Chưa có giá» (đồng bộ mobile) |
 | `Trạng thái` | **Chỉ** Mở bán ↔ Tạm dừng (công tắc). **Không** phải đã bán / đặt cọc. Track xanh `#10b981` khi Mở bán; xám khi Tạm dừng |
 | `Cập nhật` | `HH:mm:ss D/M/YYYY` — **không** icon lọc (timestamp) |
 | `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Giao dịch**, **Sửa** |
