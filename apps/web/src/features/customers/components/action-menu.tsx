@@ -80,7 +80,10 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    /* Chỉ instance có nút đang hiện mới lắng nghe bấm-ngoài. Instance ẩn
+       (bảng/thẻ còn lại) mà nghe sẽ đóng menu ngay tại mousedown → mục
+       trong menu thật không bao giờ nhận được click. */
+    if (!open || !triggerVisible) return;
     const onDoc = (e: MouseEvent) => {
       const t = e.target as Node;
       if (wrapRef.current?.contains(t) || menuRef.current?.contains(t)) return;
@@ -88,7 +91,7 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
-  }, [open, onClose]);
+  }, [open, triggerVisible, onClose]);
 
   function run(action: CustomerAction) {
     onAction(action);

@@ -63,7 +63,8 @@ export function ColumnFilter({
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
+    /* Instance ẩn không lắng nghe bấm-ngoài — tránh đóng menu thật tại mousedown. */
+    if (!open || !triggerVisible) return;
     const onDoc = (e: MouseEvent) => {
       const t = e.target as Node;
       if (wrapRef.current?.contains(t) || menuRef.current?.contains(t)) return;
@@ -71,7 +72,7 @@ export function ColumnFilter({
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
-  }, [open, onClose]);
+  }, [open, triggerVisible, onClose]);
 
   const menu =
     open && mounted && triggerVisible
