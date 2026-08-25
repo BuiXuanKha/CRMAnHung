@@ -82,7 +82,7 @@ pm2_cmd start ecosystem.config.cjs
 pm2_cmd save
 
 echo "==> Health checks"
-sleep 2
+sleep 5
 curl -sf "http://127.0.0.1:5050/api/v1/health"
 echo
 curl -sf "http://127.0.0.1:5001/" >/dev/null && echo "web_local=ok" || echo "web_local=fail"

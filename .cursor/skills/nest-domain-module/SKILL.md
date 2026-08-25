@@ -33,6 +33,7 @@ apps/api/src/modules/<domain>/
 6. Route dưới prefix global `api/v1` (đã set trong `main.ts`).
 7. Response shape khớp shared contract.
 8. File tiến gần 400+ dòng → tách service phụ / repository.
+9. `@crmanhung/shared` là ESM — API Nest (CJS) **chỉ** `import type`. Enum / label runtime copy local (như lodats). `require('@crmanhung/shared')` làm API crash → 502.
 
 ## Checklist bảo mật (xem thêm `security-baseline`)
 

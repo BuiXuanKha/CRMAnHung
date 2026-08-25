@@ -1,20 +1,32 @@
 import { Prisma } from '@prisma/client';
-import {
-  OPEN_TRANSACTION_EXISTS_CODE,
-  TRANSACTION_OPEN_STATUSES,
-  TRANSACTION_STATUS_LABELS,
-  TRANSACTION_TYPE_LABELS,
-  TransactionPartyRole,
-  TransactionStatus,
-  TransactionType,
-  type TransactionDetail,
-  type TransactionListItem,
-  type TransactionListStats,
-  type TransactionSnapshot,
+import type {
+  TransactionDetail,
+  TransactionListItem,
+  TransactionListStats,
+  TransactionSnapshot,
 } from '@crmanhung/shared';
 import type { StorageService } from '../../storage/storage.service';
 
-export const OPEN_STATUSES = [...TRANSACTION_OPEN_STATUSES];
+/** Runtime enums — không require ESM `@crmanhung/shared` (Nest CJS). */
+export const TX_TYPE = { OWN: 'OWN', RECORD: 'RECORD' } as const;
+export const TX_STATUS = {
+  DA_COC: 'DA_COC',
+  DA_CONG_CHUNG: 'DA_CONG_CHUNG',
+  HOAN_TAT: 'HOAN_TAT',
+  HUY: 'HUY',
+} as const;
+export const TX_PARTY = { SELLER: 'SELLER', BUYER: 'BUYER' } as const;
+
+export const OPEN_STATUSES = [TX_STATUS.DA_COC, TX_STATUS.DA_CONG_CHUNG] as const;
+export const OPEN_TRANSACTION_EXISTS_CODE = 'OPEN_TRANSACTION_EXISTS';
+
+const TYPE_LABELS: Record<string, string> = { OWN: 'Của tôi', RECORD: 'Ghi nhận' };
+const STATUS_LABELS: Record<string, string> = {
+  DA_COC: 'Đã cọc',
+  DA_CONG_CHUNG: 'Đã công chứng',
+  HOAN_TAT: 'Hoàn thành',
+  HUY: 'Đã hủy',
+};
 
 export const LIST_INCLUDE = {
   parties: {
@@ -95,12 +107,12 @@ export function toListItem(row: {
   return {
     id: row.id,
     code: row.code,
-    type: row.type as TransactionType,
-    status: row.status as TransactionStatus,
+    type: row.type as TransactionListItem['type'],
+    status: row.status as TransactionListItem['status'],
     lodatId: row.lodatId,
     lodatTitle,
-    sellerNames: namesOf(row.parties, TransactionPartyRole.SELLER),
-    buyerNames: namesOf(row.parties, TransactionPartyRole.BUYER),
+    sellerNames: namesOf(row.parties, TX_PARTY.SELLER),
+    buyerNames: namesOf(row.parties, TX_PARTY.BUYER),
     salePriceVnd: toMoney(row.salePriceVnd),
     commissionVnd: toMoney(row.commissionVnd),
     notaryAppointmentAt: toIso(row.notaryAppointmentAt),
@@ -145,7 +157,7 @@ export function toDetail(row: DetailRow, storage: StorageService): TransactionDe
     updatedAt: row.updatedAt.toISOString(),
     parties: row.parties.map((p) => ({
       id: p.id,
-      role: p.role as TransactionPartyRole,
+      role: p.role as TransactionDetail['parties'][number]['role'],
       customerId: p.customerId,
       freeTextName: p.freeTextName,
       sortOrder: p.sortOrder,
@@ -167,7 +179,7 @@ export function statsFromItems(items: TransactionListItem[]): TransactionListSta
   let totalRevenueVnd = 0;
   let totalCommissionVnd = 0;
   for (const item of items) {
-    if (item.type !== TransactionType.OWN || item.status !== TransactionStatus.HOAN_TAT) {
+    if (item.type !== TX_TYPE.OWN || item.status !== TX_STATUS.HOAN_TAT) {
       continue;
     }
     const sale = typeof item.salePriceVnd === 'string' ? Number(item.salePriceVnd) : item.salePriceVnd;
@@ -194,11 +206,11 @@ export function keywordWhere(keyword: string | undefined): Prisma.TransactionWhe
     { parties: { some: { freeTextName: { contains: q, mode: 'insensitive' } } } },
   ];
   const ql = q.toLowerCase();
-  const types = (Object.values(TransactionType) as TransactionType[]).filter(
-    (t) => TRANSACTION_TYPE_LABELS[t].toLowerCase().includes(ql) || t.toLowerCase() === ql,
+  const types = Object.values(TX_TYPE).filter(
+    (t) => TYPE_LABELS[t].toLowerCase().includes(ql) || t.toLowerCase() === ql,
   );
-  const statuses = (Object.values(TransactionStatus) as TransactionStatus[]).filter(
-    (s) => TRANSACTION_STATUS_LABELS[s].toLowerCase().includes(ql) || s.toLowerCase() === ql,
+  const statuses = Object.values(TX_STATUS).filter(
+    (s) => STATUS_LABELS[s].toLowerCase().includes(ql) || s.toLowerCase() === ql,
   );
   if (types.length) or.push({ type: { in: types } });
   if (statuses.length) or.push({ status: { in: statuses } });

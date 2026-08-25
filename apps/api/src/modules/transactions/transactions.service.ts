@@ -6,11 +6,6 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import {
-  TransactionPartyRole,
-  TransactionStatus,
-  TransactionType,
-} from '@crmanhung/shared';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
@@ -24,7 +19,6 @@ import type {
 import {
   buildSnapshotCreate,
   LODAT_SNAPSHOT_INCLUDE,
-  type LodatSnapshotRow,
 } from './transactions-snapshot';
 import {
   DETAIL_INCLUDE,
@@ -32,6 +26,9 @@ import {
   LIST_INCLUDE,
   OPEN_EXISTS_BODY,
   OPEN_STATUSES,
+  TX_PARTY,
+  TX_STATUS,
+  TX_TYPE,
   statsFromItems,
   toDetail,
   toListItem,
@@ -91,7 +88,7 @@ export class TransactionsService {
     const sale = this.parsePrice(dto.salePriceVnd) ?? 0n;
     const tax = this.parsePrice(dto.taxPriceVnd);
     const commission =
-      dto.type === TransactionType.RECORD ? 0n : (this.parsePrice(dto.commissionVnd) ?? 0n);
+      dto.type === TX_TYPE.RECORD ? 0n : (this.parsePrice(dto.commissionVnd) ?? 0n);
     const snapshot = buildSnapshotCreate(lodat, map);
 
     try {
@@ -101,7 +98,7 @@ export class TransactionsService {
           lodatId: lodat.id,
           lodatCustomerMapId: map.id,
           type: dto.type,
-          status: TransactionStatus.DA_COC,
+          status: TX_STATUS.DA_COC,
           notaryAppointmentAt: this.parseDate(dto.notaryAppointmentAt) ?? null,
           salePriceVnd: sale,
           taxPriceVnd: tax ?? null,
@@ -139,7 +136,7 @@ export class TransactionsService {
     }
 
     const commission =
-      current.type === TransactionType.RECORD
+      current.type === TX_TYPE.RECORD
         ? 0n
         : dto.commissionVnd !== undefined
           ? (this.parsePrice(dto.commissionVnd) ?? 0n)
@@ -161,7 +158,7 @@ export class TransactionsService {
           data: {
             status: nextStatus,
             cancelReason:
-              nextStatus === TransactionStatus.HUY
+              nextStatus === TX_STATUS.HUY
                 ? (dto.cancelReason?.trim() ?? current.cancelReason)
                 : null,
             notaryAppointmentAt:
@@ -177,7 +174,7 @@ export class TransactionsService {
             commissionVnd: commission,
             note: dto.note !== undefined ? dto.note?.trim() || null : undefined,
             completedAt:
-              nextStatus === TransactionStatus.HOAN_TAT
+              nextStatus === TX_STATUS.HOAN_TAT
                 ? (current.completedAt ?? new Date())
                 : null,
           },
@@ -315,13 +312,13 @@ export class TransactionsService {
   private partyRows(sellers: TransactionPartyInputDto[], buyers: TransactionPartyInputDto[]) {
     return [
       ...sellers.map((p, i) => ({
-        role: TransactionPartyRole.SELLER,
+        role: TX_PARTY.SELLER,
         customerId: p.customerId?.trim() || null,
         freeTextName: p.freeTextName.trim(),
         sortOrder: p.sortOrder ?? i,
       })),
       ...buyers.map((p, i) => ({
-        role: TransactionPartyRole.BUYER,
+        role: TX_PARTY.BUYER,
         customerId: p.customerId?.trim() || null,
         freeTextName: p.freeTextName.trim(),
         sortOrder: p.sortOrder ?? i,
@@ -333,13 +330,13 @@ export class TransactionsService {
     if (!dto.lodatId?.trim() && !dto.lodatCustomerMapId?.trim()) {
       throw new BadRequestException('Thiếu lô đất.');
     }
-    if (dto.type === TransactionType.OWN && !dto.notaryAppointmentAt) {
+    if (dto.type === TX_TYPE.OWN && !dto.notaryAppointmentAt) {
       throw new BadRequestException('Giao dịch của tôi cần ngày hẹn công chứng.');
     }
   }
 
   private assertUpdateRules(dto: UpdateTransactionDto) {
-    if (dto.status === TransactionStatus.HUY && !dto.cancelReason?.trim()) {
+    if (dto.status === TX_STATUS.HUY && !dto.cancelReason?.trim()) {
       throw new BadRequestException('Cần lý do khi hủy giao dịch.');
     }
     if ((dto.sellers && !dto.buyers) || (!dto.sellers && dto.buyers)) {
