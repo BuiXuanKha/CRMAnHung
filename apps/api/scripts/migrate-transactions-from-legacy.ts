@@ -486,8 +486,22 @@ async function main() {
   const mapped = await prisma.$queryRaw<Array<{ c: bigint }>>`
     SELECT COUNT(*)::bigint AS c FROM migrate.legacy_id_map WHERE entity = ${TX_ENTITY}
   `;
+  const owners = await prisma.transaction.findMany({
+    select: {
+      code: true,
+      type: true,
+      status: true,
+      createdBy: { select: { username: true } },
+    },
+    orderBy: { code: 'asc' },
+  });
   console.log(`Đã copy ${copied}/${txs.length} GD (bỏ ${skipped}).`);
   console.log(`Đích Transaction=${dest}, map transaction=${mapped[0]?.c ?? 0n}.`);
+  for (const row of owners) {
+    console.log(
+      `  ${row.code} ${row.type} ${row.status} createdBy=${row.createdBy.username}`,
+    );
+  }
 
   await prisma.$disconnect();
   if (skipped && copied === 0) {

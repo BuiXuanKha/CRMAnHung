@@ -12,6 +12,10 @@ on:
       - '.github/workflows/copy-legacy-transactions.yml'
   workflow_dispatch:
 
+concurrency:
+  group: copy-legacy-transactions
+  cancel-in-progress: false
+
 jobs:
   copy:
     runs-on: ubuntu-latest
@@ -61,11 +65,20 @@ jobs:
           export LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db
           echo "==> Preflight sqlite (read-only)"
           sqlite3 "$LEGACY_SQLITE" "SELECT COUNT(*) AS tx FROM tblTransaction;"
-          echo "==> Copy transactions"
-          if ! pnpm transactions:migrate-legacy; then
-            echo "==> Có thể thiếu bước 10d — chạy lodats rồi copy lại"
-            pnpm lodats:migrate-legacy
-            pnpm transactions:migrate-legacy
+          sqlite3 "$LEGACY_SQLITE" "SELECT ID, Code, TransactionType, Status, CreatedByEmployeeId FROM tblTransaction;"
+          echo "==> Copy transactions (không ghi SQLite / không restart PM2)"
+          set +e
+          pnpm transactions:migrate-legacy 2>&1 | tee /tmp/tx-migrate.log
+          RC=${PIPESTATUS[0]}
+          set -e
+          if [[ "$RC" -ne 0 ]]; then
+            if grep -q "Chưa copy map lô" /tmp/tx-migrate.log; then
+              echo "==> Thiếu bước 10d — chạy lodats (text+map, bỏ ảnh) rồi copy lại"
+              SKIP_LODAT_IMAGES=1 pnpm lodats:migrate-legacy
+              pnpm transactions:migrate-legacy
+            else
+              exit "$RC"
+            fi
           fi
           echo "==> Done copy (CRM cũ không bị ghi)"
           REMOTE
