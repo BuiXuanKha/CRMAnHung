@@ -160,6 +160,45 @@ function tableNames(sqlitePath: string): string[] {
   ).map((r) => r.name);
 }
 
+function assertTxTable(name: string): string {
+  if (!/^tblTransaction[A-Za-z]*$/.test(name)) {
+    throw new Error(`Tên bảng SQLite không hợp lệ: ${name}`);
+  }
+  return name;
+}
+
+function tableColumns(sqlitePath: string, table: string): string[] {
+  const safe = assertTxTable(table);
+  return sqliteJson<{ name: string }>(sqlitePath, `PRAGMA table_info(${safe})`).map((r) => r.name);
+}
+
+function hasColumn(cols: string[], name: string): boolean {
+  const want = name.toLowerCase();
+  return cols.some((c) => c.toLowerCase() === want);
+}
+
+/** Snapshot cũ có thể PK = TransactionId, không có cột ID. */
+function selectAll(sqlitePath: string, table: string): Row[] {
+  const safe = assertTxTable(table);
+  const cols = tableColumns(sqlitePath, table);
+  console.log(`  ${safe} columns: ${cols.join(', ') || '(none)'}`);
+  if (cols.length === 0) return [];
+  const order = hasColumn(cols, 'ID')
+    ? 'ID'
+    : hasColumn(cols, 'TransactionId')
+      ? 'TransactionId'
+      : 'rowid';
+  return sqliteJson<Row>(sqlitePath, `SELECT rowid AS _rowid, * FROM ${safe} ORDER BY ${order}`);
+}
+
+function rowOldId(row: Row, ...fallbacks: string[]): number | null {
+  for (const name of ['ID', ...fallbacks, '_rowid']) {
+    const n = asNumber(col(row, name));
+    if (n != null) return n;
+  }
+  return null;
+}
+
 async function putPublic(
   s3: S3Client,
   bucket: string,
@@ -189,29 +228,19 @@ async function main() {
 
   const tables = tableNames(sqlitePath);
   console.log(`SQLite tables: ${tables.join(', ') || '(none)'}`);
-  const txs = sqliteJson<Row>(sqlitePath, 'SELECT * FROM tblTransaction ORDER BY ID');
-  const parties = sqliteJson<Row>(
-    sqlitePath,
-    tables.includes('tblTransactionParty') ? 'SELECT * FROM tblTransactionParty ORDER BY ID' : 'SELECT 1 WHERE 0',
-  );
-  const snapshots = sqliteJson<Row>(
-    sqlitePath,
-    tables.includes('tblTransactionSnapshot')
-      ? 'SELECT * FROM tblTransactionSnapshot ORDER BY ID'
-      : 'SELECT 1 WHERE 0',
-  );
-  const snapImages = sqliteJson<Row>(
-    sqlitePath,
-    tables.includes('tblTransactionSnapshotImage')
-      ? 'SELECT * FROM tblTransactionSnapshotImage ORDER BY ID'
-      : 'SELECT 1 WHERE 0',
-  );
-  const attachments = sqliteJson<Row>(
-    sqlitePath,
-    tables.includes('tblTransactionAttachment')
-      ? 'SELECT * FROM tblTransactionAttachment ORDER BY ID'
-      : 'SELECT 1 WHERE 0',
-  );
+  const txs = selectAll(sqlitePath, 'tblTransaction');
+  const parties = tables.includes('tblTransactionParty')
+    ? selectAll(sqlitePath, 'tblTransactionParty')
+    : [];
+  const snapshots = tables.includes('tblTransactionSnapshot')
+    ? selectAll(sqlitePath, 'tblTransactionSnapshot')
+    : [];
+  const snapImages = tables.includes('tblTransactionSnapshotImage')
+    ? selectAll(sqlitePath, 'tblTransactionSnapshotImage')
+    : [];
+  const attachments = tables.includes('tblTransactionAttachment')
+    ? selectAll(sqlitePath, 'tblTransactionAttachment')
+    : [];
   console.log(
     `Nguồn: ${txs.length} GD, ${parties.length} bên, ${snapshots.length} snapshot, ${snapImages.length} ảnh snapshot, ${attachments.length} đính kèm.`,
   );
@@ -298,7 +327,7 @@ async function main() {
   let skipped = 0;
 
   for (const row of txs) {
-    const oldId = asNumber(col(row, 'ID'));
+    const oldId = rowOldId(row);
     if (oldId == null) {
       skipped += 1;
       continue;
@@ -387,7 +416,7 @@ async function main() {
           sortOrder: asNumber(col(p, 'SortOrder')) ?? i,
         },
       });
-      const partyOld = asNumber(col(p, 'ID'));
+      const partyOld = rowOldId(p);
       if (partyOld != null) await upsertMap(prisma, PARTY_ENTITY, partyOld, savedParty.id);
     }
 
@@ -410,7 +439,7 @@ async function main() {
           createdAt: toDate(col(snap, 'CreatedAtMs')),
         },
       });
-      const snapOld = asNumber(col(snap, 'ID'));
+      const snapOld = rowOldId(snap, 'TransactionId');
       if (snapOld != null) await upsertMap(prisma, SNAP_ENTITY, snapOld, savedSnap.id);
 
       const imgs = [
@@ -443,7 +472,7 @@ async function main() {
               sourceOld != null ? (lodatImageMap.get(String(sourceOld)) ?? null) : null,
           },
         });
-        const imgOld = asNumber(col(img, 'ID'));
+        const imgOld = rowOldId(img);
         if (imgOld != null) await upsertMap(prisma, SNAP_IMG_ENTITY, imgOld, savedImg.id);
       }
     }
@@ -474,7 +503,7 @@ async function main() {
             createdAt: toDate(col(att, 'CreatedAtMs')),
           },
         });
-        const attOld = asNumber(col(att, 'ID'));
+        const attOld = rowOldId(att);
         if (attOld != null) await upsertMap(prisma, ATTACH_ENTITY, attOld, savedAtt.id);
       }
     }

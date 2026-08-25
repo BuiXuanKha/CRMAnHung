@@ -3,13 +3,14 @@ name: Copy legacy transactions
 # One-shot: SSH VPS, copy tblTransaction* → Postgres.
 # Không đụng CRM cũ (SQLite chỉ đọc). Không restart PM2.
 #
-# Chạy khi file workflow này được đẩy lên main (hoặc Run workflow).
+# Chạy khi file workflow / script copy được đẩy lên main (hoặc Run workflow).
 
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/copy-legacy-transactions.yml'
+      - 'apps/api/scripts/migrate-transactions-from-legacy.ts'
   workflow_dispatch:
 
 concurrency:
@@ -25,6 +26,9 @@ jobs:
       SSH_USER: deploy
       REMOTE_ROOT: '/var/www/crmanhung'
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Setup SSH
         env:
           SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
@@ -54,6 +58,15 @@ jobs:
           echo "REMOTE=${SSH_USER}@${SSH_HOST}" > "$HOME/.ssh/deploy.env"
           "$HOME/.ssh/rsh.sh" "${SSH_USER}@${SSH_HOST}" "echo SSH_OK"
 
+      - name: Sync migrate script
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          rsync -az -e "$RSH" \
+            ./apps/api/scripts/migrate-transactions-from-legacy.ts \
+            "${REMOTE}:${REMOTE_ROOT}/repo/apps/api/scripts/migrate-transactions-from-legacy.ts"
+
       - name: Run transactions migrate
         run: |
           set -euo pipefail
@@ -66,6 +79,11 @@ jobs:
           echo "==> Preflight sqlite (read-only)"
           sqlite3 "$LEGACY_SQLITE" "SELECT COUNT(*) AS tx FROM tblTransaction;"
           sqlite3 "$LEGACY_SQLITE" "SELECT ID, Code, TransactionType, Status, CreatedByEmployeeId FROM tblTransaction;"
+          echo "==> Schema snapshot/party/attachment"
+          sqlite3 "$LEGACY_SQLITE" ".schema tblTransactionSnapshot"
+          sqlite3 "$LEGACY_SQLITE" ".schema tblTransactionSnapshotImage"
+          sqlite3 "$LEGACY_SQLITE" ".schema tblTransactionParty"
+          sqlite3 "$LEGACY_SQLITE" ".schema tblTransactionAttachment"
           echo "==> Copy transactions (không ghi SQLite / không restart PM2)"
           set +e
           pnpm transactions:migrate-legacy 2>&1 | tee /tmp/tx-migrate.log
