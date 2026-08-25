@@ -16,6 +16,7 @@ import type {
   UpdateLodatImageRotationDto,
   UpdateLodatSaleStatusDto,
 } from './dto/lodat.dto';
+import { listLodatTransactionHistory } from './lodat-transaction-history';
 
 const ADDRESS_INCLUDE = {
   province: { select: { name: true, isHidden: true } },
@@ -231,7 +232,10 @@ export class LodatsService {
     const isProject = Boolean(row.projectLotId);
     const canAccess =
       user.role === 'ADMIN' || row.createdByEmployeeId === user.id;
-    const ownerHistory = await this.listOwnerHistory(row.id);
+    const [ownerHistory, transactionHistory] = await Promise.all([
+      this.listOwnerHistory(row.id),
+      listLodatTransactionHistory(this.prisma, row.id),
+    ]);
     return {
       ...base,
       note: note?.trim() || null,
@@ -254,6 +258,7 @@ export class LodatsService {
       canEditMap: canAccess,
       canEditImages: canAccess && !isProject,
       ownerHistory,
+      transactionHistory,
     };
   }
 

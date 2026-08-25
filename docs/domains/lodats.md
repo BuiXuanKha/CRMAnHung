@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list + chi tiết + gallery + lô cùng xã + **trang sửa** `/sua` (kể **đổi chủ**) + **form tạo lô từ khách** (§12.5); **chưa bàn** list ADMIN
+- **Status:** Ready for API — list + chi tiết (kể **lịch sử GD**) + gallery + lô cùng xã + **trang sửa** `/sua` (kể **đổi chủ**) + **form tạo lô từ khách** (§12.5); **chưa bàn** list ADMIN / nút Giao dịch
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
@@ -368,6 +368,7 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 │ │   hangtag · Mở bán · Copy    │  │ {tên xã}                    │ │
 │ │ Hero ảnh (prev/next→gallery) │  │ list scroll độc lập         │ │
 │ │ Specs · chủ · ghi chú        │  │ (thumb · title · giá · TT)  │ │
+│ │ Lịch sử giao dịch (nếu có)   │  │                             │ │
 │ │ Nút Giao dịch / Sửa          │  └─────────────────────────────┘ │
 │ └──────────────────────────────┘                                  │
 └────────────────────────────────────────────────────────────────────┘
@@ -375,7 +376,7 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 
 #### 12.3.2 Mobile
 
-Xếp dọc: content → **Lô đất cùng xã** dưới specs; footer dính đáy: **Giao dịch** · **Sửa lô đất**.
+Xếp dọc: content → **Lịch sử giao dịch** (nếu có) → **Lô đất cùng xã**; footer dính đáy: **Giao dịch** · **Sửa lô đất**.
 
 #### 12.3.3 Gallery ảnh (đã làm)
 
@@ -388,9 +389,23 @@ Full-screen giống CRM cũ: tiêu đề + `N / M` · đóng · prev/next · vu�
 
 CRM cũ `relatedAside`: desktop **cột phải sticky** (`max-height` + scroll thân); mobile dưới content. Danh sách lô **cùng `wardId`**, cùng quyền list (STAFF chỉ luồng mình), trừ lô đang xem. Thẻ bấm → `/lo-dat/[id]`. Không có xã → ẩn khối.
 
-#### 12.3.5 Để sau
+#### 12.3.5 Lịch sử giao dịch (đã làm)
 
-Lịch sử GD · gắn ảnh chat trên form sửa.
+CRM cũ `LodatTransactionHistorySection` — **không** copy god-file. Nằm trong cột content (desktop dưới ghi chú, trên nút Giao dịch/Sửa; mobile cùng chỗ, trước lô cùng xã).
+
+**Ẩn** khi không có GD trên lô. Có GD → khối «Lịch sử giao dịch»:
+
+Mỗi dòng (mới → cũ):
+
+1. Mã GD đậm (`GD-…`) → `/giao-dich/[id]` (placeholder chi tiết; form tạo/sửa GD **chưa bàn**).
+2. Hangtag trạng thái: Đã cọc `amber` · Đã công chứng `blue` · Hoàn thành `green` · Đã hủy `red`.
+3. Hangtag loại: Của tôi `blue` · Ghi nhận `gray`. Giá `crm-money` nếu > 0.
+4. Bán / Mua: tên, thiếu = `Chưa có`.
+5. Ngày tạo `HH:mm:ss D/M/YYYY`.
+
+GD đang mở (`DA_COC` / `DA_CONG_CHUNG`) viền vàng nhạt. STAFF / ADMIN: mọi GD gắn map của **lô đang xem** (lô đã lọc quyền). Copy GD (P3) vẫn Todo — chưa có data thì khối trống.
+
+**Không làm:** gắn thêm ảnh chat trên form sửa (chủ chốt). Tạo lô từ khách đã gợi ý ảnh chat.
 
 ---
 
@@ -446,7 +461,7 @@ Không đổi `Lodat.createdByEmployeeId` (luồng NV giữ nguyên).
 
 #### 12.4.5 Lịch sử chủ đất
 
-Mọi map của lô (active trước, cũ sau). Active: badge xanh «Đang active». Đã kết thúc: badge xám + ngày kết thúc. Gắn ảnh chat — để sau.
+Mọi map của lô (active trước, cũ sau). Active: badge xanh «Đang active». Đã kết thúc: badge xám + ngày kết thúc. **Không** gắn thêm ảnh chat trên form sửa (chủ chốt).
 
 ---
 
@@ -526,7 +541,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | **Done** — §12.5; `POST /lodats` + picker kho |
-| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + form sửa **xong**; **đổi chủ** `POST /lodats/:id/change-owner` |
+| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + form sửa + **đổi chủ** + **lịch sử GD** (GET kèm detail); nút Giao dịch chưa bàn |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
 
 Copy data: script **chỉ đọc** SQLite, idempotent, map id trong schema `migrate` — như khách. Skill agent: **`migrate-legacy-data`** (preflight FK, giữ luồng kha/buinam, reshape PROJECT → `ProjectLot`).
