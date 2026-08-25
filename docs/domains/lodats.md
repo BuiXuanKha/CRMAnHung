@@ -207,7 +207,7 @@ Lọc cột Trạng thái = Tạm dừng vẫn hiện lô tạm dừng (không c
 
 #### 12.1.2 Bộ lọc
 
-Icon cột: ảnh / địa chỉ / phân loại / **DT (khoảng) + hướng** / giá có-chưa / trạng thái.
+Icon cột: ảnh / địa chỉ / phân loại / **DT (khoảng) + hướng** / **giá (khoảng 500tr)** / trạng thái.
 
 Cột **DT · MT · Hướng** — menu lọc 2 nhóm (AND):
 
@@ -217,6 +217,20 @@ Cột **DT · MT · Hướng** — menu lọc 2 nhóm (AND):
 | Hướng | Tất cả · Đông · Tây · Nam · Bắc · Đông Bắc · Đông Nam · Tây Bắc · Tây Nam · Mặt nước · Khác |
 
 Biên DT: `1–100` = 1≤DT≤100; `100–200` = 100&lt;DT≤200; `Trên 200` = DT&gt;200. Thiếu DT không khớp khoảng.
+
+Cột **Giá bán** — khoảng giá bước **500 triệu** (cùng bộ lọc mobile):
+
+| Lựa chọn | Điều kiện |
+|----------|-----------|
+| Tất cả giá | — |
+| Chưa có giá | thiếu / ≤ 0 |
+| Dưới 500 triệu | 0 &lt; giá &lt; 500tr |
+| 500 triệu – 1 tỷ | 500tr ≤ giá &lt; 1 tỷ |
+| 1 tỷ – 1,5 tỷ | 1 tỷ ≤ giá &lt; 1,5 tỷ |
+| 1,5 tỷ – 2 tỷ | 1,5 tỷ ≤ giá &lt; 2 tỷ |
+| 2 tỷ – 2,5 tỷ | 2 tỷ ≤ giá &lt; 2,5 tỷ |
+| 2,5 tỷ – 3 tỷ | 2,5 tỷ ≤ giá &lt; 3 tỷ |
+| Trên 3 tỷ | giá ≥ 3 tỷ |
 
 #### 12.1.3 Item (dòng bảng)
 

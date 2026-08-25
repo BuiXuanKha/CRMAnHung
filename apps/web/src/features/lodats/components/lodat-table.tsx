@@ -10,7 +10,7 @@ import {
   ADDRESS_FILTER_OPTIONS,
   KIND_FILTER_OPTIONS,
   PHOTO_FILTER_OPTIONS,
-  PRICE_FILTER_OPTIONS,
+  PRICE_BRACKET_OPTIONS,
   STATUS_FILTER_OPTIONS,
   formatArea,
   formatFrontageDir,
@@ -19,6 +19,7 @@ import {
   kindLabel,
   kindTone,
   type ExtraFilters,
+  type PriceBracket,
 } from '../display';
 import { ActionMenu, type LodatAction } from './action-menu';
 import { SaleToggle } from './sale-toggle';
@@ -34,9 +35,11 @@ type Props = {
   status: string;
   kind: string;
   extra: ExtraFilters;
+  priceBracket: PriceBracket;
   onStatus: (v: string) => void;
   onKind: (v: string) => void;
   onExtra: (next: ExtraFilters) => void;
+  onPriceBracket: (v: PriceBracket) => void;
   onSelect: (id: string) => void;
   onToggleMenu: (id: string) => void;
   onCloseMenu: () => void;
@@ -53,9 +56,11 @@ export function LodatTable({
   status,
   kind,
   extra,
+  priceBracket,
   onStatus,
   onKind,
   onExtra,
+  onPriceBracket,
   onSelect,
   onToggleMenu,
   onCloseMenu,
@@ -128,12 +133,13 @@ export function LodatTable({
             <span>Giá bán</span>
             <ColumnFilter
               label="Giá bán"
-              value={extra.price}
-              options={PRICE_FILTER_OPTIONS}
+              value={priceBracket}
+              allValue=""
+              options={[...PRICE_BRACKET_OPTIONS]}
               open={headerFilter === 'price'}
               onToggle={() => toggleFilter('price')}
               onClose={() => setHeaderFilter(null)}
-              onChange={(v) => onExtra({ ...extra, price: v as ExtraFilters['price'] })}
+              onChange={(v) => onPriceBracket(v as PriceBracket)}
             />
           </div>
           <div className="ld-col-head" role="columnheader">

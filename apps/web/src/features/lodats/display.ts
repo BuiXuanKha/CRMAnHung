@@ -55,7 +55,6 @@ export type ExtraFilters = {
   area: AreaBracket;
   /** Hướng lô — khớp `Lodat.direction` */
   direction: DirectionFilter;
-  price: 'all' | 'has' | 'empty';
 };
 
 export type AreaBracket = 'all' | '1_100' | '100_200' | 'gt_200';
@@ -86,11 +85,20 @@ export const DIRECTION_FILTER_OPTIONS: { value: DirectionFilter; label: string }
   ...LODAT_DIRECTION_OPTIONS.map((d) => ({ value: d as DirectionFilter, label: d })),
 ];
 
-export const PRICE_FILTER_OPTIONS = [
-  { value: 'all', label: 'Tất cả giá' },
-  { value: 'has', label: 'Có giá bán' },
-  { value: 'empty', label: 'Chưa nhập giá' },
-];
+/** Khoảng giá bán (bước 500tr) — cột desktop + bộ lọc mobile. */
+export const PRICE_BRACKET_OPTIONS = [
+  { value: '', label: 'Tất cả giá' },
+  { value: 'no_price', label: 'Chưa có giá' },
+  { value: 'lt_500m', label: 'Dưới 500 triệu' },
+  { value: '500m_1b', label: '500 triệu – 1 tỷ' },
+  { value: '1b_15b', label: '1 tỷ – 1,5 tỷ' },
+  { value: '15b_2b', label: '1,5 tỷ – 2 tỷ' },
+  { value: '2b_25b', label: '2 tỷ – 2,5 tỷ' },
+  { value: '25b_3b', label: '2,5 tỷ – 3 tỷ' },
+  { value: 'gt_3b', label: 'Trên 3 tỷ' },
+] as const;
+
+export type PriceBracket = (typeof PRICE_BRACKET_OPTIONS)[number]['value'];
 
 export function kindLabel(kind: LodatKind): string {
   return kind === LodatKind.NHA ? 'Nhà' : 'Đất';
@@ -119,21 +127,6 @@ export function formatSpecsInline(p: LodatListItem): string {
   if (p.direction?.trim()) parts.push(p.direction.trim());
   return parts.length ? parts.join(' · ') : '—';
 }
-
-/** Khoảng giá bán (bước 500tr) — lọc mobile /lo-dat. */
-export const PRICE_BRACKET_OPTIONS = [
-  { value: '', label: 'Tất cả giá' },
-  { value: 'no_price', label: 'Chưa có giá' },
-  { value: 'lt_500m', label: 'Dưới 500 triệu' },
-  { value: '500m_1b', label: '500 triệu – 1 tỷ' },
-  { value: '1b_15b', label: '1 tỷ – 1,5 tỷ' },
-  { value: '15b_2b', label: '1,5 tỷ – 2 tỷ' },
-  { value: '2b_25b', label: '2 tỷ – 2,5 tỷ' },
-  { value: '25b_3b', label: '2,5 tỷ – 3 tỷ' },
-  { value: 'gt_3b', label: 'Trên 3 tỷ' },
-] as const;
-
-export type PriceBracket = (typeof PRICE_BRACKET_OPTIONS)[number]['value'];
 
 export function applyPriceBracket(
   items: LodatListItem[],
@@ -164,6 +157,7 @@ export function countActiveLodatFilters(
   status: string,
   kind: string,
   extra: ExtraFilters,
+  priceBracket: PriceBracket = '',
 ): number {
   let n = 0;
   if (status) n += 1;
@@ -172,7 +166,7 @@ export function countActiveLodatFilters(
   if (extra.address !== 'all') n += 1;
   if (extra.area !== 'all') n += 1;
   if (extra.direction !== 'all') n += 1;
-  if (extra.price !== 'all') n += 1;
+  if (priceBracket) n += 1;
   return n;
 }
 
@@ -195,9 +189,6 @@ export function applyExtraFilters(
     if (extra.direction !== 'all') {
       if ((p.direction?.trim() || '') !== extra.direction) return false;
     }
-    const hasPrice = p.priceVnd != null;
-    if (extra.price === 'has' && !hasPrice) return false;
-    if (extra.price === 'empty' && hasPrice) return false;
     return true;
   });
 }

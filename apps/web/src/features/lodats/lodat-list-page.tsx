@@ -35,7 +35,6 @@ const DEFAULT_EXTRA: ExtraFilters = {
   address: 'all',
   area: 'all',
   direction: 'all',
-  price: 'all',
 };
 
 type AlertState = {
@@ -168,10 +167,12 @@ export function LodatListPage() {
               status={status}
               kind={kind}
               extra={extra}
+              priceBracket={priceBracket}
               togglingId={toggleMut.isPending ? (toggleMut.variables?.id ?? null) : null}
               onStatus={setStatus}
               onKind={setKind}
               onExtra={setExtra}
+              onPriceBracket={setPriceBracket}
               onSelect={setSelectedId}
               onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
               onCloseMenu={() => setMenuId(null)}
