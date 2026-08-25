@@ -270,8 +270,9 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 | `DT · MT · Hướng` | Dòng 1: diện tích (`90 m²`); dòng 2: `MT 4,5 m · Bắc` — thiếu = `—`. Lọc cột: **khoảng DT** (1–100 / 100–200 / &gt;200) + **hướng** (Đông…Khác), AND |
 | `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng `%` |
 | `Trạng thái` | **Chỉ** Mở bán ↔ Tạm dừng (công tắc). **Không** phải đã bán / đặt cọc. Track xanh `#10b981` khi Mở bán; xám khi Tạm dừng |
-| `Cập nhật` | `HH:mm:ss D/M/YYYY` — **không** icon lọc (timestamp) |
 | `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Giao dịch**, **Sửa** |
+
+**Không** hiện cột `Cập nhật` trên list `/lo-dat` (timestamp vẫn dùng cho sort API).
 
 **Thanh tìm (§4.3.4, biến thể lô đất):** desktop chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới. Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Không rail phải trên màn này. Không nút «Thêm lô» (chưa có trên ảnh mẫu).
 
