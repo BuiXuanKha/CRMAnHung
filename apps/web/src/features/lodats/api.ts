@@ -1,8 +1,10 @@
 import {
   LODAT_KIND_LABELS,
+  LodatKind,
   LodatSaleStatus,
   updateLodatImageRotationSchema,
   updateLodatSaleStatusSchema,
+  updateLodatSchema,
   type LodatDetail,
   type LodatImage,
   type LodatListItem,
@@ -10,6 +12,7 @@ import {
   type LodatListResponse,
   type LodatSameWardResponse,
   type UpdateLodatImageRotationInput,
+  type UpdateLodatInput,
   type UpdateLodatSaleStatusInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
@@ -18,6 +21,10 @@ import { mockLodats } from './mock-data';
 
 let mockStore: LodatListItem[] = structuredClone(mockLodats);
 const mockRotations = new Map<string, number>();
+const mockExtras = new Map<
+  string,
+  Partial<Pick<LodatDetail, 'note' | 'mapNote' | 'addressId' | 'images'>>
+>();
 
 const MOCK_IMAGE_POOL = [
   '/mock/lodats/p1.svg',
@@ -29,6 +36,8 @@ const MOCK_IMAGE_POOL = [
 ];
 
 function mockImages(item: LodatListItem): LodatImage[] {
+  const extras = mockExtras.get(item.id);
+  if (extras?.images?.length) return extras.images;
   const cover = item.coverImageUrl;
   if (!cover) return [];
   const extra = Math.max(0, item.extraPhotoCount ?? 0);
@@ -50,9 +59,13 @@ function mockImages(item: LodatListItem): LodatImage[] {
 
 function toDetail(item: LodatListItem): LodatDetail {
   const images = mockImages(item);
+  const isProject = Boolean(item.projectLotId);
+  const extras = mockExtras.get(item.id);
   return {
     ...item,
-    note: null,
+    note: extras?.note ?? null,
+    mapNote: extras?.mapNote ?? null,
+    addressId: extras?.addressId ?? (isProject ? null : `addr-${item.id}`),
     images,
     imageUrls: images.map((i) => i.url),
     wardName: item.address?.includes('An Đồng')
@@ -63,6 +76,9 @@ function toDetail(item: LodatListItem): LodatDetail {
     owner: item.customerHint
       ? { customerId: 'mock', fullName: item.customerHint, phones: [] }
       : null,
+    canEditSpecs: !isProject,
+    canEditMap: true,
+    canEditImages: !isProject,
   };
 }
 
@@ -161,6 +177,61 @@ export async function updateLodatSaleStatus(
   });
 }
 
+export async function updateLodat(
+  id: string,
+  input: UpdateLodatInput,
+): Promise<LodatDetail> {
+  const parsed = updateLodatSchema.parse(input);
+  if (isMockLodats()) {
+    const idx = mockStore.findIndex((p) => p.id === id);
+    if (idx < 0) throw new Error('Không tìm thấy lô đất');
+    const current = mockStore[idx];
+    const isProject = Boolean(current.projectLotId);
+    const next: LodatListItem = {
+      ...current,
+      title: !isProject && parsed.title !== undefined ? parsed.title : current.title,
+      areaM2:
+        !isProject && parsed.areaM2 !== undefined ? parsed.areaM2 : current.areaM2,
+      frontageM:
+        !isProject && parsed.frontageM !== undefined
+          ? parsed.frontageM
+          : current.frontageM,
+      direction:
+        !isProject && parsed.direction !== undefined
+          ? parsed.direction
+          : current.direction,
+      kind: !isProject && parsed.kind !== undefined ? parsed.kind : current.kind,
+      priceVnd: parsed.priceVnd !== undefined ? parsed.priceVnd : current.priceVnd,
+      priceNote:
+        parsed.priceNote !== undefined ? parsed.priceNote : current.priceNote,
+      brokerFeeNote:
+        parsed.brokerFeeNote !== undefined
+          ? parsed.brokerFeeNote
+          : current.brokerFeeNote,
+      status: parsed.status !== undefined ? parsed.status : current.status,
+      updatedAt: new Date().toISOString(),
+    };
+    mockStore = mockStore.map((p, i) => (i === idx ? next : p));
+    const prev = mockExtras.get(id) ?? {};
+    mockExtras.set(id, {
+      ...prev,
+      note:
+        !isProject && parsed.note !== undefined ? parsed.note : (prev.note ?? null),
+      mapNote:
+        parsed.mapNote !== undefined ? parsed.mapNote : (prev.mapNote ?? null),
+      addressId:
+        !isProject && parsed.addressId !== undefined
+          ? parsed.addressId
+          : (prev.addressId ?? `addr-${id}`),
+    });
+    return toDetail(next);
+  }
+  return apiFetch<LodatDetail>(`/lodats/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed),
+  });
+}
+
 export async function updateLodatImageRotation(
   lodatId: string,
   imageId: string,
@@ -178,3 +249,61 @@ export async function updateLodatImageRotation(
     body: JSON.stringify(parsed),
   });
 }
+
+export async function uploadLodatImage(
+  lodatId: string,
+  file: File,
+): Promise<LodatDetail> {
+  if (isMockLodats()) {
+    const found = mockStore.find((p) => p.id === lodatId);
+    if (!found) throw new Error('Không tìm thấy lô đất');
+    if (found.projectLotId) throw new Error('Không thêm ảnh lô dự án tại đây.');
+    const detail = toDetail(found);
+    const lodatImgs = detail.images.filter((i) => i.source === 'lodat');
+    if (lodatImgs.length >= 5) throw new Error('Tối đa 5 ảnh lô đất.');
+    const id = `mock-img-${lodatId}-${Date.now()}`;
+    const url = URL.createObjectURL(file);
+    const images = [
+      ...detail.images,
+      { id, url, rotationDeg: 0, source: 'lodat' as const },
+    ];
+    mockExtras.set(lodatId, { ...(mockExtras.get(lodatId) ?? {}), images });
+    return toDetail(found);
+  }
+  const body = new FormData();
+  body.append('file', file);
+  return apiFetch<LodatDetail>(`/lodats/${lodatId}/images`, {
+    method: 'POST',
+    body,
+  });
+}
+
+export async function deleteLodatImage(
+  lodatId: string,
+  imageId: string,
+): Promise<LodatDetail> {
+  if (isMockLodats()) {
+    const found = mockStore.find((p) => p.id === lodatId);
+    if (!found) throw new Error('Không tìm thấy lô đất');
+    const detail = toDetail(found);
+    const images = detail.images.filter((i) => i.id !== imageId);
+    mockExtras.set(lodatId, { ...(mockExtras.get(lodatId) ?? {}), images });
+    return toDetail(found);
+  }
+  return apiFetch<LodatDetail>(`/lodats/${lodatId}/images/${imageId}`, {
+    method: 'DELETE',
+  });
+}
+
+export function formatPriceInput(value: number | string | null | undefined): string {
+  if (value == null || value === '') return '';
+  const digits = String(value).replace(/[^\d]/g, '');
+  if (!digits) return '';
+  return digits.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+export function parsePriceInput(raw: string): string {
+  return raw.replace(/[^\d]/g, '');
+}
+
+export { LodatKind, LodatSaleStatus };

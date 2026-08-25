@@ -109,7 +109,7 @@ export function LodatListPage() {
       flash(`Giao dịch «${title}» — sẽ làm ở màn giao dịch.`);
       return;
     }
-    flash(`Sửa «${title}» — form sửa sẽ làm sau.`);
+    router.push(`/lo-dat/${id}/sua`);
   }
 
   function handleToggleSale(plot: LodatListItem) {

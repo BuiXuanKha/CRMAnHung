@@ -10,6 +10,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type {
   ListLodatsQueryDto,
+  UpdateLodatDto,
   UpdateLodatImageRotationDto,
   UpdateLodatSaleStatusDto,
 } from './dto/lodat.dto';
@@ -217,7 +218,7 @@ export class LodatsService {
     };
   }
 
-  private mapDetail(row: LodatRow) {
+  private mapDetail(row: LodatRow, user: RequestUser) {
     const base = this.mapRow(row);
     const images = this.galleryImages(row);
     const activeMap = row.maps[0] ?? null;
@@ -225,9 +226,14 @@ export class LodatsService {
     const note =
       (row.projectLotId ? row.projectLot?.note : null) || row.note || null;
     const { wardName } = this.wardMeta(row);
+    const isProject = Boolean(row.projectLotId);
+    const canAccess =
+      user.role === 'ADMIN' || row.createdByEmployeeId === user.id;
     return {
       ...base,
       note: note?.trim() || null,
+      addressId: isProject ? null : (row.addressId ?? null),
+      mapNote: activeMap?.note ?? null,
       images,
       imageUrls: images.map((i) => i.url),
       wardName,
@@ -241,6 +247,9 @@ export class LodatsService {
             })),
           }
         : null,
+      canEditSpecs: canAccess && !isProject,
+      canEditMap: canAccess,
+      canEditImages: canAccess && !isProject,
     };
   }
 
@@ -377,7 +386,7 @@ export class LodatsService {
     if (!row.maps.length) {
       throw new NotFoundException('Lô đất chưa gắn chủ.');
     }
-    return this.mapDetail(row);
+    return this.mapDetail(row, user);
   }
 
   async updateSaleStatus(
@@ -407,7 +416,7 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
-    return this.mapDetail(refreshed);
+    return this.mapDetail(refreshed, user);
   }
 
   async listSameWard(user: RequestUser, id: string) {
@@ -492,6 +501,187 @@ export class LodatsService {
       where: { id: lodatId },
       include: LIST_INCLUDE,
     });
-    return this.mapDetail(refreshed);
+    return this.mapDetail(refreshed, user);
+  }
+
+  private parseOptionalNumber(value: unknown): number | null | undefined {
+    if (value === undefined) return undefined;
+    if (value === null || value === '') return null;
+    const n = typeof value === 'number' ? value : Number(String(value).replace(/,/g, ''));
+    if (!Number.isFinite(n)) {
+      throw new BadRequestException('Số không hợp lệ.');
+    }
+    return n;
+  }
+
+  private parsePrice(value: unknown): bigint | null | undefined {
+    if (value === undefined) return undefined;
+    if (value === null || value === '') return null;
+    const raw = String(value).replace(/[^\d]/g, '');
+    if (!raw) return null;
+    try {
+      return BigInt(raw);
+    } catch {
+      throw new BadRequestException('Giá không hợp lệ.');
+    }
+  }
+
+  async update(user: RequestUser, id: string, dto: UpdateLodatDto) {
+    const row = await this.prisma.lodat.findUnique({
+      where: { id },
+      include: LIST_INCLUDE,
+    });
+    if (!row) throw new NotFoundException('Không tìm thấy lô đất.');
+    this.assertCanAccess(user, row.createdByEmployeeId);
+    const activeMap = row.maps[0];
+    if (!activeMap) throw new NotFoundException('Lô đất chưa gắn chủ.');
+
+    const isProject = Boolean(row.projectLotId);
+    const lodatData: Prisma.LodatUpdateInput = {};
+
+    if (!isProject) {
+      if (dto.title !== undefined) {
+        const title = String(dto.title ?? '').trim();
+        if (!title) throw new BadRequestException('Cần nhập tiêu đề lô đất.');
+        lodatData.title = title;
+      }
+      if (dto.addressId !== undefined) {
+        if (!dto.addressId) {
+          throw new BadRequestException('Cần chọn địa chỉ đất dân.');
+        }
+        const addr = await this.prisma.address.findUnique({
+          where: { id: dto.addressId },
+        });
+        if (!addr || addr.isHidden) {
+          throw new NotFoundException('Không tìm thấy địa chỉ.');
+        }
+        if (addr.kind !== 'REGULAR') {
+          throw new BadRequestException('Lô đất dân chỉ chọn địa chỉ loại Đất dân.');
+        }
+        lodatData.address = { connect: { id: addr.id } };
+      }
+      if (dto.areaM2 !== undefined) {
+        lodatData.areaM2 = this.parseOptionalNumber(dto.areaM2) ?? null;
+      }
+      if (dto.frontageM !== undefined) {
+        lodatData.frontageM = this.parseOptionalNumber(dto.frontageM) ?? null;
+      }
+      if (dto.direction !== undefined) {
+        const d = dto.direction?.trim() || null;
+        lodatData.direction = d;
+      }
+      if (dto.note !== undefined) {
+        lodatData.note = dto.note?.trim() || null;
+      }
+      if (dto.kind !== undefined) {
+        lodatData.propertyKind = dto.kind;
+      }
+    } else if (
+      dto.title !== undefined ||
+      dto.addressId !== undefined ||
+      dto.areaM2 !== undefined ||
+      dto.frontageM !== undefined ||
+      dto.direction !== undefined ||
+      dto.note !== undefined ||
+      dto.kind !== undefined
+    ) {
+      // Ignore / soft-reject specs on project lots — map fields still apply below.
+      // Only reject if client sent only specs with no map fields? Allow ignore for UX.
+    }
+
+    const mapData: Prisma.LodatCustomerMapUpdateInput = {};
+    if (dto.status !== undefined) mapData.status = dto.status;
+    if (dto.priceVnd !== undefined) {
+      mapData.priceVnd = this.parsePrice(dto.priceVnd) ?? null;
+    }
+    if (dto.priceNote !== undefined) {
+      mapData.priceNote = dto.priceNote?.trim() || null;
+    }
+    if (dto.brokerFeeNote !== undefined) {
+      mapData.brokerFeeNote = dto.brokerFeeNote?.trim() || null;
+    }
+    if (dto.mapNote !== undefined) {
+      mapData.note = dto.mapNote?.trim() || null;
+    }
+
+    if (Object.keys(lodatData).length) {
+      await this.prisma.lodat.update({ where: { id }, data: lodatData });
+    }
+    if (Object.keys(mapData).length) {
+      await this.prisma.lodatCustomerMap.update({
+        where: { id: activeMap.id },
+        data: mapData,
+      });
+    }
+
+    const refreshed = await this.prisma.lodat.findUniqueOrThrow({
+      where: { id },
+      include: LIST_INCLUDE,
+    });
+    return this.mapDetail(refreshed, user);
+  }
+
+  async addImage(
+    user: RequestUser,
+    lodatId: string,
+    file: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    const row = await this.prisma.lodat.findUnique({
+      where: { id: lodatId },
+      include: { images: true },
+    });
+    if (!row) throw new NotFoundException('Không tìm thấy lô đất.');
+    this.assertCanAccess(user, row.createdByEmployeeId);
+    if (row.projectLotId) {
+      throw new BadRequestException(
+        'Ảnh dự án chung chỉ Admin sửa trên sổ địa chỉ. Không thêm ảnh lô dự án tại đây.',
+      );
+    }
+    if (row.images.length >= 5) {
+      throw new BadRequestException('Tối đa 5 ảnh lô đất.');
+    }
+    const uploaded = await this.storage.upload({
+      folder: `lodats/${lodatId}`,
+      buffer: file.buffer,
+      contentType: file.mimetype,
+      originalName: file.originalname,
+    });
+    await this.prisma.lodatImage.create({
+      data: {
+        lodatId,
+        objectKey: uploaded.objectKey,
+        sortOrder: row.images.length,
+        rotationDeg: 0,
+      },
+    });
+    const refreshed = await this.prisma.lodat.findUniqueOrThrow({
+      where: { id: lodatId },
+      include: LIST_INCLUDE,
+    });
+    return this.mapDetail(refreshed, user);
+  }
+
+  async deleteImage(user: RequestUser, lodatId: string, imageId: string) {
+    const row = await this.prisma.lodat.findUnique({ where: { id: lodatId } });
+    if (!row) throw new NotFoundException('Không tìm thấy lô đất.');
+    this.assertCanAccess(user, row.createdByEmployeeId);
+    if (row.projectLotId) {
+      throw new BadRequestException('Không gỡ ảnh dự án chung từ đây.');
+    }
+    const image = await this.prisma.lodatImage.findFirst({
+      where: { id: imageId, lodatId },
+    });
+    if (!image) throw new NotFoundException('Không tìm thấy ảnh lô.');
+    await this.prisma.lodatImage.delete({ where: { id: imageId } });
+    try {
+      await this.storage.delete(image.objectKey, 'public');
+    } catch {
+      // orphan ok
+    }
+    const refreshed = await this.prisma.lodat.findUniqueOrThrow({
+      where: { id: lodatId },
+      include: LIST_INCLUDE,
+    });
+    return this.mapDetail(refreshed, user);
   }
 }

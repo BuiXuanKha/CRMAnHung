@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list + chi tiết đọc + gallery (lưu xoay LodatImage) + lô cùng xã; **chưa bàn** list ADMIN / form sửa / đổi chủ / upload ảnh
+- **Status:** Ready for API — list + chi tiết + gallery + lô cùng xã + **trang sửa** `/sua`; **chưa bàn** list ADMIN / đổi chủ / tạo lô từ khách
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
@@ -337,11 +337,52 @@ Dưới specs / ghi chú: danh sách lô **cùng `wardId`** (địa chỉ dân h
 
 #### 12.3.5 Để sau
 
-Lịch sử chủ / đổi chủ · lịch sử GD · **upload ảnh** (form tạo/sửa lô; ảnh dự án = Admin sổ địa chỉ) · form sửa đầy đủ.
+Lịch sử chủ / đổi chủ · lịch sử GD · **upload ảnh** (form tạo/sửa — upload LodatImage trên trang sửa slice sau nếu chưa kịp) · form tạo lô từ khách.
 
 ---
 
-*Hành vi list bám §12. Visual §4.3.5. Không copy god-file CRM cũ.*
+### 12.4 Trang sửa `/lo-dat/[id]/sua`
+
+Học CRM cũ `LodatEditPage` (route `/lo-dat/:id/sua`) — **không** copy god-file. Full page (không modal).
+
+#### 12.4.1 Máy tính
+
+```
+← Chi tiết lô
+H1 Sửa lô đất · badge Lô dự án|Lô thường (Đất dân)
+┌ Thông số lô ─────────────────────────────────────────┐
+│ PROJECT: hint chỉ xem; hiện địa chỉ dự án            │
+│ Đất dân: picker Địa chỉ tổng quát * (REGULAR)        │
+│ Tiêu đề * · DT (m²) · MT (m) · Hướng (select)        │
+│ Phân loại Nhà/Đất (web mới) · Ghi chú chung (lô)     │
+└──────────────────────────────────────────────────────┘
+┌ Chủ đất & giá bán ───────────────────────────────────┐
+│ Chủ hiện tại (đọc) · nút Đổi chủ = toast (slice sau) │
+│ Trạng thái Mở bán|Tạm dừng · Giá (VND)               │
+│ Ghi chú giá + chip · Hoa hồng + chip · Ghi chú map   │
+└──────────────────────────────────────────────────────┘
+┌ Hình ảnh ────────────────────────────────────────────┐
+│ PROJECT: ảnh dự án chỉ xem                           │
+│ Đất dân: xem ảnh lô; thêm/gỡ LodatImage (max 5)      │
+└──────────────────────────────────────────────────────┘
+Footer: Huỷ → chi tiết · Lưu thay đổi
+```
+
+#### 12.4.2 Mobile
+
+Cùng form xếp dọc; footer dính đáy Huỷ / Lưu.
+
+#### 12.4.3 Chip / hướng (CRM cũ)
+
+- Hướng: Đông, Tây, Nam, Bắc, Đông Bắc, Đông Nam, Tây Bắc, Tây Nam, Mặt nước, Khác  
+- Ghi chú giá: Thương lượng · Cứng giá · Chưa chi tiết  
+- Hoa hồng: 1% · 2% · Chưa trao đổi  
+
+Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thông số thửa; map giá vẫn sửa được.
+
+#### 12.4.4 Để sau trên trang sửa
+
+Đổi chủ (modal) · lịch sử chủ · gắn ảnh chat.
 
 ---
 
@@ -384,7 +425,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | Form + picker địa chỉ bước 3 |
-| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + lưu xoay LodatImage + lô cùng xã **xong**; đổi chủ / form sửa / upload Todo |
+| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + **form sửa** (PATCH + upload LodatImage) **xong**; đổi chủ Todo |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
 
 Copy data: script **chỉ đọc** SQLite, idempotent, map id trong schema `migrate` — như khách. Skill agent: **`migrate-legacy-data`** (preflight FK, giữ luồng kha/buinam, reshape PROJECT → `ProjectLot`).

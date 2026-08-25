@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight, Copy, Phone, SquarePen } from 'lucide-react';
 import {
@@ -35,6 +35,7 @@ const SWIPE_PX = 48;
 export function LodatDetailPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
+  const router = useRouter();
   const { user } = useAuth();
   const qc = useQueryClient();
   const isAdmin = user?.role === UserRole.ADMIN;
@@ -334,7 +335,7 @@ export function LodatDetailPage() {
             <button
               type="button"
               className="ld-detail-action-btn secondary"
-              onClick={() => flash('Form sửa lô sẽ làm sau.')}
+              onClick={() => router.push(`/lo-dat/${detail.id}/sua`)}
             >
               <SquarePen size={14} aria-hidden />
               Sửa lô đất
@@ -354,7 +355,7 @@ export function LodatDetailPage() {
           <button
             type="button"
             className="secondary"
-            onClick={() => flash('Form sửa lô sẽ làm sau.')}
+            onClick={() => router.push(`/lo-dat/${detail.id}/sua`)}
           >
             Sửa lô đất
           </button>

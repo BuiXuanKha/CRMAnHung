@@ -92,14 +92,57 @@ export type LodatImage = z.infer<typeof lodatImageSchema>;
 /** Chi tiết `/lo-dat/[id]` — mở rộng list item. */
 export const lodatDetailSchema = lodatListItemSchema.extend({
   note: z.string().nullable().optional(),
+  /** Địa chỉ dân (REGULAR); PROJECT = null — địa chỉ qua kho */
+  addressId: z.string().nullable().optional(),
+  /** Ghi chú trên map chủ active */
+  mapNote: z.string().nullable().optional(),
   /** @deprecated dùng `images` — giữ để tương thích tạm */
   imageUrls: z.array(z.string()).default([]),
   images: z.array(lodatImageSchema).default([]),
   wardName: z.string().nullable().optional(),
   owner: lodatOwnerSchema.nullable().optional(),
+  canEditSpecs: z.boolean().default(false),
+  canEditMap: z.boolean().default(false),
+  canEditImages: z.boolean().default(false),
 });
 
 export type LodatDetail = z.infer<typeof lodatDetailSchema>;
+
+export const LODAT_DIRECTION_OPTIONS = [
+  'Đông',
+  'Tây',
+  'Nam',
+  'Bắc',
+  'Đông Bắc',
+  'Đông Nam',
+  'Tây Bắc',
+  'Tây Nam',
+  'Mặt nước',
+  'Khác',
+] as const;
+
+export const LODAT_PRICE_NOTE_CHIPS = ['Thương lượng', 'Cứng giá', 'Chưa chi tiết'] as const;
+
+export const LODAT_BROKER_FEE_CHIPS = ['1%', '2%', 'Chưa trao đổi'] as const;
+
+export const LODAT_MAX_UPLOAD_IMAGES = 5;
+
+export const updateLodatSchema = z.object({
+  title: z.string().trim().min(1, 'Cần nhập tiêu đề lô đất.').max(200).optional(),
+  addressId: z.string().nullable().optional(),
+  areaM2: z.number().nonnegative().nullable().optional(),
+  frontageM: z.number().nonnegative().nullable().optional(),
+  direction: z.string().trim().max(40).nullable().optional(),
+  note: z.string().trim().max(4000).nullable().optional(),
+  kind: z.nativeEnum(LodatKind).optional(),
+  priceVnd: z.union([z.number().nonnegative(), z.string()]).nullable().optional(),
+  priceNote: z.string().trim().max(200).nullable().optional(),
+  brokerFeeNote: z.string().trim().max(200).nullable().optional(),
+  mapNote: z.string().trim().max(4000).nullable().optional(),
+  status: lodatListingStatusSchema.optional(),
+});
+
+export type UpdateLodatInput = z.infer<typeof updateLodatSchema>;
 
 export const updateLodatImageRotationSchema = z.object({
   rotationDeg: z

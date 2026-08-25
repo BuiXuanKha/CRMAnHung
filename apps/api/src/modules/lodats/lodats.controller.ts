@@ -1,10 +1,24 @@
-import { Body, Controller, Get, Param, Patch, Query } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UploadedFile,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   CurrentUser,
   type RequestUser,
 } from '../../common/decorators/current-user.decorator';
 import {
   ListLodatsQueryDto,
+  UpdateLodatDto,
   UpdateLodatImageRotationDto,
   UpdateLodatSaleStatusDto,
 } from './dto/lodat.dto';
@@ -29,6 +43,15 @@ export class LodatsController {
     return this.lodats.getById(user, id);
   }
 
+  @Patch(':id')
+  update(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateLodatDto,
+  ) {
+    return this.lodats.update(user, id, dto);
+  }
+
   @Patch(':id/sale-status')
   updateSaleStatus(
     @CurrentUser() user: RequestUser,
@@ -46,5 +69,36 @@ export class LodatsController {
     @Body() dto: UpdateLodatImageRotationDto,
   ) {
     return this.lodats.updateImageRotation(user, id, imageId, dto);
+  }
+
+  @Post(':id/images')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 4 * 1024 * 1024 },
+    }),
+  )
+  addImage(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @UploadedFile()
+    file?: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Thiếu file ảnh.');
+    }
+    const mime = String(file.mimetype || '');
+    if (!mime.startsWith('image/')) {
+      throw new BadRequestException('Chỉ nhận file ảnh.');
+    }
+    return this.lodats.addImage(user, id, file);
+  }
+
+  @Delete(':id/images/:imageId')
+  deleteImage(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+  ) {
+    return this.lodats.deleteImage(user, id, imageId);
   }
 }

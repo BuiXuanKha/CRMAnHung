@@ -12,13 +12,21 @@ import '../addresses.css';
 
 type Props = {
   value?: string | null;
+  /** Nhãn ban đầu khi chưa load item từ list (vd. địa chỉ hiện tại trên form sửa). */
+  labelHint?: string | null;
   kindFilter?: AddressKind;
   disabled?: boolean;
   onChange: (item: AddressListItem | null) => void;
 };
 
 /** Picker chọn địa chỉ có sẵn — STAFF chỉ đọc (không thêm). */
-export function AddressPicker({ value, kindFilter, disabled, onChange }: Props) {
+export function AddressPicker({
+  value,
+  labelHint,
+  kindFilter,
+  disabled,
+  onChange,
+}: Props) {
   const [open, setOpen] = useState(false);
   const [keyword, setKeyword] = useState('');
   const [items, setItems] = useState<AddressListItem[]>([]);
@@ -63,8 +71,9 @@ export function AddressPicker({ value, kindFilter, disabled, onChange }: Props) 
 
   const label = useMemo(() => {
     if (selected) return formatAddressLabel(selected);
+    if (labelHint?.trim()) return labelHint.trim();
     return 'Chọn địa chỉ…';
-  }, [selected]);
+  }, [selected, labelHint]);
 
   return (
     <div className="addr-picker">
