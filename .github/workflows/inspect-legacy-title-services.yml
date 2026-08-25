@@ -1,0 +1,116 @@
+name: Inspect legacy title services
+
+# SSH VPS, chỉ ĐỌC SQLite CRM cũ (sổ đỏ). Không ghi, không restart PM2.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/inspect-legacy-title-services.yml'
+  workflow_dispatch:
+
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+      SSH_USER: deploy
+    steps:
+      - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${SSH_HOST:-}" || { echo "Missing secret DEPLOY_SSH_HOST"; exit 1; }
+          test -n "${SSH_KEY:-}" || { echo "Missing secret DEPLOY_SSH_KEY"; exit 1; }
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          KEY_TRIMMED=$(printf '%s' "$SSH_KEY" | tr -d '\r')
+          if printf '%s' "$KEY_TRIMMED" | grep -q "BEGIN .*PRIVATE KEY"; then
+            printf '%s\n' "$KEY_TRIMMED" > ~/.ssh/deploy_key
+          else
+            printf '%s' "$KEY_TRIMMED" | base64 -d > ~/.ssh/deploy_key
+          fi
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh-keyscan -H "$SSH_HOST" > ~/.ssh/known_hosts 2>/tmp/keyscan.err || true
+          test -s ~/.ssh/known_hosts || { cat /tmp/keyscan.err; exit 1; }
+
+          printf '%s\n' \
+            '#!/bin/bash' \
+            'exec ssh -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" "$@"' \
+            > "$HOME/.ssh/rsh.sh"
+          chmod +x "$HOME/.ssh/rsh.sh"
+          echo "REMOTE=${SSH_USER}@${SSH_HOST}" > "$HOME/.ssh/deploy.env"
+          "$HOME/.ssh/rsh.sh" "${SSH_USER}@${SSH_HOST}" "echo SSH_OK"
+
+      - name: Inspect title-service tables (read-only)
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          "$HOME/.ssh/rsh.sh" "$REMOTE" bash -s <<'REMOTE'
+          set -euo pipefail
+          DB=/var/www/anhungland-crm/database/facebook_customer_crm.db
+          URI="file:${DB}?mode=ro"
+          test -r "$DB" || { echo "Không đọc được $DB"; exit 1; }
+
+          echo "==> SQLite (read-only) $DB"
+          ls -lh "$DB"
+
+          echo ""
+          echo "==> Tất cả bảng"
+          sqlite3 "$URI" "SELECT name FROM sqlite_master WHERE type='table' ORDER BY name;"
+
+          echo ""
+          echo "==> Bảng tên gợi sổ đỏ / title / deed / service"
+          sqlite3 "$URI" "SELECT name FROM sqlite_master WHERE type='table' AND (
+            lower(name) LIKE '%title%' OR lower(name) LIKE '%sodo%' OR lower(name) LIKE '%so_do%'
+            OR lower(name) LIKE '%deed%' OR lower(name) LIKE '%service%' OR lower(name) LIKE '%hoso%'
+            OR lower(name) LIKE '%ho_so%' OR lower(name) LIKE '%landcert%'
+          ) ORDER BY name;"
+
+          echo ""
+          echo "==> Thư mục ảnh có title/sodo"
+          ls -la /var/www/anhungland-crm/api/img 2>/dev/null | head -80 || true
+
+          dump_table() {
+            local t="$1"
+            echo ""
+            echo "======== $t ========"
+            sqlite3 "$URI" ".schema ${t}"
+            echo "-- COUNT"
+            sqlite3 "$URI" "SELECT COUNT(*) FROM ${t};"
+            echo "-- COLUMNS"
+            sqlite3 "$URI" "PRAGMA table_info(${t});"
+          }
+
+          echo ""
+          echo "==> Schema + COUNT bảng Title*"
+          TITLE_LIST=$(sqlite3 "$URI" "SELECT name FROM sqlite_master WHERE type='table' AND name LIKE 'tblTitle%' ORDER BY name;")
+          if [[ -z "${TITLE_LIST}" ]]; then
+            echo "(không có tblTitle*)"
+          else
+            while IFS= read -r t; do
+              [[ -n "$t" ]] || continue
+              dump_table "$t"
+            done <<< "$TITLE_LIST"
+          fi
+
+          echo ""
+          echo "==> Phân bố + FK (nếu có tblTitleService)"
+          if sqlite3 "$URI" "SELECT name FROM sqlite_master WHERE type='table' AND name='tblTitleService';" | grep -q .; then
+            echo "-- Status"
+            sqlite3 "$URI" "SELECT Status, COUNT(*) FROM tblTitleService GROUP BY Status ORDER BY 2 DESC;"
+            echo "-- CreatedByEmployeeId"
+            sqlite3 "$URI" "SELECT CreatedByEmployeeId, COUNT(*) FROM tblTitleService GROUP BY CreatedByEmployeeId ORDER BY 2 DESC;"
+            echo "-- PersonId null?"
+            sqlite3 "$URI" "SELECT CASE WHEN PersonId IS NULL THEN 'null' ELSE 'set' END, COUNT(*) FROM tblTitleService GROUP BY 1;"
+            echo "-- Mẫu 5 hàng (ID, Code, Status, PersonId, CreatedBy, tiền nếu có)"
+            sqlite3 -header -column "$URI" "SELECT * FROM tblTitleService LIMIT 5;" | head -c 8000
+          fi
+
+          echo ""
+          echo "==> Done inspect (CRM cũ không bị ghi)"
+          REMOTE
