@@ -87,6 +87,13 @@
   gap: 12px;
 }
 
+.ld-edit-area-side {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
 .ld-edit-card {
   background: #fff;
   border: 1px solid #e2e8f0;
@@ -695,8 +702,7 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr) min(360px, 34%);
     grid-template-areas:
-      'info gallery'
-      'images gallery'
+      'info side'
       'actions actions';
     gap: 12px;
     align-items: start;
@@ -709,15 +715,18 @@
     gap: 12px;
   }
 
-  .ld-edit-area-images {
-    grid-area: images;
-  }
-
-  .ld-edit-area-gallery {
-    grid-area: gallery;
+  /* Cột phải: Hình ảnh + Xem nhanh — sticky khi cuộn form trái */
+  .ld-edit-area-side {
+    grid-area: side;
     position: sticky;
     top: 12px;
     align-self: start;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
   }
 
   .ld-edit-actions {

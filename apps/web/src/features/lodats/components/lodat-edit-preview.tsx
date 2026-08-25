@@ -24,7 +24,7 @@ export function LodatEditPreview({
   const canRotate = Boolean(current?.id && current.source === 'lodat');
 
   return (
-    <div className="ld-edit-gallery ld-edit-area-gallery">
+    <div className="ld-edit-gallery">
       <div className="ld-edit-gallery-head">
         <h2 className="ld-edit-gallery-title">Xem nhanh hình ảnh</h2>
         {images.length ? (

@@ -86,7 +86,7 @@ export function LodatEditImages({
     .join(' ');
 
   return (
-    <section className="ld-edit-card ld-edit-area-images">
+    <section className="ld-edit-card">
       <h2 className="ld-edit-section-title">Hình ảnh</h2>
       {canEditImages ? (
         <p className="ld-edit-hint">

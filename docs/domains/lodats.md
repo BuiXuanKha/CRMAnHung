@@ -350,20 +350,16 @@ Học CRM cũ `LodatEditPage` (route `/lo-dat/:id/sua`) — **không** copy god-
 
 #### 12.4.1 Máy tính
 
-Layout CRM cũ (`bodyGrid`): **2 cột** — trái form, phải gallery sticky; **Huỷ/Lưu dưới form** (không sticky/fixed).
+Layout: **2 cột** desktop — trái form (thông số / chủ & giá / lịch sử); phải **Hình ảnh + Xem nhanh** sticky top; **Huỷ/Lưu dưới form** (không sticky/fixed).
 
 ```
 ← Chi tiết lô · H1 Sửa lô đất · badge
 ┌ bodyGrid ──────────────────────────────────────────────────────────┐
-│ ┌ areaInfo ─────────────────────┐  ┌ areaGallery (sticky top) ──┐ │
-│ │ Thông số lô                   │  │ Xem nhanh hình ảnh N/M     │ │
-│ │ Chủ đất & giá bán · Đổi chủ   │  │ [xoay trái/phải]           │ │
-│ │ Lịch sử chủ đất (nếu có)      │  │ preview → mở gallery full  │ │
+│ ┌ areaInfo ─────────────────────┐  ┌ areaSide (sticky top) ─────┐ │
+│ │ Thông số lô                   │  │ Hình ảnh · dán/kéo thả     │ │
+│ │ Chủ đất & giá bán · Đổi chủ   │  │ thumb + × · Xem nhanh N/M  │ │
+│ │ Lịch sử chủ đất (nếu có)      │  │ [xoay] preview → gallery   │ │
 │ └───────────────────────────────┘  └────────────────────────────┘ │
-│ ┌ areaImages ───────────────────┐        (gallery rowspan)        │
-│ │ Hình ảnh · dán/kéo thả / file │                                 │
-│ │ thumb + × (ảnh lodat)         │                                 │
-│ └───────────────────────────────┘                                 │
 │ ┌ areaActions (full width) ─────────────────────────────────────┐ │
 │ │                         Huỷ · Lưu thay đổi                    │ │
 │ └───────────────────────────────────────────────────────────────┘ │
