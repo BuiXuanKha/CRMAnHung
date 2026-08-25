@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import {
   ChevronLeft,
   ChevronRight,
@@ -99,6 +100,11 @@ export function LodatImageGallery({
   const [rotations, setRotations] = useState<Record<number, number>>({});
   const [busyDownload, setBusyDownload] = useState(false);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const count = urls.length;
   const safeIndex = count ? Math.min(Math.max(0, index), count - 1) : 0;
@@ -165,9 +171,9 @@ export function LodatImageGallery({
     }
   }
 
-  if (count < 1 || !url) return null;
+  if (!mounted || count < 1 || !url) return null;
 
-  return (
+  return createPortal(
     <div
       className="ld-img-gallery"
       role="dialog"
@@ -296,6 +302,7 @@ export function LodatImageGallery({
           Xoay phải
         </button>
       </footer>
-    </div>
+    </div>,
+    document.body,
   );
 }
