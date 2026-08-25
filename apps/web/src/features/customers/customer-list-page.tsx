@@ -50,7 +50,7 @@ import {
   COMING_SOON_TITLE,
   comingSoonMessage,
 } from './coming-soon';
-import { openCustomerMessenger } from './messenger';
+import { openExternalUrl, facebookInboxChatUrl, messengerComUrl } from './messenger';
 import {
   getActiveListScrollEl,
   needsMoreListScrollHeight,
@@ -393,22 +393,21 @@ export function CustomerListPage() {
     setMenuId(null);
     setSelectedId(customer.id);
     if (action === 'chat') {
-      if (isMobileList()) {
+      // CRM cũ: tab facebook.com/messages (không phải rail tin đã lưu)
+      if (!openExternalUrl(facebookInboxChatUrl(customer))) {
         setAlertBox({
-          title: 'Mở chat',
-          message: 'Nội dung chat đã lưu xem trên máy tính (panel phải). Điện thoại dùng «Mở Messenger» để vào hội thoại Facebook.',
+          title: 'Không mở được chat',
+          message: 'Khách này chưa có thread Facebook Inbox (mã số) để mở hội thoại.',
         });
-        return;
       }
-      setRail('chat');
       return;
     }
     if (action === 'messenger') {
-      if (!openCustomerMessenger(customer)) {
+      if (!openExternalUrl(messengerComUrl(customer))) {
         setAlertBox({
           title: 'Không mở được Messenger',
           message: customer.facebook
-            ? 'Khách này chưa có thread / UID Messenger để mở hội thoại.'
+            ? 'Khách này chưa có thread / UID Messenger (mã số) để mở hội thoại.'
             : 'Khách này chưa gắn Facebook — không mở được Messenger.',
         });
       }

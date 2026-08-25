@@ -85,7 +85,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [{ id: 'ph1', phone: '0901234567', label: 'Zalo Khả' }],
     facebook: {
       customerUid: 'fb_1001',
-      threadId: 'thread_1001',
+      threadId: '1000000000001',
       facebookName: 'Nguyen Van An FB',
       avatarUrl: null,
       scanSource: 'business_suite',
@@ -149,7 +149,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [{ id: 'ph7', phone: '0938111222', label: null }],
     facebook: {
       customerUid: 'fb_page_ha',
-      threadId: 'thread_ha',
+      threadId: '1000000000002',
       facebookName: 'Bùi Xuân Khả',
       avatarUrl: null,
       scanSource: 'page',
@@ -199,7 +199,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [{ id: 'ph9', phone: '0988123456', label: 'Zalo' }],
     facebook: {
       customerUid: 'fb_lan',
-      threadId: 'thread_lan',
+      threadId: '1000000000003',
       facebookName: 'Ngo Thi Lan',
       avatarUrl: null,
       scanSource: 'messenger',
@@ -249,7 +249,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [{ id: 'ph11', phone: '0919000111', label: null }],
     facebook: {
       customerUid: 'fb_mai',
-      threadId: 'thread_mai',
+      threadId: '1000000000004',
       facebookName: 'Hoang Mai Anh',
       avatarUrl: null,
       scanSource: 'page',
@@ -307,7 +307,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [{ id: 'ph13', phone: '0912333444', label: null }],
     facebook: {
       customerUid: 'fb_ngoc',
-      threadId: 'thread_ngoc',
+      threadId: '1000000000005',
       facebookName: 'Trinh Bao Ngoc',
       avatarUrl: null,
       scanSource: 'messenger',
@@ -365,7 +365,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [],
     facebook: {
       customerUid: 'fb_trang',
-      threadId: 'thread_trang',
+      threadId: '1000000000006',
       facebookName: 'Dang Thu Trang',
       avatarUrl: null,
       scanSource: 'page',
@@ -421,7 +421,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [{ id: 'ph17', phone: '0966123456', label: null }],
     facebook: {
       customerUid: 'fb_huyen',
-      threadId: 'thread_huyen',
+      threadId: '1000000000007',
       facebookName: 'Cao Thi Huyen',
       avatarUrl: null,
       scanSource: 'business_suite',
@@ -479,7 +479,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [{ id: 'ph19', phone: '0909999888', label: null }],
     facebook: {
       customerUid: 'fb_oanh',
-      threadId: 'thread_oanh',
+      threadId: '1000000000008',
       facebookName: 'Tran Kim Oanh',
       avatarUrl: null,
       scanSource: 'page',
@@ -529,7 +529,7 @@ export const mockCustomers: CustomerDetail[] = [
     phones: [{ id: 'ph21', phone: '0933666555', label: 'Zalo' }],
     facebook: {
       customerUid: 'fb_thao',
-      threadId: 'thread_thao',
+      threadId: '1000000000009',
       facebookName: 'Mai Phuong Thao',
       avatarUrl: null,
       scanSource: 'messenger',
@@ -584,7 +584,7 @@ export const mockCustomers: CustomerDetail[] = [
     facebook: {
       customerUid: 'fb_other',
       facebookName: 'Pham Thi Dung',
-      threadId: 'thread_other',
+      threadId: '1000000000010',
       avatarUrl: null,
       scanSource: 'messenger',
     },

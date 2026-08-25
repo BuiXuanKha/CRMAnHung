@@ -75,7 +75,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Có trên staging.
-21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging (20 253 tin / 2 448 ảnh CDN). Inbox Facebook sống (`facebook.com/messages`) — **cần bàn rõ hơn**; menu **Mở chat** = mở rail; **Mở Messenger** = `messenger.com`.
+21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging. Menu **Mở chat** / **Mở Messenger** = tab ngoài như CRM cũ (`facebook.com/messages` · `messenger.com`), không mở rail.
 22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. **API** (`GET /customers/:id/lodats`).
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; lọc lô = icon trên cột Tên; **không** icon mess trên item. **API `lodatCount`.**
 24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Có trên staging.
@@ -201,8 +201,8 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 | Mục | Việc |
 |-----|------|
-| Mở chat | Mở rail **Nội dung chat** (tin + ảnh đã lưu) |
-| Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid khách) |
+| Mở chat | Tab `facebook.com/messages/t/{threadId}` (CRM cũ). Chỉ hiện khi có thread số; **ẩn mobile**. Tin đã lưu xem qua rail «Nội dung chat» |
+| Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Chỉ hiện khi có id số hợp lệ |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
 | Tạo lô đất | STAFF → form sau (`/them-lo-dat`). Hiện alert đang phát triển. ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | Form từ khách sau. Hiện alert đang phát triển |
@@ -353,7 +353,7 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 | Mục | Việc |
 |-----|------|
-| Mở chat | **Không** (không Inbox tab trên điện thoại) |
+| Mở chat | Tab `facebook.com/messages/t/…` (ẩn mobile; cần thread số) |
 | Mở Messenger | Tab `messenger.com/t/…` |
 | Cập nhật chăm sóc | Trang `/khach-hang/[id]/cham-soc`. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat`. ADMIN: báo không được tạo |

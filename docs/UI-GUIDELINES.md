@@ -219,8 +219,8 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 
 | Mục | Ghi chú UI |
 |-----|------------|
-| Mở chat | Mở rail «Nội dung chat» (desktop) — tin + ảnh đã lưu |
-| Mở Messenger | Tab Facebook / Messenger; thiếu thread/uid → CrmAlert |
+| Mở chat | Tab `facebook.com/messages/t/…` (thread số); ẩn mobile / thiếu thread |
+| Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu → ẩn mục (hoặc CrmAlert) |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
 | Tạo lô đất | Đang phát triển (CrmAlert). ADMIN: báo không tạo từ menu khách |
 | Dịch vụ sổ đỏ | Đang phát triển (CrmAlert) |
