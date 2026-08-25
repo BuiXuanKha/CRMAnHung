@@ -20,6 +20,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | `add-shared-contract` | Thêm Zod/types vào `packages/shared` |
 | `ui-guidelines` | **Trước mọi UI** — đọc `docs/UI-GUIDELINES.md` |
 | `crm-data-table` | **Bảng list CRM** — hover/scroll/font theo §4.5 |
+| `crm-list-state` | **Nhớ tìm/lọc/cuộn list** — `sessionStorage` + `shared/list-state` |
 | `crm-dialog` | **Alert / confirm / form modal** — §4.7; không `window.confirm` |
 | `ui-mock-feature` | Làm màn hình Web với mock data |
 | `nest-domain-module` | Thêm module NestJS API |

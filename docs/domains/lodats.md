@@ -267,6 +267,24 @@ CRM cũ: nút GD / Sửa / Xóa (admin, lô admin tạo) trên dòng.
 
 `Hiển thị N / Tổng M lô đất`.
 
+#### 12.1.5 Nhớ tìm / lọc / cuộn khi rời list
+
+Cùng quy tắc shared list-state (`apps/web/src/shared/list-state`) như `/khach-hang` §12.1.5:
+
+| Lưu | Gồm |
+|-----|-----|
+| Lọc | Ô tìm (`@`/`@@`), trạng thái, phân loại, ảnh, địa chỉ, DT/hướng, khoảng giá |
+| Chọn | `selectedId` |
+| Cuộn | `scrollTop` + `anchorId` (dòng/thẻ đầu còn thấy) |
+
+- Storage: **sessionStorage** key `crmanhung:lodat-list-state` (theo tab; đóng tab / đăng xuất → mất).
+- Lưu khi: đổi lọc, cuộn, rời list (chi tiết, sửa, Back, F5 cùng tab).
+- Vào lại: khôi phục lọc → fetch → đặt lại scroll; che list ngắn lúc restore (~4s an toàn).
+- Đổi tìm/lọc → scroll về đầu.
+- **Không** nhớ panel (list lô không có rail phải).
+
+Máy tính (thân bảng) và mobile (danh sách thẻ) cùng quy tắc.
+
 ---
 
 ### 12.2 Giao diện mobile

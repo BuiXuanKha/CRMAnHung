@@ -230,7 +230,7 @@ Ghim: nền vàng. Đang chọn: highlight. Đã xoá: hàng kiểu ẩn.
 
 **Nhớ vị trí + lọc khi rời list**
 
-Lưu **sessionStorage** (theo tab; đóng tab thì mất):
+Lưu **sessionStorage** (theo tab; đóng tab thì mất) qua helper chung `apps/web/src/shared/list-state` (`createListStateStore`, key `crmanhung:customer-list-state`):
 
 | Lưu | Gồm |
 |-----|-----|

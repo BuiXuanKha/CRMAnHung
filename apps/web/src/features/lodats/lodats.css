@@ -22,6 +22,15 @@
   flex: 1;
 }
 
+.ld-list-restore {
+  display: contents;
+}
+
+.ld-list-restore.is-restoring .ld-table-shell,
+.ld-list-restore.is-restoring .ld-cards-shell {
+  opacity: 0;
+}
+
 .ld-filter-wrap {
   flex-shrink: 0;
   border: 1px solid var(--ld-line);
