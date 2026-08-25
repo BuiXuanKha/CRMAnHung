@@ -7,34 +7,64 @@ type Props = {
   detail: LodatDetail;
 };
 
-function statusLabel(status: LodatDetail['status']): string {
-  return status === LodatSaleStatus.DANG_BAN ? 'Mở bán' : 'Tạm dừng';
+function statusLabel(status: string): string {
+  if (status === LodatSaleStatus.DANG_BAN) return 'Mở bán';
+  if (status === LodatSaleStatus.TAM_DUNG) return 'Tạm dừng';
+  if (status === 'DAT_COC') return 'Đã cọc';
+  if (status === 'DA_BAN') return 'Đã bán';
+  return status || '—';
 }
 
-/**
- * Lịch sử chủ đầy đủ (API maps) = slice sau.
- * Hiện card chủ active từ detail để khớp layout CRM cũ.
- */
+/** Lịch sử chủ — mọi map của lô (lodats.md §12.4.5). */
 export function LodatEditOwnerHistory({ detail }: Props) {
-  if (!detail.owner) return null;
+  const rows = detail.ownerHistory?.length
+    ? detail.ownerHistory
+    : detail.owner
+      ? [
+          {
+            id: detail.owner.customerId,
+            customerId: detail.owner.customerId,
+            fullName: detail.owner.fullName,
+            isActive: true,
+            status: detail.status,
+            priceVnd: detail.priceVnd ?? null,
+            startedAt: detail.updatedAt,
+            endedAt: null as string | null,
+          },
+        ]
+      : [];
+
+  if (rows.length === 0) return null;
 
   return (
     <section className="ld-edit-card">
       <h2 className="ld-edit-section-title">Lịch sử chủ đất</h2>
       <ul className="ld-edit-history-list">
-        <li className="ld-edit-history-item active">
-          <div className="ld-edit-history-head">
-            <span className="ld-edit-history-owner">{detail.owner.fullName}</span>
-            <span className="ld-edit-history-badge">Đang active</span>
-          </div>
-          <div className="ld-edit-history-meta">
-            <span>{statusLabel(detail.status)}</span>
-            <span>{formatPriceVnd(detail.priceVnd)}</span>
-          </div>
-          <div className="ld-edit-history-dates">
-            Từ {formatUpdatedAt(detail.updatedAt)}
-          </div>
-        </li>
+        {rows.map((row) => (
+          <li
+            key={row.id}
+            className={row.isActive ? 'ld-edit-history-item active' : 'ld-edit-history-item'}
+          >
+            <div className="ld-edit-history-head">
+              <span className="ld-edit-history-owner">{row.fullName}</span>
+              <span
+                className={
+                  row.isActive ? 'ld-edit-history-badge' : 'ld-edit-history-badge ended'
+                }
+              >
+                {row.isActive ? 'Đang active' : 'Đã kết thúc'}
+              </span>
+            </div>
+            <div className="ld-edit-history-meta">
+              <span>{statusLabel(row.status)}</span>
+              <span>{formatPriceVnd(row.priceVnd)}</span>
+            </div>
+            <div className="ld-edit-history-dates">
+              Từ {formatUpdatedAt(row.startedAt)}
+              {row.endedAt ? ` · Đến ${formatUpdatedAt(row.endedAt)}` : ''}
+            </div>
+          </li>
+        ))}
       </ul>
     </section>
   );

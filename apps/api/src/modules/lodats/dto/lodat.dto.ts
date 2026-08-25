@@ -10,6 +10,7 @@ import {
   Max,
   MaxLength,
   Min,
+  MinLength,
   ValidateIf,
 } from 'class-validator';
 
@@ -101,6 +102,13 @@ export class ListLodatsQueryDto {
 export class UpdateLodatSaleStatusDto {
   @IsIn(['DANG_BAN', 'TAM_DUNG'], { message: 'Trạng thái rao bán không hợp lệ.' })
   status!: 'DANG_BAN' | 'TAM_DUNG';
+}
+
+export class ChangeLodatOwnerDto {
+  @IsString()
+  @MinLength(1, { message: 'Chọn khách làm chủ mới.' })
+  @MaxLength(60)
+  customerId!: string;
 }
 
 export class UpdateLodatImageRotationDto {

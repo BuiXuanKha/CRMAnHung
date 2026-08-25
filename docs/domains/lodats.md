@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list + chi tiết + gallery + lô cùng xã + **trang sửa** `/sua` + **form tạo lô từ khách** (§12.5); **chưa bàn** list ADMIN / đổi chủ
+- **Status:** Ready for API — list + chi tiết + gallery + lô cùng xã + **trang sửa** `/sua` (kể **đổi chủ**) + **form tạo lô từ khách** (§12.5); **chưa bàn** list ADMIN
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
@@ -390,7 +390,7 @@ CRM cũ `relatedAside`: desktop **cột phải sticky** (`max-height` + scroll t
 
 #### 12.3.5 Để sau
 
-Lịch sử chủ / đổi chủ · lịch sử GD · **upload ảnh** (form tạo/sửa — upload LodatImage trên trang sửa slice sau nếu chưa kịp) · form tạo lô từ khách.
+Lịch sử GD · gắn ảnh chat trên form sửa.
 
 ---
 
@@ -428,11 +428,24 @@ Xếp dọc: thông số → chủ/giá → lịch sử → hình ảnh → xem 
 
 Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thông số thửa; map giá vẫn sửa được.
 
-#### 12.4.4 Để sau trên trang sửa
+#### 12.4.4 Đổi chủ
 
-Đổi chủ (modal) · lịch sử chủ **đầy đủ** (mọi map đã kết thúc) · gắn ảnh chat.
+Nút **Đổi chủ** (cùng hàng tiêu đề «Chủ đất & giá bán»). Chỉ hiện khi `canEditMap` (NV giữ luồng / ADMIN).
 
-Hiện tại: card «Lịch sử chủ đất» chỉ hiện **chủ active** từ detail (UI khớp CRM cũ).
+Bấm → **CrmDialog** form «Đổi chủ đất»:
+
+1. Dòng chủ hiện tại (tên).
+2. Ô tìm khách (tên / SĐT) — debounce ~250ms; STAFF chỉ khách của mình; ADMIN mọi khách đang hiện (`isHidden=false`). **Không** liệt kê chủ đang active.
+3. Danh sách: tên đậm + SĐT; bấm một dòng = chọn (viền xanh).
+4. Huỷ · **Đổi chủ** (primary). Chưa chọn / trùng chủ hiện tại → không gửi.
+
+**Nghiệp vụ:** đóng map active (`isActive=false`, `endedAt=now`) → tạo map mới (cùng lô, khách mới). Copy giá / ghi chú giá / hoa hồng / trạng thái rao bán / ghi chú liên kết từ map cũ để tin rao không mất số. Toast «Đã đổi chủ sang …». Card lịch sử hiện map đã kết thúc + map active.
+
+Không đổi `Lodat.createdByEmployeeId` (luồng NV giữ nguyên).
+
+#### 12.4.5 Lịch sử chủ đất
+
+Mọi map của lô (active trước, cũ sau). Active: badge xanh «Đang active». Đã kết thúc: badge xám + ngày kết thúc. Gắn ảnh chat — để sau.
 
 ---
 
@@ -469,12 +482,13 @@ Xếp dọc như §12.4.2 (một cột; Huỷ/Tạo cuối form; nút «Thêm �
 |----------|------|
 | `GET /lodats/project-lots?addressId=` | Kho lô của địa chỉ PROJECT + cờ `takenByMe` |
 | `POST /lodats` | Tạo lô dân (addressId REGULAR + specs) hoặc lô dự án (projectLotId) + map chủ; chặn ADMIN; khách phải thuộc NV |
+| `POST /lodats/:id/change-owner` | Đổi chủ: đóng map active, mở map mới. Body `{ customerId }`. STAFF: lô mình + khách mình. ADMIN: mọi lô / khách đang hiện. |
 
 ---
 
 ## 13. Lịch làm — thứ tự DB (STAFF trước)
 
-**Có: phải có sổ địa chỉ trước lô.** Prisma + copy kho/map/ảnh **xong staging**. API list `/lo-dat` STAFF trong PR này. Còn: Admin import kho, tạo lô, đổi chủ, list ADMIN.
+**Có: phải có sổ địa chỉ trước lô.** Prisma + copy kho/map/ảnh **xong staging**. API list `/lo-dat` STAFF trong PR này. Còn: Admin import kho, list ADMIN.
 
 Khách (`Customer`) **đã có** — map chủ mới gắn được.
 
@@ -511,7 +525,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | **Done** — §12.5; `POST /lodats` + picker kho |
-| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + **form sửa** (PATCH + upload LodatImage) **xong**; đổi chủ Todo |
+| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + form sửa **xong**; **đổi chủ** `POST /lodats/:id/change-owner` |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
 
 Copy data: script **chỉ đọc** SQLite, idempotent, map id trong schema `migrate` — như khách. Skill agent: **`migrate-legacy-data`** (preflight FK, giữ luồng kha/buinam, reshape PROJECT → `ProjectLot`).

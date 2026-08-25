@@ -23,6 +23,7 @@ import {
   UpdateLodatDto,
   UpdateLodatImageRotationDto,
   UpdateLodatSaleStatusDto,
+  ChangeLodatOwnerDto,
 } from './dto/lodat.dto';
 import { LodatsService } from './lodats.service';
 
@@ -75,6 +76,15 @@ export class LodatsController {
     @Body() dto: UpdateLodatSaleStatusDto,
   ) {
     return this.lodats.updateSaleStatus(user, id, dto);
+  }
+
+  @Post(':id/change-owner')
+  changeOwner(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: ChangeLodatOwnerDto,
+  ) {
+    return this.lodats.changeOwner(user, id, dto);
   }
 
   @Patch(':id/images/:imageId/rotation')

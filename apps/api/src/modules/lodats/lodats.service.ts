@@ -9,6 +9,7 @@ import type { RequestUser } from '../../common/decorators/current-user.decorator
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type {
+  ChangeLodatOwnerDto,
   CreateLodatDto,
   ListLodatsQueryDto,
   UpdateLodatDto,
@@ -219,7 +220,7 @@ export class LodatsService {
     };
   }
 
-  private mapDetail(row: LodatRow, user: RequestUser) {
+  private async mapDetail(row: LodatRow, user: RequestUser) {
     const base = this.mapRow(row);
     const images = this.galleryImages(row);
     const activeMap = row.maps[0] ?? null;
@@ -230,6 +231,7 @@ export class LodatsService {
     const isProject = Boolean(row.projectLotId);
     const canAccess =
       user.role === 'ADMIN' || row.createdByEmployeeId === user.id;
+    const ownerHistory = await this.listOwnerHistory(row.id);
     return {
       ...base,
       note: note?.trim() || null,
@@ -251,7 +253,28 @@ export class LodatsService {
       canEditSpecs: canAccess && !isProject,
       canEditMap: canAccess,
       canEditImages: canAccess && !isProject,
+      ownerHistory,
     };
+  }
+
+  private async listOwnerHistory(lodatId: string) {
+    const maps = await this.prisma.lodatCustomerMap.findMany({
+      where: { lodatId },
+      orderBy: [{ isActive: 'desc' }, { createdAt: 'desc' }],
+      include: {
+        customer: { select: { id: true, fullName: true } },
+      },
+    });
+    return maps.map((m) => ({
+      id: m.id,
+      customerId: m.customerId,
+      fullName: m.customer.fullName,
+      isActive: m.isActive,
+      status: m.status,
+      priceVnd: this.toPriceNumber(m.priceVnd),
+      startedAt: m.createdAt.toISOString(),
+      endedAt: m.endedAt?.toISOString() ?? null,
+    }));
   }
 
   private ownershipWhere(user: RequestUser): Prisma.LodatWhereInput {
@@ -535,6 +558,73 @@ export class LodatsService {
     await this.prisma.lodat.update({
       where: { id },
       data: { updatedAt: new Date() },
+    });
+
+    const refreshed = await this.prisma.lodat.findUniqueOrThrow({
+      where: { id },
+      include: LIST_INCLUDE,
+    });
+    return this.mapDetail(refreshed, user);
+  }
+
+  /**
+   * Đổi chủ trong luồng NV (lodats.md §0.3 / §12.4.4):
+   * đóng map active → tạo map mới (copy giá/trạng thái).
+   */
+  async changeOwner(user: RequestUser, id: string, dto: ChangeLodatOwnerDto) {
+    const customerId = String(dto.customerId || '').trim();
+    if (!customerId) {
+      throw new BadRequestException('Chọn khách làm chủ mới.');
+    }
+
+    const row = await this.prisma.lodat.findUnique({
+      where: { id },
+      include: LIST_INCLUDE,
+    });
+    if (!row) {
+      throw new NotFoundException('Không tìm thấy lô đất.');
+    }
+    this.assertCanAccess(user, row.createdByEmployeeId);
+
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: customerId },
+      select: { id: true, employeeId: true, isHidden: true, fullName: true },
+    });
+    if (!customer || customer.isHidden) {
+      throw new NotFoundException('Không tìm thấy khách hàng.');
+    }
+    if (user.role !== 'ADMIN' && customer.employeeId !== user.id) {
+      throw new ForbiddenException('Khách này không thuộc hồ sơ của bạn.');
+    }
+
+    const activeMap = row.maps[0] ?? null;
+    if (activeMap && activeMap.customerId === customer.id) {
+      throw new BadRequestException('Khách này đã là chủ hiện tại.');
+    }
+
+    const now = new Date();
+    await this.prisma.$transaction(async (tx) => {
+      await tx.lodatCustomerMap.updateMany({
+        where: { lodatId: id, isActive: true },
+        data: { isActive: false, endedAt: now },
+      });
+      await tx.lodatCustomerMap.create({
+        data: {
+          lodatId: id,
+          customerId: customer.id,
+          priceVnd: activeMap?.priceVnd ?? null,
+          priceNote: activeMap?.priceNote ?? null,
+          brokerFeeNote: activeMap?.brokerFeeNote ?? null,
+          note: activeMap?.note ?? null,
+          status: activeMap?.status ?? 'DANG_BAN',
+          isActive: true,
+          createdByEmployeeId: user.id,
+        },
+      });
+      await tx.lodat.update({
+        where: { id },
+        data: { updatedAt: now },
+      });
     });
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({

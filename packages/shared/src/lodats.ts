@@ -108,6 +108,20 @@ export const lodatOwnerSchema = z.object({
 
 export type LodatOwner = z.infer<typeof lodatOwnerSchema>;
 
+/** Một dòng lịch sử chủ (mọi map của lô). */
+export const lodatOwnerHistoryItemSchema = z.object({
+  id: z.string(),
+  customerId: z.string(),
+  fullName: z.string(),
+  isActive: z.boolean(),
+  status: z.string(),
+  priceVnd: z.union([z.number(), z.string()]).nullable().optional(),
+  startedAt: z.string(),
+  endedAt: z.string().nullable(),
+});
+
+export type LodatOwnerHistoryItem = z.infer<typeof lodatOwnerHistoryItemSchema>;
+
 /**
  * Ảnh trên chi tiết / gallery.
  * `source: address` = ảnh dự án chung (không lưu xoay từ NV).
@@ -137,6 +151,7 @@ export const lodatDetailSchema = lodatListItemSchema.extend({
   canEditSpecs: z.boolean().default(false),
   canEditMap: z.boolean().default(false),
   canEditImages: z.boolean().default(false),
+  ownerHistory: z.array(lodatOwnerHistoryItemSchema).default([]),
 });
 
 export type LodatDetail = z.infer<typeof lodatDetailSchema>;
@@ -260,3 +275,10 @@ export const createLodatSchema = z
   });
 
 export type CreateLodatInput = z.infer<typeof createLodatSchema>;
+
+/** Đổi chủ trên trang sửa (§12.4.4). */
+export const changeLodatOwnerSchema = z.object({
+  customerId: z.string().trim().min(1, 'Chọn khách làm chủ mới.'),
+});
+
+export type ChangeLodatOwnerInput = z.infer<typeof changeLodatOwnerSchema>;

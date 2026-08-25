@@ -1,0 +1,125 @@
+/* Modal đổi chủ — cùng chrome picker lô kho (§12.4.4) */
+
+.ld-change-owner-lead {
+  margin: 0 0 12px;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ld-change-owner-search {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.ld-change-owner-search span {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+}
+
+.ld-change-owner-search input {
+  font: inherit;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+}
+
+.ld-change-owner-search input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.ld-change-owner-list-head {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #64748b;
+  margin-bottom: 8px;
+}
+
+.ld-change-owner-list-head span {
+  color: #2563eb;
+}
+
+.ld-change-owner-state {
+  margin: 0;
+  padding: 16px 0;
+  color: #64748b;
+  font-size: 0.88rem;
+}
+
+.ld-change-owner-state.error {
+  color: #b91c1c;
+}
+
+.ld-change-owner-list {
+  list-style: none;
+  margin: 0;
+  padding: 2px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: min(40vh, 360px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.ld-change-owner-item {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  font: inherit;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+}
+
+.ld-change-owner-item:hover:not(:disabled) {
+  border-color: #bfdbfe;
+  background: #f8fafc;
+}
+
+.ld-change-owner-item.is-selected {
+  border-color: #2563eb;
+  background: #eff6ff;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+
+.ld-change-owner-item:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.ld-change-owner-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ld-change-owner-text strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.ld-change-owner-text .sub {
+  font-size: 0.82rem;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.ld-change-owner-picked {
+  margin: 10px 0 0;
+  font-size: 0.88rem;
+  color: #334155;
+}

@@ -19,6 +19,7 @@ import {
 import { AddressPicker } from '@/features/addresses/components/address-picker';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import {
+  changeLodatOwner,
   deleteLodatImage,
   formatPriceInput,
   getLodat,
@@ -27,12 +28,7 @@ import {
   updateLodatImageRotation,
   uploadLodatImage,
 } from './api';
-import {
-  COMING_SOON_CONFIRM,
-  COMING_SOON_ICON,
-  COMING_SOON_TITLE,
-  comingSoonMessage,
-} from './coming-soon';
+import { ChangeOwnerModal } from './components/change-owner-modal';
 import { LodatEditImages } from './components/lodat-edit-images';
 import { LodatEditOwnerHistory } from './components/lodat-edit-owner-history';
 import { LodatEditPreview } from './components/lodat-edit-preview';
@@ -93,8 +89,9 @@ export function LodatEditPage() {
   const [mapForm, setMapForm] = useState<MapForm | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
-  const [comingSoon, setComingSoon] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [ownerOpen, setOwnerOpen] = useState(false);
+  const [ownerError, setOwnerError] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
 
@@ -138,6 +135,19 @@ export function LodatEditPage() {
       router.push(`/lo-dat/${id}`);
     },
     onError: (err: Error) => setFormError(err.message),
+  });
+
+  const ownerMut = useMutation({
+    mutationFn: (customerId: string) => changeLodatOwner(id, { customerId }),
+    onSuccess: async (updated) => {
+      qc.setQueryData(['lodat', id], updated);
+      await qc.invalidateQueries({ queryKey: ['lodats'] });
+      await qc.invalidateQueries({ queryKey: ['customer-lodats'] });
+      setOwnerOpen(false);
+      setOwnerError(null);
+      flash(`Đã đổi chủ sang ${updated.owner?.fullName ?? 'khách mới'}.`);
+    },
+    onError: (err: Error) => setOwnerError(err.message),
   });
 
   const uploadMut = useMutation({
@@ -249,6 +259,7 @@ export function LodatEditPage() {
     uploadMut.isPending ||
     deleteMut.isPending ||
     rotateMut.isPending ||
+    ownerMut.isPending ||
     q.isLoading;
 
   return (
@@ -385,14 +396,19 @@ export function LodatEditPage() {
               <section className="ld-edit-card">
                 <div className="ld-edit-section-head">
                   <h2 className="ld-edit-section-title">Chủ đất & giá bán</h2>
-                  <button
-                    type="button"
-                    className="ld-edit-change-owner"
-                    onClick={() => setComingSoon(comingSoonMessage('Đổi chủ đất'))}
-                    disabled={busy}
-                  >
-                    Đổi chủ
-                  </button>
+                  {canEditMap ? (
+                    <button
+                      type="button"
+                      className="ld-edit-change-owner"
+                      onClick={() => {
+                        setOwnerError(null);
+                        setOwnerOpen(true);
+                      }}
+                      disabled={busy}
+                    >
+                      Đổi chủ
+                    </button>
+                  ) : null}
                 </div>
                 {detail.owner ? (
                   <p className="ld-edit-owner">
@@ -572,13 +588,16 @@ export function LodatEditPage() {
         />
       ) : null}
 
-      <CrmAlertDialog
-        open={Boolean(comingSoon)}
-        title={COMING_SOON_TITLE}
-        message={comingSoon ?? ''}
-        icon={COMING_SOON_ICON}
-        confirmLabel={COMING_SOON_CONFIRM}
-        onClose={() => setComingSoon(null)}
+      <ChangeOwnerModal
+        open={ownerOpen}
+        currentOwner={detail?.owner ?? null}
+        busy={ownerMut.isPending}
+        error={ownerError}
+        onClose={() => {
+          setOwnerOpen(false);
+          setOwnerError(null);
+        }}
+        onSubmit={(customerId) => ownerMut.mutateAsync(customerId).then(() => undefined)}
       />
       <CrmAlertDialog
         open={Boolean(alertMsg)}

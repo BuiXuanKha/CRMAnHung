@@ -2,16 +2,19 @@ import {
   LODAT_KIND_LABELS,
   LodatKind,
   LodatSaleStatus,
+  changeLodatOwnerSchema,
   createLodatSchema,
   updateLodatImageRotationSchema,
   updateLodatSaleStatusSchema,
   updateLodatSchema,
+  type ChangeLodatOwnerInput,
   type CreateLodatInput,
   type LodatDetail,
   type LodatImage,
   type LodatListItem,
   type LodatListQuery,
   type LodatListResponse,
+  type LodatOwnerHistoryItem,
   type LodatSameWardResponse,
   type ProjectLotOptionsResponse,
   type UpdateLodatImageRotationInput,
@@ -20,6 +23,7 @@ import {
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 import { isMockLodats } from '@/shared/api/mode';
+import { mockCustomers } from '@/features/customers/mock-data';
 import {
   applyExtraFilters,
   applyPriceBracket,
@@ -31,7 +35,9 @@ let mockStore: LodatListItem[] = structuredClone(mockLodats);
 const mockRotations = new Map<string, number>();
 const mockExtras = new Map<
   string,
-  Partial<Pick<LodatDetail, 'note' | 'mapNote' | 'addressId' | 'images'>>
+  Partial<
+    Pick<LodatDetail, 'note' | 'mapNote' | 'addressId' | 'images' | 'ownerHistory'>
+  > & { owner?: LodatDetail['owner'] }
 >();
 
 const MOCK_IMAGE_POOL = [
@@ -69,6 +75,32 @@ function toDetail(item: LodatListItem): LodatDetail {
   const images = mockImages(item);
   const isProject = Boolean(item.projectLotId);
   const extras = mockExtras.get(item.id);
+  const owner =
+    extras?.owner !== undefined
+      ? extras.owner
+      : item.customerHint
+        ? {
+            customerId: `mock-owner-${item.id}`,
+            fullName: item.customerHint,
+            phones: [],
+          }
+        : null;
+  const ownerHistory: LodatOwnerHistoryItem[] =
+    extras?.ownerHistory ??
+    (owner
+      ? [
+          {
+            id: `hist-${item.id}`,
+            customerId: owner.customerId,
+            fullName: owner.fullName,
+            isActive: true,
+            status: item.status,
+            priceVnd: item.priceVnd ?? null,
+            startedAt: item.updatedAt,
+            endedAt: null,
+          },
+        ]
+      : []);
   return {
     ...item,
     note: extras?.note ?? null,
@@ -81,12 +113,11 @@ function toDetail(item: LodatListItem): LodatDetail {
       : item.address?.includes('Hồng Phong')
         ? 'Hồng Phong'
         : 'An Đồng',
-    owner: item.customerHint
-      ? { customerId: 'mock', fullName: item.customerHint, phones: [] }
-      : null,
+    owner,
     canEditSpecs: !isProject,
     canEditMap: true,
     canEditImages: !isProject,
+    ownerHistory,
   };
 }
 
@@ -200,6 +231,61 @@ export async function updateLodatSaleStatus(
   }
   return apiFetch<LodatDetail>(`/lodats/${id}/sale-status`, {
     method: 'PATCH',
+    body: JSON.stringify(parsed),
+  });
+}
+
+export async function changeLodatOwner(
+  id: string,
+  input: ChangeLodatOwnerInput,
+): Promise<LodatDetail> {
+  const parsed = changeLodatOwnerSchema.parse(input);
+  if (isMockLodats()) {
+    const idx = mockStore.findIndex((p) => p.id === id);
+    if (idx < 0) throw new Error('Không tìm thấy lô đất');
+    const current = mockStore[idx];
+    const detail = toDetail(current);
+    if (detail.owner?.customerId === parsed.customerId) {
+      throw new Error('Khách này đã là chủ hiện tại.');
+    }
+    const found = mockCustomers.find((c) => c.id === parsed.customerId && !c.isHidden);
+    if (!found) throw new Error('Không tìm thấy khách hàng.');
+    const now = new Date().toISOString();
+    const ended: LodatOwnerHistoryItem[] = (detail.ownerHistory ?? []).map((h) =>
+      h.isActive ? { ...h, isActive: false, endedAt: now } : h,
+    );
+    const nextOwner = {
+      customerId: found.id,
+      fullName: found.fullName,
+      phones: found.primaryPhone
+        ? [{ phone: found.primaryPhone, label: null }]
+        : found.phones.map((p) => ({ phone: p.phone, label: p.label ?? null })),
+    };
+    const nextHistory: LodatOwnerHistoryItem[] = [
+      {
+        id: `hist-${id}-${now}`,
+        customerId: found.id,
+        fullName: found.fullName,
+        isActive: true,
+        status: current.status,
+        priceVnd: current.priceVnd ?? null,
+        startedAt: now,
+        endedAt: null,
+      },
+      ...ended,
+    ];
+    const updated: LodatListItem = {
+      ...current,
+      customerHint: found.fullName,
+      updatedAt: now,
+    };
+    mockStore = mockStore.map((p, i) => (i === idx ? updated : p));
+    const extras = mockExtras.get(id) ?? {};
+    mockExtras.set(id, { ...extras, owner: nextOwner, ownerHistory: nextHistory });
+    return toDetail(updated);
+  }
+  return apiFetch<LodatDetail>(`/lodats/${id}/change-owner`, {
+    method: 'POST',
     body: JSON.stringify(parsed),
   });
 }

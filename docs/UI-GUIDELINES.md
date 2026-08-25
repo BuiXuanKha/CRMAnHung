@@ -638,6 +638,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-20 | Chi tiết `/khach-hang/[id]`: hero + SĐT + tài chính + lịch sử; lô đất mock. Mobile bấm thẻ → trang này |
 | 2026-08-20 | List `/khach-hang`: lần đầu 50 dòng, cuộn gần đáy tải thêm 50; nhớ lọc/scroll khi rời trang (mọi lối, cùng tab) |
 | 2026-08-20 | Mục 24 list khách: tải 50 dòng khi cuộn + nhớ lọc/scroll (sessionStorage) — `customers.md` §12.1.5 |
+| 2026-08-25 | Trang sửa lô: **Đổi chủ** (CrmDialog chọn khách; đóng map cũ / mở map mới) |
 | 2026-08-25 | List `/lo-dat`: lần đầu 50 dòng, cuộn gần đáy tải thêm 50; lọc cột chạy trên API; hook `useCrmInfiniteList` |
 | 2026-08-25 | Ô tìm list CRM: hangtag **Clear** (`CrmBadge` gray) ngay sau con trỏ — `CrmSearchField` |
 | 2026-08-25 | Helper chung nhớ list (`shared/list-state` + skill `crm-list-state`): `/khach-hang` refactor; `/lo-dat` nhớ tìm/lọc/cuộn; logout xóa mọi `*-list-state` |
