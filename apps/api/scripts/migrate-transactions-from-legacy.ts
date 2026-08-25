@@ -65,6 +65,22 @@ function asString(value: unknown): string | null {
   return t ? t : null;
 }
 
+function snapshotTitle(snap: Row): string | null {
+  return asString(col(snap, 'Title', 'LodatTitle'));
+}
+
+function snapshotAddressText(snap: Row): string | null {
+  const direct = asString(col(snap, 'AddressText'));
+  if (direct) return direct;
+  const parts = [
+    asString(col(snap, 'AddressDetail')),
+    asString(col(snap, 'AddressWard')),
+    asString(col(snap, 'AddressDistrict')),
+    asString(col(snap, 'AddressProvince')),
+  ].filter((p): p is string => Boolean(p));
+  return parts.length ? parts.join(', ') : null;
+}
+
 function toDate(ms: unknown): Date {
   const n = asNumber(ms);
   if (n && n > 0) return new Date(n);
@@ -425,8 +441,8 @@ async function main() {
       const savedSnap = await prisma.transactionSnapshot.create({
         data: {
           transactionId: txId,
-          title: asString(col(snap, 'Title')),
-          addressText: asString(col(snap, 'AddressText')),
+          title: snapshotTitle(snap),
+          addressText: snapshotAddressText(snap),
           areaM2: asNumber(col(snap, 'AreaM2')),
           frontageM: asNumber(col(snap, 'FrontageM')),
           direction: asString(col(snap, 'Direction')),
@@ -435,8 +451,8 @@ async function main() {
           mapPriceVnd: toBigInt(col(snap, 'MapPriceVnd')),
           mapPriceNote: asString(col(snap, 'MapPriceNote')),
           mapBrokerFeeNote: asString(col(snap, 'MapBrokerFeeNote')),
-          mapNote: asString(col(snap, 'MapNote')),
-          createdAt: toDate(col(snap, 'CreatedAtMs')),
+          mapNote: asString(col(snap, 'MapNote', 'MapNotes', 'LotNote')),
+          createdAt: toDate(col(snap, 'CreatedAtMs', 'SnapshotAtMs')),
         },
       });
       const snapOld = rowOldId(snap, 'TransactionId');
@@ -500,7 +516,7 @@ async function main() {
             kind,
             label: asString(col(att, 'Label')),
             sortOrder: asNumber(col(att, 'SortOrder')) ?? i,
-            createdAt: toDate(col(att, 'CreatedAtMs')),
+            createdAt: toDate(col(att, 'CreatedAtMs', 'UploadedAtMs')),
           },
         });
         const attOld = rowOldId(att);
@@ -529,6 +545,20 @@ async function main() {
   for (const row of owners) {
     console.log(
       `  ${row.code} ${row.type} ${row.status} createdBy=${row.createdBy.username}`,
+    );
+  }
+  const destSnaps = await prisma.transactionSnapshot.findMany({
+    select: {
+      title: true,
+      addressText: true,
+      transaction: { select: { code: true } },
+      _count: { select: { images: true } },
+    },
+    orderBy: { transaction: { code: 'asc' } },
+  });
+  for (const snap of destSnaps) {
+    console.log(
+      `  snapshot ${snap.transaction.code} title=${snap.title ?? '∅'} ảnh=${snap._count.images} addr=${snap.addressText ?? '∅'}`,
     );
   }
 

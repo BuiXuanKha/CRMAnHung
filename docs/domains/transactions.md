@@ -1,7 +1,7 @@
 # Domain: Transactions (Giao dịch)
 
 - **Slug:** `transactions`
-- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI mock (list / chi tiết / form / tạo từ lô). Copy CRM cũ **sau**.
+- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI + **copy CRM cũ xong staging** (2 GD).
 - **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich` (SQLite `tblTransaction*`, 2026-08-25)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
@@ -134,9 +134,9 @@ Chi tiết cột: [`MIGRATION.md`](../MIGRATION.md) bước 11. Tóm tắt:
 | `tblTransactionSnapshotImage` | `TransactionSnapshotImage.objectKey` (R2; không path disk) |
 | `tblTransactionAttachment` | `TransactionAttachment.objectKey` + `kind` |
 
-**PROJECT:** `lodatId` mới = `Lodat` của **map** (`lodat_customer_map`), không map `tblLodats.ID` kho. Live cũ: 2 GD `OWN`+`HOAN_TAT` (buinam), 0 file đính kèm.
+**PROJECT:** `lodatId` mới = `Lodat` của **map** (`lodat_customer_map`), không map `tblLodats.ID` kho.
 
-Script copy: `pnpm transactions:migrate-legacy` (cần bước 10d). Live cũ: 2 GD `OWN`+`HOAN_TAT` (buinam), 0 file đính kèm.
+Script copy: `pnpm transactions:migrate-legacy`. **Xong staging (2026-08-25)** — 2/2 GD `OWN`+`HOAN_TAT` (`GD-2026-0002` / `GD-2026-0003`, **buinam**), 2 snapshot, 9 ảnh, 0 đính kèm. Snapshot cũ PK = `TransactionId`, tiêu đề `LodatTitle`.
 
 ## 11. CRM cũ vs web mới
 

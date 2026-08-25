@@ -81,7 +81,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 10b | `tblAddresses` + ảnh dự án R2 | `address`, `address_image` | `pnpm addresses:migrate-legacy` | Xong staging (110 địa chỉ, 9 ảnh) |
 | 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
 | 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Todo — chạy VPS; PROJECT stream `p:{lodatId}:{empId}`; giữ kha/buinam; `SKIP_LODAT_IMAGES=1` nếu chỉ text |
-| 11 | Giao dịch | `transaction` (+ party/snapshot/ảnh/đính kèm) | `pnpm transactions:migrate-legacy` | Script xong — chạy VPS sau 10d. Live cũ: 2 GD OWN+HOAN_TAT (buinam), 0 file |
+| 11 | Giao dịch | `transaction` (+ party/snapshot/ảnh/đính kèm) | `pnpm transactions:migrate-legacy` | Xong staging (2/2 GD OWN+HOAN_TAT, buinam, 2 snapshot, 9 ảnh, 0 đính kèm) |
 | 12 | Sổ đỏ | `title_service` | — | Todo |
 
 Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV copy cùng metadata `tblPersonFacebook` (UID NV) để cột Kênh liên hệ hiện tên page/nick.
@@ -90,7 +90,9 @@ Freeze CRM cũ + tắt extension trước khi copy khách.
 
 ### Bước 11 — giao dịch (schema đã chốt)
 
-Live SQLite (2026-08-25): **2** GD, cả `OWN` + `HOAN_TAT`, tạo bởi **buinam**, mã `GD-2026-0002` / `GD-2026-0003`. Attachment = 0. Sau hoàn tất, map vẫn **active + TAM_DUNG** (không `DA_BAN`).
+Live SQLite (2026-08-25): **2** GD, cả `OWN` + `HOAN_TAT`, tạo bởi **buinam**, mã `GD-2026-0002` / `GD-2026-0003`. Attachment = 0. Snapshot PK = `TransactionId` (không cột `ID`); tiêu đề = `LodatTitle`; địa chỉ = ghép `AddressDetail` + xã/huyện/tỉnh. Sau hoàn tất, map vẫn **active + TAM_DUNG** (không `DA_BAN`).
+
+**Đã copy staging** (2026-08-25): Transaction=2, map `transaction`=2, cả hai `createdBy=buinam`. Snapshot 2, ảnh snapshot 9, đính kèm 0. Map lô sẵn có (`lodat_customer_map`=190). CRM cũ không bị ghi.
 
 | Cột cũ | Cột mới |
 |--------|---------|
@@ -105,6 +107,7 @@ Live SQLite (2026-08-25): **2** GD, cả `OWN` + `HOAN_TAT`, tạo bởi **buina
 | `CreatedByEmployeeId` | `createdByEmployeeId` ← map `user` |
 | `CreatedAtMs` / `UpdatedAtMs` / `CompletedAtMs` | `createdAt` / `updatedAt` / `completedAt` |
 | Party `PersonId` / `FreeTextName` / `Role` / `SortOrder` | `customerId` / `freeTextName` (bắt buộc; copy tên nếu trống) / `role` / `sortOrder` |
+| Snapshot `LodatTitle` / địa chỉ tách cột / `SnapshotAtMs` | `title` / `addressText` (ghép) / `createdAt` |
 | Snapshot ảnh / đính kèm `StoredPath` | R2 `objectKey` (giống ảnh lô) |
 
 Cần bước 10d xong (map `lodat` + `lodat_customer_map` + `user` + `customer`). Unique 1 GD mở / lô: dữ liệu live hiện không có GD mở.
