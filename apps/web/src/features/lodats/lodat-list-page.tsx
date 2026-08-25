@@ -33,7 +33,8 @@ import '@/shared/ui/money.css';
 const DEFAULT_EXTRA: ExtraFilters = {
   photo: 'all',
   address: 'all',
-  specs: 'all',
+  area: 'all',
+  direction: 'all',
   price: 'all',
 };
 

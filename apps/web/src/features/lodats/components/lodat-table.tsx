@@ -11,7 +11,6 @@ import {
   KIND_FILTER_OPTIONS,
   PHOTO_FILTER_OPTIONS,
   PRICE_FILTER_OPTIONS,
-  SPECS_FILTER_OPTIONS,
   STATUS_FILTER_OPTIONS,
   formatArea,
   formatFrontageDir,
@@ -23,6 +22,7 @@ import {
 } from '../display';
 import { ActionMenu, type LodatAction } from './action-menu';
 import { SaleToggle } from './sale-toggle';
+import { SpecsColumnFilter } from './specs-column-filter';
 
 type HeaderFilter = 'photo' | 'address' | 'kind' | 'specs' | 'price' | 'status' | null;
 
@@ -113,14 +113,15 @@ export function LodatTable({
           </div>
           <div className="ld-col-head" role="columnheader">
             <span>DT · MT · Hướng</span>
-            <ColumnFilter
-              label="DT · MT · Hướng"
-              value={extra.specs}
-              options={SPECS_FILTER_OPTIONS}
+            <SpecsColumnFilter
+              area={extra.area}
+              direction={extra.direction}
               open={headerFilter === 'specs'}
               onToggle={() => toggleFilter('specs')}
               onClose={() => setHeaderFilter(null)}
-              onChange={(v) => onExtra({ ...extra, specs: v as ExtraFilters['specs'] })}
+              onChange={({ area, direction }) =>
+                onExtra({ ...extra, area, direction })
+              }
             />
           </div>
           <div className="ld-col-head" role="columnheader">
