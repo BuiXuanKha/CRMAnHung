@@ -35,3 +35,10 @@ export function isMockAddresses(): boolean {
 export function isMockLodats(): boolean {
   return isMockAuth();
 }
+
+/**
+ * List `/giao-dich`: API + copy CRM cũ đã có. Staging login thật → Postgres; chỉ mock khi login giả.
+ */
+export function isMockTransactions(): boolean {
+  return isMockAuth();
+}

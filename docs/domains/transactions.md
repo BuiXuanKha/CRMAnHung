@@ -1,7 +1,7 @@
 # Domain: Transactions (Giao dịch)
 
 - **Slug:** `transactions`
-- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI + **copy CRM cũ xong staging** (2 GD).
+- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI **nối API** (staging login thật, không mock). Copy CRM cũ xong (2 GD).
 - **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich` (SQLite `tblTransaction*`, 2026-08-25)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
@@ -116,7 +116,7 @@ Tạo: status = `DA_COC`; sinh `code`; copy snapshot từ lô + map active. RECO
 
 ## 8. Mock data
 
-List mock §12 / `mock-data.ts` — đủ loại, trạng thái, hẹn CC, thiếu giá. Form tạo chưa mock.
+`mock-data.ts` cho local khi `NEXT_PUBLIC_USE_MOCK_AUTH=true`. Staging login thật → API (`isMockTransactions` = `isMockAuth`).
 
 ## 9. Extension?
 

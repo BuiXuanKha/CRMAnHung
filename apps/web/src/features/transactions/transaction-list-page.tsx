@@ -225,7 +225,7 @@ export function TransactionListPage() {
         icon={Trash2}
         message={
           confirmDelete
-            ? `Bạn có chắc muốn xóa giao dịch ${confirmDelete.code}? Dữ liệu mock sẽ bị gỡ khỏi danh sách.`
+            ? `Bạn có chắc muốn xóa giao dịch ${confirmDelete.code}?`
             : ''
         }
         confirmLabel="Xóa"

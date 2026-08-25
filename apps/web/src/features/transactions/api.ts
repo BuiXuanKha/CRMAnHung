@@ -18,7 +18,7 @@ import {
   type UpdateTransactionInput,
 } from '@crmanhung/shared';
 import { ApiError, apiFetch } from '@/shared/api/client';
-import { isMockMode } from '@/shared/api/mode';
+import { isMockTransactions } from '@/shared/api/mode';
 import { mockLodats } from '@/features/lodats/mock-data';
 import { mockTransactionDetails, toTransactionListItem } from './mock-data';
 
@@ -126,7 +126,7 @@ function namesOf(detail: TransactionDetail, role: TransactionPartyRole): string[
 export async function listTransactions(
   query: TransactionListQuery = {},
 ): Promise<TransactionListResponse> {
-  if (isMockMode()) {
+  if (isMockTransactions()) {
     const items = applyQuery(listItems(), query);
     return { items, total: items.length, stats: statsFromItems(items) };
   }
@@ -140,7 +140,7 @@ export async function listTransactions(
 }
 
 export async function getTransaction(id: string): Promise<TransactionDetail> {
-  if (isMockMode()) {
+  if (isMockTransactions()) {
     const found = mockStore.find((item) => item.id === id);
     if (!found) {
       throw new Error('Không tìm thấy giao dịch');
@@ -151,7 +151,7 @@ export async function getTransaction(id: string): Promise<TransactionDetail> {
 }
 
 export async function getOpenTransaction(lodatId: string): Promise<OpenTransactionResponse> {
-  if (isMockMode()) {
+  if (isMockTransactions()) {
     const found = mockStore.find(
       (item) => item.lodatId === lodatId && isOpenStatus(item.status),
     );
@@ -162,7 +162,7 @@ export async function getOpenTransaction(lodatId: string): Promise<OpenTransacti
 
 export async function createTransaction(input: CreateTransactionInput): Promise<TransactionDetail> {
   const parsed = createTransactionSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTransactions()) {
     const lodatId =
       parsed.lodatId ||
       mockLodats.find((l) => `map_${l.id}` === parsed.lodatCustomerMapId)?.id ||
@@ -233,7 +233,7 @@ export async function updateTransaction(
   input: UpdateTransactionInput,
 ): Promise<TransactionDetail> {
   const parsed = updateTransactionSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTransactions()) {
     const idx = mockStore.findIndex((item) => item.id === id);
     if (idx < 0) throw new Error('Không tìm thấy giao dịch');
     const current = mockStore[idx];
@@ -278,7 +278,7 @@ export async function updateTransaction(
 }
 
 export async function deleteTransaction(id: string): Promise<void> {
-  if (isMockMode()) {
+  if (isMockTransactions()) {
     const exists = mockStore.some((item) => item.id === id);
     if (!exists) {
       throw new Error('Không tìm thấy giao dịch');
