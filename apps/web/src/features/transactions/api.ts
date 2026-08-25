@@ -21,8 +21,14 @@ export function statsFromItems(items: TransactionListItem[]): TransactionListSta
     if (item.type !== TransactionType.OWN || item.status !== TransactionStatus.HOAN_TAT) {
       continue;
     }
-    totalRevenueVnd += item.salePriceVnd ?? 0;
-    totalCommissionVnd += item.commissionVnd ?? 0;
+    const sale =
+      typeof item.salePriceVnd === 'string' ? Number(item.salePriceVnd) : item.salePriceVnd;
+    const commission =
+      typeof item.commissionVnd === 'string' ? Number(item.commissionVnd) : item.commissionVnd;
+    if (typeof sale === 'number' && Number.isFinite(sale)) totalRevenueVnd += sale;
+    if (typeof commission === 'number' && Number.isFinite(commission)) {
+      totalCommissionVnd += commission;
+    }
   }
   return { totalRevenueVnd, totalCommissionVnd };
 }

@@ -2,8 +2,8 @@ import { formatStatMoneyVnd, formatStatShortVnd } from '../display';
 
 type Props = {
   count: number;
-  totalRevenueVnd: number;
-  totalCommissionVnd: number;
+  totalRevenueVnd: number | string;
+  totalCommissionVnd: number | string;
 };
 
 export function TransactionStats({ count, totalRevenueVnd, totalCommissionVnd }: Props) {

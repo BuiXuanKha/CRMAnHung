@@ -37,7 +37,10 @@
 | `tblLodatPersonMap` trên lô PROJECT | Mỗi map → `Lodat` (trỏ `projectLotId`) + `LodatCustomerMap` |
 | `tblLodatImages` (chỉ lô dân) | `LodatImage` (`objectKey`) |
 | `tblAddresses` + admin units | `Address`, `Province`, `District`, `Ward` |
-| `tblTransaction*` | `Transaction*` |
+| `tblTransaction` | `Transaction` (`code`, `lodatId` + `lodatCustomerMapId`, BigInt tiền) |
+| `tblTransactionParty` | `TransactionParty` (`customerId`, `freeTextName`) |
+| `tblTransactionSnapshot` (+ ảnh) | `TransactionSnapshot` + `TransactionSnapshotImage.objectKey` |
+| `tblTransactionAttachment` | `TransactionAttachment.objectKey` (`kind`) |
 | `tblTitleService*` | `TitleService*` |
 | `tblImageRotation` | `ImageRotation` |
 
@@ -78,12 +81,33 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 10b | `tblAddresses` + ảnh dự án R2 | `address`, `address_image` | `pnpm addresses:migrate-legacy` | Xong staging (110 địa chỉ, 9 ảnh) |
 | 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
 | 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Todo — chạy VPS; PROJECT stream `p:{lodatId}:{empId}`; giữ kha/buinam; `SKIP_LODAT_IMAGES=1` nếu chỉ text |
-| 11 | Giao dịch | `transaction` | — | Todo |
+| 11 | Giao dịch | `transaction` | — | Schema Prisma **xong** (PR transaction-db). Script copy Todo — sau Nest + sau bước 10d |
 | 12 | Sổ đỏ | `title_service` | — | Todo |
 
 Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV copy cùng metadata `tblPersonFacebook` (UID NV) để cột Kênh liên hệ hiện tên page/nick.
 
 Freeze CRM cũ + tắt extension trước khi copy khách.
+
+### Bước 11 — giao dịch (schema đã chốt)
+
+Live SQLite (2026-08-25): **2** GD, cả `OWN` + `HOAN_TAT`, tạo bởi **buinam**, mã `GD-2026-0002` / `GD-2026-0003`. Attachment = 0. Sau hoàn tất, map vẫn **active + TAM_DUNG** (không `DA_BAN`).
+
+| Cột cũ | Cột mới |
+|--------|---------|
+| `Code` | `code` (giữ nguyên) |
+| `LodatPersonMapId` | `lodatCustomerMapId` ← map entity `lodat_customer_map` |
+| `LodatId` | **không** map thẳng kho PROJECT. Lấy `LodatCustomerMap.lodatId` (luồng NV; PROJECT = `p:{lodatId}:{empId}`) |
+| `TransactionType` | `type` |
+| `Status` | `status` |
+| `NotaryAppointmentAtMs` | `notaryAppointmentAt` |
+| `SalePriceVnd` / `TaxPriceVnd` / `CommissionVnd` | BigInt cùng tên camelCase |
+| `Note` / `CancelReason` | `note` / `cancelReason` |
+| `CreatedByEmployeeId` | `createdByEmployeeId` ← map `user` |
+| `CreatedAtMs` / `UpdatedAtMs` / `CompletedAtMs` | `createdAt` / `updatedAt` / `completedAt` |
+| Party `PersonId` / `FreeTextName` / `Role` / `SortOrder` | `customerId` / `freeTextName` (bắt buộc; copy tên nếu trống) / `role` / `sortOrder` |
+| Snapshot ảnh / đính kèm `StoredPath` | R2 `objectKey` (giống ảnh lô) |
+
+Cần bước 10d xong (map `lodat` + `lodat_customer_map` + `user` + `customer`). Unique 1 GD mở / lô: dữ liệu live hiện không có GD mở.
 
 ## Bảng map ID (không phải bảng nghiệp vụ)
 

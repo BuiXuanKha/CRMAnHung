@@ -1,10 +1,11 @@
 # Domain: Transactions (Giao dịch)
 
 - **Slug:** `transactions`
-- **Status:** Ready for mock
-- **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich`
+- **Status:** Ready for API — Prisma + contract entity; Nest module + form **sau**
+- **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich` (SQLite `tblTransaction*`, 2026-08-25)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
+- **Prisma:** `Transaction`, `TransactionParty`, `TransactionSnapshot` (+ ảnh), `TransactionAttachment`
 
 §12 = đặc tả list. Mỗi trang: **máy tính** → **mobile** → rồi chi tiết từng phần.
 
@@ -18,8 +19,8 @@ Theo dõi deal mua bán lô: loại, các bên, giá, hoa hồng, cọc → côn
 
 | Actor | List | Không |
 |-------|------|--------|
-| STAFF | GD mình tạo (CRM cũ). Mock mới: list demo + xóa mock | Sửa GD NV khác |
-| ADMIN | Tất cả; CRM cũ lọc theo NV | — |
+| STAFF | GD mình tạo (`createdByEmployeeId`); tạo từ lô / khách | Sửa / xoá GD NV khác |
+| ADMIN | Tất cả; lọc theo NV | — |
 
 Không nút «Thêm GD» trên list — tạo từ lô / khách.
 
@@ -45,15 +46,104 @@ Không nút «Thêm GD» trên list — tạo từ lô / khách.
 
 Gợi ý dưới số 2–3: «Chỉ giao dịch của tôi · Hoàn thành». Mobile: ẩn gợi ý; số rút gọn (tỷ / triệu). **Luôn 3 cột.**
 
-## 4–10.
+## 4. Use cases
 
-GET list: `keyword`, `type`, `status`. DELETE mock. Chi tiết / form sau. Không extension. Migrate `tblTransaction*`.
+1. **Tạo GD từ lô** — nếu lô đã có GD mở (`DA_COC` / `DA_CONG_CHUNG`) → mở sửa GD đó (`OPEN_TRANSACTION_EXISTS`). Không thì tạo mới, status luôn **Đã cọc**. Snapshot lô + map đóng băng lúc tạo.
+2. **List `/giao-dich`** — tìm / lọc; STAFF chỉ GD mình; ADMIN tất cả.
+3. **Sửa** — đổi status, giá, thuế, hoa hồng, hẹn CC, bên, ghi chú. Hủy bắt buộc `cancelReason`.
+4. **Xóa cứng** — CRM cũ: xóa hàng + mở lại rao bán map nếu cần. API làm sau.
+5. **Lịch sử trên chi tiết lô** — list GD của lô (làm sau, cùng Nest).
+
+Tạo GD: **OWN** bắt buộc ngày hẹn CC; **RECORD** hẹn CC tuỳ chọn, hoa hồng = 0, **không** vào thẻ doanh thu.
+
+## 5. Quan hệ dữ liệu
+
+```
+Lodat 1 ── n Transaction
+LodatCustomerMap 1 ── n Transaction     (map lúc tạo deal; đổi chủ sau không đổi FK này)
+Transaction 1 ── n TransactionParty     (SELLER | BUYER)
+Transaction 1 ── 1 TransactionSnapshot  (đóng băng tiêu đề / ĐC / DT·MT / giá map)
+  └── n TransactionSnapshotImage        (objectKey; optional sourceLodatImageId)
+Transaction 1 ── n TransactionAttachment (R2 objectKey, kind HOP_DONG|SO_DO|KHAC)
+```
+
+| Field chính | Kiểu | Ghi chú |
+|-------------|------|---------|
+| `code` | unique | `GD-YYYY-NNNN` — API cấp, không nhập tay |
+| `lodatId` + `lodatCustomerMapId` | cả hai bắt buộc | Giống cũ. `lodatId` = `Lodat` **luồng NV** (PROJECT: không dùng ID kho) |
+| `type` / `status` | string enum | mục 3 |
+| `salePriceVnd` `taxPriceVnd` `commissionVnd` | **BigInt** | Không dùng `Int` (stub cũ `amountVnd`) |
+| `notaryAppointmentAt` | DateTime? | OWN bắt buộc lúc tạo |
+| `cancelReason` | text? | bắt buộc khi `HUY` |
+| `createdByEmployeeId` | FK User | ownership list STAFF |
+| `completedAt` | DateTime? | khi chuyển `HOAN_TAT` |
+
+**Bên:** `customerId` tuỳ chọn (khách CRM) + `freeTextName` **luôn ghi** (tên lúc tạo). Xoá khách → `customerId` SET NULL, tên còn.
+
+**1 GD mở / lô:** unique index SQL `Transaction_lodatId_open_uidx` (`DA_COC` \| `DA_CONG_CHUNG`). Cũ chỉ chặn ở app.
+
+**Xoá lô / map:** `Restrict` — còn GD thì không xoá thửa/map. Party/snapshot/ảnh/đính kèm cascade theo GD.
+
+**Đổi chủ sau GD:** map mới không thay `lodatCustomerMapId` của GD cũ.
+
+Ownership: theo `createdByEmployeeId` (người **tạo GD**), không theo `Lodat.createdByEmployeeId`.
+
+## 6. UI
+
+| Màn | Route | Hành vi |
+|-----|-------|---------|
+| List | `/giao-dich` | Mock §12 — đã có |
+| Chi tiết | `/giao-dich/[id]` | Placeholder; form sửa sau |
+| Tạo / sửa | `/giao-dich/tao`, `/giao-dich/[id]/sua` | Sau Nest |
+
+Không nút thêm trên list. Nút **Giao dịch** trên lô = open-or-create (API sau).
+
+## 7. Contract / API dự kiến
+
+Prefix `/api/v1`. Zod: `packages/shared/src/transactions.ts`. **Nest module = PR sau.**
+
+| Method | Path | Ai | Ghi chú |
+|--------|------|----|---------|
+| GET | `/transactions` | STAFF (mình) / ADMIN (tất cả) | `keyword` `type` `status` `createdByEmployeeId` |
+| GET | `/transactions/:id` | owner / ADMIN | `TransactionDetail` |
+| POST | `/transactions` | owner map / ADMIN | body `CreateTransactionInput`; trùng mở → `OPEN_TRANSACTION_EXISTS` |
+| PATCH | `/transactions/:id` | owner / ADMIN | `UpdateTransactionInput`; `HUY` cần `cancelReason` |
+| DELETE | `/transactions/:id` | owner / ADMIN | xóa cứng; mở lại rao bán — chốt lúc API |
+| GET | `/transactions/lodat/:lodatId/open` | owner lô / ADMIN | `{ id }` hoặc `id: null` |
+
+Tạo: status = `DA_COC`; sinh `code`; copy snapshot từ lô + map active. RECORD: `commissionVnd = 0`.
+
+## 8. Mock data
+
+List mock §12 / `mock-data.ts` — đủ loại, trạng thái, hẹn CC, thiếu giá. Form tạo chưa mock.
+
+## 9. Extension?
+
+- [x] Không
+
+## 10. Migrate từ hệ cũ
+
+Chi tiết cột: [`MIGRATION.md`](../MIGRATION.md) bước 11. Tóm tắt:
+
+| Cũ | Mới |
+|----|-----|
+| `tblTransaction` | `Transaction` (`code`, hai FK lô+map, BigInt tiền, `createdByEmployeeId`) |
+| `tblTransactionParty` | `TransactionParty` (`role`, `customerId`, `freeTextName`, `sortOrder`) |
+| `tblTransactionSnapshot` | `TransactionSnapshot` |
+| `tblTransactionSnapshotImage` | `TransactionSnapshotImage.objectKey` (R2; không path disk) |
+| `tblTransactionAttachment` | `TransactionAttachment.objectKey` + `kind` |
+
+**PROJECT:** `lodatId` mới = `Lodat` của **map** (`lodat_customer_map`), không map `tblLodats.ID` kho. Live cũ: 2 GD `OWN`+`HOAN_TAT` (buinam), 0 file đính kèm.
+
+Script copy: **chưa viết** (sau Nest + sau khi copy lô xong).
 
 ## 11. CRM cũ vs web mới
 
 - Cũ: tìm Code + tiêu đề lô snapshot + ghi chú (API **không** tìm tên bên). Mới: mock tìm thêm người bán / mua, nhãn loại / trạng thái.
-- Cũ ADMIN: lọc nhân viên. Mới: chưa mock cột NV.
+- Cũ ADMIN: lọc nhân viên. Mới: chưa mock cột NV — query `createdByEmployeeId` đã có trên contract.
+- Cũ: bấm hàng → sửa. Mới list: hàng PC = chọn; chi tiết = menu / mobile bấm thẻ.
 - Không `@` / `@@`.
+- Schema mới: BigInt; snapshot + 1 GD mở / lô chặn ở DB; đính kèm R2.
 
 ---
 
@@ -168,7 +258,7 @@ Một dòng, cắt `…`. Thiếu = `—`.
 |-----|------|
 | Xem chi tiết | `/giao-dich/[id]` (placeholder) |
 | Sửa | Toast — form sau |
-| Xóa | Đỏ → confirm → gỡ khỏi list (mock). API: xóa cứng? mở lại rao bán lô? — sau |
+| Xóa | Đỏ → confirm → gỡ khỏi list (mock). API: xóa cứng; mở lại rao bán map nếu cần — chốt lúc Nest |
 
 #### 12.1.5 Footer
 

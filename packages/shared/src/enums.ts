@@ -43,6 +43,17 @@ export enum TransactionStatus {
   HUY = 'HUY',
 }
 
+export enum TransactionPartyRole {
+  SELLER = 'SELLER',
+  BUYER = 'BUYER',
+}
+
+export enum TransactionAttachmentKind {
+  HOP_DONG = 'HOP_DONG',
+  SO_DO = 'SO_DO',
+  KHAC = 'KHAC',
+}
+
 export enum TitleServiceStatus {
   DANG_LAM = 'DANG_LAM',
   TAM_DUNG = 'TAM_DUNG',
@@ -114,6 +125,23 @@ export const TRANSACTION_STATUS_LABELS: Record<TransactionStatus, string> = {
   [TransactionStatus.HOAN_TAT]: 'Hoàn thành',
   [TransactionStatus.HUY]: 'Đã hủy',
 };
+
+export const TRANSACTION_PARTY_ROLE_LABELS: Record<TransactionPartyRole, string> = {
+  [TransactionPartyRole.SELLER]: 'Người bán',
+  [TransactionPartyRole.BUYER]: 'Người mua',
+};
+
+export const TRANSACTION_ATTACHMENT_KIND_LABELS: Record<TransactionAttachmentKind, string> = {
+  [TransactionAttachmentKind.HOP_DONG]: 'Hợp đồng',
+  [TransactionAttachmentKind.SO_DO]: 'Sổ đỏ',
+  [TransactionAttachmentKind.KHAC]: 'Khác',
+};
+
+/** GD đang mở — tối đa 1 / lô (index SQL `Transaction_lodatId_open_uidx`). */
+export const TRANSACTION_OPEN_STATUSES = [
+  TransactionStatus.DA_COC,
+  TransactionStatus.DA_CONG_CHUNG,
+] as const;
 
 export const TITLE_SERVICE_STATUS_LABELS: Record<TitleServiceStatus, string> = {
   [TitleServiceStatus.DANG_LAM]: 'Đang làm',

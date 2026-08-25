@@ -32,6 +32,7 @@ model User {
   createdProjectLots ProjectLot[]          @relation("ProjectLotCreator")
   createdLodats     Lodat[]                @relation("LodatCreator")
   createdLodatMaps  LodatCustomerMap[]     @relation("LodatMapCreator")
+  createdTransactions Transaction[]        @relation("TransactionCreator")
 }
 
 model RefreshToken {
@@ -70,6 +71,7 @@ model Customer {
   phones        CustomerPhone[]
   careNotes     CustomerCareNote[]
   lodatMaps     LodatCustomerMap[]
+  transactionParties TransactionParty[]
 
   @@index([employeeId])
   @@index([status])
@@ -331,8 +333,9 @@ model Lodat {
   address    Address?           @relation(fields: [addressId], references: [id], onDelete: Restrict)
   projectLot ProjectLot?        @relation(fields: [projectLotId], references: [id], onDelete: Restrict)
   createdBy  User               @relation("LodatCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
-  images     LodatImage[]
-  maps       LodatCustomerMap[]
+  images       LodatImage[]
+  maps         LodatCustomerMap[]
+  transactions Transaction[]
 
   @@index([addressId])
   @@index([projectLotId])
@@ -349,6 +352,7 @@ model LodatImage {
   createdAt   DateTime @default(now())
 
   lodat Lodat @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+  snapshotImages TransactionSnapshotImage[]
 
   @@index([lodatId, sortOrder])
 }
@@ -389,40 +393,104 @@ model LodatCustomerMap {
   @@index([status])
 }
 
+/// Giao dịch mua bán lô — khớp tblTransaction (CRM cũ). Tiền BIGINT.
+/// 1 GD mở (DA_COC | DA_CONG_CHUNG) / lodat: unique index SQL (không khai báo trong Prisma).
 model Transaction {
-  id                 String   @id @default(cuid())
-  lodatCustomerMapId String
-  type               String   @default("OWN")
-  status             String   @default("DA_COC")
-  amountVnd          Int?
-  note               String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  id                  String    @id @default(cuid())
+  code                String    @unique
+  lodatId             String
+  lodatCustomerMapId  String
+  type                String    @default("OWN") // OWN | RECORD
+  status              String    @default("DA_COC") // DA_COC | DA_CONG_CHUNG | HOAN_TAT | HUY
+  notaryAppointmentAt DateTime?
+  salePriceVnd        BigInt    @default(0)
+  taxPriceVnd         BigInt?
+  commissionVnd       BigInt    @default(0)
+  note                String?
+  cancelReason        String?
+  createdByEmployeeId String
+  completedAt         DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  lodatCustomerMap LodatCustomerMap        @relation(fields: [lodatCustomerMapId], references: [id], onDelete: Cascade)
+  lodat            Lodat                   @relation(fields: [lodatId], references: [id], onDelete: Restrict)
+  lodatCustomerMap LodatCustomerMap        @relation(fields: [lodatCustomerMapId], references: [id], onDelete: Restrict)
+  createdBy        User                    @relation("TransactionCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
   parties          TransactionParty[]
   attachments      TransactionAttachment[]
+  snapshot         TransactionSnapshot?
+
+  @@index([lodatId])
+  @@index([lodatCustomerMapId])
+  @@index([createdByEmployeeId])
+  @@index([status])
+  @@index([type])
+  @@index([createdAt])
 }
 
 model TransactionParty {
   id            String  @id @default(cuid())
   transactionId String
-  role          String // BUYER | SELLER | OTHER
-  fullName      String
-  phone         String?
-  note          String?
+  role          String // SELLER | BUYER
+  customerId    String?
+  /// Tên lúc tạo GD — luôn ghi, kể cả khi có customerId
+  freeTextName  String
+  sortOrder     Int     @default(0)
 
   transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  customer    Customer?   @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([transactionId, role, sortOrder])
+  @@index([customerId])
+}
+
+/// Đóng băng tiêu đề / địa chỉ / DT·MT / giá map lúc tạo GD (tblTransactionSnapshot).
+model TransactionSnapshot {
+  id               String   @id @default(cuid())
+  transactionId    String   @unique
+  title            String?
+  addressText      String?
+  areaM2           Float?
+  frontageM        Float?
+  direction        String?
+  propertyKind     String? // NHA | DAT
+  mapStatus        String?
+  mapPriceVnd      BigInt?
+  mapPriceNote     String?
+  mapBrokerFeeNote String?
+  mapNote          String?
+  createdAt        DateTime @default(now())
+
+  transaction Transaction                @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+  images      TransactionSnapshotImage[]
+}
+
+model TransactionSnapshotImage {
+  id                 String @id @default(cuid())
+  snapshotId         String
+  objectKey          String
+  sortOrder          Int    @default(0)
+  rotationDeg        Int    @default(0)
+  sourceLodatImageId String?
+
+  snapshot         TransactionSnapshot @relation(fields: [snapshotId], references: [id], onDelete: Cascade)
+  sourceLodatImage LodatImage?         @relation(fields: [sourceLodatImageId], references: [id], onDelete: SetNull)
+
+  @@index([snapshotId, sortOrder])
 }
 
 model TransactionAttachment {
   id            String   @id @default(cuid())
   transactionId String
-  objectKey      String
+  objectKey     String
+  kind          String   @default("KHAC") // HOP_DONG | SO_DO | KHAC
   label         String?
+  sortOrder     Int      @default(0)
   createdAt     DateTime @default(now())
 
   transaction Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
+
+  @@index([transactionId, sortOrder])
 }
 
 model TitleService {

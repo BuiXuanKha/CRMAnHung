@@ -119,7 +119,7 @@ apps/extension/src/
 | **Customers** | Lead từ extension hoặc thủ công; phone; care history; pin/hide |
 | **Lodats** | Lô đất + map M–N với khách (giá / trạng thái bán) |
 | **Addresses** | Địa chỉ REGULAR / PROJECT + đơn vị hành chính |
-| **Transactions** | Giao dịch trên map lô–khách |
+| **Transactions** | Giao dịch trên map lô–khách: snapshot lô, bên mua/bán, đính kèm R2 |
 | **Title services** | Hồ sơ dịch vụ sổ đỏ |
 | **Admin registry** | Xem / xóa cứng khách toàn hệ thống |
 

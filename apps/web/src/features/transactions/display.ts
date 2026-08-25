@@ -7,35 +7,44 @@ import {
 } from '@crmanhung/shared';
 import type { BadgeTone } from '@/shared/ui/badge';
 
-export function formatMoneyVnd(n?: number | null): string {
-  if (n == null || n <= 0) return '—';
-  return `${n.toLocaleString('vi-VN')} đ`;
+function toVndNumber(n?: number | string | null): number | null {
+  if (n == null || n === '') return null;
+  const v = typeof n === 'string' ? Number(n) : n;
+  return Number.isFinite(v) ? v : null;
 }
 
-export function formatStatMoneyVnd(n: number): string {
-  return `${n.toLocaleString('vi-VN')} đ`;
+export function formatMoneyVnd(n?: number | string | null): string {
+  const v = toVndNumber(n);
+  if (v == null || v <= 0) return '—';
+  return `${v.toLocaleString('vi-VN')} đ`;
+}
+
+export function formatStatMoneyVnd(n?: number | string | null): string {
+  const v = toVndNumber(n) ?? 0;
+  return `${v.toLocaleString('vi-VN')} đ`;
 }
 
 /** Số tiền rút gọn trên thẻ thống kê mobile (2,6 tỷ / 26 triệu). */
-export function formatStatShortVnd(n: number): string {
-  if (!Number.isFinite(n) || n <= 0) return '0 đ';
-  if (n >= 1_000_000_000) {
-    const ty = n / 1_000_000_000;
+export function formatStatShortVnd(n?: number | string | null): string {
+  const v = toVndNumber(n);
+  if (v == null || v <= 0) return '0 đ';
+  if (v >= 1_000_000_000) {
+    const ty = v / 1_000_000_000;
     const text = new Intl.NumberFormat('vi-VN', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 3,
     }).format(ty);
     return `${text} tỷ`;
   }
-  if (n >= 1_000_000) {
-    const trieu = n / 1_000_000;
+  if (v >= 1_000_000) {
+    const trieu = v / 1_000_000;
     const text = new Intl.NumberFormat('vi-VN', {
       minimumFractionDigits: 0,
       maximumFractionDigits: 1,
     }).format(trieu);
     return `${text} triệu`;
   }
-  return `${n.toLocaleString('vi-VN')} đ`;
+  return `${v.toLocaleString('vi-VN')} đ`;
 }
 
 export function countMobileTransactionFilters(type: string, status: string): number {
@@ -203,11 +212,15 @@ export const NOTE_FILTER_OPTIONS = [
 ];
 
 function hasPrice(item: TransactionListItem): boolean {
-  return item.salePriceVnd != null && item.salePriceVnd > 0;
+  const n = typeof item.salePriceVnd === 'string' ? Number(item.salePriceVnd) : item.salePriceVnd;
+  return n != null && Number.isFinite(n) && n > 0;
 }
 
 function hasCommission(item: TransactionListItem): boolean {
-  return item.type !== TransactionType.RECORD && item.commissionVnd != null && item.commissionVnd > 0;
+  if (item.type === TransactionType.RECORD) return false;
+  const n =
+    typeof item.commissionVnd === 'string' ? Number(item.commissionVnd) : item.commissionVnd;
+  return n != null && Number.isFinite(n) && n > 0;
 }
 
 export function applyExtraFilters(
