@@ -704,6 +704,32 @@ export class LodatsService {
       select: { id: true },
     });
 
+    // Ảnh chat reuse (CRM cũ) — chỉ lô dân; giữ objectKey, không copy R2
+    if (!isProject && dto.chatImageIds?.length) {
+      const chatImages = await this.prisma.customerMessengerImage.findMany({
+        where: {
+          id: { in: dto.chatImageIds.slice(0, 5) },
+          message: { customerFacebook: { customerId: customer.id } },
+        },
+        orderBy: [{ createdAt: 'asc' }],
+        select: { id: true, objectKey: true, rotationDeg: true },
+      });
+      const ordered = dto.chatImageIds
+        .map((id) => chatImages.find((img) => img.id === id))
+        .filter((img): img is (typeof chatImages)[number] => Boolean(img))
+        .slice(0, 5);
+      if (ordered.length) {
+        await this.prisma.lodatImage.createMany({
+          data: ordered.map((img, i) => ({
+            lodatId: created.id,
+            objectKey: img.objectKey,
+            sortOrder: i,
+            rotationDeg: ((img.rotationDeg % 360) + 360) % 360,
+          })),
+        });
+      }
+    }
+
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({
       where: { id: created.id },
       include: LIST_INCLUDE,
@@ -858,10 +884,19 @@ export class LodatsService {
     });
     if (!image) throw new NotFoundException('Không tìm thấy ảnh lô.');
     await this.prisma.lodatImage.delete({ where: { id: imageId } });
-    try {
-      await this.storage.delete(image.objectKey, 'public');
-    } catch {
-      // orphan ok
+    // objectKey có thể reuse từ ảnh chat / lô khác — chỉ xoá R2 khi hết tham chiếu
+    const [chatRefs, lodatRefs] = await Promise.all([
+      this.prisma.customerMessengerImage.count({
+        where: { objectKey: image.objectKey },
+      }),
+      this.prisma.lodatImage.count({ where: { objectKey: image.objectKey } }),
+    ]);
+    if (chatRefs + lodatRefs === 0) {
+      try {
+        await this.storage.delete(image.objectKey, 'public');
+      } catch {
+        // orphan ok
+      }
     }
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({
       where: { id: lodatId },

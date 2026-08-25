@@ -1,5 +1,6 @@
 import { Transform } from 'class-transformer';
 import {
+  IsArray,
   IsBoolean,
   IsIn,
   IsInt,
@@ -156,6 +157,11 @@ export class CreateLodatDto {
   @IsString()
   @MaxLength(4000)
   mapNote?: string | null;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  chatImageIds?: string[];
 }
 
 export class UpdateLodatDto {

@@ -204,6 +204,8 @@ export const createLodatSchema = z
     priceNote: z.string().trim().max(200).nullable().optional(),
     brokerFeeNote: z.string().trim().max(200).nullable().optional(),
     mapNote: z.string().trim().max(4000).nullable().optional(),
+    /** Ảnh chat Messenger reuse cho lô dân (CRM cũ «ảnh từ hội thoại») */
+    chatImageIds: z.array(z.string()).max(LODAT_MAX_UPLOAD_IMAGES).optional(),
   })
   .superRefine((v, ctx) => {
     const hasAddress = Boolean(v.addressId);
