@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
   NotFoundException,
@@ -7,15 +8,19 @@ import { Prisma } from '@prisma/client';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
-import type { ListLodatsQueryDto, UpdateLodatSaleStatusDto } from './dto/lodat.dto';
+import type {
+  ListLodatsQueryDto,
+  UpdateLodatImageRotationDto,
+  UpdateLodatSaleStatusDto,
+} from './dto/lodat.dto';
 
 const ADDRESS_INCLUDE = {
   province: { select: { name: true, isHidden: true } },
   district: { select: { name: true, isHidden: true } },
-  ward: { select: { name: true, isHidden: true } },
+  ward: { select: { id: true, name: true, isHidden: true } },
   images: {
     orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
-    select: { objectKey: true },
+    select: { id: true, objectKey: true },
   },
 } satisfies Prisma.AddressInclude;
 
@@ -28,7 +33,7 @@ const LIST_INCLUDE = {
   },
   images: {
     orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
-    select: { objectKey: true },
+    select: { id: true, objectKey: true, rotationDeg: true },
   },
   maps: {
     where: { isActive: true },
@@ -50,6 +55,13 @@ const LIST_INCLUDE = {
 } satisfies Prisma.LodatInclude;
 
 type LodatRow = Prisma.LodatGetPayload<{ include: typeof LIST_INCLUDE }>;
+
+type GalleryImage = {
+  id: string | null;
+  url: string;
+  rotationDeg: number;
+  source: 'lodat' | 'address';
+};
 
 @Injectable()
 export class LodatsService {
@@ -93,7 +105,8 @@ export class LodatsService {
     return row.address;
   }
 
-  private coverKeys(row: LodatRow): string[] {
+  /** Keys for cover thumbnail — keep object-key merge order. */
+  private coverObjectKeys(row: LodatRow): string[] {
     const addr = this.resolveAddress(row);
     const addressKeys =
       row.projectLotId && addr?.images
@@ -108,6 +121,51 @@ export class LodatsService {
       merged.push(key);
     }
     return merged;
+  }
+
+  private galleryImages(row: LodatRow): GalleryImage[] {
+    const addr = this.resolveAddress(row);
+    const out: GalleryImage[] = [];
+    const seen = new Set<string>();
+
+    if (row.projectLotId && addr?.images) {
+      for (const img of addr.images) {
+        if (!img.objectKey || seen.has(img.objectKey)) continue;
+        const url = this.publicUrl(img.objectKey);
+        if (!url) continue;
+        seen.add(img.objectKey);
+        out.push({
+          id: null,
+          url,
+          rotationDeg: 0,
+          source: 'address',
+        });
+      }
+    }
+
+    for (const img of row.images) {
+      if (!img.objectKey || seen.has(img.objectKey)) continue;
+      const url = this.publicUrl(img.objectKey);
+      if (!url) continue;
+      seen.add(img.objectKey);
+      out.push({
+        id: img.id,
+        url,
+        rotationDeg: ((img.rotationDeg % 360) + 360) % 360,
+        source: 'lodat',
+      });
+    }
+
+    return out;
+  }
+
+  private wardMeta(row: LodatRow): { wardId: string | null; wardName: string | null } {
+    const addr = this.resolveAddress(row);
+    const ward = addr?.ward;
+    if (!ward || ward.isHidden) {
+      return { wardId: ward?.id ?? null, wardName: null };
+    }
+    return { wardId: ward.id, wardName: ward.name };
   }
 
   private mapRow(row: LodatRow) {
@@ -126,7 +184,7 @@ export class LodatsService {
     const direction = isProject
       ? (lot?.direction ?? row.direction)
       : row.direction;
-    const keys = this.coverKeys(row);
+    const keys = this.coverObjectKeys(row);
     const rawStatus = activeMap?.status ?? 'TAM_DUNG';
     const status =
       rawStatus === 'DANG_BAN' || rawStatus === 'TAM_DUNG'
@@ -161,17 +219,18 @@ export class LodatsService {
 
   private mapDetail(row: LodatRow) {
     const base = this.mapRow(row);
-    const keys = this.coverKeys(row);
+    const images = this.galleryImages(row);
     const activeMap = row.maps[0] ?? null;
     const customer = activeMap?.customer;
     const note =
       (row.projectLotId ? row.projectLot?.note : null) || row.note || null;
+    const { wardName } = this.wardMeta(row);
     return {
       ...base,
       note: note?.trim() || null,
-      imageUrls: keys
-        .map((k) => this.publicUrl(k))
-        .filter((u): u is string => Boolean(u)),
+      images,
+      imageUrls: images.map((i) => i.url),
+      wardName,
       owner: customer
         ? {
             customerId: customer.id,
@@ -346,6 +405,91 @@ export class LodatsService {
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({
       where: { id },
+      include: LIST_INCLUDE,
+    });
+    return this.mapDetail(refreshed);
+  }
+
+  async listSameWard(user: RequestUser, id: string) {
+    const row = await this.prisma.lodat.findUnique({
+      where: { id },
+      include: LIST_INCLUDE,
+    });
+    if (!row) {
+      throw new NotFoundException('Không tìm thấy lô đất.');
+    }
+    this.assertCanAccess(user, row.createdByEmployeeId);
+    if (!row.maps.length) {
+      throw new NotFoundException('Lô đất chưa gắn chủ.');
+    }
+
+    const { wardId, wardName } = this.wardMeta(row);
+    if (!wardId) {
+      return { wardName: null, items: [], total: 0 };
+    }
+
+    const and: Prisma.LodatWhereInput[] = [
+      this.ownershipWhere(user),
+      { maps: { some: { isActive: true } } },
+      { id: { not: id } },
+      {
+        OR: [
+          { address: { wardId } },
+          { projectLot: { address: { wardId } } },
+        ],
+      },
+    ];
+
+    const rows = await this.prisma.lodat.findMany({
+      where: { AND: and },
+      include: LIST_INCLUDE,
+      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+      take: 40,
+    });
+
+    const items = rows
+      .filter((r) => r.maps.length > 0)
+      .map((r) => this.mapRow(r))
+      .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
+
+    return { wardName, items, total: items.length };
+  }
+
+  async updateImageRotation(
+    user: RequestUser,
+    lodatId: string,
+    imageId: string,
+    dto: UpdateLodatImageRotationDto,
+  ) {
+    const row = await this.prisma.lodat.findUnique({
+      where: { id: lodatId },
+      include: LIST_INCLUDE,
+    });
+    if (!row) {
+      throw new NotFoundException('Không tìm thấy lô đất.');
+    }
+    this.assertCanAccess(user, row.createdByEmployeeId);
+
+    const image = await this.prisma.lodatImage.findFirst({
+      where: { id: imageId, lodatId },
+    });
+    if (!image) {
+      throw new NotFoundException(
+        'Không tìm thấy ảnh lô (ảnh dự án chung không lưu xoay tại đây).',
+      );
+    }
+
+    const rotationDeg = ((dto.rotationDeg % 360) + 360) % 360;
+    if (rotationDeg % 90 !== 0) {
+      throw new BadRequestException('Góc xoay phải là bội số của 90°.');
+    }
+    await this.prisma.lodatImage.update({
+      where: { id: image.id },
+      data: { rotationDeg },
+    });
+
+    const refreshed = await this.prisma.lodat.findUniqueOrThrow({
+      where: { id: lodatId },
       include: LIST_INCLUDE,
     });
     return this.mapDetail(refreshed);

@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list + chi tiết đọc `/lo-dat/[id]` + gallery view (tải/xoay phiên); **chưa bàn** list ADMIN / form sửa / đổi chủ / lưu xoay
+- **Status:** Ready for API — list + chi tiết đọc + gallery (lưu xoay LodatImage) + lô cùng xã; **chưa bàn** list ADMIN / form sửa / đổi chủ / upload ảnh
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
@@ -326,11 +326,18 @@ Cùng nội dung; footer dính đáy: **Giao dịch** · **Sửa lô đất**.
 
 #### 12.3.3 Gallery ảnh (đã làm)
 
-Full-screen giống CRM cũ: tiêu đề + `N / M` · đóng · prev/next · vuốt · chấm · **Tải về** · **Xoay trái/phải** (CSS trong phiên; chưa lưu DB) · icon mở ảnh gốc.
+Full-screen giống CRM cũ: tiêu đề + `N / M` · đóng · prev/next · vuốt · chấm · **Tải về** · **Xoay trái/phải** · icon mở ảnh gốc.
 
-#### 12.3.4 Để sau
+- Ảnh **lô** (`LodatImage`): xoay **lưu DB** (`rotationDeg`).
+- Ảnh **dự án chung** (`AddressImage`): chỉ xem; xoay phiên không lưu (Admin sửa ảnh dự án trên sổ địa chỉ).
 
-Lịch sử chủ / đổi chủ · lịch sử GD · lô cùng xã · **upload ảnh** / **lưu xoay** · form sửa đầy đủ.
+#### 12.3.4 Lô cùng xã (đã làm)
+
+Dưới specs / ghi chú: danh sách lô **cùng `wardId`** (địa chỉ dân hoặc địa chỉ dự án), cùng quyền list (STAFF chỉ luồng mình), trừ lô đang xem. Thẻ bấm → `/lo-dat/[id]`. Không có xã → ẩn khối.
+
+#### 12.3.5 Để sau
+
+Lịch sử chủ / đổi chủ · lịch sử GD · **upload ảnh** (form tạo/sửa lô; ảnh dự án = Admin sổ địa chỉ) · form sửa đầy đủ.
 
 ---
 
@@ -377,7 +384,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | Form + picker địa chỉ bước 3 |
-| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Slice đọc + gallery view (tải/xoay phiên) **xong**; đổi chủ / form sửa / lưu xoay / upload Todo |
+| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + lưu xoay LodatImage + lô cùng xã **xong**; đổi chủ / form sửa / upload Todo |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
 
 Copy data: script **chỉ đọc** SQLite, idempotent, map id trong schema `migrate` — như khách. Skill agent: **`migrate-legacy-data`** (preflight FK, giữ luồng kha/buinam, reshape PROJECT → `ProjectLot`).

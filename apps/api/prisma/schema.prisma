@@ -341,11 +341,12 @@ model Lodat {
 }
 
 model LodatImage {
-  id        String   @id @default(cuid())
-  lodatId   String
-  objectKey String
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
+  id          String   @id @default(cuid())
+  lodatId     String
+  objectKey   String
+  sortOrder   Int      @default(0)
+  rotationDeg Int      @default(0)
+  createdAt   DateTime @default(now())
 
   lodat Lodat @relation(fields: [lodatId], references: [id], onDelete: Cascade)
 

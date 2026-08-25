@@ -1,5 +1,12 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsInt,
+  IsOptional,
+  IsString,
+  MaxLength,
+} from 'class-validator';
 
 function toBool(value: unknown): boolean | undefined {
   if (value === undefined || value === null || value === '') return undefined;
@@ -36,4 +43,10 @@ export class ListLodatsQueryDto {
 export class UpdateLodatSaleStatusDto {
   @IsIn(['DANG_BAN', 'TAM_DUNG'], { message: 'Trạng thái rao bán không hợp lệ.' })
   status!: 'DANG_BAN' | 'TAM_DUNG';
+}
+
+export class UpdateLodatImageRotationDto {
+  @Transform(({ value }) => (value === '' || value == null ? value : Number(value)))
+  @IsInt({ message: 'Góc xoay không hợp lệ.' })
+  rotationDeg!: number;
 }

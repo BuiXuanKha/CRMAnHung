@@ -3,7 +3,11 @@ import {
   CurrentUser,
   type RequestUser,
 } from '../../common/decorators/current-user.decorator';
-import { ListLodatsQueryDto, UpdateLodatSaleStatusDto } from './dto/lodat.dto';
+import {
+  ListLodatsQueryDto,
+  UpdateLodatImageRotationDto,
+  UpdateLodatSaleStatusDto,
+} from './dto/lodat.dto';
 import { LodatsService } from './lodats.service';
 
 @Controller('lodats')
@@ -13,6 +17,11 @@ export class LodatsController {
   @Get()
   list(@CurrentUser() user: RequestUser, @Query() query: ListLodatsQueryDto) {
     return this.lodats.list(user, query);
+  }
+
+  @Get(':id/same-ward')
+  listSameWard(@CurrentUser() user: RequestUser, @Param('id') id: string) {
+    return this.lodats.listSameWard(user, id);
   }
 
   @Get(':id')
@@ -27,5 +36,15 @@ export class LodatsController {
     @Body() dto: UpdateLodatSaleStatusDto,
   ) {
     return this.lodats.updateSaleStatus(user, id, dto);
+  }
+
+  @Patch(':id/images/:imageId/rotation')
+  updateImageRotation(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+    @Body() dto: UpdateLodatImageRotationDto,
+  ) {
+    return this.lodats.updateImageRotation(user, id, imageId, dto);
   }
 }

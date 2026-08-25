@@ -1,5 +1,5 @@
 /**
- * Lodats contract — P2 mock
+ * Lodats contract — list + detail + gallery images + same-ward
  *
  * `status` trên list = trạng thái **rao bán** (Mở bán / Tạm dừng),
  * không phải đã bán / đặt cọc (giao dịch P3).
@@ -75,11 +75,45 @@ export const lodatOwnerSchema = z.object({
 
 export type LodatOwner = z.infer<typeof lodatOwnerSchema>;
 
+/**
+ * Ảnh trên chi tiết / gallery.
+ * `source: address` = ảnh dự án chung (không lưu xoay từ NV).
+ * `source: lodat` = ảnh lô — `id` dùng PATCH rotation.
+ */
+export const lodatImageSchema = z.object({
+  id: z.string().nullable(),
+  url: z.string(),
+  rotationDeg: z.number().int().default(0),
+  source: z.enum(['lodat', 'address']),
+});
+
+export type LodatImage = z.infer<typeof lodatImageSchema>;
+
 /** Chi tiết `/lo-dat/[id]` — mở rộng list item. */
 export const lodatDetailSchema = lodatListItemSchema.extend({
   note: z.string().nullable().optional(),
+  /** @deprecated dùng `images` — giữ để tương thích tạm */
   imageUrls: z.array(z.string()).default([]),
+  images: z.array(lodatImageSchema).default([]),
+  wardName: z.string().nullable().optional(),
   owner: lodatOwnerSchema.nullable().optional(),
 });
 
 export type LodatDetail = z.infer<typeof lodatDetailSchema>;
+
+export const updateLodatImageRotationSchema = z.object({
+  rotationDeg: z
+    .number({ message: 'Góc xoay không hợp lệ.' })
+    .int()
+    .refine((n) => n % 90 === 0, { message: 'Góc xoay phải là bội số của 90°.' }),
+});
+
+export type UpdateLodatImageRotationInput = z.infer<typeof updateLodatImageRotationSchema>;
+
+export const lodatSameWardResponseSchema = z.object({
+  wardName: z.string().nullable(),
+  items: z.array(lodatListItemSchema),
+  total: z.number().int().nonnegative(),
+});
+
+export type LodatSameWardResponse = z.infer<typeof lodatSameWardResponseSchema>;

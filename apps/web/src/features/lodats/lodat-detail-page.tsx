@@ -14,8 +14,9 @@ import {
 import { useAuth } from '@/features/auth/auth-context';
 import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
-import { getLodat, updateLodatSaleStatus } from './api';
+import { getLodat, listSameWardLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { LodatImageGallery } from './components/lodat-image-gallery';
+import { SameWardList } from './components/same-ward-list';
 import { SaleToggle } from './components/sale-toggle';
 import { buildLodatCopyText, copyTextToClipboard } from './copy-text';
 import {
@@ -50,13 +51,34 @@ export function LodatDetailPage() {
     enabled: Boolean(id),
   });
 
+  const sameWardQ = useQuery({
+    queryKey: ['lodat', id, 'same-ward'],
+    queryFn: () => listSameWardLodats(id),
+    enabled: Boolean(id) && Boolean(q.data),
+  });
+
   const detail = q.data ?? null;
-  const images = detail?.imageUrls?.length
-    ? detail.imageUrls
-    : detail?.coverImageUrl
-      ? [detail.coverImageUrl]
-      : [];
-  const imageCount = images.length;
+  const galleryImages =
+    detail?.images?.length
+      ? detail.images
+      : detail?.imageUrls?.length
+        ? detail.imageUrls.map((url) => ({
+            id: null,
+            url,
+            rotationDeg: 0,
+            source: 'lodat' as const,
+          }))
+        : detail?.coverImageUrl
+          ? [
+              {
+                id: null,
+                url: detail.coverImageUrl,
+                rotationDeg: 0,
+                source: 'lodat' as const,
+              },
+            ]
+          : [];
+  const imageCount = galleryImages.length;
 
   useEffect(() => {
     setHeroIdx(0);
@@ -107,7 +129,9 @@ export function LodatDetailPage() {
     }
   }
 
-  const heroUrl = images[heroIdx] ?? images[0] ?? '';
+  const hero = galleryImages[heroIdx] ?? galleryImages[0] ?? null;
+  const heroUrl = hero?.url ?? '';
+  const heroRotation = hero?.rotationDeg ?? 0;
 
   return (
     <div className={['ld-detail-page', detail ? 'has-mobile-footer' : ''].filter(Boolean).join(' ')}>
@@ -207,6 +231,7 @@ export function LodatDetailPage() {
                   src={heroUrl}
                   alt=""
                   className="ld-detail-hero-img"
+                  style={heroRotation ? { transform: `rotate(${heroRotation}deg)` } : undefined}
                   onClick={() => setGalleryOpen(true)}
                   role="button"
                   tabIndex={0}
@@ -292,6 +317,12 @@ export function LodatDetailPage() {
             </section>
           ) : null}
 
+          <SameWardList
+            wardName={sameWardQ.data?.wardName ?? detail.wardName}
+            items={sameWardQ.data?.items ?? []}
+            loading={sameWardQ.isLoading}
+          />
+
           <div className="ld-detail-desktop-actions">
             <button
               type="button"
@@ -333,10 +364,21 @@ export function LodatDetailPage() {
       {galleryOpen && detail && imageCount ? (
         <LodatImageGallery
           title={detail.title}
-          urls={images}
+          images={galleryImages}
           startIndex={heroIdx}
           onClose={() => setGalleryOpen(false)}
           onIndexChange={setHeroIdx}
+          onRotate={async (image, nextDeg) => {
+            if (!image.id) {
+              throw new Error('Ảnh dự án chung không lưu xoay tại đây.');
+            }
+            const updated = await updateLodatImageRotation(detail.id, image.id, {
+              rotationDeg: nextDeg,
+            });
+            await qc.invalidateQueries({ queryKey: ['lodat', id] });
+            const saved = updated.images.find((i) => i.id === image.id);
+            return saved?.rotationDeg ?? nextDeg;
+          }}
           onToast={flash}
           onError={setAlertMsg}
         />

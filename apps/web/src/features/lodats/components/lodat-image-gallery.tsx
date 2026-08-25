@@ -12,16 +12,19 @@ import {
   X,
 } from 'lucide-react';
 import { Icon } from '@/shared/ui/icon';
+import type { LodatImage } from '@crmanhung/shared';
 import './lodat-image-gallery.css';
 
 const SWIPE_PX = 48;
 
 type Props = {
   title: string;
-  urls: string[];
+  images: LodatImage[];
   startIndex?: number;
   onClose: () => void;
   onIndexChange?: (index: number) => void;
+  /** Persist rotate for lodat-sourced images; return next deg or throw. */
+  onRotate?: (image: LodatImage, nextDeg: number) => Promise<number>;
   onToast?: (message: string) => void;
   onError?: (message: string) => void;
 };
@@ -89,16 +92,18 @@ async function downloadRotatedImage(url: string, rotationDeg: number, fileName: 
 
 export function LodatImageGallery({
   title,
-  urls,
+  images,
   startIndex = 0,
   onClose,
   onIndexChange,
+  onRotate,
   onToast,
   onError,
 }: Props) {
   const [index, setIndex] = useState(startIndex);
-  const [rotations, setRotations] = useState<Record<number, number>>({});
+  const [localRotations, setLocalRotations] = useState<Record<string, number>>({});
   const [busyDownload, setBusyDownload] = useState(false);
+  const [busyRotate, setBusyRotate] = useState(false);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [mounted, setMounted] = useState(false);
 
@@ -106,10 +111,21 @@ export function LodatImageGallery({
     setMounted(true);
   }, []);
 
-  const count = urls.length;
+  useEffect(() => {
+    const next: Record<string, number> = {};
+    for (const img of images) {
+      const key = img.id ?? img.url;
+      next[key] = normalizeDeg(img.rotationDeg ?? 0);
+    }
+    setLocalRotations(next);
+  }, [images]);
+
+  const count = images.length;
   const safeIndex = count ? Math.min(Math.max(0, index), count - 1) : 0;
-  const url = urls[safeIndex] ?? '';
-  const rotationDeg = rotations[safeIndex] ?? 0;
+  const current = images[safeIndex] ?? null;
+  const url = current?.url ?? '';
+  const rotationKey = current ? (current.id ?? current.url) : '';
+  const rotationDeg = rotationKey ? (localRotations[rotationKey] ?? 0) : 0;
 
   const goTo = useCallback(
     (next: number) => {
@@ -147,10 +163,27 @@ export function LodatImageGallery({
   }, [onClose, goPrev, goNext]);
 
   function rotate(delta: number) {
-    setRotations((cur) => ({
-      ...cur,
-      [safeIndex]: normalizeDeg((cur[safeIndex] ?? 0) + delta),
-    }));
+    if (!current || busyRotate) return;
+    const nextDeg = normalizeDeg(rotationDeg + delta);
+
+    if (current.source !== 'lodat' || !current.id || !onRotate) {
+      setLocalRotations((cur) => ({ ...cur, [rotationKey]: nextDeg }));
+      onToast?.('Ảnh dự án chung — xoay chỉ trong phiên, không lưu DB.');
+      return;
+    }
+
+    setLocalRotations((cur) => ({ ...cur, [rotationKey]: nextDeg }));
+    setBusyRotate(true);
+    void onRotate(current, nextDeg)
+      .then((saved) => {
+        setLocalRotations((cur) => ({ ...cur, [rotationKey]: normalizeDeg(saved) }));
+        onToast?.('Đã lưu góc xoay ảnh.');
+      })
+      .catch((err: Error) => {
+        setLocalRotations((cur) => ({ ...cur, [rotationKey]: rotationDeg }));
+        onError?.(err.message || 'Không lưu được góc xoay.');
+      })
+      .finally(() => setBusyRotate(false));
   }
 
   async function handleDownload() {
@@ -271,9 +304,9 @@ export function LodatImageGallery({
 
         {count > 1 ? (
           <div className="ld-img-gallery-dots" role="tablist" aria-label="Chọn ảnh">
-            {urls.map((_, i) => (
+            {images.map((img, i) => (
               <button
-                key={`${urls[i]}-${i}`}
+                key={img.id ?? `${img.url}-${i}`}
                 type="button"
                 role="tab"
                 aria-selected={i === safeIndex}
@@ -293,11 +326,21 @@ export function LodatImageGallery({
       </div>
 
       <footer className="ld-img-gallery-actions">
-        <button type="button" className="ld-img-gallery-rotate" onClick={() => rotate(-90)}>
+        <button
+          type="button"
+          className="ld-img-gallery-rotate"
+          disabled={busyRotate}
+          onClick={() => rotate(-90)}
+        >
           <Icon icon={RotateCcw} size={18} />
           Xoay trái
         </button>
-        <button type="button" className="ld-img-gallery-rotate" onClick={() => rotate(90)}>
+        <button
+          type="button"
+          className="ld-img-gallery-rotate"
+          disabled={busyRotate}
+          onClick={() => rotate(90)}
+        >
           <Icon icon={RotateCw} size={18} />
           Xoay phải
         </button>

@@ -1,11 +1,15 @@
 import {
   LODAT_KIND_LABELS,
   LodatSaleStatus,
+  updateLodatImageRotationSchema,
   updateLodatSaleStatusSchema,
   type LodatDetail,
+  type LodatImage,
   type LodatListItem,
   type LodatListQuery,
   type LodatListResponse,
+  type LodatSameWardResponse,
+  type UpdateLodatImageRotationInput,
   type UpdateLodatSaleStatusInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
@@ -13,6 +17,7 @@ import { isMockLodats } from '@/shared/api/mode';
 import { mockLodats } from './mock-data';
 
 let mockStore: LodatListItem[] = structuredClone(mockLodats);
+const mockRotations = new Map<string, number>();
 
 const MOCK_IMAGE_POOL = [
   '/mock/lodats/p1.svg',
@@ -23,7 +28,7 @@ const MOCK_IMAGE_POOL = [
   '/mock/lodats/p6.svg',
 ];
 
-function mockImageUrls(item: LodatListItem): string[] {
+function mockImages(item: LodatListItem): LodatImage[] {
   const cover = item.coverImageUrl;
   if (!cover) return [];
   const extra = Math.max(0, item.extraPhotoCount ?? 0);
@@ -32,14 +37,29 @@ function mockImageUrls(item: LodatListItem): string[] {
     const next = MOCK_IMAGE_POOL[(MOCK_IMAGE_POOL.indexOf(cover) + i + 1) % MOCK_IMAGE_POOL.length];
     if (next && !urls.includes(next)) urls.push(next);
   }
-  return urls;
+  return urls.map((url, i) => {
+    const id = `mock-img-${item.id}-${i}`;
+    return {
+      id,
+      url,
+      rotationDeg: mockRotations.get(id) ?? 0,
+      source: 'lodat' as const,
+    };
+  });
 }
 
 function toDetail(item: LodatListItem): LodatDetail {
+  const images = mockImages(item);
   return {
     ...item,
     note: null,
-    imageUrls: mockImageUrls(item),
+    images,
+    imageUrls: images.map((i) => i.url),
+    wardName: item.address?.includes('An Đồng')
+      ? 'An Đồng'
+      : item.address?.includes('Hồng Phong')
+        ? 'Hồng Phong'
+        : 'An Đồng',
     owner: item.customerHint
       ? { customerId: 'mock', fullName: item.customerHint, phones: [] }
       : null,
@@ -103,6 +123,21 @@ export async function getLodat(id: string): Promise<LodatDetail> {
   return apiFetch<LodatDetail>(`/lodats/${id}`);
 }
 
+export async function listSameWardLodats(id: string): Promise<LodatSameWardResponse> {
+  if (isMockLodats()) {
+    const current = mockStore.find((p) => p.id === id);
+    if (!current) throw new Error('Không tìm thấy lô đất');
+    const detail = toDetail(current);
+    const ward = detail.wardName;
+    const items = mockStore.filter((p) => {
+      if (p.id === id) return false;
+      return toDetail(p).wardName === ward;
+    });
+    return { wardName: ward ?? null, items, total: items.length };
+  }
+  return apiFetch<LodatSameWardResponse>(`/lodats/${id}/same-ward`);
+}
+
 export async function updateLodatSaleStatus(
   id: string,
   input: UpdateLodatSaleStatusInput,
@@ -121,6 +156,24 @@ export async function updateLodatSaleStatus(
     return toDetail(updated);
   }
   return apiFetch<LodatDetail>(`/lodats/${id}/sale-status`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed),
+  });
+}
+
+export async function updateLodatImageRotation(
+  lodatId: string,
+  imageId: string,
+  input: UpdateLodatImageRotationInput,
+): Promise<LodatDetail> {
+  const parsed = updateLodatImageRotationSchema.parse(input);
+  if (isMockLodats()) {
+    const found = mockStore.find((p) => p.id === lodatId);
+    if (!found) throw new Error('Không tìm thấy lô đất');
+    mockRotations.set(imageId, ((parsed.rotationDeg % 360) + 360) % 360);
+    return toDetail(found);
+  }
+  return apiFetch<LodatDetail>(`/lodats/${lodatId}/images/${imageId}/rotation`, {
     method: 'PATCH',
     body: JSON.stringify(parsed),
   });
