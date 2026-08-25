@@ -67,6 +67,22 @@ export function formatDateShort(iso?: string | null): string | null {
   return `${d.getDate()}/${d.getMonth() + 1}/${d.getFullYear()}`;
 }
 
+export function isoToDateInput(iso?: string | null): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+export function dateInputToIso(value: string): string | null {
+  const v = value.trim();
+  if (!v) return null;
+  return `${v}T09:00:00.000`;
+}
+
 export type CountdownTone = 'none' | 'ok' | 'today' | 'overdue';
 
 export type NotaryDisplay = {

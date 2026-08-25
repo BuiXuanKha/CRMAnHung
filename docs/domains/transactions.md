@@ -1,7 +1,7 @@
 # Domain: Transactions (Giao dịch)
 
 - **Slug:** `transactions`
-- **Status:** Ready for API — Prisma + contract entity; Nest module + form **sau**
+- **Status:** Ready for API — Prisma + contract; UI mock list + chi tiết + form; Nest **sau**
 - **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich` (SQLite `tblTransaction*`, 2026-08-25)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
@@ -93,8 +93,9 @@ Ownership: theo `createdByEmployeeId` (người **tạo GD**), không theo `Loda
 | Màn | Route | Hành vi |
 |-----|-------|---------|
 | List | `/giao-dich` | Mock §12 — đã có |
-| Chi tiết | `/giao-dich/[id]` | Placeholder; form sửa sau |
-| Tạo / sửa | `/giao-dich/tao`, `/giao-dich/[id]/sua` | Sau Nest |
+| Chi tiết | `/giao-dich/[id]` | Đọc: mã, loại, TT, lô, bên, giá, hẹn CC, ghi chú, snapshot |
+| Tạo | `/giao-dich/tao` | `?lodatId=` khoá lô; trùng GD mở → sửa GD đó |
+| Sửa | `/giao-dich/[id]/sua` | Cùng form; thêm trạng thái + lý do hủy |
 
 Không nút thêm trên list. Nút **Giao dịch** trên lô = open-or-create (API sau).
 
@@ -256,8 +257,8 @@ Một dòng, cắt `…`. Thiếu = `—`.
 
 | Mục | Việc |
 |-----|------|
-| Xem chi tiết | `/giao-dich/[id]` (placeholder) |
-| Sửa | Toast — form sau |
+| Xem chi tiết | `/giao-dich/[id]` |
+| Sửa | `/giao-dich/[id]/sua` |
 | Xóa | Đỏ → confirm → gỡ khỏi list (mock). API: xóa cứng; mở lại rao bán map nếu cần — chốt lúc Nest |
 
 #### 12.1.5 Footer
@@ -318,8 +319,101 @@ Cùng câu `Hiển thị N / Tổng M giao dịch`.
 
 ### 12.3 Chi tiết `/giao-dich/[id]`
 
-Placeholder: mã GD + quay lại.
+#### 12.3.1 Giao diện máy tính
+
+```
+┌ ← Quản lý giao dịch · Sửa ───────────────────────────────────┐
+├ Mã GD + hangtag Loại + hangtag Trạng thái                    │
+├ Thẻ: lô (snapshot) · giá · thuế · HH · hẹn CC · ghi chú      │
+├ Thẻ: người bán / người mua                                   │
+└ Không rail ──────────────────────────────────────────────────┘
+```
+
+##### 1. Quay lại
+
+Link `/giao-dich`. Giữ ô tìm / lọc list (list-state).
+
+##### 2. Sửa
+
+Nút primary → `/giao-dich/[id]/sua`.
+
+##### 3. Đầu trang
+
+Mã GD đậm. Hangtag loại + trạng thái. Tiêu đề lô (snapshot, thiếu thì `lodatTitle` live).
+
+##### 4. Số liệu
+
+Giá bán, thuế, hoa hồng (`RECORD` = `—`), hẹn CC (kèm đếm ngược 12.1.4 mục 9), ghi chú, ngày tạo. Thiếu = `—`.
+
+##### 5. Các bên
+
+Người bán / người mua: mỗi tên một dòng. Rỗng = `—`.
+
+##### 6. Snapshot lô
+
+Địa chỉ, DT · MT · hướng, giá map lúc tạo. Thiếu = ẩn dòng. Ảnh snapshot: mock có thể trống.
+
+#### 12.3.2 Giao diện mobile
+
+Cùng 12.3.1. Một cột. Nút **Sửa** full-width đáy nội dung. Input không — chỉ đọc. Ô 16px không áp (không form).
 
 ---
 
-*Hành vi list bám §12. Visual §4.3.6. Không copy god-file.*
+### 12.4 Form `/giao-dich/tao` và `/giao-dich/[id]/sua`
+
+Tạo: status luôn **Đã cọc**; không chọn trạng thái. OWN bắt buộc hẹn CC. RECORD: hoa hồng khoá = 0. Trùng GD mở cùng lô → vào sửa GD đó.
+
+#### 12.4.1 Giao diện máy tính
+
+```
+┌ ← Quay lại · tiêu đề Tạo / Sửa mã GD ────────────────────────┐
+├ Thẻ loại · lô (picker khi tạo) · trạng thái (chỉ sửa)        │
+├ Giá · thuế · HH · hẹn CC                                     │
+├ Người bán · Người mua (thêm dòng / chọn khách)               │
+├ Ghi chú · lý do hủy (khi HUY)                                │
+└ Huỷ · Lưu ───────────────────────────────────────────────────┘
+```
+
+##### 1. Quay lại
+
+Tạo: `/giao-dich` hoặc lô nếu `?lodatId=`. Sửa: chi tiết GD.
+
+##### 2. Loại
+
+Của tôi / Ghi nhận. **Tạo** đổi được. **Sửa** khoá.
+
+##### 3. Lô đất
+
+Tạo: chọn lô (khoá nếu có `?lodatId=`). Sửa: chỉ đọc tiêu đề.
+
+##### 4. Trạng thái
+
+Chỉ trang sửa. Hủy → hiện ô lý do (bắt buộc).
+
+##### 5. Hẹn CC
+
+`input type=date`. OWN tạo: bắt buộc.
+
+##### 6. Giá / thuế / hoa hồng
+
+Số VND, format nghìn. RECORD: ô HH disabled.
+
+##### 7. Người bán / mua
+
+Mỗi bên ≥ 1 tên lúc Lưu. Thêm dòng; xoá nếu còn >1. Gõ tên hoặc chọn khách CRM (điền tên + `customerId`).
+
+##### 8. Ghi chú
+
+Textarea.
+
+##### 9. Lưu / Huỷ
+
+Huỷ về chi tiết (sửa) hoặc list (tạo). Lưu mock → chi tiết. Lỗi Zod → `CrmAlertDialog`.
+
+#### 12.4.2 Giao diện mobile
+
+Cùng field 12.4.1. Một cột. `input`/`select`/`textarea` **16px**. Nút Lưu/Huỷ full-width cuối form (không đè nội dung).
+
+---
+
+*Hành vi list bám §12. Visual §4.3.6. Form token giống trang sửa lô. Không copy god-file.*

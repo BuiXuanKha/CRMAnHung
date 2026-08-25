@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
@@ -17,6 +17,7 @@ import { TransactionStats } from './components/stats';
 import { TransactionCardList } from './components/transaction-card-list';
 import { TransactionTable } from './components/transaction-table';
 import { applyExtraFilters, countMobileTransactionFilters, type ExtraFilters } from './display';
+import { peekTransactionListState, saveTransactionListState } from './list-state';
 import './transactions.css';
 import './transactions-table.css';
 import './transactions-mobile.css';
@@ -50,6 +51,26 @@ export function TransactionListPage() {
   const [alertBox, setAlertBox] = useState<AlertState>(null);
   const [confirmDelete, setConfirmDelete] = useState<TransactionListItem | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
+
+  useLayoutEffect(() => {
+    const snap = peekTransactionListState();
+    if (!snap) return;
+    setKeyword(snap.searchKeyword);
+    setType(snap.type);
+    setStatus(snap.status);
+    setExtra(snap.extra);
+    setSelectedId(snap.selectedId);
+  }, []);
+
+  useEffect(() => {
+    saveTransactionListState(null, {
+      searchKeyword: keyword,
+      type,
+      status,
+      extra,
+      selectedId,
+    });
+  }, [keyword, type, status, extra, selectedId]);
 
   const listQuery = {
     keyword: keyword.trim() || undefined,
@@ -86,11 +107,25 @@ export function TransactionListPage() {
     setMenuId(null);
     setSelectedId(item.id);
     if (action === 'detail') {
+      saveTransactionListState(null, {
+        searchKeyword: keyword,
+        type,
+        status,
+        extra,
+        selectedId: item.id,
+      });
       router.push(`/giao-dich/${item.id}`);
       return;
     }
     if (action === 'edit') {
-      flash(`Sửa «${item.code}» — form sửa sẽ làm sau.`);
+      saveTransactionListState(null, {
+        searchKeyword: keyword,
+        type,
+        status,
+        extra,
+        selectedId: item.id,
+      });
+      router.push(`/giao-dich/${item.id}/sua`);
       return;
     }
     setConfirmDelete(item);
@@ -173,7 +208,10 @@ export function TransactionListPage() {
             selectedId={selectedId}
             menuId={menuId}
             onSelect={setSelectedId}
-            onOpen={(id) => router.push(`/giao-dich/${id}`)}
+            onOpen={(id) => {
+              setSelectedId(id);
+              router.push(`/giao-dich/${id}`);
+            }}
             onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
             onCloseMenu={() => setMenuId(null)}
             onAction={handleAction}

@@ -178,7 +178,7 @@ export const updateTransactionSchema = z
 
 export type UpdateTransactionInput = z.infer<typeof updateTransactionSchema>;
 
-/** GET `/transactions/lodat/:lodatId/open` — GD đang mở hoặc null. */
+export const OPEN_TRANSACTION_EXISTS_CODE = 'OPEN_TRANSACTION_EXISTS';
 export const openTransactionResponseSchema = z.object({
   id: z.string().nullable(),
 });

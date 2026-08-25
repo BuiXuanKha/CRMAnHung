@@ -1,51 +1,112 @@
 import {
+  TransactionPartyRole,
   TransactionStatus,
   TransactionType,
+  type TransactionDetail,
   type TransactionListItem,
+  type TransactionParty,
 } from '@crmanhung/shared';
 
-function row(partial: TransactionListItem): TransactionListItem {
-  return partial;
+function party(
+  id: string,
+  role: TransactionPartyRole,
+  freeTextName: string,
+  sortOrder: number,
+  customerId?: string | null,
+): TransactionParty {
+  return { id, role, freeTextName, sortOrder, customerId: customerId ?? null };
+}
+
+function detail(
+  partial: Omit<TransactionDetail, 'attachments'> & { attachments?: TransactionDetail['attachments'] },
+): TransactionDetail {
+  return {
+    attachments: [],
+    ...partial,
+  };
 }
 
 /** Domain transactions §8 — đủ loại, trạng thái, hẹn CC, thiếu trường. */
-export const mockTransactions: TransactionListItem[] = [
-  row({
+export const mockTransactionDetails: TransactionDetail[] = [
+  detail({
     id: 'tx_001',
     code: 'GD-00012',
     type: TransactionType.OWN,
     status: TransactionStatus.HOAN_TAT,
     lodatId: 'ld_lk5_37',
+    lodatCustomerMapId: 'map_ld_lk5_37',
     lodatTitle: 'LK5 - 37 Mặt sông',
     sellerNames: ['Trần Thị Bích'],
     buyerNames: ['Phạm Quốc Huy'],
     salePriceVnd: 2_600_000_000,
+    taxPriceVnd: 52_000_000,
     commissionVnd: 26_000_000,
     notaryAppointmentAt: '2026-07-20T09:00:00.000',
     note: 'Đã bàn giao sổ',
+    cancelReason: null,
+    createdByEmployeeId: 'user_staff_1',
+    completedAt: '2026-07-20T11:00:00.000',
     createdAt: '2026-07-02T10:15:22.000',
+    updatedAt: '2026-07-20T11:00:00.000',
+    parties: [
+      party('tx_001_s0', TransactionPartyRole.SELLER, 'Trần Thị Bích', 0, 'cus_net_phones'),
+      party('tx_001_b0', TransactionPartyRole.BUYER, 'Phạm Quốc Huy', 0),
+    ],
+    snapshot: {
+      title: 'LK5 - 37 Mặt sông',
+      addressText: 'Khu Đô Thị Đồng Khê - Hồng Phong',
+      areaM2: 90,
+      frontageM: 4.5,
+      direction: 'Bắc',
+      propertyKind: 'DAT',
+      mapStatus: 'TAM_DUNG',
+      mapPriceVnd: 2_600_000_000,
+      mapPriceNote: 'Thương lượng',
+      mapBrokerFeeNote: '1%',
+      mapNote: null,
+      images: [],
+    },
   }),
-  row({
+  detail({
     id: 'tx_002',
     code: 'GD-00018',
     type: TransactionType.OWN,
     status: TransactionStatus.DA_COC,
     lodatId: 'ld_lk3_12',
+    lodatCustomerMapId: 'map_ld_lk3_12',
     lodatTitle: 'LK3 - 12 Đường 20m',
     sellerNames: ['Nguyễn Văn An', 'Nguyễn Thị Lan'],
     buyerNames: ['Lê Hoàng Nam'],
     salePriceVnd: 3_150_000_000,
+    taxPriceVnd: 63_000_000,
     commissionVnd: 37_800_000,
     notaryAppointmentAt: '2026-08-25T09:00:00.000',
     note: 'Cọc 200 triệu, còn thương lượng nội thất',
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-08-12T14:08:41.000',
+    updatedAt: '2026-08-12T14:08:41.000',
+    parties: [
+      party('tx_002_s0', TransactionPartyRole.SELLER, 'Nguyễn Văn An', 0, 'cus_moi_fb'),
+      party('tx_002_s1', TransactionPartyRole.SELLER, 'Nguyễn Thị Lan', 1),
+      party('tx_002_b0', TransactionPartyRole.BUYER, 'Lê Hoàng Nam', 0),
+    ],
+    snapshot: {
+      title: 'LK3 - 12 Đường 20m',
+      addressText: 'Khu Đô Thị An Hưng - An Đồng',
+      areaM2: 100,
+      frontageM: 5,
+      direction: 'Đông Nam',
+      mapPriceVnd: 3_150_000_000,
+      images: [],
+    },
   }),
-  row({
+  detail({
     id: 'tx_003',
     code: 'GD-00019',
     type: TransactionType.OWN,
     status: TransactionStatus.DA_COC,
     lodatId: 'ld_bt08',
+    lodatCustomerMapId: 'map_ld_bt08',
     lodatTitle: 'BT-08 Biệt thự vườn',
     sellerNames: ['Lê Minh Khoa'],
     buyerNames: ['Vũ Thanh Hà'],
@@ -53,14 +114,30 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: 71_200_000,
     notaryAppointmentAt: '2026-08-18T09:00:00.000',
     note: 'Hẹn công chứng hôm nay',
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-08-08T09:22:00.000',
+    updatedAt: '2026-08-08T09:22:00.000',
+    parties: [
+      party('tx_003_s0', TransactionPartyRole.SELLER, 'Lê Minh Khoa', 0),
+      party('tx_003_b0', TransactionPartyRole.BUYER, 'Vũ Thanh Hà', 0),
+    ],
+    snapshot: {
+      title: 'BT-08 Biệt thự vườn',
+      addressText: 'Khu Đô Thị Đồng Khê - Hồng Phong',
+      areaM2: 220,
+      frontageM: 10,
+      direction: 'Nam',
+      mapPriceVnd: 8_900_000_000,
+      images: [],
+    },
   }),
-  row({
+  detail({
     id: 'tx_004',
     code: 'GD-00021',
     type: TransactionType.OWN,
     status: TransactionStatus.DA_COC,
     lodatId: 'ld_sh05',
+    lodatCustomerMapId: 'map_ld_sh05',
     lodatTitle: 'SH-05 Shophouse mặt tiền',
     sellerNames: ['Đỗ Thị Mai'],
     buyerNames: ['Công ty TNHH An Phát'],
@@ -68,14 +145,22 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: 54_000_000,
     notaryAppointmentAt: '2026-08-10T09:00:00.000',
     note: null,
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-08-01T16:40:18.000',
+    updatedAt: '2026-08-01T16:40:18.000',
+    parties: [
+      party('tx_004_s0', TransactionPartyRole.SELLER, 'Đỗ Thị Mai', 0),
+      party('tx_004_b0', TransactionPartyRole.BUYER, 'Công ty TNHH An Phát', 0),
+    ],
+    snapshot: { title: 'SH-05 Shophouse mặt tiền', images: [] },
   }),
-  row({
+  detail({
     id: 'tx_005',
     code: 'GD-00022',
     type: TransactionType.OWN,
     status: TransactionStatus.DA_CONG_CHUNG,
     lodatId: 'ld_lk7_04',
+    lodatCustomerMapId: 'map_ld_lk7_04',
     lodatTitle: 'LK7 - 04 Gần công viên',
     sellerNames: ['Hoàng Đức Anh'],
     buyerNames: ['Ngô Thị Yến'],
@@ -83,14 +168,22 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: 29_500_000,
     notaryAppointmentAt: '2026-08-14T10:30:00.000',
     note: 'Chờ sang tên',
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-07-28T11:05:09.000',
+    updatedAt: '2026-08-14T10:30:00.000',
+    parties: [
+      party('tx_005_s0', TransactionPartyRole.SELLER, 'Hoàng Đức Anh', 0),
+      party('tx_005_b0', TransactionPartyRole.BUYER, 'Ngô Thị Yến', 0),
+    ],
+    snapshot: { title: 'LK7 - 04 Gần công viên', images: [] },
   }),
-  row({
+  detail({
     id: 'tx_006',
     code: 'GD-00009',
     type: TransactionType.OWN,
     status: TransactionStatus.HOAN_TAT,
     lodatId: 'ld_n04',
+    lodatCustomerMapId: 'map_ld_n04',
     lodatTitle: 'N04 Nhà phố 3 tầng',
     sellerNames: ['Bùi Xuân Kha'],
     buyerNames: ['Trịnh Văn Long'],
@@ -98,14 +191,23 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: 42_000_000,
     notaryAppointmentAt: '2026-06-18T09:00:00.000',
     note: 'Khách giới thiệu',
+    createdByEmployeeId: 'user_staff_1',
+    completedAt: '2026-06-18T15:00:00.000',
     createdAt: '2026-06-03T08:50:33.000',
+    updatedAt: '2026-06-18T15:00:00.000',
+    parties: [
+      party('tx_006_s0', TransactionPartyRole.SELLER, 'Bùi Xuân Kha', 0),
+      party('tx_006_b0', TransactionPartyRole.BUYER, 'Trịnh Văn Long', 0),
+    ],
+    snapshot: { title: 'N04 Nhà phố 3 tầng', images: [] },
   }),
-  row({
+  detail({
     id: 'tx_007',
     code: 'GD-00024',
     type: TransactionType.OWN,
     status: TransactionStatus.HUY,
     lodatId: 'ld_lk2_19',
+    lodatCustomerMapId: 'map_ld_lk2_19',
     lodatTitle: 'LK2 - 19 Đường 16m',
     sellerNames: ['Phan Thị Hồng'],
     buyerNames: [],
@@ -113,14 +215,20 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: 21_000_000,
     notaryAppointmentAt: null,
     note: 'Khách hủy cọc, hoàn tiền',
+    cancelReason: 'Khách hủy cọc, hoàn tiền',
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-08-05T13:12:55.000',
+    updatedAt: '2026-08-06T09:00:00.000',
+    parties: [party('tx_007_s0', TransactionPartyRole.SELLER, 'Phan Thị Hồng', 0)],
+    snapshot: { title: 'LK2 - 19 Đường 16m', images: [] },
   }),
-  row({
+  detail({
     id: 'tx_008',
     code: 'GD-00015',
     type: TransactionType.RECORD,
     status: TransactionStatus.HOAN_TAT,
     lodatId: 'ld_dat_a12',
+    lodatCustomerMapId: 'map_ld_dat_a12',
     lodatTitle: 'A12 Đất nền Hồng Phong',
     sellerNames: ['Lương Văn Tùng'],
     buyerNames: ['Mai Thị Oanh'],
@@ -128,14 +236,23 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: null,
     notaryAppointmentAt: null,
     note: 'Ghi nhận deal sàn khác',
+    createdByEmployeeId: 'user_staff_1',
+    completedAt: '2026-07-19T17:28:00.000',
     createdAt: '2026-07-19T17:28:00.000',
+    updatedAt: '2026-07-19T17:28:00.000',
+    parties: [
+      party('tx_008_s0', TransactionPartyRole.SELLER, 'Lương Văn Tùng', 0),
+      party('tx_008_b0', TransactionPartyRole.BUYER, 'Mai Thị Oanh', 0),
+    ],
+    snapshot: { title: 'A12 Đất nền Hồng Phong', images: [] },
   }),
-  row({
+  detail({
     id: 'tx_009',
     code: 'GD-00026',
     type: TransactionType.RECORD,
     status: TransactionStatus.DA_COC,
     lodatId: 'ld_lk9_02',
+    lodatCustomerMapId: 'map_ld_lk9_02',
     lodatTitle: 'LK9 - 02 Góc 2 mặt tiền',
     sellerNames: [],
     buyerNames: ['Nguyễn Đức Thành'],
@@ -143,14 +260,19 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: null,
     notaryAppointmentAt: '2026-08-30T09:00:00.000',
     note: null,
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-08-11T10:00:00.000',
+    updatedAt: '2026-08-11T10:00:00.000',
+    parties: [party('tx_009_b0', TransactionPartyRole.BUYER, 'Nguyễn Đức Thành', 0)],
+    snapshot: { title: 'LK9 - 02 Góc 2 mặt tiền', images: [] },
   }),
-  row({
+  detail({
     id: 'tx_010',
     code: 'GD-00027',
     type: TransactionType.RECORD,
     status: TransactionStatus.DA_CONG_CHUNG,
     lodatId: null,
+    lodatCustomerMapId: 'map_orphan',
     lodatTitle: null,
     sellerNames: ['Trần Minh Châu'],
     buyerNames: ['Hà Thị Ngọc'],
@@ -158,14 +280,22 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: null,
     notaryAppointmentAt: null,
     note: 'Chưa gắn lô trên hệ',
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-08-13T19:41:12.000',
+    updatedAt: '2026-08-13T19:41:12.000',
+    parties: [
+      party('tx_010_s0', TransactionPartyRole.SELLER, 'Trần Minh Châu', 0),
+      party('tx_010_b0', TransactionPartyRole.BUYER, 'Hà Thị Ngọc', 0),
+    ],
+    snapshot: null,
   }),
-  row({
+  detail({
     id: 'tx_011',
     code: 'GD-00028',
     type: TransactionType.OWN,
     status: TransactionStatus.DA_COC,
     lodatId: 'ld_lk4_08',
+    lodatCustomerMapId: 'map_ld_lk4_08',
     lodatTitle: 'LK4 - 08 Gần trường',
     sellerNames: ['Võ Thị Kim'],
     buyerNames: ['Đặng Quang Huy', 'Đặng Thị Lan'],
@@ -173,14 +303,23 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: null,
     notaryAppointmentAt: '2026-09-02T09:00:00.000',
     note: 'Chưa chốt hoa hồng',
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-08-16T07:33:44.000',
+    updatedAt: '2026-08-16T07:33:44.000',
+    parties: [
+      party('tx_011_s0', TransactionPartyRole.SELLER, 'Võ Thị Kim', 0),
+      party('tx_011_b0', TransactionPartyRole.BUYER, 'Đặng Quang Huy', 0),
+      party('tx_011_b1', TransactionPartyRole.BUYER, 'Đặng Thị Lan', 1),
+    ],
+    snapshot: { title: 'LK4 - 08 Gần trường', images: [] },
   }),
-  row({
+  detail({
     id: 'tx_012',
     code: 'GD-00004',
     type: TransactionType.RECORD,
     status: TransactionStatus.HUY,
     lodatId: 'ld_bt02',
+    lodatCustomerMapId: 'map_ld_bt02',
     lodatTitle: 'BT-02 Biệt thự góc',
     sellerNames: ['Lý Văn Sơn'],
     buyerNames: ['Phùng Thị Dung'],
@@ -188,6 +327,43 @@ export const mockTransactions: TransactionListItem[] = [
     commissionVnd: null,
     notaryAppointmentAt: null,
     note: '',
+    cancelReason: 'Đối tác rút',
+    createdByEmployeeId: 'user_staff_1',
     createdAt: '2026-05-22T15:09:01.000',
+    updatedAt: '2026-05-23T08:00:00.000',
+    parties: [
+      party('tx_012_s0', TransactionPartyRole.SELLER, 'Lý Văn Sơn', 0),
+      party('tx_012_b0', TransactionPartyRole.BUYER, 'Phùng Thị Dung', 0),
+    ],
+    snapshot: { title: 'BT-02 Biệt thự góc', images: [] },
   }),
 ];
+
+export function toTransactionListItem(d: TransactionDetail): TransactionListItem {
+  const sellers = d.parties
+    .filter((p) => p.role === TransactionPartyRole.SELLER)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((p) => p.freeTextName);
+  const buyers = d.parties
+    .filter((p) => p.role === TransactionPartyRole.BUYER)
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((p) => p.freeTextName);
+  return {
+    id: d.id,
+    code: d.code,
+    type: d.type,
+    status: d.status,
+    lodatId: d.lodatId,
+    lodatTitle: d.lodatTitle ?? d.snapshot?.title ?? null,
+    sellerNames: sellers.length ? sellers : d.sellerNames,
+    buyerNames: buyers.length ? buyers : d.buyerNames,
+    salePriceVnd: d.salePriceVnd,
+    commissionVnd: d.commissionVnd,
+    notaryAppointmentAt: d.notaryAppointmentAt,
+    note: d.note,
+    createdAt: d.createdAt,
+  };
+}
+
+export const mockTransactions: TransactionListItem[] =
+  mockTransactionDetails.map(toTransactionListItem);
