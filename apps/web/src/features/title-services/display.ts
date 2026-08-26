@@ -233,3 +233,10 @@ export function parseMoneyInput(raw: string): number | null {
   const n = Number(digits);
   return Number.isFinite(n) && n > 0 ? n : null;
 }
+
+export function formatMoneyInput(raw: string): string {
+  const digits = raw.replace(/[^\d]/g, '');
+  if (!digits) return '';
+  const n = Number(digits);
+  return Number.isFinite(n) ? n.toLocaleString('vi-VN') : '';
+}

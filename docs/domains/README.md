@@ -9,7 +9,7 @@
 | Lodats | [lodats.md](./lodats.md) | Draft — model chốt; lịch làm §13 (địa chỉ → kho → lô STAFF) |
 | Addresses | [addresses.md](./addresses.md) | Ready for API — Admin `/cai-dat/dia-chi`; copy data sau |
 | Transactions | [transactions.md](./transactions.md) | Ready for API — Prisma + contract; UI mock list + chi tiết + form |
-| Title services | [title-services.md](./title-services.md) | Ready for API — UI nối API khi login thật; chưa tạo từ khách / copy |
+| Title services | [title-services.md](./title-services.md) | Ready for API — UI nối API; tạo từ khách xong; chưa copy legacy |
 | Users / admin registry | [users.md](./users.md) §11 mục 5 | P4 — CRUD NV, chưa làm |
 
 Trước khi code UI/API: domain doc phải ở trạng thái **Ready for mock** trở lên.

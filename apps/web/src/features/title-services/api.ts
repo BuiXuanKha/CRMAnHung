@@ -1,12 +1,15 @@
 import {
+  TitleServiceStatus,
   addTitleServiceAttachmentSchema,
   addTitleServiceMoneySchema,
   addTitleServiceProgressSchema,
+  createTitleServiceSchema,
   pinTitleServiceSchema,
   updateTitleServiceSchema,
   type AddTitleServiceAttachmentInput,
   type AddTitleServiceMoneyInput,
   type AddTitleServiceProgressInput,
+  type CreateTitleServiceInput,
   type PinTitleServiceInput,
   type TitleServiceDetail,
   type TitleServiceListItem,
@@ -16,6 +19,7 @@ import {
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 import { isMockTitleServices } from '@/shared/api/mode';
+import { getCustomer } from '@/features/customers/api';
 import { computeDaysWorking, sumVnd } from './display';
 import { mockTitleServices } from './mock-data';
 
@@ -108,6 +112,73 @@ export async function listTitleServices(
   if (query.createdByEmployeeId) params.set('createdByEmployeeId', query.createdByEmployeeId);
   const qs = params.toString();
   return apiFetch<TitleServiceListResponse>(`/title-services${qs ? `?${qs}` : ''}`);
+}
+
+function nextMockCode(): string {
+  const year = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+  }).format(new Date());
+  const prefix = `SD-${year}-`;
+  let max = 0;
+  for (const row of mockStore) {
+    const m = row.code.match(/^SD-\d{4}-(\d+)$/);
+    if (row.code.startsWith(prefix) && m) max = Math.max(max, Number(m[1]));
+  }
+  return `${prefix}${String(max + 1).padStart(4, '0')}`;
+}
+
+export async function createTitleService(
+  input: CreateTitleServiceInput,
+): Promise<TitleServiceDetail> {
+  const parsed = createTitleServiceSchema.parse(input);
+  if (isMockTitleServices()) {
+    const customer = await getCustomer(parsed.customerId);
+    if (customer.isHidden) {
+      throw new Error('Không tạo hồ sơ cho khách đang ẩn.');
+    }
+    const now = new Date().toISOString();
+    const startedAt = parsed.startedAt
+      ? new Date(`${parsed.startedAt}T12:00:00`).toISOString()
+      : now;
+    const expectedDoneAt = parsed.expectedDoneAt
+      ? new Date(`${parsed.expectedDoneAt}T12:00:00`).toISOString()
+      : null;
+    const created = refreshComputed({
+      id: `ts_${Date.now()}`,
+      code: nextMockCode(),
+      customerId: customer.id,
+      customerName: customer.fullName,
+      primaryPhone: customer.primaryPhone ?? null,
+      status: TitleServiceStatus.DANG_LAM,
+      agreedFeeVnd: parsed.agreedFeeVnd ?? null,
+      needSummary: parsed.needSummary?.trim() || null,
+      note: parsed.note?.trim() || null,
+      isPinned: false,
+      pinnedAt: null,
+      startedAt,
+      expectedDoneAt,
+      completedAt: null,
+      createdByEmployeeId: STAFF_ID,
+      createdByName: STAFF,
+      daysWorking: 0,
+      documentCount: 0,
+      totalThuVnd: 0,
+      totalChiVnd: 0,
+      latestProgress: null,
+      createdAt: now,
+      updatedAt: now,
+      progress: [],
+      moneyEntries: [],
+      attachments: [],
+    });
+    mockStore = [created, ...mockStore];
+    return created;
+  }
+  return apiFetch<TitleServiceDetail>('/title-services', {
+    method: 'POST',
+    body: JSON.stringify(parsed),
+  });
 }
 
 export async function getTitleService(id: string): Promise<TitleServiceDetail> {

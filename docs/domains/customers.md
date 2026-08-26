@@ -48,7 +48,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 | TT | Việc | Quyết định |
 |----|------|------------|
 | 1 | Khôi phục khách ẩn (§11 mục 16) | **Chưa làm.** Phụ thuộc extension kéo khách cũ. |
-| 2 | Tạo hồ sơ sổ đỏ từ khách (§11 mục 7) | **Chưa làm.** |
+| 2 | Tạo hồ sơ sổ đỏ từ khách (§11 mục 7) | **Xong.** Form `/khach-hang/[id]/dich-vu-so-do`. |
 | 3 | Xoá SĐT (§11 mục 11) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
 | 4 | Sửa tên Facebook (§11 mục 13) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
 | 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Sau** khi đã xong mục 1 (khôi phục ẩn). |
@@ -61,7 +61,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 4. **Trang chi tiết `/khach-hang/[id]`** — SĐT, tài chính, lịch sử chăm sóc, **danh sách lô** (API). Có trên staging.
 5. **Trang `/khach-hang/[id]/cham-soc`** (điện thoại). Có trên staging.
 6. **Tạo lô đất từ khách** — STAFF → `/khach-hang/[id]/them-lo-dat` (**form đã có** — lodats.md §12.5). ADMIN: CrmAlert không tạo từ khách.
-7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do`. Hiện nhảy list `/dich-vu-so-do` chung. **Chưa làm** (chốt 2026-08-24).
+7. **Tạo hồ sơ sổ đỏ từ khách** — `/khach-hang/[id]/dich-vu-so-do` (title-services.md §12.4). STAFF + ADMIN. Khách ẩn → không tạo. Lưu → list `/dich-vu-so-do?id=`.
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
 10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Có trên staging. Trùng số → modal mục 15.
@@ -207,7 +207,7 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 | Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (lodats.md §12.5). ADMIN: báo không được tạo |
-| Dịch vụ sổ đỏ | Form từ khách sau. Hiện alert đang phát triển |
+| Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` (form tạo hồ sơ) |
 | Ghim / Bỏ ghim | `isPinned` |
 | Xóa khách | Confirm ẩn mềm; tìm lại bằng `@` / `@@` |
 

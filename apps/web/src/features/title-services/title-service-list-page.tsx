@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
@@ -44,10 +45,11 @@ type AlertState = { title: string; message: string } | null;
 
 export function TitleServiceListPage() {
   const qc = useQueryClient();
+  const search = useSearchParams();
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
-  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(() => search.get('id'));
   const [menuId, setMenuId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
@@ -75,7 +77,10 @@ export function TitleServiceListPage() {
     [list.data?.items, extra],
   );
 
-  const selected = filtered.find((row) => row.id === selectedId) ?? null;
+  const selected =
+    filtered.find((row) => row.id === selectedId) ??
+    list.data?.items.find((row) => row.id === selectedId) ??
+    null;
   const mobileFilterCount = countMobileTitleServiceFilters(status);
 
   useEffect(() => {

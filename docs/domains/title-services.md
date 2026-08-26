@@ -1,7 +1,7 @@
 # Domain: Title services (Dịch vụ sổ đỏ)
 
 - **Slug:** `title-services`
-- **Status:** Ready for API — UI `/dich-vu-so-do` nối API khi login thật; chưa tạo từ khách / copy.
+- **Status:** Ready for API — UI `/dich-vu-so-do` nối API khi login thật; tạo từ khách **xong**; chưa copy legacy.
 - **Nguồn:** màn [`/dich-vu-so-do`](https://anhungland.com/dich-vu-so-do) (web mới) + CRM cũ `/dich-vu-so-do` (API `/api/title-services`, SQLite `tblTitleService*`)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.7 + §4.5
 - **Contract:** `packages/shared/src/title-services.ts`
@@ -59,6 +59,7 @@ Ownership list = `CreatedByEmployeeId`, không phải `Customer.employeeId` (tr�
 | Màn | Route mới | Cũ |
 |-----|-----------|-----|
 | List + panel | `/dich-vu-so-do` | `/dich-vu-so-do` |
+| Tạo từ khách | `/khach-hang/[id]/dich-vu-so-do` | menu khách «Dịch vụ sổ đỏ» |
 | Chi tiết | `/dich-vu-so-do/[id]` | panel trên list; `GET /api/title-services/:id` |
 
 §12 = list đã chốt. API cũ: `GET/POST /api/title-services`.
@@ -246,6 +247,33 @@ Placeholder: mã + quay lại. Làm việc hàng ngày = list + panel (máy tín
 
 ---
 
+### 12.4 Tạo từ khách `/khach-hang/[id]/dich-vu-so-do`
+
+Không nút Thêm trên list. Menu khách «Dịch vụ sổ đỏ» → trang này. ADMIN **được** tạo (khác lô đất). Lưu xong → `/dich-vu-so-do?id=` (chọn hồ sơ mới). Quay lại / Hủy → `/khach-hang`.
+
+#### 12.4.1 Máy tính
+
+Form một cột: khách chỉ đọc + trường hồ sơ + Hủy / Lưu.
+
+#### 12.4.2 Mobile
+
+Cùng form. Nút Hủy / Lưu đáy.
+
+#### 12.4.3 Thành phần
+
+1. Tên khách, SĐT — chỉ đọc.
+2. Trạng thái lúc tạo = `DANG_LAM` (không sửa trên form).
+3. Phí thỏa thuận (tuỳ chọn).
+4. Nhu cầu (tuỳ chọn).
+5. Ghi chú (tuỳ chọn).
+6. Ngày bắt đầu — mặc định hôm nay.
+7. Ngày dự kiến xong — tuỳ chọn.
+8. Không đính file lúc tạo — thêm sau trên panel list.
+
+Khách ẩn / không thuộc NV (STAFF) / không tìm thấy → báo, không lưu.
+
+---
+
 *Hành vi list bám §12. Visual §4.3.7. Không copy god-file.*
 
 ---
@@ -267,7 +295,7 @@ CRM cũ **đủ dùng** cho 1–vài hồ sơ: một hồ sơ / khách, trạng 
 | `HUY` không ghi `completedAt` → số ngày vẫn chạy | Hủy **và** Hoàn thành đều ghi `completedAt`, dừng đếm ngày |
 | `StepType` / loại giấy tùy ý | Enum chốt + «Khác» (ghi chú). Không nhận chuỗi tự do làm `kind` lưu DB |
 | Prisma stub lệch | Sửa schema **trước** copy. Tiền **BigInt** |
-| Tạo từ khách trên web mới chưa có | Slice riêng sau API list |
+| ~~Tạo từ khách trên web mới chưa có~~ | **Xong** — `/khach-hang/[id]/dich-vu-so-do` |
 
 **Không làm** trong P3: nối lô/GD vào hồ sơ sổ đỏ; audit log xem file (có thể thêm sau); extension.
 
@@ -293,6 +321,6 @@ Khách + User **đã có**. List mock §12 **đã có**.
 | **5** | ~~Nest tiến độ + thu/chi~~ **xong** | Nhật ký / tiền trên hồ sơ sống |
 | **6** | ~~Nest file~~ **xong** — upload private R2 + signed URL + xóa object | Giấy tờ mật |
 | **7** | ~~Nối UI `/dich-vu-so-do`~~ **xong** — `isMockTitleServices` = login giả | List/panel thật |
-| **8** | Tạo hồ sơ từ khách (`/khach-hang/[id]/dich-vu-so-do`) | Không nút Thêm trên list |
+| **8** | ~~Tạo hồ sơ từ khách~~ **xong** — `/khach-hang/[id]/dich-vu-so-do` | Không nút Thêm trên list |
 | **9** | Copy 1 hồ sơ SQLite → Postgres (+ 2 tiến độ, 3 tiền; 0 file) | Data kha `SD-2026-0001` |
 | **10** | (Sau) ADMIN lọc NV trên list; tùy chọn audit xem file | Không chặn 1–9 |
