@@ -7,8 +7,10 @@ import {
 import { Prisma } from '@prisma/client';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../../storage/storage.service';
 import { assertCanAccess as assertCustomerAccess } from '../customers/customers-view';
 import type {
+  AddTitleServiceAttachmentDto,
   AddTitleServiceMoneyDto,
   AddTitleServiceProgressDto,
   CreateTitleServiceDto,
@@ -21,6 +23,9 @@ import {
   DONE_STATUSES,
   LIST_INCLUDE,
   LIST_LIMIT,
+  TITLE_DOC_KINDS,
+  TITLE_FILE_MAX_BYTES,
+  TITLE_FILE_MIMES,
   TITLE_STATUS,
   TITLE_STATUSES,
   keywordWhere,
@@ -28,9 +33,14 @@ import {
   toListItem,
 } from './title-services-view';
 
+const SIGNED_URL_TTL_SEC = 15 * 60;
+
 @Injectable()
 export class TitleServicesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
   async list(user: RequestUser, query: ListTitleServicesQueryDto) {
     const where: Prisma.TitleServiceWhereInput = {
@@ -139,11 +149,82 @@ export class TitleServicesService {
   async remove(user: RequestUser, id: string) {
     const row = await this.prisma.titleService.findUnique({
       where: { id },
-      select: { id: true, createdByEmployeeId: true },
+      select: {
+        id: true,
+        createdByEmployeeId: true,
+        attachments: { select: { objectKey: true } },
+      },
     });
     if (!row) throw new NotFoundException('Không tìm thấy hồ sơ sổ đỏ.');
     this.assertCanAccess(user, row.createdByEmployeeId);
     await this.prisma.titleService.delete({ where: { id } });
+    await this.deletePrivateKeys(row.attachments.map((a) => a.objectKey));
+  }
+
+  async addAttachment(
+    user: RequestUser,
+    id: string,
+    dto: AddTitleServiceAttachmentDto,
+    file: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    await this.requireOwned(user, id);
+    if (!(TITLE_DOC_KINDS as readonly string[]).includes(dto.kind)) {
+      throw new BadRequestException('Loại giấy tờ không hợp lệ.');
+    }
+    this.assertUploadFile(file);
+    const fileName = this.safeFileName(file.originalname);
+    const uploaded = await this.storage.uploadPrivate({
+      folder: `title-services/${id}`,
+      buffer: file.buffer,
+      contentType: file.mimetype,
+      originalName: fileName,
+    });
+    try {
+      const updated = await this.prisma.titleService.update({
+        where: { id },
+        data: {
+          attachments: {
+            create: {
+              kind: dto.kind,
+              fileName,
+              objectKey: uploaded.objectKey,
+              createdByEmployeeId: user.id,
+            },
+          },
+        },
+        include: DETAIL_INCLUDE,
+      });
+      return toDetail(updated);
+    } catch (err) {
+      await this.storage.delete(uploaded.objectKey, 'private');
+      throw err;
+    }
+  }
+
+  async attachmentSignedUrl(user: RequestUser, id: string, attachmentId: string) {
+    const row = await this.requireOwned(user, id);
+    const att = row.attachments.find((a) => a.id === attachmentId);
+    if (!att) throw new NotFoundException('Không tìm thấy tài liệu.');
+    const expiresIn = SIGNED_URL_TTL_SEC;
+    const url = await this.storage.getPrivateSignedUrl(att.objectKey, expiresIn);
+    return {
+      url,
+      expiresAt: new Date(Date.now() + expiresIn * 1000).toISOString(),
+    };
+  }
+
+  async removeAttachment(user: RequestUser, id: string, attachmentId: string) {
+    const row = await this.requireOwned(user, id);
+    const att = row.attachments.find((a) => a.id === attachmentId);
+    if (!att) throw new NotFoundException('Không tìm thấy tài liệu.');
+    await this.prisma.$transaction([
+      this.prisma.titleServiceAttachment.delete({ where: { id: attachmentId } }),
+      this.prisma.titleService.update({
+        where: { id },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+    await this.storage.delete(att.objectKey, 'private');
   }
 
   async addProgress(user: RequestUser, id: string, dto: AddTitleServiceProgressDto) {
@@ -286,5 +367,30 @@ export class TitleServicesService {
     const m = last?.code.match(/^SD-\d{4}-(\d+)$/);
     if (m) max = Number(m[1]);
     return `${prefix}${String(max + 1).padStart(4, '0')}`;
+  }
+
+  private assertUploadFile(file: { buffer: Buffer; mimetype: string }) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Thiếu file tài liệu.');
+    }
+    if (file.buffer.length > TITLE_FILE_MAX_BYTES) {
+      throw new BadRequestException('File tối đa 12 MB.');
+    }
+    const mime = String(file.mimetype || '').toLowerCase();
+    if (!(TITLE_FILE_MIMES as readonly string[]).includes(mime)) {
+      throw new BadRequestException('Chỉ nhận ảnh (JPEG/PNG/WebP/GIF) hoặc PDF.');
+    }
+  }
+
+  private safeFileName(original?: string): string {
+    const raw = (original ?? '').split(/[/\\]/).pop()?.trim() || 'tai-lieu';
+    return raw.replace(/[^\w.\- ()à-ỹÀ-Ỹ]/gi, '_').slice(0, 180) || 'tai-lieu';
+  }
+
+  private async deletePrivateKeys(keys: string[]) {
+    for (const key of keys) {
+      if (!key) continue;
+      await this.storage.delete(key, 'private');
+    }
   }
 }

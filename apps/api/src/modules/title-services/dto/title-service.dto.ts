@@ -142,3 +142,10 @@ export class AddTitleServiceMoneyDto {
   @MaxLength(4000)
   note?: string;
 }
+
+const TITLE_DOC_KINDS = ['SO_DO', 'CAN_CUOC', 'KHAC'] as const;
+
+export class AddTitleServiceAttachmentDto {
+  @IsIn(TITLE_DOC_KINDS, { message: 'Loại giấy tờ không hợp lệ.' })
+  kind!: (typeof TITLE_DOC_KINDS)[number];
+}

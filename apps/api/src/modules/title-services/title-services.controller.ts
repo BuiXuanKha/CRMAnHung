@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,7 +9,10 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   CurrentUser,
   type RequestUser,
@@ -20,8 +24,10 @@ import {
   UpdateTitleServiceDto,
   AddTitleServiceProgressDto,
   AddTitleServiceMoneyDto,
+  AddTitleServiceAttachmentDto,
 } from './dto/title-service.dto';
 import { TitleServicesService } from './title-services.service';
+import { TITLE_FILE_MAX_BYTES } from './title-services-view';
 
 @Controller('title-services')
 export class TitleServicesController {
@@ -96,6 +102,44 @@ export class TitleServicesController {
     @Param('moneyId') moneyId: string,
   ) {
     return this.titleServices.removeMoney(user, id, moneyId);
+  }
+
+  @Post(':id/attachments')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: TITLE_FILE_MAX_BYTES },
+    }),
+  )
+  addAttachment(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: AddTitleServiceAttachmentDto,
+    @UploadedFile()
+    file?: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Thiếu file tài liệu.');
+    }
+    return this.titleServices.addAttachment(user, id, dto, file);
+  }
+
+  @Get(':id/attachments/:attachmentId/url')
+  attachmentSignedUrl(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Param('attachmentId') attachmentId: string,
+  ) {
+    return this.titleServices.attachmentSignedUrl(user, id, attachmentId);
+  }
+
+  @Delete(':id/attachments/:attachmentId')
+  @HttpCode(204)
+  removeAttachment(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Param('attachmentId') attachmentId: string,
+  ) {
+    return this.titleServices.removeAttachment(user, id, attachmentId);
   }
 
   @Delete(':id')

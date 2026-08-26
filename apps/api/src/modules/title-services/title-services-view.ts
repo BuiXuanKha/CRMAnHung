@@ -35,6 +35,22 @@ export const TITLE_STEPS = Object.values(TITLE_STEP);
 export const TITLE_MONEY_KIND = { THU: 'THU', CHI: 'CHI' } as const;
 export const TITLE_MONEY_KINDS = Object.values(TITLE_MONEY_KIND);
 
+export const TITLE_DOC_KIND = {
+  SO_DO: 'SO_DO',
+  CAN_CUOC: 'CAN_CUOC',
+  KHAC: 'KHAC',
+} as const;
+export const TITLE_DOC_KINDS = Object.values(TITLE_DOC_KIND);
+
+export const TITLE_FILE_MAX_BYTES = 12 * 1024 * 1024;
+export const TITLE_FILE_MIMES = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+] as const;
+
 export const LIST_LIMIT = 500;
 
 export const LIST_INCLUDE = {

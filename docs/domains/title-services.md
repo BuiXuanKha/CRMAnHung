@@ -1,7 +1,7 @@
 # Domain: Title services (Dịch vụ sổ đỏ)
 
 - **Slug:** `title-services`
-- **Status:** Ready for API — Nest CRUD hồ sơ + tiến độ/thu-chi; chưa file upload / copy.
+- **Status:** Ready for API — Nest CRUD + tiến độ/thu-chi + file private R2; chưa nối UI / copy.
 - **Nguồn:** màn [`/dich-vu-so-do`](https://anhungland.com/dich-vu-so-do) (web mới) + CRM cũ `/dich-vu-so-do` (API `/api/title-services`, SQLite `tblTitleService*`)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.7 + §4.5
 - **Contract:** `packages/shared/src/title-services.ts`
@@ -67,7 +67,7 @@ Ownership list = `CreatedByEmployeeId`, không phải `Customer.employeeId` (tr�
 
 `packages/shared/src/title-services.ts` + Prisma `TitleService*` khớp CRM cũ: `code`, `customerId`, `createdByEmployeeId`, `agreedFeeVnd` BigInt, ghim, `startedAt` / `expectedDoneAt` / `completedAt`, tiến độ `stepType`, tiền `kind` THU|CHI, file `objectKey` **private** (contract **không** trả URL public).
 
-Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim / xóa + POST/DELETE tiến độ và thu-chi. Chưa file.
+Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim / xóa + tiến độ / thu-chi + file private (multipart, signed GET, xóa object).
 
 ## 8. Mock data
 
@@ -291,7 +291,7 @@ Khách + User **đã có**. List mock §12 **đã có**.
 | **3** | ~~Prisma `TitleService*`~~ **xong** — bỏ stub; FK khách + NV | Schema trước data |
 | **4** | ~~Nest CRUD hồ sơ~~ **xong** — list / get / tạo / sửa / ghim / xóa — **chưa** file | Xương ownership |
 | **5** | ~~Nest tiến độ + thu/chi~~ **xong** | Nhật ký / tiền trên hồ sơ sống |
-| **6** | Nest file: upload private R2 + signed URL + xóa object | Giấy tờ mật |
+| **6** | ~~Nest file~~ **xong** — upload private R2 + signed URL + xóa object | Giấy tờ mật |
 | **7** | Nối UI `/dich-vu-so-do` → API (`isMockTitleServices` = login giả) | List/panel thật |
 | **8** | Tạo hồ sơ từ khách (`/khach-hang/[id]/dich-vu-so-do`) | Không nút Thêm trên list |
 | **9** | Copy 1 hồ sơ SQLite → Postgres (+ 2 tiến độ, 3 tiền; 0 file) | Data kha `SD-2026-0001` |
