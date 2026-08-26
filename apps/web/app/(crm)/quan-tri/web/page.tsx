@@ -1,5 +1,6 @@
-import { PublicWebDashboard } from '@/features/public-content/public-web-dashboard';
+import { redirect } from 'next/navigation';
 
-export default function QuanTriWebPage() {
-  return <PublicWebDashboard />;
+/** Đường cũ — chuyển sang `/dashboard`. */
+export default function QuanTriWebRedirectPage() {
+  redirect('/dashboard');
 }

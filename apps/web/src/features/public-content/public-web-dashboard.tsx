@@ -77,7 +77,7 @@ export function PublicWebDashboard() {
       <header className="pw-head">
         <div>
           <h1>
-            <Icon icon={Globe} size="sm" /> Web công khai
+            <Icon icon={Globe} size="sm" /> Dashboard
           </h1>
           <p>Khách trên anhungland.com chỉ thấy lô và bài đã đăng.</p>
         </div>

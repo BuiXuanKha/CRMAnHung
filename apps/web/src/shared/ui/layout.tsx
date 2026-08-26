@@ -48,7 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     ...navItems,
     ...(user.role === 'ADMIN'
       ? [
-          { href: '/quan-tri/web', label: 'Web công khai', icon: Globe },
+          { href: '/dashboard', label: 'Dashboard', icon: Globe },
           { href: '/quan-tri/khach-hang', label: 'Quản trị khách', icon: null },
         ]
       : []),

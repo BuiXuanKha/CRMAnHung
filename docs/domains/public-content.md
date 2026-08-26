@@ -1,8 +1,7 @@
 # Domain: Nội dung web công khai (Khách / Admin đăng)
 
 - **Slug:** `public-content`
-- **Status:** Ready for mock — **dashboard** `/quan-tri/web` (ADMIN). List đăng lô / soạn bài = slice sau.
-- **Owner:** An Hưng Land
+- **Status:** Ready for mock — **Dashboard** `/dashboard` (ADMIN). Bốn trang CRM không thêm quyền admin.
 - **Owner:** An Hưng Land
 - **IA khách:** [`PUBLIC-WEB.md`](../PUBLIC-WEB.md) · SEO: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md)
 - **Lô nguồn:** [`lodats.md`](./lodats.md) — **không** tự đẩy mọi lô Mở bán lên web
@@ -111,16 +110,15 @@ PublicPost                        (category, slug, status, cover, body) — khô
 
 | Màn | Route | Việc |
 |-----|--------|------|
-| **Dashboard admin** | `/quan-tri/web` | **Slice này.** Tổng quan + lô/bài gần đây. §12 |
+| **Dashboard admin** | `/dashboard` | Tổng quan đăng web. §12 |
 | Trang chủ khách | `/` | Mock sẵn — sau nối data đã public |
 | List / chi tiết lô khách | `/san-pham` | Mock sẵn |
 | List bài khách | `/du-an` … | Stub; chi tiết `[slug]` chưa |
-| Admin — lô đăng bán | `/quan-tri/web/lo-dat` | **Chưa** — nút dashboard → alert |
-| Admin — bài viết | `/quan-tri/web/bai-viet` | **Chưa** — nút dashboard → alert |
+| Admin — lô / bài | menu trong Dashboard | **Chưa** — chủ sẽ chốt mục |
 
-**Không** nhét vào `/quan-tri/khach-hang`.
+**Tạm thời không** thêm hành vi/quyền admin trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do` — bốn trang đó giữ như STAFF.
 
-Menu header CRM: **Web công khai** chỉ ADMIN (cạnh Quản trị khách). STAFF vào URL → `/khach-hang`.
+Menu header: bốn mục CRM cho mọi NV. ADMIN thêm **Dashboard** (`/dashboard`). STAFF vào URL → `/khach-hang`.
 
 ---
 
@@ -163,7 +161,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồi UI.
 
-1. Chỉ **ADMIN** bấm Đăng web / vào `/quan-tri/web`.
+1. Chỉ **ADMIN** vào `/dashboard`. Bốn trang CRM **không** thêm UI/quyền admin.
 2. Lô lên web = công tắc tường minh — không auto mọi lô Mở bán.
 3. Tạm dừng / Đã cọc / Đã bán → gỡ web (chưa mock hành vi; chỉ số đếm).
 4. Giá từng lô: hiện số hoặc **Liên hệ**.
@@ -174,7 +172,7 @@ Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồ
 
 ---
 
-## 12. Dashboard `/quan-tri/web` — ADMIN
+## 12. Dashboard `/dashboard` — ADMIN
 
 Thứ tự: **12.1 máy tính** → **12.2 mobile**. Không trộn PC/mobile trong một mục.
 
@@ -185,7 +183,7 @@ Không H1 lặp tên menu trên thanh tìm — **có** H1 trên trang dashboard 
 ### 12.1 Giao diện máy tính
 
 ```
-┌ Web công khai          [Xem trang khách] [Đăng lô] [Soạn bài] ┐
+┌ Dashboard              [Xem trang khách] [Đăng lô] [Soạn bài] ┐
 │ Dòng phụ: khách chỉ thấy nội dung đã đăng                    │
 ├ 4 thẻ đếm (kiểu §4.3.6, không card marketing)                │
 ├ Hai cột: bảng Lô trên web · bảng Bài viết gần đây  (§4.5)    │
@@ -194,7 +192,7 @@ Không H1 lặp tên menu trên thanh tìm — **có** H1 trên trang dashboard 
 
 #### 12.1.1 Thanh đầu trang
 
-1. **H1** `Web công khai`
+1. **H1** `Dashboard`
 2. Dòng phụ: `Khách trên anhungland.com chỉ thấy lô và bài đã đăng.`
 3. **Xem trang khách** — viền; mở `/` tab mới
 4. **Đăng lô** — primary. Slice này: `CrmAlert` «Danh sách đăng lô làm sau.»
