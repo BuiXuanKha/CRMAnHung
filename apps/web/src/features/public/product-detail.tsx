@@ -3,6 +3,7 @@ import { ANHUNG_BRAND } from './brand';
 import { ProductGallery, ProductShareButton } from './product-detail-client';
 import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
+import { listingHeadline } from './listing-seo';
 import { PUBLIC_LISTING_PATH, listingHref } from './site';
 import './public-home.css';
 import './product-detail.css';
@@ -59,17 +60,17 @@ export function ProductDetailView({
           <span aria-hidden>/</span>
           <Link href={PUBLIC_LISTING_PATH}>Nhà đất đang bán</Link>
           <span aria-hidden>/</span>
-          <span>{listing.title}</span>
+          <span>{listingHeadline(listing)}</span>
         </nav>
 
         <div className="pd-layout">
           <div className="pd-primary">
             {images.length > 0 ? (
-              <ProductGallery title={listing.title} images={images} />
+              <ProductGallery title={listingHeadline(listing)} images={images} />
             ) : null}
 
             {product?.postedLabel ? <p className="pd-posted">{product.postedLabel}</p> : null}
-            <h1>{listing.title}</h1>
+            <h1>{listingHeadline(listing)}</h1>
             <p className="pd-price">
               {price}
               <span>
