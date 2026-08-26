@@ -157,8 +157,8 @@ export function TitleServiceListPage() {
     return getActiveListScrollEl(tableScrollRef.current, cardsScrollRef.current);
   }
 
-  function persistListState(selectedOverride?: string | null, force = false) {
-    if (!force && !restoreDone.current) return;
+  function persistListState(selectedOverride?: string | null) {
+    if (!restoreDone.current) return;
     saveTitleServiceListState(getListScrollEl(), {
       ...persistRef.current,
       selectedId: selectedOverride ?? persistRef.current.selectedId,
@@ -211,7 +211,7 @@ export function TitleServiceListPage() {
 
   useEffect(() => {
     function persist() {
-      persistListState(undefined, true);
+      persistListState();
     }
     window.addEventListener('pagehide', persist);
     return () => {
@@ -250,7 +250,10 @@ export function TitleServiceListPage() {
     setSelectedId(id);
     setPanelOpen(true);
     persistRef.current = { ...persistRef.current, selectedId: id };
-    persistListState(id, true);
+    saveTitleServiceListState(getListScrollEl(), {
+      ...persistRef.current,
+      selectedId: id,
+    });
   }
 
   function openDialog(kind: DialogKind, item: TitleServiceListItem) {
