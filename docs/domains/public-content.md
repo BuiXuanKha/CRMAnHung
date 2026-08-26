@@ -393,7 +393,7 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Không `window.confirm`.
 ```
 
 1. Ô tìm — `CrmSearchField`, placeholder `Tìm tiêu đề, chuyên mục...`. Gõ là lọc. Hangtag Clear sau caret.
-2. **Soạn bài** — dialog tiêu đề + chuyên mục; Lưu nháp / Xuất bản. Nội dung dài = slice sau.
+2. **Soạn bài** — dialog chuyên nghiệp (§14.3): tiêu đề + chuyên mục; Lưu nháp / Xuất bản. Nội dung dài = slice sau.
 3. Hangtag chuyên mục `blue`: Dự án · Kiến thức · Liên hệ · Chính sách bảo mật · Tin tức · Kinh nghiệm
 4. Hangtag trạng thái: Đã xuất bản `green` · Nháp `gray`
 5. Bấm hàng → `CrmConfirm` Xuất bản / Về nháp (12.1.4). Toast khi xong.
@@ -415,6 +415,16 @@ Cùng 14.1. Thẻ: hai hangtag + tiêu đề. Thanh tìm: ô tìm + **Bộ lọc
 
 Nhớ tìm + lọc + dòng chọn + cuộn: `sessionStorage` `crmanhung:public-post-list-state`.
 
+### 14.3 Modal Soạn bài viết
+
+Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` §4.7 (rộng ~520px). Không `window.confirm`. Không copy kiểu “mock / slice sau” trên UI.
+
+1. Dòng phụ: bài hiện trên web khách theo chuyên mục; nháp chỉ admin; Xuất bản = khách đọc được. Nội dung chi tiết bổ sung sau.
+2. **Tiêu đề** — bắt buộc; đếm `n/160`; placeholder ví dụ thật.
+3. **Đường dẫn dự kiến** — `/{category}/{slug}` (slug từ tiêu đề); chỉ đọc.
+4. **Chuyên mục** — lưới chọn (radio), 6 mục; không dropdown trần.
+5. **Huỷ** · **Lưu nháp** (secondary) · **Xuất bản** (primary).
+6. Lỗi validate / API: `crm-form-error` dưới form.
 ---
 
 ## 15. SEO lô trên trang khách
