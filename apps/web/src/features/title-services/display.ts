@@ -145,8 +145,8 @@ export const DOCS_FILTER_OPTIONS = [
   { value: 'empty', label: 'Chưa có tài liệu' },
 ];
 
-export function countMobileTitleServiceFilters(status: string): number {
-  return status ? 1 : 0;
+export function countMobileTitleServiceFilters(status: string, employeeId = ''): number {
+  return (status ? 1 : 0) + (employeeId ? 1 : 0);
 }
 
 export function applyExtraFilters(
@@ -180,7 +180,7 @@ export function todayInputValue(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-const MOCK_STAFF_ID = 'emp_kha';
+const MOCK_STAFF_ID = 'user_staff_1';
 const MOCK_STAFF_NAME = 'Bùi Xuân Khả';
 
 export function hydrateTitleServiceDetail(

@@ -24,7 +24,7 @@ import { computeDaysWorking, sumVnd } from './display';
 import { mockTitleServices } from './mock-data';
 
 const STAFF = 'Bùi Xuân Khả';
-const STAFF_ID = 'emp_kha';
+const STAFF_ID = 'user_staff_1';
 
 let mockStore: TitleServiceDetail[] = structuredClone(mockTitleServices);
 

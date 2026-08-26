@@ -378,7 +378,7 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 | `Số ngày` | Hangtag `CrmBadge` green (`30 ngày` / `Hôm nay`) — **không** icon lọc |
 | `Thao tác` | Chevron → menu: **Xem chi tiết**, **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**, **Xóa hồ sơ** (đỏ + confirm) |
 
-**Thanh tìm:** desktop chỉ ô tìm. Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ trên desktop. Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới.
+**Thanh tìm:** desktop chỉ ô tìm (+ **ADMIN:** select nhân viên tạo). Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ trên desktop. Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới.
 
 **Panel phải — Chi tiết hồ sơ** (biến thể §4.3.2, **một** tab):
 
@@ -391,7 +391,7 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 
 ```
 ┌─ ô tìm ───── [ Bộ lọc ] [ Tìm ] ─┐
-│ (mở Bộ lọc: Trạng thái)          │
+│ (mở Bộ lọc: Trạng thái · NV nếu ADMIN) │
 │ thẻ: ★ tên           [hangtag][▾]│
 │      mã · số ngày · SĐT          │
 │      Nhu cầu                     │
@@ -407,7 +407,7 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 | Meta | Mã hồ sơ · số ngày (`30 ngày` / `Hôm nay`) · SĐT nếu có |
 | Thân | Nhu cầu (2 dòng); một hàng Giá `crm-money` / Thu xanh `#047857` / Chi đỏ `#b91c1c`; bước tiến độ mới nhất; `N file` hoặc `Chưa có` |
 | Bấm thẻ | Chọn dòng (không nhảy placeholder). Chevron = menu đầy đủ |
-| Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel inline: select Trạng thái, nút Xoá lọc khi đang lọc. Desktop không hiện Bộ lọc / Tìm |
+| Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel inline: select Trạng thái, **ADMIN** thêm select NV, nút Xoá lọc khi đang lọc. Desktop không hiện Bộ lọc / Tìm (ADMIN vẫn thấy select NV cạnh ô tìm) |
 | Footer | «Hiển thị N / Tổng M hồ sơ sổ đỏ». Không nút Thêm hồ sơ |
 
 Desktop giữ bảng §4.5 + panel Chi tiết hồ sơ.
@@ -645,6 +645,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-25 | Khách: `lodatCount` API + Map cạnh tên; bỏ cột Số lô; rail/chi tiết lô từ `GET /customers/:id/lodats` |
 | 2026-08-24 | Khách: xoá SĐT + sửa tên FB = **NV phụ trách khách** (không chỉ admin). Khôi phục ẩn / hangtag / inbox FB / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |
 | 2026-08-26 | Menu khách **Dịch vụ sổ đỏ** → form `/khach-hang/[id]/dich-vu-so-do` (STAFF + ADMIN; không nút Thêm trên list) |
+| 2026-08-26 | `/dich-vu-so-do` ADMIN: select nhân viên tạo; xem file mật ghi nhật ký `TitleServiceAttachmentView` |
 
 ---
 

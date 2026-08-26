@@ -1,7 +1,7 @@
 # Domain: Title services (Dịch vụ sổ đỏ)
 
 - **Slug:** `title-services`
-- **Status:** Ready for API — UI `/dich-vu-so-do` nối API; tạo từ khách xong; script copy legacy sẵn (chưa chạy VPS).
+- **Status:** Ready for API — list + tạo từ khách + script copy; ADMIN lọc NV; audit xem file (ghi DB, chưa UI nhật ký).
 - **Nguồn:** màn [`/dich-vu-so-do`](https://anhungland.com/dich-vu-so-do) (web mới) + CRM cũ `/dich-vu-so-do` (API `/api/title-services`, SQLite `tblTitleService*`)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.7 + §4.5
 - **Contract:** `packages/shared/src/title-services.ts`
@@ -92,7 +92,7 @@ Script copy: `pnpm title-services:migrate-legacy` — chi tiết [`MIGRATION.md`
 ## 11. CRM cũ vs web mới
 
 - Tìm: mã + tên + SĐT (không tìm nhu cầu / ghi chú).
-- Cũ ADMIN: `?employeeId=`. Mới: chưa.
+- Cũ ADMIN: `?employeeId=`. Mới: ADMIN lọc `createdByEmployeeId` trên list (select NV). STAFF không thấy select.
 - Không `@` / `@@`.
 - Xóa cũ = cứng (kèm file). Mock chỉ gỡ list.
 
@@ -140,6 +140,8 @@ Hangtag **Clear** (`CrmBadge` gray) **ngay sau con trỏ** khi ô không trống
 #### 12.1.2 Bộ lọc
 
 Icon cột — trạng thái (cột Tên khách), nhu cầu / tiến độ / giá / tài liệu có-chưa.
+
+ADMIN: select **nhân viên tạo** cạnh ô tìm (`?createdByEmployeeId=`). STAFF không thấy.
 
 #### 12.1.3 Item (dòng bảng)
 
@@ -217,7 +219,7 @@ Placeholder và quy tắc field: **cùng 12.1.1**. Nút **Tìm** = đóng bàn p
 
 #### 12.2.2 Bộ lọc
 
-Nút **Bộ lọc** + **Tìm** — Trạng thái. Xoá lọc.
+Nút **Bộ lọc** + **Tìm** — Trạng thái. ADMIN thêm select nhân viên. Xoá lọc.
 
 #### 12.2.3 Item (thẻ)
 
@@ -297,7 +299,7 @@ CRM cũ **đủ dùng** cho 1–vài hồ sơ: một hồ sơ / khách, trạng 
 | Prisma stub lệch | Sửa schema **trước** copy. Tiền **BigInt** |
 | ~~Tạo từ khách trên web mới chưa có~~ | **Xong** — `/khach-hang/[id]/dich-vu-so-do` |
 
-**Không làm** trong P3: nối lô/GD vào hồ sơ sổ đỏ; audit log xem file (có thể thêm sau); extension.
+**Không làm** trong P3: nối lô/GD vào hồ sơ sổ đỏ; UI xem nhật ký file (chỉ **ghi** `TitleServiceAttachmentView`); extension.
 
 ### 13.2 Giấy tờ — chốt mật
 
@@ -307,6 +309,7 @@ CCCD, sổ đỏ, scan hồ sơ = **tài liệu mật**.
 - UI **không** nhúng URL CDN / `/img/…`. Xem/tải = bấm → API cấp link có hạn.
 - Object key do server đặt (`title-services/{id}/…`). MIME + size chặn ở API.
 - Copy từ cũ: `StoredPath` → private R2, không public.
+- Xem/tải: ghi `TitleServiceAttachmentView` (`viewedByEmployeeId`, `viewedAt`). Chưa có màn list nhật ký.
 
 ### 13.3 Lộ trình (một số = một PR)
 
@@ -323,4 +326,4 @@ Khách + User **đã có**. List mock §12 **đã có**.
 | **7** | ~~Nối UI `/dich-vu-so-do`~~ **xong** — `isMockTitleServices` = login giả | List/panel thật |
 | **8** | ~~Tạo hồ sơ từ khách~~ **xong** — `/khach-hang/[id]/dich-vu-so-do` | Không nút Thêm trên list |
 | **9** | ~~Copy 1 hồ sơ SQLite~~ **script xong** — `pnpm title-services:migrate-legacy` (chạy VPS khi gộp `main`) | Data kha `SD-2026-0001` |
-| **10** | (Sau) ADMIN lọc NV trên list; tùy chọn audit xem file | Không chặn 1–9 |
+| **10** | ~~ADMIN lọc NV + audit xem file~~ **xong** — select NV trên list; ghi `TitleServiceAttachmentView` khi cấp signed URL | Không chặn 1–9 |

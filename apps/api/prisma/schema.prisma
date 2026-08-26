@@ -37,6 +37,7 @@ model User {
   createdTitleServiceProgress TitleServiceProgress[] @relation("TitleServiceProgressCreator")
   createdTitleServiceMoney TitleServiceMoney[] @relation("TitleServiceMoneyCreator")
   createdTitleServiceAttachments TitleServiceAttachment[] @relation("TitleServiceAttachmentCreator")
+  viewedTitleServiceAttachments TitleServiceAttachmentView[] @relation("TitleServiceAttachmentViewer")
 }
 
 model RefreshToken {
@@ -575,10 +576,25 @@ model TitleServiceAttachment {
 
   titleService TitleService @relation(fields: [titleServiceId], references: [id], onDelete: Cascade)
   createdBy    User         @relation("TitleServiceAttachmentCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+  views        TitleServiceAttachmentView[]
 
   @@unique([objectKey])
   @@index([titleServiceId])
   @@index([createdByEmployeeId])
+}
+
+/// Nhật ký xem giấy tờ mật — ghi khi cấp signed URL.
+model TitleServiceAttachmentView {
+  id                 String   @id @default(cuid())
+  attachmentId       String
+  viewedByEmployeeId String
+  viewedAt           DateTime @default(now())
+
+  attachment TitleServiceAttachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
+  viewedBy   User                   @relation("TitleServiceAttachmentViewer", fields: [viewedByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([attachmentId, viewedAt])
+  @@index([viewedByEmployeeId])
 }
 
 model ImageRotation {
