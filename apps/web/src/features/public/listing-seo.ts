@@ -20,7 +20,16 @@ export const SAN_PHAM_LIST_DESCRIPTION =
 
 function listingOgImage(listing: PublicGuestListing): { url: string; alt: string } {
   const src = listing.coverImageUrl?.trim() || PUBLIC_OG_DEFAULT;
-  return { url: toAbsoluteUrl(src), alt: listing.title };
+  return { url: toAbsoluteUrl(src), alt: listingHeadline(listing) };
+}
+
+/** H1 + meta title: tên lô + địa chỉ công khai. Không đổi slug. */
+export function listingHeadline(listing: { title: string; location?: string | null }): string {
+  const title = listing.title.trim();
+  const location = listing.location?.trim() ?? '';
+  if (!location) return title;
+  if (title.toLowerCase().includes(location.toLowerCase())) return title;
+  return `${title} tại ${location}`;
 }
 
 export function unpublishedListingMetadata(): Metadata {
@@ -34,9 +43,10 @@ export function listingMetadata(listing: PublicGuestListing): Metadata {
   const description = listingSearchDescription(listing);
   const url = listingCanonicalUrl(listing.slug);
   const image = listingOgImage(listing);
-  const branded = `${listing.title} | ${ANHUNG_BRAND.name}`;
+  const headline = listingHeadline(listing);
+  const branded = `${headline} | ${ANHUNG_BRAND.name}`;
   return {
-    title: listing.title,
+    title: headline,
     description,
     alternates: { canonical: url },
     robots: { index: true, follow: true },
@@ -101,6 +111,7 @@ export function listingJsonLd(listing: PublicGuestListing) {
   const description = listingSearchDescription(listing);
   const image = listingOgImage(listing).url;
   const priceVnd = publicPriceLabelToVnd(listing.priceLabel);
+  const headline = listingHeadline(listing);
   const offers: Record<string, unknown> = {
     '@type': 'Offer',
     url,
@@ -117,7 +128,7 @@ export function listingJsonLd(listing: PublicGuestListing) {
   return {
     '@context': 'https://schema.org',
     '@type': 'RealEstateListing',
-    name: listing.title,
+    name: headline,
     description,
     url,
     image,
@@ -146,7 +157,7 @@ export function listingBreadcrumbJsonLd(listing: PublicGuestListing) {
       {
         '@type': 'ListItem',
         position: 3,
-        name: listing.title,
+        name: listingHeadline(listing),
         item: listingCanonicalUrl(listing.slug),
       },
     ],
@@ -162,7 +173,7 @@ export function listingItemListJsonLd(listings: PublicGuestListing[]) {
       '@type': 'ListItem',
       position: index + 1,
       url: listingCanonicalUrl(listing.slug),
-      name: listing.title,
+      name: listingHeadline(listing),
     })),
   };
 }
