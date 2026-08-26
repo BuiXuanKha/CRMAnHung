@@ -129,13 +129,13 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 
 | Method | Path | Auth | Việc |
 |--------|------|------|------|
-| GET | `/admin/public-web/dashboard` | JWT ADMIN | Số đếm + lô/bài gần đây |
-| PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN | Đăng / gỡ lô (`isPublished`) — mock |
-| PATCH | `/admin/public-web/lots/:id/draft` | JWT ADMIN | Lưu copy public (tiêu đề, địa chỉ, giá, mô tả) — mock |
+| GET | `/admin/public-web/lots` | JWT ADMIN | Overlay bài đăng (nháp + đã đăng) |
+| PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN | Đăng / gỡ lô (`isPublished`) — **Postgres** |
+| PATCH | `/admin/public-web/lots/:id/draft` | JWT ADMIN | Lưu copy public — **Postgres** |
 | PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — mock |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục) — mock |
-| GET | `/public/listings` | Không | Lô đã đăng → `publicGuestListingSchema` (SEO + trang khách) |
-| GET | `/public/posts` | Không | Bài `PUBLISHED` — sau |
+| GET | `/public/listings` | Không | Lô đã đăng ∩ Mở bán → `publicCatalogListingSchema` |
+| GET | `/public/listings/:slug` | Không | Chi tiết `/san-pham/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
 
 ---
 

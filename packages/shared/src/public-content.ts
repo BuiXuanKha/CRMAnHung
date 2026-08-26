@@ -65,6 +65,23 @@ export const publicGuestListingSchema = z.object({
 
 export type PublicGuestListing = z.infer<typeof publicGuestListingSchema>;
 
+/** Guest catalog card / SEO page — public-safe fields only. */
+export const publicCatalogListingSchema = publicGuestListingSchema.extend({
+  id: z.string(),
+  kindLabel: z.string(),
+  areaLabel: z.string().nullable(),
+  frontageLabel: z.string().nullable(),
+  directionLabel: z.string().nullable(),
+});
+
+export type PublicCatalogListing = z.infer<typeof publicCatalogListingSchema>;
+
+export const publicCatalogListResponseSchema = z.object({
+  items: z.array(publicCatalogListingSchema),
+});
+
+export type PublicCatalogListResponse = z.infer<typeof publicCatalogListResponseSchema>;
+
 export function clipMetaDescription(
   text: string,
   max = META_DESCRIPTION_MAX,

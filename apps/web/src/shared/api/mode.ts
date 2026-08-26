@@ -50,3 +50,11 @@ export function isMockTransactions(): boolean {
 export function isMockTitleServices(): boolean {
   return isMockAuth();
 }
+
+/**
+ * Overlay Đăng web: API + Postgres trên staging (login thật).
+ * Login giả → mock RAM (tắt tab là mất).
+ */
+export function isMockPublicWeb(): boolean {
+  return isMockAuth();
+}

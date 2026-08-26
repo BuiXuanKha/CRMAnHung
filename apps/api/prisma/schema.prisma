@@ -339,14 +339,37 @@ model Lodat {
   address    Address?           @relation(fields: [addressId], references: [id], onDelete: Restrict)
   projectLot ProjectLot?        @relation(fields: [projectLotId], references: [id], onDelete: Restrict)
   createdBy  User               @relation("LodatCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
-  images       LodatImage[]
-  maps         LodatCustomerMap[]
-  transactions Transaction[]
+  images         LodatImage[]
+  maps           LodatCustomerMap[]
+  transactions   Transaction[]
+  publicListing  PublicLotListing?
 
   @@index([addressId])
   @@index([projectLotId])
   @@index([createdByEmployeeId])
   @@index([propertyKind])
+}
+
+/// Copy public anhungland.com — không chứa PII / giá CRM / hoa hồng.
+model PublicLotListing {
+  id              String   @id @default(cuid())
+  lodatId         String   @unique
+  slug            String   @unique
+  title           String
+  location        String   @default("")
+  isPublished     Boolean  @default(false)
+  /// AMOUNT | CONTACT
+  priceMode       String   @default("CONTACT")
+  priceLabel      String?
+  excerpt         String   @default("")
+  metaDescription String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  lodat Lodat @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+
+  @@index([isPublished])
+  @@index([updatedAt])
 }
 
 model LodatImage {
