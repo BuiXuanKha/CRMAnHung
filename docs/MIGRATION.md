@@ -82,7 +82,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
 | 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Todo — chạy VPS; PROJECT stream `p:{lodatId}:{empId}`; giữ kha/buinam; `SKIP_LODAT_IMAGES=1` nếu chỉ text |
 | 11 | Giao dịch | `transaction` (+ party/snapshot/ảnh/đính kèm) | `pnpm transactions:migrate-legacy` | Xong staging (2/2 GD OWN+HOAN_TAT, buinam, 2 snapshot, 9 ảnh, 0 đính kèm) |
-| 12 | Sổ đỏ | `title_service` | — | Schema Prisma **đã chốt** (`20260826010000_title_service_domain`). Live 1 hồ sơ `SD-2026-0001` (kha). **Chưa copy** |
+| 12 | Sổ đỏ | `title_service` (+ progress/money/attachment) | `pnpm title-services:migrate-legacy` | Script sẵn — chờ chạy VPS (1 hồ sơ `SD-2026-0001` kha, 0 file) |
 
 Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV copy cùng metadata `tblPersonFacebook` (UID NV) để cột Kênh liên hệ hiện tên page/nick.
 
@@ -120,7 +120,7 @@ LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db \
 
 `SKIP_TX_FILES=1` nếu chỉ copy text (bỏ R2). Idempotent qua `migrate.legacy_id_map` entity `transaction`.
 
-### Bước 12 — sổ đỏ (đã đọc CRM cũ, chưa copy)
+### Bước 12 — sổ đỏ (script sẵn, chưa chạy staging)
 
 API cũ: `GET/POST /api/title-services` (`titleServices.controller.js`). SQLite:
 
@@ -131,11 +131,21 @@ API cũ: `GET/POST /api/title-services` (`titleServices.controller.js`). SQLite:
 | `tblTitleServiceMoney` | 3 (THU 3tr+10tr, CHI 2tr) |
 | `tblTitleServiceAttachment` | 0 — folder `/img/title-services` trống |
 
-**Chưa chạy copy.** Schema `TitleService*` + contract Zod đã khớp CRM cũ (mã, NV tạo, ghim, phí BigInt, `startedAt` / `expectedDoneAt`). Script migrate = lộ trình §13.3 bước 9.
+Cột hồ sơ: `Code`, `PersonId` → `customerId`, `Status`, `AgreedFeeVnd`, `NeedSummary`, `Note`, `StartedAtMs`, `ExpectedDoneAtMs`, `CompletedAtMs` (HUY/HOAN_THANH thiếu thì lấy `UpdatedAtMs` để dừng đếm ngày), `CreatedByEmployeeId`, `IsPinned`/`PinnedAtMs`.
 
-Cột hồ sơ: `Code`, `PersonId` → `customerId`, `Status`, `AgreedFeeVnd`, `NeedSummary`, `Note`, `StartedAtMs`, `ExpectedDoneAtMs`, `CompletedAtMs` (chỉ khi Hoàn thành), `CreatedByEmployeeId`, `IsPinned`/`PinnedAtMs`.
+Tiền: `Kind` THU/CHI, `Title`, `AmountVnd` (Integer; copy BigInt). File: `StoredPath` → private R2 `objectKey`.
 
-Tiền: `Kind` THU/CHI, `Title`, `AmountVnd` (Integer; copy nên BigInt). File: `StoredPath` → R2 `objectKey`.
+Luật NV: EmployeeId **5 → kha**, **3 → buinam**; không gán sang `admin`.
+
+```bash
+cd /var/www/crmanhung/repo/apps/api
+LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db \
+  pnpm title-services:migrate-legacy
+```
+
+`SKIP_TITLE_FILES=1` nếu chỉ copy text. Idempotent qua `migrate.legacy_id_map` entity `title_service`. Workflow: `.github/workflows/copy-legacy-title-services.yml` (push `main` hoặc Run workflow).
+
+Cần map `user` + `customer` (PersonId 1561). Schema `TitleService*` đã chốt.
 
 ## Bảng map ID (không phải bảng nghiệp vụ)
 
