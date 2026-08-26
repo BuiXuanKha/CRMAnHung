@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { UserRole } from '@crmanhung/shared';
 import { useAuth } from './auth-context';
 import { crmHomePath } from './home-path';
 import { ApiError } from '@/shared/api/client';
@@ -33,7 +34,9 @@ export function LoginForm() {
   if (!loading && user) {
     return (
       <div className="login-page">
-        <p className="login-redirect">Đang vào CRM…</p>
+        <p className="login-redirect">
+          {user.role === UserRole.ADMIN ? 'Đang vào Dashboard…' : 'Đang vào CRM…'}
+        </p>
       </div>
     );
   }

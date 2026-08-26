@@ -1,6 +1,6 @@
 import { UserRole, type AuthUser } from '@crmanhung/shared';
 
-/** ADMIN vào dashboard đăng web; STAFF vào CRM khách. */
+/** Sau login: ADMIN vào `/dashboard` trước; STAFF vào `/khach-hang`. */
 export function crmHomePath(user: Pick<AuthUser, 'role'>): string {
-  return user.role === UserRole.ADMIN ? '/dashboard' : '/khach-hang';
+  return String(user.role).toUpperCase() === UserRole.ADMIN ? '/dashboard' : '/khach-hang';
 }

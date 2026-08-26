@@ -53,7 +53,7 @@ Copy data: **User trước** (`employeeId` bắt buộc). Hotline nguồn có th
 | Màn | Route | Việc |
 |-----|-------|------|
 | Login | `/login` | Form đăng nhập |
-| CRM | sau login | Header + avatar (đã có) |
+| CRM | sau login | ADMIN → `/dashboard` (trang đầu); STAFF → `/khach-hang` |
 | Quản lý NV | — | **Chưa** (P4) |
 
 ### 6.1 Giao diện máy tính — `/login`

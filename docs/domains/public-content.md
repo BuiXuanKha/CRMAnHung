@@ -117,7 +117,9 @@ PublicPost                        (category, slug, status, cover, body) — khô
 
 Menu **trong** Dashboard (không gắn lên 4 trang CRM): Tổng quan · Lô đất public mở bán · Bài viết.
 
-Header CRM: bốn mục NV. ADMIN thêm **Dashboard**. STAFF vào URL → `/khach-hang`.
+Header CRM: bốn mục NV. ADMIN thêm **Dashboard**. STAFF vào URL `/dashboard` → `/khach-hang`.
+
+**Sau login thành công:** ADMIN vào **`/dashboard` trước** (trang đầu). STAFF vào `/khach-hang`. Logo CRM (góc trái) của admin cũng về `/dashboard`.
 
 ---
 

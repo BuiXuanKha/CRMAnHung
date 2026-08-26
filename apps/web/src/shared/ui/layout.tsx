@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { CreditCard, FileText, Globe, Map, Menu, Users } from 'lucide-react';
 import { useAuth } from '@/features/auth/auth-context';
+import { crmHomePath } from '@/features/auth/home-path';
 import { Icon } from './icon';
 import { UserMenu } from './user-menu';
 import { SettingsHubDialog } from '@/features/settings/settings-hub-dialog';
@@ -68,7 +69,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <Icon icon={Menu} size="sm" />
             </button>
-            <Link href="/khach-hang" className="shell-brand">
+            <Link href={crmHomePath(user)} className="shell-brand">
               <span className="shell-logo-mark" aria-hidden>
                 AH
               </span>
