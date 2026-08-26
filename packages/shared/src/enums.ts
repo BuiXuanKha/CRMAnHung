@@ -84,6 +84,19 @@ export enum TitleServiceMoneyKind {
   CHI = 'CHI',
 }
 
+/** Bài trên web khách — `public-content.md` */
+export enum PublicPostCategory {
+  TIN_TUC = 'tin-tuc',
+  DU_AN = 'du-an',
+  KIEN_THUC = 'kien-thuc',
+  KINH_NGHIEM = 'kinh-nghiem',
+}
+
+export enum PublicPostStatus {
+  DRAFT = 'DRAFT',
+  PUBLISHED = 'PUBLISHED',
+}
+
 export const CUSTOMER_STATUS_LABELS: Record<CustomerStatus, string> = {
   [CustomerStatus.KHACH_MOI]: 'Khách mới',
   [CustomerStatus.KHACH_NET]: 'Khách nét',
@@ -171,4 +184,16 @@ export const TITLE_SERVICE_DOC_LABELS: Record<TitleServiceDocKind, string> = {
 export const TITLE_SERVICE_MONEY_LABELS: Record<TitleServiceMoneyKind, string> = {
   [TitleServiceMoneyKind.THU]: 'Thu',
   [TitleServiceMoneyKind.CHI]: 'Chi',
+};
+
+export const PUBLIC_POST_CATEGORY_LABELS: Record<PublicPostCategory, string> = {
+  [PublicPostCategory.TIN_TUC]: 'Tin tức',
+  [PublicPostCategory.DU_AN]: 'Dự án',
+  [PublicPostCategory.KIEN_THUC]: 'Kiến thức',
+  [PublicPostCategory.KINH_NGHIEM]: 'Kinh nghiệm',
+};
+
+export const PUBLIC_POST_STATUS_LABELS: Record<PublicPostStatus, string> = {
+  [PublicPostStatus.DRAFT]: 'Nháp',
+  [PublicPostStatus.PUBLISHED]: 'Đã xuất bản',
 };

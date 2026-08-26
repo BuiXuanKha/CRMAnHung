@@ -1,7 +1,8 @@
 # Domain: Nội dung web công khai (Khách / Admin đăng)
 
 - **Slug:** `public-content`
-- **Status:** Draft — chủ chốt hướng: khách xem tin + bài + lô bán; **admin mới được public**. Còn vài luật dưới §11.
+- **Status:** Ready for mock — **dashboard** `/quan-tri/web` (ADMIN). List đăng lô / soạn bài = slice sau.
+- **Owner:** An Hưng Land
 - **Owner:** An Hưng Land
 - **IA khách:** [`PUBLIC-WEB.md`](../PUBLIC-WEB.md) · SEO: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md)
 - **Lô nguồn:** [`lodats.md`](./lodats.md) — **không** tự đẩy mọi lô Mở bán lên web
@@ -32,7 +33,7 @@ Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên k
 | STAFF | Làm CRM như hiện tại | Đăng / gỡ web; sửa copy public |
 | ADMIN | Như STAFF trên CRM + **đăng / gỡ** lô và bài | — |
 
-Đề xuất quyền (chờ §11): **chỉ ADMIN** bấm Đăng web — trang khách là thương hiệu công ty, không phải sàn từng NV.
+Đề xuất quyền (§11, dùng cho mock): **chỉ ADMIN** bấm Đăng web — trang khách là thương hiệu công ty, không phải sàn từng NV.
 
 ---
 
@@ -108,38 +109,30 @@ PublicPost                        (category, slug, status, cover, body) — khô
 
 ## 6. UI (màn hình)
 
-Chưa đặc tả §12 từng control — chờ chủ xác nhận §11 rồi viết máy tính → mobile.
+| Màn | Route | Việc |
+|-----|--------|------|
+| **Dashboard admin** | `/quan-tri/web` | **Slice này.** Tổng quan + lô/bài gần đây. §12 |
+| Trang chủ khách | `/` | Mock sẵn — sau nối data đã public |
+| List / chi tiết lô khách | `/san-pham` | Mock sẵn |
+| List bài khách | `/du-an` … | Stub; chi tiết `[slug]` chưa |
+| Admin — lô đăng bán | `/quan-tri/web/lo-dat` | **Chưa** — nút dashboard → alert |
+| Admin — bài viết | `/quan-tri/web/bai-viet` | **Chưa** — nút dashboard → alert |
 
-| Màn | Route (gợi ý) | Việc |
-|-----|----------------|------|
-| Trang chủ khách | `/` | Đã có mock — sau nối data đã public |
-| List / chi tiết lô khách | `/san-pham`, `/san-pham/[slug]` | Đã có mock |
-| List / chi tiết bài khách | `/du-an`, `/kien-thuc`, `/kinh-nghiem` (+ `[slug]`) | List stub; **thiếu** trang chi tiết `[slug]` |
-| Hub admin đăng web | `/quan-tri/web` | Chỉ ADMIN; menu **Web công khai** |
-| Admin — lô đăng bán | `/quan-tri/web/lo-dat` | Tìm lô CRM, Đăng / Gỡ, sửa copy public |
-| Admin — bài viết | `/quan-tri/web/bai-viet` | List nháp/đã đăng; tạo/sửa; Xuất bản |
-| Lối tắt trên lô CRM | `/lo-dat/[id]` (ADMIN) | Hangtag / nút **Đăng web** — quy tắc nút viết sau |
+**Không** nhét vào `/quan-tri/khach-hang`.
 
-**Không** nhét vào `/quan-tri/khach-hang` (registry xóa cứng — việc khác).
-
-Menu header CRM: mục **Web công khai** chỉ hiện với ADMIN (cạnh Quản trị khách).
+Menu header CRM: **Web công khai** chỉ ADMIN (cạnh Quản trị khách). STAFF vào URL → `/khach-hang`.
 
 ---
 
 ## 7. Contract / API dự kiến
 
-Prefix `/api/v1`. **Chưa** khóa Zod — sau khi §11 chốt.
+Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 
 | Method | Path | Auth | Việc |
 |--------|------|------|------|
-| GET | `/public/listings` | Không | Lô đã đăng (trang khách) |
-| GET | `/public/listings/:slug` | Không | Chi tiết lô |
-| GET | `/public/posts` | Không | Bài `PUBLISHED` |
-| GET | `/public/posts/:slug` | Không | Chi tiết bài |
-| GET/PATCH | `/admin/listings…` | JWT ADMIN | Đăng / gỡ / sửa copy |
-| GET/POST/PATCH | `/admin/posts…` | JWT ADMIN | CRUD bài |
-
-Public GET: không JWT; không trả field cấm §3.3.
+| GET | `/admin/public-web/dashboard` | JWT ADMIN | Số đếm + lô/bài gần đây |
+| GET | `/public/listings` | Không | Lô đã đăng (trang khách) — sau |
+| GET | `/public/posts` | Không | Bài `PUBLISHED` — sau |
 
 ---
 
@@ -166,17 +159,127 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 ---
 
-## 11. Open questions — chủ xác nhận
+## 11. Luật dùng cho mock dashboard (2026-08-26)
 
-Mặc định đề xuất (bác thì nói số):
+Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồi UI.
 
-1. **Ai bấm Đăng web?** Chỉ ADMIN. STAFF không đăng, không sửa copy public.
-2. **Lô lên web thế nào?** Công tắc tường minh — **không** auto mọi lô Mở bán.
-3. **Tự gỡ?** Tạm dừng / Đã cọc / Đã bán → gỡ web. Admin đăng lại khi lại Mở bán.
-4. **Giá?** Admin chọn từng lô: hiện số (lấy từ map) hoặc chữ **Liên hệ**.
-5. **Hai NV cùng LK12?** Chỉ một listing public / một lô kho.
-6. **Tin vs bài?** Một màn Bài viết, bốn chuyên mục (`tin-tuc` + ba mục IA).
-7. **Liên hệ khách?** Giữ hotline + Zalo công ty trên trang lô. **Chưa** form để lại SĐT (tránh trộn lead CRM).
-8. **Mô tả public?** Ô riêng (admin viết cho khách). Không lấy nguyên `note` nội bộ lô.
+1. Chỉ **ADMIN** bấm Đăng web / vào `/quan-tri/web`.
+2. Lô lên web = công tắc tường minh — không auto mọi lô Mở bán.
+3. Tạm dừng / Đã cọc / Đã bán → gỡ web (chưa mock hành vi; chỉ số đếm).
+4. Giá từng lô: hiện số hoặc **Liên hệ**.
+5. Cùng số lô kho → một listing public (chưa mock conflict UI).
+6. Tin + bài = một CMS, bốn chuyên mục.
+7. Liên hệ khách: hotline + Zalo công ty; chưa form SĐT.
+8. Mô tả public = ô riêng (form làm slice sau).
 
-Xong 1–8 → Status **Ready for mock** → §12 màn admin (máy tính rồi mobile) → contract → mock UI.
+---
+
+## 12. Dashboard `/quan-tri/web` — ADMIN
+
+Thứ tự: **12.1 máy tính** → **12.2 mobile**. Không trộn PC/mobile trong một mục.
+
+Không H1 lặp tên menu trên thanh tìm — **có** H1 trên trang dashboard (hub, không phải list §4.3.4).
+
+---
+
+### 12.1 Giao diện máy tính
+
+```
+┌ Web công khai          [Xem trang khách] [Đăng lô] [Soạn bài] ┐
+│ Dòng phụ: khách chỉ thấy nội dung đã đăng                    │
+├ 4 thẻ đếm (kiểu §4.3.6, không card marketing)                │
+├ Hai cột: bảng Lô trên web · bảng Bài viết gần đây  (§4.5)    │
+└ Không rail phải                                              │
+```
+
+#### 12.1.1 Thanh đầu trang
+
+1. **H1** `Web công khai`
+2. Dòng phụ: `Khách trên anhungland.com chỉ thấy lô và bài đã đăng.`
+3. **Xem trang khách** — viền; mở `/` tab mới
+4. **Đăng lô** — primary. Slice này: `CrmAlert` «Danh sách đăng lô làm sau.»
+5. **Soạn bài** — viền. Slice này: `CrmAlert` «Soạn bài làm sau.»
+
+#### 12.1.2 Bốn thẻ đếm
+
+Cùng hình thức thẻ GD: nền trắng, viền `#e2e8f0`, bo 12px. 4 cột.
+
+| Thẻ | Số | Gợi ý |
+|-----|----|--------|
+| Lô đang hiện | `publishedLotCount` | Khách thấy trên `/san-pham` |
+| Chờ đăng | `pendingLotCount` | Mở bán CRM, chưa Đăng web |
+| Bài đã đăng | `publishedPostCount` | Khách đọc được |
+| Bài nháp | `draftPostCount` | Chỉ admin |
+
+#### 12.1.3 Bảng Lô trên web
+
+§4.5. Không icon lọc cột (hub). Không cột Thao tác.
+
+| Cột | Ô |
+|-----|---|
+| Ảnh | Thumb 52px; thiếu = ô xám + `ImageOff` |
+| Tiêu đề | **Đậm**; dòng phụ địa chỉ. **Không** tên khách / NV |
+| Giá | `crm-money` nếu hiện số; không thì chữ `Liên hệ` |
+| Web | Hangtag **Đang hiện** `green` · **Chờ đăng** `gray` |
+
+Bấm nền hàng → `CrmAlert` «Sửa copy / gỡ web làm sau.»
+
+Footer: `Hiển thị N / Tổng M lô` (N = dòng trên hub; M = đang hiện + chờ đăng).
+
+Trống: `Không có lô trên web.`
+
+#### 12.1.4 Bảng Bài viết gần đây
+
+§4.5. Không lọc cột.
+
+| Cột | Ô |
+|-----|---|
+| Chuyên mục | Hangtag `blue`: Tin tức / Dự án / Kiến thức / Kinh nghiệm |
+| Tiêu đề | **Đậm** |
+| Trạng thái | **Đã xuất bản** `green` · **Nháp** `gray` |
+
+Bấm hàng → `CrmAlert` «Sửa bài làm sau.»
+
+Footer: `Hiển thị N / Tổng M bài` (M = đã đăng + nháp).
+
+Trống: `Không có bài viết.`
+
+---
+
+### 12.2 Giao diện mobile
+
+```
+┌ H1 + dòng phụ                    ┐
+├ [Xem trang khách]                │
+├ [Đăng lô] [Soạn bài]             │
+├ 4 thẻ đếm — lưới 2×2             │
+├ Thẻ lô xếp dọc                   │
+└ Thẻ bài xếp dọc                  │
+```
+
+#### 12.2.1 Thanh đầu — cùng 12.1.1
+
+Nút đủ vùng chạm. `Xem trang khách` full ngang. Hai nút Đăng lô / Soạn bài một hàng.
+
+#### 12.2.2 Thẻ đếm — cùng 12.1.2
+
+Lưới **2×2**. Ẩn gợi ý dưới số. Chữ nhỏ hơn (như GD mobile).
+
+#### 12.2.3 Item lô (thẻ)
+
+1. Thumb trái
+2. Tiêu đề đậm + hangtag Web
+3. Địa chỉ dòng phụ
+4. Giá `crm-money` hoặc `Liên hệ`
+5. Bấm thẻ → cùng alert 12.1.3
+
+Footer đếm dưới list lô.
+
+#### 12.2.4 Item bài (thẻ)
+
+1. Hangtag chuyên mục + hangtag trạng thái
+2. Tiêu đề
+3. Bấm thẻ → cùng alert 12.1.4
+
+Footer đếm dưới list bài.
+

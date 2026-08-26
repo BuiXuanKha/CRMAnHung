@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { CreditCard, FileText, Map, Menu, Users } from 'lucide-react';
+import { CreditCard, FileText, Globe, Map, Menu, Users } from 'lucide-react';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from './icon';
 import { UserMenu } from './user-menu';
@@ -47,7 +47,10 @@ export function AppShell({ children }: { children: ReactNode }) {
   const links = [
     ...navItems,
     ...(user.role === 'ADMIN'
-      ? [{ href: '/quan-tri/khach-hang', label: 'Quản trị khách', icon: null }]
+      ? [
+          { href: '/quan-tri/web', label: 'Web công khai', icon: Globe },
+          { href: '/quan-tri/khach-hang', label: 'Quản trị khách', icon: null },
+        ]
       : []),
   ];
 

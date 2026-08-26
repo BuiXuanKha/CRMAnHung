@@ -566,7 +566,7 @@ Hai việc **khác nhau** — không gộp một màn:
 
 | Việc | Trạng thái |
 |------|------------|
-| **Đăng web công khai** (tin, bài, lô bán) | Đang chốt nghiệp vụ — [`domains/public-content.md`](./domains/public-content.md). Menu gợi ý: **Web công khai** (`/quan-tri/web`), chỉ ADMIN. |
+| **Đăng web công khai** (tin, bài, lô bán) | Mock dashboard `/quan-tri/web` — [`public-content.md`](./domains/public-content.md) §12. Menu **Web công khai**, chỉ ADMIN. |
 | Registry / xóa cứng khách, CRUD NV | **Tạm hoãn** (P4). `/quan-tri/khach-hang` vẫn placeholder. |
 
 Khi mock Đăng web: shell CRM §4.2; bảng list §4.5; dialog §4.7. Không dùng layout marketing public cho màn admin.
@@ -654,7 +654,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | List `/dich-vu-so-do`: nhớ tìm / lọc / cuộn (`sessionStorage`, skill `crm-list-state`) |
 | 2026-08-26 | Panel sổ đỏ **File tài liệu:** hangtag loại giấy (Sổ đỏ / CCCD / Giấy tờ khác) trên đầu mỗi file |
 | 2026-08-26 | `/dich-vu-so-do` ADMIN: select nhân viên tạo; xem file mật ghi nhật ký `TitleServiceAttachmentView` |
-| 2026-08-26 | **Web công khai:** khách thấy tin/bài/lô đã đăng; admin mới public — `public-content.md` (Draft, chưa mock UI) |
+| 2026-08-26 | **Web công khai:** mock dashboard `/quan-tri/web` (ADMIN) — `public-content.md` §12 |
 
 ---
 
