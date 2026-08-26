@@ -660,6 +660,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | `/dashboard/lo-dat`: không H1, không nút Đăng lô cạnh ô tìm; ô tìm chrome như `/lo-dat`; preview ~440px; cột bảng sát list lô NV |
 | 2026-08-26 | `/dashboard/lo-dat` preview: **Đăng web** khi chờ đăng; lô đang hiện chỉ còn link xem trang khách — không nút Gỡ web |
 | 2026-08-26 | Menu trong Dashboard: **Lô đất** (trước: Lô đất public mở bán) |
+| 2026-08-26 | `/dashboard/lo-dat` panel phải: tiêu đề **Preview Post** |
 
 ---
 

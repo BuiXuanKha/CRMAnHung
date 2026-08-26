@@ -335,7 +335,7 @@ Trống: `Không có lô đang mở bán.`
 
 **Phải — preview bài đăng** (cột cố định ~440px, luôn mở trên máy tính)
 
-1. Nhãn `Preview trang khách`
+1. Nhãn `Preview Post`
 2. Chưa chọn dòng: `Chọn một lô đang mở bán để xem bài đăng.`
 3. Có chọn: ảnh bìa, hangtag Web, tiêu đề, địa chỉ, giá, DT · MT · hướng, hangtag Nhà/Đất, mô tả public (không PII), hotline công ty
 4. Nút **Đăng web** khi chờ đăng → `CrmConfirm`. **Không** nút Gỡ web trên màn này.

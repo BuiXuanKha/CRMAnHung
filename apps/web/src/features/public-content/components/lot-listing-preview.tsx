@@ -23,10 +23,9 @@ export function LotListingPreview({ lot, busy, onPublish }: Props) {
   const price = lot ? lotPriceDisplay(lot) : null;
 
   return (
-    <aside className="pw-preview" aria-label="Preview bài đăng">
+    <aside className="pw-preview" aria-label="Preview Post">
       <header className="pw-preview-head">
-        <p className="pw-preview-kicker">Preview trang khách</p>
-        <h2>Bài đăng lô đất</h2>
+        <h2>Preview Post</h2>
       </header>
 
       {!lot ? (
