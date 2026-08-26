@@ -1,5 +1,6 @@
 import { ImageOff } from 'lucide-react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
+import { formatArea, formatFrontageDir, kindLabel, kindTone } from '@/features/lodats/display';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 import { lotPriceDisplay, lotWebLabel, lotWebTone } from '../display';
@@ -45,6 +46,12 @@ export function StaffOpenLotCards({ items, total, selectedId, onSelect }: Props)
                       </CrmBadge>
                     </span>
                     <span className="pw-sub">{row.location || '—'}</span>
+                    <span className="pw-card-meta">
+                      <CrmBadge tone={kindTone(row.kind)}>{kindLabel(row.kind)}</CrmBadge>
+                      <span className="pw-sub">
+                        {formatArea(row.areaM2)} · {formatFrontageDir(row.frontageM, row.direction)}
+                      </span>
+                    </span>
                     <span className="pw-staff">{row.staffName}</span>
                     {price.isMoney ? (
                       <span className="crm-money">{price.text}</span>

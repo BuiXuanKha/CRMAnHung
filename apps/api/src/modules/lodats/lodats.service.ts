@@ -56,6 +56,7 @@ const LIST_INCLUDE = {
       },
     },
   },
+  createdBy: { select: { id: true, fullName: true } },
 } satisfies Prisma.LodatInclude;
 
 type LodatRow = Prisma.LodatGetPayload<{ include: typeof LIST_INCLUDE }>;
@@ -217,6 +218,7 @@ export class LodatsService {
       extraPhotoCount: Math.max(0, keys.length - 1),
       customerHint: activeMap?.customer?.fullName ?? null,
       projectLotId: row.projectLotId ?? null,
+      createdByEmployeeName: row.createdBy?.fullName ?? null,
       updatedAt: updatedAt.toISOString(),
     };
   }

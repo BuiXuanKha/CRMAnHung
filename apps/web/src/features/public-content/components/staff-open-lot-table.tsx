@@ -1,6 +1,7 @@
 import { ImageOff } from 'lucide-react';
 import type { Ref } from 'react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
+import { formatArea, formatFrontageDir, kindLabel, kindTone } from '@/features/lodats/display';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 import { lotPriceDisplay, lotWebLabel, lotWebTone } from '../display';
@@ -20,9 +21,11 @@ export function StaffOpenLotTable({ items, total, selectedId, onSelect, scrollRe
         <div className="pw-table-head">
           <div className="pw-grid-row pw-grid-header" role="row">
             <div>Ảnh</div>
-            <div>Tiêu đề</div>
-            <div>NV</div>
+            <div>Tiêu đề / Địa chỉ</div>
+            <div>Phân loại</div>
+            <div>DT · MT · Hướng</div>
             <div>Giá</div>
+            <div>NV</div>
             <div>Web</div>
           </div>
         </div>
@@ -59,7 +62,11 @@ export function StaffOpenLotTable({ items, total, selectedId, onSelect, scrollRe
                     <p className="pw-sub">{row.location || '—'}</p>
                   </div>
                   <div>
-                    <p className="pw-staff">{row.staffName}</p>
+                    <CrmBadge tone={kindTone(row.kind)}>{kindLabel(row.kind)}</CrmBadge>
+                  </div>
+                  <div>
+                    <span>{formatArea(row.areaM2)}</span>
+                    <span className="pw-sub">{formatFrontageDir(row.frontageM, row.direction)}</span>
                   </div>
                   <div>
                     {price.isMoney ? (
@@ -67,6 +74,9 @@ export function StaffOpenLotTable({ items, total, selectedId, onSelect, scrollRe
                     ) : (
                       <span className="pw-contact">{price.text}</span>
                     )}
+                  </div>
+                  <div>
+                    <p className="pw-staff">{row.staffName}</p>
                   </div>
                   <div>
                     <CrmBadge tone={lotWebTone(row.isPublished)}>

@@ -38,6 +38,8 @@ export const lodatListItemSchema = z.object({
   customerHint: z.string().nullable().optional(),
   /** Có projectLotId = lô dự án (trỏ kho); không = đất dân */
   projectLotId: z.string().nullable().optional(),
+  /** NV tạo / đang rao — dashboard admin */
+  createdByEmployeeName: z.string().nullable().optional(),
   updatedAt: z.string(),
 });
 

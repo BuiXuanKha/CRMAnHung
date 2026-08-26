@@ -36,13 +36,6 @@ export function postStatusTone(row: PublicWebPostRow): BadgeTone {
   return row.status === PublicPostStatus.PUBLISHED ? 'green' : 'gray';
 }
 
-export function matchLotSearch(row: PublicWebLotRow, keyword: string): boolean {
-  const q = keyword.trim().toLocaleLowerCase('vi');
-  if (!q) return true;
-  const staff = 'staffName' in row ? String((row as PublicWebStaffLotRow).staffName) : '';
-  return `${row.title} ${row.location} ${staff}`.toLocaleLowerCase('vi').includes(q);
-}
-
 export function matchPostSearch(row: PublicWebPostRow, keyword: string): boolean {
   const q = keyword.trim().toLocaleLowerCase('vi');
   if (!q) return true;
@@ -59,6 +52,18 @@ export function lotSpecLine(row: PublicWebStaffLotRow): string {
   if (row.frontageM != null) parts.push(`MT ${row.frontageM.toLocaleString('vi-VN')} m`);
   if (row.direction?.trim()) parts.push(row.direction.trim());
   return parts.join(' · ') || '—';
+}
+
+export function matchLotSearch(row: PublicWebLotRow, keyword: string): boolean {
+  const q = keyword.trim().toLocaleLowerCase('vi');
+  if (!q) return true;
+  const staff = 'staffName' in row ? (row as PublicWebStaffLotRow) : null;
+  const extra = staff
+    ? `${staff.staffName} ${lotKindLabel(staff)} ${lotSpecLine(staff)}`
+    : '';
+  return `${row.title} ${row.location} ${row.priceLabel ?? ''} ${extra}`
+    .toLocaleLowerCase('vi')
+    .includes(q);
 }
 
 /** Slug URL bài viết (mock). */

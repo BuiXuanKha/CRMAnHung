@@ -111,24 +111,27 @@ export function PublicPostListPage() {
         </div>
       </header>
 
-      <div className="pw-search-bar">
-        <CrmSearchField
-          value={search}
-          onValueChange={onSearch}
-          placeholder="Tìm tiêu đề, chuyên mục..."
-          aria-label="Tìm bài viết"
-        />
-        <button
-          type="button"
-          className="crm-btn primary"
-          onClick={() => {
-            setFormError(null);
-            setComposeOpen(true);
-          }}
-        >
-          <Icon icon={FilePlus} size="sm" /> Soạn bài
-        </button>
-      </div>
+      <section className="pw-filter-wrap" aria-label="Tìm bài viết">
+        <div className="pw-filter">
+          <CrmSearchField
+            className="pw-search"
+            value={search}
+            onValueChange={onSearch}
+            placeholder="Tìm tiêu đề, chuyên mục..."
+            aria-label="Tìm bài viết"
+          />
+          <button
+            type="button"
+            className="crm-btn primary"
+            onClick={() => {
+              setFormError(null);
+              setComposeOpen(true);
+            }}
+          >
+            <Icon icon={FilePlus} size="sm" /> Soạn bài
+          </button>
+        </div>
+      </section>
 
       {query.isLoading ? (
         <p className="pw-loading">Đang tải…</p>

@@ -2,11 +2,9 @@
 
 import { useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Globe } from 'lucide-react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { CrmSearchField } from '@/shared/ui/search-field';
-import { Icon } from '@/shared/ui/icon';
 import { listStaffOpenLots, setPublicLotPublished } from './api';
 import { LotListingPreview } from './components/lot-listing-preview';
 import { LotWebConfirm } from './components/lot-web-confirm';
@@ -78,43 +76,19 @@ export function PublicLotListPage() {
     },
   });
 
-  function requestPublish() {
-    const target =
-      selected && !selected.isPublished
-        ? selected
-        : filtered.find((row) => !row.isPublished) ?? items.find((row) => !row.isPublished);
-    if (!target) {
-      setAlertBox({
-        title: 'Không còn lô chờ đăng',
-        message: 'Mọi lô đang mở bán trong danh sách đã hiện trên web khách.',
-      });
-      return;
-    }
-    setSelectedId(target.lodatId);
-    persist(target.lodatId);
-    setLotConfirm(target);
-  }
-
   return (
     <div className="pw-page">
-      <header className="pw-head">
-        <div>
-          <h1>Lô đất public mở bán</h1>
-          <p>Giữa: lô nhân viên đang Mở bán. Phải: preview bài đăng trang khách.</p>
+      <section className="pw-filter-wrap" aria-label="Tìm lô đang mở bán">
+        <div className="pw-filter">
+          <CrmSearchField
+            className="pw-search"
+            value={search}
+            onValueChange={onSearch}
+            placeholder="Tìm tiêu đề, địa chỉ, nhân viên..."
+            aria-label="Tìm lô đang mở bán"
+          />
         </div>
-      </header>
-
-      <div className="pw-search-bar">
-        <CrmSearchField
-          value={search}
-          onValueChange={onSearch}
-          placeholder="Tìm tiêu đề, địa chỉ, nhân viên..."
-          aria-label="Tìm lô đang mở bán"
-        />
-        <button type="button" className="crm-btn primary" onClick={requestPublish}>
-          <Icon icon={Globe} size="sm" /> Đăng lô
-        </button>
-      </div>
+      </section>
 
       {query.isLoading ? (
         <p className="pw-loading">Đang tải…</p>

@@ -3,7 +3,10 @@ import { LodatKind, LodatSaleStatus, type LodatListItem } from '@crmanhung/share
 function plot(
   partial: LodatListItem,
 ): LodatListItem {
-  return partial;
+  return {
+    createdByEmployeeName: 'Bùi Xuân Khả',
+    ...partial,
+  };
 }
 
 /** Domain lodats §8 — Mở bán / Tạm dừng, Nhà / Đất, thiếu trường. */
@@ -40,6 +43,7 @@ export const mockLodats: LodatListItem[] = [
     coverImageUrl: '/mock/lodats/p2.svg',
     extraPhotoCount: 5,
     customerHint: 'Nguyễn Văn An',
+    createdByEmployeeName: 'Bùi Nam',
     updatedAt: '2026-08-16T11:22:10.000',
   }),
   plot({
@@ -74,6 +78,7 @@ export const mockLodats: LodatListItem[] = [
     coverImageUrl: '/mock/lodats/p4.svg',
     extraPhotoCount: 1,
     customerHint: 'Phạm Thu Hà',
+    createdByEmployeeName: 'Bùi Nam',
     updatedAt: '2026-08-10T16:05:33.000',
   }),
   plot({
@@ -125,6 +130,7 @@ export const mockLodats: LodatListItem[] = [
     coverImageUrl: '/mock/lodats/p6.svg',
     extraPhotoCount: 4,
     customerHint: 'Inbox Page',
+    createdByEmployeeName: 'Bùi Nam',
     updatedAt: '2026-08-16T07:55:00.000',
   }),
   plot({
@@ -159,6 +165,7 @@ export const mockLodats: LodatListItem[] = [
     coverImageUrl: '/mock/lodats/p2.svg',
     extraPhotoCount: 2,
     customerHint: 'Nguyễn Văn An',
+    createdByEmployeeName: 'Bùi Nam',
     updatedAt: '2026-08-12T10:11:08.000',
   }),
   plot({
@@ -193,6 +200,7 @@ export const mockLodats: LodatListItem[] = [
     coverImageUrl: '/mock/lodats/p4.svg',
     extraPhotoCount: 1,
     customerHint: 'Lê Minh Khoa',
+    createdByEmployeeName: 'Bùi Nam',
     updatedAt: '2026-08-15T21:03:55.000',
   }),
   plot({
@@ -244,6 +252,7 @@ export const mockLodats: LodatListItem[] = [
     coverImageUrl: '/mock/lodats/p1.svg',
     extraPhotoCount: 2,
     customerHint: 'Trần Thị Bích',
+    createdByEmployeeName: 'Bùi Nam',
     updatedAt: '2026-08-16T08:00:12.000',
   }),
 ];

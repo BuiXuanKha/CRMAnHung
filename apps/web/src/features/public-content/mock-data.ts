@@ -3,12 +3,12 @@ import {
   LodatSaleStatus,
   PublicPostCategory,
   PublicPostStatus,
+  type LodatListItem,
   type PublicWebDashboard,
   type PublicWebLotRow,
   type PublicWebPostRow,
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
-import { mockLodats } from '@/features/lodats/mock-data';
 import { toPublicSlug } from './display';
 
 export const MOCK_PUBLIC_WEB_LOTS: PublicWebLotRow[] = [
@@ -161,8 +161,11 @@ function publicExcerpt(title: string, address: string | null | undefined): strin
     : `${title}. Pháp lý rõ, hỗ trợ xem đất thực tế. Liên hệ hotline An Hưng Land.`;
 }
 
-export function buildStaffOpenLots(listings: PublicWebLotRow[]): PublicWebStaffLotRow[] {
-  return mockLodats
+export function buildStaffOpenLots(
+  plots: LodatListItem[],
+  listings: PublicWebLotRow[],
+): PublicWebStaffLotRow[] {
+  return plots
     .filter((plot) => plot.status === LodatSaleStatus.DANG_BAN)
     .map((plot) => {
       const listing = listings.find((row) => row.lodatId === plot.id);
@@ -170,6 +173,8 @@ export function buildStaffOpenLots(listings: PublicWebLotRow[]): PublicWebStaffL
       const priceMode = listing?.priceMode ?? (fromCrm ? 'AMOUNT' : 'CONTACT');
       const priceLabel =
         priceMode === 'AMOUNT' ? (listing?.priceLabel ?? fromCrm) : null;
+      const staffName =
+        plot.createdByEmployeeName?.trim() || STAFF_BY_LODAT[plot.id] || '—';
       return {
         id: listing?.id ?? `pending-${plot.id}`,
         lodatId: plot.id,
@@ -180,7 +185,7 @@ export function buildStaffOpenLots(listings: PublicWebLotRow[]): PublicWebStaffL
         isPublished: listing?.isPublished ?? false,
         priceMode,
         priceLabel,
-        staffName: STAFF_BY_LODAT[plot.id] ?? 'Bùi Xuân Khả',
+        staffName,
         kind: plot.kind ?? LodatKind.DAT,
         areaM2: plot.areaM2 ?? null,
         frontageM: plot.frontageM ?? null,
@@ -207,11 +212,11 @@ export function listingFromStaffLot(row: PublicWebStaffLotRow): PublicWebLotRow 
 export function buildPublicWebDashboard(
   lots: PublicWebLotRow[],
   posts: PublicWebPostRow[],
+  staffOpen: PublicWebStaffLotRow[],
 ): PublicWebDashboard {
-  const staff = buildStaffOpenLots(lots);
   return {
-    publishedLotCount: staff.filter((row) => row.isPublished).length,
-    pendingLotCount: staff.filter((row) => !row.isPublished).length,
+    publishedLotCount: staffOpen.filter((row) => row.isPublished).length,
+    pendingLotCount: staffOpen.filter((row) => !row.isPublished).length,
     publishedPostCount: posts.filter((row) => row.status === PublicPostStatus.PUBLISHED).length,
     draftPostCount: posts.filter((row) => row.status === PublicPostStatus.DRAFT).length,
     recentLots: lots.slice(0, 8),

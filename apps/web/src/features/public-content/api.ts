@@ -1,4 +1,6 @@
 import {
+  LODAT_LIST_MAX_PAGE_SIZE,
+  LodatSaleStatus,
   createPublicPostInputSchema,
   setPublicLotPublishedSchema,
   setPublicPostStatusSchema,
@@ -10,6 +12,7 @@ import {
   type SetPublicLotPublishedInput,
   type SetPublicPostStatusInput,
 } from '@crmanhung/shared';
+import { listLodats } from '@/features/lodats/api';
 import { toPublicSlug } from './display';
 import {
   MOCK_PUBLIC_WEB_LOTS,
@@ -39,9 +42,18 @@ function uniquePostSlug(title: string): string {
   return `${base}-${n}`;
 }
 
-/** Chưa có API — mock dashboard admin đăng web. */
+async function loadOpenPlots() {
+  const res = await listLodats({
+    status: LodatSaleStatus.DANG_BAN,
+    limit: LODAT_LIST_MAX_PAGE_SIZE,
+  });
+  return res.items;
+}
+
+/** Chưa có API CMS — listing public mock; lô nguồn = list `/lo-dat`. */
 export async function getPublicWebDashboard(): Promise<PublicWebDashboard> {
-  return buildPublicWebDashboard(cloneLots(), clonePosts());
+  const staff = buildStaffOpenLots(await loadOpenPlots(), cloneLots());
+  return buildPublicWebDashboard(cloneLots(), clonePosts(), staff);
 }
 
 export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
@@ -49,7 +61,7 @@ export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
 }
 
 export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
-  return buildStaffOpenLots(cloneLots());
+  return buildStaffOpenLots(await loadOpenPlots(), cloneLots());
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {
@@ -65,11 +77,11 @@ export async function setPublicLotPublished(
     throw new Error(parsed.error.issues[0]?.message ?? 'Không đổi được trạng thái lô.');
   }
 
-  const staff = buildStaffOpenLots(lots);
+  const staff = buildStaffOpenLots(await loadOpenPlots(), lots);
   const source = staff.find((row) => row.id === id || row.lodatId === id);
   if (!source) throw new Error('Không tìm thấy lô đang mở bán.');
 
-  let index = lots.findIndex((row) => row.lodatId === source.lodatId);
+  const index = lots.findIndex((row) => row.lodatId === source.lodatId);
 
   if (index < 0) {
     const created = listingFromStaffLot({

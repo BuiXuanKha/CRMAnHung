@@ -180,7 +180,7 @@ Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồ
 
 Thứ tự: **12.1 máy tính** → **12.2 mobile**. Không trộn PC/mobile trong một mục.
 
-Không H1 lặp tên menu trên thanh tìm — **có** H1 trên từng trang dashboard.
+Không H1 lặp tên menu trên thanh tìm. H1 trên Tổng quan và Bài viết; **`/dashboard/lo-dat` không H1** (tên đã có trên menu trái).
 
 ### 12.0 Menu trong Dashboard (mọi màn `/dashboard/*`)
 
@@ -299,23 +299,23 @@ Footer đếm dưới list bài.
 
 ## 13. List `/dashboard/lo-dat`
 
-Nguồn list = lô CRM **đang Mở bán** của nhân viên — **không** phải mọi listing đã có. Admin chọn lô → xem preview bài đăng trang khách bên phải → Đăng web / Gỡ web.
+Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (ADMIN thấy mọi NV). Overlay đăng web (slug, copy, `isPublished`) vẫn mock. Admin chọn lô → preview bài đăng trang khách bên phải → Đăng web / Gỡ web từ preview.
 
 Không hiện trên list/preview: tên khách, SĐT khách, hoa hồng.
 
 ### 13.1 Máy tính
 
 ```
-┌ H1 Lô đất public mở bán                                      ┐
-├ Ô tìm (CrmSearchField)                     [ Đăng lô ]       │
-├ Bảng §4.5 (giữa)              │ Preview bài đăng (phải)      │
-│ Ảnh · Tiêu đề · NV · Giá · Web│ Ảnh + copy public + CTA      │
-└ Footer đếm                    │                              ┘
+┌ Ô tìm (CrmSearchField, chrome trắng viền như /lo-dat)        ┐
+├ Bảng §4.5 (giữa)                      │ Preview (phải ~440px) │
+│ Ảnh · Tiêu đề/Địa chỉ · Phân loại     │ Ảnh + copy + CTA      │
+│ DT·MT·Hướng · Giá · NV · Web          │                       │
+└ Footer đếm                            │                       ┘
 ```
 
-1. Ô tìm — placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc.
-2. **Đăng lô** — chọn lô **Chờ đăng** đầu tiên (hoặc lô đang chọn nếu chưa đăng) → `CrmConfirm` Đăng web.
-3. **Giữa — bảng** lô đang Mở bán. Không icon lọc cột. Không cột Thao tác.
+1. **Không** H1 `Lô đất public mở bán` (đã có trên menu trái).
+2. Ô tìm — khung trắng bo 12px, input viền `#cbd5e1` / focus xanh. Placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc. **Không** nút Đăng lô cạnh ô tìm.
+3. **Giữa — bảng** mọi lô NV đang Mở bán. Không icon lọc cột. Không cột Thao tác / công tắc rao bán. Không tên khách.
 4. Bấm hàng → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm ngay.
 5. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list Mở bán).
 
@@ -324,14 +324,16 @@ Không hiện trên list/preview: tên khách, SĐT khách, hoa hồng.
 | Cột | Ô |
 |-----|---|
 | Ảnh | Thumb 52px; thiếu = ô xám + `ImageOff` |
-| Tiêu đề | **Đậm**; dòng phụ địa chỉ. Không tên khách |
-| NV | Tên nhân viên đang rao lô |
+| Tiêu đề / Địa chỉ | **Đậm**; dòng phụ địa chỉ. Không tên khách |
+| Phân loại | Hangtag Nhà `blue` / Đất `amber` |
+| DT · MT · Hướng | DT dòng 1; MT · hướng dòng phụ. Trống: `—` |
 | Giá | `crm-money` hoặc `Liên hệ` |
+| NV | Tên nhân viên đang rao lô |
 | Web | **Đang hiện** `green` · **Chờ đăng** `gray` |
 
 Trống: `Không có lô đang mở bán.`
 
-**Phải — preview bài đăng** (cột cố định ~360px, luôn mở trên máy tính)
+**Phải — preview bài đăng** (cột cố định ~440px, luôn mở trên máy tính)
 
 1. Nhãn `Preview trang khách`
 2. Chưa chọn dòng: `Chọn một lô đang mở bán để xem bài đăng.`
@@ -341,7 +343,7 @@ Trống: `Không có lô đang mở bán.`
 
 ### 13.2 Mobile
 
-Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + NV + hangtag Web). Preview **dưới** list khi đã chọn dòng — không rail phải.
+Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ + phân loại + DT/MT/hướng + NV + giá). Preview **dưới** list khi đã chọn dòng — không rail phải.
 
 Nhớ tìm + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-state`.
 
