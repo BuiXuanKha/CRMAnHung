@@ -14,6 +14,7 @@ import {
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
 import { parseMoneyInput, todayInputValue } from '../display';
+import { assertTitleServiceFile } from '../api';
 import type { TitleServiceAction } from './action-menu';
 
 export type DialogKind = Extract<TitleServiceAction, 'progress' | 'thu' | 'chi' | 'attach' | 'edit'>;
@@ -31,7 +32,7 @@ type Props = {
     amountVnd: number,
     happenedAt: string,
   ) => void;
-  onSubmitAttach: (kind: TitleServiceDocKind, fileName: string) => void;
+  onSubmitAttach: (kind: TitleServiceDocKind, file: File) => void;
   onSubmitEdit: (status: TitleServiceStatus, agreedFeeVnd: number | null, needSummary: string, note: string) => void;
 };
 
@@ -68,7 +69,8 @@ export function ActionDialogs({
   const [title, setTitle] = useState('');
   const [amountText, setAmountText] = useState('');
   const [docKind, setDocKind] = useState<TitleServiceDocKind>(TitleServiceDocKind.SO_DO);
-  const [fileName, setFileName] = useState('');
+  const [file, setFile] = useState<File | null>(null);
+  const [fileError, setFileError] = useState<string | null>(null);
   const [status, setStatus] = useState<TitleServiceStatus>(TitleServiceStatus.DANG_LAM);
   const [feeText, setFeeText] = useState('');
   const [needSummary, setNeedSummary] = useState('');
@@ -81,7 +83,8 @@ export function ActionDialogs({
     setTitle(kind === 'thu' ? 'Thu tiền dịch vụ' : '');
     setAmountText('');
     setDocKind(TitleServiceDocKind.SO_DO);
-    setFileName('');
+    setFile(null);
+    setFileError(null);
     setStatus(item.status);
     setFeeText(item.agreedFeeVnd != null ? String(item.agreedFeeVnd) : '');
     setNeedSummary(item.needSummary ?? '');
@@ -108,8 +111,18 @@ export function ActionDialogs({
       return;
     }
     if (kind === 'attach') {
-      if (!fileName.trim()) return;
-      onSubmitAttach(docKind, fileName);
+      if (!file) {
+        setFileError('Chọn file tài liệu.');
+        return;
+      }
+      try {
+        assertTitleServiceFile(file);
+      } catch (err) {
+        setFileError((err as Error).message);
+        return;
+      }
+      setFileError(null);
+      onSubmitAttach(docKind, file);
       return;
     }
     const fee = parseMoneyInput(feeText);
@@ -183,14 +196,15 @@ export function ActionDialogs({
               </select>
             </label>
             <label>
-              Tên file (mock)
+              File
               <input
-                value={fileName}
-                onChange={(e) => setFileName(e.target.value)}
-                placeholder="vd. so-do.pdf"
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
                 required
               />
             </label>
+            <p className="crm-form-hint">Ảnh hoặc PDF, tối đa 12 MB. Giấy tờ mật — không đưa lên CDN.</p>
           </>
         ) : null}
 
@@ -228,7 +242,7 @@ export function ActionDialogs({
           </>
         ) : null}
 
-        {error ? <p className="crm-form-error">{error}</p> : null}
+        {error || fileError ? <p className="crm-form-error">{error || fileError}</p> : null}
         <div className="crm-dialog-actions">
           <button type="button" className="crm-btn" disabled={busy} onClick={onClose}>
             Huỷ

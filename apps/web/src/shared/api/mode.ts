@@ -42,3 +42,11 @@ export function isMockLodats(): boolean {
 export function isMockTransactions(): boolean {
   return isMockAuth();
 }
+
+/**
+ * List `/dich-vu-so-do`: API hồ sơ + tiến độ/thu-chi + file private.
+ * Staging login thật → Postgres; chỉ mock khi login giả.
+ */
+export function isMockTitleServices(): boolean {
+  return isMockAuth();
+}

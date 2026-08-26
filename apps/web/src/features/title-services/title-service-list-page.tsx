@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
-  TitleServiceDocKind,
   TitleServiceMoneyKind,
   TitleServiceStatus,
   type TitleServiceListItem,
@@ -16,6 +15,7 @@ import {
   addTitleServiceProgress,
   deleteTitleService,
   getTitleService,
+  getTitleServiceAttachmentUrl,
   listTitleServices,
   pinTitleService,
   updateTitleService,
@@ -57,6 +57,7 @@ export function TitleServiceListPage() {
     null,
   );
   const [dialogError, setDialogError] = useState<string | null>(null);
+  const [dialogBusy, setDialogBusy] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
   const listQuery = {
@@ -140,6 +141,31 @@ export function TitleServiceListPage() {
     await qc.invalidateQueries({ queryKey: ['title-service', id] });
   }
 
+  async function runDialog(work: () => Promise<void>) {
+    setDialogBusy(true);
+    setDialogError(null);
+    try {
+      await work();
+    } catch (err) {
+      setDialogError((err as Error).message);
+    } finally {
+      setDialogBusy(false);
+    }
+  }
+
+  async function openAttachment(attachmentId: string) {
+    if (!selectedId) return;
+    try {
+      const { url } = await getTitleServiceAttachmentUrl(selectedId, attachmentId);
+      window.open(url, '_blank', 'noopener,noreferrer');
+    } catch (err) {
+      setAlertBox({
+        title: 'Không mở được tài liệu',
+        message: (err as Error).message,
+      });
+    }
+  }
+
   async function confirmRemove() {
     if (!confirmDelete) return;
     const code = confirmDelete.code;
@@ -153,8 +179,6 @@ export function TitleServiceListPage() {
       setAlertBox({ title: 'Không xóa được hồ sơ', message: (err as Error).message });
     }
   }
-
-  const dialogBusy = false;
 
   return (
     <div className="sd-page">
@@ -222,6 +246,9 @@ export function TitleServiceListPage() {
           onAddAttach={() => selected && openDialog('attach', selected)}
           onAddThu={() => selected && openDialog('thu', selected)}
           onAddChi={() => selected && openDialog('chi', selected)}
+          onOpenAttachment={(attachmentId) => {
+            void openAttachment(attachmentId);
+          }}
         />
       </div>
 
@@ -236,40 +263,34 @@ export function TitleServiceListPage() {
         }}
         onSubmitProgress={async (stepType, note, happenedAt) => {
           if (!dialog) return;
-          try {
+          await runDialog(async () => {
             await addTitleServiceProgress(dialog.item.id, { stepType, note, happenedAt });
             setDialog(null);
             await refreshDetail(dialog.item.id);
             flash('Đã thêm tiến độ.');
-          } catch (err) {
-            setDialogError((err as Error).message);
-          }
+          });
         }}
         onSubmitMoney={async (kind, title, amountVnd, happenedAt) => {
           if (!dialog) return;
-          try {
+          await runDialog(async () => {
             await addTitleServiceMoney(dialog.item.id, { kind, title, amountVnd, happenedAt });
             setDialog(null);
             await refreshDetail(dialog.item.id);
             flash(kind === TitleServiceMoneyKind.THU ? 'Đã nhập thu.' : 'Đã nhập chi phí.');
-          } catch (err) {
-            setDialogError((err as Error).message);
-          }
+          });
         }}
-        onSubmitAttach={async (kind: TitleServiceDocKind, fileName: string) => {
+        onSubmitAttach={async (kind, file) => {
           if (!dialog) return;
-          try {
-            await addTitleServiceAttachment(dialog.item.id, { kind, fileName });
+          await runDialog(async () => {
+            await addTitleServiceAttachment(dialog.item.id, { kind, file });
             setDialog(null);
             await refreshDetail(dialog.item.id);
-            flash('Đã thêm tài liệu (mock).');
-          } catch (err) {
-            setDialogError((err as Error).message);
-          }
+            flash('Đã thêm tài liệu.');
+          });
         }}
         onSubmitEdit={async (nextStatus, agreedFeeVnd, needSummary, note) => {
           if (!dialog) return;
-          try {
+          await runDialog(async () => {
             await updateTitleService(dialog.item.id, {
               status: nextStatus,
               agreedFeeVnd,
@@ -279,9 +300,7 @@ export function TitleServiceListPage() {
             setDialog(null);
             await refreshDetail(dialog.item.id);
             flash('Đã cập nhật hồ sơ.');
-          } catch (err) {
-            setDialogError((err as Error).message);
-          }
+          });
         }}
       />
 
@@ -291,7 +310,7 @@ export function TitleServiceListPage() {
         icon={Trash2}
         message={
           confirmDelete
-            ? `Xóa hồ sơ ${confirmDelete.code}? Toàn bộ tiến độ và thu/chi mock sẽ bị gỡ.`
+            ? `Xóa hồ sơ ${confirmDelete.code}? Toàn bộ tiến độ, thu/chi và tài liệu sẽ bị gỡ.`
             : ''
         }
         confirmLabel="Xóa hồ sơ"

@@ -26,6 +26,7 @@ type Props = {
   onAddAttach: () => void;
   onAddThu: () => void;
   onAddChi: () => void;
+  onOpenAttachment: (attachmentId: string) => void;
 };
 
 export function DetailPanel({
@@ -39,6 +40,7 @@ export function DetailPanel({
   onAddAttach,
   onAddThu,
   onAddChi,
+  onOpenAttachment,
 }: Props) {
   return (
     <aside className="sd-side" aria-label="Chi tiết hồ sơ">
@@ -71,6 +73,7 @@ export function DetailPanel({
                 onAddAttach={onAddAttach}
                 onAddThu={onAddThu}
                 onAddChi={onAddChi}
+                onOpenAttachment={onOpenAttachment}
               />
             ) : null}
           </div>
@@ -97,12 +100,14 @@ function DetailBody({
   onAddAttach,
   onAddThu,
   onAddChi,
+  onOpenAttachment,
 }: {
   detail: TitleServiceDetail;
   onAddProgress: () => void;
   onAddAttach: () => void;
   onAddThu: () => void;
   onAddChi: () => void;
+  onOpenAttachment: (attachmentId: string) => void;
 }) {
   return (
     <>
@@ -172,7 +177,13 @@ function DetailBody({
           <ul className="sd-files">
             {detail.attachments.map((att) => (
               <li key={att.id}>
-                <strong>{att.fileName}</strong>
+                <button
+                  type="button"
+                  className="sd-file-open"
+                  onClick={() => onOpenAttachment(att.id)}
+                >
+                  {att.fileName}
+                </button>
                 <span className="sd-muted">
                   {TITLE_SERVICE_DOC_LABELS[att.kind]} · {formatDateTime(att.createdAt)}
                 </span>

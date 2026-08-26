@@ -1,7 +1,7 @@
 # Domain: Title services (Dịch vụ sổ đỏ)
 
 - **Slug:** `title-services`
-- **Status:** Ready for API — Nest CRUD + tiến độ/thu-chi + file private R2; chưa nối UI / copy.
+- **Status:** Ready for API — UI `/dich-vu-so-do` nối API khi login thật; chưa tạo từ khách / copy.
 - **Nguồn:** màn [`/dich-vu-so-do`](https://anhungland.com/dich-vu-so-do) (web mới) + CRM cũ `/dich-vu-so-do` (API `/api/title-services`, SQLite `tblTitleService*`)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.7 + §4.5
 - **Contract:** `packages/shared/src/title-services.ts`
@@ -71,7 +71,7 @@ Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim / xóa + t
 
 ## 8. Mock data
 
-`mock-data.ts` — nhiều trạng thái cho UI local. Staging vẫn mock (`isMockMode`) cho đến khi nối API.
+`mock-data.ts` cho local khi `NEXT_PUBLIC_USE_MOCK_AUTH=true`. Staging login thật → API (`isMockTitleServices` = `isMockAuth`). List kha trống cho đến khi copy `SD-2026-0001`.
 
 ## 9. Extension?
 
@@ -292,7 +292,7 @@ Khách + User **đã có**. List mock §12 **đã có**.
 | **4** | ~~Nest CRUD hồ sơ~~ **xong** — list / get / tạo / sửa / ghim / xóa — **chưa** file | Xương ownership |
 | **5** | ~~Nest tiến độ + thu/chi~~ **xong** | Nhật ký / tiền trên hồ sơ sống |
 | **6** | ~~Nest file~~ **xong** — upload private R2 + signed URL + xóa object | Giấy tờ mật |
-| **7** | Nối UI `/dich-vu-so-do` → API (`isMockTitleServices` = login giả) | List/panel thật |
+| **7** | ~~Nối UI `/dich-vu-so-do`~~ **xong** — `isMockTitleServices` = login giả | List/panel thật |
 | **8** | Tạo hồ sơ từ khách (`/khach-hang/[id]/dich-vu-so-do`) | Không nút Thêm trên list |
 | **9** | Copy 1 hồ sơ SQLite → Postgres (+ 2 tiến độ, 3 tiền; 0 file) | Data kha `SD-2026-0001` |
 | **10** | (Sau) ADMIN lọc NV trên list; tùy chọn audit xem file | Không chặn 1–9 |

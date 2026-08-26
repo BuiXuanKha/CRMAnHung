@@ -15,7 +15,7 @@ import {
   type UpdateTitleServiceInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
-import { isMockMode } from '@/shared/api/mode';
+import { isMockTitleServices } from '@/shared/api/mode';
 import { computeDaysWorking, sumVnd } from './display';
 import { mockTitleServices } from './mock-data';
 
@@ -98,7 +98,7 @@ function applyQuery(
 export async function listTitleServices(
   query: TitleServiceListQuery = {},
 ): Promise<TitleServiceListResponse> {
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const items = applyQuery(mockStore, query).map(toListItem);
     return { items, total: items.length };
   }
@@ -111,7 +111,7 @@ export async function listTitleServices(
 }
 
 export async function getTitleService(id: string): Promise<TitleServiceDetail> {
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const found = mockStore.find((row) => row.id === id);
     if (!found) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     return refreshComputed(found);
@@ -124,7 +124,7 @@ export async function updateTitleService(
   input: UpdateTitleServiceInput,
 ): Promise<TitleServiceListItem> {
   const parsed = updateTitleServiceSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -163,7 +163,7 @@ export async function pinTitleService(
   input: PinTitleServiceInput,
 ): Promise<TitleServiceListItem> {
   const parsed = pinTitleServiceSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -188,7 +188,7 @@ export async function addTitleServiceProgress(
   input: AddTitleServiceProgressInput,
 ): Promise<TitleServiceDetail> {
   const parsed = addTitleServiceProgressSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -223,7 +223,7 @@ export async function addTitleServiceMoney(
   input: AddTitleServiceMoneyInput,
 ): Promise<TitleServiceDetail> {
   const parsed = addTitleServiceMoneySchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -257,10 +257,13 @@ export async function addTitleServiceMoney(
 
 export async function addTitleServiceAttachment(
   id: string,
-  input: AddTitleServiceAttachmentInput,
+  input: { kind: AddTitleServiceAttachmentInput['kind']; file: File },
 ): Promise<TitleServiceDetail> {
-  const parsed = addTitleServiceAttachmentSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
+    const parsed = addTitleServiceAttachmentSchema.parse({
+      kind: input.kind,
+      fileName: input.file.name,
+    });
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -280,14 +283,48 @@ export async function addTitleServiceAttachment(
     mockStore = mockStore.map((row, i) => (i === idx ? updated : row));
     return updated;
   }
+  assertTitleServiceFile(input.file);
+  const body = new FormData();
+  body.append('kind', input.kind);
+  body.append('file', input.file);
   return apiFetch<TitleServiceDetail>(`/title-services/${id}/attachments`, {
     method: 'POST',
-    body: JSON.stringify(parsed),
+    body,
   });
 }
 
+export async function getTitleServiceAttachmentUrl(
+  id: string,
+  attachmentId: string,
+): Promise<{ url: string; expiresAt: string }> {
+  if (isMockTitleServices()) {
+    throw new Error('Tài liệu mock không mở được file thật.');
+  }
+  return apiFetch<{ url: string; expiresAt: string }>(
+    `/title-services/${id}/attachments/${attachmentId}/url`,
+  );
+}
+
+const TITLE_FILE_MAX_BYTES = 12 * 1024 * 1024;
+const TITLE_FILE_MIMES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+]);
+
+export function assertTitleServiceFile(file: File) {
+  if (!file.size) throw new Error('Thiếu file tài liệu.');
+  if (file.size > TITLE_FILE_MAX_BYTES) throw new Error('File tối đa 12 MB.');
+  const mime = (file.type || '').toLowerCase();
+  if (!TITLE_FILE_MIMES.has(mime)) {
+    throw new Error('Chỉ nhận ảnh (JPEG/PNG/WebP/GIF) hoặc PDF.');
+  }
+}
+
 export async function deleteTitleService(id: string): Promise<void> {
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const exists = mockStore.some((row) => row.id === id);
     if (!exists) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     mockStore = mockStore.filter((row) => row.id !== id);
