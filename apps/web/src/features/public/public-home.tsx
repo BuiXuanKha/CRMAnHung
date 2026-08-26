@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import type { PublicGuestLot } from '@/features/public-content/guest-listing';
 import { ANHUNG_BRAND } from './brand';
 import { HomeProductSection } from './home-product-section';
+import { PUBLIC_LISTING_PATH } from './site';
 import {
   ARTICLE_CATEGORY_LABEL,
   PROJECT_STATUS_LABEL,
@@ -54,7 +55,7 @@ export function PublicHome({ initialLots }: { initialLots: PublicGuestLot[] }) {
               Hotline {ANHUNG_BRAND.hotlineDisplay}
             </a>
             <nav className="ph-nav" aria-label="Menu chính">
-              <a href="#san-pham">Sản phẩm</a>
+              <a href="#mua-ban-nha-dat">Sản phẩm</a>
               <a href="#du-an">Dự án</a>
               <a href="#bai-viet">Kiến thức</a>
               <Link href="/login" className="ph-nav-login">
@@ -80,7 +81,7 @@ export function PublicHome({ initialLots }: { initialLots: PublicGuestLot[] }) {
           <h1>Mua bán · ký gửi BĐS — tư vấn đo đạc, thừa kế, sổ hồng</h1>
           <p className="ph-hero-lead">{ANHUNG_BRAND.services}</p>
           <div className="ph-hero-cta">
-            <a className="ph-btn ph-btn-primary" href="#san-pham">
+            <a className="ph-btn ph-btn-primary" href="#mua-ban-nha-dat">
               Xem sản phẩm
             </a>
             <a className="ph-btn ph-btn-ghost" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
@@ -185,7 +186,7 @@ export function PublicHome({ initialLots }: { initialLots: PublicGuestLot[] }) {
             </p>
           </div>
           <div className="ph-footer-links">
-            <Link href="/san-pham">Sản phẩm</Link>
+            <Link href={PUBLIC_LISTING_PATH}>Sản phẩm</Link>
             <Link href="/du-an">Dự án</Link>
             <Link href="/kien-thuc">Kiến thức</Link>
             <Link href="/kinh-nghiem">Kinh nghiệm</Link>

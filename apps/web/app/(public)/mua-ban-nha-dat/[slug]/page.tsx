@@ -24,7 +24,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return listingMetadata(listing);
 }
 
-export default async function SanPhamDetailPage({ params }: Props) {
+export default async function MuaBanNhaDatDetailPage({ params }: Props) {
   const { slug } = await params;
   const listing = await getPublicListingBySlug(slug);
   if (!listing) notFound();

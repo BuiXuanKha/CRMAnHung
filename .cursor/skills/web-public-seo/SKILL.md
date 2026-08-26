@@ -18,7 +18,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 2. Một `<h1>`; ảnh có `alt`; URL sạch
 3. Nội dung chính SSR/RSC — không để bot chỉ thấy shell trống
 4. URL mới → cập nhật `sitemap.ts`; giữ `robots.ts` chặn khu CRM + `/login`
-5. **Lô `/san-pham/[slug]`:** làm đúng công thức [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §7 (excerpt → meta; cover → OG; sitemap chỉ `isPublished`; JSON-LD không bịa giá)
+5. **Lô `/mua-ban-nha-dat/[slug]`:** làm đúng công thức [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §7 (excerpt → meta; cover → OG; sitemap chỉ `isPublished`; JSON-LD không bịa giá)
 
 ## Cấm
 
@@ -30,7 +30,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 
 Next.js App Router — dùng `metadata` API, `next/image`, `app/robots.ts`, `app/sitemap.ts`.
 
-Meta Pixel Facebook: mã cơ sở trong `<head>` `app/layout.tsx`. `/san-pham` → `ViewProductList`; `/san-pham/[slug]` → `ViewContent`. Chi tiết [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §6.
+Meta Pixel Facebook: mã cơ sở trong `<head>` `app/layout.tsx`. `/mua-ban-nha-dat` → `ViewProductList`; `/mua-ban-nha-dat/[slug]` → `ViewContent`. Chi tiết [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §6.
 
 ## Sau khi làm
 

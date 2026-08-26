@@ -11,6 +11,12 @@ const nextConfig: NextConfig = {
   // Monorepo: trace deps từ root workspace
   outputFileTracingRoot: path.join(__dirname, '../..'),
   transpilePackages: ['@crmanhung/shared'],
+  async redirects() {
+    return [
+      { source: '/san-pham', destination: '/mua-ban-nha-dat', permanent: true },
+      { source: '/san-pham/:slug', destination: '/mua-ban-nha-dat/:slug', permanent: true },
+    ];
+  },
 };
 
 export default nextConfig;

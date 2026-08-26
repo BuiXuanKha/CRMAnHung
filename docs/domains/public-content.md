@@ -56,7 +56,7 @@ Web: công tắc **Đăng web** là việc admin chọn lô nào khách được
 |-----|-----------|
 | Tạm dừng / nháp / thiếu ảnh | Không hiện |
 | Mở bán nhưng chưa Đăng web | Không hiện |
-| Đăng web + đang Mở bán | Hiện `/san-pham/[slug]` |
+| Đăng web + đang Mở bán | Hiện `/mua-ban-nha-dat/[slug]` |
 | Đang Đăng web rồi Tạm dừng / Đã cọc / Đã bán | **Tự gỡ** (đề xuất) |
 
 ### 3.2 Bài viết
@@ -80,7 +80,7 @@ Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú
 ## 4. Use cases
 
 1. **Khách vào /** — hero brand + lô đã đăng + teaser tin/bài. Không login.
-2. **Khách xem lô** — `/san-pham` và `/san-pham/[slug]`; share OG.
+2. **Khách xem lô** — `/mua-ban-nha-dat` và `/mua-ban-nha-dat/[slug]`; share OG.
 3. **Khách đọc bài** — list + chi tiết theo chuyên mục.
 4. **Admin đăng lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn bài đăng** (prefill copy đã lọc) → Lưu nháp / Đăng web.
 5. **Admin gỡ lô** — tắt Đăng web; URL cũ → không tìm thấy (hoặc 404).
@@ -135,7 +135,7 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — mock |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục) — mock |
 | GET | `/public/listings` | Không | Lô đã đăng ∩ Mở bán → `publicCatalogListingSchema` |
-| GET | `/public/listings/:slug` | Không | Chi tiết `/san-pham/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
+| GET | `/public/listings/:slug` | Không | Chi tiết `/mua-ban-nha-dat/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
 
 ---
 
@@ -219,7 +219,7 @@ Cùng hình thức thẻ GD: nền trắng, viền `#e2e8f0`, bo 12px. 4 cột.
 
 | Thẻ | Số | Gợi ý |
 |-----|----|--------|
-| Lô đang hiện | `publishedLotCount` | Khách thấy trên `/san-pham` |
+| Lô đang hiện | `publishedLotCount` | Khách thấy trên `/mua-ban-nha-dat` |
 | Chờ đăng | `pendingLotCount` | Mở bán CRM, chưa Đăng web |
 | Bài đã đăng | `publishedPostCount` | Khách đọc được |
 | Bài nháp | `draftPostCount` | Chỉ admin |
@@ -355,7 +355,7 @@ Trống: `Không có lô đang mở bán.`
 2. Chưa chọn dòng: `Chọn một lô đang mở bán để xem bài đăng.`
 3. Có chọn: ảnh bìa, hangtag Web, tiêu đề, địa chỉ, giá, DT · MT · hướng, hangtag Nhà/Đất, mô tả public (không PII), hotline công ty
 4. Nút **Đăng web** khi chờ đăng → `CrmConfirm`. **Không** nút Gỡ web trên màn này.
-5. Nếu đang hiện: link `Xem trên anhungland.com` tab mới `/san-pham/[slug]`
+5. Nếu đang hiện: link `Xem trên anhungland.com` tab mới `/mua-ban-nha-dat/[slug]`
 
 ### 13.2 Mobile
 
@@ -412,7 +412,7 @@ Nhớ list: `crmanhung:public-post-list-state`.
 
 Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn bài dashboard **không** đổi layout — chỉ có thể thêm `metaDescription` (tuỳ chọn).
 
-1. URL khách: `/san-pham/[slug]` — chỉ lô `isPublished`.
+1. URL khách: `/mua-ban-nha-dat/[slug]` — chỉ lô `isPublished`. `/san-pham` 301 sang path mới.
 2. Title / H1 = tiêu đề public. Meta = `metaDescription` hoặc excerpt.
 3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`.
 4. JSON-LD `RealEstateListing`: giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`).

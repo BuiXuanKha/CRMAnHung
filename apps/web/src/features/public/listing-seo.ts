@@ -6,13 +6,14 @@ import {
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import {
+  PUBLIC_LISTING_PATH,
   PUBLIC_OG_DEFAULT,
   PUBLIC_SITE_ORIGIN,
   listingCanonicalUrl,
   toAbsoluteUrl,
 } from './site';
 
-export const SAN_PHAM_LIST_PATH = '/san-pham';
+export const SAN_PHAM_LIST_PATH = PUBLIC_LISTING_PATH;
 export const SAN_PHAM_LIST_TITLE = 'Nhà đất đang bán';
 export const SAN_PHAM_LIST_DESCRIPTION =
   'Nhà đất An Hưng Land đang giới thiệu — xem vị trí, diện tích và giá công bố (hoặc liên hệ). Không cần đăng nhập.';

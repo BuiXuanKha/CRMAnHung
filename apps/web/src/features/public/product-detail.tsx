@@ -3,6 +3,7 @@ import { ANHUNG_BRAND } from './brand';
 import { ProductGallery, ProductShareButton } from './product-detail-client';
 import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
+import { PUBLIC_LISTING_PATH, listingHref } from './site';
 import './public-home.css';
 import './product-detail.css';
 
@@ -43,7 +44,7 @@ export function ProductDetailView({
               Hotline {ANHUNG_BRAND.hotlineDisplay}
             </a>
             <nav className="ph-nav" aria-label="Menu">
-              <Link href="/san-pham">Sản phẩm</Link>
+              <Link href={PUBLIC_LISTING_PATH}>Sản phẩm</Link>
               <Link href="/login" className="ph-nav-login">
                 Đăng nhập
               </Link>
@@ -56,7 +57,7 @@ export function ProductDetailView({
         <nav className="pd-breadcrumb" aria-label="Đường dẫn">
           <Link href="/">Trang chủ</Link>
           <span aria-hidden>/</span>
-          <Link href="/san-pham">Nhà đất đang bán</Link>
+          <Link href={PUBLIC_LISTING_PATH}>Nhà đất đang bán</Link>
           <span aria-hidden>/</span>
           <span>{listing.title}</span>
         </nav>
@@ -160,14 +161,14 @@ export function ProductDetailView({
           <section className="pd-related" aria-labelledby="pd-related-title">
             <div className="ph-section-head">
               <h2 id="pd-related-title">Sản phẩm khác</h2>
-              <Link href="/san-pham" className="ph-more">
+              <Link href={PUBLIC_LISTING_PATH} className="ph-more">
                 Xem tất cả →
               </Link>
             </div>
             <div className="ph-product-grid pd-related-grid">
               {related.map((p) => (
                 <article key={p.slug} className="ph-product">
-                  <Link href={`/san-pham/${p.slug}`} className="ph-product-media">
+                  <Link href={listingHref(p.slug)} className="ph-product-media">
                     {p.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={p.coverImageUrl} alt={p.title} loading="lazy" />
@@ -176,7 +177,7 @@ export function ProductDetailView({
                     )}
                   </Link>
                   <div className="ph-product-body">
-                    <Link href={`/san-pham/${p.slug}`}>
+                    <Link href={listingHref(p.slug)}>
                       <h3>{p.title}</h3>
                     </Link>
                     <p className="ph-product-meta">
