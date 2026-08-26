@@ -11,6 +11,7 @@
 | Transactions | [transactions.md](./transactions.md) | Ready for API — Prisma + contract; UI mock list + chi tiết + form |
 | Title services | [title-services.md](./title-services.md) | Ready for API — copy script + ADMIN lọc NV + audit xem file |
 | Users / admin registry | [users.md](./users.md) §11 mục 5 | P4 — CRUD NV, chưa làm |
+| Public content (web khách) | [public-content.md](./public-content.md) | Draft — khách xem tin/bài/lô; admin đăng web |
 
 Trước khi code UI/API: domain doc phải ở trạng thái **Ready for mock** trở lên.
 

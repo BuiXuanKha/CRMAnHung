@@ -157,6 +157,7 @@ Quyền đã siết so với cũ: **chỉ Admin** tạo địa chỉ và import 
 Tạm hoãn (chưa bàn — trước mắt chỉ làm UI cho STAFF):
 
 1. List **ADMIN** `/lo-dat`: hiển thị theo cách nào (tách theo NV/luồng hay gộp theo LK12)? — **chờ bàn sau**.
+2. **Đăng lô lên web khách** — không tự theo Mở bán. Domain riêng [`public-content.md`](./public-content.md).
 
 Nhẹ hơn (mặc định nếu không bác): hangtag Nhà/Đất copy = `DAT`; số lô trùng trong kho = cấm; admin được bổ sung lô vào dự án đã import; `DAT_COC`/`DA_BAN` cũ giữ khi copy, list chỉ hiện Mở bán/Tạm dừng. Giá `BIGINT`; hoa hồng chữ.
 

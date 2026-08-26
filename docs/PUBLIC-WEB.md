@@ -1,10 +1,10 @@
 # Web công khai (trang khách) — An Hưng Land
 
 - **Slug:** `public-web`
-- **Status:** Ready for mock (IA đã chốt hướng)
+- **Status:** Ready for mock (IA khách) — **đăng nội dung:** [`domains/public-content.md`](./domains/public-content.md) (Draft)
 - **URL:** `https://anhungland.com` — **không** cần đăng nhập
 - **SEO:** bắt buộc theo [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) · skill `web-public-seo`
-- **CRM:** sau `/login` — không thuộc phạm vi doc này
+- **CRM:** sau `/login` — khu nhân viên; **admin đăng web** = domain `public-content`, không phải registry khách
 
 ---
 
@@ -93,8 +93,11 @@ Danh sách sản phẩm: ngay dưới fold hoặc section chính tiếp theo —
 
 | Ai | Được | Không |
 |----|------|--------|
-| Khách / công chúng | Xem mọi trang public, share sản phẩm | Vào CRM, sửa dữ liệu nội bộ |
-| STAFF / ADMIN | Như khách trên public + login CRM | — |
+| Khách / công chúng | Xem tin, bài, lô **đã admin đăng**; share | Vào CRM; xem nháp; sửa |
+| STAFF | Như khách trên public + CRM của mình | Đăng / gỡ web |
+| ADMIN | Như STAFF + **đăng / gỡ** lô và bài lên web | Lộ PII khách lên public |
+
+Chi tiết quyền + công tắc Đăng web: [`domains/public-content.md`](./domains/public-content.md).
 
 ---
 
@@ -107,8 +110,12 @@ Danh sách sản phẩm: ngay dưới fold hoặc section chính tiếp theo —
 
 ---
 
-## 9. Open questions (chốt khi làm mock)
+## 9. Open questions
 
-- Sản phẩm public = map 1–1 lô đất CRM hay catalogue marketing riêng?
-- Giá công khai đầy đủ hay “liên hệ”?
-- Liên hệ khách: form / Zalo / SĐT trên public?
+**Đã chốt (2026-08-26):** khách trên `/` thấy tin tức, bài đăng, lô cần bán. **Admin** mới được public dữ liệu đó. Không catalogue marketing tách khỏi CRM — lô web = lô CRM được chọn đăng.
+
+Còn lại (mặc định đề xuất trong [`public-content.md`](./domains/public-content.md) §11):
+
+- Chỉ ADMIN bấm Đăng web? Công tắc tường minh (không auto Mở bán)?
+- Giá: hiện số hoặc «Liên hệ» từng lô?
+- Liên hệ: hotline + Zalo công ty; chưa form SĐT?
