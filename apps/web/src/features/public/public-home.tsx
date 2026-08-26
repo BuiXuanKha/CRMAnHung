@@ -2,46 +2,16 @@
 
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import type { PublicGuestLot } from '@/features/public-content/guest-listing';
 import { ANHUNG_BRAND } from './brand';
+import { HomeProductSection } from './home-product-section';
 import {
   ARTICLE_CATEGORY_LABEL,
   PROJECT_STATUS_LABEL,
   PUBLIC_ARTICLES,
-  PUBLIC_PRODUCTS,
   PUBLIC_PROJECTS,
-  type PublicProduct,
 } from './mock-data';
 import './public-home.css';
-
-function ShareButton({ product }: { product: PublicProduct }) {
-  const [copied, setCopied] = useState(false);
-
-  const share = async () => {
-    const url = `${window.location.origin}/san-pham/${product.slug}`;
-    const payload = {
-      title: product.title,
-      text: `${product.title} — ${product.priceLabel} · ${product.areaLabel}`,
-      url,
-    };
-    try {
-      if (navigator.share) {
-        await navigator.share(payload);
-        return;
-      }
-    } catch {
-      // clipboard
-    }
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
-  };
-
-  return (
-    <button type="button" className="ph-share" onClick={() => void share()} title="Chia sẻ">
-      {copied ? 'Đã copy' : 'Chia sẻ'}
-    </button>
-  );
-}
 
 function BrandLogo({
   className,
@@ -62,7 +32,7 @@ function BrandLogo({
   );
 }
 
-export function PublicHome() {
+export function PublicHome({ initialLots }: { initialLots: PublicGuestLot[] }) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -124,43 +94,7 @@ export function PublicHome() {
         </div>
       </section>
 
-      <section id="san-pham" className="ph-section">
-        <div className="ph-section-head">
-          <h2>Sản phẩm dành cho bạn</h2>
-          <Link href="/san-pham" className="ph-more">
-            Xem tất cả →
-          </Link>
-        </div>
-        <div className="ph-product-grid">
-          {PUBLIC_PRODUCTS.map((p, i) => (
-            <article
-              key={p.id}
-              className="ph-product"
-              style={{ animationDelay: `${Math.min(i, 7) * 40}ms` }}
-            >
-              <Link href={`/san-pham/${p.slug}`} className="ph-product-media">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={p.imageUrl} alt={p.title} loading={i < 4 ? 'eager' : 'lazy'} />
-              </Link>
-              <div className="ph-product-body">
-                <Link href={`/san-pham/${p.slug}`}>
-                  <h3>{p.title}</h3>
-                </Link>
-                <p className="ph-product-meta">
-                  <span>{p.priceLabel}</span>
-                  <span aria-hidden>·</span>
-                  <span>{p.areaLabel}</span>
-                </p>
-                <p className="ph-product-loc">{p.location}</p>
-                <div className="ph-product-foot">
-                  <span>{p.postedLabel}</span>
-                  <ShareButton product={p} />
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+      <HomeProductSection initialLots={initialLots} />
 
       <section id="du-an" className="ph-section ph-section-muted">
         <div className="ph-section-head">

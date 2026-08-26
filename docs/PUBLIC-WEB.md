@@ -103,9 +103,10 @@ Chi tiết quyền + công tắc Đăng web: [`domains/public-content.md`](./dom
 
 ## 8. Mock FE (chưa BE)
 
-- Ảnh brand + 4–8 sản phẩm giả + vài bài phụ.
+- Trang `/`: lô khách = `listPublishedPublicLots` — overlay Đăng web (`isPublished`) ∩ lô CRM đang Mở bán (cùng store dashboard). **Không** dùng mảng `PUBLIC_PRODUCTS` giả trên homepage.
+- Chưa có lô đăng → empty state tiếng Việt (không hàng mock). Có lô → card title / giá public / DT / địa chỉ; không PII, hoa hồng, ghi chú chủ.
 - Chi tiết sản phẩm có nút share (UI).
-- `NEXT_PUBLIC_USE_MOCK` / data cứng trong `features/public/`.
+- `NEXT_PUBLIC_USE_MOCK` / bài phụ + dự án teaser vẫn data cứng trong `features/public/` cho đến CMS bài.
 - API / CMS thật: phase sau (ngoài scope khi chỉ làm FE).
 
 ---

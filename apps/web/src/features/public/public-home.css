@@ -293,6 +293,31 @@
   gap: 20px;
 }
 
+.ph-product-empty {
+  margin: 0;
+  padding: 28px 20px;
+  border: 1px dashed var(--ph-line);
+  border-radius: var(--ph-radius);
+  background: var(--ph-soft);
+  color: var(--ph-muted);
+  text-align: center;
+  line-height: 1.55;
+}
+
+.ph-product-empty a {
+  color: var(--ph-brand-deep);
+  font-weight: 700;
+}
+
+.ph-product-media-empty {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--ph-muted);
+  font-size: 0.85rem;
+  background: #efe8e6;
+}
+
 .ph-product {
   background: #fff;
   border: 1px solid var(--ph-line);
