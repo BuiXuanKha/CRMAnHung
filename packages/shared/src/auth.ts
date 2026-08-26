@@ -30,3 +30,14 @@ export const refreshTokenSchema = z.object({
 });
 
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;
+
+/** ADMIN directory — GET /users (lọc NV trên list sổ đỏ). */
+export const userDirectoryItemSchema = z.object({
+  id: z.string(),
+  username: z.string(),
+  fullName: z.string(),
+  role: z.nativeEnum(UserRole),
+  isActive: z.boolean().optional(),
+});
+
+export type UserDirectoryItem = z.infer<typeof userDirectoryItemSchema>;

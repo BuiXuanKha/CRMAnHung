@@ -3,6 +3,7 @@
 import { useRef } from 'react';
 import { CrmSearchField } from '@/shared/ui/search-field';
 import { STATUS_FILTER_OPTIONS } from '../display';
+import type { UserDirectoryItem } from '@crmanhung/shared';
 
 type Props = {
   keyword: string;
@@ -13,6 +14,10 @@ type Props = {
   onStatus: (v: string) => void;
   hasActiveFilters: boolean;
   onResetFilters: () => void;
+  showEmployeeFilter?: boolean;
+  employees?: UserDirectoryItem[];
+  employeeId?: string;
+  onEmployee?: (v: string) => void;
 };
 
 export function FilterBar({
@@ -24,11 +29,36 @@ export function FilterBar({
   onStatus,
   hasActiveFilters,
   onResetFilters,
+  showEmployeeFilter = false,
+  employees = [],
+  employeeId = '',
+  onEmployee,
 }: Props) {
   const searchRef = useRef<HTMLInputElement>(null);
 
   function submitSearch() {
     searchRef.current?.blur();
+  }
+
+  function employeeSelect(extraClass: string) {
+    if (!showEmployeeFilter) return null;
+    return (
+      <select
+        className={`sd-filter-select sd-filter-employee ${extraClass}`.trim()}
+        value={employeeId}
+        onChange={(e) => onEmployee?.(e.target.value)}
+        aria-label="Lọc theo nhân viên tạo hồ sơ"
+      >
+        <option value="">Tất cả nhân viên</option>
+        {employees
+          .filter((u) => u.isActive !== false)
+          .map((u) => (
+            <option key={u.id} value={u.id}>
+              {u.fullName}
+            </option>
+          ))}
+      </select>
+    );
   }
 
   return (
@@ -46,6 +76,7 @@ export function FilterBar({
           aria-label="Tìm hồ sơ sổ đỏ"
         />
       </div>
+      {employeeSelect('is-desktop')}
       <button
         type="button"
         className={['sd-filter-btn', filtersOpen ? 'is-open' : '', hasActiveFilters ? 'is-active' : '']
@@ -76,6 +107,7 @@ export function FilterBar({
             </option>
           ))}
         </select>
+        {employeeSelect('is-mobile')}
         {hasActiveFilters ? (
           <button type="button" className="sd-filter-clear" onClick={onResetFilters}>
             Xoá lọc

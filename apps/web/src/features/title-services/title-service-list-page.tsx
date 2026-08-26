@@ -7,9 +7,12 @@ import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
   TitleServiceMoneyKind,
   TitleServiceStatus,
+  UserRole,
   type TitleServiceListItem,
 } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
+import { useAuth } from '@/features/auth/auth-context';
+import { listUserDirectory } from '@/features/users/api';
 import {
   addTitleServiceAttachment,
   addTitleServiceMoney,
@@ -45,9 +48,11 @@ type AlertState = { title: string; message: string } | null;
 
 export function TitleServiceListPage() {
   const qc = useQueryClient();
+  const { user } = useAuth();
   const search = useSearchParams();
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('');
+  const [employeeId, setEmployeeId] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [selectedId, setSelectedId] = useState<string | null>(() => search.get('id'));
   const [menuId, setMenuId] = useState<string | null>(null);
@@ -62,14 +67,22 @@ export function TitleServiceListPage() {
   const [dialogBusy, setDialogBusy] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
 
+  const isAdmin = user?.role === UserRole.ADMIN;
   const listQuery = {
     keyword: keyword.trim() || undefined,
     status: (status || undefined) as TitleServiceStatus | undefined,
+    createdByEmployeeId: isAdmin && employeeId ? employeeId : undefined,
   };
 
   const list = useQuery({
     queryKey: ['title-services', listQuery],
     queryFn: () => listTitleServices(listQuery),
+  });
+
+  const staffDir = useQuery({
+    queryKey: ['user-directory'],
+    queryFn: listUserDirectory,
+    enabled: isAdmin,
   });
 
   const filtered = useMemo(
@@ -81,7 +94,7 @@ export function TitleServiceListPage() {
     filtered.find((row) => row.id === selectedId) ??
     list.data?.items.find((row) => row.id === selectedId) ??
     null;
-  const mobileFilterCount = countMobileTitleServiceFilters(status);
+  const mobileFilterCount = countMobileTitleServiceFilters(status, employeeId);
 
   useEffect(() => {
     if (selectedId || filtered.length === 0) return;
@@ -198,7 +211,14 @@ export function TitleServiceListPage() {
               status={status}
               onStatus={setStatus}
               hasActiveFilters={mobileFilterCount > 0}
-              onResetFilters={() => setStatus('')}
+              onResetFilters={() => {
+                setStatus('');
+                setEmployeeId('');
+              }}
+              showEmployeeFilter={isAdmin}
+              employees={staffDir.data ?? []}
+              employeeId={employeeId}
+              onEmployee={setEmployeeId}
             />
           </section>
 

@@ -205,6 +205,16 @@ export class TitleServicesService {
     const row = await this.requireOwned(user, id);
     const att = row.attachments.find((a) => a.id === attachmentId);
     if (!att) throw new NotFoundException('Không tìm thấy tài liệu.');
+    try {
+      await this.prisma.titleServiceAttachmentView.create({
+        data: {
+          attachmentId: att.id,
+          viewedByEmployeeId: user.id,
+        },
+      });
+    } catch {
+      // Không chặn xem file nếu ghi nhật ký lỗi.
+    }
     const expiresIn = SIGNED_URL_TTL_SEC;
     const url = await this.storage.getPrivateSignedUrl(att.objectKey, expiresIn);
     return {

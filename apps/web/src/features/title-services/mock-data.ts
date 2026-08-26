@@ -332,13 +332,15 @@ export const mockTitleServices: TitleServiceDetail[] = [
     completedAt: '2026-05-02T11:00:00.000',
     createdAt: '2026-04-10T10:00:00.000',
     updatedAt: '2026-05-02T11:00:00.000',
+    createdByEmployeeId: 'user_staff_other',
+    createdByName: 'Bùi Nam',
     progress: [
       {
         id: 'prg_oanh_1',
         stepType: TitleServiceStepType.BAN_GIAO,
         note: null,
         happenedAt: '2026-05-02T11:00:00.000',
-        employeeName: STAFF,
+        employeeName: 'Bùi Nam',
       },
     ],
     moneyEntries: [
@@ -348,7 +350,7 @@ export const mockTitleServices: TitleServiceDetail[] = [
         title: 'Thu đủ',
         amountVnd: 7_000_000,
         happenedAt: '2026-04-12T10:00:00.000',
-        employeeName: STAFF,
+        employeeName: 'Bùi Nam',
       },
     ],
     attachments: [
