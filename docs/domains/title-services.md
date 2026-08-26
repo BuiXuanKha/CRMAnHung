@@ -247,3 +247,52 @@ Placeholder: mã + quay lại. Làm việc hàng ngày = list + panel (máy tín
 ---
 
 *Hành vi list bám §12. Visual §4.3.7. Không copy god-file.*
+
+---
+
+## 13. Đánh giá CRM cũ + lộ trình CRM mới
+
+### 13.1 Đánh giá chức năng cũ
+
+CRM cũ **đủ dùng** cho 1–vài hồ sơ: một hồ sơ / khách, trạng thái, phí thỏa thuận tách khỏi thu-chi thật, nhật ký bước, ghim, mã `SD-YYYY-NNNN`, STAFF chỉ thấy hồ sơ mình tạo.
+
+**Giữ** (không invent lại): ownership `createdBy`; tạo từ khách; không nút Thêm trên list; list + panel (máy tính) / thẻ (mobile) đã chốt §12; thu/chi tách giá; bước gợi ý 9 loại.
+
+**Yếu / nâng cấp bắt buộc trên CRM mới**
+
+| Vấn đề cũ | Làm mới |
+|-----------|---------|
+| File trên disk `/img/title-services/` — cùng cây `img` có thể **public** | **Private R2** (`uploadPrivate` + signed URL). **Không** CDN, **không** URL tĩnh. Chỉ NV có quyền hồ sơ mới lấy link (TTL ngắn) |
+| Xóa cứng + xóa file | STAFF xóa = confirm; file mật **không** public kể cả sau xóa (xóa object private). Không soft-delete trừ khi chủ bảo thêm |
+| `HUY` không ghi `completedAt` → số ngày vẫn chạy | Hủy **và** Hoàn thành đều ghi `completedAt`, dừng đếm ngày |
+| `StepType` / loại giấy tùy ý | Enum chốt + «Khác» (ghi chú). Không nhận chuỗi tự do làm `kind` lưu DB |
+| Prisma stub lệch | Sửa schema **trước** copy. Tiền **BigInt** |
+| Tạo từ khách trên web mới chưa có | Slice riêng sau API list |
+
+**Không làm** trong P3: nối lô/GD vào hồ sơ sổ đỏ; audit log xem file (có thể thêm sau); extension.
+
+### 13.2 Giấy tờ — chốt mật
+
+CCCD, sổ đỏ, scan hồ sơ = **tài liệu mật**.
+
+- Bucket `anhungland-crm-private`. API trả `objectKey` + `GET …/attachments/:id/url` (signed, sau authz).
+- UI **không** nhúng URL CDN / `/img/…`. Xem/tải = bấm → API cấp link có hạn.
+- Object key do server đặt (`title-services/{id}/…`). MIME + size chặn ở API.
+- Copy từ cũ: `StoredPath` → private R2, không public.
+
+### 13.3 Lộ trình (một số = một PR)
+
+Khách + User **đã có**. List mock §12 **đã có**.
+
+| # | Việc | Vì sao thứ tự này |
+|---|------|-------------------|
+| **1** | Chốt docs (mục 13.1–13.2) | Trước schema / API |
+| **2** | Contract Zod: đủ cột cũ + `createdBy` + attachment **không** public URL | UI/API cùng shape |
+| **3** | Sửa Prisma `TitleService*` (bỏ stub; BigInt tiền; FK khách + NV) | Schema trước data |
+| **4** | Nest CRUD hồ sơ: list / get / tạo / sửa / ghim / xóa — **chưa** file | Xương ownership |
+| **5** | Nest tiến độ + thu/chi | Nhật ký / tiền trên hồ sơ sống |
+| **6** | Nest file: upload private R2 + signed URL + xóa object | Giấy tờ mật |
+| **7** | Nối UI `/dich-vu-so-do` → API (`isMockTitleServices` = login giả) | List/panel thật |
+| **8** | Tạo hồ sơ từ khách (`/khach-hang/[id]/dich-vu-so-do`) | Không nút Thêm trên list |
+| **9** | Copy 1 hồ sơ SQLite → Postgres (+ 2 tiến độ, 3 tiền; 0 file) | Data kha `SD-2026-0001` |
+| **10** | (Sau) ADMIN lọc NV trên list; tùy chọn audit xem file | Không chặn 1–9 |
