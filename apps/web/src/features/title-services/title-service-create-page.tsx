@@ -9,6 +9,7 @@ import { getCustomer } from '@/features/customers/api';
 import { CrmBadge } from '@/shared/ui/badge';
 import { createTitleService } from './api';
 import { formatMoneyInput, parseMoneyInput, statusLabel, statusTone, todayInputValue } from './display';
+import { DEFAULT_TITLE_SERVICE_EXTRA, saveTitleServiceListState } from './list-state';
 import '@/features/lodats/lodat-edit.css';
 
 /** Form tạo hồ sơ sổ đỏ từ khách — title-services.md §12.4. */
@@ -52,6 +53,13 @@ export function TitleServiceCreatePage() {
     setSaving(true);
     try {
       const created = await createTitleService(input);
+      saveTitleServiceListState(null, {
+        searchKeyword: '',
+        status: '',
+        employeeId: '',
+        extra: DEFAULT_TITLE_SERVICE_EXTRA,
+        selectedId: created.id,
+      });
       router.push(`/dich-vu-so-do?id=${encodeURIComponent(created.id)}`);
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Không tạo được hồ sơ sổ đỏ.');

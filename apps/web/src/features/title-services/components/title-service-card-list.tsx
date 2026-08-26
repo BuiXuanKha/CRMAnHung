@@ -1,6 +1,7 @@
 'use client';
 
 import { Star } from 'lucide-react';
+import type { Ref } from 'react';
 import type { TitleServiceListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
@@ -22,6 +23,8 @@ type Props = {
   onToggleMenu: (id: string) => void;
   onCloseMenu: () => void;
   onAction: (item: TitleServiceListItem, action: TitleServiceAction) => void;
+  scrollRef?: Ref<HTMLDivElement>;
+  onScroll?: () => void;
 };
 
 export function TitleServiceCardList({
@@ -33,10 +36,18 @@ export function TitleServiceCardList({
   onToggleMenu,
   onCloseMenu,
   onAction,
+  scrollRef,
+  onScroll,
 }: Props) {
   return (
     <div className="sd-cards-shell">
-      <div className="sd-cards" role="list" aria-label="Danh sách hồ sơ sổ đỏ">
+      <div
+        className="sd-cards"
+        role="list"
+        aria-label="Danh sách hồ sơ sổ đỏ"
+        ref={scrollRef}
+        onScroll={onScroll}
+      >
         {items.length === 0 ? (
           <p className="sd-empty-cards">Không có hồ sơ sổ đỏ phù hợp.</p>
         ) : (
@@ -46,6 +57,7 @@ export function TitleServiceCardList({
               <article
                 key={item.id}
                 role="listitem"
+                data-list-row-id={item.id}
                 className={[
                   'sd-card',
                   selectedId === item.id ? 'is-selected' : '',

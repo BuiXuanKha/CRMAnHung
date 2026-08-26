@@ -7,8 +7,10 @@ import {
   TITLE_SERVICE_MONEY_LABELS,
   TitleServiceMoneyKind,
 } from '@crmanhung/shared';
+import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 import {
+  docKindTone,
   formatDateTime,
   formatMoneyVnd,
   statusLabel,
@@ -177,6 +179,12 @@ function DetailBody({
           <ul className="sd-files">
             {detail.attachments.map((att) => (
               <li key={att.id}>
+                <div className="sd-file-head">
+                  <CrmBadge tone={docKindTone(att.kind)}>
+                    {TITLE_SERVICE_DOC_LABELS[att.kind]}
+                  </CrmBadge>
+                  <span>{formatDateTime(att.createdAt)}</span>
+                </div>
                 <button
                   type="button"
                   className="sd-file-open"
@@ -184,9 +192,6 @@ function DetailBody({
                 >
                   {att.fileName}
                 </button>
-                <span className="sd-muted">
-                  {TITLE_SERVICE_DOC_LABELS[att.kind]} · {formatDateTime(att.createdAt)}
-                </span>
               </li>
             ))}
           </ul>

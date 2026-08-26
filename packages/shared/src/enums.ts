@@ -164,7 +164,7 @@ export const TITLE_SERVICE_STEP_LABELS: Record<TitleServiceStepType, string> = {
 
 export const TITLE_SERVICE_DOC_LABELS: Record<TitleServiceDocKind, string> = {
   [TitleServiceDocKind.SO_DO]: 'Sổ đỏ',
-  [TitleServiceDocKind.CAN_CUOC]: 'Căn cước',
+  [TitleServiceDocKind.CAN_CUOC]: 'CCCD',
   [TitleServiceDocKind.KHAC]: 'Giấy tờ khác',
 };
 

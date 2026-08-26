@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
@@ -30,19 +30,20 @@ import { DetailPanel } from './components/detail-panel';
 import { FilterBar } from './components/filter-bar';
 import { TitleServiceCardList } from './components/title-service-card-list';
 import { TitleServiceTable } from './components/title-service-table';
-import { applyExtraFilters, countMobileTitleServiceFilters, type ExtraFilters } from './display';
+import { applyExtraFilters, countMobileTitleServiceFilters } from './display';
+import {
+  DEFAULT_TITLE_SERVICE_EXTRA,
+  getActiveListScrollEl,
+  peekTitleServiceListState,
+  restoreTitleServiceListScroll,
+  saveTitleServiceListState,
+  type TitleServiceListSavedState,
+} from './list-state';
 import './title-services.css';
 import './title-services-table.css';
 import './title-services-panel.css';
 import './title-services-mobile.css';
 import '@/shared/ui/money.css';
-
-const DEFAULT_EXTRA: ExtraFilters = {
-  need: 'all',
-  progress: 'all',
-  money: 'all',
-  docs: 'all',
-};
 
 type AlertState = { title: string; message: string } | null;
 
@@ -53,7 +54,7 @@ export function TitleServiceListPage() {
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('');
   const [employeeId, setEmployeeId] = useState('');
-  const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
+  const [extra, setExtra] = useState(DEFAULT_TITLE_SERVICE_EXTRA);
   const [selectedId, setSelectedId] = useState<string | null>(() => search.get('id'));
   const [menuId, setMenuId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(true);
@@ -66,6 +67,26 @@ export function TitleServiceListPage() {
   const [dialogError, setDialogError] = useState<string | null>(null);
   const [dialogBusy, setDialogBusy] = useState(false);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [restoreReady, setRestoreReady] = useState(false);
+  const [listConcealed, setListConcealed] = useState(false);
+  const restoreSnap = useRef<TitleServiceListSavedState | null>(null);
+  const restoreDone = useRef(false);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const cardsScrollRef = useRef<HTMLDivElement>(null);
+  const persistRef = useRef({
+    searchKeyword: keyword,
+    status,
+    employeeId,
+    extra,
+    selectedId,
+  });
+  persistRef.current = {
+    searchKeyword: keyword,
+    status,
+    employeeId,
+    extra,
+    selectedId,
+  };
 
   const isAdmin = user?.role === UserRole.ADMIN;
   const listQuery = {
@@ -77,6 +98,7 @@ export function TitleServiceListPage() {
   const list = useQuery({
     queryKey: ['title-services', listQuery],
     queryFn: () => listTitleServices(listQuery),
+    enabled: restoreReady,
   });
 
   const staffDir = useQuery({
@@ -97,9 +119,106 @@ export function TitleServiceListPage() {
   const mobileFilterCount = countMobileTitleServiceFilters(status, employeeId);
 
   useEffect(() => {
-    if (selectedId || filtered.length === 0) return;
+    if (filtered.length === 0) return;
+    if (selected) return;
     setSelectedId(filtered[0].id);
-  }, [filtered, selectedId]);
+  }, [filtered, selected]);
+
+  useLayoutEffect(() => {
+    const snap = peekTitleServiceListState();
+    restoreSnap.current = snap;
+    const urlId = search.get('id');
+    if (snap) {
+      setKeyword(snap.searchKeyword);
+      setStatus(snap.status);
+      setEmployeeId(snap.employeeId);
+      setExtra(snap.extra);
+      setSelectedId(urlId || snap.selectedId);
+      setListConcealed(true);
+    } else if (urlId) {
+      setSelectedId(urlId);
+    }
+    setRestoreReady(true);
+    // Restore once on mount; `?id=` from tạo hồ sơ chỉ ghi đè selectedId.
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only peek
+  }, []);
+
+  useEffect(() => {
+    if (!listConcealed) return undefined;
+    const timer = window.setTimeout(() => {
+      restoreDone.current = true;
+      restoreSnap.current = null;
+      setListConcealed(false);
+    }, 4000);
+    return () => window.clearTimeout(timer);
+  }, [listConcealed]);
+
+  function getListScrollEl() {
+    return getActiveListScrollEl(tableScrollRef.current, cardsScrollRef.current);
+  }
+
+  function persistListState(selectedOverride?: string | null) {
+    if (!restoreDone.current) return;
+    saveTitleServiceListState(getListScrollEl(), {
+      ...persistRef.current,
+      selectedId: selectedOverride ?? persistRef.current.selectedId,
+    });
+  }
+
+  function onListScroll() {
+    persistListState();
+  }
+
+  useLayoutEffect(() => {
+    if (!restoreReady || list.isLoading) return;
+    if (restoreDone.current) return;
+    const snap = restoreSnap.current;
+    if (!snap) {
+      restoreDone.current = true;
+      return;
+    }
+    if (filtered.length === 0) {
+      restoreDone.current = true;
+      restoreSnap.current = null;
+      setListConcealed(false);
+      return;
+    }
+    restoreTitleServiceListScroll(getListScrollEl(), snap);
+    restoreDone.current = true;
+    restoreSnap.current = null;
+    setListConcealed(false);
+  }, [restoreReady, filtered.length, list.isLoading]);
+
+  useLayoutEffect(() => {
+    if (!restoreReady || restoreSnap.current || !restoreDone.current) return;
+    const root = getListScrollEl();
+    if (root) root.scrollTop = 0;
+  }, [
+    keyword,
+    status,
+    employeeId,
+    extra.need,
+    extra.progress,
+    extra.money,
+    extra.docs,
+    restoreReady,
+  ]);
+
+  useEffect(() => {
+    if (!restoreReady || listConcealed || !restoreDone.current) return;
+    persistListState();
+  }, [keyword, status, employeeId, extra, selectedId, restoreReady, listConcealed]);
+
+  useEffect(() => {
+    function persist() {
+      persistListState();
+    }
+    window.addEventListener('pagehide', persist);
+    return () => {
+      persist();
+      window.removeEventListener('pagehide', persist);
+    };
+  }, []);
 
   const detail = useQuery({
     queryKey: ['title-service', selectedId],
@@ -130,6 +249,11 @@ export function TitleServiceListPage() {
   function selectRow(id: string) {
     setSelectedId(id);
     setPanelOpen(true);
+    persistRef.current = { ...persistRef.current, selectedId: id };
+    saveTitleServiceListState(getListScrollEl(), {
+      ...persistRef.current,
+      selectedId: id,
+    });
   }
 
   function openDialog(kind: DialogKind, item: TitleServiceListItem) {
@@ -222,42 +346,48 @@ export function TitleServiceListPage() {
             />
           </section>
 
-          {list.isLoading ? <p className="sd-status">Đang tải danh sách…</p> : null}
+          {!restoreReady || list.isLoading ? <p className="sd-status">Đang tải danh sách…</p> : null}
           {list.error ? (
             <p className="sd-status error">{(list.error as Error).message}</p>
           ) : null}
 
-          {!list.isLoading && !list.error ? (
-            <section className="sd-table-shell" aria-label="Danh sách hồ sơ sổ đỏ">
-              <TitleServiceTable
+          <div className={listConcealed ? 'sd-list-restore is-restoring' : 'sd-list-restore'}>
+            {restoreReady && !list.isLoading && !list.error ? (
+              <section className="sd-table-shell" aria-label="Danh sách hồ sơ sổ đỏ">
+                <TitleServiceTable
+                  items={filtered}
+                  total={list.data?.total ?? filtered.length}
+                  selectedId={selectedId}
+                  menuId={menuId}
+                  status={status}
+                  extra={extra}
+                  onStatus={setStatus}
+                  onExtra={setExtra}
+                  onSelect={selectRow}
+                  onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+                  onCloseMenu={() => setMenuId(null)}
+                  onAction={handleAction}
+                  scrollRef={tableScrollRef}
+                  onScroll={onListScroll}
+                />
+              </section>
+            ) : null}
+
+            {restoreReady && !list.isLoading && !list.error ? (
+              <TitleServiceCardList
                 items={filtered}
                 total={list.data?.total ?? filtered.length}
                 selectedId={selectedId}
                 menuId={menuId}
-                status={status}
-                extra={extra}
-                onStatus={setStatus}
-                onExtra={setExtra}
                 onSelect={selectRow}
                 onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
                 onCloseMenu={() => setMenuId(null)}
                 onAction={handleAction}
+                scrollRef={cardsScrollRef}
+                onScroll={onListScroll}
               />
-            </section>
-          ) : null}
-
-          {!list.isLoading && !list.error ? (
-            <TitleServiceCardList
-              items={filtered}
-              total={list.data?.total ?? filtered.length}
-              selectedId={selectedId}
-              menuId={menuId}
-              onSelect={selectRow}
-              onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
-              onCloseMenu={() => setMenuId(null)}
-              onAction={handleAction}
-            />
-          ) : null}
+            ) : null}
+          </div>
         </div>
 
         <DetailPanel
