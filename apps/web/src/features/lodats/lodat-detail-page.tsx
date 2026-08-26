@@ -16,6 +16,7 @@ import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, listSameWardLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { LodatImageGallery } from './components/lodat-image-gallery';
+import { LodatTransactionHistory } from './components/lodat-transaction-history';
 import { SameWardList } from './components/same-ward-list';
 import { SaleToggle } from './components/sale-toggle';
 import { buildLodatCopyText, copyTextToClipboard } from './copy-text';
@@ -338,6 +339,8 @@ export function LodatDetailPage() {
                 <p>{detail.note}</p>
               </section>
             ) : null}
+
+            <LodatTransactionHistory items={detail.transactionHistory} />
 
             <SameWardList
               placement="mobile"

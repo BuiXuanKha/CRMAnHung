@@ -16,6 +16,7 @@ import {
   type LodatListResponse,
   type LodatOwnerHistoryItem,
   type LodatSameWardResponse,
+  type LodatTransactionHistoryItem,
   type ProjectLotOptionsResponse,
   type UpdateLodatImageRotationInput,
   type UpdateLodatInput,
@@ -30,6 +31,7 @@ import {
   type ExtraFilters,
 } from './display';
 import { mockLodats } from './mock-data';
+import { mockTransactions } from '@/features/transactions/mock-data';
 
 let mockStore: LodatListItem[] = structuredClone(mockLodats);
 const mockRotations = new Map<string, number>();
@@ -101,6 +103,19 @@ function toDetail(item: LodatListItem): LodatDetail {
           },
         ]
       : []);
+  const transactionHistory: LodatTransactionHistoryItem[] = mockTransactions
+    .filter((tx) => tx.lodatId === item.id)
+    .map((tx) => ({
+      id: tx.id,
+      code: tx.code,
+      type: tx.type,
+      status: tx.status,
+      salePriceVnd: tx.salePriceVnd ?? null,
+      sellerNames: tx.sellerNames,
+      buyerNames: tx.buyerNames,
+      createdAt: tx.createdAt,
+    }))
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt) || b.id.localeCompare(a.id));
   return {
     ...item,
     note: extras?.note ?? null,
@@ -118,6 +133,7 @@ function toDetail(item: LodatListItem): LodatDetail {
     canEditMap: true,
     canEditImages: !isProject,
     ownerHistory,
+    transactionHistory,
   };
 }
 

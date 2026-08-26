@@ -1,0 +1,79 @@
+.ld-tx-history {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.ld-tx-history-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.ld-tx-history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ld-tx-history-item {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 10px 12px;
+  background: #f8fafc;
+}
+
+.ld-tx-history-item.open {
+  border-color: #fcd34d;
+  background: #fffbeb;
+}
+
+.ld-tx-history-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.ld-tx-history-code {
+  font-weight: 800;
+  color: #2563eb;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+
+.ld-tx-history-code:hover {
+  text-decoration: underline;
+}
+
+.ld-tx-history-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 6px;
+  font-size: 0.82rem;
+  color: #475569;
+  font-weight: 700;
+}
+
+.ld-tx-history-parties {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.ld-tx-history-dates {
+  margin-top: 4px;
+  font-size: 0.78rem;
+  color: #64748b;
+}

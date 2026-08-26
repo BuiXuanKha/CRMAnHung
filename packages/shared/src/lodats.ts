@@ -1,11 +1,16 @@
 /**
- * Lodats contract — list + detail + gallery images + same-ward
+ * Lodats contract — list + detail + gallery + same-ward + transaction history
  *
  * `status` trên list = trạng thái **rao bán** (Mở bán / Tạm dừng),
  * không phải đã bán / đặt cọc (giao dịch P3).
  */
 import { z } from 'zod';
-import { LodatKind, LodatSaleStatus } from './enums.js';
+import {
+  LodatKind,
+  LodatSaleStatus,
+  TransactionStatus,
+  TransactionType,
+} from './enums.js';
 
 export const lodatListingStatusSchema = z.enum([
   LodatSaleStatus.DANG_BAN,
@@ -122,6 +127,22 @@ export const lodatOwnerHistoryItemSchema = z.object({
 
 export type LodatOwnerHistoryItem = z.infer<typeof lodatOwnerHistoryItemSchema>;
 
+/** Tóm tắt GD trên chi tiết lô (lodats.md §12.3.5). */
+export const lodatTransactionHistoryItemSchema = z.object({
+  id: z.string(),
+  code: z.string(),
+  type: z.nativeEnum(TransactionType),
+  status: z.nativeEnum(TransactionStatus),
+  salePriceVnd: z.union([z.number(), z.string()]).nullable().optional(),
+  sellerNames: z.array(z.string()),
+  buyerNames: z.array(z.string()),
+  createdAt: z.string(),
+});
+
+export type LodatTransactionHistoryItem = z.infer<
+  typeof lodatTransactionHistoryItemSchema
+>;
+
 /**
  * Ảnh trên chi tiết / gallery.
  * `source: address` = ảnh dự án chung (không lưu xoay từ NV).
@@ -152,6 +173,7 @@ export const lodatDetailSchema = lodatListItemSchema.extend({
   canEditMap: z.boolean().default(false),
   canEditImages: z.boolean().default(false),
   ownerHistory: z.array(lodatOwnerHistoryItemSchema).default([]),
+  transactionHistory: z.array(lodatTransactionHistoryItemSchema).default([]),
 });
 
 export type LodatDetail = z.infer<typeof lodatDetailSchema>;
