@@ -17,6 +17,7 @@ export default function robots(): MetadataRoute.Robots {
         '/dashboard',
         '/dashbroad',
         '/quan-tri',
+        '/api',
       ],
     },
     sitemap: `${SITE}/sitemap.xml`,

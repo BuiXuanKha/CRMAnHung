@@ -46,7 +46,7 @@ Mỗi route public phải có:
 | Hạng mục | Quy ước |
 |----------|---------|
 | `app/robots.ts` | Cho phép crawl public; chặn `/login`, khu `(crm)` (`/khach-hang`, `/lo-dat`, …) |
-| `app/sitemap.ts` | Liệt kê URL public ổn định; cập nhật khi thêm trang |
+| `app/sitemap.ts` | URL public ổn định + **lô đã đăng** `/san-pham/[slug]` (không nháp) |
 | HTTPS | Chỉ `https://anhungland.com` (www → apex hoặc ngược lại — một hướng, khớp canonical) |
 | `lang` | `<html lang="vi">` (đã có ở root layout) |
 
@@ -98,6 +98,8 @@ Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem 
 - [ ] Cập nhật `sitemap` nếu URL mới
 - [ ] `robots` không chặn nhầm trang cần index
 - [ ] Kiểm tra nhanh trên mobile viewport
+- [ ] Lô: title / excerpt / canonical / OG bìa / JSON-LD trung thực theo §7
+- [ ] Sitemap chỉ lô đã đăng; lô gỡ → 404 `noindex`
 
 ---
 
@@ -108,3 +110,30 @@ Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem 
 3. Tách metadata CRM (có thể `noindex` toàn `(crm)` layout).
 
 CRM layout: khuyến nghị `robots: { index: false, follow: false }` để tránh index trang nội bộ.
+
+---
+
+## 7. Công thức SEO lô đã đăng (`/san-pham/[slug]`)
+
+Áp dụng khi admin **Đăng web**. Khách và Google chỉ thấy field public (title, slug, excerpt, cover, `priceLabel`, vị trí). Không index lô nháp / đã gỡ.
+
+Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `packages/shared`. Field `metaDescription` **tuỳ chọn** — overlay soạn bài có thể điền sau; trống thì dùng excerpt.
+
+| Hạng mục | Công thức | Không làm |
+|----------|-----------|-----------|
+| **URL** | `https://anhungland.com/san-pham/{slug}` — slug ổn định, không dấu, unique | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
+| **Title** | `{title}` + template `\| An Hưng Land`. Một title / lô, khớp H1 | Nhồi «đất nền Đồng Nai giá rẻ mua bán ký gửi…» |
+| **Meta description** | `metaDescription` nếu có, không thì **excerpt** public, cắt ~160 ký tự | Copy giống nhau mọi lô; mô tả CRM / hoa hồng |
+| **Canonical** | Đúng URL tuyệt đối ở trên | Hai URL một lô |
+| **H1** | `title` public — **một** H1 | H1 khác title hoặc nhiều H1 |
+| **Copy** | Excerpt + mô tả **riêng** từng lô (SSR) | Lặp đoạn khuôn + keyword |
+| **OG / Twitter** | title + description như trên; `og:image` = ảnh bìa; thiếu bìa → `/og-default.png`; `summary_large_image` | Ảnh PII / ảnh nội bộ CRM |
+| **JSON-LD** | `RealEstateListing` + `BreadcrumbList`. `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM |
+| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → lô; block sản phẩm khác; list `/san-pham` | Orphan URL |
+| **Sitemap** | Chỉ lô `isPublished`. Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán |
+| **robots** | Cho phép `/san-pham`; chặn `/login` + CRM | `Disallow: /san-pham` |
+
+**Giá trên SERP:** cùng `priceLabel` khách thấy. Chính sách làm mờ (3,2 tỷ → `3 tỷ xxx`) thì meta/OG/JSON-LD cũng mờ — không lộ số CRM.
+
+**Danh sách `/san-pham`:** title/H1 `Nhà đất đang bán`; canonical `/san-pham`; OG + `ItemList` các URL đã đăng.
+

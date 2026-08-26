@@ -1,16 +1,29 @@
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
 import { ANHUNG_BRAND } from './brand';
-import { getProductBySlug, getRelatedProducts } from './mock-data';
 import { ProductGallery, ProductShareButton } from './product-detail-client';
+import type { PublicListingView } from './published-listings';
+import { getProductBySlug } from './mock-data';
 import './public-home.css';
 import './product-detail.css';
 
-export function ProductDetailView({ slug }: { slug: string }) {
-  const product = getProductBySlug(slug);
-  if (!product) notFound();
-
-  const related = getRelatedProducts(product.slug);
+export function ProductDetailView({
+  listing,
+  related,
+}: {
+  listing: PublicListingView;
+  related: PublicListingView[];
+}) {
+  const product = getProductBySlug(listing.slug);
+  const images = product?.gallery?.length
+    ? product.gallery
+    : listing.coverImageUrl
+      ? [listing.coverImageUrl]
+      : [];
+  const price = listing.priceLabel ?? 'Liên hệ';
+  const area = listing.areaLabel;
+  const body = product?.description?.trim() || listing.excerpt;
+  const showBodySection = body !== listing.excerpt.trim();
+  const highlights = product?.highlights ?? [];
 
   return (
     <div className="ph pd">
@@ -43,64 +56,82 @@ export function ProductDetailView({ slug }: { slug: string }) {
         <nav className="pd-breadcrumb" aria-label="Đường dẫn">
           <Link href="/">Trang chủ</Link>
           <span aria-hidden>/</span>
-          <Link href="/san-pham">Sản phẩm</Link>
+          <Link href="/san-pham">Nhà đất đang bán</Link>
           <span aria-hidden>/</span>
-          <span>{product.title}</span>
+          <span>{listing.title}</span>
         </nav>
 
         <div className="pd-layout">
           <div className="pd-primary">
-            <ProductGallery title={product.title} images={product.gallery} />
+            {images.length > 0 ? (
+              <ProductGallery title={listing.title} images={images} />
+            ) : null}
 
-            <p className="pd-posted">{product.postedLabel}</p>
-            <h1>{product.title}</h1>
+            {product?.postedLabel ? <p className="pd-posted">{product.postedLabel}</p> : null}
+            <h1>{listing.title}</h1>
             <p className="pd-price">
-              {product.priceLabel}
+              {price}
               <span>
-                · {product.areaLabel} · {product.location}
+                {area ? ` · ${area}` : ''}
+                {listing.location ? ` · ${listing.location}` : ''}
               </span>
             </p>
+            <p className="pd-lead">{listing.excerpt}</p>
 
             <dl className="pd-specs">
               <div>
                 <dt>Loại</dt>
-                <dd>{product.typeLabel}</dd>
+                <dd>{listing.kindLabel}</dd>
               </div>
-              <div>
-                <dt>Diện tích</dt>
-                <dd>{product.areaLabel}</dd>
-              </div>
-              <div>
-                <dt>Mặt tiền</dt>
-                <dd>{product.frontageLabel}</dd>
-              </div>
-              <div>
-                <dt>Hướng</dt>
-                <dd>{product.directionLabel}</dd>
-              </div>
-              <div>
-                <dt>Pháp lý</dt>
-                <dd>{product.legalLabel}</dd>
-              </div>
-              <div>
-                <dt>Vị trí</dt>
-                <dd>{product.location}</dd>
-              </div>
+              {area ? (
+                <div>
+                  <dt>Diện tích</dt>
+                  <dd>{area}</dd>
+                </div>
+              ) : null}
+              {listing.frontageLabel ? (
+                <div>
+                  <dt>Mặt tiền</dt>
+                  <dd>{listing.frontageLabel}</dd>
+                </div>
+              ) : null}
+              {listing.directionLabel ? (
+                <div>
+                  <dt>Hướng</dt>
+                  <dd>{listing.directionLabel}</dd>
+                </div>
+              ) : null}
+              {product?.legalLabel ? (
+                <div>
+                  <dt>Pháp lý</dt>
+                  <dd>{product.legalLabel}</dd>
+                </div>
+              ) : null}
+              {listing.location ? (
+                <div>
+                  <dt>Vị trí</dt>
+                  <dd>{listing.location}</dd>
+                </div>
+              ) : null}
             </dl>
 
-            <section className="pd-section" aria-labelledby="pd-desc-title">
-              <h2 id="pd-desc-title">Mô tả</h2>
-              <p>{product.description}</p>
-            </section>
+            {showBodySection ? (
+              <section className="pd-section" aria-labelledby="pd-desc-title">
+                <h2 id="pd-desc-title">Mô tả</h2>
+                <p>{body}</p>
+              </section>
+            ) : null}
 
-            <section className="pd-section" aria-labelledby="pd-hl-title">
-              <h2 id="pd-hl-title">Điểm nổi bật</h2>
-              <ul className="pd-highlights">
-                {product.highlights.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
+            {highlights.length > 0 ? (
+              <section className="pd-section" aria-labelledby="pd-hl-title">
+                <h2 id="pd-hl-title">Điểm nổi bật</h2>
+                <ul className="pd-highlights">
+                  {highlights.map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              </section>
+            ) : null}
           </div>
 
           <aside className="pd-aside" aria-label="Liên hệ tư vấn">
@@ -115,7 +146,11 @@ export function ProductDetailView({ slug }: { slug: string }) {
             >
               Zalo / máy phụ {ANHUNG_BRAND.hotlineAltDisplay}
             </a>
-            <ProductShareButton product={product} className="ph-btn ph-btn-ghost pd-aside-cta" />
+            <ProductShareButton
+              title={listing.title}
+              text={`${listing.title} — ${price}${area ? ` · ${area}` : ''}`}
+              className="ph-btn ph-btn-ghost pd-aside-cta"
+            />
             <p className="pd-aside-addr">{ANHUNG_BRAND.address}</p>
             <p className="pd-aside-note">{ANHUNG_BRAND.services}</p>
           </aside>
@@ -131,21 +166,29 @@ export function ProductDetailView({ slug }: { slug: string }) {
             </div>
             <div className="ph-product-grid pd-related-grid">
               {related.map((p) => (
-                <article key={p.id} className="ph-product">
+                <article key={p.slug} className="ph-product">
                   <Link href={`/san-pham/${p.slug}`} className="ph-product-media">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={p.imageUrl} alt={p.title} loading="lazy" />
+                    {p.coverImageUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={p.coverImageUrl} alt={p.title} loading="lazy" />
+                    ) : (
+                      <span className="ph-product-media-empty">Chưa có ảnh</span>
+                    )}
                   </Link>
                   <div className="ph-product-body">
                     <Link href={`/san-pham/${p.slug}`}>
                       <h3>{p.title}</h3>
                     </Link>
                     <p className="ph-product-meta">
-                      <span>{p.priceLabel}</span>
-                      <span aria-hidden>·</span>
-                      <span>{p.areaLabel}</span>
+                      <span>{p.priceLabel ?? 'Liên hệ'}</span>
+                      {p.areaLabel ? (
+                        <>
+                          <span aria-hidden>·</span>
+                          <span>{p.areaLabel}</span>
+                        </>
+                      ) : null}
                     </p>
-                    <p className="ph-product-loc">{p.location}</p>
+                    {p.location ? <p className="ph-product-loc">{p.location}</p> : null}
                   </div>
                 </article>
               ))}
@@ -158,7 +201,11 @@ export function ProductDetailView({ slug }: { slug: string }) {
         <a className="ph-btn ph-btn-primary" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
           Gọi {ANHUNG_BRAND.hotlineDisplay}
         </a>
-        <ProductShareButton product={product} className="ph-btn ph-btn-ghost" />
+        <ProductShareButton
+          title={listing.title}
+          text={`${listing.title} — ${price}${area ? ` · ${area}` : ''}`}
+          className="ph-btn ph-btn-ghost"
+        />
       </div>
     </div>
   );

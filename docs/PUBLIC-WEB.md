@@ -74,6 +74,7 @@ Danh sách sản phẩm: ngay dưới fold hoặc section chính tiếp theo —
 ## 5. Sản phẩm & chia sẻ MXH
 
 - Mỗi sản phẩm có URL ổn định (`/san-pham/[slug]`).
+- **SEO lô:** công thức title / excerpt / canonical / OG bìa / sitemap chỉ lô đã đăng — [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) §7.
 - Metadata + Open Graph đủ để share Facebook / Zalo / Messenger hiện ảnh + title + mô tả.
 - Trang chi tiết: ảnh, giá (nếu công bố), diện tích, vị trí, mô tả — đủ để khách quyết định xem tiếp / liên hệ.
 - Nút chia sẻ (copy link / share) trên FE; **không** cần BE để mock UI.

@@ -1,4 +1,6 @@
 import { listPublishedPublicLots } from '@/features/public-content/api';
+import { JsonLd } from '@/features/public/json-ld';
+import { organizationJsonLd, websiteJsonLd } from '@/features/public/listing-seo';
 import { PublicHome } from '@/features/public/public-home';
 
 /**
@@ -10,5 +12,11 @@ export const dynamic = 'force-dynamic';
 
 export default async function PublicHomePage() {
   const lots = await listPublishedPublicLots();
-  return <PublicHome initialLots={lots} />;
+  return (
+    <>
+      <JsonLd data={organizationJsonLd()} />
+      <JsonLd data={websiteJsonLd()} />
+      <PublicHome initialLots={lots} />
+    </>
+  );
 }
