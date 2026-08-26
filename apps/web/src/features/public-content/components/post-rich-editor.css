@@ -1,0 +1,100 @@
+/* TipTap compose editor — /dashboard bài viết */
+
+.pw-editor {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.pw-editor.is-disabled {
+  opacity: 0.7;
+}
+
+.pw-editor-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.pw-editor-toolbar button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: #334155;
+  cursor: pointer;
+}
+
+.pw-editor-toolbar button:hover:not(:disabled) {
+  background: #e2e8f0;
+}
+
+.pw-editor-toolbar button.is-active {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+.pw-editor-toolbar button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pw-editor .tiptap,
+.pw-editor-prose {
+  min-height: 220px;
+  max-height: min(42vh, 360px);
+  overflow: auto;
+  padding: 12px 14px;
+  outline: none;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: #0f172a;
+}
+
+.pw-editor .tiptap p {
+  margin: 0 0 0.75em;
+}
+
+.pw-editor .tiptap h2 {
+  margin: 0.9em 0 0.45em;
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.pw-editor .tiptap h3 {
+  margin: 0.8em 0 0.4em;
+  font-size: 1.02rem;
+  font-weight: 700;
+}
+
+.pw-editor .tiptap ul,
+.pw-editor .tiptap ol {
+  margin: 0 0 0.75em;
+  padding-left: 1.25em;
+}
+
+.pw-editor .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: #94a3b8;
+}
+
+.pw-editor-img,
+.pw-editor .tiptap img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0.75em 0;
+}

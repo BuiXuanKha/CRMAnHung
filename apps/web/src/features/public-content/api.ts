@@ -250,6 +250,9 @@ export async function createPublicPost(
     title: parsed.data.title,
     category: parsed.data.category,
     status: parsed.data.status,
+    coverImageUrl: parsed.data.coverImageUrl ?? null,
+    bodyHtml: parsed.data.bodyHtml ?? '',
+    excerpt: parsed.data.excerpt,
   };
   posts = [row, ...posts];
   return { ...row };

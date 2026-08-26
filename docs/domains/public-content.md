@@ -68,6 +68,8 @@ Cùng entity `PublicPost`:
 | `category` | `du-an` · `kien-thuc` · `lien-he` · `chinh-sach` · `tin-tuc` · `kinh-nghiem` |
 | `status` | `DRAFT` · `PUBLISHED` |
 | `slug` | URL ổn định, unique |
+| `coverImageUrl` | Ảnh bìa / thumbnail (CDN) |
+| `bodyHtml` | Nội dung rich text + ảnh đan xen |
 
 ### 3.3 Cấm lộ trên public
 
@@ -415,16 +417,31 @@ Cùng 14.1. Thẻ: hai hangtag + tiêu đề. Thanh tìm: ô tìm + **Bộ lọc
 
 Nhớ tìm + lọc + dòng chọn + cuộn: `sessionStorage` `crmanhung:public-post-list-state`.
 
-### 14.3 Modal Soạn bài viết
+### 14.3 Modal Soạn bài viết (trình soạn thảo)
 
-Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` §4.7 (rộng ~520px). Không `window.confirm`. Không copy kiểu “mock / slice sau” trên UI.
+Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm-dialog--wide`, ~840px). Không `window.confirm`. Không copy kiểu “mock / slice sau” trên UI.
 
-1. Dòng phụ: bài hiện trên web khách theo chuyên mục; nháp chỉ admin; Xuất bản = khách đọc được. Nội dung chi tiết bổ sung sau.
-2. **Tiêu đề** — bắt buộc; đếm `n/160`; placeholder ví dụ thật.
-3. **Đường dẫn dự kiến** — `/{category}/{slug}` (slug từ tiêu đề); chỉ đọc.
-4. **Chuyên mục** — chip chọn (radio), 6 mục; không dropdown trần.
-5. **Huỷ** · **Lưu nháp** (secondary) · **Xuất bản** (primary).
-6. Lỗi validate / API: `crm-form-error` dưới form.
+**Trường**
+
+| Trường | Bắt buộc | Ghi chú |
+|--------|----------|---------|
+| Tiêu đề | Có | Max 160; đếm `n/160` |
+| Chuyên mục | Có | Chip chọn (6 mục) |
+| Ảnh bìa (thumbnail) | **Xuất bản** | ~16:9; upload R2 public CDN. Nháp được trống |
+| Nội dung | **Xuất bản** | Rich text (TipTap): đậm/nghiêng/H2/H3/list + **ảnh đan xen** |
+| Đường dẫn dự kiến | Chỉ đọc | `/{category}/{slug}` từ tiêu đề |
+
+**Hành vi**
+
+1. Dòng phụ: bài hiện trên web khách theo chuyên mục; nháp chỉ admin; Xuất bản = khách đọc được.
+2. Ảnh bìa: **Chọn ảnh** · **Gỡ ảnh** + preview.
+3. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload → chèn vào vị trí con trỏ).
+4. Ảnh bìa + ảnh trong bài = bucket **public** R2. Mock: URL tạm / stub.
+5. **Huỷ** · **Lưu nháp** (được thiếu ảnh/nội dung) · **Xuất bản** (thiếu ảnh bìa hoặc nội dung trống → lỗi form).
+6. Lỗi validate / API: `crm-form-error`.
+
+Slice API Postgres + upload R2 thật = sau khi mock UI ổn.
+
 ---
 
 ## 15. SEO lô trên trang khách

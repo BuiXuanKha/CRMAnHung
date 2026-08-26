@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { PenLine } from 'lucide-react';
+import { ImagePlus, PenLine, Trash2 } from 'lucide-react';
 import {
   PUBLIC_POST_CATEGORY_LABELS,
   PublicPostCategory,
@@ -10,7 +10,10 @@ import {
   type CreatePublicPostInput,
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
+import { Icon } from '@/shared/ui/icon';
 import { toPublicSlug } from '../display';
+import { uploadPublicPostImage } from '../upload-image';
+import { PostRichEditor } from './post-rich-editor';
 import '@/shared/ui/dialog.css';
 
 type Props = {
@@ -27,22 +30,37 @@ const TITLE_MAX = 160;
 export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Props) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<PublicPostCategory>(PublicPostCategory.TIN_TUC);
+  const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
+  const [bodyHtml, setBodyHtml] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
+  const [coverBusy, setCoverBusy] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
     setTitle('');
     setCategory(PublicPostCategory.TIN_TUC);
+    setCoverImageUrl(null);
+    setBodyHtml('');
     setParseError(null);
+    setUploadError(null);
     const t = window.setTimeout(() => titleRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
   }, [open]);
 
   const slugPreview = toPublicSlug(title.trim() || 'tieu-de-bai-viet');
+  const formBusy = busy || coverBusy;
 
   function submit(status: PublicPostStatus) {
-    const parsed = createPublicPostInputSchema.safeParse({ title, category, status });
+    const parsed = createPublicPostInputSchema.safeParse({
+      title,
+      category,
+      status,
+      coverImageUrl,
+      bodyHtml,
+    });
     if (!parsed.success) {
       setParseError(parsed.error.issues[0]?.message ?? 'Dữ liệu không hợp lệ.');
       titleRef.current?.focus();
@@ -52,14 +70,28 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
     void onSubmit(parsed.data);
   }
 
+  async function onPickCover(file: File | undefined) {
+    if (!file) return;
+    setUploadError(null);
+    setCoverBusy(true);
+    try {
+      const url = await uploadPublicPostImage(file);
+      setCoverImageUrl(url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Không tải được ảnh bìa.');
+    } finally {
+      setCoverBusy(false);
+    }
+  }
+
   return (
     <CrmDialog
       open={open}
       title="Soạn bài viết"
       icon={PenLine}
       onClose={onClose}
-      busy={busy}
-      className="crm-dialog--compose"
+      busy={formBusy}
+      className="crm-dialog--wide crm-dialog--compose"
     >
       <form
         onSubmit={(e) => {
@@ -68,16 +100,14 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
         }}
       >
         <p className="crm-form-hint">
-          Bài sẽ hiện trên anhungland.com theo chuyên mục. Lưu nháp chỉ admin thấy; Xuất bản thì khách
-          đọc được ngay. Nội dung chi tiết bổ sung ở bước sau.
+          Bài hiện trên anhungland.com theo chuyên mục. Lưu nháp chỉ admin thấy; Xuất bản cần ảnh bìa
+          và nội dung — khách đọc được ngay.
         </p>
 
         <label>
           <span className="crm-field-head">
             <span>
-              Tiêu đề <span className="crm-req" aria-hidden>
-                *
-              </span>
+              Tiêu đề <span className="crm-req" aria-hidden>*</span>
             </span>
             <span className="crm-field-meta" aria-live="polite">
               {title.length}/{TITLE_MAX}
@@ -89,7 +119,7 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
             onChange={(e) => setTitle(e.target.value)}
             placeholder="VD: Tiến độ hạ tầng Long Thành quý 3"
             maxLength={TITLE_MAX}
-            disabled={busy}
+            disabled={formBusy}
             required
             autoComplete="off"
           />
@@ -100,7 +130,7 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
           <code className="crm-slug-preview__path">/{category}/{slugPreview}</code>
         </p>
 
-        <fieldset className="pw-compose-categories" disabled={busy}>
+        <fieldset className="pw-compose-categories" disabled={formBusy}>
           <legend>
             Chuyên mục <span className="crm-req" aria-hidden>*</span>
           </legend>
@@ -118,7 +148,7 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
                     value={value}
                     checked={active}
                     onChange={() => setCategory(value)}
-                    disabled={busy}
+                    disabled={formBusy}
                   />
                   {PUBLIC_POST_CATEGORY_LABELS[value]}
                 </label>
@@ -127,19 +157,80 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
           </div>
         </fieldset>
 
-        {parseError || error ? <p className="crm-form-error">{parseError || error}</p> : null}
+        <div className="pw-compose-cover">
+          <div className="crm-field-head">
+            <span>
+              Ảnh bìa <span className="crm-field-meta">(bắt buộc khi xuất bản)</span>
+            </span>
+          </div>
+          <div className="pw-compose-cover-row">
+            <div className="pw-compose-cover-preview">
+              {coverImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={coverImageUrl} alt="" />
+              ) : (
+                <span className="pw-compose-cover-empty">Chưa chọn ảnh</span>
+              )}
+            </div>
+            <div className="pw-compose-cover-actions">
+              <button
+                type="button"
+                className="crm-btn"
+                disabled={formBusy}
+                onClick={() => coverInputRef.current?.click()}
+              >
+                <Icon icon={ImagePlus} size="sm" /> Chọn ảnh
+              </button>
+              {coverImageUrl ? (
+                <button
+                  type="button"
+                  className="crm-btn"
+                  disabled={formBusy}
+                  onClick={() => setCoverImageUrl(null)}
+                >
+                  <Icon icon={Trash2} size="sm" /> Gỡ ảnh
+                </button>
+              ) : null}
+              <p className="crm-form-hint">JPG / PNG / WEBP · tối đa 5 MB · tỷ lệ ~16:9</p>
+            </div>
+          </div>
+          <input
+            ref={coverInputRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            hidden
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              e.target.value = '';
+              void onPickCover(file);
+            }}
+          />
+        </div>
+
+        <div className="pw-compose-body-field">
+          <span className="crm-field-head">
+            <span>
+              Nội dung <span className="crm-field-meta">(bắt buộc khi xuất bản)</span>
+            </span>
+          </span>
+          <PostRichEditor value={bodyHtml} disabled={formBusy} onChange={setBodyHtml} />
+        </div>
+
+        {parseError || error || uploadError ? (
+          <p className="crm-form-error">{parseError || error || uploadError}</p>
+        ) : null}
 
         <div className="crm-dialog-actions">
-          <button type="button" className="crm-btn" disabled={busy} onClick={onClose}>
+          <button type="button" className="crm-btn" disabled={formBusy} onClick={onClose}>
             Huỷ
           </button>
-          <button type="submit" className="crm-btn" disabled={busy}>
+          <button type="submit" className="crm-btn" disabled={formBusy}>
             {busy ? 'Đang lưu…' : 'Lưu nháp'}
           </button>
           <button
             type="button"
             className="crm-btn primary"
-            disabled={busy}
+            disabled={formBusy}
             onClick={() => submit(PublicPostStatus.PUBLISHED)}
           >
             Xuất bản

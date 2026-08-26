@@ -153,6 +153,12 @@ export const publicWebPostRowSchema = z.object({
   title: z.string(),
   category: z.nativeEnum(PublicPostCategory),
   status: z.nativeEnum(PublicPostStatus),
+  /** Ảnh bìa / thumbnail trên list & OG */
+  coverImageUrl: z.string().nullable().optional(),
+  /** HTML nội dung bài (TipTap). Ảnh trong bài = URL CDN. */
+  bodyHtml: z.string().optional(),
+  /** Đoạn tóm tắt ngắn — teaser / SEO fallback */
+  excerpt: z.string().optional(),
 });
 
 export type PublicWebPostRow = z.infer<typeof publicWebPostRowSchema>;
@@ -180,14 +186,47 @@ export const setPublicPostStatusSchema = z.object({
 
 export type SetPublicPostStatusInput = z.infer<typeof setPublicPostStatusSchema>;
 
-export const createPublicPostInputSchema = z.object({
-  title: z.string().trim().min(1, 'Nhập tiêu đề bài viết'),
-  category: z.nativeEnum(PublicPostCategory),
-  status: z.nativeEnum(PublicPostStatus),
-});
+function stripHtmlText(html: string): string {
+  return html
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/gi, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+export const createPublicPostInputSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Nhập tiêu đề bài viết').max(160, 'Tiêu đề tối đa 160 ký tự'),
+    category: z.nativeEnum(PublicPostCategory),
+    status: z.nativeEnum(PublicPostStatus),
+    coverImageUrl: z.string().trim().nullable().optional(),
+    bodyHtml: z.string().optional(),
+    excerpt: z.string().trim().max(320).optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.status !== PublicPostStatus.PUBLISHED) return;
+    if (!data.coverImageUrl?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Chọn ảnh bìa trước khi xuất bản',
+        path: ['coverImageUrl'],
+      });
+    }
+    const text = stripHtmlText(data.bodyHtml ?? '');
+    if (!text) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Nhập nội dung bài trước khi xuất bản',
+        path: ['bodyHtml'],
+      });
+    }
+  });
 
 export type CreatePublicPostInput = z.infer<typeof createPublicPostInputSchema>;
 
+export { stripHtmlText as stripPublicPostHtmlText };
 export const updatePublicListingDraftSchema = z
   .object({
     title: z.string().trim().min(1, 'Nhập tiêu đề bài đăng').max(160, 'Tiêu đề tối đa 160 ký tự'),

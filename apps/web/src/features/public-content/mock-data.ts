@@ -77,6 +77,9 @@ export const MOCK_PUBLIC_WEB_POSTS: PublicWebPostRow[] = [
     title: 'Bảng giá KĐT Tây Nam Sách tháng 8',
     category: PublicPostCategory.TIN_TUC,
     status: PublicPostStatus.PUBLISHED,
+    coverImageUrl: '/mock/lodats/p1.svg',
+    bodyHtml:
+      '<p>Cập nhật bảng giá tháng 8 tại KĐT Tây Nam Sách.</p><p>Liên hệ hotline công ty để nhận bảng chi tiết.</p>',
   },
   {
     id: 'pp2',
@@ -84,6 +87,8 @@ export const MOCK_PUBLIC_WEB_POSTS: PublicWebPostRow[] = [
     title: 'Tiến độ hạ tầng Long Thành quý 3',
     category: PublicPostCategory.DU_AN,
     status: PublicPostStatus.PUBLISHED,
+    coverImageUrl: '/mock/lodats/p2.svg',
+    bodyHtml: '<p>Tiến độ đường giao thông và hạ tầng kỹ thuật quý 3.</p>',
   },
   {
     id: 'pp3',
@@ -91,6 +96,8 @@ export const MOCK_PUBLIC_WEB_POSTS: PublicWebPostRow[] = [
     title: 'Thủ tục sang tên sổ hồng cần giấy tờ gì',
     category: PublicPostCategory.KIEN_THUC,
     status: PublicPostStatus.PUBLISHED,
+    coverImageUrl: '/mock/lodats/p3.svg',
+    bodyHtml: '<p>Danh mục giấy tờ cơ bản khi sang tên sổ hồng.</p>',
   },
   {
     id: 'pp4',
@@ -98,6 +105,8 @@ export const MOCK_PUBLIC_WEB_POSTS: PublicWebPostRow[] = [
     title: 'Kinh nghiệm xem đất cuối tuần',
     category: PublicPostCategory.KINH_NGHIEM,
     status: PublicPostStatus.DRAFT,
+    coverImageUrl: null,
+    bodyHtml: '<p>Nháp: checklist khi đi xem đất cuối tuần.</p>',
   },
   {
     id: 'pp5',
@@ -105,6 +114,8 @@ export const MOCK_PUBLIC_WEB_POSTS: PublicWebPostRow[] = [
     title: 'Nháp: mở bán đợt 2 — chưa xuất bản',
     category: PublicPostCategory.TIN_TUC,
     status: PublicPostStatus.DRAFT,
+    coverImageUrl: null,
+    bodyHtml: '',
   },
   {
     id: 'pp6',
@@ -112,6 +123,8 @@ export const MOCK_PUBLIC_WEB_POSTS: PublicWebPostRow[] = [
     title: 'Liên hệ An Hưng Land',
     category: PublicPostCategory.LIEN_HE,
     status: PublicPostStatus.PUBLISHED,
+    coverImageUrl: '/mock/lodats/p4.svg',
+    bodyHtml: '<p>Hotline 0977.656.280 · BT6.8 KĐT Tây Nam Sách.</p>',
   },
   {
     id: 'pp7',
@@ -119,6 +132,8 @@ export const MOCK_PUBLIC_WEB_POSTS: PublicWebPostRow[] = [
     title: 'Chính sách bảo mật',
     category: PublicPostCategory.CHINH_SACH,
     status: PublicPostStatus.PUBLISHED,
+    coverImageUrl: '/mock/lodats/p1.svg',
+    bodyHtml: '<p>Cam kết bảo mật thông tin khách hàng trên website.</p>',
   },
 ];
 
