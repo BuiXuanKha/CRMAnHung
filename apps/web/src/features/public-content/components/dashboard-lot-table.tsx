@@ -1,4 +1,5 @@
 import { ImageOff } from 'lucide-react';
+import type { Ref } from 'react';
 import type { PublicWebLotRow } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
@@ -9,12 +10,21 @@ type Props = {
   total: number;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  heading?: string | null;
+  scrollRef?: Ref<HTMLDivElement>;
 };
 
-export function DashboardLotTable({ items, total, selectedId, onSelect }: Props) {
+export function DashboardLotTable({
+  items,
+  total,
+  selectedId,
+  onSelect,
+  heading = 'Lô trên web',
+  scrollRef,
+}: Props) {
   return (
-    <section className="pw-table-shell" aria-label="Lô trên web">
-      <h2 className="pw-panel-title">Lô trên web</h2>
+    <section className="pw-table-shell" aria-label={heading ?? 'Lô trên web'}>
+      {heading ? <h2 className="pw-panel-title">{heading}</h2> : null}
       <div className="pw-table-wrap pw-table-wrap--lot">
         <div className="pw-table-head">
           <div className="pw-grid-row pw-grid-header" role="row">
@@ -24,7 +34,7 @@ export function DashboardLotTable({ items, total, selectedId, onSelect }: Props)
             <div>Web</div>
           </div>
         </div>
-        <div className="pw-table-scroll">
+        <div className="pw-table-scroll" ref={scrollRef}>
           {items.length === 0 ? (
             <p className="pw-empty">Không có lô trên web.</p>
           ) : (
@@ -34,6 +44,7 @@ export function DashboardLotTable({ items, total, selectedId, onSelect }: Props)
                 <div
                   key={row.id}
                   role="row"
+                  data-list-row-id={row.id}
                   className={
                     selectedId === row.id ? 'pw-grid-row is-selected' : 'pw-grid-row'
                   }

@@ -65,11 +65,9 @@ Cùng entity `PublicPost`:
 
 | Field ý niệm | Nghĩa |
 |--------------|--------|
-| `category` | `tin-tuc` · `du-an` · `kien-thuc` · `kinh-nghiem` |
-| `status` | `DRAFT` (chỉ admin) · `PUBLISHED` (khách thấy) |
+| `category` | `du-an` · `kien-thuc` · `lien-he` · `chinh-sach` · `tin-tuc` · `kinh-nghiem` |
+| `status` | `DRAFT` · `PUBLISHED` |
 | `slug` | URL ổn định, unique |
-
-Tin tức = chuyên mục `tin-tuc`. Bài đăng = ba chuyên mục còn lại. **Một** màn soạn, lọc theo chuyên mục.
 
 ### 3.3 Cấm lộ trên public
 
@@ -110,15 +108,16 @@ PublicPost                        (category, slug, status, cover, body) — khô
 
 | Màn | Route | Việc |
 |-----|--------|------|
-| **Dashboard admin** | `/dashboard` | Tổng quan đăng web. §12 |
-| Trang chủ khách | `/` | Mock sẵn — sau nối data đã public |
-| List / chi tiết lô khách | `/san-pham` | Mock sẵn |
-| List bài khách | `/du-an` … | Stub; chi tiết `[slug]` chưa |
-| Admin — lô / bài | menu trong Dashboard | **Chưa** — chủ sẽ chốt mục |
+| **Dashboard** | `/dashboard` | Tổng quan + menu trái. §12 |
+| **Lô đất public mở bán** | `/dashboard/lo-dat` | List lô đăng web. §13 |
+| **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). §14 |
+| Trang chủ khách | `/` | Mock sẵn |
 
-**Tạm thời không** thêm hành vi/quyền admin trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do` — bốn trang đó giữ như STAFF.
+**Tạm thời không** thêm hành vi/quyền admin trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
-Menu header: bốn mục CRM cho mọi NV. ADMIN thêm **Dashboard** (`/dashboard`). STAFF vào URL → `/khach-hang`.
+Menu **trong** Dashboard (không gắn lên 4 trang CRM): Tổng quan · Lô đất public mở bán · Bài viết.
+
+Header CRM: bốn mục NV. ADMIN thêm **Dashboard**. STAFF vào URL → `/khach-hang`.
 
 ---
 
@@ -166,7 +165,7 @@ Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồ
 3. Tạm dừng / Đã cọc / Đã bán → gỡ web (chưa mock hành vi; chỉ số đếm).
 4. Giá từng lô: hiện số hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public (chưa mock conflict UI).
-6. Tin + bài = một CMS, bốn chuyên mục.
+6. Bài viết = một list; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
 7. Liên hệ khách: hotline + Zalo công ty; chưa form SĐT.
 8. Mô tả public = ô riêng (form làm slice sau).
 
@@ -176,7 +175,17 @@ Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồ
 
 Thứ tự: **12.1 máy tính** → **12.2 mobile**. Không trộn PC/mobile trong một mục.
 
-Không H1 lặp tên menu trên thanh tìm — **có** H1 trên trang dashboard (hub, không phải list §4.3.4).
+Không H1 lặp tên menu trên thanh tìm — **có** H1 trên từng trang dashboard.
+
+### 12.0 Menu trong Dashboard (mọi màn `/dashboard/*`)
+
+**Máy tính:** cột trái, 3 mục. Active chữ xanh `#2563eb` **700** + nền `#eff6ff`.
+
+1. **Tổng quan** → `/dashboard`
+2. **Lô đất public mở bán** → `/dashboard/lo-dat`
+3. **Bài viết** → `/dashboard/bai-viet`
+
+**Mobile:** cùng 3 mục, cuộn ngang trên đầu nội dung.
 
 ---
 
@@ -195,8 +204,8 @@ Không H1 lặp tên menu trên thanh tìm — **có** H1 trên trang dashboard 
 1. **H1** `Dashboard`
 2. Dòng phụ: `Khách trên anhungland.com chỉ thấy lô và bài đã đăng.`
 3. **Xem trang khách** — viền; mở `/` tab mới
-4. **Đăng lô** — primary. Slice này: `CrmAlert` «Danh sách đăng lô làm sau.»
-5. **Soạn bài** — viền. Slice này: `CrmAlert` «Soạn bài làm sau.»
+4. **Lô đất public** — primary → `/dashboard/lo-dat`
+5. **Bài viết** — viền → `/dashboard/bai-viet`
 
 #### 12.1.2 Bốn thẻ đếm
 
@@ -257,7 +266,7 @@ Trống: `Không có bài viết.`
 
 #### 12.2.1 Thanh đầu — cùng 12.1.1
 
-Nút đủ vùng chạm. `Xem trang khách` full ngang. Hai nút Đăng lô / Soạn bài một hàng.
+Nút đủ vùng chạm. `Xem trang khách` full ngang. Hai nút Lô đất public / Bài viết một hàng.
 
 #### 12.2.2 Thẻ đếm — cùng 12.1.2
 
@@ -280,4 +289,58 @@ Footer đếm dưới list lô.
 3. Bấm thẻ → cùng alert 12.1.4
 
 Footer đếm dưới list bài.
+
+---
+
+## 13. List `/dashboard/lo-dat`
+
+### 13.1 Máy tính
+
+```
+┌ H1 Lô đất public mở bán                                      ┐
+├ Ô tìm (CrmSearchField)                                       │
+├ Bảng §4.5: Ảnh · Tiêu đề · Giá · Web                         │
+└ Footer đếm                                                   ┘
+```
+
+1. Ô tìm — placeholder `Tìm tiêu đề, địa chỉ...`. Hangtag Clear sau caret. Gõ là lọc.
+2. Bảng — cùng cột 12.1.3. Không icon lọc cột (slice này).
+3. Bấm hàng → `CrmAlert` «Sửa copy làm sau.»
+4. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list).
+
+Trống: `Không có lô trên web.`
+
+### 13.2 Mobile
+
+Cùng 13.1. Thẻ xếp dọc như 12.2.3. Ô tìm trên list.
+
+Nhớ tìm + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-state`.
+
+---
+
+## 14. List `/dashboard/bai-viet`
+
+### 14.1 Máy tính
+
+```
+┌ H1 Bài viết                                                  ┐
+│ Dòng phụ: Dự án, kiến thức, liên hệ, chính sách bảo mật…     │
+├ Ô tìm                                                        │
+├ Bảng §4.5: Chuyên mục · Tiêu đề · Trạng thái                 │
+└ Footer đếm                                                   ┘
+```
+
+1. Ô tìm — `Tìm tiêu đề, chuyên mục...`
+2. Hangtag chuyên mục `blue`: Dự án · Kiến thức · Liên hệ · Chính sách bảo mật · Tin tức · Kinh nghiệm
+3. Hangtag trạng thái: Đã xuất bản `green` · Nháp `gray`
+4. Bấm hàng → `CrmAlert` «Soạn bài làm sau.»
+
+Trống: `Không có bài viết.`
+
+### 14.2 Mobile
+
+Cùng 14.1. Thẻ: hai hangtag + tiêu đề.
+
+Nhớ list: `crmanhung:public-post-list-state`.
+
 

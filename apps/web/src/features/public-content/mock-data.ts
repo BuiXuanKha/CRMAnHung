@@ -5,9 +5,9 @@ import {
 } from '@crmanhung/shared';
 
 export const MOCK_PUBLIC_WEB_DASHBOARD: PublicWebDashboard = {
-  publishedLotCount: 4,
+  publishedLotCount: 3,
   pendingLotCount: 2,
-  publishedPostCount: 3,
+  publishedPostCount: 5,
   draftPostCount: 2,
   recentLots: [
     {
@@ -101,6 +101,20 @@ export const MOCK_PUBLIC_WEB_DASHBOARD: PublicWebDashboard = {
       title: 'Nháp: mở bán đợt 2 — chưa xuất bản',
       category: PublicPostCategory.TIN_TUC,
       status: PublicPostStatus.DRAFT,
+    },
+    {
+      id: 'pp6',
+      slug: 'lien-he',
+      title: 'Liên hệ An Hưng Land',
+      category: PublicPostCategory.LIEN_HE,
+      status: PublicPostStatus.PUBLISHED,
+    },
+    {
+      id: 'pp7',
+      slug: 'chinh-sach-bao-mat',
+      title: 'Chính sách bảo mật',
+      category: PublicPostCategory.CHINH_SACH,
+      status: PublicPostStatus.PUBLISHED,
     },
   ],
 };

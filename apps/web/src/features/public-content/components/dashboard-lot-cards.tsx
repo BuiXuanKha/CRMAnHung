@@ -8,12 +8,13 @@ type Props = {
   items: PublicWebLotRow[];
   total: number;
   onSelect: (id: string) => void;
+  heading?: string | null;
 };
 
-export function DashboardLotCards({ items, total, onSelect }: Props) {
+export function DashboardLotCards({ items, total, onSelect, heading = 'Lô trên web' }: Props) {
   return (
-    <section className="pw-cards" aria-label="Lô trên web">
-      <h2 className="pw-panel-title">Lô trên web</h2>
+    <section className="pw-cards" aria-label={heading ?? 'Lô trên web'}>
+      {heading ? <h2 className="pw-panel-title">{heading}</h2> : null}
       {items.length === 0 ? (
         <p className="pw-empty">Không có lô trên web.</p>
       ) : (
@@ -21,7 +22,7 @@ export function DashboardLotCards({ items, total, onSelect }: Props) {
           {items.map((row) => {
             const price = lotPriceDisplay(row);
             return (
-              <li key={row.id}>
+              <li key={row.id} data-list-row-id={row.id}>
                 <button type="button" className="pw-card" onClick={() => onSelect(row.id)}>
                   <span className="pw-thumb">
                     {row.coverImageUrl ? (

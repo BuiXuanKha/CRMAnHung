@@ -1,3 +1,4 @@
+import type { Ref } from 'react';
 import type { PublicWebPostRow } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { postCategoryLabel, postStatusLabel, postStatusTone } from '../display';
@@ -7,12 +8,21 @@ type Props = {
   total: number;
   selectedId: string | null;
   onSelect: (id: string) => void;
+  heading?: string | null;
+  scrollRef?: Ref<HTMLDivElement>;
 };
 
-export function DashboardPostTable({ items, total, selectedId, onSelect }: Props) {
+export function DashboardPostTable({
+  items,
+  total,
+  selectedId,
+  onSelect,
+  heading = 'Bài viết gần đây',
+  scrollRef,
+}: Props) {
   return (
-    <section className="pw-table-shell" aria-label="Bài viết gần đây">
-      <h2 className="pw-panel-title">Bài viết gần đây</h2>
+    <section className="pw-table-shell" aria-label={heading ?? 'Bài viết'}>
+      {heading ? <h2 className="pw-panel-title">{heading}</h2> : null}
       <div className="pw-table-wrap pw-table-wrap--post">
         <div className="pw-table-head">
           <div className="pw-grid-row pw-grid-header" role="row">
@@ -21,7 +31,7 @@ export function DashboardPostTable({ items, total, selectedId, onSelect }: Props
             <div>Trạng thái</div>
           </div>
         </div>
-        <div className="pw-table-scroll">
+        <div className="pw-table-scroll" ref={scrollRef}>
           {items.length === 0 ? (
             <p className="pw-empty">Không có bài viết.</p>
           ) : (
@@ -29,6 +39,7 @@ export function DashboardPostTable({ items, total, selectedId, onSelect }: Props
               <div
                 key={row.id}
                 role="row"
+                data-list-row-id={row.id}
                 className={
                   selectedId === row.id ? 'pw-grid-row is-selected' : 'pw-grid-row'
                 }

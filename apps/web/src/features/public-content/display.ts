@@ -33,3 +33,15 @@ export function postStatusLabel(row: PublicWebPostRow): string {
 export function postStatusTone(row: PublicWebPostRow): BadgeTone {
   return row.status === PublicPostStatus.PUBLISHED ? 'green' : 'gray';
 }
+
+export function matchLotSearch(row: PublicWebLotRow, keyword: string): boolean {
+  const q = keyword.trim().toLocaleLowerCase('vi');
+  if (!q) return true;
+  return `${row.title} ${row.location}`.toLocaleLowerCase('vi').includes(q);
+}
+
+export function matchPostSearch(row: PublicWebPostRow, keyword: string): boolean {
+  const q = keyword.trim().toLocaleLowerCase('vi');
+  if (!q) return true;
+  return `${row.title} ${postCategoryLabel(row)}`.toLocaleLowerCase('vi').includes(q);
+}

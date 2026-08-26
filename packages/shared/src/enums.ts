@@ -90,6 +90,8 @@ export enum PublicPostCategory {
   DU_AN = 'du-an',
   KIEN_THUC = 'kien-thuc',
   KINH_NGHIEM = 'kinh-nghiem',
+  LIEN_HE = 'lien-he',
+  CHINH_SACH = 'chinh-sach',
 }
 
 export enum PublicPostStatus {
@@ -191,6 +193,8 @@ export const PUBLIC_POST_CATEGORY_LABELS: Record<PublicPostCategory, string> = {
   [PublicPostCategory.DU_AN]: 'Dự án',
   [PublicPostCategory.KIEN_THUC]: 'Kiến thức',
   [PublicPostCategory.KINH_NGHIEM]: 'Kinh nghiệm',
+  [PublicPostCategory.LIEN_HE]: 'Liên hệ',
+  [PublicPostCategory.CHINH_SACH]: 'Chính sách bảo mật',
 };
 
 export const PUBLIC_POST_STATUS_LABELS: Record<PublicPostStatus, string> = {
