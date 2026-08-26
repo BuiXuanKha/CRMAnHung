@@ -82,7 +82,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
 | 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Todo — chạy VPS; PROJECT stream `p:{lodatId}:{empId}`; giữ kha/buinam; `SKIP_LODAT_IMAGES=1` nếu chỉ text |
 | 11 | Giao dịch | `transaction` (+ party/snapshot/ảnh/đính kèm) | `pnpm transactions:migrate-legacy` | Xong staging (2/2 GD OWN+HOAN_TAT, buinam, 2 snapshot, 9 ảnh, 0 đính kèm) |
-| 12 | Sổ đỏ | `title_service` | — | Todo |
+| 12 | Sổ đỏ | `title_service` | — | **Đã đọc** code+SQLite 2026-08-26: 1 hồ sơ `SD-2026-0001` (kha), 2 tiến độ, 3 tiền, 0 file. **Chưa copy** — Prisma stub lệch (thiếu code/NV/ghim/phí) |
 
 Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV copy cùng metadata `tblPersonFacebook` (UID NV) để cột Kênh liên hệ hiện tên page/nick.
 
@@ -119,6 +119,23 @@ LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db \
 ```
 
 `SKIP_TX_FILES=1` nếu chỉ copy text (bỏ R2). Idempotent qua `migrate.legacy_id_map` entity `transaction`.
+
+### Bước 12 — sổ đỏ (đã đọc CRM cũ, chưa copy)
+
+API cũ: `GET/POST /api/title-services` (`titleServices.controller.js`). SQLite:
+
+| Bảng | COUNT live |
+|------|------------|
+| `tblTitleService` | 1 (`SD-2026-0001`, `DANG_LAM`, `CreatedByEmployeeId=5` kha, `PersonId=1561`) |
+| `tblTitleServiceProgress` | 2 (`DO_DAC`, `NHAN_KET_QUA`) |
+| `tblTitleServiceMoney` | 3 (THU 3tr+10tr, CHI 2tr) |
+| `tblTitleServiceAttachment` | 0 — folder `/img/title-services` trống |
+
+**Chưa chạy copy.** Prisma `TitleService` stub không đủ cột (`code`, `createdByEmployeeId`, `isPinned`, `agreedFeeVnd`, `startedAt`…). Sửa schema + contract khớp CRM cũ **trước** script migrate.
+
+Cột hồ sơ: `Code`, `PersonId` → `customerId`, `Status`, `AgreedFeeVnd`, `NeedSummary`, `Note`, `StartedAtMs`, `ExpectedDoneAtMs`, `CompletedAtMs` (chỉ khi Hoàn thành), `CreatedByEmployeeId`, `IsPinned`/`PinnedAtMs`.
+
+Tiền: `Kind` THU/CHI, `Title`, `AmountVnd` (Integer; copy nên BigInt). File: `StoredPath` → R2 `objectKey`.
 
 ## Bảng map ID (không phải bảng nghiệp vụ)
 
