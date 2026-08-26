@@ -82,7 +82,7 @@ Bảng **trỏ sang khách** (SĐT, Facebook, chăm sóc) thì **phải sau** ma
 | 10c | Lô PROJECT → `ProjectLot` (kho) | `project_lot` | `pnpm project-lots:migrate-legacy` | Xong staging (3608/3608) |
 | 10d | Lô dân + map NV → `Lodat` + `LodatCustomerMap`; ảnh lô dân R2 | `lodat`, `lodat_customer_map`, `lodat_image` | `pnpm lodats:migrate-legacy` | Todo — chạy VPS; PROJECT stream `p:{lodatId}:{empId}`; giữ kha/buinam; `SKIP_LODAT_IMAGES=1` nếu chỉ text |
 | 11 | Giao dịch | `transaction` (+ party/snapshot/ảnh/đính kèm) | `pnpm transactions:migrate-legacy` | Xong staging (2/2 GD OWN+HOAN_TAT, buinam, 2 snapshot, 9 ảnh, 0 đính kèm) |
-| 12 | Sổ đỏ | `title_service` (+ progress/money/attachment) | `pnpm title-services:migrate-legacy` | Script sẵn — chờ chạy VPS (1 hồ sơ `SD-2026-0001` kha, 0 file) |
+| 12 | Sổ đỏ | `title_service` (+ progress/money/attachment) | `pnpm title-services:migrate-legacy` | Xong staging (1/1 `SD-2026-0001` kha, 2 tiến độ, 3 tiền, 0 file) |
 
 Copy **cả** hotline đã tắt (`isActive = false`) để khách không mất nguồn. Profile FB NV copy cùng metadata `tblPersonFacebook` (UID NV) để cột Kênh liên hệ hiện tên page/nick.
 
@@ -120,7 +120,7 @@ LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db \
 
 `SKIP_TX_FILES=1` nếu chỉ copy text (bỏ R2). Idempotent qua `migrate.legacy_id_map` entity `transaction`.
 
-### Bước 12 — sổ đỏ (script sẵn, chưa chạy staging)
+### Bước 12 — sổ đỏ (đã copy staging)
 
 API cũ: `GET/POST /api/title-services` (`titleServices.controller.js`). SQLite:
 
@@ -146,6 +146,8 @@ LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db \
 `SKIP_TITLE_FILES=1` nếu chỉ copy text. Idempotent qua `migrate.legacy_id_map` entity `title_service`. Workflow: `.github/workflows/copy-legacy-title-services.yml` (push `main` hoặc Run workflow).
 
 Cần map `user` + `customer` (PersonId 1561). Schema `TitleService*` đã chốt.
+
+**Đã copy staging** (2026-08-26, workflow copy #92): TitleService=1, map `title_service`=1, `createdBy=kha`, khách PersonId 1561. Tiến độ 2, tiền 3, file 0. Preflight FK PersonId 1/1, EmployeeId 1/1. CRM cũ không bị ghi.
 
 ## Bảng map ID (không phải bảng nghiệp vụ)
 

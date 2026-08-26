@@ -72,7 +72,7 @@ Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim / xóa + t
 
 ## 8. Mock data
 
-`mock-data.ts` cho local khi `NEXT_PUBLIC_USE_MOCK_AUTH=true`. Staging login thật → API (`isMockTitleServices` = `isMockAuth`). List kha trống cho đến khi copy `SD-2026-0001`.
+`mock-data.ts` cho local khi `NEXT_PUBLIC_USE_MOCK_AUTH=true`. Staging login thật → API (`isMockTitleServices` = `isMockAuth`). List kha trên staging có `SD-2026-0001` sau copy bước 12.
 
 ## 9. Extension?
 
@@ -80,7 +80,7 @@ Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim / xóa + t
 
 ## 10. Migrate từ hệ cũ
 
-Script copy: `pnpm title-services:migrate-legacy` — chi tiết [`MIGRATION.md`](../MIGRATION.md) bước 12. Live (2026-08-26): **1** hồ sơ `SD-2026-0001` (`DANG_LAM`, **kha**, khách `PersonId` 1561), 2 tiến độ, 3 khoản tiền (thu 13tr / chi 2tr), **0** file. Thư mục `img/title-services` trống. **Chưa chạy staging** — chờ merge + workflow/VPS.
+Script copy: `pnpm title-services:migrate-legacy` — chi tiết [`MIGRATION.md`](../MIGRATION.md) bước 12. Live (2026-08-26): **1** hồ sơ `SD-2026-0001` (`DANG_LAM`, **kha**, khách `PersonId` 1561), 2 tiến độ, 3 khoản tiền (thu 13tr / chi 2tr), **0** file. Thư mục `img/title-services` trống. **Xong staging (2026-08-26)** — 1/1 `createdBy=kha`, map `title_service`=1.
 
 | Cũ | Mới (đã chốt Prisma) |
 |----|----------------------|
@@ -325,5 +325,5 @@ Khách + User **đã có**. List mock §12 **đã có**.
 | **6** | ~~Nest file~~ **xong** — upload private R2 + signed URL + xóa object | Giấy tờ mật |
 | **7** | ~~Nối UI `/dich-vu-so-do`~~ **xong** — `isMockTitleServices` = login giả | List/panel thật |
 | **8** | ~~Tạo hồ sơ từ khách~~ **xong** — `/khach-hang/[id]/dich-vu-so-do` | Không nút Thêm trên list |
-| **9** | ~~Copy 1 hồ sơ SQLite~~ **script xong** — `pnpm title-services:migrate-legacy` (chạy VPS khi gộp `main`) | Data kha `SD-2026-0001` |
+| **9** | ~~Copy 1 hồ sơ SQLite~~ **xong staging** — `SD-2026-0001` kha, 2 tiến độ, 3 tiền, 0 file | Data kha trên `anhungland.com` |
 | **10** | ~~ADMIN lọc NV + audit xem file~~ **xong** — select NV trên list; ghi `TitleServiceAttachmentView` khi cấp signed URL | Không chặn 1–9 |
