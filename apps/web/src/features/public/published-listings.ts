@@ -1,6 +1,9 @@
-import { toGuestListing, type PublicGuestListing } from '@crmanhung/shared';
-import { listStaffOpenLots } from '@/features/public-content/api';
-import { lotKindLabel, lotPriceDisplay } from '@/features/public-content/display';
+import {
+  toGuestListing,
+  type PublicGuestListing,
+  type PublicWebLotRow,
+} from '@crmanhung/shared';
+import { listPublicWebLots } from '@/features/public-content/api';
 import { PUBLIC_PRODUCTS, type PublicProduct } from './mock-data';
 
 export type PublicListingView = PublicGuestListing & {
@@ -10,28 +13,36 @@ export type PublicListingView = PublicGuestListing & {
   directionLabel: string | null;
 };
 
-function staffToView(
-  row: Awaited<ReturnType<typeof listStaffOpenLots>>[number],
-): PublicListingView | null {
+function overlayExcerpt(row: PublicWebLotRow): string {
+  const custom = row.excerpt?.trim();
+  if (custom) return custom;
+  return [row.title, row.location].filter(Boolean).join('. ');
+}
+
+function overlayPriceLabel(row: PublicWebLotRow): string | null {
+  if (row.priceMode === 'CONTACT') return null;
+  const label = row.priceLabel?.trim();
+  return label || null;
+}
+
+/** Overlay Đăng web — no JWT `/lodats`. Safe for `next build` + public SSR. */
+function overlayToView(row: PublicWebLotRow): PublicListingView | null {
   const guest = toGuestListing({
     isPublished: row.isPublished,
     slug: row.slug,
     title: row.title,
     location: row.location,
-    priceLabel: lotPriceDisplay(row).isMoney ? row.priceLabel : null,
-    excerpt: row.excerpt,
+    priceLabel: overlayPriceLabel(row),
+    excerpt: overlayExcerpt(row),
     coverImageUrl: row.coverImageUrl,
-    metaDescription: row.metaDescription,
   });
   if (!guest) return null;
   return {
     ...guest,
-    priceLabel: lotPriceDisplay(row).text,
-    kindLabel: lotKindLabel(row),
-    areaLabel: row.areaM2 != null ? `${row.areaM2.toLocaleString('vi-VN')} m²` : null,
-    frontageLabel:
-      row.frontageM != null ? `${row.frontageM.toLocaleString('vi-VN')} m` : null,
-    directionLabel: row.direction?.trim() || null,
+    kindLabel: 'Nhà đất',
+    areaLabel: null,
+    frontageLabel: null,
+    directionLabel: null,
   };
 }
 
@@ -56,33 +67,28 @@ export function productToListingView(product: PublicProduct): PublicListingView 
   };
 }
 
-/** Overlay Đăng web ∩ lô đang Mở bán — source of truth for sitemap /san-pham. */
+function fallbackMarketingCatalog(): PublicListingView[] {
+  return PUBLIC_PRODUCTS.map(productToListingView).filter(
+    (row): row is PublicListingView => row != null,
+  );
+}
+
+/** Overlay Đăng web — source of truth for sitemap /san-pham. Never fetches `/lodats`. */
 export async function listPublishedOverlayListings(): Promise<PublicListingView[]> {
-  try {
-    const staff = await listStaffOpenLots();
-    return staff
-      .map(staffToView)
-      .filter((row): row is PublicListingView => row != null);
-  } catch {
-    // `next build` / public SSR cannot call JWT `/lodats` via relative `/api/v1`.
-    return [];
-  }
+  const overlay = await listPublicWebLots();
+  return overlay.map(overlayToView).filter((row): row is PublicListingView => row != null);
 }
 
 export async function listSitemapListings(): Promise<PublicGuestListing[]> {
   const overlay = await listPublishedOverlayListings();
   if (overlay.length > 0) return overlay;
-  return PUBLIC_PRODUCTS.map(productToListingView).filter(
-    (row): row is PublicListingView => row != null,
-  );
+  return fallbackMarketingCatalog();
 }
 
 export async function listPublicCatalog(): Promise<PublicListingView[]> {
   const overlay = await listPublishedOverlayListings();
   if (overlay.length > 0) return overlay;
-  return PUBLIC_PRODUCTS.map(productToListingView).filter(
-    (row): row is PublicListingView => row != null,
-  );
+  return fallbackMarketingCatalog();
 }
 
 export async function getPublicListingBySlug(slug: string): Promise<PublicListingView | null> {

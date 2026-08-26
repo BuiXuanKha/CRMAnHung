@@ -16,11 +16,7 @@ import {
 } from '@crmanhung/shared';
 import { listLodats } from '@/features/lodats/api';
 import { toPublicSlug } from './display';
-import {
-  overlayRowToGuestLot,
-  publishedStaffLotsToGuest,
-  type PublicGuestLot,
-} from './guest-listing';
+import { overlayRowToGuestLot, type PublicGuestLot } from './guest-listing';
 import {
   MOCK_PUBLIC_WEB_LOTS,
   MOCK_PUBLIC_WEB_POSTS,
@@ -72,21 +68,16 @@ export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
 }
 
 /**
- * Guest homepage / public list: CRM lots đang Mở bán whose overlay is published.
- * Overlay (`listPublicWebLots`) is the Đăng web flag; paused CRM lots drop out.
+ * Guest homepage / public list: overlay Đăng web (`isPublished`).
+ *
+ * Do **not** call JWT `/lodats` here. `next build` and public SSR run in Node
+ * with `NEXT_PUBLIC_API_URL=/api/v1` (relative) and no staff token — that
+ * crashed CI/deploy (`Failed to collect page data for /san-pham/[slug]`).
+ * Dashboard `/dashboard/lo-dat` still uses `listStaffOpenLots` in the browser.
  */
 export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
   const overlay = await listPublicWebLots();
-  const published = overlay.filter((row) => row.isPublished);
-  if (published.length === 0) return [];
-  try {
-    const staff = await listStaffOpenLots();
-    const publishedIds = new Set(published.map((row) => row.lodatId));
-    return publishedStaffLotsToGuest(staff.filter((row) => publishedIds.has(row.lodatId)));
-  } catch {
-    // Public SSR/build has no JWT and relative `/api/v1` is invalid in Node fetch.
-    return published.map(overlayRowToGuestLot);
-  }
+  return overlay.filter((row) => row.isPublished).map(overlayRowToGuestLot);
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {
