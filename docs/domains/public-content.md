@@ -111,7 +111,7 @@ PublicPost                        (category, slug, status, cover, body) — khô
 | **Dashboard** | `/dashboard` | Tổng quan + menu trái. §12 |
 | **Lô đất** | `/dashboard/lo-dat` | List lô đăng web. §13 |
 | **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). §14 |
-| Trang chủ khách | `/` | Mock sẵn |
+| Trang chủ khách | `/` | Lô đã Đăng web (`listPublishedPublicLots`) |
 
 **Tạm thời không** thêm hành vi/quyền admin trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
@@ -146,7 +146,7 @@ Khi mock UI admin (sau Ready for mock):
 - 3–5 lô CRM: chưa đăng / đã đăng / Mở bán vs Tạm dừng
 - 1 lô kho hai NV — chỉ một listing public
 - Bài: nháp + đã đăng, đủ 4 chuyên mục
-- Khách `/` không thấy nháp
+- Khách `/` không thấy nháp — chỉ lô `isPublished` đang Mở bán; trống thì empty state, không hàng marketing giả
 
 ---
 

@@ -16,6 +16,7 @@ import {
 } from '@crmanhung/shared';
 import { listLodats } from '@/features/lodats/api';
 import { toPublicSlug } from './display';
+import { publishedStaffLotsToGuest, type PublicGuestLot } from './guest-listing';
 import {
   MOCK_PUBLIC_WEB_LOTS,
   MOCK_PUBLIC_WEB_POSTS,
@@ -64,6 +65,20 @@ export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
 
 export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
   return buildStaffOpenLots(await loadOpenPlots(), cloneLots());
+}
+
+/**
+ * Guest homepage / public list: CRM lots đang Mở bán whose overlay is published.
+ * Overlay (`listPublicWebLots`) is the Đăng web flag; paused CRM lots drop out.
+ */
+export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
+  const overlay = await listPublicWebLots();
+  const publishedIds = new Set(
+    overlay.filter((row) => row.isPublished).map((row) => row.lodatId),
+  );
+  if (publishedIds.size === 0) return [];
+  const staff = await listStaffOpenLots();
+  return publishedStaffLotsToGuest(staff.filter((row) => publishedIds.has(row.lodatId)));
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {
