@@ -18,6 +18,8 @@ import {
   ListTitleServicesQueryDto,
   PinTitleServiceDto,
   UpdateTitleServiceDto,
+  AddTitleServiceProgressDto,
+  AddTitleServiceMoneyDto,
 } from './dto/title-service.dto';
 import { TitleServicesService } from './title-services.service';
 
@@ -56,6 +58,44 @@ export class TitleServicesController {
     @Body() dto: PinTitleServiceDto,
   ) {
     return this.titleServices.pin(user, id, dto);
+  }
+
+  @Post(':id/progress')
+  addProgress(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: AddTitleServiceProgressDto,
+  ) {
+    return this.titleServices.addProgress(user, id, dto);
+  }
+
+  @Delete(':id/progress/:progressId')
+  @HttpCode(204)
+  removeProgress(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Param('progressId') progressId: string,
+  ) {
+    return this.titleServices.removeProgress(user, id, progressId);
+  }
+
+  @Post(':id/money')
+  addMoney(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: AddTitleServiceMoneyDto,
+  ) {
+    return this.titleServices.addMoney(user, id, dto);
+  }
+
+  @Delete(':id/money/:moneyId')
+  @HttpCode(204)
+  removeMoney(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Param('moneyId') moneyId: string,
+  ) {
+    return this.titleServices.removeMoney(user, id, moneyId);
   }
 
   @Delete(':id')

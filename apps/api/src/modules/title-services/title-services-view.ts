@@ -18,6 +18,23 @@ export const TITLE_STATUS = {
 export const TITLE_STATUSES = Object.values(TITLE_STATUS);
 export const DONE_STATUSES = [TITLE_STATUS.HOAN_THANH, TITLE_STATUS.HUY] as const;
 
+export const TITLE_STEP = {
+  BAN_GIA: 'BAN_GIA',
+  THU_THAP_GIAY_TO: 'THU_THAP_GIAY_TO',
+  DO_DAC: 'DO_DAC',
+  NOP_HO_SO: 'NOP_HO_SO',
+  BO_SUNG: 'BO_SUNG',
+  LAM_VIEC_CO_QUAN: 'LAM_VIEC_CO_QUAN',
+  NHAN_KET_QUA: 'NHAN_KET_QUA',
+  BAN_GIAO: 'BAN_GIAO',
+  KHAC: 'KHAC',
+} as const;
+
+export const TITLE_STEPS = Object.values(TITLE_STEP);
+
+export const TITLE_MONEY_KIND = { THU: 'THU', CHI: 'CHI' } as const;
+export const TITLE_MONEY_KINDS = Object.values(TITLE_MONEY_KIND);
+
 export const LIST_LIMIT = 500;
 
 export const LIST_INCLUDE = {

@@ -92,3 +92,53 @@ export class PinTitleServiceDto {
   @IsBoolean({ message: 'Cần chọn ghim hoặc bỏ ghim.' })
   pinned!: boolean;
 }
+
+const TITLE_STEPS = [
+  'BAN_GIA',
+  'THU_THAP_GIAY_TO',
+  'DO_DAC',
+  'NOP_HO_SO',
+  'BO_SUNG',
+  'LAM_VIEC_CO_QUAN',
+  'NHAN_KET_QUA',
+  'BAN_GIAO',
+  'KHAC',
+] as const;
+
+const TITLE_MONEY_KINDS = ['THU', 'CHI'] as const;
+
+export class AddTitleServiceProgressDto {
+  @IsIn(TITLE_STEPS, { message: 'Loại bước không hợp lệ.' })
+  stepType!: (typeof TITLE_STEPS)[number];
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  note?: string;
+
+  @IsOptional()
+  @IsString()
+  happenedAt?: string;
+}
+
+export class AddTitleServiceMoneyDto {
+  @IsIn(TITLE_MONEY_KINDS, { message: 'Loại khoản tiền không hợp lệ.' })
+  kind!: (typeof TITLE_MONEY_KINDS)[number];
+
+  @IsString()
+  @MinLength(1, { message: 'Nhập tiêu đề khoản tiền.' })
+  @MaxLength(200)
+  title!: string;
+
+  @Allow()
+  amountVnd!: number | string;
+
+  @IsOptional()
+  @IsString()
+  happenedAt?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  note?: string;
+}

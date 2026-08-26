@@ -9,6 +9,8 @@ import type { RequestUser } from '../../common/decorators/current-user.decorator
 import { PrismaService } from '../../prisma/prisma.service';
 import { assertCanAccess as assertCustomerAccess } from '../customers/customers-view';
 import type {
+  AddTitleServiceMoneyDto,
+  AddTitleServiceProgressDto,
   CreateTitleServiceDto,
   ListTitleServicesQueryDto,
   PinTitleServiceDto,
@@ -144,6 +146,78 @@ export class TitleServicesService {
     await this.prisma.titleService.delete({ where: { id } });
   }
 
+  async addProgress(user: RequestUser, id: string, dto: AddTitleServiceProgressDto) {
+    await this.requireOwned(user, id);
+    const happenedAt = this.parseDate(dto.happenedAt) ?? new Date();
+    const updated = await this.prisma.titleService.update({
+      where: { id },
+      data: {
+        progress: {
+          create: {
+            stepType: dto.stepType,
+            note: dto.note?.trim() || null,
+            happenedAt,
+            createdByEmployeeId: user.id,
+          },
+        },
+      },
+      include: DETAIL_INCLUDE,
+    });
+    return toDetail(updated);
+  }
+
+  async addMoney(user: RequestUser, id: string, dto: AddTitleServiceMoneyDto) {
+    await this.requireOwned(user, id);
+    const amount = this.parsePrice(dto.amountVnd);
+    if (amount == null || amount <= 0n) {
+      throw new BadRequestException('Nhập số tiền hợp lệ.');
+    }
+    const happenedAt = this.parseDate(dto.happenedAt) ?? new Date();
+    const updated = await this.prisma.titleService.update({
+      where: { id },
+      data: {
+        moneyEntries: {
+          create: {
+            kind: dto.kind,
+            title: dto.title.trim(),
+            amountVnd: amount,
+            note: dto.note?.trim() || null,
+            happenedAt,
+            createdByEmployeeId: user.id,
+          },
+        },
+      },
+      include: DETAIL_INCLUDE,
+    });
+    return toDetail(updated);
+  }
+
+  async removeProgress(user: RequestUser, id: string, progressId: string) {
+    const row = await this.requireOwned(user, id);
+    const entry = row.progress.find((p) => p.id === progressId);
+    if (!entry) throw new NotFoundException('Không tìm thấy bước tiến độ.');
+    await this.prisma.$transaction([
+      this.prisma.titleServiceProgress.delete({ where: { id: progressId } }),
+      this.prisma.titleService.update({
+        where: { id },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+  }
+
+  async removeMoney(user: RequestUser, id: string, moneyId: string) {
+    const row = await this.requireOwned(user, id);
+    const entry = row.moneyEntries.find((e) => e.id === moneyId);
+    if (!entry) throw new NotFoundException('Không tìm thấy khoản tiền.');
+    await this.prisma.$transaction([
+      this.prisma.titleServiceMoney.delete({ where: { id: moneyId } }),
+      this.prisma.titleService.update({
+        where: { id },
+        data: { updatedAt: new Date() },
+      }),
+    ]);
+  }
+
   private ownershipWhere(
     user: RequestUser,
     createdByEmployeeId?: string,
@@ -158,6 +232,12 @@ export class TitleServicesService {
     if (createdByEmployeeId !== user.id) {
       throw new ForbiddenException('Không có quyền với hồ sơ sổ đỏ này.');
     }
+  }
+
+  private async requireOwned(user: RequestUser, id: string) {
+    const row = await this.requireDetail(id);
+    this.assertCanAccess(user, row.createdByEmployeeId);
+    return row;
   }
 
   private async requireDetail(id: string) {
