@@ -12,9 +12,13 @@ export type PublicProduct = {
   legalLabel: string;
   directionLabel: string;
   frontageLabel: string;
+  /** Short public summary — meta description fallback. */
+  excerpt: string;
   description: string;
   highlights: string[];
   gallery: string[];
+  isPublished: boolean;
+  metaDescription?: string | null;
 };
 
 export type PublicProject = {
@@ -68,6 +72,9 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
     areaLabel: '120 m²',
     location: 'Long Thành, Đồng Nai',
     imageUrl: GALLERY.land[0],
+    excerpt:
+      'Nền thổ cư mặt tiền đường nhựa 8m tại Long Thành, Đồng Nai. Khu dân cư hiện hữu, phù hợp xây nhà hoặc giữ đất.',
+    isPublished: true,
     postedLabel: 'Đăng hôm nay',
     typeLabel: 'Đất nền thổ cư',
     legalLabel: 'Sổ hồng riêng',
@@ -91,6 +98,9 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
     areaLabel: '520 m²',
     location: 'Cẩm Mỹ, Đồng Nai',
     imageUrl: GALLERY.land[1],
+    excerpt:
+      'Đất vườn Cẩm Mỹ view sông, sổ riêng, đường ô tô. Phù hợp nhà vườn hoặc nghỉ dưỡng cuối tuần.',
+    isPublished: true,
     postedLabel: 'Đăng 1 ngày trước',
     typeLabel: 'Đất vườn',
     legalLabel: 'Sổ riêng',
@@ -109,6 +119,9 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
     areaLabel: '96 m²',
     location: 'Biên Hòa, Đồng Nai',
     imageUrl: GALLERY.house[3],
+    excerpt:
+      'Nhà phố 2 tầng gần trung tâm Biên Hòa, hoàn thiện cơ bản, hẻm xe hơi, vào ở ngay.',
+    isPublished: true,
     postedLabel: 'Đăng 2 ngày trước',
     typeLabel: 'Nhà phố',
     legalLabel: 'Sổ hồng',
@@ -127,6 +140,9 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
     areaLabel: '100 m²',
     location: 'Nhơn Trạch, Đồng Nai',
     imageUrl: GALLERY.house[1],
+    excerpt:
+      'Lô góc 2 mặt tiền trong khu dân cư hiện hữu Nhơn Trạch. Hạ tầng điện nước đầy đủ.',
+    isPublished: true,
     postedLabel: 'Đăng 3 ngày trước',
     typeLabel: 'Đất nền',
     legalLabel: 'Sổ hồng',
@@ -145,6 +161,9 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
     areaLabel: '85 m²',
     location: 'Trảng Bom, Đồng Nai',
     imageUrl: GALLERY.land[1],
+    excerpt:
+      'Nền giá tốt tại Trảng Bom, pháp lý rõ. Phù hợp mua lần đầu hoặc đầu tư dài hạn.',
+    isPublished: true,
     postedLabel: 'Đăng 4 ngày trước',
     typeLabel: 'Đất nền',
     legalLabel: 'Sổ riêng',
@@ -163,6 +182,9 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
     areaLabel: '350 m²',
     location: 'Xuân Lộc, Đồng Nai',
     imageUrl: GALLERY.villa[0],
+    excerpt:
+      'Biệt thự vườn Xuân Lộc, sân rộng, không gian xanh yên tĩnh. Phù hợp ở lâu dài hoặc nghỉ dưỡng.',
+    isPublished: true,
     postedLabel: 'Đăng 5 ngày trước',
     typeLabel: 'Biệt thự vườn',
     legalLabel: 'Sổ hồng',
@@ -181,6 +203,9 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
     areaLabel: '1.000 m²',
     location: 'Long Thành, Đồng Nai',
     imageUrl: GALLERY.land[3],
+    excerpt:
+      'Lô đất lớn gần cao tốc Long Thành. Phù hợp kho xưởng nhỏ, showroom hoặc đầu tư hạ tầng.',
+    isPublished: true,
     postedLabel: 'Đăng tuần trước',
     typeLabel: 'Đất thương mại',
     legalLabel: 'Sổ đỏ',
@@ -199,6 +224,9 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
     areaLabel: '90 m²',
     location: 'Biên Hòa, Đồng Nai',
     imageUrl: GALLERY.house[2],
+    excerpt:
+      'Nền khu dân cư nội bộ Biên Hòa có cổng bảo vệ, đường nội bộ sạch. Phù hợp gia đình trẻ xây nhà.',
+    isPublished: true,
     postedLabel: 'Đăng tuần trước',
     typeLabel: 'Đất nền dự án',
     legalLabel: 'Sổ hồng',

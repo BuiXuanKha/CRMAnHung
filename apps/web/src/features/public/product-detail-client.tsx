@@ -1,24 +1,21 @@
 'use client';
 
 import { useState } from 'react';
-import type { PublicProduct } from './mock-data';
 
 export function ProductShareButton({
-  product,
+  title,
+  text,
   className = 'ph-btn ph-btn-ghost',
 }: {
-  product: PublicProduct;
+  title: string;
+  text: string;
   className?: string;
 }) {
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
-    const payload = {
-      title: product.title,
-      text: `${product.title} — ${product.priceLabel} · ${product.areaLabel}`,
-      url,
-    };
+    const payload = { title, text, url };
     try {
       if (navigator.share) {
         await navigator.share(payload);

@@ -92,7 +92,7 @@ Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú
 ## 5. Quan hệ dữ liệu
 
 ```
-Lodat  1──0..1  PublicListing     (slug, isPublished, pricePublic, publicTitle, publicBody)
+Lodat  1──0..1  PublicListing     (slug, isPublished, pricePublic, publicTitle, excerpt, metaDescription?, cover)
 PublicPost                        (category, slug, status, cover, body) — không gắn khách
 ```
 
@@ -133,7 +133,7 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN | Đăng / gỡ lô (`isPublished`) — mock |
 | PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — mock |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục) — mock |
-| GET | `/public/listings` | Không | Lô đã đăng (trang khách) — sau |
+| GET | `/public/listings` | Không | Lô đã đăng → `publicGuestListingSchema` (SEO + trang khách) |
 | GET | `/public/posts` | Không | Bài `PUBLISHED` — sau |
 
 ---
@@ -374,5 +374,18 @@ Trống: `Không có bài viết.`
 Cùng 14.1. Thẻ: hai hangtag + tiêu đề.
 
 Nhớ list: `crmanhung:public-post-list-state`.
+
+---
+
+## 15. SEO lô trên trang khách
+
+Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn bài dashboard **không** đổi layout — chỉ có thể thêm `metaDescription` (tuỳ chọn).
+
+1. URL khách: `/san-pham/[slug]` — chỉ lô `isPublished`.
+2. Title / H1 = tiêu đề public. Meta = `metaDescription` hoặc excerpt.
+3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`.
+4. JSON-LD `RealEstateListing`: giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`).
+5. Sitemap chỉ lô đang hiện. Gỡ web → 404, không còn trong sitemap.
+6. Cấm trên HTML + JSON-LD + meta: giá map CRM, hoa hồng, tên/SĐT khách, ghi chú nội bộ.
 
 

@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { PUBLIC_OG_DEFAULT, PUBLIC_SITE_ORIGIN } from '@/features/public/site';
 import './public.css';
 
 export const metadata: Metadata = {
@@ -10,22 +11,24 @@ export const metadata: Metadata = {
   description:
     'An Hưng Land — mua bán, ký gửi BĐS. Hotline 0977.656.280. Địa chỉ BT6.8 KĐT Tây Nam Sách.',
   alternates: {
-    canonical: 'https://anhungland.com',
+    canonical: PUBLIC_SITE_ORIGIN,
   },
   openGraph: {
     type: 'website',
     locale: 'vi_VN',
-    url: 'https://anhungland.com',
+    url: PUBLIC_SITE_ORIGIN,
     siteName: 'An Hưng Land',
     title: 'An Hưng Land — Văn phòng giao dịch bất động sản',
     description:
       'An Hưng Land — mua bán, ký gửi BĐS. Hotline 0977.656.280. Địa chỉ BT6.8 KĐT Tây Nam Sách.',
+    images: [{ url: PUBLIC_OG_DEFAULT, alt: 'An Hưng Land' }],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'An Hưng Land — Văn phòng giao dịch bất động sản',
     description:
       'An Hưng Land — mua bán, ký gửi BĐS. Hotline 0977.656.280. Địa chỉ BT6.8 KĐT Tây Nam Sách.',
+    images: [PUBLIC_OG_DEFAULT],
   },
   robots: {
     index: true,
