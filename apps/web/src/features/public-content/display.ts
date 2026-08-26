@@ -1,9 +1,11 @@
 import {
+  LODAT_KIND_LABELS,
   PUBLIC_POST_CATEGORY_LABELS,
   PUBLIC_POST_STATUS_LABELS,
   PublicPostStatus,
   type PublicWebLotRow,
   type PublicWebPostRow,
+  type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import type { BadgeTone } from '@/shared/ui/badge';
 
@@ -37,13 +39,26 @@ export function postStatusTone(row: PublicWebPostRow): BadgeTone {
 export function matchLotSearch(row: PublicWebLotRow, keyword: string): boolean {
   const q = keyword.trim().toLocaleLowerCase('vi');
   if (!q) return true;
-  return `${row.title} ${row.location}`.toLocaleLowerCase('vi').includes(q);
+  const staff = 'staffName' in row ? String((row as PublicWebStaffLotRow).staffName) : '';
+  return `${row.title} ${row.location} ${staff}`.toLocaleLowerCase('vi').includes(q);
 }
 
 export function matchPostSearch(row: PublicWebPostRow, keyword: string): boolean {
   const q = keyword.trim().toLocaleLowerCase('vi');
   if (!q) return true;
   return `${row.title} ${postCategoryLabel(row)}`.toLocaleLowerCase('vi').includes(q);
+}
+
+export function lotKindLabel(row: PublicWebStaffLotRow): string {
+  return LODAT_KIND_LABELS[row.kind];
+}
+
+export function lotSpecLine(row: PublicWebStaffLotRow): string {
+  const parts: string[] = [];
+  if (row.areaM2 != null) parts.push(`${row.areaM2.toLocaleString('vi-VN')} m²`);
+  if (row.frontageM != null) parts.push(`MT ${row.frontageM.toLocaleString('vi-VN')} m`);
+  if (row.direction?.trim()) parts.push(row.direction.trim());
+  return parts.join(' · ') || '—';
 }
 
 /** Slug URL bài viết (mock). */

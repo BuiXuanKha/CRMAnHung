@@ -3,15 +3,15 @@
 import { useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Globe } from 'lucide-react';
-import type { PublicWebLotRow } from '@crmanhung/shared';
+import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { CrmSearchField } from '@/shared/ui/search-field';
 import { Icon } from '@/shared/ui/icon';
-import { listPublicWebLots, setPublicLotPublished } from './api';
-import { DashboardLotCards } from './components/dashboard-lot-cards';
-import { DashboardLotTable } from './components/dashboard-lot-table';
+import { listStaffOpenLots, setPublicLotPublished } from './api';
+import { LotListingPreview } from './components/lot-listing-preview';
 import { LotWebConfirm } from './components/lot-web-confirm';
-import { PublishLotDialog } from './components/publish-lot-dialog';
+import { StaffOpenLotCards } from './components/staff-open-lot-cards';
+import { StaffOpenLotTable } from './components/staff-open-lot-table';
 import { matchLotSearch } from './display';
 import { publicLotListState } from './list-state';
 import { invalidatePublicWebQueries, publicWebKeys } from './query';
@@ -26,15 +26,13 @@ export function PublicLotListPage() {
   const peeked = publicLotListState.peek();
   const [search, setSearch] = useState(peeked?.searchKeyword ?? '');
   const [selectedId, setSelectedId] = useState<string | null>(peeked?.selectedId ?? null);
-  const [lotConfirm, setLotConfirm] = useState<PublicWebLotRow | null>(null);
-  const [publishOpen, setPublishOpen] = useState(false);
-  const [formError, setFormError] = useState<string | null>(null);
+  const [lotConfirm, setLotConfirm] = useState<PublicWebStaffLotRow | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const query = useQuery({
-    queryKey: publicWebKeys.lots,
-    queryFn: listPublicWebLots,
+    queryKey: publicWebKeys.staffLots,
+    queryFn: listStaffOpenLots,
   });
 
   const items = query.data ?? [];
@@ -42,7 +40,7 @@ export function PublicLotListPage() {
     () => items.filter((row) => matchLotSearch(row, search)),
     [items, search],
   );
-  const pendingLots = items.filter((row) => !row.isPublished);
+  const selected = items.find((row) => row.lodatId === selectedId) ?? null;
 
   function persist(nextSelected: string | null, nextSearch = search) {
     publicLotListState.save(scrollRef.current, {
@@ -56,19 +54,19 @@ export function PublicLotListPage() {
     persist(selectedId, value);
   };
 
-  const onSelect = (id: string) => {
-    const row = items.find((item) => item.id === id) ?? null;
-    setSelectedId(id);
-    persist(id);
-    if (row) setLotConfirm(row);
+  const onSelect = (lodatId: string) => {
+    setSelectedId(lodatId);
+    persist(lodatId);
   };
 
   const lotMut = useMutation({
-    mutationFn: (lot: PublicWebLotRow) =>
-      setPublicLotPublished(lot.id, { isPublished: !lot.isPublished }),
+    mutationFn: (lot: PublicWebStaffLotRow) =>
+      setPublicLotPublished(lot.lodatId, { isPublished: !lot.isPublished }),
     onSuccess: async (updated) => {
       await invalidatePublicWebQueries(qc);
       setLotConfirm(null);
+      setSelectedId(updated.lodatId);
+      persist(updated.lodatId);
       flash(
         updated.isPublished
           ? `Đã đăng «${updated.title}» lên web khách.`
@@ -80,27 +78,29 @@ export function PublicLotListPage() {
     },
   });
 
-  const publishMut = useMutation({
-    mutationFn: (id: string) => setPublicLotPublished(id, { isPublished: true }),
-    onSuccess: async (updated) => {
-      await invalidatePublicWebQueries(qc);
-      setPublishOpen(false);
-      setFormError(null);
-      setSelectedId(updated.id);
-      persist(updated.id);
-      flash(`Đã đăng «${updated.title}» lên web khách.`);
-    },
-    onError: (err: Error) => {
-      setFormError(err.message);
-    },
-  });
+  function requestPublish() {
+    const target =
+      selected && !selected.isPublished
+        ? selected
+        : filtered.find((row) => !row.isPublished) ?? items.find((row) => !row.isPublished);
+    if (!target) {
+      setAlertBox({
+        title: 'Không còn lô chờ đăng',
+        message: 'Mọi lô đang mở bán trong danh sách đã hiện trên web khách.',
+      });
+      return;
+    }
+    setSelectedId(target.lodatId);
+    persist(target.lodatId);
+    setLotConfirm(target);
+  }
 
   return (
     <div className="pw-page">
       <header className="pw-head">
         <div>
           <h1>Lô đất public mở bán</h1>
-          <p>Lô khách thấy trên anhungland.com khi admin đã Đăng web.</p>
+          <p>Giữa: lô nhân viên đang Mở bán. Phải: preview bài đăng trang khách.</p>
         </div>
       </header>
 
@@ -108,17 +108,10 @@ export function PublicLotListPage() {
         <CrmSearchField
           value={search}
           onValueChange={onSearch}
-          placeholder="Tìm tiêu đề, địa chỉ..."
-          aria-label="Tìm lô public"
+          placeholder="Tìm tiêu đề, địa chỉ, nhân viên..."
+          aria-label="Tìm lô đang mở bán"
         />
-        <button
-          type="button"
-          className="crm-btn primary"
-          onClick={() => {
-            setFormError(null);
-            setPublishOpen(true);
-          }}
-        >
+        <button type="button" className="crm-btn primary" onClick={requestPublish}>
           <Icon icon={Globe} size="sm" /> Đăng lô
         </button>
       </div>
@@ -126,26 +119,37 @@ export function PublicLotListPage() {
       {query.isLoading ? (
         <p className="pw-loading">Đang tải…</p>
       ) : (
-        <>
-          <div className="pw-list-desktop">
-            <DashboardLotTable
-              items={filtered}
-              total={items.length}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              heading={null}
-              scrollRef={scrollRef}
-            />
+        <div className="pw-split">
+          <div className="pw-split-list">
+            <div className="pw-list-desktop">
+              <StaffOpenLotTable
+                items={filtered}
+                total={items.length}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                scrollRef={scrollRef}
+              />
+            </div>
+            <div className="pw-list-mobile">
+              <StaffOpenLotCards
+                items={filtered}
+                total={items.length}
+                selectedId={selectedId}
+                onSelect={onSelect}
+              />
+            </div>
           </div>
-          <div className="pw-list-mobile">
-            <DashboardLotCards
-              items={filtered}
-              total={items.length}
-              onSelect={onSelect}
-              heading={null}
-            />
-          </div>
-        </>
+          <LotListingPreview
+            lot={selected}
+            busy={lotMut.isPending}
+            onPublish={() => {
+              if (selected && !selected.isPublished) setLotConfirm(selected);
+            }}
+            onUnpublish={() => {
+              if (selected?.isPublished) setLotConfirm(selected);
+            }}
+          />
+        </div>
       )}
 
       <LotWebConfirm
@@ -154,18 +158,6 @@ export function PublicLotListPage() {
         onCancel={() => setLotConfirm(null)}
         onConfirm={() => {
           if (lotConfirm && !lotMut.isPending) void lotMut.mutateAsync(lotConfirm);
-        }}
-      />
-      <PublishLotDialog
-        open={publishOpen}
-        pendingLots={pendingLots}
-        busy={publishMut.isPending}
-        error={formError}
-        onClose={() => {
-          if (!publishMut.isPending) setPublishOpen(false);
-        }}
-        onPublish={async (id) => {
-          await publishMut.mutateAsync(id);
         }}
       />
       <CrmAlertDialog

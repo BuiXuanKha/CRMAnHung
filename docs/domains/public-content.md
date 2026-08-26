@@ -299,26 +299,49 @@ Footer đếm dưới list bài.
 
 ## 13. List `/dashboard/lo-dat`
 
+Nguồn list = lô CRM **đang Mở bán** của nhân viên — **không** phải mọi listing đã có. Admin chọn lô → xem preview bài đăng trang khách bên phải → Đăng web / Gỡ web.
+
+Không hiện trên list/preview: tên khách, SĐT khách, hoa hồng.
+
 ### 13.1 Máy tính
 
 ```
 ┌ H1 Lô đất public mở bán                                      ┐
 ├ Ô tìm (CrmSearchField)                     [ Đăng lô ]       │
-├ Bảng §4.5: Ảnh · Tiêu đề · Giá · Web                         │
-└ Footer đếm                                                   ┘
+├ Bảng §4.5 (giữa)              │ Preview bài đăng (phải)      │
+│ Ảnh · Tiêu đề · NV · Giá · Web│ Ảnh + copy public + CTA      │
+└ Footer đếm                    │                              ┘
 ```
 
-1. Ô tìm — placeholder `Tìm tiêu đề, địa chỉ...`. Hangtag Clear sau caret. Gõ là lọc.
-2. **Đăng lô** — cùng hàng ô tìm; dialog chọn lô chờ đăng.
-3. Bảng — cùng cột 12.1.3. Không icon lọc cột (slice này).
-4. Bấm hàng → `CrmConfirm` Đăng web / Gỡ web (12.1.3).
-5. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list).
+1. Ô tìm — placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc.
+2. **Đăng lô** — chọn lô **Chờ đăng** đầu tiên (hoặc lô đang chọn nếu chưa đăng) → `CrmConfirm` Đăng web.
+3. **Giữa — bảng** lô đang Mở bán. Không icon lọc cột. Không cột Thao tác.
+4. Bấm hàng → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm ngay.
+5. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list Mở bán).
 
-Trống: `Không có lô trên web.`
+**Cột bảng**
+
+| Cột | Ô |
+|-----|---|
+| Ảnh | Thumb 52px; thiếu = ô xám + `ImageOff` |
+| Tiêu đề | **Đậm**; dòng phụ địa chỉ. Không tên khách |
+| NV | Tên nhân viên đang rao lô |
+| Giá | `crm-money` hoặc `Liên hệ` |
+| Web | **Đang hiện** `green` · **Chờ đăng** `gray` |
+
+Trống: `Không có lô đang mở bán.`
+
+**Phải — preview bài đăng** (cột cố định ~360px, luôn mở trên máy tính)
+
+1. Nhãn `Preview trang khách`
+2. Chưa chọn dòng: `Chọn một lô đang mở bán để xem bài đăng.`
+3. Có chọn: ảnh bìa, hangtag Web, tiêu đề, địa chỉ, giá, DT · MT · hướng, hangtag Nhà/Đất, mô tả public (không PII), hotline công ty
+4. Nút **Đăng web** (chờ đăng) hoặc **Gỡ web** (đang hiện, danger) → `CrmConfirm`
+5. Nếu đang hiện: link `Xem trên anhungland.com` tab mới `/san-pham/[slug]`
 
 ### 13.2 Mobile
 
-Cùng 13.1. Thẻ xếp dọc như 12.2.3. Ô tìm trên list.
+Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + NV + hangtag Web). Preview **dưới** list khi đã chọn dòng — không rail phải.
 
 Nhớ tìm + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-state`.
 

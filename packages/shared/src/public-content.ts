@@ -3,7 +3,7 @@
  * Guest reads published only. ADMIN publishes. See docs/domains/public-content.md.
  */
 import { z } from 'zod';
-import { PublicPostCategory, PublicPostStatus } from './enums.js';
+import { LodatKind, PublicPostCategory, PublicPostStatus } from './enums.js';
 
 export const publicListingPriceModeSchema = z.enum(['AMOUNT', 'CONTACT']);
 
@@ -23,6 +23,18 @@ export const publicWebLotRowSchema = z.object({
 });
 
 export type PublicWebLotRow = z.infer<typeof publicWebLotRowSchema>;
+
+/** Lô CRM đang Mở bán — list giữa `/dashboard/lo-dat` + preview phải. */
+export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
+  staffName: z.string(),
+  kind: z.nativeEnum(LodatKind),
+  areaM2: z.number().nullable(),
+  frontageM: z.number().nullable(),
+  direction: z.string().nullable(),
+  excerpt: z.string(),
+});
+
+export type PublicWebStaffLotRow = z.infer<typeof publicWebStaffLotRowSchema>;
 
 export const publicWebPostRowSchema = z.object({
   id: z.string(),

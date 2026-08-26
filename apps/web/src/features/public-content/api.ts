@@ -6,6 +6,7 @@ import {
   type PublicWebDashboard,
   type PublicWebLotRow,
   type PublicWebPostRow,
+  type PublicWebStaffLotRow,
   type SetPublicLotPublishedInput,
   type SetPublicPostStatusInput,
 } from '@crmanhung/shared';
@@ -14,6 +15,8 @@ import {
   MOCK_PUBLIC_WEB_LOTS,
   MOCK_PUBLIC_WEB_POSTS,
   buildPublicWebDashboard,
+  buildStaffOpenLots,
+  listingFromStaffLot,
 } from './mock-data';
 
 let lots: PublicWebLotRow[] = structuredClone(MOCK_PUBLIC_WEB_LOTS);
@@ -45,6 +48,10 @@ export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
   return cloneLots();
 }
 
+export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
+  return buildStaffOpenLots(cloneLots());
+}
+
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {
   return clonePosts();
 }
@@ -57,8 +64,22 @@ export async function setPublicLotPublished(
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không đổi được trạng thái lô.');
   }
-  const index = lots.findIndex((row) => row.id === id);
-  if (index < 0) throw new Error('Không tìm thấy lô trên web.');
+
+  const staff = buildStaffOpenLots(lots);
+  const source = staff.find((row) => row.id === id || row.lodatId === id);
+  if (!source) throw new Error('Không tìm thấy lô đang mở bán.');
+
+  let index = lots.findIndex((row) => row.lodatId === source.lodatId);
+
+  if (index < 0) {
+    const created = listingFromStaffLot({
+      ...source,
+      isPublished: parsed.data.isPublished,
+    });
+    lots = [created, ...lots];
+    return { ...created };
+  }
+
   lots[index] = { ...lots[index], isPublished: parsed.data.isPublished };
   return { ...lots[index] };
 }
