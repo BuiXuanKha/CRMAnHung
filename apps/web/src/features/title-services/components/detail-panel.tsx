@@ -183,15 +183,15 @@ function DetailBody({
                   <CrmBadge tone={docKindTone(att.kind)}>
                     {TITLE_SERVICE_DOC_LABELS[att.kind]}
                   </CrmBadge>
-                  <button
-                    type="button"
-                    className="sd-file-open"
-                    onClick={() => onOpenAttachment(att.id)}
-                  >
-                    {att.fileName}
-                  </button>
+                  <span>{formatDateTime(att.createdAt)}</span>
                 </div>
-                <span className="sd-muted">{formatDateTime(att.createdAt)}</span>
+                <button
+                  type="button"
+                  className="sd-file-open"
+                  onClick={() => onOpenAttachment(att.id)}
+                >
+                  {att.fileName}
+                </button>
               </li>
             ))}
           </ul>

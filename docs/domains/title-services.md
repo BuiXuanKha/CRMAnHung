@@ -34,7 +34,7 @@ Tạo hồ sơ từ menu khách «Dịch vụ sổ đỏ». **Không** nút Thê
 
 **Số ngày:** từ `startedAt` đến nay; khi **Hoàn thành hoặc Hủy** dừng tại `completedAt` (CRM mới ghi cả hai). `0` → «Hôm nay».
 
-Tiến độ gợi ý: Bàn giá, Thu thập giấy tờ, Đo đạc, Nộp hồ sơ, Bổ sung, Làm việc cơ quan, Nhận kết quả, Bàn giao, Khác — API cũ **không chặn** `StepType` ngoài list. Thu/Chi. Tài liệu: Sổ đỏ / Căn cước / Khác (hoặc chuỗi tự nhập).
+Tiến độ gợi ý: Bàn giá, Thu thập giấy tờ, Đo đạc, Nộp hồ sơ, Bổ sung, Làm việc cơ quan, Nhận kết quả, Bàn giao, Khác — API cũ **không chặn** `StepType` ngoài list. Thu/Chi. Tài liệu: Sổ đỏ / CCCD / Khác (hoặc chuỗi tự nhập).
 
 ## 4. Use cases (CRM cũ)
 
@@ -197,7 +197,7 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 
 - Thu hẹp: thanh dọc, chữ xoay 90°, nhãn **Chi tiết hồ sơ**.
 - Mở: tên + mã · SĐT; lưới Trạng thái / Giá / Đã thu / Đã chi; hộp Nhu cầu; nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline tiến độ, file, thu/chi.
-- File tài liệu: hangtag loại **Sổ đỏ** / **Căn cước** / **Giấy tờ khác** cạnh tên file; bấm tên → mở. Ngày đính kèm dòng phụ.
+- File tài liệu: hangtag loại **Sổ đỏ** / **CCCD** / **Giấy tờ khác** trên đầu mỗi file; tên file dòng dưới (bấm → mở); ngày đính kèm cạnh hangtag.
 - Chưa chọn: «Chọn một hồ sơ…»
 
 #### 12.1.6 Nhớ tìm / lọc / cuộn

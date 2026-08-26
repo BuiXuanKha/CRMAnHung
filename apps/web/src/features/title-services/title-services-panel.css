@@ -220,7 +220,7 @@
 
 .sd-file-head {
   display: flex;
-  flex-wrap: wrap;
+  justify-content: space-between;
   align-items: center;
   gap: 8px;
   min-width: 0;
@@ -231,7 +231,7 @@
 }
 
 .sd-timeline-meta span,
-.sd-files > li > span {
+.sd-file-head span {
   font-size: 0.75rem;
   color: #64748b;
   white-space: nowrap;
