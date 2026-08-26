@@ -16,7 +16,7 @@ export function DashboardStats({
       <article className="pw-stat">
         <p className="pw-stat-label">Lô đang hiện</p>
         <p className="pw-stat-value">{publishedLotCount}</p>
-        <p className="pw-stat-hint">Khách thấy trên /san-pham</p>
+        <p className="pw-stat-hint">Khách thấy trên /mua-ban-nha-dat</p>
       </article>
       <article className="pw-stat">
         <p className="pw-stat-label">Chờ đăng</p>

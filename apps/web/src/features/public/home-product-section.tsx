@@ -7,12 +7,13 @@ import { listPublishedPublicLots } from '@/features/public-content/api';
 import type { PublicGuestLot } from '@/features/public-content/guest-listing';
 import { publicWebKeys } from '@/features/public-content/query';
 import { ANHUNG_BRAND } from './brand';
+import { listingHref, PUBLIC_LISTING_PATH } from './site';
 
 function ShareButton({ lot }: { lot: PublicGuestLot }) {
   const [copied, setCopied] = useState(false);
 
   const share = async () => {
-    const url = `${window.location.origin}/san-pham/${lot.slug}`;
+    const url = `${window.location.origin}${listingHref(lot.slug)}`;
     const meta = lot.areaLabel
       ? `${lot.title} — ${lot.priceLabel} · ${lot.areaLabel}`
       : `${lot.title} — ${lot.priceLabel}`;
@@ -46,11 +47,11 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
   const lots = query.data ?? initialLots;
 
   return (
-    <section id="san-pham" className="ph-section">
+    <section id="mua-ban-nha-dat" className="ph-section">
       <div className="ph-section-head">
         <h2>Sản phẩm dành cho bạn</h2>
         {lots.length > 0 ? (
-          <Link href="/san-pham" className="ph-more">
+          <Link href={PUBLIC_LISTING_PATH} className="ph-more">
             Xem tất cả →
           </Link>
         ) : null}
@@ -69,7 +70,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
               className="ph-product"
               style={{ animationDelay: `${Math.min(i, 7) * 40}ms` }}
             >
-              <Link href={`/san-pham/${lot.slug}`} className="ph-product-media">
+              <Link href={listingHref(lot.slug)} className="ph-product-media">
                 {lot.coverImageUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -82,7 +83,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
                 )}
               </Link>
               <div className="ph-product-body">
-                <Link href={`/san-pham/${lot.slug}`}>
+                <Link href={listingHref(lot.slug)}>
                   <h3>{lot.title}</h3>
                 </Link>
                 <p className="ph-product-meta">

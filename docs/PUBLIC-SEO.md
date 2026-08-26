@@ -46,7 +46,7 @@ Mỗi route public phải có:
 | Hạng mục | Quy ước |
 |----------|---------|
 | `app/robots.ts` | Cho phép crawl public; chặn `/login`, khu `(crm)` (`/khach-hang`, `/lo-dat`, …) |
-| `app/sitemap.ts` | URL public ổn định + **lô đã đăng** `/san-pham/[slug]` (không nháp) |
+| `app/sitemap.ts` | URL public ổn định + **lô đã đăng** `/mua-ban-nha-dat/[slug]` (không nháp) |
 | HTTPS | Chỉ `https://anhungland.com` (www → apex hoặc ngược lại — một hướng, khớp canonical) |
 | `lang` | `<html lang="vi">` (đã có ở root layout) |
 
@@ -72,10 +72,10 @@ Next.js không có file HTML tĩnh — tương đương: snippet trong `app/layo
 | Pixel ID | `391165622297911` (public, hiện trong View Source) |
 | noscript | Ảnh 1×1 trong `<head>` (fallback tắt JS) |
 | SPA | `MetaPixelRouteTracker` — PageView khi đổi route Next `Link` (bỏ lần tải đầu) |
-| Sản phẩm | URL `/san-pham` → custom **ViewProductList**; `/san-pham/[slug]` → chuẩn **ViewContent** (`content_ids` = slug) |
+| Sản phẩm | URL `/mua-ban-nha-dat` → custom **ViewProductList**; `/mua-ban-nha-dat/[slug]` → chuẩn **ViewContent** (`content_ids` = slug) |
 | Dev | Tắt khi `next dev` (`NODE_ENV !== production`) |
 
-Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem chi tiết 1 lô; `ViewProductList` = khách vào danh sách. Có thể tạo conversion URL chứa `/san-pham` trên `PageView` nếu muốn gom cả hai.
+Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem chi tiết 1 lô; `ViewProductList` = khách vào danh sách. Có thể tạo conversion URL chứa `/mua-ban-nha-dat` trên `PageView` nếu muốn gom cả hai.
 
 ---
 
@@ -113,7 +113,7 @@ CRM layout: khuyến nghị `robots: { index: false, follow: false }` để trá
 
 ---
 
-## 7. Công thức SEO lô đã đăng (`/san-pham/[slug]`)
+## 7. Công thức SEO lô đã đăng (`/mua-ban-nha-dat/[slug]`)
 
 Áp dụng khi admin **Đăng web**. Khách và Google chỉ thấy field public (title, slug, excerpt, cover, `priceLabel`, vị trí). Không index lô nháp / đã gỡ.
 
@@ -121,7 +121,7 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
-| **URL** | `https://anhungland.com/san-pham/{slug}` — slug ổn định, không dấu, unique | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
+| **URL** | `https://anhungland.com/mua-ban-nha-dat/{slug}` — slug ổn định, không dấu, unique. `/san-pham/...` 301 | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
 | **Title** | `{title}` + template `\| An Hưng Land`. Một title / lô, khớp H1 | Nhồi «đất nền Đồng Nai giá rẻ mua bán ký gửi…» |
 | **Meta description** | `metaDescription` nếu có, không thì **excerpt** public, cắt ~160 ký tự | Copy giống nhau mọi lô; mô tả CRM / hoa hồng |
 | **Canonical** | Đúng URL tuyệt đối ở trên | Hai URL một lô |
@@ -129,11 +129,11 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 | **Copy** | Excerpt + mô tả **riêng** từng lô (SSR) | Lặp đoạn khuôn + keyword |
 | **OG / Twitter** | title + description như trên; `og:image` = ảnh bìa; thiếu bìa → `/og-default.png`; `summary_large_image` | Ảnh PII / ảnh nội bộ CRM |
 | **JSON-LD** | `RealEstateListing` + `BreadcrumbList`. `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM |
-| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → lô; block sản phẩm khác; list `/san-pham` | Orphan URL |
+| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → lô; block sản phẩm khác; list `/mua-ban-nha-dat` | Orphan URL |
 | **Sitemap** | Chỉ lô `isPublished`. Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán |
-| **robots** | Cho phép `/san-pham`; chặn `/login` + CRM | `Disallow: /san-pham` |
+| **robots** | Cho phép `/mua-ban-nha-dat`; chặn `/login` + CRM | `Disallow: /mua-ban-nha-dat` |
 
 **Giá trên SERP:** cùng `priceLabel` khách thấy. Chính sách làm mờ (3,2 tỷ → `3 tỷ xxx`) thì meta/OG/JSON-LD cũng mờ — không lộ số CRM.
 
-**Danh sách `/san-pham`:** title/H1 `Nhà đất đang bán`; canonical `/san-pham`; OG + `ItemList` các URL đã đăng.
+**Danh sách `/mua-ban-nha-dat`:** title/H1 `Nhà đất đang bán`; canonical `/mua-ban-nha-dat`; OG + `ItemList` các URL đã đăng.
 

@@ -2,13 +2,14 @@ import Link from 'next/link';
 import { JsonLd } from '@/features/public/json-ld';
 import { listingItemListJsonLd, sanPhamListMetadata } from '@/features/public/listing-seo';
 import { listPublicCatalog } from '@/features/public/published-listings';
+import { listingHref } from '@/features/public/site';
 import '@/features/public/public-home.css';
 
 export const dynamic = 'force-dynamic';
 
 export const metadata = sanPhamListMetadata();
 
-export default async function SanPhamListPage() {
+export default async function MuaBanNhaDatListPage() {
   const listings = await listPublicCatalog();
   return (
     <div className="ph">
@@ -25,7 +26,7 @@ export default async function SanPhamListPage() {
           <div className="ph-product-grid">
             {listings.map((p) => (
               <article key={p.slug} className="ph-product">
-                <Link href={`/san-pham/${p.slug}`} className="ph-product-media">
+                <Link href={listingHref(p.slug)} className="ph-product-media">
                   {p.coverImageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img src={p.coverImageUrl} alt={p.title} loading="lazy" />
@@ -34,7 +35,7 @@ export default async function SanPhamListPage() {
                   )}
                 </Link>
                 <div className="ph-product-body">
-                  <Link href={`/san-pham/${p.slug}`}>
+                  <Link href={listingHref(p.slug)}>
                     <h3>{p.title}</h3>
                   </Link>
                   <p className="ph-product-meta">

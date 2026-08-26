@@ -1,6 +1,12 @@
 import type { MetadataRoute } from 'next';
 import { listSitemapListings } from '@/features/public/published-listings';
-import { PUBLIC_SITE_ORIGIN, listingCanonicalUrl } from '@/features/public/site';
+import {
+  PUBLIC_LISTING_PATH,
+  PUBLIC_SITE_ORIGIN,
+  listingCanonicalUrl,
+} from '@/features/public/site';
+
+export const dynamic = 'force-dynamic';
 
 /** URL public ổn định + lô đã Đăng web. Không đưa nháp / đã gỡ. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -19,7 +25,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${PUBLIC_SITE_ORIGIN}/san-pham`,
+      url: `${PUBLIC_SITE_ORIGIN}${PUBLIC_LISTING_PATH}`,
       changeFrequency: 'daily',
       priority: 0.9,
     },

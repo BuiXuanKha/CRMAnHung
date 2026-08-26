@@ -47,7 +47,7 @@ Trang khách thể hiện **thương hiệu An Hưng Land**, cho phép ai cũng 
 | Route (gợi ý) | Nội dung | Ưu tiên |
 |---------------|----------|---------|
 | `/` | Brand hero + nổi bật sản phẩm + lối vào các mục phụ | Chính |
-| `/san-pham` (+ `/san-pham/[slug]`) | Danh sách + chi tiết sản phẩm; OG/share | Chính |
+| `/mua-ban-nha-dat` (+ `/mua-ban-nha-dat/[slug]`) | Danh sách + chi tiết nhà đất; OG/share. `/san-pham` 301 | Chính |
 | `/du-an` (+ `/du-an/[slug]`) | Bài / thông tin dự án | Phụ |
 | `/kien-thuc` (+ bài chi tiết) | Pháp lý, luật, kiến thức BĐS | Phụ |
 | `/kinh-nghiem` (+ bài chi tiết) | Kinh nghiệm mua bán / trao đổi | Phụ |
@@ -73,7 +73,7 @@ Danh sách sản phẩm: ngay dưới fold hoặc section chính tiếp theo —
 
 ## 5. Sản phẩm & chia sẻ MXH
 
-- Mỗi sản phẩm có URL ổn định (`/san-pham/[slug]`).
+- Mỗi sản phẩm có URL ổn định (`/mua-ban-nha-dat/[slug]`).
 - **SEO lô:** công thức title / excerpt / canonical / OG bìa / sitemap chỉ lô đã đăng — [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) §7.
 - Metadata + Open Graph đủ để share Facebook / Zalo / Messenger hiện ảnh + title + mô tả.
 - Trang chi tiết: ảnh, giá (nếu công bố), diện tích, vị trí, mô tả — đủ để khách quyết định xem tiếp / liên hệ.

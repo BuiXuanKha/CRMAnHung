@@ -3,6 +3,7 @@
 import { ExternalLink, Globe, ImageOff } from 'lucide-react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from '@/features/public/brand';
+import { listingHref } from '@/features/public/site';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 import {
@@ -63,7 +64,7 @@ export function LotListingPreview({ lot, busy, onPublish }: Props) {
             {lot.isPublished ? (
               <a
                 className="crm-btn"
-                href={`/san-pham/${lot.slug}`}
+                href={listingHref(lot.slug)}
                 target="_blank"
                 rel="noreferrer"
               >
