@@ -383,7 +383,7 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 **Panel phải — Chi tiết hồ sơ** (biến thể §4.3.2, **một** tab):
 
 - Thu hẹp: thanh dọc nhãn **Chi tiết hồ sơ** (chữ xoay 90°).
-- Mở: kicker «Chi tiết hồ sơ», tên + mã; lưới 2×2 Trạng thái / Giá thỏa thuận / Đã thu / Đã chi; hộp Nhu cầu; bốn nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi` (`CrmDialog`); timeline tiến độ, file, thu/chi gần đây.
+- Mở: kicker «Chi tiết hồ sơ», tên + mã; lưới 2×2 Trạng thái / Giá thỏa thuận / Đã thu / Đã chi; hộp Nhu cầu; bốn nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi` (`CrmDialog`); timeline tiến độ, file, thu/chi gần đây. Mỗi file: hangtag loại (Sổ đỏ `blue` · Căn cước `amber` · Giấy tờ khác `gray`) + tên file.
 - Bấm dòng bảng → chọn + mở panel. Nền dòng chọn `#eff6ff` (§4.5), ghim `#fef9c3`.
 - **Mobile:** ẩn panel; thao tác qua chevron trên thẻ.
 
@@ -646,6 +646,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-24 | Khách: xoá SĐT + sửa tên FB = **NV phụ trách khách** (không chỉ admin). Khôi phục ẩn / hangtag / inbox FB / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |
 | 2026-08-26 | Menu khách **Dịch vụ sổ đỏ** → form `/khach-hang/[id]/dich-vu-so-do` (STAFF + ADMIN; không nút Thêm trên list) |
 | 2026-08-26 | List `/dich-vu-so-do`: nhớ tìm / lọc / cuộn (`sessionStorage`, skill `crm-list-state`) |
+| 2026-08-26 | Panel sổ đỏ **File tài liệu:** hangtag loại giấy (Sổ đỏ / Căn cước / Giấy tờ khác) cạnh tên file |
 | 2026-08-26 | `/dich-vu-so-do` ADMIN: select nhân viên tạo; xem file mật ghi nhật ký `TitleServiceAttachmentView` |
 
 ---

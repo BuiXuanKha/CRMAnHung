@@ -197,6 +197,7 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 
 - Thu hẹp: thanh dọc, chữ xoay 90°, nhãn **Chi tiết hồ sơ**.
 - Mở: tên + mã · SĐT; lưới Trạng thái / Giá / Đã thu / Đã chi; hộp Nhu cầu; nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline tiến độ, file, thu/chi.
+- File tài liệu: hangtag loại **Sổ đỏ** / **Căn cước** / **Giấy tờ khác** cạnh tên file; bấm tên → mở. Ngày đính kèm dòng phụ.
 - Chưa chọn: «Chọn một hồ sơ…»
 
 #### 12.1.6 Nhớ tìm / lọc / cuộn

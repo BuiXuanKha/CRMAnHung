@@ -1,6 +1,7 @@
 import {
   TITLE_SERVICE_STATUS_LABELS,
   TITLE_SERVICE_STEP_LABELS,
+  TitleServiceDocKind,
   TitleServiceStatus,
   TitleServiceStepType,
   type TitleServiceDetail,
@@ -77,6 +78,17 @@ export function statusTone(status: TitleServiceStatus): BadgeTone {
       return 'blue';
     case TitleServiceStatus.HUY:
       return 'red';
+  }
+}
+
+export function docKindTone(kind: TitleServiceDocKind): BadgeTone {
+  switch (kind) {
+    case TitleServiceDocKind.SO_DO:
+      return 'blue';
+    case TitleServiceDocKind.CAN_CUOC:
+      return 'amber';
+    case TitleServiceDocKind.KHAC:
+      return 'gray';
   }
 }
 
