@@ -48,8 +48,9 @@ pnpm run build
 
 echo "==> Build Web (Next.js standalone)"
 cd "$WEB"
-# distDir=.next-build nhưng tsconfig vẫn include .next/types — cache route cũ (vd. /san-pham) làm next build fail.
-rm -rf "$WEB/.next" "$WEB/.next-build"
+# distDir=.next-build. Không xóa .next (PM2 root giữ standalone). Types cũ /san-pham nằm ở .next/types.
+rm -rf "$WEB/.next-build"
+rm -rf "$WEB/.next/types" 2>/dev/null || true
 if [[ ! -f .env.production ]]; then
   # Sổ đỏ còn mock qua isMockMode; login + khách + địa chỉ + lô + GD = API
   printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=true\nNEXT_PUBLIC_USE_MOCK_AUTH=false\n' > .env.production
