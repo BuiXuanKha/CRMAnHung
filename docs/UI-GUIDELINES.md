@@ -566,7 +566,7 @@ Hai việc **khác nhau** — không gộp một màn:
 
 | Việc | Trạng thái |
 |------|------------|
-| **Đăng web công khai** (tin, bài, lô bán) | **Dashboard** `/dashboard` — menu: Tổng quan, Lô đất public mở bán, Bài viết. [`public-content.md`](./domains/public-content.md). Chỉ ADMIN. **Không** thêm UI admin trên 4 trang CRM. |
+| **Đăng web công khai** (tin, bài, lô bán) | **Dashboard** `/dashboard` — menu: Tổng quan, Lô đất, Bài viết. [`public-content.md`](./domains/public-content.md). Chỉ ADMIN. **Không** thêm UI admin trên 4 trang CRM. |
 | Registry / xóa cứng khách, CRUD NV | **Tạm hoãn** (P4). `/quan-tri/khach-hang` vẫn placeholder. |
 
 Khi mock Đăng web: shell CRM §4.2; bảng list §4.5; dialog §4.7. Không dùng layout marketing public cho màn admin.
@@ -659,6 +659,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | `/dashboard/lo-dat`: giữa = lô NV đang Mở bán; phải = preview bài đăng trang khách |
 | 2026-08-26 | `/dashboard/lo-dat`: không H1, không nút Đăng lô cạnh ô tìm; ô tìm chrome như `/lo-dat`; preview ~440px; cột bảng sát list lô NV |
 | 2026-08-26 | `/dashboard/lo-dat` preview: **Đăng web** khi chờ đăng; lô đang hiện chỉ còn link xem trang khách — không nút Gỡ web |
+| 2026-08-26 | Menu trong Dashboard: **Lô đất** (trước: Lô đất public mở bán) |
 
 ---
 

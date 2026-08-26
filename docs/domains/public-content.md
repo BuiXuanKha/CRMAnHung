@@ -109,13 +109,13 @@ PublicPost                        (category, slug, status, cover, body) — khô
 | Màn | Route | Việc |
 |-----|--------|------|
 | **Dashboard** | `/dashboard` | Tổng quan + menu trái. §12 |
-| **Lô đất public mở bán** | `/dashboard/lo-dat` | List lô đăng web. §13 |
+| **Lô đất** | `/dashboard/lo-dat` | List lô đăng web. §13 |
 | **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). §14 |
 | Trang chủ khách | `/` | Mock sẵn |
 
 **Tạm thời không** thêm hành vi/quyền admin trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
-Menu **trong** Dashboard (không gắn lên 4 trang CRM): Tổng quan · Lô đất public mở bán · Bài viết.
+Menu **trong** Dashboard (không gắn lên 4 trang CRM): Tổng quan · Lô đất · Bài viết.
 
 Header CRM: bốn mục NV. ADMIN thêm **Dashboard**. STAFF vào URL `/dashboard` → `/khach-hang`.
 
@@ -187,7 +187,7 @@ Không H1 lặp tên menu trên thanh tìm. H1 trên Tổng quan và Bài viết
 **Máy tính:** cột trái, 3 mục. Active chữ xanh `#2563eb` **700** + nền `#eff6ff`.
 
 1. **Tổng quan** → `/dashboard`
-2. **Lô đất public mở bán** → `/dashboard/lo-dat`
+2. **Lô đất** → `/dashboard/lo-dat`
 3. **Bài viết** → `/dashboard/bai-viet`
 
 **Mobile:** cùng 3 mục, cuộn ngang trên đầu nội dung.
@@ -313,7 +313,7 @@ Không hiện trên list/preview: tên khách, SĐT khách, hoa hồng.
 └ Footer đếm                            │                       ┘
 ```
 
-1. **Không** H1 `Lô đất public mở bán` (đã có trên menu trái).
+1. **Không** H1 (tên đã có trên menu trái: **Lô đất**).
 2. Ô tìm — khung trắng bo 12px, input viền `#cbd5e1` / focus xanh. Placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc. **Không** nút Đăng lô cạnh ô tìm.
 3. **Giữa — bảng** mọi lô NV đang Mở bán. Không icon lọc cột. Không cột Thao tác / công tắc rao bán. Không tên khách.
 4. Bấm hàng → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm ngay.

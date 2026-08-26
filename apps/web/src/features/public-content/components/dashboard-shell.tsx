@@ -11,7 +11,7 @@ import './dashboard-shell.css';
 
 const MENU = [
   { href: '/dashboard', label: 'Tổng quan', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/lo-dat', label: 'Lô đất public mở bán', icon: Map, exact: false },
+  { href: '/dashboard/lo-dat', label: 'Lô đất', icon: Map, exact: false },
   { href: '/dashboard/bai-viet', label: 'Bài viết', icon: FileText, exact: false },
 ] as const;
 
