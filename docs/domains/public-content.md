@@ -392,19 +392,28 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Không `window.confirm`.
 └ Footer đếm                                                   ┘
 ```
 
-1. Ô tìm — `Tìm tiêu đề, chuyên mục...`
+1. Ô tìm — `CrmSearchField`, placeholder `Tìm tiêu đề, chuyên mục...`. Gõ là lọc. Hangtag Clear sau caret.
 2. **Soạn bài** — dialog tiêu đề + chuyên mục; Lưu nháp / Xuất bản. Nội dung dài = slice sau.
 3. Hangtag chuyên mục `blue`: Dự án · Kiến thức · Liên hệ · Chính sách bảo mật · Tin tức · Kinh nghiệm
 4. Hangtag trạng thái: Đã xuất bản `green` · Nháp `gray`
-5. Bấm hàng → `CrmConfirm` Xuất bản / Về nháp (12.1.4).
+5. Bấm hàng → `CrmConfirm` Xuất bản / Về nháp (12.1.4). Toast khi xong.
+6. Lọc cột §4.5.5 (icon `ListFilter` sát chữ tên cột). Không cột Thao tác.
 
-Trống: `Không có bài viết.`
+| Cột | Menu |
+|-----|------|
+| Chuyên mục | Tất cả chuyên mục · từng chuyên mục (6 mục) |
+| Tiêu đề | Không lọc cột (chỉ ô tìm) |
+| Trạng thái | Tất cả trạng thái · Đã xuất bản · Nháp |
+
+Footer: `Hiển thị N / Tổng M bài` (N đã lọc, M cả list).
+
+Trống: `Không có bài viết.` (không lọc) · `Không có bài viết phù hợp.` (đang lọc / tìm).
 
 ### 14.2 Mobile
 
-Cùng 14.1. Thẻ: hai hangtag + tiêu đề.
+Cùng 14.1. Thẻ: hai hangtag + tiêu đề. Thanh tìm: ô tìm + **Bộ lọc** + **Tìm**. Panel: Chuyên mục · Trạng thái. **Xoá lọc** xóa lọc cột (giữ từ khoá ô tìm). Desktop không hiện Bộ lọc / Tìm.
 
-Nhớ list: `crmanhung:public-post-list-state`.
+Nhớ tìm + lọc + dòng chọn + cuộn: `sessionStorage` `crmanhung:public-post-list-state`.
 
 ---
 

@@ -1,18 +1,21 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { FilePlus } from 'lucide-react';
 import { PublicPostStatus, type PublicWebPostRow } from '@crmanhung/shared';
+import { getActiveListScrollEl } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
-import { CrmSearchField } from '@/shared/ui/search-field';
-import { Icon } from '@/shared/ui/icon';
 import { createPublicPost, listPublicWebPosts, setPublicPostStatus } from './api';
 import { ComposePostDialog } from './components/compose-post-dialog';
 import { DashboardPostCards } from './components/dashboard-post-cards';
 import { DashboardPostTable } from './components/dashboard-post-table';
+import { PostFilterBar } from './components/post-filter-bar';
 import { PostStatusConfirm } from './components/post-status-confirm';
-import { matchPostSearch } from './display';
+import {
+  applyPostFilters,
+  countActivePostFilters,
+  matchPostSearch,
+} from './display';
 import { publicPostListState } from './list-state';
 import { invalidatePublicWebQueries, publicWebKeys } from './query';
 import { useFlash } from './use-flash';
@@ -24,12 +27,16 @@ export function PublicPostListPage() {
   const { toast, flash } = useFlash();
   const peeked = publicPostListState.peek();
   const [search, setSearch] = useState(peeked?.searchKeyword ?? '');
+  const [category, setCategory] = useState(peeked?.category ?? '');
+  const [status, setStatus] = useState(peeked?.status ?? '');
+  const [filterOpen, setFilterOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(peeked?.selectedId ?? null);
   const [postConfirm, setPostConfirm] = useState<PublicWebPostRow | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const cardsScrollRef = useRef<HTMLDivElement>(null);
 
   const query = useQuery({
     queryKey: publicWebKeys.posts,
@@ -38,20 +45,51 @@ export function PublicPostListPage() {
 
   const items = query.data ?? [];
   const filtered = useMemo(
-    () => items.filter((row) => matchPostSearch(row, search)),
-    [items, search],
+    () =>
+      applyPostFilters(
+        items.filter((row) => matchPostSearch(row, search)),
+        { category, status },
+      ),
+    [items, search, category, status],
   );
+  const activeFilterCount = countActivePostFilters({ category, status });
+  const hasActiveFilters = activeFilterCount > 0 || Boolean(search.trim());
 
-  function persist(nextSelected: string | null, nextSearch = search) {
-    publicPostListState.save(scrollRef.current, {
-      searchKeyword: nextSearch,
+  function getScrollEl() {
+    return getActiveListScrollEl(tableScrollRef.current, cardsScrollRef.current);
+  }
+
+  function persist(
+    nextSelected: string | null,
+    patch?: Partial<{ searchKeyword: string; category: string; status: string }>,
+  ) {
+    publicPostListState.save(getScrollEl(), {
+      searchKeyword: patch?.searchKeyword ?? search,
+      category: patch?.category ?? category,
+      status: patch?.status ?? status,
       selectedId: nextSelected,
     });
   }
 
+  useLayoutEffect(() => {
+    const root = getScrollEl();
+    if (root) root.scrollTop = 0;
+  }, [search, category, status]);
+
+  useEffect(() => {
+    function onHide() {
+      persist(selectedId);
+    }
+    window.addEventListener('pagehide', onHide);
+    return () => {
+      onHide();
+      window.removeEventListener('pagehide', onHide);
+    };
+  }, [search, category, status, selectedId]);
+
   const onSearch = (value: string) => {
     setSearch(value);
-    persist(selectedId, value);
+    persist(selectedId, { searchKeyword: value });
   };
 
   const onSelect = (id: string) => {
@@ -112,25 +150,32 @@ export function PublicPostListPage() {
       </header>
 
       <section className="pw-filter-wrap" aria-label="Tìm bài viết">
-        <div className="pw-filter">
-          <CrmSearchField
-            className="pw-search"
-            value={search}
-            onValueChange={onSearch}
-            placeholder="Tìm tiêu đề, chuyên mục..."
-            aria-label="Tìm bài viết"
-          />
-          <button
-            type="button"
-            className="crm-btn primary"
-            onClick={() => {
-              setFormError(null);
-              setComposeOpen(true);
-            }}
-          >
-            <Icon icon={FilePlus} size="sm" /> Soạn bài
-          </button>
-        </div>
+        <PostFilterBar
+          keyword={search}
+          onKeyword={onSearch}
+          filtersOpen={filterOpen}
+          onToggleFilters={() => setFilterOpen((v) => !v)}
+          category={category}
+          onCategory={(v) => {
+            setCategory(v);
+            persist(selectedId, { category: v });
+          }}
+          status={status}
+          onStatus={(v) => {
+            setStatus(v);
+            persist(selectedId, { status: v });
+          }}
+          hasActiveFilters={activeFilterCount > 0}
+          onResetFilters={() => {
+            setCategory('');
+            setStatus('');
+            persist(selectedId, { category: '', status: '' });
+          }}
+          onCompose={() => {
+            setFormError(null);
+            setComposeOpen(true);
+          }}
+        />
       </section>
 
       {query.isLoading ? (
@@ -144,15 +189,32 @@ export function PublicPostListPage() {
               selectedId={selectedId}
               onSelect={onSelect}
               heading={null}
-              scrollRef={scrollRef}
+              scrollRef={tableScrollRef}
+              onScroll={() => persist(selectedId)}
+              enableFilters
+              category={category}
+              status={status}
+              onCategory={(v) => {
+                setCategory(v);
+                persist(selectedId, { category: v });
+              }}
+              onStatus={(v) => {
+                setStatus(v);
+                persist(selectedId, { status: v });
+              }}
+              hasActiveFilters={hasActiveFilters}
             />
           </div>
           <div className="pw-list-mobile">
             <DashboardPostCards
               items={filtered}
               total={items.length}
+              selectedId={selectedId}
               onSelect={onSelect}
               heading={null}
+              scrollRef={cardsScrollRef}
+              onScroll={() => persist(selectedId)}
+              hasActiveFilters={hasActiveFilters}
             />
           </div>
         </>
