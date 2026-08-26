@@ -183,6 +183,18 @@
   align-items: center;
 }
 
+.pw-col-head {
+  width: 100%;
+  justify-content: flex-start;
+  gap: 6px;
+}
+
+.pw-col-head > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .pw-grid-row {
   display: grid;
   grid-template-columns: var(--pw-cols);
@@ -373,6 +385,13 @@
   min-width: 200px;
 }
 
+.pw-search-wrap {
+  flex: 1 1 auto;
+  min-width: 200px;
+  display: flex;
+  align-items: center;
+}
+
 .pw-search {
   flex: 1 1 auto;
   min-width: 200px;
@@ -396,6 +415,12 @@
   gap: 6px;
   flex-shrink: 0;
   white-space: nowrap;
+}
+
+.pw-filter-btn,
+.pw-search-btn,
+.pw-filter-advanced {
+  display: none;
 }
 
 .pw-pick-list {
@@ -654,6 +679,100 @@
 
   .pw-list-mobile {
     display: block;
+  }
+
+  .pw-filter {
+    padding: 10px;
+    gap: 6px;
+  }
+
+  .pw-search-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .pw-filter-btn,
+  .pw-search-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-weight: 600;
+    font-size: 0.84rem;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .pw-filter-btn {
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    color: #1e293b;
+  }
+
+  .pw-filter-btn.is-open {
+    background: #e0f2fe;
+    border-color: #38bdf8;
+    color: #075985;
+  }
+
+  .pw-filter-btn.is-active:not(.is-open) {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+
+  .pw-search-btn {
+    border: 1px solid #2563eb;
+    background: #2563eb;
+    color: #fff;
+    font-weight: 700;
+    padding: 7px 18px;
+  }
+
+  .pw-filter-advanced {
+    display: none;
+    flex-basis: 100%;
+    width: 100%;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .pw-filter-advanced.is-open {
+    display: flex;
+  }
+
+  .pw-filter-select {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 7px 10px;
+    font-size: 0.86rem;
+    background: #fff;
+    color: #0f172a;
+    cursor: pointer;
+    font-family: inherit;
+  }
+
+  .pw-filter-select:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  .pw-filter-clear {
+    width: 100%;
+    border: 1px solid #fecaca;
+    background: #fff;
+    color: #b91c1c;
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
   }
 
   .pw-filter .crm-btn {

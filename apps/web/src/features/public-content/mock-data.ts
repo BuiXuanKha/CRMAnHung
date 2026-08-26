@@ -191,6 +191,7 @@ export function buildStaffOpenLots(
         frontageM: plot.frontageM ?? null,
         direction: plot.direction ?? null,
         excerpt: publicExcerpt(listing?.title ?? plot.title, plot.address),
+        priceVnd: plot.priceVnd ?? null,
       };
     });
 }

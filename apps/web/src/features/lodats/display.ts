@@ -136,7 +136,7 @@ export function applyPriceBracket(
   return items.filter((p) => matchesPriceBracket(p.priceVnd, bracket));
 }
 
-function matchesPriceBracket(
+export function matchesPriceBracket(
   price: number | string | null | undefined,
   bracket: PriceBracket,
 ): boolean {

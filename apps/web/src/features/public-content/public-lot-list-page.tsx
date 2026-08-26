@@ -1,16 +1,24 @@
 'use client';
 
-import { useMemo, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
+import type { ExtraFilters, PriceBracket } from '@/features/lodats/display';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
-import { CrmSearchField } from '@/shared/ui/search-field';
 import { listStaffOpenLots, setPublicLotPublished } from './api';
 import { LotListingPreview } from './components/lot-listing-preview';
 import { LotWebConfirm } from './components/lot-web-confirm';
+import { StaffLotFilterBar } from './components/staff-lot-filter-bar';
 import { StaffOpenLotCards } from './components/staff-open-lot-cards';
 import { StaffOpenLotTable } from './components/staff-open-lot-table';
-import { matchLotSearch } from './display';
+import {
+  DEFAULT_STAFF_LOT_EXTRA,
+  applyStaffLotFilters,
+  countActiveStaffLotFilters,
+  matchLotSearch,
+  staffNameFilterOptions,
+  type StaffLotWebFilter,
+} from './display';
 import { publicLotListState } from './list-state';
 import { invalidatePublicWebQueries, publicWebKeys } from './query';
 import { useFlash } from './use-flash';
@@ -23,6 +31,12 @@ export function PublicLotListPage() {
   const { toast, flash } = useFlash();
   const peeked = publicLotListState.peek();
   const [search, setSearch] = useState(peeked?.searchKeyword ?? '');
+  const [kind, setKind] = useState(peeked?.kind ?? '');
+  const [extra, setExtra] = useState<ExtraFilters>(peeked?.extra ?? DEFAULT_STAFF_LOT_EXTRA);
+  const [priceBracket, setPriceBracket] = useState<PriceBracket>(peeked?.priceBracket ?? '');
+  const [staffName, setStaffName] = useState(peeked?.staffName ?? '');
+  const [web, setWeb] = useState<StaffLotWebFilter>(peeked?.web ?? 'all');
+  const [filterOpen, setFilterOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(peeked?.selectedId ?? null);
   const [lotConfirm, setLotConfirm] = useState<PublicWebStaffLotRow | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
@@ -34,22 +48,54 @@ export function PublicLotListPage() {
   });
 
   const items = query.data ?? [];
+  const staffOptions = useMemo(() => staffNameFilterOptions(items), [items]);
   const filtered = useMemo(
-    () => items.filter((row) => matchLotSearch(row, search)),
-    [items, search],
+    () =>
+      applyStaffLotFilters(
+        items.filter((row) => matchLotSearch(row, search)),
+        { kind, extra, priceBracket, staffName, web },
+      ),
+    [items, search, kind, extra, priceBracket, staffName, web],
   );
   const selected = items.find((row) => row.lodatId === selectedId) ?? null;
+  const activeFilterCount = countActiveStaffLotFilters({
+    kind,
+    extra,
+    priceBracket,
+    staffName,
+    web,
+  });
 
-  function persist(nextSelected: string | null, nextSearch = search) {
+  function persist(
+    nextSelected: string | null,
+    patch?: Partial<{
+      searchKeyword: string;
+      kind: string;
+      extra: ExtraFilters;
+      priceBracket: PriceBracket;
+      staffName: string;
+      web: StaffLotWebFilter;
+    }>,
+  ) {
     publicLotListState.save(scrollRef.current, {
-      searchKeyword: nextSearch,
+      searchKeyword: patch?.searchKeyword ?? search,
+      kind: patch?.kind ?? kind,
+      extra: patch?.extra ?? extra,
+      priceBracket: patch?.priceBracket ?? priceBracket,
+      staffName: patch?.staffName ?? staffName,
+      web: patch?.web ?? web,
       selectedId: nextSelected,
     });
   }
 
+  useLayoutEffect(() => {
+    const root = scrollRef.current;
+    if (root) root.scrollTop = 0;
+  }, [search, kind, extra.photo, extra.address, extra.area, extra.direction, priceBracket, staffName, web]);
+
   const onSearch = (value: string) => {
     setSearch(value);
-    persist(selectedId, value);
+    persist(selectedId, { searchKeyword: value });
   };
 
   const onSelect = (lodatId: string) => {
@@ -75,15 +121,48 @@ export function PublicLotListPage() {
   return (
     <div className="pw-page">
       <section className="pw-filter-wrap" aria-label="Tìm lô đang mở bán">
-        <div className="pw-filter">
-          <CrmSearchField
-            className="pw-search"
-            value={search}
-            onValueChange={onSearch}
-            placeholder="Tìm tiêu đề, địa chỉ, nhân viên..."
-            aria-label="Tìm lô đang mở bán"
-          />
-        </div>
+        <StaffLotFilterBar
+          keyword={search}
+          onKeyword={onSearch}
+          filtersOpen={filterOpen}
+          onToggleFilters={() => setFilterOpen((v) => !v)}
+          kind={kind}
+          onKind={(v) => {
+            setKind(v);
+            persist(selectedId, { kind: v });
+          }}
+          priceBracket={priceBracket}
+          onPriceBracket={(v) => {
+            setPriceBracket(v);
+            persist(selectedId, { priceBracket: v });
+          }}
+          web={web}
+          onWeb={(v) => {
+            setWeb(v);
+            persist(selectedId, { web: v });
+          }}
+          staffName={staffName}
+          staffOptions={staffOptions}
+          onStaffName={(v) => {
+            setStaffName(v);
+            persist(selectedId, { staffName: v });
+          }}
+          hasActiveFilters={activeFilterCount > 0}
+          onResetFilters={() => {
+            setKind('');
+            setPriceBracket('');
+            setWeb('all');
+            setStaffName('');
+            setExtra({ ...DEFAULT_STAFF_LOT_EXTRA });
+            persist(selectedId, {
+              kind: '',
+              priceBracket: '',
+              web: 'all',
+              staffName: '',
+              extra: { ...DEFAULT_STAFF_LOT_EXTRA },
+            });
+          }}
+        />
       </section>
 
       {query.isLoading ? (
@@ -98,6 +177,32 @@ export function PublicLotListPage() {
                 selectedId={selectedId}
                 onSelect={onSelect}
                 scrollRef={scrollRef}
+                kind={kind}
+                extra={extra}
+                priceBracket={priceBracket}
+                staffName={staffName}
+                staffOptions={staffOptions}
+                web={web}
+                onKind={(v) => {
+                  setKind(v);
+                  persist(selectedId, { kind: v });
+                }}
+                onExtra={(next) => {
+                  setExtra(next);
+                  persist(selectedId, { extra: next });
+                }}
+                onPriceBracket={(v) => {
+                  setPriceBracket(v);
+                  persist(selectedId, { priceBracket: v });
+                }}
+                onStaffName={(v) => {
+                  setStaffName(v);
+                  persist(selectedId, { staffName: v });
+                }}
+                onWeb={(v) => {
+                  setWeb(v);
+                  persist(selectedId, { web: v });
+                }}
               />
             </div>
             <div className="pw-list-mobile">

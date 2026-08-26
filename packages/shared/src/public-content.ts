@@ -32,6 +32,8 @@ export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   frontageM: z.number().nullable(),
   direction: z.string().nullable(),
   excerpt: z.string(),
+  /** Giá CRM — lọc khoảng giá trên `/dashboard/lo-dat` */
+  priceVnd: z.union([z.number(), z.string()]).nullable(),
 });
 
 export type PublicWebStaffLotRow = z.infer<typeof publicWebStaffLotRowSchema>;

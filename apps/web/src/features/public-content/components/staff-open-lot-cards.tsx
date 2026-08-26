@@ -16,7 +16,7 @@ export function StaffOpenLotCards({ items, total, selectedId, onSelect }: Props)
   return (
     <section className="pw-cards" aria-label="Lô nhân viên đang mở bán">
       {items.length === 0 ? (
-        <p className="pw-empty">Không có lô đang mở bán.</p>
+        <p className="pw-empty">Không có lô đất phù hợp.</p>
       ) : (
         <ul className="pw-card-list">
           {items.map((row) => {

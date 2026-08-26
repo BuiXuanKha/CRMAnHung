@@ -7,6 +7,12 @@ import {
   type PublicWebPostRow,
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
+import {
+  matchesAreaBracket,
+  matchesPriceBracket,
+  type ExtraFilters,
+  type PriceBracket,
+} from '@/features/lodats/display';
 import type { BadgeTone } from '@/shared/ui/badge';
 
 export function lotWebLabel(isPublished: boolean): string {
@@ -64,6 +70,82 @@ export function matchLotSearch(row: PublicWebLotRow, keyword: string): boolean {
   return `${row.title} ${row.location} ${row.priceLabel ?? ''} ${extra}`
     .toLocaleLowerCase('vi')
     .includes(q);
+}
+
+export type StaffLotWebFilter = 'all' | 'published' | 'pending';
+
+export type StaffLotFilters = {
+  kind: string;
+  extra: ExtraFilters;
+  priceBracket: PriceBracket;
+  staffName: string;
+  web: StaffLotWebFilter;
+};
+
+export const DEFAULT_STAFF_LOT_EXTRA: ExtraFilters = {
+  photo: 'all',
+  address: 'all',
+  area: 'all',
+  direction: 'all',
+};
+
+export const WEB_FILTER_OPTIONS: { value: StaffLotWebFilter; label: string }[] = [
+  { value: 'all', label: 'Tất cả web' },
+  { value: 'published', label: 'Đang hiện' },
+  { value: 'pending', label: 'Chờ đăng' },
+];
+
+export function staffNameFilterOptions(
+  items: PublicWebStaffLotRow[],
+): { value: string; label: string }[] {
+  const names = [...new Set(items.map((row) => row.staffName.trim()).filter(Boolean))].sort((a, b) =>
+    a.localeCompare(b, 'vi'),
+  );
+  return [{ value: '', label: 'Tất cả NV' }, ...names.map((name) => ({ value: name, label: name }))];
+}
+
+export function applyStaffLotFilters(
+  items: PublicWebStaffLotRow[],
+  filters: StaffLotFilters,
+): PublicWebStaffLotRow[] {
+  return items.filter((row) => {
+    if (filters.kind && row.kind !== filters.kind) return false;
+    if (filters.staffName && row.staffName !== filters.staffName) return false;
+    if (filters.web === 'published' && !row.isPublished) return false;
+    if (filters.web === 'pending' && row.isPublished) return false;
+
+    const hasPhoto = Boolean(row.coverImageUrl);
+    if (filters.extra.photo === 'has' && !hasPhoto) return false;
+    if (filters.extra.photo === 'empty' && hasPhoto) return false;
+
+    const hasAddr = Boolean(row.location?.trim());
+    if (filters.extra.address === 'has' && !hasAddr) return false;
+    if (filters.extra.address === 'empty' && hasAddr) return false;
+
+    if (!matchesAreaBracket(row.areaM2, filters.extra.area)) return false;
+    if (filters.extra.direction !== 'all') {
+      if ((row.direction?.trim() || '') !== filters.extra.direction) return false;
+    }
+
+    if (filters.priceBracket) {
+      const price = row.priceMode === 'AMOUNT' ? row.priceVnd : null;
+      if (!matchesPriceBracket(price, filters.priceBracket)) return false;
+    }
+    return true;
+  });
+}
+
+export function countActiveStaffLotFilters(filters: StaffLotFilters): number {
+  let n = 0;
+  if (filters.kind) n += 1;
+  if (filters.staffName) n += 1;
+  if (filters.web !== 'all') n += 1;
+  if (filters.extra.photo !== 'all') n += 1;
+  if (filters.extra.address !== 'all') n += 1;
+  if (filters.extra.area !== 'all') n += 1;
+  if (filters.extra.direction !== 'all') n += 1;
+  if (filters.priceBracket) n += 1;
+  return n;
 }
 
 /** Slug URL bài viết (mock). */

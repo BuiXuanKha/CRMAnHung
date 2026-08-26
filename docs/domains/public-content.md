@@ -315,9 +315,23 @@ Không hiện trên list/preview: tên khách, SĐT khách, hoa hồng.
 
 1. **Không** H1 (tên đã có trên menu trái: **Lô đất**).
 2. Ô tìm — khung trắng bo 12px, input viền `#cbd5e1` / focus xanh. Placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc. **Không** nút Đăng lô cạnh ô tìm.
-3. **Giữa — bảng** mọi lô NV đang Mở bán. Không icon lọc cột. Không cột Thao tác / công tắc rao bán. Không tên khách.
+3. **Giữa — bảng** mọi lô NV đang Mở bán. Lọc cột §4.5.5. Không cột Thao tác / công tắc rao bán. Không tên khách.
 4. Bấm hàng → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm ngay.
 5. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list Mở bán).
+
+**Lọc cột (icon `ListFilter` sát chữ tên cột)**
+
+| Cột | Menu |
+|-----|------|
+| Ảnh | Tất cả ảnh · Có ảnh · Chưa có ảnh |
+| Tiêu đề / Địa chỉ | Tất cả địa chỉ · Có địa chỉ · Chưa có địa chỉ |
+| Phân loại | Tất cả · Nhà · Đất |
+| DT · MT · Hướng | Khoảng DT + hướng (AND), cùng `/lo-dat` |
+| Giá | Khoảng 500tr + Chưa có giá — theo giá hiện trên cột (Liên hệ = chưa có giá) |
+| NV | Tất cả NV · từng tên NV trong list |
+| Web | Tất cả web · Đang hiện · Chờ đăng |
+
+Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Không dropdown lọc trên thanh tìm desktop.
 
 **Cột bảng**
 
@@ -345,7 +359,9 @@ Trống: `Không có lô đang mở bán.`
 
 Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ + phân loại + DT/MT/hướng + NV + giá). Preview **dưới** list khi đã chọn dòng — không rail phải.
 
-Nhớ tìm + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-state`.
+Thanh tìm: ô tìm + **Bộ lọc** + **Tìm**. Panel: Phân loại · Giá · Web · NV. **Xoá lọc** xóa mọi lọc (cả cột desktop). Desktop không hiện Bộ lọc / Tìm.
+
+Nhớ tìm + lọc + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-state`.
 
 ---
 
