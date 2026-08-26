@@ -223,7 +223,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 | Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu mã → CrmAlert |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (form §12.5 lodats). ADMIN: CrmAlert không tạo từ menu khách |
-| Dịch vụ sổ đỏ | Đang phát triển (CrmAlert) |
+| Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` (form tạo hồ sơ; ADMIN được tạo) |
 | Ghim khách / Bỏ ghim khách | **Một chỗ**, đổi nhãn theo `isPinned` |
 | **Xóa khách** | Đỏ — confirm **ẩn** (`isHidden`), không hard-delete |
 | Hiện lại khách | Khi đang xem khách ẩn (`@`/`@@`); thay chỗ «Xóa khách» |
@@ -643,7 +643,8 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-25 | Ô tìm list CRM: hangtag **Clear** (`CrmBadge` gray) ngay sau con trỏ — `CrmSearchField` |
 | 2026-08-25 | Helper chung nhớ list (`shared/list-state` + skill `crm-list-state`): `/khach-hang` refactor; `/lo-dat` nhớ tìm/lọc/cuộn; logout xóa mọi `*-list-state` |
 | 2026-08-25 | Khách: `lodatCount` API + Map cạnh tên; bỏ cột Số lô; rail/chi tiết lô từ `GET /customers/:id/lodats` |
-| 2026-08-24 | Khách: xoá SĐT + sửa tên FB = **NV phụ trách khách** (không chỉ admin). Khôi phục ẩn / sổ đỏ từ khách / hangtag / inbox FB / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |
+| 2026-08-24 | Khách: xoá SĐT + sửa tên FB = **NV phụ trách khách** (không chỉ admin). Khôi phục ẩn / hangtag / inbox FB / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |
+| 2026-08-26 | Menu khách **Dịch vụ sổ đỏ** → form `/khach-hang/[id]/dich-vu-so-do` (STAFF + ADMIN; không nút Thêm trên list) |
 
 ---
 

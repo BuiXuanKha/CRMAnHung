@@ -226,9 +226,28 @@
 }
 
 .sd-timeline p,
-.sd-files strong {
+.sd-files strong,
+.sd-file-open {
   margin: 0;
   font-size: 0.84rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.sd-file-open {
+  display: inline;
+  padding: 0;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  color: #1d4ed8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.sd-file-open:hover {
+  color: #1e40af;
 }
 
 @media (max-width: 1024px) {

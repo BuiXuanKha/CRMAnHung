@@ -1,6 +1,6 @@
 import { Construction } from 'lucide-react';
 
-/** Alert dùng chung cho mục Thao tác chưa làm (tạo lô, sổ đỏ…). */
+/** Alert dùng chung cho mục Thao tác chưa làm. */
 export const COMING_SOON_TITLE = 'Chức năng đang phát triển';
 export const COMING_SOON_ICON = Construction;
 export const COMING_SOON_CONFIRM = 'Đã hiểu';

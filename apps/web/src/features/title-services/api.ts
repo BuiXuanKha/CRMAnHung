@@ -1,12 +1,16 @@
 import {
-  TITLE_SERVICE_STATUS_LABELS,
+  TitleServiceStatus,
   addTitleServiceAttachmentSchema,
   addTitleServiceMoneySchema,
   addTitleServiceProgressSchema,
+  createTitleServiceSchema,
+  pinTitleServiceSchema,
   updateTitleServiceSchema,
   type AddTitleServiceAttachmentInput,
   type AddTitleServiceMoneyInput,
   type AddTitleServiceProgressInput,
+  type CreateTitleServiceInput,
+  type PinTitleServiceInput,
   type TitleServiceDetail,
   type TitleServiceListItem,
   type TitleServiceListQuery,
@@ -14,22 +18,20 @@ import {
   type UpdateTitleServiceInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
-import { isMockMode } from '@/shared/api/mode';
-import { computeDaysWorking } from './display';
+import { isMockTitleServices } from '@/shared/api/mode';
+import { getCustomer } from '@/features/customers/api';
+import { computeDaysWorking, sumVnd } from './display';
 import { mockTitleServices } from './mock-data';
 
 const STAFF = 'Bùi Xuân Khả';
+const STAFF_ID = 'emp_kha';
 
 let mockStore: TitleServiceDetail[] = structuredClone(mockTitleServices);
 
 function refreshComputed(row: TitleServiceDetail): TitleServiceDetail {
   const progress = [...row.progress].sort((a, b) => b.happenedAt.localeCompare(a.happenedAt));
-  const thu = row.moneyEntries
-    .filter((e) => e.kind === 'THU')
-    .reduce((s, e) => s + e.amountVnd, 0);
-  const chi = row.moneyEntries
-    .filter((e) => e.kind === 'CHI')
-    .reduce((s, e) => s + e.amountVnd, 0);
+  const thu = sumVnd(row.moneyEntries.filter((e) => e.kind === 'THU').map((e) => e.amountVnd));
+  const chi = sumVnd(row.moneyEntries.filter((e) => e.kind === 'CHI').map((e) => e.amountVnd));
   return {
     ...row,
     progress,
@@ -54,8 +56,12 @@ function toListItem(row: TitleServiceDetail): TitleServiceListItem {
     needSummary: computed.needSummary,
     note: computed.note,
     isPinned: computed.isPinned,
+    pinnedAt: computed.pinnedAt,
     startedAt: computed.startedAt,
+    expectedDoneAt: computed.expectedDoneAt,
     completedAt: computed.completedAt,
+    createdByEmployeeId: computed.createdByEmployeeId,
+    createdByName: computed.createdByName,
     daysWorking: computed.daysWorking,
     documentCount: computed.documentCount,
     totalThuVnd: computed.totalThuVnd,
@@ -74,24 +80,21 @@ function applyQuery(
   if (query.status) {
     next = next.filter((row) => row.status === query.status);
   }
+  if (query.createdByEmployeeId) {
+    next = next.filter((row) => row.createdByEmployeeId === query.createdByEmployeeId);
+  }
   if (query.keyword?.trim()) {
     const q = query.keyword.trim().toLowerCase();
     next = next.filter((row) => {
-      const hay = [
-        row.code,
-        row.customerName,
-        row.primaryPhone ?? '',
-        row.needSummary ?? '',
-        row.note ?? '',
-        TITLE_SERVICE_STATUS_LABELS[row.status],
-      ]
-        .join(' ')
-        .toLowerCase();
+      const hay = [row.code, row.customerName, row.primaryPhone ?? ''].join(' ').toLowerCase();
       return hay.includes(q);
     });
   }
   return [...next].sort((a, b) => {
     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+    const pinA = a.pinnedAt ?? '';
+    const pinB = b.pinnedAt ?? '';
+    if (pinA !== pinB) return pinB.localeCompare(pinA);
     return b.updatedAt.localeCompare(a.updatedAt);
   });
 }
@@ -99,19 +102,87 @@ function applyQuery(
 export async function listTitleServices(
   query: TitleServiceListQuery = {},
 ): Promise<TitleServiceListResponse> {
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const items = applyQuery(mockStore, query).map(toListItem);
     return { items, total: items.length };
   }
   const params = new URLSearchParams();
   if (query.keyword) params.set('keyword', query.keyword);
   if (query.status) params.set('status', query.status);
+  if (query.createdByEmployeeId) params.set('createdByEmployeeId', query.createdByEmployeeId);
   const qs = params.toString();
   return apiFetch<TitleServiceListResponse>(`/title-services${qs ? `?${qs}` : ''}`);
 }
 
+function nextMockCode(): string {
+  const year = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Ho_Chi_Minh',
+    year: 'numeric',
+  }).format(new Date());
+  const prefix = `SD-${year}-`;
+  let max = 0;
+  for (const row of mockStore) {
+    const m = row.code.match(/^SD-\d{4}-(\d+)$/);
+    if (row.code.startsWith(prefix) && m) max = Math.max(max, Number(m[1]));
+  }
+  return `${prefix}${String(max + 1).padStart(4, '0')}`;
+}
+
+export async function createTitleService(
+  input: CreateTitleServiceInput,
+): Promise<TitleServiceDetail> {
+  const parsed = createTitleServiceSchema.parse(input);
+  if (isMockTitleServices()) {
+    const customer = await getCustomer(parsed.customerId);
+    if (customer.isHidden) {
+      throw new Error('Không tạo hồ sơ cho khách đang ẩn.');
+    }
+    const now = new Date().toISOString();
+    const startedAt = parsed.startedAt
+      ? new Date(`${parsed.startedAt}T12:00:00`).toISOString()
+      : now;
+    const expectedDoneAt = parsed.expectedDoneAt
+      ? new Date(`${parsed.expectedDoneAt}T12:00:00`).toISOString()
+      : null;
+    const created = refreshComputed({
+      id: `ts_${Date.now()}`,
+      code: nextMockCode(),
+      customerId: customer.id,
+      customerName: customer.fullName,
+      primaryPhone: customer.primaryPhone ?? null,
+      status: TitleServiceStatus.DANG_LAM,
+      agreedFeeVnd: parsed.agreedFeeVnd ?? null,
+      needSummary: parsed.needSummary?.trim() || null,
+      note: parsed.note?.trim() || null,
+      isPinned: false,
+      pinnedAt: null,
+      startedAt,
+      expectedDoneAt,
+      completedAt: null,
+      createdByEmployeeId: STAFF_ID,
+      createdByName: STAFF,
+      daysWorking: 0,
+      documentCount: 0,
+      totalThuVnd: 0,
+      totalChiVnd: 0,
+      latestProgress: null,
+      createdAt: now,
+      updatedAt: now,
+      progress: [],
+      moneyEntries: [],
+      attachments: [],
+    });
+    mockStore = [created, ...mockStore];
+    return created;
+  }
+  return apiFetch<TitleServiceDetail>('/title-services', {
+    method: 'POST',
+    body: JSON.stringify(parsed),
+  });
+}
+
 export async function getTitleService(id: string): Promise<TitleServiceDetail> {
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const found = mockStore.find((row) => row.id === id);
     if (!found) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     return refreshComputed(found);
@@ -124,7 +195,7 @@ export async function updateTitleService(
   input: UpdateTitleServiceInput,
 ): Promise<TitleServiceListItem> {
   const parsed = updateTitleServiceSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -144,7 +215,8 @@ export async function updateTitleService(
       needSummary:
         parsed.needSummary !== undefined ? parsed.needSummary : current.needSummary,
       note: parsed.note !== undefined ? parsed.note : current.note,
-      isPinned: parsed.isPinned ?? current.isPinned,
+      expectedDoneAt:
+        parsed.expectedDoneAt !== undefined ? parsed.expectedDoneAt : current.expectedDoneAt,
       completedAt,
       updatedAt: now,
     });
@@ -157,12 +229,37 @@ export async function updateTitleService(
   });
 }
 
+export async function pinTitleService(
+  id: string,
+  input: PinTitleServiceInput,
+): Promise<TitleServiceListItem> {
+  const parsed = pinTitleServiceSchema.parse(input);
+  if (isMockTitleServices()) {
+    const idx = mockStore.findIndex((row) => row.id === id);
+    if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
+    const now = new Date().toISOString();
+    const current = mockStore[idx];
+    const updated = refreshComputed({
+      ...current,
+      isPinned: parsed.pinned,
+      pinnedAt: parsed.pinned ? (current.pinnedAt ?? now) : null,
+      updatedAt: now,
+    });
+    mockStore = mockStore.map((row, i) => (i === idx ? updated : row));
+    return toListItem(updated);
+  }
+  return apiFetch<TitleServiceListItem>(`/title-services/${id}/pin`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed),
+  });
+}
+
 export async function addTitleServiceProgress(
   id: string,
   input: AddTitleServiceProgressInput,
 ): Promise<TitleServiceDetail> {
   const parsed = addTitleServiceProgressSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -174,6 +271,7 @@ export async function addTitleServiceProgress(
       stepType: parsed.stepType,
       note: parsed.note?.trim() || null,
       happenedAt,
+      createdByEmployeeId: STAFF_ID,
       employeeName: STAFF,
     };
     const current = mockStore[idx];
@@ -196,7 +294,7 @@ export async function addTitleServiceMoney(
   input: AddTitleServiceMoneyInput,
 ): Promise<TitleServiceDetail> {
   const parsed = addTitleServiceMoneySchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -209,6 +307,8 @@ export async function addTitleServiceMoney(
       title: parsed.title.trim(),
       amountVnd: parsed.amountVnd,
       happenedAt,
+      note: parsed.note?.trim() || null,
+      createdByEmployeeId: STAFF_ID,
       employeeName: STAFF,
     };
     const current = mockStore[idx];
@@ -228,10 +328,13 @@ export async function addTitleServiceMoney(
 
 export async function addTitleServiceAttachment(
   id: string,
-  input: AddTitleServiceAttachmentInput,
+  input: { kind: AddTitleServiceAttachmentInput['kind']; file: File },
 ): Promise<TitleServiceDetail> {
-  const parsed = addTitleServiceAttachmentSchema.parse(input);
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
+    const parsed = addTitleServiceAttachmentSchema.parse({
+      kind: input.kind,
+      fileName: input.file.name,
+    });
     const idx = mockStore.findIndex((row) => row.id === id);
     if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     const now = new Date().toISOString();
@@ -240,6 +343,7 @@ export async function addTitleServiceAttachment(
       kind: parsed.kind,
       fileName: parsed.fileName.trim(),
       createdAt: now,
+      createdByEmployeeId: STAFF_ID,
     };
     const current = mockStore[idx];
     const updated = refreshComputed({
@@ -250,14 +354,48 @@ export async function addTitleServiceAttachment(
     mockStore = mockStore.map((row, i) => (i === idx ? updated : row));
     return updated;
   }
+  assertTitleServiceFile(input.file);
+  const body = new FormData();
+  body.append('kind', input.kind);
+  body.append('file', input.file);
   return apiFetch<TitleServiceDetail>(`/title-services/${id}/attachments`, {
     method: 'POST',
-    body: JSON.stringify(parsed),
+    body,
   });
 }
 
+export async function getTitleServiceAttachmentUrl(
+  id: string,
+  attachmentId: string,
+): Promise<{ url: string; expiresAt: string }> {
+  if (isMockTitleServices()) {
+    throw new Error('Tài liệu mock không mở được file thật.');
+  }
+  return apiFetch<{ url: string; expiresAt: string }>(
+    `/title-services/${id}/attachments/${attachmentId}/url`,
+  );
+}
+
+const TITLE_FILE_MAX_BYTES = 12 * 1024 * 1024;
+const TITLE_FILE_MIMES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'application/pdf',
+]);
+
+export function assertTitleServiceFile(file: File) {
+  if (!file.size) throw new Error('Thiếu file tài liệu.');
+  if (file.size > TITLE_FILE_MAX_BYTES) throw new Error('File tối đa 12 MB.');
+  const mime = (file.type || '').toLowerCase();
+  if (!TITLE_FILE_MIMES.has(mime)) {
+    throw new Error('Chỉ nhận ảnh (JPEG/PNG/WebP/GIF) hoặc PDF.');
+  }
+}
+
 export async function deleteTitleService(id: string): Promise<void> {
-  if (isMockMode()) {
+  if (isMockTitleServices()) {
     const exists = mockStore.some((row) => row.id === id);
     if (!exists) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
     mockStore = mockStore.filter((row) => row.id !== id);

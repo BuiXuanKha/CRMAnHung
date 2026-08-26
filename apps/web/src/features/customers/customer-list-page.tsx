@@ -44,12 +44,6 @@ import { FilterBar } from './components/filter-bar';
 import { CustomerCardList } from './components/customer-card-list';
 import { RightRail, type RailKey } from './components/right-rail';
 import { applyExtraFilters, countCustomerStats, countMobileCustomerFilters, parseSearchKeyword, type ExtraFilters } from './display';
-import {
-  COMING_SOON_CONFIRM,
-  COMING_SOON_ICON,
-  COMING_SOON_TITLE,
-  comingSoonMessage,
-} from './coming-soon';
 import { openExternalUrl, facebookInboxChatUrl, messengerComUrl } from './messenger';
 import {
   getActiveListScrollEl,
@@ -426,12 +420,8 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'sodo') {
-      setAlertBox({
-        title: COMING_SOON_TITLE,
-        message: comingSoonMessage(`Dịch vụ sổ đỏ cho «${customer.fullName}»`),
-        icon: COMING_SOON_ICON,
-        confirmLabel: COMING_SOON_CONFIRM,
-      });
+      saveListBeforeLeave(customer.id);
+      router.push(`/khach-hang/${customer.id}/dich-vu-so-do`);
       return;
     }
     if (action === 'pin') {

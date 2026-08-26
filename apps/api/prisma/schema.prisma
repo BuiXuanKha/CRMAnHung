@@ -33,6 +33,10 @@ model User {
   createdLodats     Lodat[]                @relation("LodatCreator")
   createdLodatMaps  LodatCustomerMap[]     @relation("LodatMapCreator")
   createdTransactions Transaction[]        @relation("TransactionCreator")
+  createdTitleServices TitleService[]      @relation("TitleServiceCreator")
+  createdTitleServiceProgress TitleServiceProgress[] @relation("TitleServiceProgressCreator")
+  createdTitleServiceMoney TitleServiceMoney[] @relation("TitleServiceMoneyCreator")
+  createdTitleServiceAttachments TitleServiceAttachment[] @relation("TitleServiceAttachmentCreator")
 }
 
 model RefreshToken {
@@ -72,6 +76,7 @@ model Customer {
   careNotes     CustomerCareNote[]
   lodatMaps     LodatCustomerMap[]
   transactionParties TransactionParty[]
+  titleServices TitleService[]
 
   @@index([employeeId])
   @@index([status])
@@ -493,48 +498,87 @@ model TransactionAttachment {
   @@index([transactionId, sortOrder])
 }
 
+/// Hồ sơ làm sổ đỏ — khớp tblTitleService (CRM cũ). Tiền BIGINT. File = private R2.
 model TitleService {
-  id         String   @id @default(cuid())
-  customerId String?
-  title      String
-  status     String   @default("DANG_LAM")
-  note       String?
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id                  String    @id @default(cuid())
+  code                String    @unique
+  customerId          String
+  status              String    @default("DANG_LAM") // DANG_LAM | TAM_DUNG | HOAN_THANH | HUY
+  agreedFeeVnd        BigInt?
+  needSummary         String?
+  note                String?
+  startedAt           DateTime
+  expectedDoneAt      DateTime?
+  completedAt         DateTime?
+  createdByEmployeeId String
+  isPinned            Boolean   @default(false)
+  pinnedAt            DateTime?
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
 
-  progress    TitleServiceProgress[]
+  customer     Customer                  @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  createdBy    User                      @relation("TitleServiceCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+  progress     TitleServiceProgress[]
   moneyEntries TitleServiceMoney[]
-  attachments TitleServiceAttachment[]
+  attachments  TitleServiceAttachment[]
+
+  @@index([customerId])
+  @@index([createdByEmployeeId])
+  @@index([status])
+  @@index([isPinned, pinnedAt])
+  @@index([updatedAt])
 }
 
 model TitleServiceProgress {
-  id             String   @id @default(cuid())
-  titleServiceId String
-  note           String
-  createdAt      DateTime @default(now())
+  id                  String   @id @default(cuid())
+  titleServiceId      String
+  stepType            String // BAN_GIA | THU_THAP_GIAY_TO | DO_DAC | NOP_HO_SO | BO_SUNG | LAM_VIEC_CO_QUAN | NHAN_KET_QUA | BAN_GIAO | KHAC
+  note                String?
+  happenedAt          DateTime
+  createdByEmployeeId String
+  createdAt           DateTime @default(now())
 
   titleService TitleService @relation(fields: [titleServiceId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("TitleServiceProgressCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([titleServiceId, happenedAt])
+  @@index([createdByEmployeeId])
 }
 
 model TitleServiceMoney {
-  id             String   @id @default(cuid())
-  titleServiceId String
-  direction      String // IN | OUT
-  amountVnd      Int
-  note           String?
-  createdAt      DateTime @default(now())
+  id                  String   @id @default(cuid())
+  titleServiceId      String
+  kind                String // THU | CHI
+  title               String
+  amountVnd           BigInt
+  note                String?
+  happenedAt          DateTime
+  createdByEmployeeId String
+  createdAt           DateTime @default(now())
 
   titleService TitleService @relation(fields: [titleServiceId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("TitleServiceMoneyCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@index([titleServiceId, happenedAt])
+  @@index([createdByEmployeeId])
 }
 
+/// Giấy tờ mật — objectKey chỉ private R2 (không CDN / không URL tĩnh).
 model TitleServiceAttachment {
-  id             String   @id @default(cuid())
-  titleServiceId String
-  objectKey       String
-  label          String?
-  createdAt      DateTime @default(now())
+  id                  String   @id @default(cuid())
+  titleServiceId      String
+  kind                String // SO_DO | CAN_CUOC | KHAC
+  fileName            String
+  objectKey           String
+  createdByEmployeeId String
+  createdAt           DateTime @default(now())
 
   titleService TitleService @relation(fields: [titleServiceId], references: [id], onDelete: Cascade)
+  createdBy    User         @relation("TitleServiceAttachmentCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+
+  @@unique([objectKey])
+  @@index([titleServiceId])
+  @@index([createdByEmployeeId])
 }
 
 model ImageRotation {
