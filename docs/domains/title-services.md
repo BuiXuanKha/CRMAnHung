@@ -1,7 +1,7 @@
 # Domain: Title services (Dịch vụ sổ đỏ)
 
 - **Slug:** `title-services`
-- **Status:** Ready for mock — list UI xong; **schema Prisma stub lệch CRM cũ** (đọc code+DB 2026-08-26). Copy data **sau** khi sửa schema.
+- **Status:** Ready for API — contract Zod + Prisma `TitleService*` chốt (2026-08-26). Chưa Nest / chưa copy.
 - **Nguồn:** màn [`/dich-vu-so-do`](https://anhungland.com/dich-vu-so-do) (web mới) + CRM cũ `/dich-vu-so-do` (API `/api/title-services`, SQLite `tblTitleService*`)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.7 + §4.5
 - **Contract:** `packages/shared/src/title-services.ts`
@@ -32,7 +32,7 @@ Tạo hồ sơ từ menu khách «Dịch vụ sổ đỏ». **Không** nút Thê
 | Hoàn thành | `HOAN_THANH` | blue |
 | Hủy | `HUY` | red |
 
-**Số ngày:** từ `startedAt` đến nay; khi **Hoàn thành** dừng tại `completedAt`. CRM cũ: **Hủy không ghi** `completedAt` (số ngày vẫn chạy). `0` → «Hôm nay».
+**Số ngày:** từ `startedAt` đến nay; khi **Hoàn thành hoặc Hủy** dừng tại `completedAt` (CRM mới ghi cả hai). `0` → «Hôm nay».
 
 Tiến độ gợi ý: Bàn giá, Thu thập giấy tờ, Đo đạc, Nộp hồ sơ, Bổ sung, Làm việc cơ quan, Nhận kết quả, Bàn giao, Khác — API cũ **không chặn** `StepType` ngoài list. Thu/Chi. Tài liệu: Sổ đỏ / Căn cước / Khác (hoặc chuỗi tự nhập).
 
@@ -65,9 +65,9 @@ Ownership list = `CreatedByEmployeeId`, không phải `Customer.employeeId` (tr�
 
 ## 7. Contract / API
 
-`packages/shared/src/title-services.ts` gần CRM cũ (`code`, `needSummary`, `agreedFeeVnd`, ghim, thu/chi). **Prisma `TitleService` hiện stub** (`title`/`note`, thiếu mã, NV, ghim, phí, ngày) — **sửa schema trước khi copy**.
+`packages/shared/src/title-services.ts` + Prisma `TitleService*` khớp CRM cũ: `code`, `customerId`, `createdByEmployeeId`, `agreedFeeVnd` BigInt, ghim, `startedAt` / `expectedDoneAt` / `completedAt`, tiến độ `stepType`, tiền `kind` THU|CHI, file `objectKey` **private** (contract **không** trả URL public).
 
-Prefix mới dự kiến `/api/v1/title-services` (chưa Nest).
+Prefix mới dự kiến `/api/v1/title-services` (chưa Nest — lộ trình §13.3 bước 4).
 
 ## 8. Mock data
 
@@ -81,16 +81,16 @@ Prefix mới dự kiến `/api/v1/title-services` (chưa Nest).
 
 Chi tiết: [`MIGRATION.md`](../MIGRATION.md) bước 12. Live (2026-08-26): **1** hồ sơ `SD-2026-0001` (`DANG_LAM`, **kha**, khách `PersonId` 1561), 2 tiến độ, 3 khoản tiền (thu 13tr / chi 2tr), **0** file. Thư mục `img/title-services` trống.
 
-| Cũ | Mới (chốt khi sửa Prisma) |
-|----|---------------------------|
+| Cũ | Mới (đã chốt Prisma) |
+|----|----------------------|
 | `tblTitleService` | `TitleService` (`code`, `customerId`, `createdByEmployeeId`, BigInt phí, ghim, `startedAt`…) |
-| `tblTitleServiceProgress` | `TitleServiceProgress` (`stepType`, `happenedAt`) |
-| `tblTitleServiceMoney` | `TitleServiceMoney` (`kind` THU/CHI, `title`, `amountVnd`) |
-| `tblTitleServiceAttachment` | `TitleServiceAttachment` (`objectKey` R2, `kind`) |
+| `tblTitleServiceProgress` | `TitleServiceProgress` (`stepType`, `happenedAt`, `createdByEmployeeId`) |
+| `tblTitleServiceMoney` | `TitleServiceMoney` (`kind` THU/CHI, `title`, `amountVnd` BigInt) |
+| `tblTitleServiceAttachment` | `TitleServiceAttachment` (`objectKey` private R2, `kind`, `fileName`) |
 
 ## 11. CRM cũ vs web mới
 
-- Tìm cũ: mã + tên + SĐT. Mock mới thêm nhu cầu / ghi chú / nhãn trạng thái.
+- Tìm: mã + tên + SĐT (không tìm nhu cầu / ghi chú).
 - Cũ ADMIN: `?employeeId=`. Mới: chưa.
 - Không `@` / `@@`.
 - Xóa cũ = cứng (kèm file). Mock chỉ gỡ list.
@@ -287,8 +287,8 @@ Khách + User **đã có**. List mock §12 **đã có**.
 | # | Việc | Vì sao thứ tự này |
 |---|------|-------------------|
 | **1** | Chốt docs (mục 13.1–13.2) | Trước schema / API |
-| **2** | Contract Zod: đủ cột cũ + `createdBy` + attachment **không** public URL | UI/API cùng shape |
-| **3** | Sửa Prisma `TitleService*` (bỏ stub; BigInt tiền; FK khách + NV) | Schema trước data |
+| **2** | ~~Contract Zod~~ **xong** — `createdBy`, BigInt tiền, file không public URL | UI/API cùng shape |
+| **3** | ~~Prisma `TitleService*`~~ **xong** — bỏ stub; FK khách + NV | Schema trước data |
 | **4** | Nest CRUD hồ sơ: list / get / tạo / sửa / ghim / xóa — **chưa** file | Xương ownership |
 | **5** | Nest tiến độ + thu/chi | Nhật ký / tiền trên hồ sơ sống |
 | **6** | Nest file: upload private R2 + signed URL + xóa object | Giấy tờ mật |

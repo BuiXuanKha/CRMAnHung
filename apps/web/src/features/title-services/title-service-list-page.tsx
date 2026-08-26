@@ -17,6 +17,7 @@ import {
   deleteTitleService,
   getTitleService,
   listTitleServices,
+  pinTitleService,
   updateTitleService,
 } from './api';
 import { ActionDialogs, type DialogKind } from './components/action-dialogs';
@@ -89,7 +90,7 @@ export function TitleServiceListPage() {
 
   const pinMut = useMutation({
     mutationFn: (item: TitleServiceListItem) =>
-      updateTitleService(item.id, { isPinned: !item.isPinned }),
+      pinTitleService(item.id, { pinned: !item.isPinned }),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ['title-services'] });
     },

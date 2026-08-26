@@ -9,9 +9,20 @@ import {
 } from '@crmanhung/shared';
 import type { BadgeTone } from '@/shared/ui/badge';
 
-export function formatMoneyVnd(n?: number | null): string {
-  if (n == null) return '—';
-  return `${n.toLocaleString('vi-VN')} đ`;
+function toVndNumber(n?: number | string | null): number | null {
+  if (n == null || n === '') return null;
+  const v = typeof n === 'string' ? Number(n) : n;
+  return Number.isFinite(v) ? v : null;
+}
+
+export function formatMoneyVnd(n?: number | string | null): string {
+  const v = toVndNumber(n);
+  if (v == null) return '—';
+  return `${v.toLocaleString('vi-VN')} đ`;
+}
+
+export function sumVnd(amounts: Array<number | string>): number {
+  return amounts.reduce<number>((s, n) => s + (toVndNumber(n) ?? 0), 0);
 }
 
 export function formatDateShort(iso?: string | null): string {
@@ -151,7 +162,8 @@ export function applyExtraFilters(
     if (extra.progress === 'has' && !progress) return false;
     if (extra.progress === 'empty' && progress) return false;
 
-    const money = item.agreedFeeVnd != null && item.agreedFeeVnd > 0;
+    const fee = toVndNumber(item.agreedFeeVnd);
+    const money = fee != null && fee > 0;
     if (extra.money === 'has' && !money) return false;
     if (extra.money === 'empty' && money) return false;
 
@@ -168,25 +180,44 @@ export function todayInputValue(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
+const MOCK_STAFF_ID = 'emp_kha';
+const MOCK_STAFF_NAME = 'Bùi Xuân Khả';
+
 export function hydrateTitleServiceDetail(
   row: Omit<
     TitleServiceDetail,
-    'daysWorking' | 'documentCount' | 'totalThuVnd' | 'totalChiVnd' | 'latestProgress'
+    | 'daysWorking'
+    | 'documentCount'
+    | 'totalThuVnd'
+    | 'totalChiVnd'
+    | 'latestProgress'
+    | 'createdByEmployeeId'
+    | 'createdByName'
+    | 'expectedDoneAt'
+    | 'pinnedAt'
   > & {
+    createdByEmployeeId?: string;
+    createdByName?: string | null;
+    expectedDoneAt?: string | null;
+    pinnedAt?: string | null;
     progress: TitleServiceDetail['progress'];
     moneyEntries: TitleServiceDetail['moneyEntries'];
     attachments: TitleServiceDetail['attachments'];
   },
 ): TitleServiceDetail {
-  const thu = row.moneyEntries
-    .filter((e) => e.kind === 'THU')
-    .reduce((s, e) => s + e.amountVnd, 0);
-  const chi = row.moneyEntries
-    .filter((e) => e.kind === 'CHI')
-    .reduce((s, e) => s + e.amountVnd, 0);
+  const thu = sumVnd(
+    row.moneyEntries.filter((e) => e.kind === 'THU').map((e) => e.amountVnd),
+  );
+  const chi = sumVnd(
+    row.moneyEntries.filter((e) => e.kind === 'CHI').map((e) => e.amountVnd),
+  );
   const progress = [...row.progress].sort((a, b) => b.happenedAt.localeCompare(a.happenedAt));
   return {
     ...row,
+    createdByEmployeeId: row.createdByEmployeeId ?? MOCK_STAFF_ID,
+    createdByName: row.createdByName ?? MOCK_STAFF_NAME,
+    expectedDoneAt: row.expectedDoneAt ?? null,
+    pinnedAt: row.pinnedAt ?? (row.isPinned ? row.updatedAt : null),
     daysWorking: computeDaysWorking(row.startedAt, row.completedAt, row.status),
     documentCount: row.attachments.length,
     totalThuVnd: thu,

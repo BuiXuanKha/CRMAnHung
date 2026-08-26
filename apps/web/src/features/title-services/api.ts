@@ -1,12 +1,13 @@
 import {
-  TITLE_SERVICE_STATUS_LABELS,
   addTitleServiceAttachmentSchema,
   addTitleServiceMoneySchema,
   addTitleServiceProgressSchema,
+  pinTitleServiceSchema,
   updateTitleServiceSchema,
   type AddTitleServiceAttachmentInput,
   type AddTitleServiceMoneyInput,
   type AddTitleServiceProgressInput,
+  type PinTitleServiceInput,
   type TitleServiceDetail,
   type TitleServiceListItem,
   type TitleServiceListQuery,
@@ -15,21 +16,18 @@ import {
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 import { isMockMode } from '@/shared/api/mode';
-import { computeDaysWorking } from './display';
+import { computeDaysWorking, sumVnd } from './display';
 import { mockTitleServices } from './mock-data';
 
 const STAFF = 'Bùi Xuân Khả';
+const STAFF_ID = 'emp_kha';
 
 let mockStore: TitleServiceDetail[] = structuredClone(mockTitleServices);
 
 function refreshComputed(row: TitleServiceDetail): TitleServiceDetail {
   const progress = [...row.progress].sort((a, b) => b.happenedAt.localeCompare(a.happenedAt));
-  const thu = row.moneyEntries
-    .filter((e) => e.kind === 'THU')
-    .reduce((s, e) => s + e.amountVnd, 0);
-  const chi = row.moneyEntries
-    .filter((e) => e.kind === 'CHI')
-    .reduce((s, e) => s + e.amountVnd, 0);
+  const thu = sumVnd(row.moneyEntries.filter((e) => e.kind === 'THU').map((e) => e.amountVnd));
+  const chi = sumVnd(row.moneyEntries.filter((e) => e.kind === 'CHI').map((e) => e.amountVnd));
   return {
     ...row,
     progress,
@@ -54,8 +52,12 @@ function toListItem(row: TitleServiceDetail): TitleServiceListItem {
     needSummary: computed.needSummary,
     note: computed.note,
     isPinned: computed.isPinned,
+    pinnedAt: computed.pinnedAt,
     startedAt: computed.startedAt,
+    expectedDoneAt: computed.expectedDoneAt,
     completedAt: computed.completedAt,
+    createdByEmployeeId: computed.createdByEmployeeId,
+    createdByName: computed.createdByName,
     daysWorking: computed.daysWorking,
     documentCount: computed.documentCount,
     totalThuVnd: computed.totalThuVnd,
@@ -74,24 +76,21 @@ function applyQuery(
   if (query.status) {
     next = next.filter((row) => row.status === query.status);
   }
+  if (query.createdByEmployeeId) {
+    next = next.filter((row) => row.createdByEmployeeId === query.createdByEmployeeId);
+  }
   if (query.keyword?.trim()) {
     const q = query.keyword.trim().toLowerCase();
     next = next.filter((row) => {
-      const hay = [
-        row.code,
-        row.customerName,
-        row.primaryPhone ?? '',
-        row.needSummary ?? '',
-        row.note ?? '',
-        TITLE_SERVICE_STATUS_LABELS[row.status],
-      ]
-        .join(' ')
-        .toLowerCase();
+      const hay = [row.code, row.customerName, row.primaryPhone ?? ''].join(' ').toLowerCase();
       return hay.includes(q);
     });
   }
   return [...next].sort((a, b) => {
     if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+    const pinA = a.pinnedAt ?? '';
+    const pinB = b.pinnedAt ?? '';
+    if (pinA !== pinB) return pinB.localeCompare(pinA);
     return b.updatedAt.localeCompare(a.updatedAt);
   });
 }
@@ -106,6 +105,7 @@ export async function listTitleServices(
   const params = new URLSearchParams();
   if (query.keyword) params.set('keyword', query.keyword);
   if (query.status) params.set('status', query.status);
+  if (query.createdByEmployeeId) params.set('createdByEmployeeId', query.createdByEmployeeId);
   const qs = params.toString();
   return apiFetch<TitleServiceListResponse>(`/title-services${qs ? `?${qs}` : ''}`);
 }
@@ -144,7 +144,8 @@ export async function updateTitleService(
       needSummary:
         parsed.needSummary !== undefined ? parsed.needSummary : current.needSummary,
       note: parsed.note !== undefined ? parsed.note : current.note,
-      isPinned: parsed.isPinned ?? current.isPinned,
+      expectedDoneAt:
+        parsed.expectedDoneAt !== undefined ? parsed.expectedDoneAt : current.expectedDoneAt,
       completedAt,
       updatedAt: now,
     });
@@ -152,6 +153,31 @@ export async function updateTitleService(
     return toListItem(updated);
   }
   return apiFetch<TitleServiceListItem>(`/title-services/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed),
+  });
+}
+
+export async function pinTitleService(
+  id: string,
+  input: PinTitleServiceInput,
+): Promise<TitleServiceListItem> {
+  const parsed = pinTitleServiceSchema.parse(input);
+  if (isMockMode()) {
+    const idx = mockStore.findIndex((row) => row.id === id);
+    if (idx < 0) throw new Error('Không tìm thấy hồ sơ sổ đỏ');
+    const now = new Date().toISOString();
+    const current = mockStore[idx];
+    const updated = refreshComputed({
+      ...current,
+      isPinned: parsed.pinned,
+      pinnedAt: parsed.pinned ? (current.pinnedAt ?? now) : null,
+      updatedAt: now,
+    });
+    mockStore = mockStore.map((row, i) => (i === idx ? updated : row));
+    return toListItem(updated);
+  }
+  return apiFetch<TitleServiceListItem>(`/title-services/${id}/pin`, {
     method: 'PATCH',
     body: JSON.stringify(parsed),
   });
@@ -174,6 +200,7 @@ export async function addTitleServiceProgress(
       stepType: parsed.stepType,
       note: parsed.note?.trim() || null,
       happenedAt,
+      createdByEmployeeId: STAFF_ID,
       employeeName: STAFF,
     };
     const current = mockStore[idx];
@@ -209,6 +236,8 @@ export async function addTitleServiceMoney(
       title: parsed.title.trim(),
       amountVnd: parsed.amountVnd,
       happenedAt,
+      note: parsed.note?.trim() || null,
+      createdByEmployeeId: STAFF_ID,
       employeeName: STAFF,
     };
     const current = mockStore[idx];
@@ -240,6 +269,7 @@ export async function addTitleServiceAttachment(
       kind: parsed.kind,
       fileName: parsed.fileName.trim(),
       createdAt: now,
+      createdByEmployeeId: STAFF_ID,
     };
     const current = mockStore[idx];
     const updated = refreshComputed({
