@@ -1,0 +1,89 @@
+name: Copy legacy title services
+
+# One-shot: SSH VPS, copy tblTitleService* → Postgres (+ file private R2 nếu có).
+# Không đụng CRM cũ (SQLite chỉ đọc). Không restart PM2.
+#
+# Chạy khi file workflow / script copy được đẩy lên main (hoặc Run workflow).
+# Cần schema TitleService* đã deploy (PR sổ đỏ CRUD).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/copy-legacy-title-services.yml'
+      - 'apps/api/scripts/migrate-title-services-from-legacy.ts'
+  workflow_dispatch:
+
+concurrency:
+  group: copy-legacy-title-services
+  cancel-in-progress: false
+
+jobs:
+  copy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
+      SSH_USER: deploy
+      REMOTE_ROOT: '/var/www/crmanhung'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        env:
+          SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          set -euo pipefail
+          test -n "${SSH_HOST:-}" || { echo "Missing secret DEPLOY_SSH_HOST"; exit 1; }
+          test -n "${SSH_KEY:-}" || { echo "Missing secret DEPLOY_SSH_KEY"; exit 1; }
+
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          KEY_TRIMMED=$(printf '%s' "$SSH_KEY" | tr -d '\r')
+          if printf '%s' "$KEY_TRIMMED" | grep -q "BEGIN .*PRIVATE KEY"; then
+            printf '%s\n' "$KEY_TRIMMED" > ~/.ssh/deploy_key
+          else
+            printf '%s' "$KEY_TRIMMED" | base64 -d > ~/.ssh/deploy_key
+          fi
+          chmod 600 ~/.ssh/deploy_key
+
+          ssh-keyscan -H "$SSH_HOST" > ~/.ssh/known_hosts 2>/tmp/keyscan.err || true
+          test -s ~/.ssh/known_hosts || { cat /tmp/keyscan.err; exit 1; }
+
+          printf '%s\n' \
+            '#!/bin/bash' \
+            'exec ssh -i "$HOME/.ssh/deploy_key" -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/known_hosts" "$@"' \
+            > "$HOME/.ssh/rsh.sh"
+          chmod +x "$HOME/.ssh/rsh.sh"
+          echo "REMOTE=${SSH_USER}@${SSH_HOST}" > "$HOME/.ssh/deploy.env"
+          "$HOME/.ssh/rsh.sh" "${SSH_USER}@${SSH_HOST}" "echo SSH_OK"
+
+      - name: Sync migrate script
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          rsync -az -e "$RSH" \
+            ./apps/api/scripts/migrate-title-services-from-legacy.ts \
+            "${REMOTE}:${REMOTE_ROOT}/repo/apps/api/scripts/migrate-title-services-from-legacy.ts"
+
+      - name: Run title-services migrate
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          "$RSH" "$REMOTE" bash -s <<'REMOTE'
+          set -euo pipefail
+          cd /var/www/crmanhung/repo/apps/api
+          export LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db
+          echo "==> Preflight sqlite (read-only)"
+          sqlite3 "$LEGACY_SQLITE" "SELECT COUNT(*) AS n FROM tblTitleService;"
+          sqlite3 "$LEGACY_SQLITE" "SELECT ID, Code, Status, PersonId, CreatedByEmployeeId FROM tblTitleService;"
+          sqlite3 "$LEGACY_SQLITE" "SELECT COUNT(*) FROM tblTitleServiceProgress;"
+          sqlite3 "$LEGACY_SQLITE" "SELECT COUNT(*) FROM tblTitleServiceMoney;"
+          sqlite3 "$LEGACY_SQLITE" "SELECT COUNT(*) FROM tblTitleServiceAttachment;"
+          echo "==> Copy title services (không ghi SQLite / không restart PM2)"
+          pnpm exec tsx scripts/migrate-title-services-from-legacy.ts
+          echo "==> Done copy (CRM cũ không bị ghi)"
+          REMOTE

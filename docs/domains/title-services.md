@@ -1,7 +1,7 @@
 # Domain: Title services (Dịch vụ sổ đỏ)
 
 - **Slug:** `title-services`
-- **Status:** Ready for API — UI `/dich-vu-so-do` nối API khi login thật; tạo từ khách **xong**; chưa copy legacy.
+- **Status:** Ready for API — UI `/dich-vu-so-do` nối API; tạo từ khách xong; script copy legacy sẵn (chưa chạy VPS).
 - **Nguồn:** màn [`/dich-vu-so-do`](https://anhungland.com/dich-vu-so-do) (web mới) + CRM cũ `/dich-vu-so-do` (API `/api/title-services`, SQLite `tblTitleService*`)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.7 + §4.5
 - **Contract:** `packages/shared/src/title-services.ts`
@@ -80,7 +80,7 @@ Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim / xóa + t
 
 ## 10. Migrate từ hệ cũ
 
-Chi tiết: [`MIGRATION.md`](../MIGRATION.md) bước 12. Live (2026-08-26): **1** hồ sơ `SD-2026-0001` (`DANG_LAM`, **kha**, khách `PersonId` 1561), 2 tiến độ, 3 khoản tiền (thu 13tr / chi 2tr), **0** file. Thư mục `img/title-services` trống.
+Script copy: `pnpm title-services:migrate-legacy` — chi tiết [`MIGRATION.md`](../MIGRATION.md) bước 12. Live (2026-08-26): **1** hồ sơ `SD-2026-0001` (`DANG_LAM`, **kha**, khách `PersonId` 1561), 2 tiến độ, 3 khoản tiền (thu 13tr / chi 2tr), **0** file. Thư mục `img/title-services` trống. **Chưa chạy staging** — chờ merge + workflow/VPS.
 
 | Cũ | Mới (đã chốt Prisma) |
 |----|----------------------|
@@ -322,5 +322,5 @@ Khách + User **đã có**. List mock §12 **đã có**.
 | **6** | ~~Nest file~~ **xong** — upload private R2 + signed URL + xóa object | Giấy tờ mật |
 | **7** | ~~Nối UI `/dich-vu-so-do`~~ **xong** — `isMockTitleServices` = login giả | List/panel thật |
 | **8** | ~~Tạo hồ sơ từ khách~~ **xong** — `/khach-hang/[id]/dich-vu-so-do` | Không nút Thêm trên list |
-| **9** | Copy 1 hồ sơ SQLite → Postgres (+ 2 tiến độ, 3 tiền; 0 file) | Data kha `SD-2026-0001` |
+| **9** | ~~Copy 1 hồ sơ SQLite~~ **script xong** — `pnpm title-services:migrate-legacy` (chạy VPS khi gộp `main`) | Data kha `SD-2026-0001` |
 | **10** | (Sau) ADMIN lọc NV trên list; tùy chọn audit xem file | Không chặn 1–9 |

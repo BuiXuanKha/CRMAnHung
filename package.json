@@ -31,6 +31,7 @@
     "chat:migrate-legacy": "pnpm --filter @crmanhung/api chat:migrate-legacy",
     "lodats:migrate-legacy": "pnpm --filter @crmanhung/api lodats:migrate-legacy",
     "transactions:migrate-legacy": "pnpm --filter @crmanhung/api transactions:migrate-legacy",
+    "title-services:migrate-legacy": "pnpm --filter @crmanhung/api title-services:migrate-legacy",
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "doctor": "node ./scripts/doctor.mjs"
