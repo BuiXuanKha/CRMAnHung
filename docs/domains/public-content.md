@@ -422,7 +422,7 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` §4.7 (rộn
 1. Dòng phụ: bài hiện trên web khách theo chuyên mục; nháp chỉ admin; Xuất bản = khách đọc được. Nội dung chi tiết bổ sung sau.
 2. **Tiêu đề** — bắt buộc; đếm `n/160`; placeholder ví dụ thật.
 3. **Đường dẫn dự kiến** — `/{category}/{slug}` (slug từ tiêu đề); chỉ đọc.
-4. **Chuyên mục** — lưới chọn (radio), 6 mục; không dropdown trần.
+4. **Chuyên mục** — chip chọn (radio), 6 mục; không dropdown trần.
 5. **Huỷ** · **Lưu nháp** (secondary) · **Xuất bản** (primary).
 6. Lỗi validate / API: `crm-form-error` dưới form.
 ---

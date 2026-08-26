@@ -100,25 +100,31 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
           <code className="crm-slug-preview__path">/{category}/{slugPreview}</code>
         </p>
 
-        <fieldset className="pw-pick-list pw-compose-categories" disabled={busy}>
+        <fieldset className="pw-compose-categories" disabled={busy}>
           <legend>
             Chuyên mục <span className="crm-req" aria-hidden>*</span>
           </legend>
-          {CATEGORIES.map((value) => (
-            <label key={value} className="pw-pick-item">
-              <input
-                type="radio"
-                name="public-post-category"
-                value={value}
-                checked={category === value}
-                onChange={() => setCategory(value)}
-                disabled={busy}
-              />
-              <span>
-                <strong>{PUBLIC_POST_CATEGORY_LABELS[value]}</strong>
-              </span>
-            </label>
-          ))}
+          <div className="pw-compose-category-chips" role="radiogroup" aria-label="Chuyên mục">
+            {CATEGORIES.map((value) => {
+              const active = category === value;
+              return (
+                <label
+                  key={value}
+                  className={active ? 'pw-compose-chip is-active' : 'pw-compose-chip'}
+                >
+                  <input
+                    type="radio"
+                    name="public-post-category"
+                    value={value}
+                    checked={active}
+                    onChange={() => setCategory(value)}
+                    disabled={busy}
+                  />
+                  {PUBLIC_POST_CATEGORY_LABELS[value]}
+                </label>
+              );
+            })}
+          </div>
         </fieldset>
 
         {parseError || error ? <p className="crm-form-error">{parseError || error}</p> : null}
