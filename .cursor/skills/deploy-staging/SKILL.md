@@ -17,6 +17,8 @@ Chi tiết: `docs/DEPLOYMENT.md`. Workflow: `.github/workflows/deploy-staging.ym
 ```
 ① Nhánh abc (cursor/…) — sửa, commit, push
     ↓ chủ bảo deploy / đã ổn
+①b Kiểm tra nhánh/PR cũ chưa merge → **hỏi chủ** có gộp trước không
+    ↓ chủ trả lời (hoặc đã chỉ đích danh nhánh merge)
 ② Gộp abc vào main
     ↓ GitHub tự chạy
 ③ Actions Deploy CRMAnHung (staging) trên commit main mới
@@ -27,6 +29,36 @@ Chi tiết: `docs/DEPLOYMENT.md`. Workflow: `.github/workflows/deploy-staging.ym
 - Commit + push trên nhánh feature (`cursor/<ten>-2b02`).
 - Không sửa trực tiếp trên VPS.
 - Push nhánh `abc` **không** lên server.
+
+### ①b Kiểm tra nhánh trước chưa merge (**bắt buộc trước khi merge**)
+
+**Trước** khi merge nhánh đang làm (`abc`) hoặc bất kỳ PR nào vào `main`, agent **phải** rà soát xem còn nhánh/PR cũ chưa gộp không.
+
+**Cách kiểm tra (chạy thật, không đoán):**
+
+```bash
+git fetch origin main
+# Nhánh cursor/* có commit chưa nằm trong main
+git branch -r --no-merged origin/main | rg 'origin/cursor/' || true
+# PR mở trỏ main (ưu tiên draft + open)
+gh pr list --base main --state open --limit 20
+```
+
+Liệt kê ngắn gọn cho chủ: **PR #**, **nhánh**, **tiêu đề**, **draft/open** — bỏ qua PR đã superseded hoặc nhánh trùng commit với nhánh đang deploy.
+
+**Bắt buộc hỏi lại chủ** nếu tìm thấy ≥1 nhánh/PR còn commit chưa merge (trừ nhánh đang được yêu cầu merge):
+
+> Trước khi merge/deploy **`abc`**, còn các nhánh/PR chưa gộp vào `main`:
+> - PR #… — `cursor/…` — …
+>
+> Bạn có muốn **merge nhanh** (các) nhánh trên **trước**, hay chỉ merge **`abc`** rồi deploy?
+
+**Quy tắc:**
+
+- **Không** tự merge/deploy nhánh đang làm khi còn nhánh cũ chưa merge mà **chưa hỏi** và **chưa có câu trả lời** của chủ.
+- Chủ trả lời *«chỉ merge abc»* / *«merge #107 trước»* / *«gộp hết rồi deploy»* → làm đúng thứ tự đã chốt.
+- Chủ đã **chỉ đích danh** PR/nhánh cần merge trong tin nhắn hiện tại (vd. *«merge #107»*) → vẫn **nhắc** nhánh còn lại nếu có, nhưng không chặn lệnh đích danh đó.
+- Không có nhánh cũ nào → báo *«không còn PR/nhánh cursor chưa merge»* rồi tiếp tục merge.
 
 ### ② Gộp vào `main` (đây là “bấm deploy”)
 
@@ -68,6 +100,7 @@ Không dán private key / mật khẩu root vào chat. Không commit `.env`.
 
 ## Cấm
 
+- Merge/deploy **mà không** chạy bước ①b và **không hỏi** khi còn nhánh/PR cũ chưa merge
 - Rsync/`remote_deploy.sh` từ agent làm đường mặc định
 - Deploy nhánh khác `main`
 - Đụng CRM cũ / port 5000 / cây `anhungland-crm`
