@@ -155,7 +155,7 @@
 }
 
 .pw-table-wrap--post {
-  --pw-cols: 120px minmax(120px, 1fr) 120px;
+  --pw-cols: minmax(160px, 0.9fr) minmax(160px, 1.4fr) minmax(130px, 0.7fr);
 }
 
 .pw-table-head {

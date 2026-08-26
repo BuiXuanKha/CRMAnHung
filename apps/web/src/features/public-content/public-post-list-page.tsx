@@ -149,7 +149,7 @@ export function PublicPostListPage() {
         </div>
       </header>
 
-      <section className="pw-filter-wrap" aria-label="Tìm bài viết">
+      <section className="pw-filter-wrap" aria-label="Thanh tìm và soạn bài">
         <PostFilterBar
           keyword={search}
           onKeyword={onSearch}
