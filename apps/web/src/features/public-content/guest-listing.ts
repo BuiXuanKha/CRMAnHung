@@ -16,6 +16,26 @@ export type PublicGuestLot = {
   areaLabel: string | null;
 };
 
+/** Overlay-only card when CRM `/lodats` is not callable (build / unauthenticated SSR). */
+export function overlayRowToGuestLot(row: {
+  id: string;
+  slug: string;
+  title: string;
+  location: string;
+  coverImageUrl: string | null;
+  priceLabel: string | null;
+}): PublicGuestLot {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    location: row.location,
+    coverImageUrl: row.coverImageUrl,
+    priceLabel: row.priceLabel?.trim() || 'Liên hệ',
+    areaLabel: null,
+  };
+}
+
 export function toPublicGuestLot(row: PublicWebStaffLotRow): PublicGuestLot {
   return {
     id: row.id,

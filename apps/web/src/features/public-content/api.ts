@@ -16,7 +16,11 @@ import {
 } from '@crmanhung/shared';
 import { listLodats } from '@/features/lodats/api';
 import { toPublicSlug } from './display';
-import { publishedStaffLotsToGuest, type PublicGuestLot } from './guest-listing';
+import {
+  overlayRowToGuestLot,
+  publishedStaffLotsToGuest,
+  type PublicGuestLot,
+} from './guest-listing';
 import {
   MOCK_PUBLIC_WEB_LOTS,
   MOCK_PUBLIC_WEB_POSTS,
@@ -73,12 +77,16 @@ export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
  */
 export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
   const overlay = await listPublicWebLots();
-  const publishedIds = new Set(
-    overlay.filter((row) => row.isPublished).map((row) => row.lodatId),
-  );
-  if (publishedIds.size === 0) return [];
-  const staff = await listStaffOpenLots();
-  return publishedStaffLotsToGuest(staff.filter((row) => publishedIds.has(row.lodatId)));
+  const published = overlay.filter((row) => row.isPublished);
+  if (published.length === 0) return [];
+  try {
+    const staff = await listStaffOpenLots();
+    const publishedIds = new Set(published.map((row) => row.lodatId));
+    return publishedStaffLotsToGuest(staff.filter((row) => publishedIds.has(row.lodatId)));
+  } catch {
+    // Public SSR/build has no JWT and relative `/api/v1` is invalid in Node fetch.
+    return published.map(overlayRowToGuestLot);
+  }
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {

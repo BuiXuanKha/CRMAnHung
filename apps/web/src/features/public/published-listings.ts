@@ -58,10 +58,15 @@ export function productToListingView(product: PublicProduct): PublicListingView 
 
 /** Overlay Đăng web ∩ lô đang Mở bán — source of truth for sitemap /san-pham. */
 export async function listPublishedOverlayListings(): Promise<PublicListingView[]> {
-  const staff = await listStaffOpenLots();
-  return staff
-    .map(staffToView)
-    .filter((row): row is PublicListingView => row != null);
+  try {
+    const staff = await listStaffOpenLots();
+    return staff
+      .map(staffToView)
+      .filter((row): row is PublicListingView => row != null);
+  } catch {
+    // `next build` / public SSR cannot call JWT `/lodats` via relative `/api/v1`.
+    return [];
+  }
 }
 
 export async function listSitemapListings(): Promise<PublicGuestListing[]> {

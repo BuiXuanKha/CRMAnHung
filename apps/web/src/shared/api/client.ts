@@ -1,6 +1,18 @@
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:5050/api/v1';
 
+/** Staging sets `NEXT_PUBLIC_API_URL=/api/v1` (nginx). Browsers resolve it; Node `fetch` needs an origin. */
+function resolveApiUrl(path: string): string {
+  const base = API_URL.replace(/\/$/, '');
+  const suffix = path.startsWith('/') ? path : `/${path}`;
+  const joined = `${base}${suffix}`;
+  if (/^https?:\/\//i.test(joined)) return joined;
+  const relative = joined.startsWith('/') ? joined : `/${joined}`;
+  if (typeof window !== 'undefined') return relative;
+  const origin = process.env.INTERNAL_API_ORIGIN ?? 'http://127.0.0.1:5050';
+  return new URL(relative, origin).href;
+}
+
 const ACCESS_KEY = 'crmanhung_access_token';
 const REFRESH_KEY = 'crmanhung_refresh_token';
 
@@ -92,7 +104,7 @@ async function tryRefresh(): Promise<boolean> {
   const refreshToken = getRefreshToken();
   if (!refreshToken) return false;
 
-  const res = await fetch(`${API_URL}/auth/refresh`, {
+  const res = await fetch(resolveApiUrl('/auth/refresh'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ refreshToken }),
@@ -127,7 +139,7 @@ export async function apiFetch<T>(
     headers.set('Authorization', `Bearer ${accessToken}`);
   }
 
-  const res = await fetch(`${API_URL}${path}`, {
+  const res = await fetch(resolveApiUrl(path), {
     ...init,
     headers,
   });

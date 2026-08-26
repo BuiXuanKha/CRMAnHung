@@ -4,6 +4,8 @@ import { listingItemListJsonLd, sanPhamListMetadata } from '@/features/public/li
 import { listPublicCatalog } from '@/features/public/published-listings';
 import '@/features/public/public-home.css';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = sanPhamListMetadata();
 
 export default async function SanPhamListPage() {
