@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { ImageOff } from 'lucide-react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import { formatArea, formatFrontageDir, kindLabel, kindTone } from '@/features/lodats/display';
@@ -5,14 +6,31 @@ import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 import { lotPriceDisplay, lotWebLabel, lotWebTone } from '../display';
 
+const DOUBLE_TAP_MS = 400;
+
 type Props = {
   items: PublicWebStaffLotRow[];
   total: number;
   selectedId: string | null;
   onSelect: (lodatId: string) => void;
+  onEdit: (lodatId: string) => void;
 };
 
-export function StaffOpenLotCards({ items, total, selectedId, onSelect }: Props) {
+export function StaffOpenLotCards({ items, total, selectedId, onSelect, onEdit }: Props) {
+  const lastTap = useRef<{ id: string; at: number } | null>(null);
+
+  function handleClick(lodatId: string) {
+    onSelect(lodatId);
+    const now = Date.now();
+    const prev = lastTap.current;
+    if (prev && prev.id === lodatId && now - prev.at < DOUBLE_TAP_MS) {
+      lastTap.current = null;
+      onEdit(lodatId);
+      return;
+    }
+    lastTap.current = { id: lodatId, at: now };
+  }
+
   return (
     <section className="pw-cards" aria-label="Lô nhân viên đang mở bán">
       {items.length === 0 ? (
@@ -26,7 +44,8 @@ export function StaffOpenLotCards({ items, total, selectedId, onSelect }: Props)
                 <button
                   type="button"
                   className={selectedId === row.lodatId ? 'pw-card is-selected' : 'pw-card'}
-                  onClick={() => onSelect(row.lodatId)}
+                  onClick={() => handleClick(row.lodatId)}
+                  onDoubleClick={() => onEdit(row.lodatId)}
                 >
                   <span className="pw-thumb">
                     {row.coverImageUrl ? (

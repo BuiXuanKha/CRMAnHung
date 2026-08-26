@@ -10,6 +10,7 @@ import {
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { toPublicSlug } from './display';
+import { suggestPublicExcerpt, suggestPublicPrice } from './listing-copy';
 
 export const MOCK_PUBLIC_WEB_LOTS: PublicWebLotRow[] = [
   {
@@ -21,7 +22,7 @@ export const MOCK_PUBLIC_WEB_LOTS: PublicWebLotRow[] = [
     coverImageUrl: '/mock/lodats/p1.svg',
     isPublished: true,
     priceMode: 'AMOUNT',
-    priceLabel: '2,6 tỷ',
+    priceLabel: '2 tỷ xxx',
   },
   {
     id: 'pl2',
@@ -32,7 +33,7 @@ export const MOCK_PUBLIC_WEB_LOTS: PublicWebLotRow[] = [
     coverImageUrl: '/mock/lodats/p2.svg',
     isPublished: true,
     priceMode: 'AMOUNT',
-    priceLabel: '3,15 tỷ',
+    priceLabel: '3 tỷ xxx',
   },
   {
     id: 'pl3',
@@ -54,7 +55,7 @@ export const MOCK_PUBLIC_WEB_LOTS: PublicWebLotRow[] = [
     coverImageUrl: '/mock/lodats/p4.svg',
     isPublished: false,
     priceMode: 'AMOUNT',
-    priceLabel: '1,85 tỷ',
+    priceLabel: '1 tỷ xxx',
   },
   {
     id: 'pl5',
@@ -136,31 +137,6 @@ const STAFF_BY_LODAT: Record<string, string> = {
   ld_lk9_41: 'Bùi Nam',
 };
 
-function publicPriceLabel(priceVnd?: number | string | null): string | null {
-  if (priceVnd == null || priceVnd === '') return null;
-  const v = typeof priceVnd === 'string' ? Number(priceVnd) : priceVnd;
-  if (!Number.isFinite(v) || v <= 0) return null;
-  if (v >= 1_000_000_000) {
-    const ty = v / 1_000_000_000;
-    const text = new Intl.NumberFormat('vi-VN', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 2,
-    }).format(ty);
-    return `${text} tỷ`;
-  }
-  if (v >= 1_000_000) {
-    return `${new Intl.NumberFormat('vi-VN').format(Math.round(v / 1_000_000))} triệu`;
-  }
-  return `${v.toLocaleString('vi-VN')} đ`;
-}
-
-function publicExcerpt(title: string, address: string | null | undefined): string {
-  const where = address?.trim();
-  return where
-    ? `${title} tại ${where}. Pháp lý rõ, hỗ trợ xem đất thực tế. Liên hệ hotline An Hưng Land.`
-    : `${title}. Pháp lý rõ, hỗ trợ xem đất thực tế. Liên hệ hotline An Hưng Land.`;
-}
-
 export function buildStaffOpenLots(
   plots: LodatListItem[],
   listings: PublicWebLotRow[],
@@ -169,28 +145,36 @@ export function buildStaffOpenLots(
     .filter((plot) => plot.status === LodatSaleStatus.DANG_BAN)
     .map((plot) => {
       const listing = listings.find((row) => row.lodatId === plot.id);
-      const fromCrm = publicPriceLabel(plot.priceVnd);
-      const priceMode = listing?.priceMode ?? (fromCrm ? 'AMOUNT' : 'CONTACT');
+      const suggested = suggestPublicPrice(plot.priceVnd);
+      const priceMode = listing?.priceMode ?? suggested.priceMode;
       const priceLabel =
-        priceMode === 'AMOUNT' ? (listing?.priceLabel ?? fromCrm) : null;
+        priceMode === 'AMOUNT' ? (listing?.priceLabel ?? suggested.priceLabel) : null;
       const staffName =
         plot.createdByEmployeeName?.trim() || STAFF_BY_LODAT[plot.id] || '—';
+      const title = listing?.title ?? plot.title;
+      const location = listing?.location ?? plot.address ?? '';
+      const kind = plot.kind ?? LodatKind.DAT;
+      const areaM2 = plot.areaM2 ?? null;
+      const frontageM = plot.frontageM ?? null;
+      const direction = plot.direction ?? null;
       return {
         id: listing?.id ?? `pending-${plot.id}`,
         lodatId: plot.id,
         slug: listing?.slug ?? toPublicSlug(plot.title),
-        title: listing?.title ?? plot.title,
-        location: listing?.location ?? plot.address ?? '',
+        title,
+        location,
         coverImageUrl: listing?.coverImageUrl ?? plot.coverImageUrl ?? null,
         isPublished: listing?.isPublished ?? false,
         priceMode,
         priceLabel,
+        excerpt:
+          listing?.excerpt?.trim() ||
+          suggestPublicExcerpt({ title, location, kind, areaM2, frontageM, direction }),
         staffName,
-        kind: plot.kind ?? LodatKind.DAT,
-        areaM2: plot.areaM2 ?? null,
-        frontageM: plot.frontageM ?? null,
-        direction: plot.direction ?? null,
-        excerpt: publicExcerpt(listing?.title ?? plot.title, plot.address),
+        kind,
+        areaM2,
+        frontageM,
+        direction,
         priceVnd: plot.priceVnd ?? null,
       };
     });
@@ -207,6 +191,7 @@ export function listingFromStaffLot(row: PublicWebStaffLotRow): PublicWebLotRow 
     isPublished: row.isPublished,
     priceMode: row.priceMode,
     priceLabel: row.priceLabel,
+    excerpt: row.excerpt,
   };
 }
 

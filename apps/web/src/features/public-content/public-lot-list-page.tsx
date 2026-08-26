@@ -2,10 +2,11 @@
 
 import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { PublicWebStaffLotRow } from '@crmanhung/shared';
+import type { PublicWebStaffLotRow, UpdatePublicListingDraftInput } from '@crmanhung/shared';
 import type { ExtraFilters, PriceBracket } from '@/features/lodats/display';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
-import { listStaffOpenLots, setPublicLotPublished } from './api';
+import { listStaffOpenLots, setPublicLotPublished, updatePublicListingDraft } from './api';
+import { LotListingEditorDialog } from './components/lot-listing-editor-dialog';
 import { LotListingPreview } from './components/lot-listing-preview';
 import { LotWebConfirm } from './components/lot-web-confirm';
 import { StaffLotFilterBar } from './components/staff-lot-filter-bar';
@@ -39,6 +40,8 @@ export function PublicLotListPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(peeked?.selectedId ?? null);
   const [lotConfirm, setLotConfirm] = useState<PublicWebStaffLotRow | null>(null);
+  const [editorLot, setEditorLot] = useState<PublicWebStaffLotRow | null>(null);
+  const [editorError, setEditorError] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -103,6 +106,15 @@ export function PublicLotListPage() {
     persist(lodatId);
   };
 
+  const onEdit = (lodatId: string) => {
+    const row = items.find((item) => item.lodatId === lodatId) ?? null;
+    if (!row) return;
+    setSelectedId(lodatId);
+    persist(lodatId);
+    setEditorError(null);
+    setEditorLot(row);
+  };
+
   const lotMut = useMutation({
     mutationFn: (lot: PublicWebStaffLotRow) =>
       setPublicLotPublished(lot.lodatId, { isPublished: true }),
@@ -117,6 +129,46 @@ export function PublicLotListPage() {
       setAlertBox({ title: 'Không đổi được lô', message: err.message });
     },
   });
+
+  const draftMut = useMutation({
+    mutationFn: ({ lodatId, input }: { lodatId: string; input: UpdatePublicListingDraftInput }) =>
+      updatePublicListingDraft(lodatId, input),
+    onSuccess: async (updated) => {
+      await invalidatePublicWebQueries(qc);
+      setSelectedId(updated.lodatId);
+      persist(updated.lodatId);
+    },
+  });
+
+  async function saveDraft(input: UpdatePublicListingDraftInput) {
+    if (!editorLot) return;
+    setEditorError(null);
+    try {
+      const updated = await draftMut.mutateAsync({ lodatId: editorLot.lodatId, input });
+      setEditorLot(null);
+      flash(`Đã lưu nháp «${updated.title}».`);
+    } catch (err) {
+      setEditorError(err instanceof Error ? err.message : 'Không lưu được bài đăng.');
+    }
+  }
+
+  async function saveAndPublish(input: UpdatePublicListingDraftInput) {
+    if (!editorLot) return;
+    setEditorError(null);
+    try {
+      const updated = await draftMut.mutateAsync({ lodatId: editorLot.lodatId, input });
+      setEditorLot(null);
+      if (updated.isPublished) {
+        flash(`Đã cập nhật «${updated.title}» trên web khách.`);
+        return;
+      }
+      setLotConfirm({ ...editorLot, ...updated });
+    } catch (err) {
+      setEditorError(err instanceof Error ? err.message : 'Không lưu được bài đăng.');
+    }
+  }
+
+  const editorBusy = draftMut.isPending;
 
   return (
     <div className="pw-page">
@@ -176,6 +228,7 @@ export function PublicLotListPage() {
                 total={items.length}
                 selectedId={selectedId}
                 onSelect={onSelect}
+                onEdit={onEdit}
                 scrollRef={scrollRef}
                 kind={kind}
                 extra={extra}
@@ -211,6 +264,7 @@ export function PublicLotListPage() {
                 total={items.length}
                 selectedId={selectedId}
                 onSelect={onSelect}
+                onEdit={onEdit}
               />
             </div>
           </div>
@@ -224,6 +278,19 @@ export function PublicLotListPage() {
         </div>
       )}
 
+      <LotListingEditorDialog
+        lot={editorLot}
+        busy={editorBusy}
+        error={editorError}
+        onClose={() => {
+          if (!editorBusy) {
+            setEditorLot(null);
+            setEditorError(null);
+          }
+        }}
+        onSaveDraft={saveDraft}
+        onPublish={saveAndPublish}
+      />
       <LotWebConfirm
         lot={lotConfirm}
         busy={lotMut.isPending}

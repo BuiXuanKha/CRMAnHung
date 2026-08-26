@@ -73,7 +73,7 @@ Cùng entity `PublicPost`:
 
 Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú nội bộ lô/map, lịch sử GD, chat, file mật.
 
-Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** admin chọn công bố, mô tả public, nút gọi hotline công ty.
+Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** admin chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi hotline công ty.
 
 ---
 
@@ -82,7 +82,7 @@ Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú
 1. **Khách vào /** — hero brand + lô đã đăng + teaser tin/bài. Không login.
 2. **Khách xem lô** — `/san-pham` và `/san-pham/[slug]`; share OG.
 3. **Khách đọc bài** — list + chi tiết theo chuyên mục.
-4. **Admin đăng lô** — chọn lô đang Mở bán → điền/chỉnh copy public (tiêu đề, mô tả, hiện giá?) → Đăng web.
+4. **Admin đăng lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn bài đăng** (prefill copy đã lọc) → Lưu nháp / Đăng web.
 5. **Admin gỡ lô** — tắt Đăng web; URL cũ → không tìm thấy (hoặc 404).
 6. **Admin soạn bài** — nháp → Xuất bản / Gỡ về nháp.
 7. **Lô đổi trạng thái CRM** — Tạm dừng / cọc / bán → web tự gỡ (đề xuất).
@@ -131,6 +131,7 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 |--------|------|------|------|
 | GET | `/admin/public-web/dashboard` | JWT ADMIN | Số đếm + lô/bài gần đây |
 | PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN | Đăng / gỡ lô (`isPublished`) — mock |
+| PATCH | `/admin/public-web/lots/:id/draft` | JWT ADMIN | Lưu copy public (tiêu đề, địa chỉ, giá, mô tả) — mock |
 | PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — mock |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục) — mock |
 | GET | `/public/listings` | Không | Lô đã đăng (trang khách) — sau |
@@ -168,11 +169,11 @@ Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồ
 1. Chỉ **ADMIN** vào `/dashboard`. Bốn trang CRM **không** thêm UI/quyền admin.
 2. Lô lên web = công tắc tường minh — không auto mọi lô Mở bán.
 3. Tạm dừng / Đã cọc / Đã bán → gỡ web (chưa mock hành vi; chỉ số đếm).
-4. Giá từng lô: hiện số hoặc **Liên hệ**.
+4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public (chưa mock conflict UI).
 6. Bài viết = một list; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
 7. Liên hệ khách: hotline + Zalo công ty; chưa form SĐT.
-8. Mô tả public = ô riêng (form làm slice sau).
+8. Soạn bài đăng: double-click hàng/thẻ → modal copy public. Giá CRM **làm mờ**. Không copy hoa hồng, ghi chú nội bộ / chủ nhà, tên/SĐT khách.
 
 ---
 
@@ -299,9 +300,9 @@ Footer đếm dưới list bài.
 
 ## 13. List `/dashboard/lo-dat`
 
-Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (ADMIN thấy mọi NV). Overlay đăng web (slug, copy, `isPublished`) vẫn mock. Admin chọn lô → preview bài đăng trang khách bên phải → **Đăng web** từ preview (lô chờ đăng).
+Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (ADMIN thấy mọi NV). Overlay đăng web (slug, copy, `isPublished`) vẫn mock. Một lần bấm hàng → preview phải. Double-click → modal **Soạn bài đăng**. **Đăng web** từ preview (lô chờ đăng) hoặc từ modal (lưu copy rồi `CrmConfirm`).
 
-Không hiện trên list/preview: tên khách, SĐT khách, hoa hồng.
+Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồng, ghi chú nội bộ / thương lượng chủ nhà. Giá cột + preview = giá **công khai** (đã làm mờ), không đúng số CRM.
 
 ### 13.1 Máy tính
 
@@ -316,8 +317,9 @@ Không hiện trên list/preview: tên khách, SĐT khách, hoa hồng.
 1. **Không** H1 (tên đã có trên menu trái: **Lô đất**).
 2. Ô tìm — khung trắng bo 12px, input viền `#cbd5e1` / focus xanh. Placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc. **Không** nút Đăng lô cạnh ô tìm.
 3. **Giữa — bảng** mọi lô NV đang Mở bán. Lọc cột §4.5.5. Không cột Thao tác / công tắc rao bán. Không tên khách.
-4. Bấm hàng → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm ngay.
-5. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list Mở bán).
+4. Bấm hàng một lần → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm / editor.
+5. Double-click hàng → modal **Soạn bài đăng** (§13.3). Lần bấm đầu vẫn chọn + preview.
+6. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list Mở bán).
 
 **Lọc cột (icon `ListFilter` sát chữ tên cột)**
 
@@ -341,7 +343,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 | Tiêu đề / Địa chỉ | **Đậm**; dòng phụ địa chỉ. Không tên khách |
 | Phân loại | Hangtag Nhà `blue` / Đất `amber` |
 | DT · MT · Hướng | DT dòng 1; MT · hướng dòng phụ. Trống: `—` |
-| Giá | `crm-money` hoặc `Liên hệ` |
+| Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM |
 | NV | Tên nhân viên đang rao lô |
 | Web | **Đang hiện** `green` · **Chờ đăng** `gray` |
 
@@ -361,7 +363,20 @@ Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ 
 
 Thanh tìm: ô tìm + **Bộ lọc** + **Tìm**. Panel: Phân loại · Giá · Web · NV. **Xoá lọc** xóa mọi lọc (cả cột desktop). Desktop không hiện Bộ lọc / Tìm.
 
+Một lần chạm thẻ → chọn + preview. Double-tap / double-click → cùng modal 13.3.
+
 Nhớ tìm + lọc + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-state`.
+
+### 13.3 Modal Soạn bài đăng
+
+Cùng máy tính / mobile. Icon Lucide `PenLine`. Không `window.confirm`.
+
+1. Prefill copy **công khai** từ lô đang Mở bán: tiêu đề, địa chỉ, giá đã làm mờ, mô tả (DT · MT · hướng · loại + CTA hotline công ty).
+2. **Không** copy: hoa hồng, ghi chú giá / broker, ghi chú thương lượng chủ nhà, tên/SĐT khách, tên NV.
+3. Ô chỉ đọc: giá gốc CRM không hiện đúng cho khách; admin phải duyệt giá công khai.
+4. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, mô tả. Ảnh bìa = ảnh lô (không upload slice này).
+5. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng).
+6. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web.
 
 ---
 

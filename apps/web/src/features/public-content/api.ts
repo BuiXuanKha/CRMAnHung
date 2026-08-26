@@ -4,6 +4,7 @@ import {
   createPublicPostInputSchema,
   setPublicLotPublishedSchema,
   setPublicPostStatusSchema,
+  updatePublicListingDraftSchema,
   type CreatePublicPostInput,
   type PublicWebDashboard,
   type PublicWebLotRow,
@@ -11,6 +12,7 @@ import {
   type PublicWebStaffLotRow,
   type SetPublicLotPublishedInput,
   type SetPublicPostStatusInput,
+  type UpdatePublicListingDraftInput,
 } from '@crmanhung/shared';
 import { listLodats } from '@/features/lodats/api';
 import { toPublicSlug } from './display';
@@ -93,6 +95,47 @@ export async function setPublicLotPublished(
   }
 
   lots[index] = { ...lots[index], isPublished: parsed.data.isPublished };
+  return { ...lots[index] };
+}
+
+export async function updatePublicListingDraft(
+  id: string,
+  input: UpdatePublicListingDraftInput,
+): Promise<PublicWebLotRow> {
+  const parsed = updatePublicListingDraftSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? 'Không lưu được bài đăng.');
+  }
+
+  const staff = buildStaffOpenLots(await loadOpenPlots(), lots);
+  const source = staff.find((row) => row.id === id || row.lodatId === id);
+  if (!source) throw new Error('Không tìm thấy lô đang mở bán.');
+
+  const draft = parsed.data;
+  const priceLabel = draft.priceMode === 'CONTACT' ? null : draft.priceLabel;
+  const index = lots.findIndex((row) => row.lodatId === source.lodatId);
+
+  if (index < 0) {
+    const created = listingFromStaffLot({
+      ...source,
+      title: draft.title,
+      location: draft.location,
+      priceMode: draft.priceMode,
+      priceLabel,
+      excerpt: draft.excerpt,
+    });
+    lots = [created, ...lots];
+    return { ...created };
+  }
+
+  lots[index] = {
+    ...lots[index],
+    title: draft.title,
+    location: draft.location,
+    priceMode: draft.priceMode,
+    priceLabel,
+    excerpt: draft.excerpt,
+  };
   return { ...lots[index] };
 }
 

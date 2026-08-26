@@ -215,6 +215,7 @@
   background: #fff;
   cursor: pointer;
   transition: background-color 0.12s ease;
+  user-select: none;
 }
 
 .pw-table-scroll .pw-grid-row:hover {
@@ -789,4 +790,17 @@
   .pw-preview {
     overflow: visible;
   }
+}
+
+.pw-editor-cover {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pw-editor-cover-note {
+  font-size: 0.82rem;
+  font-weight: 400;
+  color: #64748b;
+  line-height: 1.4;
 }

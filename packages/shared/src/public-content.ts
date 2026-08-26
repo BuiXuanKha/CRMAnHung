@@ -20,6 +20,8 @@ export const publicWebLotRowSchema = z.object({
   isPublished: z.boolean(),
   priceMode: publicListingPriceModeSchema,
   priceLabel: z.string().nullable(),
+  /** Copy public đã duyệt — overlay list/preview */
+  excerpt: z.string().optional(),
 });
 
 export type PublicWebLotRow = z.infer<typeof publicWebLotRowSchema>;
@@ -32,7 +34,7 @@ export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   frontageM: z.number().nullable(),
   direction: z.string().nullable(),
   excerpt: z.string(),
-  /** Giá CRM — lọc khoảng giá trên `/dashboard/lo-dat` */
+  /** Giá CRM — lọc khoảng giá trên `/dashboard/lo-dat`; không hiện cho khách */
   priceVnd: z.union([z.number(), z.string()]).nullable(),
 });
 
@@ -78,3 +80,27 @@ export const createPublicPostInputSchema = z.object({
 });
 
 export type CreatePublicPostInput = z.infer<typeof createPublicPostInputSchema>;
+
+export const updatePublicListingDraftSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Nhập tiêu đề bài đăng').max(160, 'Tiêu đề tối đa 160 ký tự'),
+    location: z.string().trim().max(240, 'Địa chỉ quá dài'),
+    priceMode: publicListingPriceModeSchema,
+    priceLabel: z.string().trim().max(80, 'Giá công khai quá dài').nullable(),
+    excerpt: z
+      .string()
+      .trim()
+      .min(1, 'Nhập mô tả công khai')
+      .max(2000, 'Mô tả tối đa 2000 ký tự'),
+  })
+  .superRefine((data, ctx) => {
+    if (data.priceMode === 'AMOUNT' && !data.priceLabel) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Nhập giá công khai hoặc chọn Liên hệ',
+        path: ['priceLabel'],
+      });
+    }
+  });
+
+export type UpdatePublicListingDraftInput = z.infer<typeof updatePublicListingDraftSchema>;

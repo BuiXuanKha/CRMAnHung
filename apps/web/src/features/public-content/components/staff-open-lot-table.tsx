@@ -29,6 +29,7 @@ type Props = {
   total: number;
   selectedId: string | null;
   onSelect: (lodatId: string) => void;
+  onEdit: (lodatId: string) => void;
   scrollRef?: Ref<HTMLDivElement>;
   kind: string;
   extra: ExtraFilters;
@@ -48,6 +49,7 @@ export function StaffOpenLotTable({
   total,
   selectedId,
   onSelect,
+  onEdit,
   scrollRef,
   kind,
   extra,
@@ -175,6 +177,11 @@ export function StaffOpenLotTable({
                     selectedId === row.lodatId ? 'pw-grid-row is-selected' : 'pw-grid-row'
                   }
                   onClick={() => onSelect(row.lodatId)}
+                  onDoubleClick={(event) => {
+                    const target = event.target as HTMLElement | null;
+                    if (target?.closest('button, a, [role="menu"]')) return;
+                    onEdit(row.lodatId);
+                  }}
                 >
                   <div>
                     <span className="pw-thumb">
