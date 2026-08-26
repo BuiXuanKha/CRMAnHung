@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './auth-context';
+import { crmHomePath } from './home-path';
 import { ApiError } from '@/shared/api/client';
 import { isMockAuth } from '@/shared/api/mode';
 import { ANHUNG_BRAND } from '@/features/public/brand';
@@ -25,7 +26,7 @@ export function LoginForm() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.replace('/khach-hang');
+      router.replace(crmHomePath(user));
     }
   }, [loading, user, router]);
 
@@ -42,8 +43,8 @@ export function LoginForm() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(username, password);
-      router.replace('/khach-hang');
+      const logged = await login(username, password);
+      router.replace(crmHomePath(logged));
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Đăng nhập thất bại');
     } finally {

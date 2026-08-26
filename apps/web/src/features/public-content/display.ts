@@ -45,3 +45,17 @@ export function matchPostSearch(row: PublicWebPostRow, keyword: string): boolean
   if (!q) return true;
   return `${row.title} ${postCategoryLabel(row)}`.toLocaleLowerCase('vi').includes(q);
 }
+
+/** Slug URL bài viết (mock). */
+export function toPublicSlug(title: string): string {
+  const slug = title
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/đ/gi, 'd')
+    .replace(/Đ/g, 'd')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60);
+  return slug || 'bai-viet';
+}

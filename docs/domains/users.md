@@ -37,7 +37,7 @@ Mật khẩu: bcrypt cost ≥ 12. Không lưu plaintext.
 
 ## 4. Use cases
 
-1. **Đăng nhập** — username + mật khẩu → JWT access + refresh → `/khach-hang`
+1. **Đăng nhập** — username + mật khẩu → JWT access + refresh → ADMIN `/dashboard`, STAFF `/khach-hang`
 2. **Sai / khoá** — cùng câu: «Tên đăng nhập hoặc mật khẩu không đúng»; user `isActive=false` không vào được
 3. **Phiên** — F5: còn refresh thì `/auth/me`; hết hạn → `/login`
 4. **Đăng xuất** — avatar menu → revoke refresh → `/login`
@@ -68,7 +68,7 @@ Copy data: **User trước** (`employeeId` bắt buộc). Hotline nguồn có th
 1. Link «Về trang khách»
 2. Ô tên đăng nhập
 3. Ô mật khẩu
-4. Nút Đăng nhập → `/khach-hang`
+4. Nút Đăng nhập → ADMIN `/dashboard`, STAFF `/khach-hang`
 5. Lỗi dưới form (tiếng Việt)
 6. Khối demo `staff` / `admin` **chỉ khi mock**
 

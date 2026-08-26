@@ -128,6 +128,9 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | Method | Path | Auth | Việc |
 |--------|------|------|------|
 | GET | `/admin/public-web/dashboard` | JWT ADMIN | Số đếm + lô/bài gần đây |
+| PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN | Đăng / gỡ lô (`isPublished`) — mock |
+| PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — mock |
+| POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục) — mock |
 | GET | `/public/listings` | Không | Lô đã đăng (trang khách) — sau |
 | GET | `/public/posts` | Không | Bài `PUBLISHED` — sau |
 
@@ -204,8 +207,8 @@ Không H1 lặp tên menu trên thanh tìm — **có** H1 trên từng trang das
 1. **H1** `Dashboard`
 2. Dòng phụ: `Khách trên anhungland.com chỉ thấy lô và bài đã đăng.`
 3. **Xem trang khách** — viền; mở `/` tab mới
-4. **Lô đất public** — primary → `/dashboard/lo-dat`
-5. **Bài viết** — viền → `/dashboard/bai-viet`
+4. **Đăng lô** — primary → dialog chọn lô chờ đăng → xác nhận Đăng web
+5. **Soạn bài** — viền → dialog tiêu đề + chuyên mục → Lưu nháp / Xuất bản
 
 #### 12.1.2 Bốn thẻ đếm
 
@@ -229,7 +232,7 @@ Cùng hình thức thẻ GD: nền trắng, viền `#e2e8f0`, bo 12px. 4 cột.
 | Giá | `crm-money` nếu hiện số; không thì chữ `Liên hệ` |
 | Web | Hangtag **Đang hiện** `green` · **Chờ đăng** `gray` |
 
-Bấm nền hàng → `CrmAlert` «Sửa copy / gỡ web làm sau.»
+Bấm nền hàng → `CrmConfirm` **Đăng web** (lô chờ đăng) hoặc **Gỡ web** (đang hiện). Toast khi xong. Số đếm cập nhật.
 
 Footer: `Hiển thị N / Tổng M lô` (N = dòng trên hub; M = đang hiện + chờ đăng).
 
@@ -245,7 +248,7 @@ Trống: `Không có lô trên web.`
 | Tiêu đề | **Đậm** |
 | Trạng thái | **Đã xuất bản** `green` · **Nháp** `gray` |
 
-Bấm hàng → `CrmAlert` «Sửa bài làm sau.»
+Bấm hàng → `CrmConfirm` **Xuất bản** (nháp) hoặc **Về nháp** (đã đăng). Toast khi xong.
 
 Footer: `Hiển thị N / Tổng M bài` (M = đã đăng + nháp).
 
@@ -266,7 +269,7 @@ Trống: `Không có bài viết.`
 
 #### 12.2.1 Thanh đầu — cùng 12.1.1
 
-Nút đủ vùng chạm. `Xem trang khách` full ngang. Hai nút Lô đất public / Bài viết một hàng.
+Nút đủ vùng chạm. `Xem trang khách` full ngang. Hai nút Đăng lô / Soạn bài một hàng.
 
 #### 12.2.2 Thẻ đếm — cùng 12.1.2
 
@@ -278,7 +281,7 @@ Lưới **2×2**. Ẩn gợi ý dưới số. Chữ nhỏ hơn (như GD mobile).
 2. Tiêu đề đậm + hangtag Web
 3. Địa chỉ dòng phụ
 4. Giá `crm-money` hoặc `Liên hệ`
-5. Bấm thẻ → cùng alert 12.1.3
+5. Bấm thẻ → cùng confirm 12.1.3
 
 Footer đếm dưới list lô.
 
@@ -286,7 +289,7 @@ Footer đếm dưới list lô.
 
 1. Hangtag chuyên mục + hangtag trạng thái
 2. Tiêu đề
-3. Bấm thẻ → cùng alert 12.1.4
+3. Bấm thẻ → cùng confirm 12.1.4
 
 Footer đếm dưới list bài.
 
@@ -298,15 +301,16 @@ Footer đếm dưới list bài.
 
 ```
 ┌ H1 Lô đất public mở bán                                      ┐
-├ Ô tìm (CrmSearchField)                                       │
+├ Ô tìm (CrmSearchField)                     [ Đăng lô ]       │
 ├ Bảng §4.5: Ảnh · Tiêu đề · Giá · Web                         │
 └ Footer đếm                                                   ┘
 ```
 
 1. Ô tìm — placeholder `Tìm tiêu đề, địa chỉ...`. Hangtag Clear sau caret. Gõ là lọc.
-2. Bảng — cùng cột 12.1.3. Không icon lọc cột (slice này).
-3. Bấm hàng → `CrmAlert` «Sửa copy làm sau.»
-4. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list).
+2. **Đăng lô** — cùng hàng ô tìm; dialog chọn lô chờ đăng.
+3. Bảng — cùng cột 12.1.3. Không icon lọc cột (slice này).
+4. Bấm hàng → `CrmConfirm` Đăng web / Gỡ web (12.1.3).
+5. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list).
 
 Trống: `Không có lô trên web.`
 
@@ -325,15 +329,16 @@ Nhớ tìm + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-state`.
 ```
 ┌ H1 Bài viết                                                  ┐
 │ Dòng phụ: Dự án, kiến thức, liên hệ, chính sách bảo mật…     │
-├ Ô tìm                                                        │
+├ Ô tìm                                      [ Soạn bài ]      │
 ├ Bảng §4.5: Chuyên mục · Tiêu đề · Trạng thái                 │
 └ Footer đếm                                                   ┘
 ```
 
 1. Ô tìm — `Tìm tiêu đề, chuyên mục...`
-2. Hangtag chuyên mục `blue`: Dự án · Kiến thức · Liên hệ · Chính sách bảo mật · Tin tức · Kinh nghiệm
-3. Hangtag trạng thái: Đã xuất bản `green` · Nháp `gray`
-4. Bấm hàng → `CrmAlert` «Soạn bài làm sau.»
+2. **Soạn bài** — dialog tiêu đề + chuyên mục; Lưu nháp / Xuất bản. Nội dung dài = slice sau.
+3. Hangtag chuyên mục `blue`: Dự án · Kiến thức · Liên hệ · Chính sách bảo mật · Tin tức · Kinh nghiệm
+4. Hangtag trạng thái: Đã xuất bản `green` · Nháp `gray`
+5. Bấm hàng → `CrmConfirm` Xuất bản / Về nháp (12.1.4).
 
 Trống: `Không có bài viết.`
 

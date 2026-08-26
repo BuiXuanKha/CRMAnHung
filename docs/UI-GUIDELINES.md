@@ -655,6 +655,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | Panel sổ đỏ **File tài liệu:** hangtag loại giấy (Sổ đỏ / CCCD / Giấy tờ khác) trên đầu mỗi file |
 | 2026-08-26 | `/dich-vu-so-do` ADMIN: select nhân viên tạo; xem file mật ghi nhật ký `TitleServiceAttachmentView` |
 | 2026-08-26 | **Dashboard** `/dashboard` (ADMIN): menu Tổng quan · Lô đất public mở bán · Bài viết. Bốn trang CRM không thêm quyền admin |
+| 2026-08-26 | Mock dashboard: Đăng/Gỡ lô, Soạn bài / Xuất bản / Về nháp; admin login → `/dashboard` |
 
 ---
 

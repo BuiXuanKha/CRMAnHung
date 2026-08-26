@@ -2,14 +2,11 @@ import {
   PublicPostCategory,
   PublicPostStatus,
   type PublicWebDashboard,
+  type PublicWebLotRow,
+  type PublicWebPostRow,
 } from '@crmanhung/shared';
 
-export const MOCK_PUBLIC_WEB_DASHBOARD: PublicWebDashboard = {
-  publishedLotCount: 3,
-  pendingLotCount: 2,
-  publishedPostCount: 5,
-  draftPostCount: 2,
-  recentLots: [
+export const MOCK_PUBLIC_WEB_LOTS: PublicWebLotRow[] = [
     {
       id: 'pl1',
       lodatId: 'ld1',
@@ -65,8 +62,9 @@ export const MOCK_PUBLIC_WEB_DASHBOARD: PublicWebDashboard = {
       priceMode: 'CONTACT',
       priceLabel: null,
     },
-  ],
-  recentPosts: [
+];
+
+export const MOCK_PUBLIC_WEB_POSTS: PublicWebPostRow[] = [
     {
       id: 'pp1',
       slug: 'bang-gia-kdt-tay-nam-sach-thang-8',
@@ -116,5 +114,18 @@ export const MOCK_PUBLIC_WEB_DASHBOARD: PublicWebDashboard = {
       category: PublicPostCategory.CHINH_SACH,
       status: PublicPostStatus.PUBLISHED,
     },
-  ],
-};
+];
+
+export function buildPublicWebDashboard(
+  lots: PublicWebLotRow[],
+  posts: PublicWebPostRow[],
+): PublicWebDashboard {
+  return {
+    publishedLotCount: lots.filter((row) => row.isPublished).length,
+    pendingLotCount: lots.filter((row) => !row.isPublished).length,
+    publishedPostCount: posts.filter((row) => row.status === PublicPostStatus.PUBLISHED).length,
+    draftPostCount: posts.filter((row) => row.status === PublicPostStatus.DRAFT).length,
+    recentLots: lots.slice(0, 8),
+    recentPosts: posts.slice(0, 8),
+  };
+}

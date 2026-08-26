@@ -28,7 +28,7 @@ const MOCK_USER_KEY = 'crmanhung_mock_user';
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
-  login: (username: string, password: string) => Promise<void>;
+  login: (username: string, password: string) => Promise<AuthUser>;
   logout: () => Promise<void>;
 };
 
@@ -100,7 +100,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       writeSessionUser(mock);
       setTokens('mock-access', 'mock-refresh');
       setUser(mock);
-      return;
+      return mock;
     }
 
     const data = await apiFetch<LoginResponse>('/auth/login', {
@@ -110,6 +110,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setTokens(data.accessToken, data.refreshToken);
     writeSessionUser(data.user);
     setUser(data.user);
+    return data.user;
   }, []);
 
   const logout = useCallback(async () => {

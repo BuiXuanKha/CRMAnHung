@@ -15,6 +15,7 @@ export default function robots(): MetadataRoute.Robots {
         '/giao-dich',
         '/dich-vu-so-do',
         '/dashboard',
+        '/dashbroad',
         '/quan-tri',
       ],
     },

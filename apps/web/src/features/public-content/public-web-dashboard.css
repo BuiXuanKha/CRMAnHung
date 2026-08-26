@@ -321,6 +321,66 @@
 
 .pw-search-bar {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pw-search-bar .crm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.pw-pick-list {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.pw-pick-list legend {
+  padding: 0;
+  margin: 0 0 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #334155;
+}
+
+.crm-dialog-body .pw-pick-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-weight: 400;
+  cursor: pointer;
+}
+
+.pw-pick-item:has(input:checked) {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.crm-dialog-body .pw-pick-item input {
+  width: auto;
+  margin: 3px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  flex-shrink: 0;
+}
+
+.pw-pick-item strong {
+  display: block;
+  font-weight: 600;
+  color: #0f172a;
 }
 
 .pw-list-desktop {
@@ -404,5 +464,14 @@
 
   .pw-list-mobile {
     display: block;
+  }
+
+  .pw-search-bar {
+    flex-wrap: wrap;
+  }
+
+  .pw-search-bar .crm-btn {
+    width: 100%;
+    justify-content: center;
   }
 }

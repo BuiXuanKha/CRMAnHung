@@ -44,3 +44,23 @@ export const publicWebDashboardSchema = z.object({
 });
 
 export type PublicWebDashboard = z.infer<typeof publicWebDashboardSchema>;
+
+export const setPublicLotPublishedSchema = z.object({
+  isPublished: z.boolean(),
+});
+
+export type SetPublicLotPublishedInput = z.infer<typeof setPublicLotPublishedSchema>;
+
+export const setPublicPostStatusSchema = z.object({
+  status: z.nativeEnum(PublicPostStatus),
+});
+
+export type SetPublicPostStatusInput = z.infer<typeof setPublicPostStatusSchema>;
+
+export const createPublicPostInputSchema = z.object({
+  title: z.string().trim().min(1, 'Nhập tiêu đề bài viết'),
+  category: z.nativeEnum(PublicPostCategory),
+  status: z.nativeEnum(PublicPostStatus),
+});
+
+export type CreatePublicPostInput = z.infer<typeof createPublicPostInputSchema>;
