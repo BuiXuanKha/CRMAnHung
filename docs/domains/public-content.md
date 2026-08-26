@@ -299,7 +299,7 @@ Footer đếm dưới list bài.
 
 ## 13. List `/dashboard/lo-dat`
 
-Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (ADMIN thấy mọi NV). Overlay đăng web (slug, copy, `isPublished`) vẫn mock. Admin chọn lô → preview bài đăng trang khách bên phải → Đăng web / Gỡ web từ preview.
+Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (ADMIN thấy mọi NV). Overlay đăng web (slug, copy, `isPublished`) vẫn mock. Admin chọn lô → preview bài đăng trang khách bên phải → **Đăng web** từ preview (lô chờ đăng).
 
 Không hiện trên list/preview: tên khách, SĐT khách, hoa hồng.
 
@@ -338,7 +338,7 @@ Trống: `Không có lô đang mở bán.`
 1. Nhãn `Preview trang khách`
 2. Chưa chọn dòng: `Chọn một lô đang mở bán để xem bài đăng.`
 3. Có chọn: ảnh bìa, hangtag Web, tiêu đề, địa chỉ, giá, DT · MT · hướng, hangtag Nhà/Đất, mô tả public (không PII), hotline công ty
-4. Nút **Đăng web** (chờ đăng) hoặc **Gỡ web** (đang hiện, danger) → `CrmConfirm`
+4. Nút **Đăng web** khi chờ đăng → `CrmConfirm`. **Không** nút Gỡ web trên màn này.
 5. Nếu đang hiện: link `Xem trên anhungland.com` tab mới `/san-pham/[slug]`
 
 ### 13.2 Mobile
