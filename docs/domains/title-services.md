@@ -199,6 +199,25 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 - Mở: tên + mã · SĐT; lưới Trạng thái / Giá / Đã thu / Đã chi; hộp Nhu cầu; nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline tiến độ, file, thu/chi.
 - Chưa chọn: «Chọn một hồ sơ…»
 
+#### 12.1.6 Nhớ tìm / lọc / cuộn
+
+Cùng quy tắc shared list-state (`createListStateStore`, key `crmanhung:title-service-list-state`):
+
+| Lưu | Gồm |
+|-----|-----|
+| Lọc | Ô tìm, trạng thái, nhân viên tạo (ADMIN), nhu cầu / tiến độ / giá / tài liệu |
+| Chọn | `selectedId` |
+| Cuộn | `scrollTop` + `anchorId` (dòng/thẻ đầu còn thấy) |
+
+- Storage: **sessionStorage** theo tab; đóng tab / đăng xuất → mất.
+- Lưu khi: đổi lọc, cuộn, rời list (chi tiết `[id]`, menu, Back, F5 cùng tab).
+- Vào lại: khôi phục lọc rồi fetch; đặt lại scroll; che list ngắn lúc restore (~4s).
+- Đổi tìm/lọc → scroll về đầu.
+- **Không** nhớ panel Chi tiết hồ sơ (mở/thu).
+- Tạo từ khách: ghi list-state ô tìm/lọc trống + `selectedId` hồ sơ mới, rồi `/dich-vu-so-do?id=` — hồ sơ mới **không** bị lọc cũ che.
+
+Máy tính (thân bảng) và mobile (danh sách thẻ) cùng quy tắc.
+
 ---
 
 ### 12.2 Giao diện mobile
@@ -241,17 +260,21 @@ Ghim: nền vàng + viền trái `#ca8a04`.
 
 Cùng câu `Hiển thị N / Tổng M hồ sơ sổ đỏ`.
 
+Nhớ tìm / lọc / cuộn: **cùng 12.1.6**. Vùng cuộn = danh sách thẻ.
+
 ---
 
 ### 12.3 Chi tiết `/dich-vu-so-do/[id]`
 
 Placeholder: mã + quay lại. Làm việc hàng ngày = list + panel (máy tính) / menu (cả hai).
 
+Link `/dich-vu-so-do`. Giữ ô tìm / lọc list (list-state).
+
 ---
 
 ### 12.4 Tạo từ khách `/khach-hang/[id]/dich-vu-so-do`
 
-Không nút Thêm trên list. Menu khách «Dịch vụ sổ đỏ» → trang này. ADMIN **được** tạo (khác lô đất). Lưu xong → `/dich-vu-so-do?id=` (chọn hồ sơ mới). Quay lại / Hủy → `/khach-hang`.
+Không nút Thêm trên list. Menu khách «Dịch vụ sổ đỏ» → trang này. ADMIN **được** tạo (khác lô đất). Lưu xong → ghi list-state (ô tìm/lọc trống, chọn hồ sơ mới) → `/dich-vu-so-do?id=`. Quay lại / Hủy → `/khach-hang`.
 
 #### 12.4.1 Máy tính
 

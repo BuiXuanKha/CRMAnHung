@@ -37,6 +37,15 @@
   overflow: hidden;
 }
 
+.sd-list-restore {
+  display: contents;
+}
+
+.sd-list-restore.is-restoring .sd-table-shell,
+.sd-list-restore.is-restoring .sd-cards-shell {
+  opacity: 0;
+}
+
 .sd-filter-wrap {
   flex-shrink: 0;
   border: 1px solid var(--sd-line);

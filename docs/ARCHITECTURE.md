@@ -127,7 +127,7 @@ Vai trò: `STAFF` (dữ liệu theo `employeeId`) · `ADMIN` (toàn cục + cấ
 
 ### List CRM — nhớ tìm / lọc / cuộn
 
-Các màn list (`/khach-hang`, `/lo-dat`, …) dùng helper chung `apps/web/src/shared/list-state`:
+Các màn list (`/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`) dùng helper chung `apps/web/src/shared/list-state`:
 
 - **sessionStorage** theo tab (key `crmanhung:<feature>-list-state`)
 - Lưu: ô tìm, bộ lọc, `selectedId`, `scrollTop` + `anchorId`
@@ -135,7 +135,7 @@ Các màn list (`/khach-hang`, `/lo-dat`, …) dùng helper chung `apps/web/src/
 - Feature bọc thin store (`createListStateStore`) — xem skill `crm-list-state`
 - **Cuộn tải thêm:** `useCrmInfiniteList` — mỗi lần 50 dòng, gần đáy 160px thì nối trang (`/khach-hang`, `/lo-dat`)
 
-Không nhớ panel rail (chỉ list). Chi tiết domain: `customers.md` §12.1.5, `lodats.md` §12.1.5.
+Không nhớ panel rail (chỉ list). Chi tiết domain: `customers.md` §12.1.5, `lodats.md` §12.1.5, `title-services.md` §12.1.6.
 
 ---
 

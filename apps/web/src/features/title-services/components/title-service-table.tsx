@@ -1,7 +1,7 @@
 'use client';
 
 import { Star } from 'lucide-react';
-import { useState } from 'react';
+import { useState, type Ref } from 'react';
 import type { TitleServiceListItem } from '@crmanhung/shared';
 import { ColumnFilter } from '@/shared/ui/column-filter';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -36,6 +36,8 @@ type Props = {
   onToggleMenu: (id: string) => void;
   onCloseMenu: () => void;
   onAction: (item: TitleServiceListItem, action: TitleServiceAction) => void;
+  scrollRef?: Ref<HTMLDivElement>;
+  onScroll?: () => void;
 };
 
 export function TitleServiceTable({
@@ -51,6 +53,8 @@ export function TitleServiceTable({
   onToggleMenu,
   onCloseMenu,
   onAction,
+  scrollRef,
+  onScroll,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
 
@@ -134,7 +138,12 @@ export function TitleServiceTable({
         </div>
       </div>
 
-      <div className="sd-table-scroll" role="rowgroup">
+      <div
+        className="sd-table-scroll"
+        role="rowgroup"
+        ref={scrollRef}
+        onScroll={onScroll}
+      >
         {items.length === 0 ? (
           <div className="sd-empty-row" role="row">
             Không có hồ sơ sổ đỏ phù hợp.
@@ -146,6 +155,7 @@ export function TitleServiceTable({
               <div
                 key={item.id}
                 role="row"
+                data-list-row-id={item.id}
                 className={[
                   'sd-grid-row',
                   selectedId === item.id ? 'is-selected' : '',
