@@ -1,9 +1,13 @@
 import {
   toGuestListing,
+  type PublicCatalogListing,
   type PublicGuestListing,
-  type PublicWebLotRow,
 } from '@crmanhung/shared';
-import { listPublicWebLots } from '@/features/public-content/api';
+import {
+  getPublishedCatalogBySlug,
+  listPublishedCatalog,
+} from '@/features/public-content/api';
+import { isMockPublicWeb } from '@/shared/api/mode';
 import { PUBLIC_PRODUCTS, type PublicProduct } from './mock-data';
 
 export type PublicListingView = PublicGuestListing & {
@@ -13,36 +17,20 @@ export type PublicListingView = PublicGuestListing & {
   directionLabel: string | null;
 };
 
-function overlayExcerpt(row: PublicWebLotRow): string {
-  const custom = row.excerpt?.trim();
-  if (custom) return custom;
-  return [row.title, row.location].filter(Boolean).join('. ');
-}
-
-function overlayPriceLabel(row: PublicWebLotRow): string | null {
-  if (row.priceMode === 'CONTACT') return null;
-  const label = row.priceLabel?.trim();
-  return label || null;
-}
-
-/** Overlay Đăng web — no JWT `/lodats`. Safe for `next build` + public SSR. */
-function overlayToView(row: PublicWebLotRow): PublicListingView | null {
-  const guest = toGuestListing({
-    isPublished: row.isPublished,
+function catalogToView(row: PublicCatalogListing): PublicListingView {
+  return {
     slug: row.slug,
     title: row.title,
     location: row.location,
-    priceLabel: overlayPriceLabel(row),
-    excerpt: overlayExcerpt(row),
+    priceLabel: row.priceLabel,
+    excerpt: row.excerpt,
     coverImageUrl: row.coverImageUrl,
-  });
-  if (!guest) return null;
-  return {
-    ...guest,
-    kindLabel: 'Nhà đất',
-    areaLabel: null,
-    frontageLabel: null,
-    directionLabel: null,
+    ...(row.metaDescription != null ? { metaDescription: row.metaDescription } : {}),
+    ...(row.updatedAt ? { updatedAt: row.updatedAt } : {}),
+    kindLabel: row.kindLabel,
+    areaLabel: row.areaLabel,
+    frontageLabel: row.frontageLabel,
+    directionLabel: row.directionLabel,
   };
 }
 
@@ -73,28 +61,27 @@ function fallbackMarketingCatalog(): PublicListingView[] {
   );
 }
 
-/** Overlay Đăng web — source of truth for sitemap /san-pham. Never fetches `/lodats`. */
 export async function listPublishedOverlayListings(): Promise<PublicListingView[]> {
-  const overlay = await listPublicWebLots();
-  return overlay.map(overlayToView).filter((row): row is PublicListingView => row != null);
+  const items = await listPublishedCatalog();
+  return items.map(catalogToView);
 }
 
 export async function listSitemapListings(): Promise<PublicGuestListing[]> {
   const overlay = await listPublishedOverlayListings();
   if (overlay.length > 0) return overlay;
-  return fallbackMarketingCatalog();
+  return isMockPublicWeb() ? fallbackMarketingCatalog() : [];
 }
 
 export async function listPublicCatalog(): Promise<PublicListingView[]> {
   const overlay = await listPublishedOverlayListings();
   if (overlay.length > 0) return overlay;
-  return fallbackMarketingCatalog();
+  return isMockPublicWeb() ? fallbackMarketingCatalog() : [];
 }
 
 export async function getPublicListingBySlug(slug: string): Promise<PublicListingView | null> {
-  const overlay = await listPublishedOverlayListings();
-  const fromOverlay = overlay.find((row) => row.slug === slug);
-  if (fromOverlay) return fromOverlay;
+  const fromApi = await getPublishedCatalogBySlug(slug);
+  if (fromApi) return catalogToView(fromApi);
+  if (!isMockPublicWeb()) return null;
   const product = PUBLIC_PRODUCTS.find((row) => row.slug === slug);
   return product ? productToListingView(product) : null;
 }

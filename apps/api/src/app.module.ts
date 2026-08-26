@@ -13,6 +13,7 @@ import { AddressesModule } from './modules/addresses/addresses.module';
 import { LodatsModule } from './modules/lodats/lodats.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { TitleServicesModule } from './modules/title-services/title-services.module';
+import { PublicContentModule } from './modules/public-content/public-content.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -37,6 +38,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     LodatsModule,
     TransactionsModule,
     TitleServicesModule,
+    PublicContentModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

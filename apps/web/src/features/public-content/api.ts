@@ -6,6 +6,8 @@ import {
   setPublicPostStatusSchema,
   updatePublicListingDraftSchema,
   type CreatePublicPostInput,
+  type PublicCatalogListing,
+  type PublicCatalogListResponse,
   type PublicWebDashboard,
   type PublicWebLotRow,
   type PublicWebPostRow,
@@ -14,6 +16,8 @@ import {
   type SetPublicPostStatusInput,
   type UpdatePublicListingDraftInput,
 } from '@crmanhung/shared';
+import { ApiError, apiFetch } from '@/shared/api/client';
+import { isMockPublicWeb } from '@/shared/api/mode';
 import { listLodats } from '@/features/lodats/api';
 import { toPublicSlug } from './display';
 import { overlayRowToGuestLot, type PublicGuestLot } from './guest-listing';
@@ -45,6 +49,25 @@ function uniquePostSlug(title: string): string {
   return `${base}-${n}`;
 }
 
+function overlayToCatalog(row: PublicWebLotRow): PublicCatalogListing | null {
+  if (!row.isPublished) return null;
+  const priceLabel =
+    row.priceMode === 'CONTACT' || !row.priceLabel?.trim() ? null : row.priceLabel;
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    location: row.location,
+    priceLabel,
+    excerpt: row.excerpt?.trim() || [row.title, row.location].filter(Boolean).join('. '),
+    coverImageUrl: row.coverImageUrl,
+    kindLabel: 'Nhà đất',
+    areaLabel: null,
+    frontageLabel: null,
+    directionLabel: null,
+  };
+}
+
 async function loadOpenPlots() {
   const res = await listLodats({
     status: LodatSaleStatus.DANG_BAN,
@@ -53,31 +76,66 @@ async function loadOpenPlots() {
   return res.items;
 }
 
-/** Chưa có API CMS — listing public mock; lô nguồn = list `/lo-dat`. */
-export async function getPublicWebDashboard(): Promise<PublicWebDashboard> {
-  const staff = buildStaffOpenLots(await loadOpenPlots(), cloneLots());
-  return buildPublicWebDashboard(cloneLots(), clonePosts(), staff);
+export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
+  if (isMockPublicWeb()) return cloneLots();
+  return apiFetch<PublicWebLotRow[]>('/admin/public-web/lots');
 }
 
-export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
-  return cloneLots();
+export async function getPublicWebDashboard(): Promise<PublicWebDashboard> {
+  const overlay = await listPublicWebLots();
+  const staff = buildStaffOpenLots(await loadOpenPlots(), overlay);
+  return buildPublicWebDashboard(overlay, clonePosts(), staff);
 }
 
 export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
-  return buildStaffOpenLots(await loadOpenPlots(), cloneLots());
+  return buildStaffOpenLots(await loadOpenPlots(), await listPublicWebLots());
 }
 
-/**
- * Guest homepage / public list: overlay Đăng web (`isPublished`).
- *
- * Do **not** call JWT `/lodats` here. `next build` and public SSR run in Node
- * with `NEXT_PUBLIC_API_URL=/api/v1` (relative) and no staff token — that
- * crashed CI/deploy (`Failed to collect page data for /san-pham/[slug]`).
- * Dashboard `/dashboard/lo-dat` still uses `listStaffOpenLots` in the browser.
- */
+/** Guest catalog — GET /public/listings (no JWT). Mock overlay when login giả. */
+export async function listPublishedCatalog(): Promise<PublicCatalogListing[]> {
+  if (isMockPublicWeb()) {
+    return cloneLots()
+      .map(overlayToCatalog)
+      .filter((row): row is PublicCatalogListing => row != null);
+  }
+  try {
+    const res = await apiFetch<PublicCatalogListResponse>('/public/listings');
+    return res.items;
+  } catch {
+    // next build: API chưa chạy — đừng crash collect page data.
+    return [];
+  }
+}
+
+export async function getPublishedCatalogBySlug(
+  slug: string,
+): Promise<PublicCatalogListing | null> {
+  if (isMockPublicWeb()) {
+    const row = cloneLots().find((item) => item.slug === slug);
+    return row ? overlayToCatalog(row) : null;
+  }
+  try {
+    return await apiFetch<PublicCatalogListing>(
+      `/public/listings/${encodeURIComponent(slug)}`,
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    return null;
+  }
+}
+
 export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
-  const overlay = await listPublicWebLots();
-  return overlay.filter((row) => row.isPublished).map(overlayRowToGuestLot);
+  const items = await listPublishedCatalog();
+  return items.map((row) =>
+    overlayRowToGuestLot({
+      id: row.id,
+      slug: row.slug,
+      title: row.title,
+      location: row.location,
+      coverImageUrl: row.coverImageUrl,
+      priceLabel: row.priceLabel,
+    }),
+  );
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {
@@ -91,6 +149,12 @@ export async function setPublicLotPublished(
   const parsed = setPublicLotPublishedSchema.safeParse(input);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không đổi được trạng thái lô.');
+  }
+  if (!isMockPublicWeb()) {
+    return apiFetch<PublicWebLotRow>(`/admin/public-web/lots/${encodeURIComponent(id)}/published`, {
+      method: 'PATCH',
+      body: JSON.stringify(parsed.data),
+    });
   }
 
   const staff = buildStaffOpenLots(await loadOpenPlots(), lots);
@@ -119,6 +183,12 @@ export async function updatePublicListingDraft(
   const parsed = updatePublicListingDraftSchema.safeParse(input);
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không lưu được bài đăng.');
+  }
+  if (!isMockPublicWeb()) {
+    return apiFetch<PublicWebLotRow>(`/admin/public-web/lots/${encodeURIComponent(id)}/draft`, {
+      method: 'PATCH',
+      body: JSON.stringify(parsed.data),
+    });
   }
 
   const staff = buildStaffOpenLots(await loadOpenPlots(), lots);
