@@ -52,8 +52,8 @@ cd "$WEB"
 rm -rf "$WEB/.next-build"
 rm -rf "$WEB/.next/types" 2>/dev/null || true
 if [[ ! -f .env.production ]]; then
-  # Sổ đỏ còn mock qua isMockMode; login + khách + địa chỉ + lô + GD = API
-  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=true\nNEXT_PUBLIC_USE_MOCK_AUTH=false\n' > .env.production
+  # Staging/prod: API thật. Mock chỉ bật local qua .env thủ công.
+  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=false\nNEXT_PUBLIC_USE_MOCK_AUTH=false\n' > .env.production
 elif ! grep -q '^NEXT_PUBLIC_USE_MOCK_AUTH=' .env.production; then
   echo 'NEXT_PUBLIC_USE_MOCK_AUTH=false' >> .env.production
 fi
