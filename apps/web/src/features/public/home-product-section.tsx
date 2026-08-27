@@ -1,42 +1,13 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { listPublishedPublicLots } from '@/features/public-content/api';
 import type { PublicGuestLot } from '@/features/public-content/guest-listing';
 import { publicWebKeys } from '@/features/public-content/query';
 import { ANHUNG_BRAND } from './brand';
-import { listingHref, PUBLIC_LISTING_PATH } from './site';
-
-function ShareButton({ lot }: { lot: PublicGuestLot }) {
-  const [copied, setCopied] = useState(false);
-
-  const share = async () => {
-    const url = `${window.location.origin}${listingHref(lot.slug)}`;
-    const meta = lot.areaLabel
-      ? `${lot.title} — ${lot.priceLabel} · ${lot.areaLabel}`
-      : `${lot.title} — ${lot.priceLabel}`;
-    const payload = { title: lot.title, text: meta, url };
-    try {
-      if (navigator.share) {
-        await navigator.share(payload);
-        return;
-      }
-    } catch {
-      // clipboard fallback
-    }
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
-  };
-
-  return (
-    <button type="button" className="ph-share" onClick={() => void share()} title="Chia sẻ">
-      {copied ? 'Đã copy' : 'Chia sẻ'}
-    </button>
-  );
-}
+import { ProductShareButton } from './product-detail-client';
+import { listingCanonicalUrl, listingHref, PUBLIC_LISTING_PATH } from './site';
 
 export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLot[] }) {
   const query = useQuery({
@@ -98,7 +69,11 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
                 {lot.location ? <p className="ph-product-loc">{lot.location}</p> : null}
                 <div className="ph-product-foot">
                   <span>Xem chi tiết</span>
-                  <ShareButton lot={lot} />
+                  <ProductShareButton
+                    url={listingCanonicalUrl(lot.slug)}
+                    className="ph-share"
+                    label="Chia sẻ"
+                  />
                 </div>
               </div>
             </article>

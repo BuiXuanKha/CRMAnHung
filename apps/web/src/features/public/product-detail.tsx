@@ -8,7 +8,7 @@ import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
 import { listingHeadline } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
-import { PUBLIC_LISTING_PATH, listingHref } from './site';
+import { PUBLIC_LISTING_PATH, listingCanonicalUrl, listingHref } from './site';
 import './public-home.css';
 import './product-detail.css';
 
@@ -42,8 +42,8 @@ export function ProductDetailView({
   const showPlainBody =
     !showHtmlBody && Boolean(fallbackBody) && fallbackBody !== listing.excerpt.trim();
   const highlights = product?.highlights ?? [];
-  const shareText = `${listing.title} — ${price}${area ? ` · ${area}` : ''}`;
   const brandInitial = ANHUNG_BRAND.shortName.slice(0, 1).toUpperCase();
+  const shareUrl = listingCanonicalUrl(listing.slug);
 
   return (
     <div className="ph pd">
@@ -138,8 +138,7 @@ export function ProductDetailView({
               ) : null}
               <div className="pd-summary-actions">
                 <ProductShareButton
-                  title={listing.title}
-                  text={shareText}
+                  url={shareUrl}
                   className="pd-icon-btn"
                   label="Chia sẻ"
                 />

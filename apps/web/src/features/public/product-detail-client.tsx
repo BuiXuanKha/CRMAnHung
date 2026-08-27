@@ -1,40 +1,78 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
+import { copyPageUrl, openFacebookShare } from './share';
+import './share.css';
 
 export function ProductShareButton({
-  title,
-  text,
+  url,
   className = 'ph-btn ph-btn-ghost',
   label = 'Chia sẻ',
 }: {
-  title: string;
-  text: string;
+  /** Absolute canonical listing URL (no query/hash). */
+  url: string;
   className?: string;
   label?: string;
 }) {
+  const menuId = useId();
+  const rootRef = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const share = async () => {
-    const url = typeof window !== 'undefined' ? window.location.href : '';
-    const payload = { title, text, url };
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  const onFacebook = () => {
+    setOpen(false);
+    openFacebookShare(url);
+  };
+
+  const onCopy = async () => {
     try {
-      if (navigator.share) {
-        await navigator.share(payload);
-        return;
-      }
-    } catch {
-      // clipboard fallback
+      await copyPageUrl(url);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1800);
+    } finally {
+      setOpen(false);
     }
-    await navigator.clipboard.writeText(url);
-    setCopied(true);
-    window.setTimeout(() => setCopied(false), 1800);
   };
 
   return (
-    <button type="button" className={className} onClick={() => void share()}>
-      {copied ? 'Đã copy link' : label}
-    </button>
+    <div className="pd-share" ref={rootRef}>
+      <button
+        type="button"
+        className={className}
+        aria-haspopup="menu"
+        aria-expanded={open}
+        aria-controls={menuId}
+        onClick={() => setOpen((v) => !v)}
+      >
+        {copied ? 'Đã copy link' : label}
+      </button>
+      {open ? (
+        <div className="pd-share-menu" id={menuId} role="menu">
+          <button type="button" role="menuitem" className="pd-share-item" onClick={onFacebook}>
+            Facebook
+          </button>
+          <button type="button" role="menuitem" className="pd-share-item" onClick={() => void onCopy()}>
+            Sao chép link
+          </button>
+        </div>
+      ) : null}
+    </div>
   );
 }
 
