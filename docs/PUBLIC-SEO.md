@@ -171,6 +171,8 @@ Roadmap tick-list: [`docs/domains/public-content.md`](./domains/public-content.m
 | **OG** | cover + title; thiếu cover → không Xuất bản (UI) |
 | **JSON-LD** | `Article` / `BlogPosting`: headline, image, datePublished, dateModified, author |
 | **Sitemap** | Chỉ `PUBLISHED` |
+| **List chuyên mục** | title/H1 = nhãn category; canonical `/{category}`; `ItemList` các URL bài đã xuất bản |
+| **404** | Slug giả / nháp / gỡ → `(public)/not-found.tsx` `noindex`, không kế thừa canonical trang chủ |
 
 Slice API + route guest: domain doc §16 Phase 5–7.
 

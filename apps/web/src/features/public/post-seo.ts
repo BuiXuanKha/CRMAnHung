@@ -26,6 +26,14 @@ export function unpublishedPostMetadata(): Metadata {
     description: 'Bài viết không tồn tại hoặc chưa được xuất bản.',
     robots: { index: false, follow: false },
     alternates: { canonical: null },
+    openGraph: {
+      title: 'Không tìm thấy bài viết',
+      description: 'Bài viết không tồn tại hoặc chưa được xuất bản.',
+      url: PUBLIC_SITE_ORIGIN,
+      type: 'website',
+      locale: 'vi_VN',
+      siteName: ANHUNG_BRAND.name,
+    },
   };
 }
 
@@ -116,6 +124,21 @@ export function postArticleJsonLd(post: PublicGuestPost) {
       url: PUBLIC_SITE_ORIGIN,
     },
     articleSection: publicPostCategoryLabel(post.category),
+  };
+}
+
+export function postItemListJsonLd(category: string, posts: PublicGuestPost[]) {
+  const label = publicPostCategoryLabel(category);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'ItemList',
+    name: label,
+    itemListElement: posts.map((post, index) => ({
+      '@type': 'ListItem',
+      position: index + 1,
+      url: postCanonicalUrl(post.category, post.slug),
+      name: post.title,
+    })),
   };
 }
 
