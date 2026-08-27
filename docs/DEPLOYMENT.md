@@ -139,6 +139,21 @@ R2_PUBLIC_BASE_URL=https://cdn.anhungland.com
 R2_PRIVATE_BUCKET=anhungland-crm-private
 ```
 
+On-demand ISR (Phase 3 — cùng secret Nest + Next):
+
+```env
+REVALIDATE_SECRET=<random ≥ 32 ký tự>
+PUBLIC_WEB_ORIGIN=http://127.0.0.1:5001
+```
+
+Và trên **apps/web** (PM2 / `.env`):
+
+```env
+REVALIDATE_SECRET=<cùng giá trị Nest>
+```
+
+Nest gọi Next qua **loopback** — không dùng `https://anhungland.com/api/…` (nginx `/api/` → Nest).
+
 ### 6. Nginx + SSL
 
 Mẫu server block: [`deploy/nginx/anhungland.com.conf`](../deploy/nginx/anhungland.com.conf)

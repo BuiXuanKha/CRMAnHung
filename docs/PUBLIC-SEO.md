@@ -147,12 +147,13 @@ Lô / bài ít đổi (giá làm mờ, copy ổn định lâu). **Không** reval
 |----------|---------|
 | **Chiến lược** | ISR: `revalidate = false` (hoặc số rất lớn) + **on-demand** khi admin Lưu/Đăng/Gỡ/Xuất bản |
 | **Nguồn sự thật** | PostgreSQL; HTML guest = bản build/cache từ API public |
-| **Trigger** | Nest sau ghi DB thành công → `POST` Next `/api/revalidate` với `REVALIDATE_SECRET` |
-| **Path lô** | `/mua-ban-nha-dat/[slug]`, `/mua-ban-nha-dat`, `/sitemap.xml`, `/` (khi đăng mới) |
+| **Trigger** | Nest sau ghi DB thành công → `POST` Next `/api/revalidate` với `REVALIDATE_SECRET` **qua loopback** `PUBLIC_WEB_ORIGIN` (mặc định `http://127.0.0.1:5001`). Không gọi `https://anhungland.com/api/…` — nginx `/api/` đi Nest. |
+| **Path lô** | `/mua-ban-nha-dat/[slug]`, `/mua-ban-nha-dat`, `/sitemap.xml`, `/` (khi đăng/gỡ đổi trạng thái) |
 | **Path bài** | `/{category}/[slug]`, list chuyên mục, `/`, sitemap |
 | **Gỡ / về nháp** | Revalidate + lần generate sau → 404; bỏ khỏi sitemap |
-| **HTML** | Nội dung chính (title, H1, bodyHtml) trong response đầu — không chỉ client fetch |
+| **HTML** | Nội dung chính (title, H1, bodyHtml đã sanitize) trong response đầu — không chỉ client fetch |
 | **CRM** | `noindex`; không đưa vào sitemap |
+| **Env** | Cùng `REVALIDATE_SECRET` trên Nest (`apps/api/.env`) và Next (`apps/web/.env`); `PUBLIC_WEB_ORIGIN` trên Nest |
 
 Roadmap tick-list: [`docs/domains/public-content.md`](./domains/public-content.md) §16.
 

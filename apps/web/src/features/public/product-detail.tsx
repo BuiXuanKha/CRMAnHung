@@ -4,6 +4,7 @@ import { ProductGallery, ProductShareButton } from './product-detail-client';
 import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
 import { listingHeadline } from './listing-seo';
+import { sanitizeListingHtml } from './sanitize-listing-html';
 import { PUBLIC_LISTING_PATH, listingHref } from './site';
 import './public-home.css';
 import './product-detail.css';
@@ -23,8 +24,11 @@ export function ProductDetailView({
       : [];
   const price = listing.priceLabel ?? 'Liên hệ';
   const area = listing.areaLabel;
-  const body = product?.description?.trim() || listing.excerpt;
-  const showBodySection = body !== listing.excerpt.trim();
+  const bodyHtml = sanitizeListingHtml(listing.bodyHtml ?? '');
+  const fallbackBody = product?.description?.trim() || '';
+  const showHtmlBody = Boolean(bodyHtml);
+  const showPlainBody =
+    !showHtmlBody && Boolean(fallbackBody) && fallbackBody !== listing.excerpt.trim();
   const highlights = product?.highlights ?? [];
 
   return (
@@ -117,10 +121,18 @@ export function ProductDetailView({
               ) : null}
             </dl>
 
-            {showBodySection ? (
+            {showHtmlBody ? (
               <section className="pd-section" aria-labelledby="pd-desc-title">
                 <h2 id="pd-desc-title">Mô tả</h2>
-                <p>{body}</p>
+                <div
+                  className="pd-body"
+                  dangerouslySetInnerHTML={{ __html: bodyHtml }}
+                />
+              </section>
+            ) : showPlainBody ? (
+              <section className="pd-section" aria-labelledby="pd-desc-title">
+                <h2 id="pd-desc-title">Mô tả</h2>
+                <p>{fallbackBody}</p>
               </section>
             ) : null}
 

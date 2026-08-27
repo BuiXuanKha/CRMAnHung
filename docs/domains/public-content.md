@@ -469,7 +469,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 
 - [x] CRM `(crm)/layout` `robots: noindex` + `robots.ts` chặn `/dashboard`, CRM routes
 - [x] Docs roadmap (§16 này) + PUBLIC-SEO §8 ISR
-- [ ] Secrets staging: `REVALIDATE_SECRET` (Next + Nest), `NEXT_PUBLIC_USE_MOCK=false` trên prod
+- [ ] Secrets staging: `REVALIDATE_SECRET` (Next + Nest cùng giá trị), `PUBLIC_WEB_ORIGIN=http://127.0.0.1:5001` trên Nest, `NEXT_PUBLIC_USE_MOCK=false` trên prod
 - [ ] `pnpm doctor` + R2 public CDN ổn trên VPS
 
 ### 16.1 Phase 1 — Media upload (chung lô + bài)
@@ -487,10 +487,10 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 
 ### 16.3 Phase 3 — Lô: guest ISR + revalidate
 
-- [ ] `/mua-ban-nha-dat/[slug]`: bỏ `force-dynamic` → ISR (`revalidate = false` hoặc rất dài)
-- [ ] Render `bodyHtml` SSR (sanitize)
-- [ ] `POST /api/revalidate` (secret) + Nest gọi sau draft (nếu đã published) / published / gỡ
-- [ ] Revalidate: slug + `/mua-ban-nha-dat` + sitemap (+ `/` khi đăng mới)
+- [x] `/mua-ban-nha-dat/[slug]`: bỏ `force-dynamic` → ISR (`revalidate = false` hoặc rất dài)
+- [x] Render `bodyHtml` SSR (sanitize)
+- [x] `POST /api/revalidate` (secret) + Nest gọi sau draft (nếu đã published) / published / gỡ
+- [x] Revalidate: slug + `/mua-ban-nha-dat` + sitemap (+ `/` khi đăng mới)
 
 ### 16.4 Phase 4 — Lô: QA SEO
 

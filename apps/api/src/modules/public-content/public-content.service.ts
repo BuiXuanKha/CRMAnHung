@@ -13,6 +13,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type { UpdatePublicListingDraftDto } from './dto/public-listing.dto';
+import { PublicWebRevalidateService } from './public-web-revalidate.service';
 import { formatM, kindLabel, toPublicSlug } from './public-slug';
 
 const ADDR_SELECT = {
@@ -56,6 +57,7 @@ export class PublicContentService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly revalidate: PublicWebRevalidateService,
   ) {}
 
   async listPublished() {
@@ -146,6 +148,9 @@ export class PublicContentService {
           },
           include: { lodat: { include: LODAT_INCLUDE } },
         });
+    if (saved.isPublished) {
+      await this.revalidate.revalidateListing(saved.slug);
+    }
     return this.toAdminRow(saved);
   }
 
@@ -175,8 +180,10 @@ export class PublicContentService {
         },
         include: { lodat: { include: LODAT_INCLUDE } },
       });
+      await this.revalidate.revalidateListing(created.slug, { includeHome: true });
       return this.toAdminRow(created);
     }
+    const wasPublished = existing.isPublished;
     const saved = await this.prisma.publicLotListing.update({
       where: { id: existing.id },
       data: {
@@ -184,6 +191,9 @@ export class PublicContentService {
         ...(isPublished && !existing.publishedAt ? { publishedAt: new Date() } : {}),
       },
       include: { lodat: { include: LODAT_INCLUDE } },
+    });
+    await this.revalidate.revalidateListing(saved.slug, {
+      includeHome: isPublished !== wasPublished,
     });
     return this.toAdminRow(saved);
   }

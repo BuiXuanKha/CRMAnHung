@@ -5,7 +5,8 @@ import { listPublicCatalog } from '@/features/public/published-listings';
 import { listingHref } from '@/features/public/site';
 import '@/features/public/public-home.css';
 
-export const dynamic = 'force-dynamic';
+/** On-demand ISR — Nest revalidate khi đăng / gỡ lô. */
+export const revalidate = false;
 
 export const metadata = sanPhamListMetadata();
 

@@ -178,6 +178,64 @@
   font-size: 1rem;
 }
 
+.pd-body {
+  color: var(--ph-ink);
+  font-size: 1.02rem;
+  line-height: 1.65;
+}
+
+.pd-body > *:first-child {
+  margin-top: 0;
+}
+
+.pd-body > *:last-child {
+  margin-bottom: 0;
+}
+
+.pd-body p {
+  margin: 0 0 0.85em;
+}
+
+.pd-body h2,
+.pd-body h3 {
+  margin: 1.1em 0 0.45em;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.pd-body h2 {
+  font-size: 1.2rem;
+}
+
+.pd-body h3 {
+  font-size: 1.08rem;
+}
+
+.pd-body ul,
+.pd-body ol {
+  margin: 0 0 0.85em;
+  padding-left: 1.25em;
+}
+
+.pd-body li {
+  margin: 0.2em 0;
+}
+
+.pd-body a {
+  color: var(--ph-brand);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.pd-body img,
+.pd-body .pw-editor-img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 0.9em 0;
+  border-radius: 8px;
+}
+
 .pd-highlights {
   margin: 0;
   padding: 0;

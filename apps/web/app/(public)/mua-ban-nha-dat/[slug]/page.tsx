@@ -15,7 +15,8 @@ import {
 
 type Props = { params: Promise<{ slug: string }> };
 
-export const dynamic = 'force-dynamic';
+/** On-demand ISR — Nest gọi /api/revalidate khi admin Lưu/Đăng/Gỡ. */
+export const revalidate = false;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

@@ -6,7 +6,8 @@ import {
   listingCanonicalUrl,
 } from '@/features/public/site';
 
-export const dynamic = 'force-dynamic';
+/** On-demand ISR — Nest revalidate `/sitemap.xml` khi đăng / gỡ lô. */
+export const revalidate = false;
 
 /** URL public ổn định + lô đã Đăng web. Không đưa nháp / đã gỡ. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
