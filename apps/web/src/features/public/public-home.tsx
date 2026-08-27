@@ -3,13 +3,13 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import type { PublicGuestLot } from '@/features/public-content/guest-listing';
+import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { HomeProductSection } from './home-product-section';
 import { PUBLIC_LISTING_PATH } from './site';
+import { postHref, publicPostCategoryLabel } from './published-posts';
 import {
-  ARTICLE_CATEGORY_LABEL,
   PROJECT_STATUS_LABEL,
-  PUBLIC_ARTICLES,
   PUBLIC_PROJECTS,
 } from './mock-data';
 import './public-home.css';
@@ -33,7 +33,13 @@ function BrandLogo({
   );
 }
 
-export function PublicHome({ initialLots }: { initialLots: PublicGuestLot[] }) {
+export function PublicHome({
+  initialLots,
+  initialPosts,
+}: {
+  initialLots: PublicGuestLot[];
+  initialPosts: PublicGuestPost[];
+}) {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -106,7 +112,7 @@ export function PublicHome({ initialLots }: { initialLots: PublicGuestLot[] }) {
         </div>
         <div className="ph-project-row">
           {PUBLIC_PROJECTS.map((pj) => (
-            <Link key={pj.id} href={`/du-an/${pj.slug}`} className="ph-project">
+            <Link key={pj.id} href="/du-an" className="ph-project">
               <div className="ph-project-media">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src={pj.imageUrl} alt={pj.title} loading="lazy" />
@@ -139,34 +145,36 @@ export function PublicHome({ initialLots }: { initialLots: PublicGuestLot[] }) {
             Xem thêm →
           </Link>
         </div>
-        <div className="ph-article-row">
-          {PUBLIC_ARTICLES.map((a, idx) => (
-            <Link
-              key={a.id}
-              href={
-                a.category === 'du-an'
-                  ? `/du-an/${a.slug}`
-                  : a.category === 'kinh-nghiem'
-                    ? `/kinh-nghiem/${a.slug}`
-                    : `/kien-thuc/${a.slug}`
-              }
-              className="ph-article"
-            >
-              <div className="ph-article-media">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={a.imageUrl} alt={a.title} loading="lazy" />
-              </div>
-              <div className="ph-article-body">
-                <span className="ph-article-idx">{String(idx + 1).padStart(2, '0')}</span>
-                <div>
-                  <p className="ph-article-cat">{ARTICLE_CATEGORY_LABEL[a.category]}</p>
-                  <h3>{a.title}</h3>
-                  <p className="ph-article-excerpt">{a.excerpt}</p>
+        {initialPosts.length === 0 ? (
+          <p className="ph-article-excerpt">Hiện chưa có bài viết xuất bản.</p>
+        ) : (
+          <div className="ph-article-row">
+            {initialPosts.map((a, idx) => (
+              <Link
+                key={a.id}
+                href={postHref(a.category, a.slug)}
+                className="ph-article"
+              >
+                <div className="ph-article-media">
+                  {a.coverImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={a.coverImageUrl} alt={a.title} loading="lazy" />
+                  ) : (
+                    <span className="ph-product-media-empty">Chưa có ảnh</span>
+                  )}
                 </div>
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="ph-article-body">
+                  <span className="ph-article-idx">{String(idx + 1).padStart(2, '0')}</span>
+                  <div>
+                    <p className="ph-article-cat">{publicPostCategoryLabel(a.category)}</p>
+                    <h3>{a.title}</h3>
+                    <p className="ph-article-excerpt">{a.excerpt}</p>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
 
       <footer className="ph-footer">

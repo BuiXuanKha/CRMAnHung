@@ -526,9 +526,9 @@ Sửa nhỏ kèm Phase 4: metadata 404 rõ hơn (không kế thừa canonical tr
 
 ### 16.6 Phase 6 — Bài: guest ISR
 
-- [ ] Route `/{category}/{slug}` + list chuyên mục; ISR + on-demand revalidate
-- [ ] `generateMetadata` + JSON-LD `Article`; sitemap bài published
-- [ ] Trang chủ teaser từ API
+- [x] Route `/{category}/{slug}` + list chuyên mục; ISR + on-demand revalidate
+- [x] `generateMetadata` + JSON-LD `Article`; sitemap bài published
+- [x] Trang chủ teaser từ API
 
 ### 16.7 Phase 7 — Bài: QA SEO
 

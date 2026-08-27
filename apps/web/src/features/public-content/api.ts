@@ -9,6 +9,8 @@ import {
   type CreatePublicPostInput,
   type PublicCatalogListing,
   type PublicCatalogListResponse,
+  type PublicGuestPost,
+  type PublicGuestPostListResponse,
   type PublicWebDashboard,
   type PublicWebLotRow,
   type PublicWebPostRow,
@@ -284,7 +286,9 @@ export async function createPublicPost(
 }
 
 /** Guest published posts — GET /public/posts (no JWT). */
-export async function listPublishedPosts(category?: string) {
+export async function listPublishedPosts(
+  category?: string,
+): Promise<PublicGuestPost[]> {
   if (isMockPublicWeb()) {
     return clonePosts()
       .filter((row) => row.status === 'PUBLISHED')
@@ -301,14 +305,17 @@ export async function listPublishedPosts(category?: string) {
   }
   try {
     const qs = category ? `?category=${encodeURIComponent(category)}` : '';
-    const res = await apiFetch<{ items: unknown[] }>(`/public/posts${qs}`);
+    const res = await apiFetch<PublicGuestPostListResponse>(`/public/posts${qs}`);
     return res.items;
   } catch {
     return [];
   }
 }
 
-export async function getPublishedPostByCategorySlug(category: string, slug: string) {
+export async function getPublishedPostByCategorySlug(
+  category: string,
+  slug: string,
+): Promise<PublicGuestPost | null> {
   if (isMockPublicWeb()) {
     const row = clonePosts().find(
       (item) =>
@@ -328,7 +335,7 @@ export async function getPublishedPostByCategorySlug(category: string, slug: str
     };
   }
   try {
-    return await apiFetch(
+    return await apiFetch<PublicGuestPost>(
       `/public/posts/${encodeURIComponent(category)}/${encodeURIComponent(slug)}`,
     );
   } catch (err) {

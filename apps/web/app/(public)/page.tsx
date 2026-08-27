@@ -1,23 +1,26 @@
 import { listPublishedPublicLots } from '@/features/public-content/api';
 import { JsonLd } from '@/features/public/json-ld';
 import { organizationJsonLd, websiteJsonLd } from '@/features/public/listing-seo';
+import { listHomeTeaserPosts } from '@/features/public/published-posts';
 import { PublicHome } from '@/features/public/public-home';
 
 /**
  * Web công khai — trang chủ khách.
  * IA: docs/PUBLIC-WEB.md · SEO: docs/PUBLIC-SEO.md
- * Lô: overlay Đăng web (`isPublished`) ∩ lô CRM đang Mở bán — không mock marketing.
- * On-demand ISR — Nest revalidate `/` khi đăng / gỡ lô.
+ * Lô + teaser bài từ API published. On-demand ISR.
  */
 export const revalidate = false;
 
 export default async function PublicHomePage() {
-  const lots = await listPublishedPublicLots();
+  const [lots, posts] = await Promise.all([
+    listPublishedPublicLots(),
+    listHomeTeaserPosts(6),
+  ]);
   return (
     <>
       <JsonLd data={organizationJsonLd()} />
       <JsonLd data={websiteJsonLd()} />
-      <PublicHome initialLots={lots} />
+      <PublicHome initialLots={lots} initialPosts={posts} />
     </>
   );
 }

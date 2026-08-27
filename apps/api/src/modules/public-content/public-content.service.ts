@@ -367,6 +367,11 @@ export class PublicContentService {
         publishedAt: isPublished ? new Date() : null,
       },
     });
+    if (isPublished) {
+      await this.revalidate.revalidatePost(saved.category, saved.slug, {
+        includeHome: true,
+      });
+    }
     return this.toAdminPost(saved);
   }
 
@@ -376,6 +381,7 @@ export class PublicContentService {
     if (status === 'PUBLISHED') {
       this.assertPublishablePost(status, existing.coverImageUrl, existing.bodyHtml);
     }
+    const wasPublished = existing.status === 'PUBLISHED';
     const saved = await this.prisma.publicPost.update({
       where: { id },
       data: {
@@ -385,6 +391,11 @@ export class PublicContentService {
           : {}),
       },
     });
+    if (wasPublished || status === 'PUBLISHED') {
+      await this.revalidate.revalidatePost(saved.category, saved.slug, {
+        includeHome: wasPublished !== (status === 'PUBLISHED'),
+      });
+    }
     return this.toAdminPost(saved);
   }
 

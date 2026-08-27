@@ -17,6 +17,16 @@ export class PublicWebRevalidateService {
     await this.revalidatePaths(paths);
   }
 
+  async revalidatePost(
+    category: string,
+    slug: string,
+    opts?: { includeHome?: boolean },
+  ): Promise<void> {
+    const paths = [`/${category}/${slug}`, `/${category}`, '/sitemap.xml'];
+    if (opts?.includeHome) paths.push('/');
+    await this.revalidatePaths(paths);
+  }
+
   async revalidatePaths(paths: string[]): Promise<void> {
     const secret = this.config.get<string>('REVALIDATE_SECRET')?.trim();
     const origin = (
