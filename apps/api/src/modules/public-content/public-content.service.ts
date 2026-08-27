@@ -317,17 +317,28 @@ export class PublicContentService {
     return parts.join(', ');
   }
 
-  private coverUrl(lodat: LodatLoaded): string | null {
-    const addr = lodat.projectLotId && lodat.projectLot?.address
-      ? lodat.projectLot.address
-      : lodat.address;
+  private imageUrls(lodat: LodatLoaded): string[] {
+    if (!this.storage.isConfigured()) return [];
+    const addr =
+      lodat.projectLotId && lodat.projectLot?.address
+        ? lodat.projectLot.address
+        : lodat.address;
     const keys = [
       ...(lodat.projectLotId && addr?.images ? addr.images.map((i) => i.objectKey) : []),
       ...lodat.images.map((i) => i.objectKey),
     ].filter(Boolean);
-    const first = keys[0];
-    if (!first || !this.storage.isConfigured()) return null;
-    return this.storage.publicUrl(first);
+    const seen = new Set<string>();
+    const urls: string[] = [];
+    for (const key of keys) {
+      if (seen.has(key)) continue;
+      seen.add(key);
+      urls.push(this.storage.publicUrl(key));
+    }
+    return urls;
+  }
+
+  private coverUrl(lodat: LodatLoaded): string | null {
+    return this.imageUrls(lodat)[0] ?? null;
   }
 
   private toAdminRow(row: ListingRow) {
@@ -368,6 +379,7 @@ export class PublicContentService {
       excerpt: row.excerpt.trim() || [row.title, row.location].filter(Boolean).join('. '),
       bodyHtml: row.bodyHtml ?? '',
       coverImageUrl: this.coverUrl(lodat),
+      imageUrls: this.imageUrls(lodat),
       ...(row.metaDescription ? { metaDescription: row.metaDescription } : {}),
       ...(row.publishedAt ? { publishedAt: row.publishedAt.toISOString() } : {}),
       updatedAt: row.updatedAt.toISOString(),

@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { ANHUNG_BRAND } from './brand';
-import { ProductGallery, ProductShareButton } from './product-detail-client';
+import {
+  ProductGallery,
+  ProductShareButton,
+  RevealPhoneButton,
+} from './product-detail-client';
 import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
 import { listingHeadline } from './listing-seo';
@@ -8,6 +12,18 @@ import { sanitizeListingHtml } from './sanitize-listing-html';
 import { PUBLIC_LISTING_PATH, listingHref } from './site';
 import './public-home.css';
 import './product-detail.css';
+
+function listingImages(listing: PublicListingView): string[] {
+  const product = getProductBySlug(listing.slug);
+  if (product?.gallery?.length) return product.gallery;
+  if (listing.imageUrls?.length) return listing.imageUrls;
+  if (listing.coverImageUrl) return [listing.coverImageUrl];
+  return [];
+}
+
+function zaloLink(telDigits: string): string {
+  return `https://zalo.me/${telDigits}`;
+}
 
 export function ProductDetailView({
   listing,
@@ -17,19 +33,18 @@ export function ProductDetailView({
   related: PublicListingView[];
 }) {
   const product = getProductBySlug(listing.slug);
-  const images = product?.gallery?.length
-    ? product.gallery
-    : listing.coverImageUrl
-      ? [listing.coverImageUrl]
-      : [];
+  const images = listingImages(listing);
   const price = listing.priceLabel ?? 'Liên hệ';
   const area = listing.areaLabel;
+  const headline = listingHeadline(listing);
   const bodyHtml = sanitizeListingHtml(listing.bodyHtml ?? '');
   const fallbackBody = product?.description?.trim() || '';
   const showHtmlBody = Boolean(bodyHtml);
   const showPlainBody =
     !showHtmlBody && Boolean(fallbackBody) && fallbackBody !== listing.excerpt.trim();
   const highlights = product?.highlights ?? [];
+  const shareText = `${listing.title} — ${price}${area ? ` · ${area}` : ''}`;
+  const brandInitial = ANHUNG_BRAND.shortName.slice(0, 1).toUpperCase();
 
   return (
     <div className="ph pd">
@@ -64,64 +79,86 @@ export function ProductDetailView({
           <span aria-hidden>/</span>
           <Link href={PUBLIC_LISTING_PATH}>Nhà đất đang bán</Link>
           <span aria-hidden>/</span>
-          <span>{listingHeadline(listing)}</span>
+          {listing.location ? (
+            <>
+              <span className="pd-breadcrumb-loc">{listing.location}</span>
+              <span aria-hidden>/</span>
+            </>
+          ) : null}
+          <span>{listing.title}</span>
         </nav>
 
         <div className="pd-layout">
           <div className="pd-primary">
-            {images.length > 0 ? (
-              <ProductGallery title={listingHeadline(listing)} images={images} />
-            ) : null}
+            {images.length > 0 ? <ProductGallery title={headline} images={images} /> : null}
 
             {product?.postedLabel ? <p className="pd-posted">{product.postedLabel}</p> : null}
-            <h1>{listingHeadline(listing)}</h1>
-            <p className="pd-price">
-              {price}
-              <span>
-                {area ? ` · ${area}` : ''}
-                {listing.location ? ` · ${listing.location}` : ''}
-              </span>
-            </p>
+            <h1>{headline}</h1>
+            {listing.location ? (
+              <p className="pd-location">
+                <span className="pd-location-pin" aria-hidden />
+                <span>{listing.location}</span>
+              </p>
+            ) : null}
+
+            <div className="pd-summary" role="group" aria-label="Thông tin chính">
+              <div className="pd-summary-item">
+                <span className="pd-summary-label">Khoảng giá</span>
+                <strong className="pd-summary-value pd-summary-price">{price}</strong>
+                {listing.kindLabel ? (
+                  <span className="pd-summary-sub">{listing.kindLabel}</span>
+                ) : null}
+              </div>
+              {area ? (
+                <div className="pd-summary-item">
+                  <span className="pd-summary-label">Diện tích</span>
+                  <strong className="pd-summary-value">{area}</strong>
+                  {listing.frontageLabel ? (
+                    <span className="pd-summary-sub">Mặt tiền {listing.frontageLabel}</span>
+                  ) : null}
+                </div>
+              ) : listing.frontageLabel ? (
+                <div className="pd-summary-item">
+                  <span className="pd-summary-label">Mặt tiền</span>
+                  <strong className="pd-summary-value">{listing.frontageLabel}</strong>
+                </div>
+              ) : null}
+              <div className="pd-summary-actions">
+                <ProductShareButton
+                  title={listing.title}
+                  text={shareText}
+                  className="pd-icon-btn"
+                  label="Chia sẻ"
+                />
+              </div>
+            </div>
+
             {!showHtmlBody && listing.excerpt.trim() ? (
               <p className="pd-lead">{listing.excerpt}</p>
             ) : null}
 
-            <dl className="pd-specs">
-              <div>
-                <dt>Loại</dt>
-                <dd>{listing.kindLabel}</dd>
-              </div>
-              {area ? (
-                <div>
-                  <dt>Diện tích</dt>
-                  <dd>{area}</dd>
-                </div>
-              ) : null}
-              {listing.frontageLabel ? (
-                <div>
-                  <dt>Mặt tiền</dt>
-                  <dd>{listing.frontageLabel}</dd>
-                </div>
-              ) : null}
-              {listing.directionLabel ? (
-                <div>
-                  <dt>Hướng</dt>
-                  <dd>{listing.directionLabel}</dd>
-                </div>
-              ) : null}
-              {product?.legalLabel ? (
-                <div>
-                  <dt>Pháp lý</dt>
-                  <dd>{product.legalLabel}</dd>
-                </div>
-              ) : null}
-              {listing.location ? (
-                <div>
-                  <dt>Vị trí</dt>
-                  <dd>{listing.location}</dd>
-                </div>
-              ) : null}
-            </dl>
+            {(listing.directionLabel || product?.legalLabel) && (
+              <dl className="pd-specs">
+                {listing.directionLabel ? (
+                  <div>
+                    <dt>Hướng</dt>
+                    <dd>{listing.directionLabel}</dd>
+                  </div>
+                ) : null}
+                {product?.legalLabel ? (
+                  <div>
+                    <dt>Pháp lý</dt>
+                    <dd>{product.legalLabel}</dd>
+                  </div>
+                ) : null}
+                {listing.kindLabel ? (
+                  <div>
+                    <dt>Loại</dt>
+                    <dd>{listing.kindLabel}</dd>
+                  </div>
+                ) : null}
+              </dl>
+            )}
 
             {showHtmlBody ? (
               <section className="pd-section" aria-labelledby="pd-desc-title">
@@ -151,22 +188,31 @@ export function ProductDetailView({
           </div>
 
           <aside className="pd-aside" aria-label="Liên hệ tư vấn">
-            <p className="pd-aside-kicker">{ANHUNG_BRAND.name}</p>
+            <div className="pd-agent">
+              <span className="pd-agent-avatar" aria-hidden>
+                {brandInitial}
+              </span>
+              <div className="pd-agent-meta">
+                <p className="pd-agent-name">{ANHUNG_BRAND.name}</p>
+                <p className="pd-agent-role">{ANHUNG_BRAND.legalLine}</p>
+              </div>
+            </div>
             <p className="pd-aside-lead">Xem đất thực tế · tư vấn miễn phí</p>
-            <a className="ph-btn ph-btn-primary pd-aside-cta" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-              Gọi {ANHUNG_BRAND.hotlineDisplay}
-            </a>
             <a
-              className="ph-btn ph-btn-ghost pd-aside-cta"
-              href={`tel:${ANHUNG_BRAND.hotlineAltTel}`}
+              className="pd-zalo-btn"
+              href={zaloLink(ANHUNG_BRAND.hotlineTel)}
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              Zalo / máy phụ {ANHUNG_BRAND.hotlineAltDisplay}
+              Chat qua Zalo
             </a>
-            <ProductShareButton
-              title={listing.title}
-              text={`${listing.title} — ${price}${area ? ` · ${area}` : ''}`}
-              className="ph-btn ph-btn-ghost pd-aside-cta"
+            <RevealPhoneButton
+              display={ANHUNG_BRAND.hotlineDisplay}
+              tel={ANHUNG_BRAND.hotlineTel}
             />
+            <a className="pd-alt-phone" href={`tel:${ANHUNG_BRAND.hotlineAltTel}`}>
+              Máy phụ {ANHUNG_BRAND.hotlineAltDisplay}
+            </a>
             <p className="pd-aside-addr">{ANHUNG_BRAND.address}</p>
             <p className="pd-aside-note">{ANHUNG_BRAND.services}</p>
           </aside>
@@ -175,7 +221,7 @@ export function ProductDetailView({
         {related.length > 0 ? (
           <section className="pd-related" aria-labelledby="pd-related-title">
             <div className="ph-section-head">
-              <h2 id="pd-related-title">Sản phẩm khác</h2>
+              <h2 id="pd-related-title">Bất động sản nổi bật</h2>
               <Link href={PUBLIC_LISTING_PATH} className="ph-more">
                 Xem tất cả →
               </Link>
@@ -214,13 +260,18 @@ export function ProductDetailView({
       </main>
 
       <div className="pd-mobile-bar">
-        <a className="ph-btn ph-btn-primary" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-          Gọi {ANHUNG_BRAND.hotlineDisplay}
+        <a
+          className="pd-zalo-btn"
+          href={zaloLink(ANHUNG_BRAND.hotlineTel)}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Zalo
         </a>
-        <ProductShareButton
-          title={listing.title}
-          text={`${listing.title} — ${price}${area ? ` · ${area}` : ''}`}
-          className="ph-btn ph-btn-ghost"
+        <RevealPhoneButton
+          display={ANHUNG_BRAND.hotlineDisplay}
+          tel={ANHUNG_BRAND.hotlineTel}
+          className="pd-phone-btn pd-phone-btn-mobile"
         />
       </div>
     </div>
