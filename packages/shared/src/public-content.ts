@@ -51,6 +51,38 @@ export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
 export type PublicWebStaffLotRow = z.infer<typeof publicWebStaffLotRowSchema>;
 
 /**
+ * Request body shape for external GPT lot-content API.
+ * Built from public-safe listing facts — no CRM map VND or customer PII.
+ */
+export const lotGptLocationSchema = z.object({
+  village: z.string(),
+  commune: z.string(),
+  district: z.string(),
+  province: z.string(),
+});
+
+export type LotGptLocation = z.infer<typeof lotGptLocationSchema>;
+
+export const lotGptRequestPayloadSchema = z.object({
+  title: z.string(),
+  location: lotGptLocationSchema,
+  area: z.number().nullable(),
+  residentialArea: z.number().nullable(),
+  frontage: z.number().nullable(),
+  direction: z.string().nullable(),
+  /** Public numeric price (VND) when parseable from priceLabel; else null. */
+  price: z.number().nullable(),
+  /** Human price copy when `price` is null or for GPT wording. */
+  priceText: z.string().nullable(),
+  /** Extra public fields when available */
+  kind: z.string().optional(),
+  excerpt: z.string().optional(),
+  slug: z.string().optional(),
+});
+
+export type LotGptRequestPayload = z.infer<typeof lotGptRequestPayloadSchema>;
+
+/**
  * Published listing as guests and search engines see it.
  * Never include CRM VND, commission, owner notes, or customer PII.
  */
