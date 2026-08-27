@@ -478,33 +478,6 @@
   font-weight: 700;
 }
 
-.pd-alt-phone {
-  display: block;
-  text-align: center;
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--ph-muted);
-  text-decoration: none;
-}
-
-.pd-alt-phone:hover {
-  color: var(--ph-brand);
-}
-
-.pd-aside-addr {
-  margin: 4px 0 0;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--ph-ink);
-}
-
-.pd-aside-note {
-  margin: 0;
-  font-size: 0.82rem;
-  color: var(--ph-muted);
-  line-height: 1.45;
-}
-
 .pd-related {
   margin-top: 56px;
   padding-top: 28px;
