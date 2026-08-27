@@ -38,43 +38,6 @@ export function ProductShareButton({
   );
 }
 
-/** Masked hotline until the guest taps «Hiện số» (Batdongsan-style). */
-export function RevealPhoneButton({
-  display,
-  tel,
-  className = 'pd-phone-btn',
-}: {
-  display: string;
-  tel: string;
-  className?: string;
-}) {
-  const [revealed, setRevealed] = useState(false);
-  const masked = maskPhoneDisplay(display);
-
-  if (revealed) {
-    return (
-      <a className={className} href={`tel:${tel}`}>
-        {display}
-      </a>
-    );
-  }
-
-  return (
-    <button type="button" className={className} onClick={() => setRevealed(true)}>
-      <span className="pd-phone-btn-num">{masked}</span>
-      <span className="pd-phone-btn-action">· Hiện số</span>
-    </button>
-  );
-}
-
-function maskPhoneDisplay(display: string): string {
-  const digits = display.replace(/\D/g, '');
-  if (digits.length < 7) return display;
-  const head = digits.slice(0, 4);
-  const mid = digits.slice(4, 7);
-  return `${head} ${mid} ***`;
-}
-
 export function ProductGallery({
   title,
   images,

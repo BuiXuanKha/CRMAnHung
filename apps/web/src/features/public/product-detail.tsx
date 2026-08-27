@@ -3,7 +3,6 @@ import { ANHUNG_BRAND } from './brand';
 import {
   ProductGallery,
   ProductShareButton,
-  RevealPhoneButton,
 } from './product-detail-client';
 import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
@@ -123,6 +122,20 @@ export function ProductDetailView({
                   <strong className="pd-summary-value">{listing.frontageLabel}</strong>
                 </div>
               ) : null}
+              {listing.directionLabel ? (
+                <div className="pd-summary-item">
+                  <span className="pd-summary-label">Hướng</span>
+                  <strong className="pd-summary-value">{listing.directionLabel}</strong>
+                  {product?.legalLabel ? (
+                    <span className="pd-summary-sub">{product.legalLabel}</span>
+                  ) : null}
+                </div>
+              ) : product?.legalLabel ? (
+                <div className="pd-summary-item">
+                  <span className="pd-summary-label">Pháp lý</span>
+                  <strong className="pd-summary-value">{product.legalLabel}</strong>
+                </div>
+              ) : null}
               <div className="pd-summary-actions">
                 <ProductShareButton
                   title={listing.title}
@@ -136,29 +149,6 @@ export function ProductDetailView({
             {!showHtmlBody && listing.excerpt.trim() ? (
               <p className="pd-lead">{listing.excerpt}</p>
             ) : null}
-
-            {(listing.directionLabel || product?.legalLabel) && (
-              <dl className="pd-specs">
-                {listing.directionLabel ? (
-                  <div>
-                    <dt>Hướng</dt>
-                    <dd>{listing.directionLabel}</dd>
-                  </div>
-                ) : null}
-                {product?.legalLabel ? (
-                  <div>
-                    <dt>Pháp lý</dt>
-                    <dd>{product.legalLabel}</dd>
-                  </div>
-                ) : null}
-                {listing.kindLabel ? (
-                  <div>
-                    <dt>Loại</dt>
-                    <dd>{listing.kindLabel}</dd>
-                  </div>
-                ) : null}
-              </dl>
-            )}
 
             {showHtmlBody ? (
               <section className="pd-section" aria-labelledby="pd-desc-title">
@@ -206,15 +196,9 @@ export function ProductDetailView({
             >
               Chat qua Zalo
             </a>
-            <RevealPhoneButton
-              display={ANHUNG_BRAND.hotlineDisplay}
-              tel={ANHUNG_BRAND.hotlineTel}
-            />
-            <a className="pd-alt-phone" href={`tel:${ANHUNG_BRAND.hotlineAltTel}`}>
-              Máy phụ {ANHUNG_BRAND.hotlineAltDisplay}
+            <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
+              Gọi {ANHUNG_BRAND.hotlineDisplay}
             </a>
-            <p className="pd-aside-addr">{ANHUNG_BRAND.address}</p>
-            <p className="pd-aside-note">{ANHUNG_BRAND.services}</p>
           </aside>
         </div>
 
@@ -268,11 +252,9 @@ export function ProductDetailView({
         >
           Zalo
         </a>
-        <RevealPhoneButton
-          display={ANHUNG_BRAND.hotlineDisplay}
-          tel={ANHUNG_BRAND.hotlineTel}
-          className="pd-phone-btn pd-phone-btn-mobile"
-        />
+        <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
+          Gọi {ANHUNG_BRAND.hotlineDisplay}
+        </a>
       </div>
     </div>
   );
