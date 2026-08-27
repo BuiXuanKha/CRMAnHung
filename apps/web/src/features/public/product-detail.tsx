@@ -199,11 +199,6 @@ export function ProductDetailView({
             <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
               Gọi {ANHUNG_BRAND.hotlineDisplay}
             </a>
-            <a className="pd-alt-phone" href={`tel:${ANHUNG_BRAND.hotlineAltTel}`}>
-              Máy phụ {ANHUNG_BRAND.hotlineAltDisplay}
-            </a>
-            <p className="pd-aside-addr">{ANHUNG_BRAND.address}</p>
-            <p className="pd-aside-note">{ANHUNG_BRAND.services}</p>
           </aside>
         </div>
 

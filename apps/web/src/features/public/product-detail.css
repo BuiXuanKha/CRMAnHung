@@ -622,8 +622,7 @@
 
   /* Contact CTAs live in the fixed mobile bar */
   .pd-aside .pd-zalo-btn,
-  .pd-aside .pd-phone-btn,
-  .pd-aside .pd-alt-phone {
+  .pd-aside .pd-phone-btn {
     display: none;
   }
 
