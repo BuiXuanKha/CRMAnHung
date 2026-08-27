@@ -227,30 +227,6 @@ export class PublicContentService {
     return this.toAdminRow(saved);
   }
 
-  /**
-   * Phase 8 — lô không còn Mở bán → gỡ web (giữ slug/copy) + revalidate.
-   * Gọi sau khi CRM đổi map status; không throw — revalidate fail chỉ log.
-   */
-  async unpublishIfLotNotOpenForSale(lodatId: string): Promise<void> {
-    const listing = await this.prisma.publicLotListing.findUnique({
-      where: { lodatId },
-      include: {
-        lodat: {
-          include: {
-            maps: {
-              where: { isActive: true },
-              take: 1,
-              select: { status: true },
-            },
-          },
-        },
-      },
-    });
-    if (!listing?.isPublished) return;
-    if (listing.lodat.maps[0]?.status === 'DANG_BAN') return;
-    await this.unpublishListingById(listing.id, listing.slug);
-  }
-
   private async unpublishListingById(id: string, slug: string): Promise<void> {
     await this.prisma.publicLotListing.update({
       where: { id },

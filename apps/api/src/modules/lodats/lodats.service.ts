@@ -7,7 +7,6 @@ import {
 import { Prisma } from '@prisma/client';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
-import { PublicContentService } from '../public-content/public-content.service';
 import { StorageService } from '../../storage/storage.service';
 import type {
   ChangeLodatOwnerDto,
@@ -74,14 +73,7 @@ export class LodatsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
-    private readonly publicContent: PublicContentService,
   ) {}
-
-  /** Gỡ listing web khi lô không còn Mở bán — không chặn luồng CRM nếu revalidate fail. */
-  private async syncPublicListingAfterSaleStatus(lodatId: string, status: string): Promise<void> {
-    if (status === 'DANG_BAN') return;
-    await this.publicContent.unpublishIfLotNotOpenForSale(lodatId);
-  }
 
   private publicUrl(objectKey: string | null | undefined): string | null {
     if (!objectKey) return null;
@@ -574,7 +566,6 @@ export class LodatsService {
       where: { id },
       data: { updatedAt: new Date() },
     });
-    await this.syncPublicListingAfterSaleStatus(id, dto.status);
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({
       where: { id },
@@ -654,9 +645,6 @@ export class LodatsService {
         data: { updatedAt: now },
       });
     });
-
-    const nextStatus = dto.status ?? activeMap?.status ?? 'DANG_BAN';
-    await this.syncPublicListingAfterSaleStatus(id, nextStatus);
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({
       where: { id },
@@ -1038,9 +1026,6 @@ export class LodatsService {
           where: { id },
           data: { updatedAt: new Date() },
         });
-      }
-      if (dto.status !== undefined) {
-        await this.syncPublicListingAfterSaleStatus(id, dto.status);
       }
     }
 
