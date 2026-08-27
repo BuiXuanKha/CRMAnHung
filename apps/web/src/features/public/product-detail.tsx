@@ -82,7 +82,9 @@ export function ProductDetailView({
                 {listing.location ? ` · ${listing.location}` : ''}
               </span>
             </p>
-            <p className="pd-lead">{listing.excerpt}</p>
+            {!showHtmlBody && listing.excerpt.trim() ? (
+              <p className="pd-lead">{listing.excerpt}</p>
+            ) : null}
 
             <dl className="pd-specs">
               <div>
