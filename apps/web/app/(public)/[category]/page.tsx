@@ -12,7 +12,8 @@ import {
   postHref,
   publicPostCategoryLabel,
 } from '@/features/public/published-posts';
-import { categoryListMetadata } from '@/features/public/post-seo';
+import { JsonLd } from '@/features/public/json-ld';
+import { categoryListMetadata, postItemListJsonLd } from '@/features/public/post-seo';
 import '@/features/public/public-home.css';
 
 type Props = { params: Promise<{ category: string }> };
@@ -41,6 +42,7 @@ export default async function PublicCategoryListPage({ params }: Props) {
 
   return (
     <div className="ph">
+      {posts.length > 0 ? <JsonLd data={postItemListJsonLd(category, posts)} /> : null}
       <div className="ph-list-page">
         <Link href="/" className="ph-detail-back">
           ← Trang chủ

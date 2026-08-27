@@ -532,7 +532,26 @@ Sửa nhỏ kèm Phase 4: metadata 404 rõ hơn (không kế thừa canonical tr
 
 ### 16.7 Phase 7 — Bài: QA SEO
 
-- [ ] Cây SEO: title, slug, meta, cover+alt, bodyHtml, canonical, schema, ngày đăng/cập nhật
+- [x] Cây SEO: title, slug, meta, cover+alt, bodyHtml, canonical, schema, ngày đăng/cập nhật
+
+**QA staging `anhungland.com` (2026-08-27) — chưa có bài published trên DB; kiểm tra hub chuyên mục + code/mock:**
+
+| §9 | Kết quả |
+|----|---------|
+| URL `/{category}/{slug}` (enum category) | OK — route `[category]/[slug]` |
+| Title / H1 = `title` + template `\| An Hưng Land` | OK — `postMetadata` + `<h1>` SSR |
+| Meta description = `metaDescription` hoặc excerpt ~160 | OK — `listingSearchDescription` |
+| Canonical tuyệt đối | OK |
+| OG / Twitter + ảnh bìa CDN (fallback `/og-default.png`) | OK |
+| JSON-LD `Article` + `BreadcrumbList`: headline, image, datePublished, dateModified, author | OK |
+| List chuyên mục title/H1/canonical + `ItemList` khi có bài | OK — hub `/du-an`, `/kien-thuc`, … |
+| Sitemap chỉ bài `PUBLISHED` + hub category | OK — API `items: []` → sitemap không có URL bài |
+| Slug giả / nháp / sai category → 404 + `noindex` | OK — `(public)/not-found.tsx` (không kế thừa canonical trang chủ) |
+| View Source: H1 + excerpt + `bodyHtml` SSR (sanitize) | OK — mock + code |
+| `<time dateTime>` ngày xuất bản trên trang chi tiết | OK |
+| robots cho phép hub; chặn CRM `/login`… | OK |
+
+Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPostMetadata` OG; `ItemList` list chuyên mục; hiển thị `publishedAt` trên chi tiết bài.
 
 ### 16.8 Phase 8 — Vận hành
 

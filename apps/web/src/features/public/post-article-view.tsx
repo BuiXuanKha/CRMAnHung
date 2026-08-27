@@ -15,6 +15,13 @@ export function PostArticleView({
 }) {
   const bodyHtml = sanitizeListingHtml(post.bodyHtml ?? '');
   const categoryLabel = publicPostCategoryLabel(post.category);
+  const publishedLabel = post.publishedAt
+    ? new Date(post.publishedAt).toLocaleDateString('vi-VN', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      })
+    : null;
 
   return (
     <div className="ph pd">
@@ -53,7 +60,15 @@ export function PostArticleView({
         </nav>
 
         <article className="pd-primary" style={{ maxWidth: 760 }}>
-          <p className="pd-posted">{categoryLabel}</p>
+          <p className="pd-posted">
+            {categoryLabel}
+            {publishedLabel ? (
+              <>
+                {' · '}
+                <time dateTime={post.publishedAt!}>{publishedLabel}</time>
+              </>
+            ) : null}
+          </p>
           <h1>{post.title}</h1>
           {post.excerpt ? <p className="pd-lead">{post.excerpt}</p> : null}
 
