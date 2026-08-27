@@ -1,16 +1,19 @@
 'use client';
 
 import { useState } from 'react';
-import { copyPageUrl, shareToFacebook } from './share';
+import { copySharePayload, shareToFacebook } from './share';
 import './share.css';
 
 export function ProductShareButton({
   url,
+  text,
   className = 'ph-btn ph-btn-ghost',
   label = 'Chia sẻ',
 }: {
   /** Absolute canonical listing URL (no query/hash). */
   url: string;
+  /** Plain-text mô tả lô (không gồm URL — helper tự nối URL). */
+  text?: string;
   className?: string;
   label?: string;
 }) {
@@ -23,11 +26,11 @@ export function ProductShareButton({
 
   const onShareFacebook = async () => {
     try {
-      await shareToFacebook(url);
+      await shareToFacebook(url, text);
       flash('shared');
     } catch {
       try {
-        await copyPageUrl(url);
+        await copySharePayload(url, text);
         flash('copied');
       } catch {
         // clipboard may be blocked
@@ -39,14 +42,14 @@ export function ProductShareButton({
     status === 'shared'
       ? 'Đã copy — dán vào Facebook'
       : status === 'copied'
-        ? 'Đã copy link'
+        ? 'Đã copy nội dung'
         : label;
 
   return (
     <button
       type="button"
       className={className}
-      title="Copy link và mở Facebook để dán"
+      title="Copy mô tả + link và mở Facebook để dán"
       onClick={() => void onShareFacebook()}
     >
       {buttonLabel}
