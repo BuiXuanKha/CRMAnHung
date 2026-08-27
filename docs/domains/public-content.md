@@ -57,7 +57,7 @@ Web: công tắc **Đăng web** là việc admin chọn lô nào khách được
 | Tạm dừng / nháp / thiếu ảnh | Không hiện |
 | Mở bán nhưng chưa Đăng web | Không hiện |
 | Đăng web + đang Mở bán | Hiện `/mua-ban-nha-dat/[slug]` |
-| Đang Đăng web rồi Tạm dừng / Đã cọc / Đã bán | **Tự gỡ** (đề xuất) |
+| Đang Đăng web rồi Tạm dừng / Đã cọc / Đã bán | Khách: list/chi tiết chỉ hiện khi **Đăng web ∩ Mở bán**. **Không** tự tắt công tắc Đăng web — admin Gỡ tường minh |
 
 ### 3.2 Bài viết
 
@@ -87,7 +87,7 @@ Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú
 4. **Admin đăng lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn bài đăng** (prefill copy đã lọc) → Lưu nháp / Đăng web.
 5. **Admin gỡ lô** — tắt Đăng web; URL cũ → không tìm thấy (hoặc 404).
 6. **Admin soạn bài** — nháp → Xuất bản / Gỡ về nháp.
-7. **Lô đổi trạng thái CRM** — Tạm dừng / cọc / bán → web tự gỡ (đề xuất).
+7. **Lô đổi trạng thái CRM** — không tự tắt Đăng web; admin Gỡ trên dashboard nếu cần.
 
 ---
 
@@ -174,7 +174,7 @@ Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồ
 
 1. Chỉ **ADMIN** vào `/dashboard`. Bốn trang CRM **không** thêm UI/quyền admin.
 2. Lô lên web = công tắc tường minh — không auto mọi lô Mở bán.
-3. Tạm dừng / Đã cọc / Đã bán → gỡ web (chưa mock hành vi; chỉ số đếm).
+3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. Gỡ web = admin tắt Đăng web tường minh. (Khách chỉ thấy lô Đăng web ∩ đang Mở bán.)
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public (chưa mock conflict UI).
 6. Bài viết = một list; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
@@ -555,18 +555,19 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 
 ### 16.8 Phase 8 — Vận hành
 
-- [x] Lô CRM không còn Mở bán → auto gỡ web + revalidate
+- [x] ~~Lô CRM không còn Mở bán → auto gỡ Đăng web~~ — **không làm** (chủ bác): chỉ admin Gỡ tường minh
 - [x] Một listing public / số lô kho; không đổi slug sau publish (301 nếu bắt buộc — sau)
 - [x] Log revalidate fail không rollback DB
 
-**Triển khai (2026-08-27):**
+**Triển khai (2026-08-27, chỉnh lại sau feedback):**
 
 | Hạng mục | Cách làm |
 |----------|----------|
-| Auto gỡ | `LodatsService` sau `PATCH …/sale-status` hoặc `PATCH …/lodats/:id` đổi map → `status !== DANG_BAN` → `PublicContentService.unpublishIfLotNotOpenForSale` (`isPublished=false`, giữ slug/copy) + revalidate slug/list/sitemap/home |
+| Gỡ web | Chỉ admin **Gỡ** / tắt Đăng web trên dashboard. **Không** auto khi Tạm dừng hay tạo/sửa GD |
+| Khách thấy lô | `isPublished` ∩ map `DANG_BAN` (rule guest API sẵn có — không đụng công tắc Đăng web) |
 | Một listing / ProjectLot | Khi admin **Đăng web**, `unpublishSiblingProjectLotListings` gỡ listing published khác cùng `projectLotId` |
-| Slug ổn định | Slug chỉ sinh lúc `create` listing; `PATCH draft` không có field slug — đổi slug / 301 để sau |
-| Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** — DB CRM/public đã commit |
+| Slug ổn định | Slug chỉ sinh lúc `create` listing; `PATCH draft` không có field slug |
+| Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** |
 
 ### 16.9 Luồng revalidate (chuẩn)
 
