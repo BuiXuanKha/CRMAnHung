@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { listingBodyToExcerpt } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import {
   ProductGallery,
@@ -9,6 +8,7 @@ import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
 import { listingHeadline } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
+import { htmlToSharePlainText } from './share';
 import { PUBLIC_LISTING_PATH, listingCanonicalUrl, listingHref } from './site';
 import './public-home.css';
 import './product-detail.css';
@@ -25,23 +25,16 @@ function zaloLink(telDigits: string): string {
   return `https://zalo.me/${telDigits}`;
 }
 
-/** Plain text for Facebook paste: tiêu đề + thông số + mô tả. */
-function listingShareText(
-  listing: PublicListingView,
-  headline: string,
-  price: string,
-  area: string | null | undefined,
-): string {
-  const lines: string[] = [headline];
-  const meta = [price, area, listing.location?.trim()].filter(Boolean);
-  if (meta.length) lines.push(meta.join(' · '));
-  const body =
-    listingBodyToExcerpt(listing.bodyHtml).trim() || listing.excerpt.trim();
-  if (body) {
-    lines.push('');
-    lines.push(body);
-  }
-  return lines.join('\n');
+/**
+ * Nội dung dán Facebook: chỉ mô tả public (giữ xuống dòng như trên web).
+ * Không nhồi thêm H1/giá — body đã có đủ và tránh trùng rối.
+ */
+function listingShareText(listing: PublicListingView): string {
+  const fromHtml = htmlToSharePlainText(listing.bodyHtml ?? '');
+  if (fromHtml) return fromHtml;
+  const excerpt = listing.excerpt.trim();
+  if (excerpt) return excerpt;
+  return listing.title.trim();
 }
 
 export function ProductDetailView({
@@ -64,7 +57,7 @@ export function ProductDetailView({
   const highlights = product?.highlights ?? [];
   const brandInitial = ANHUNG_BRAND.shortName.slice(0, 1).toUpperCase();
   const shareUrl = listingCanonicalUrl(listing.slug);
-  const shareText = listingShareText(listing, headline, price, area);
+  const shareText = listingShareText(listing);
 
   return (
     <div className="ph pd">
