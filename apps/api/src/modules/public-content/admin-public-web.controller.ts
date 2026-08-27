@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
+import {
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import {
@@ -16,6 +28,22 @@ export class AdminPublicWebController {
   @Get('lots')
   listLots() {
     return this.publicContent.listAdminLots();
+  }
+
+  @Post('media')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  uploadMedia(
+    @UploadedFile()
+    file?: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Thiếu file ảnh.');
+    }
+    return this.publicContent.uploadPublicMedia(file);
   }
 
   @Patch('lots/:id/draft')
