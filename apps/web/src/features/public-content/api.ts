@@ -65,6 +65,7 @@ function overlayToCatalog(row: PublicWebLotRow): PublicCatalogListing | null {
     excerpt: row.excerpt?.trim() || [row.title, row.location].filter(Boolean).join('. '),
     bodyHtml: row.bodyHtml ?? '',
     coverImageUrl: row.coverImageUrl,
+    ...(row.coverImageUrl ? { imageUrls: [row.coverImageUrl] } : {}),
     kindLabel: 'Nhà đất',
     areaLabel: null,
     frontageLabel: null,

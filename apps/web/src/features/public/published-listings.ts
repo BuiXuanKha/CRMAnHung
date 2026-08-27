@@ -18,6 +18,7 @@ export type PublicListingView = PublicGuestListing & {
   areaLabel: string | null;
   frontageLabel: string | null;
   directionLabel: string | null;
+  imageUrls?: string[];
 };
 
 function catalogToView(row: PublicCatalogListing): PublicListingView {
@@ -29,6 +30,7 @@ function catalogToView(row: PublicCatalogListing): PublicListingView {
     excerpt: row.excerpt,
     ...(row.bodyHtml != null ? { bodyHtml: row.bodyHtml } : {}),
     coverImageUrl: row.coverImageUrl,
+    ...(row.imageUrls?.length ? { imageUrls: row.imageUrls } : {}),
     ...(row.metaDescription != null ? { metaDescription: row.metaDescription } : {}),
     ...(row.publishedAt != null ? { publishedAt: row.publishedAt } : {}),
     ...(row.updatedAt ? { updatedAt: row.updatedAt } : {}),
@@ -57,6 +59,7 @@ export function productToListingView(product: PublicProduct): PublicListingView 
     areaLabel: product.areaLabel,
     frontageLabel: product.frontageLabel,
     directionLabel: product.directionLabel,
+    ...(product.gallery?.length ? { imageUrls: product.gallery } : {}),
   };
 }
 

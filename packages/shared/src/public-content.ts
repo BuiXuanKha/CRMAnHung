@@ -63,6 +63,8 @@ export const publicGuestListingSchema = z.object({
   /** TipTap HTML — chi tiết trang khách (Phase 2+). */
   bodyHtml: z.string().optional(),
   coverImageUrl: z.string().nullable(),
+  /** Gallery CDN URLs (lodat + project address images). Detail page; cover = first. */
+  imageUrls: z.array(z.string().min(1)).optional(),
   metaDescription: z.string().trim().max(320).nullable().optional(),
   publishedAt: z.string().datetime().nullable().optional(),
   updatedAt: z.string().datetime().optional(),
