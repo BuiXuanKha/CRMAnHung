@@ -5,10 +5,13 @@ import {
 } from '@crmanhung/shared';
 import {
   getPublishedCatalogBySlug,
+  getPublicLotSlugRedirect,
   listPublishedCatalog,
 } from '@/features/public-content/api';
 import { isMockPublicWeb } from '@/shared/api/mode';
 import { PUBLIC_PRODUCTS, type PublicProduct } from './mock-data';
+
+export { getPublicLotSlugRedirect };
 
 export type PublicListingView = PublicGuestListing & {
   kindLabel: string;

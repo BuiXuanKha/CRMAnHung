@@ -129,6 +129,22 @@ export async function getPublishedCatalogBySlug(
   }
 }
 
+/** Old lot slug → current slug after title+location regen (301 on guest). */
+export async function getPublicLotSlugRedirect(
+  fromSlug: string,
+): Promise<string | null> {
+  if (isMockPublicWeb()) return null;
+  try {
+    const row = await apiFetch<{ toSlug: string }>(
+      `/public/slug-redirects/${encodeURIComponent(fromSlug)}`,
+    );
+    return row.toSlug?.trim() || null;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    return null;
+  }
+}
+
 export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
   const items = await listPublishedCatalog();
   return items.map((row) =>

@@ -42,6 +42,9 @@ cd "$API"
 pnpm exec prisma generate
 pnpm exec prisma migrate deploy
 
+echo "==> Regenerate public lot slugs (title+location, idempotent 301)"
+pnpm exec tsx scripts/regenerate-public-lot-slugs.ts
+
 echo "==> Build API"
 cd "$API"
 pnpm run build

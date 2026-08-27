@@ -26,6 +26,7 @@
     "lodats:migrate-legacy": "tsx scripts/migrate-lodats-from-legacy.ts",
     "transactions:migrate-legacy": "tsx scripts/migrate-transactions-from-legacy.ts",
     "title-services:migrate-legacy": "tsx scripts/migrate-title-services-from-legacy.ts",
+    "lots:regenerate-public-slugs": "tsx scripts/regenerate-public-lot-slugs.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

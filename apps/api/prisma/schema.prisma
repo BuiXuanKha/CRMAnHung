@@ -376,6 +376,16 @@ model PublicLotListing {
   @@index([updatedAt])
 }
 
+/// 301 slug lô cũ → slug mới (sau khi đổi công thức tên+địa chỉ).
+model PublicLotSlugRedirect {
+  id        String   @id @default(cuid())
+  fromSlug  String   @unique
+  toSlug    String
+  createdAt DateTime @default(now())
+
+  @@index([toSlug])
+}
+
 /// Bài CMS web công khai (tin / dự án / kiến thức…).
 model PublicPost {
   id              String    @id @default(cuid())
