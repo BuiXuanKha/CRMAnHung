@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { listingBodyToExcerpt } from '@crmanhung/shared';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
@@ -89,12 +90,16 @@ export class PublicContentService {
       where: { lodatId: lodat.id },
     });
     const priceLabel = dto.priceMode === 'CONTACT' ? null : dto.priceLabel?.trim() || null;
+    const bodyHtml = dto.bodyHtml ?? '';
+    const excerpt =
+      listingBodyToExcerpt(bodyHtml) ||
+      [dto.title.trim(), dto.location.trim()].filter(Boolean).join('. ');
     const data = {
       title: dto.title.trim(),
       location: dto.location.trim(),
       priceMode: dto.priceMode,
       priceLabel,
-      excerpt: dto.excerpt.trim(),
+      excerpt,
     };
     const saved = existing
       ? await this.prisma.publicLotListing.update({

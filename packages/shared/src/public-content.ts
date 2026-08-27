@@ -26,8 +26,10 @@ export const publicWebLotRowSchema = z.object({
   isPublished: z.boolean(),
   priceMode: publicListingPriceModeSchema,
   priceLabel: z.string().nullable(),
-  /** Copy public đã duyệt — overlay list/preview */
+  /** Copy public đã duyệt — overlay list/preview (plain text, SEO) */
   excerpt: z.string().optional(),
+  /** HTML mô tả công khai (TipTap). Ảnh trong bài = URL CDN. */
+  bodyHtml: z.string().optional(),
 });
 
 export type PublicWebLotRow = z.infer<typeof publicWebLotRowSchema>;
@@ -227,17 +229,22 @@ export const createPublicPostInputSchema = z
 export type CreatePublicPostInput = z.infer<typeof createPublicPostInputSchema>;
 
 export { stripHtmlText as stripPublicPostHtmlText };
+
+/** Plain excerpt for SEO / catalog from TipTap HTML. */
+export function listingBodyToExcerpt(bodyHtml?: string | null): string {
+  const text = stripHtmlText(bodyHtml ?? '');
+  if (!text) return '';
+  if (text.length <= 2000) return text;
+  return `${text.slice(0, 1999).trim()}…`;
+}
+
 export const updatePublicListingDraftSchema = z
   .object({
     title: z.string().trim().min(1, 'Nhập tiêu đề bài đăng').max(160, 'Tiêu đề tối đa 160 ký tự'),
     location: z.string().trim().max(240, 'Địa chỉ quá dài'),
     priceMode: publicListingPriceModeSchema,
     priceLabel: z.string().trim().max(80, 'Giá công khai quá dài').nullable(),
-    excerpt: z
-      .string()
-      .trim()
-      .min(1, 'Nhập mô tả công khai')
-      .max(2000, 'Mô tả tối đa 2000 ký tự'),
+    bodyHtml: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.priceMode === 'AMOUNT' && !data.priceLabel) {

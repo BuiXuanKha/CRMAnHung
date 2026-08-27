@@ -2,6 +2,7 @@ import {
   LODAT_LIST_MAX_PAGE_SIZE,
   LodatSaleStatus,
   createPublicPostInputSchema,
+  listingBodyToExcerpt,
   setPublicLotPublishedSchema,
   setPublicPostStatusSchema,
   updatePublicListingDraftSchema,
@@ -197,6 +198,10 @@ export async function updatePublicListingDraft(
 
   const draft = parsed.data;
   const priceLabel = draft.priceMode === 'CONTACT' ? null : draft.priceLabel;
+  const bodyHtml = draft.bodyHtml ?? '';
+  const excerpt =
+    listingBodyToExcerpt(bodyHtml) ||
+    [draft.title, draft.location].filter(Boolean).join('. ');
   const index = lots.findIndex((row) => row.lodatId === source.lodatId);
 
   if (index < 0) {
@@ -206,7 +211,8 @@ export async function updatePublicListingDraft(
       location: draft.location,
       priceMode: draft.priceMode,
       priceLabel,
-      excerpt: draft.excerpt,
+      excerpt,
+      bodyHtml,
     });
     lots = [created, ...lots];
     return { ...created };
@@ -218,7 +224,8 @@ export async function updatePublicListingDraft(
     location: draft.location,
     priceMode: draft.priceMode,
     priceLabel,
-    excerpt: draft.excerpt,
+    excerpt,
+    bodyHtml,
   };
   return { ...lots[index] };
 }

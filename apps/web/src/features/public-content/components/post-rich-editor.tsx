@@ -23,9 +23,19 @@ type Props = {
   value: string;
   disabled?: boolean;
   onChange: (html: string) => void;
+  placeholder?: string;
+  ariaLabel?: string;
+  toolbarAriaLabel?: string;
 };
 
-export function PostRichEditor({ value, disabled = false, onChange }: Props) {
+export function PostRichEditor({
+  value,
+  disabled = false,
+  onChange,
+  placeholder = 'Viết nội dung bài viết… Có thể chèn ảnh giữa các đoạn.',
+  ariaLabel = 'Nội dung bài viết',
+  toolbarAriaLabel = 'Định dạng bài viết',
+}: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const uploading = useRef(false);
 
@@ -38,9 +48,7 @@ export function PostRichEditor({ value, disabled = false, onChange }: Props) {
         allowBase64: true,
         HTMLAttributes: { class: 'pw-editor-img' },
       }),
-      Placeholder.configure({
-        placeholder: 'Viết nội dung bài viết… Có thể chèn ảnh giữa các đoạn.',
-      }),
+      Placeholder.configure({ placeholder }),
       Link.configure({
         openOnClick: false,
         HTMLAttributes: { rel: 'noopener noreferrer', target: '_blank' },
@@ -55,7 +63,7 @@ export function PostRichEditor({ value, disabled = false, onChange }: Props) {
     editorProps: {
       attributes: {
         class: 'pw-editor-prose',
-        'aria-label': 'Nội dung bài viết',
+        'aria-label': ariaLabel,
       },
     },
   });
@@ -88,7 +96,7 @@ export function PostRichEditor({ value, disabled = false, onChange }: Props) {
 
   return (
     <div className={disabled ? 'pw-editor is-disabled' : 'pw-editor'}>
-      <div className="pw-editor-toolbar" role="toolbar" aria-label="Định dạng bài viết">
+      <div className="pw-editor-toolbar" role="toolbar" aria-label={toolbarAriaLabel}>
         <button
           type="button"
           className={editor.isActive('bold') ? 'is-active' : undefined}

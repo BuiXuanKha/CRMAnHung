@@ -371,14 +371,15 @@ Nhớ tìm + lọc + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-s
 
 ### 13.3 Modal Soạn bài đăng
 
-Cùng máy tính / mobile. Icon Lucide `PenLine`. Không `window.confirm`.
+Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm-dialog--wide`, ~840px). Không `window.confirm`.
 
 1. Prefill copy **công khai** từ lô đang Mở bán: tiêu đề, địa chỉ, giá đã làm mờ, mô tả (DT · MT · hướng · loại + CTA hotline công ty).
 2. **Không** copy: hoa hồng, ghi chú giá / broker, ghi chú thương lượng chủ nhà, tên/SĐT khách, tên NV.
 3. Ô chỉ đọc: giá gốc CRM không hiện đúng cho khách; admin phải duyệt giá công khai.
-4. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, mô tả. Ảnh bìa = ảnh lô (không upload slice này).
-5. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng).
-6. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web.
+4. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, **mô tả rich text (TipTap)**. Ảnh bìa = ảnh lô (không upload slice này).
+5. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload mock/R2 public CDN).
+6. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`; được thiếu mô tả) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng — **bắt buộc** có nội dung mô tả).
+7. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web. Preview render HTML mô tả.
 
 ---
 
