@@ -60,8 +60,11 @@ export const publicGuestListingSchema = z.object({
   location: z.string(),
   priceLabel: z.string().nullable(),
   excerpt: z.string(),
+  /** TipTap HTML — chi tiết trang khách (Phase 2+). */
+  bodyHtml: z.string().optional(),
   coverImageUrl: z.string().nullable(),
   metaDescription: z.string().trim().max(320).nullable().optional(),
+  publishedAt: z.string().datetime().nullable().optional(),
   updatedAt: z.string().datetime().optional(),
 });
 
@@ -112,8 +115,10 @@ export function toGuestListing(row: {
   location: string;
   priceLabel: string | null;
   excerpt: string;
+  bodyHtml?: string;
   coverImageUrl: string | null;
   metaDescription?: string | null;
+  publishedAt?: string | null;
   updatedAt?: string;
 }): PublicGuestListing | null {
   if (!row.isPublished) return null;
@@ -123,8 +128,10 @@ export function toGuestListing(row: {
     location: row.location,
     priceLabel: row.priceLabel,
     excerpt: row.excerpt,
+    ...(row.bodyHtml != null ? { bodyHtml: row.bodyHtml } : {}),
     coverImageUrl: row.coverImageUrl,
     ...(row.metaDescription != null ? { metaDescription: row.metaDescription } : {}),
+    ...(row.publishedAt != null ? { publishedAt: row.publishedAt } : {}),
     ...(row.updatedAt ? { updatedAt: row.updatedAt } : {}),
   };
 }

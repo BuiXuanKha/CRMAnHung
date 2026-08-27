@@ -362,7 +362,11 @@ model PublicLotListing {
   priceMode       String   @default("CONTACT")
   priceLabel      String?
   excerpt         String   @default("")
+  /// TipTap HTML — mô tả công khai (ảnh = URL CDN).
+  bodyHtml        String   @default("")
   metaDescription String?
+  /// Lần đăng web đầu tiên (giữ khi gỡ).
+  publishedAt     DateTime?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

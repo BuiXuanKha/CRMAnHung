@@ -129,6 +129,7 @@ export class PublicContentService {
       priceMode: dto.priceMode,
       priceLabel,
       excerpt,
+      bodyHtml,
     };
     const saved = existing
       ? await this.prisma.publicLotListing.update({
@@ -169,6 +170,8 @@ export class PublicContentService {
           priceMode: 'CONTACT',
           priceLabel: null,
           excerpt: [title, location].filter(Boolean).join('. '),
+          bodyHtml: '',
+          publishedAt: new Date(),
         },
         include: { lodat: { include: LODAT_INCLUDE } },
       });
@@ -176,7 +179,10 @@ export class PublicContentService {
     }
     const saved = await this.prisma.publicLotListing.update({
       where: { id: existing.id },
-      data: { isPublished },
+      data: {
+        isPublished,
+        ...(isPublished && !existing.publishedAt ? { publishedAt: new Date() } : {}),
+      },
       include: { lodat: { include: LODAT_INCLUDE } },
     });
     return this.toAdminRow(saved);
@@ -262,6 +268,7 @@ export class PublicContentService {
       priceMode: row.priceMode === 'AMOUNT' ? 'AMOUNT' : 'CONTACT',
       priceLabel: row.priceLabel,
       excerpt: row.excerpt,
+      bodyHtml: row.bodyHtml ?? '',
     };
   }
 
@@ -285,8 +292,10 @@ export class PublicContentService {
       location: row.location,
       priceLabel,
       excerpt: row.excerpt.trim() || [row.title, row.location].filter(Boolean).join('. '),
+      bodyHtml: row.bodyHtml ?? '',
       coverImageUrl: this.coverUrl(lodat),
       ...(row.metaDescription ? { metaDescription: row.metaDescription } : {}),
+      ...(row.publishedAt ? { publishedAt: row.publishedAt.toISOString() } : {}),
       updatedAt: row.updatedAt.toISOString(),
       kindLabel: kindLabel(kind),
       areaLabel: formatM(areaM2 ?? null, 'm²'),

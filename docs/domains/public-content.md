@@ -480,10 +480,10 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 
 ### 16.2 Phase 2 — Lô: DB + API
 
-- [ ] Prisma: `bodyHtml`, `publishedAt` trên `PublicLotListing`
-- [ ] Contract: draft = `bodyHtml`; guest catalog trả `bodyHtml`; `listingBodyToExcerpt`
-- [ ] Nest draft/published lưu + guest `GET /public/listings/:slug` trả body
-- [ ] Admin `/dashboard/lo-dat` TipTap + nối API (PR TipTap modal)
+- [x] Prisma: `bodyHtml`, `publishedAt` trên `PublicLotListing`
+- [x] Contract: draft = `bodyHtml`; guest catalog trả `bodyHtml`; `listingBodyToExcerpt`
+- [x] Nest draft/published lưu + guest `GET /public/listings/:slug` trả body
+- [x] Admin `/dashboard/lo-dat` TipTap + nối API (PR TipTap modal)
 
 ### 16.3 Phase 3 — Lô: guest ISR + revalidate
 
