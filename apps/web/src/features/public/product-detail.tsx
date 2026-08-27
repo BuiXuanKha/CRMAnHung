@@ -3,7 +3,6 @@ import { ANHUNG_BRAND } from './brand';
 import {
   ProductGallery,
   ProductShareButton,
-  RevealPhoneButton,
 } from './product-detail-client';
 import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
@@ -206,10 +205,9 @@ export function ProductDetailView({
             >
               Chat qua Zalo
             </a>
-            <RevealPhoneButton
-              display={ANHUNG_BRAND.hotlineDisplay}
-              tel={ANHUNG_BRAND.hotlineTel}
-            />
+            <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
+              Gọi {ANHUNG_BRAND.hotlineDisplay}
+            </a>
             <a className="pd-alt-phone" href={`tel:${ANHUNG_BRAND.hotlineAltTel}`}>
               Máy phụ {ANHUNG_BRAND.hotlineAltDisplay}
             </a>
@@ -268,11 +266,9 @@ export function ProductDetailView({
         >
           Zalo
         </a>
-        <RevealPhoneButton
-          display={ANHUNG_BRAND.hotlineDisplay}
-          tel={ANHUNG_BRAND.hotlineTel}
-          className="pd-phone-btn pd-phone-btn-mobile"
-        />
+        <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
+          Gọi {ANHUNG_BRAND.hotlineDisplay}
+        </a>
       </div>
     </div>
   );
