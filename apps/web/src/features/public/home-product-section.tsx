@@ -71,6 +71,12 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
                   <span>Xem chi tiết</span>
                   <ProductShareButton
                     url={listingCanonicalUrl(lot.slug)}
+                    text={[
+                      lot.title,
+                      [lot.priceLabel, lot.areaLabel, lot.location].filter(Boolean).join(' · '),
+                    ]
+                      .filter(Boolean)
+                      .join('\n')}
                     className="ph-share"
                     label="Chia sẻ"
                   />

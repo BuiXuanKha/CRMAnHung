@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { listingBodyToExcerpt } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import {
   ProductGallery,
@@ -24,6 +25,25 @@ function zaloLink(telDigits: string): string {
   return `https://zalo.me/${telDigits}`;
 }
 
+/** Plain text for Facebook paste: tiêu đề + thông số + mô tả. */
+function listingShareText(
+  listing: PublicListingView,
+  headline: string,
+  price: string,
+  area: string | null | undefined,
+): string {
+  const lines: string[] = [headline];
+  const meta = [price, area, listing.location?.trim()].filter(Boolean);
+  if (meta.length) lines.push(meta.join(' · '));
+  const body =
+    listingBodyToExcerpt(listing.bodyHtml).trim() || listing.excerpt.trim();
+  if (body) {
+    lines.push('');
+    lines.push(body);
+  }
+  return lines.join('\n');
+}
+
 export function ProductDetailView({
   listing,
   related,
@@ -44,6 +64,7 @@ export function ProductDetailView({
   const highlights = product?.highlights ?? [];
   const brandInitial = ANHUNG_BRAND.shortName.slice(0, 1).toUpperCase();
   const shareUrl = listingCanonicalUrl(listing.slug);
+  const shareText = listingShareText(listing, headline, price, area);
 
   return (
     <div className="ph pd">
@@ -139,6 +160,7 @@ export function ProductDetailView({
               <div className="pd-summary-actions">
                 <ProductShareButton
                   url={shareUrl}
+                  text={shareText}
                   className="pd-icon-btn"
                   label="Chia sẻ"
                 />
