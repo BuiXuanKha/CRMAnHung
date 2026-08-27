@@ -316,13 +316,13 @@ Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồ
 ┌ Ô tìm (CrmSearchField, chrome trắng viền như /lo-dat)        ┐
 ├ Bảng §4.5 (giữa)                      │ Preview (phải ~440px) │
 │ Ảnh · Tiêu đề/Địa chỉ · Phân loại     │ Ảnh + copy + CTA      │
-│ DT·MT·Hướng · Giá · NV · Web          │                       │
+│ DT·MT·Hướng · Giá · NV · Web · AI GPT │                       │
 └ Footer đếm                            │                       ┘
 ```
 
 1. **Không** H1 (tên đã có trên menu trái: **Lô đất**).
 2. Ô tìm — khung trắng bo 12px, input viền `#cbd5e1` / focus xanh. Placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc. **Không** nút Đăng lô cạnh ô tìm.
-3. **Giữa — bảng** mọi lô NV đang Mở bán. Lọc cột §4.5.5. Không cột Thao tác / công tắc rao bán. Không tên khách.
+3. **Giữa — bảng** mọi lô NV đang Mở bán. Lọc cột §4.5.5. Không cột Thao tác / công tắc rao bán. Không tên khách. Cột **AI GPT** (nút GPT) → modal xem thông tin lô sẽ gửi GPT (API sau).
 4. Bấm hàng một lần → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm / editor.
 5. Double-click hàng → modal **Soạn bài đăng** (§13.3). Lần bấm đầu vẫn chọn + preview.
 6. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list Mở bán).
@@ -338,6 +338,7 @@ Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồ
 | Giá | Khoảng 500tr + Chưa có giá — theo giá hiện trên cột (Liên hệ = chưa có giá) |
 | NV | Tất cả NV · từng tên NV trong list |
 | Web | Tất cả web · Đang hiện · Chờ đăng |
+| AI GPT | Không lọc (nút mở modal) |
 
 Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Không dropdown lọc trên thanh tìm desktop.
 
@@ -352,6 +353,11 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 | Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM |
 | NV | Tên nhân viên đang rao lô |
 | Web | **Đang hiện** `green` · **Chờ đăng** `gray` |
+| AI GPT | Nút **GPT** (`Sparkles`) → `LotGptContentDialog` — hiện payload lô công khai sẽ gửi GPT; **Gửi GPT** disabled tới khi có API |
+
+### 13.3a Modal Tạo content bằng AI GPT
+
+Icon Lucide `Sparkles`. `CrmDialog`. Hiện: tiêu đề, địa chỉ, loại, DT, MT·hướng, giá công khai, trạng thái web, excerpt. Không PII khách. Nút **Gửi GPT** (disabled — chờ contract JSON phản hồi).
 
 Trống: `Không có lô đang mở bán.`
 

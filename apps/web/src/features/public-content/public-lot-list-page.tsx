@@ -6,6 +6,7 @@ import type { PublicWebStaffLotRow, UpdatePublicListingDraftInput } from '@crman
 import type { ExtraFilters, PriceBracket } from '@/features/lodats/display';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { listStaffOpenLots, setPublicLotPublished, updatePublicListingDraft } from './api';
+import { LotGptContentDialog } from './components/lot-gpt-content-dialog';
 import { LotListingEditorDialog } from './components/lot-listing-editor-dialog';
 import { LotListingPreview } from './components/lot-listing-preview';
 import { LotWebConfirm } from './components/lot-web-confirm';
@@ -41,6 +42,7 @@ export function PublicLotListPage() {
   const [selectedId, setSelectedId] = useState<string | null>(peeked?.selectedId ?? null);
   const [lotConfirm, setLotConfirm] = useState<PublicWebStaffLotRow | null>(null);
   const [editorLot, setEditorLot] = useState<PublicWebStaffLotRow | null>(null);
+  const [gptLot, setGptLot] = useState<PublicWebStaffLotRow | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -113,6 +115,14 @@ export function PublicLotListPage() {
     persist(lodatId);
     setEditorError(null);
     setEditorLot(row);
+  };
+
+  const onGptContent = (lodatId: string) => {
+    const row = items.find((item) => item.lodatId === lodatId) ?? null;
+    if (!row) return;
+    setSelectedId(lodatId);
+    persist(lodatId);
+    setGptLot(row);
   };
 
   const lotMut = useMutation({
@@ -229,6 +239,7 @@ export function PublicLotListPage() {
                 selectedId={selectedId}
                 onSelect={onSelect}
                 onEdit={onEdit}
+                onGptContent={onGptContent}
                 scrollRef={scrollRef}
                 kind={kind}
                 extra={extra}
@@ -265,6 +276,7 @@ export function PublicLotListPage() {
                 selectedId={selectedId}
                 onSelect={onSelect}
                 onEdit={onEdit}
+                onGptContent={onGptContent}
               />
             </div>
           </div>
@@ -291,6 +303,7 @@ export function PublicLotListPage() {
         onSaveDraft={saveDraft}
         onPublish={saveAndPublish}
       />
+      <LotGptContentDialog lot={gptLot} onClose={() => setGptLot(null)} />
       <LotWebConfirm
         lot={lotConfirm}
         busy={lotMut.isPending}

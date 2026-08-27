@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ImageOff } from 'lucide-react';
+import { ImageOff, Sparkles } from 'lucide-react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import { formatArea, formatFrontageDir, kindLabel, kindTone } from '@/features/lodats/display';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -14,9 +14,17 @@ type Props = {
   selectedId: string | null;
   onSelect: (lodatId: string) => void;
   onEdit: (lodatId: string) => void;
+  onGptContent: (lodatId: string) => void;
 };
 
-export function StaffOpenLotCards({ items, total, selectedId, onSelect, onEdit }: Props) {
+export function StaffOpenLotCards({
+  items,
+  total,
+  selectedId,
+  onSelect,
+  onEdit,
+  onGptContent,
+}: Props) {
   const lastTap = useRef<{ id: string; at: number } | null>(null);
 
   function handleClick(lodatId: string) {
@@ -40,7 +48,7 @@ export function StaffOpenLotCards({ items, total, selectedId, onSelect, onEdit }
           {items.map((row) => {
             const price = lotPriceDisplay(row);
             return (
-              <li key={row.lodatId} data-list-row-id={row.lodatId}>
+              <li key={row.lodatId} data-list-row-id={row.lodatId} className="pw-card-item">
                 <button
                   type="button"
                   className={selectedId === row.lodatId ? 'pw-card is-selected' : 'pw-card'}
@@ -78,6 +86,15 @@ export function StaffOpenLotCards({ items, total, selectedId, onSelect, onEdit }
                       <span className="pw-contact">{price.text}</span>
                     )}
                   </span>
+                </button>
+                <button
+                  type="button"
+                  className="pw-gpt-btn pw-card-gpt"
+                  title="Tạo content bằng AI GPT"
+                  onClick={() => onGptContent(row.lodatId)}
+                >
+                  <Icon icon={Sparkles} size="sm" />
+                  GPT
                 </button>
               </li>
             );
