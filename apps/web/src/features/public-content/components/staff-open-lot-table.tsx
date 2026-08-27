@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageOff } from 'lucide-react';
+import { ImageOff, Sparkles } from 'lucide-react';
 import { useState, type Ref } from 'react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import {
@@ -30,6 +30,7 @@ type Props = {
   selectedId: string | null;
   onSelect: (lodatId: string) => void;
   onEdit: (lodatId: string) => void;
+  onGptContent: (lodatId: string) => void;
   scrollRef?: Ref<HTMLDivElement>;
   kind: string;
   extra: ExtraFilters;
@@ -50,6 +51,7 @@ export function StaffOpenLotTable({
   selectedId,
   onSelect,
   onEdit,
+  onGptContent,
   scrollRef,
   kind,
   extra,
@@ -160,6 +162,9 @@ export function StaffOpenLotTable({
                 onChange={(v) => onWeb(v as (typeof WEB_FILTER_OPTIONS)[number]['value'])}
               />
             </div>
+            <div className="pw-col-head" role="columnheader">
+              <span title="Tạo content bằng AI GPT">AI GPT</span>
+            </div>
           </div>
         </div>
         <div className="pw-table-scroll" ref={scrollRef}>
@@ -220,6 +225,20 @@ export function StaffOpenLotTable({
                     <CrmBadge tone={lotWebTone(row.isPublished)}>
                       {lotWebLabel(row.isPublished)}
                     </CrmBadge>
+                  </div>
+                  <div>
+                    <button
+                      type="button"
+                      className="pw-gpt-btn"
+                      title="Tạo content bằng AI GPT"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        onGptContent(row.lodatId);
+                      }}
+                    >
+                      <Icon icon={Sparkles} size="sm" />
+                      GPT
+                    </button>
                   </div>
                 </div>
               );
