@@ -85,9 +85,23 @@ pm2_cmd start ecosystem.config.cjs
 pm2_cmd save
 
 echo "==> Health checks"
-sleep 5
-curl -sf "http://127.0.0.1:5050/api/v1/health"
-echo
+ok=0
+for i in 1 2 3 4 5 6 7 8 9 10; do
+  sleep 3
+  if curl -sf "http://127.0.0.1:5050/api/v1/health" >/dev/null; then
+    curl -sf "http://127.0.0.1:5050/api/v1/health"
+    echo
+    ok=1
+    break
+  fi
+  echo "api health retry $i/10…"
+  pm2_cmd describe crmanhung-api >/dev/null 2>&1 && pm2_cmd pid crmanhung-api || true
+done
+if [[ "$ok" -ne 1 ]]; then
+  echo "ERROR: API health failed after retries"
+  pm2_cmd logs crmanhung-api --lines 40 --nostream || true
+  exit 1
+fi
 curl -sf "http://127.0.0.1:5001/" >/dev/null && echo "web_local=ok" || echo "web_local=fail"
 code=$(curl -s -o /dev/null -w '%{http_code}' https://anhungland.com/ || true)
 echo "web_http=$code"
