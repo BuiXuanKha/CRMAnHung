@@ -48,11 +48,13 @@ export class PublicWebRevalidateService {
       });
       if (!res.ok) {
         const text = await res.text().catch(() => '');
-        this.logger.warn(`revalidate ${res.status} ${url}: ${text.slice(0, 200)}`);
+        this.logger.warn(
+          `revalidate ${res.status} ${url} paths=${paths.join(',')}: ${text.slice(0, 200)}`,
+        );
       }
     } catch (err) {
       this.logger.warn(
-        `revalidate failed ${url}: ${err instanceof Error ? err.message : String(err)}`,
+        `revalidate failed ${url} paths=${paths.join(',')}: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }
