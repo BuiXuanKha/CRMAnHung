@@ -85,8 +85,9 @@ export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
 
 export async function getPublicWebDashboard(): Promise<PublicWebDashboard> {
   const overlay = await listPublicWebLots();
+  const posts = await listPublicWebPosts();
   const staff = buildStaffOpenLots(await loadOpenPlots(), overlay);
-  return buildPublicWebDashboard(overlay, clonePosts(), staff);
+  return buildPublicWebDashboard(overlay, posts, staff);
 }
 
 export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
@@ -141,7 +142,8 @@ export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {
-  return clonePosts();
+  if (isMockPublicWeb()) return clonePosts();
+  return apiFetch<PublicWebPostRow[]>('/admin/public-web/posts');
 }
 
 export async function setPublicLotPublished(
@@ -239,6 +241,15 @@ export async function setPublicPostStatus(
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không đổi được trạng thái bài.');
   }
+  if (!isMockPublicWeb()) {
+    return apiFetch<PublicWebPostRow>(
+      `/admin/public-web/posts/${encodeURIComponent(id)}/status`,
+      {
+        method: 'PATCH',
+        body: JSON.stringify(parsed.data),
+      },
+    );
+  }
   const index = posts.findIndex((row) => row.id === id);
   if (index < 0) throw new Error('Không tìm thấy bài viết.');
   posts[index] = { ...posts[index], status: parsed.data.status };
@@ -252,6 +263,12 @@ export async function createPublicPost(
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không lưu được bài viết.');
   }
+  if (!isMockPublicWeb()) {
+    return apiFetch<PublicWebPostRow>('/admin/public-web/posts', {
+      method: 'POST',
+      body: JSON.stringify(parsed.data),
+    });
+  }
   const row: PublicWebPostRow = {
     id: `pp-${Date.now()}`,
     slug: uniquePostSlug(parsed.data.title),
@@ -264,4 +281,58 @@ export async function createPublicPost(
   };
   posts = [row, ...posts];
   return { ...row };
+}
+
+/** Guest published posts — GET /public/posts (no JWT). */
+export async function listPublishedPosts(category?: string) {
+  if (isMockPublicWeb()) {
+    return clonePosts()
+      .filter((row) => row.status === 'PUBLISHED')
+      .filter((row) => !category || row.category === category)
+      .map((row) => ({
+        id: row.id,
+        slug: row.slug,
+        title: row.title,
+        category: row.category,
+        coverImageUrl: row.coverImageUrl,
+        bodyHtml: row.bodyHtml,
+        excerpt: row.excerpt?.trim() || row.title,
+      }));
+  }
+  try {
+    const qs = category ? `?category=${encodeURIComponent(category)}` : '';
+    const res = await apiFetch<{ items: unknown[] }>(`/public/posts${qs}`);
+    return res.items;
+  } catch {
+    return [];
+  }
+}
+
+export async function getPublishedPostByCategorySlug(category: string, slug: string) {
+  if (isMockPublicWeb()) {
+    const row = clonePosts().find(
+      (item) =>
+        item.category === category &&
+        item.slug === slug &&
+        item.status === 'PUBLISHED',
+    );
+    if (!row) return null;
+    return {
+      id: row.id,
+      slug: row.slug,
+      title: row.title,
+      category: row.category,
+      coverImageUrl: row.coverImageUrl,
+      bodyHtml: row.bodyHtml,
+      excerpt: row.excerpt?.trim() || row.title,
+    };
+  }
+  try {
+    return await apiFetch(
+      `/public/posts/${encodeURIComponent(category)}/${encodeURIComponent(slug)}`,
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    return null;
+  }
 }

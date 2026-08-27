@@ -17,6 +17,7 @@ import {
   SetPublicLotPublishedDto,
   UpdatePublicListingDraftDto,
 } from './dto/public-listing.dto';
+import { CreatePublicPostDto, SetPublicPostStatusDto } from './dto/public-post.dto';
 import { PublicContentService } from './public-content.service';
 
 @Controller('admin/public-web')
@@ -28,6 +29,21 @@ export class AdminPublicWebController {
   @Get('lots')
   listLots() {
     return this.publicContent.listAdminLots();
+  }
+
+  @Get('posts')
+  listPosts() {
+    return this.publicContent.listAdminPosts();
+  }
+
+  @Post('posts')
+  createPost(@Body() dto: CreatePublicPostDto) {
+    return this.publicContent.createPost(dto);
+  }
+
+  @Patch('posts/:id/status')
+  setPostStatus(@Param('id') id: string, @Body() dto: SetPublicPostStatusDto) {
+    return this.publicContent.setPostStatus(id, dto.status);
   }
 
   @Post('media')

@@ -13,8 +13,33 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type { UpdatePublicListingDraftDto } from './dto/public-listing.dto';
+import type { CreatePublicPostDto } from './dto/public-post.dto';
 import { PublicWebRevalidateService } from './public-web-revalidate.service';
 import { formatM, kindLabel, toPublicSlug } from './public-slug';
+
+const POST_CATEGORIES = new Set([
+  'tin-tuc',
+  'du-an',
+  'kien-thuc',
+  'kinh-nghiem',
+  'lien-he',
+  'chinh-sach',
+]);
+
+type PublicPostRow = {
+  id: string;
+  slug: string;
+  category: string;
+  status: string;
+  title: string;
+  coverImageUrl: string | null;
+  bodyHtml: string;
+  excerpt: string;
+  metaDescription: string | null;
+  authorLabel: string;
+  publishedAt: Date | null;
+  updatedAt: Date;
+};
 
 const ADDR_SELECT = {
   detail: true,
@@ -311,6 +336,141 @@ export class PublicContentService {
       areaLabel: formatM(areaM2 ?? null, 'm²'),
       frontageLabel: formatM(frontageM ?? null, 'm'),
       directionLabel: direction?.trim() || null,
+    };
+  }
+
+  async listAdminPosts() {
+    const rows = await this.prisma.publicPost.findMany({
+      orderBy: { updatedAt: 'desc' },
+    });
+    return rows.map((row) => this.toAdminPost(row));
+  }
+
+  async createPost(dto: CreatePublicPostDto) {
+    this.assertPublishablePost(dto.status, dto.coverImageUrl, dto.bodyHtml);
+    const bodyHtml = dto.bodyHtml ?? '';
+    const excerpt =
+      dto.excerpt?.trim() ||
+      listingBodyToExcerpt(bodyHtml) ||
+      dto.title.trim();
+    const slug = await this.uniquePostSlug(dto.category, toPublicSlug(dto.title));
+    const isPublished = dto.status === 'PUBLISHED';
+    const saved = await this.prisma.publicPost.create({
+      data: {
+        title: dto.title.trim(),
+        category: dto.category,
+        status: dto.status,
+        coverImageUrl: dto.coverImageUrl?.trim() || null,
+        bodyHtml,
+        excerpt,
+        slug,
+        publishedAt: isPublished ? new Date() : null,
+      },
+    });
+    return this.toAdminPost(saved);
+  }
+
+  async setPostStatus(id: string, status: 'DRAFT' | 'PUBLISHED') {
+    const existing = await this.prisma.publicPost.findUnique({ where: { id } });
+    if (!existing) throw new NotFoundException('Không tìm thấy bài viết.');
+    if (status === 'PUBLISHED') {
+      this.assertPublishablePost(status, existing.coverImageUrl, existing.bodyHtml);
+    }
+    const saved = await this.prisma.publicPost.update({
+      where: { id },
+      data: {
+        status,
+        ...(status === 'PUBLISHED' && !existing.publishedAt
+          ? { publishedAt: new Date() }
+          : {}),
+      },
+    });
+    return this.toAdminPost(saved);
+  }
+
+  async listPublishedPosts(category?: string) {
+    const where: { status: string; category?: string } = { status: 'PUBLISHED' };
+    if (category) {
+      if (!POST_CATEGORIES.has(category)) {
+        throw new BadRequestException('Chuyên mục không hợp lệ');
+      }
+      where.category = category;
+    }
+    const rows = await this.prisma.publicPost.findMany({
+      where,
+      orderBy: [{ publishedAt: 'desc' }, { updatedAt: 'desc' }],
+    });
+    return { items: rows.map((row) => this.toGuestPost(row)) };
+  }
+
+  async getPublishedPost(category: string, slug: string) {
+    if (!POST_CATEGORIES.has(category)) {
+      throw new NotFoundException('Không tìm thấy bài viết');
+    }
+    const row = await this.prisma.publicPost.findUnique({
+      where: { category_slug: { category, slug } },
+    });
+    if (!row || row.status !== 'PUBLISHED') {
+      throw new NotFoundException('Không tìm thấy bài viết');
+    }
+    return this.toGuestPost(row);
+  }
+
+  private assertPublishablePost(
+    status: string,
+    coverImageUrl: string | null | undefined,
+    bodyHtml: string | null | undefined,
+  ) {
+    if (status !== 'PUBLISHED') return;
+    if (!coverImageUrl?.trim()) {
+      throw new BadRequestException('Chọn ảnh bìa trước khi xuất bản');
+    }
+    if (!listingBodyToExcerpt(bodyHtml)) {
+      throw new BadRequestException('Nhập nội dung bài trước khi xuất bản');
+    }
+  }
+
+  private async uniquePostSlug(category: string, base: string): Promise<string> {
+    const root = base || 'bai-viet';
+    let slug = root;
+    let n = 2;
+    while (
+      await this.prisma.publicPost.findUnique({
+        where: { category_slug: { category, slug } },
+      })
+    ) {
+      slug = `${root.slice(0, 50)}-${n}`;
+      n += 1;
+    }
+    return slug;
+  }
+
+  private toAdminPost(row: PublicPostRow) {
+    return {
+      id: row.id,
+      slug: row.slug,
+      title: row.title,
+      category: row.category,
+      status: row.status === 'PUBLISHED' ? 'PUBLISHED' : 'DRAFT',
+      coverImageUrl: row.coverImageUrl,
+      bodyHtml: row.bodyHtml ?? '',
+      excerpt: row.excerpt,
+    };
+  }
+
+  private toGuestPost(row: PublicPostRow) {
+    return {
+      id: row.id,
+      slug: row.slug,
+      title: row.title,
+      category: row.category,
+      coverImageUrl: row.coverImageUrl,
+      bodyHtml: row.bodyHtml ?? '',
+      excerpt: row.excerpt.trim() || row.title,
+      ...(row.metaDescription ? { metaDescription: row.metaDescription } : {}),
+      authorLabel: row.authorLabel,
+      ...(row.publishedAt ? { publishedAt: row.publishedAt.toISOString() } : {}),
+      updatedAt: row.updatedAt.toISOString(),
     };
   }
 }

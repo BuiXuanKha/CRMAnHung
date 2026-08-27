@@ -135,10 +135,13 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | POST | `/admin/public-web/media` | JWT ADMIN | Upload ảnh public (bìa / TipTap) → CDN R2 |
 | PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN | Đăng / gỡ lô (`isPublished`) — **Postgres** |
 | PATCH | `/admin/public-web/lots/:id/draft` | JWT ADMIN | Lưu copy public — **Postgres** |
-| PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — mock |
-| POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục) — mock |
+| PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — **Postgres** |
+| GET | `/admin/public-web/posts` | JWT ADMIN | List bài (nháp + đã xuất bản) — **Postgres** |
+| POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục + body) — **Postgres** |
 | GET | `/public/listings` | Không | Lô đã đăng ∩ Mở bán → `publicCatalogListingSchema` |
 | GET | `/public/listings/:slug` | Không | Chi tiết `/mua-ban-nha-dat/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
+| GET | `/public/posts` | Không | Bài `PUBLISHED` (`?category=` tuỳ chọn) → `publicGuestPostListResponseSchema` |
+| GET | `/public/posts/:category/:slug` | Không | Chi tiết bài — 404 nếu nháp / sai chuyên mục |
 
 ---
 
@@ -517,9 +520,9 @@ Sửa nhỏ kèm Phase 4: metadata 404 rõ hơn (không kế thừa canonical tr
 
 ### 16.5 Phase 5 — Bài: DB + API
 
-- [ ] Prisma `PublicPost` (slug, category, status, cover, bodyHtml, excerpt, meta*, publishedAt, authorLabel)
-- [ ] Admin CRUD + status; guest `GET /public/posts`, `GET /public/posts/:category/:slug`
-- [ ] Admin `/dashboard/bai-viet` nối API (bỏ mock RAM)
+- [x] Prisma `PublicPost` (slug, category, status, cover, bodyHtml, excerpt, meta*, publishedAt, authorLabel)
+- [x] Admin CRUD + status; guest `GET /public/posts`, `GET /public/posts/:category/:slug`
+- [x] Admin `/dashboard/bai-viet` nối API (bỏ mock RAM)
 
 ### 16.6 Phase 6 — Bài: guest ISR
 

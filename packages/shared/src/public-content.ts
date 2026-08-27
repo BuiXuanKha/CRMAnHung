@@ -265,6 +265,29 @@ export const updatePublicListingDraftSchema = z
 
 export type UpdatePublicListingDraftInput = z.infer<typeof updatePublicListingDraftSchema>;
 
+/** Guest article — published only. */
+export const publicGuestPostSchema = z.object({
+  id: z.string(),
+  slug: z.string().min(1),
+  title: z.string().min(1),
+  category: z.nativeEnum(PublicPostCategory),
+  coverImageUrl: z.string().nullable().optional(),
+  bodyHtml: z.string().optional(),
+  excerpt: z.string(),
+  metaDescription: z.string().trim().max(320).nullable().optional(),
+  authorLabel: z.string().optional(),
+  publishedAt: z.string().datetime().nullable().optional(),
+  updatedAt: z.string().datetime().optional(),
+});
+
+export type PublicGuestPost = z.infer<typeof publicGuestPostSchema>;
+
+export const publicGuestPostListResponseSchema = z.object({
+  items: z.array(publicGuestPostSchema),
+});
+
+export type PublicGuestPostListResponse = z.infer<typeof publicGuestPostListResponseSchema>;
+
 /** Upload ảnh public (bìa / ảnh trong TipTap) — POST /admin/public-web/media */
 export const uploadPublicMediaResponseSchema = z.object({
   url: z.string().url(),
