@@ -122,6 +122,20 @@ export function ProductDetailView({
                   <strong className="pd-summary-value">{listing.frontageLabel}</strong>
                 </div>
               ) : null}
+              {listing.directionLabel ? (
+                <div className="pd-summary-item">
+                  <span className="pd-summary-label">Hướng</span>
+                  <strong className="pd-summary-value">{listing.directionLabel}</strong>
+                  {product?.legalLabel ? (
+                    <span className="pd-summary-sub">{product.legalLabel}</span>
+                  ) : null}
+                </div>
+              ) : product?.legalLabel ? (
+                <div className="pd-summary-item">
+                  <span className="pd-summary-label">Pháp lý</span>
+                  <strong className="pd-summary-value">{product.legalLabel}</strong>
+                </div>
+              ) : null}
               <div className="pd-summary-actions">
                 <ProductShareButton
                   title={listing.title}
@@ -135,29 +149,6 @@ export function ProductDetailView({
             {!showHtmlBody && listing.excerpt.trim() ? (
               <p className="pd-lead">{listing.excerpt}</p>
             ) : null}
-
-            {(listing.directionLabel || product?.legalLabel) && (
-              <dl className="pd-specs">
-                {listing.directionLabel ? (
-                  <div>
-                    <dt>Hướng</dt>
-                    <dd>{listing.directionLabel}</dd>
-                  </div>
-                ) : null}
-                {product?.legalLabel ? (
-                  <div>
-                    <dt>Pháp lý</dt>
-                    <dd>{product.legalLabel}</dd>
-                  </div>
-                ) : null}
-                {listing.kindLabel ? (
-                  <div>
-                    <dt>Loại</dt>
-                    <dd>{listing.kindLabel}</dd>
-                  </div>
-                ) : null}
-              </dl>
-            )}
 
             {showHtmlBody ? (
               <section className="pd-section" aria-labelledby="pd-desc-title">

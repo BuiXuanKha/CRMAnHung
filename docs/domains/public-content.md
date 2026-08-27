@@ -514,7 +514,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 | `/san-pham/…` → `/mua-ban-nha-dat/…` permanent | OK (308) |
 | Slug giả / đã gỡ → 404 + `noindex` | OK |
 | View Source có H1 + excerpt SSR | OK — meta/OG dùng excerpt; **on-page**: có `bodyHtml` thì không hiện lead `excerpt` (tránh trùng copy) |
-| Layout chi tiết lô | Gallery + counter/nav · breadcrumb · H1 · địa chỉ · strip Giá/DT · sidebar Zalo + hotline hiện đủ số (brand An Hưng) |
+| Layout chi tiết lô | Gallery · breadcrumb · H1 · địa chỉ · **một** strip Giá/DT/Hướng + Zalo/hotline hiện đủ số; không lặp Loại/Hướng ở lưới phụ |
 | robots cho phép list; chặn CRM `/login`… | OK (kèm Cloudflare managed) |
 
 Sửa nhỏ kèm Phase 4: metadata 404 rõ hơn (không kế thừa canonical trang chủ); JSON-LD `dateModified` / `datePosted` khi API có.
