@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { JsonLd } from '@/features/public/json-ld';
 import {
   listingBreadcrumbJsonLd,
@@ -10,6 +10,7 @@ import {
 import { ProductDetailView } from '@/features/public/product-detail';
 import {
   getPublicListingBySlug,
+  getPublicLotSlugRedirect,
   getRelatedListings,
 } from '@/features/public/published-listings';
 
@@ -18,17 +19,30 @@ type Props = { params: Promise<{ slug: string }> };
 /** On-demand ISR — Nest gọi /api/revalidate khi admin Lưu/Đăng/Gỡ. */
 export const revalidate = false;
 
+async function redirectIfLegacySlug(slug: string): Promise<void> {
+  const toSlug = await getPublicLotSlugRedirect(slug);
+  if (toSlug && toSlug !== slug) {
+    permanentRedirect(`/mua-ban-nha-dat/${toSlug}`);
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const listing = await getPublicListingBySlug(slug);
-  if (!listing) return unpublishedListingMetadata();
+  if (!listing) {
+    await redirectIfLegacySlug(slug);
+    return unpublishedListingMetadata();
+  }
   return listingMetadata(listing);
 }
 
 export default async function MuaBanNhaDatDetailPage({ params }: Props) {
   const { slug } = await params;
   const listing = await getPublicListingBySlug(slug);
-  if (!listing) notFound();
+  if (!listing) {
+    await redirectIfLegacySlug(slug);
+    notFound();
+  }
   const related = await getRelatedListings(listing.slug);
   return (
     <>

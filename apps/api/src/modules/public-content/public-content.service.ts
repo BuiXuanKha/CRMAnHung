@@ -105,6 +105,15 @@ export class PublicContentService {
     return this.toCatalog(row);
   }
 
+  /** Old guest lot slug → current slug (Next issues 301). */
+  async findLotSlugRedirect(fromSlug: string): Promise<{ toSlug: string } | null> {
+    const row = await this.prisma.publicLotSlugRedirect.findUnique({
+      where: { fromSlug },
+      select: { toSlug: true },
+    });
+    return row ?? null;
+  }
+
   async listAdminLots() {
     const rows = await this.prisma.publicLotListing.findMany({
       include: { lodat: { include: LODAT_INCLUDE } },
