@@ -15,7 +15,7 @@ import { StorageService } from '../../storage/storage.service';
 import type { UpdatePublicListingDraftDto } from './dto/public-listing.dto';
 import type { CreatePublicPostDto } from './dto/public-post.dto';
 import { PublicWebRevalidateService } from './public-web-revalidate.service';
-import { formatM, kindLabel, toPublicSlug } from './public-slug';
+import { formatM, kindLabel, toListingPublicSlug, toPublicSlug } from './public-slug';
 
 const POST_CATEGORIES = new Set([
   'tin-tuc',
@@ -167,7 +167,7 @@ export class PublicContentService {
       : await this.prisma.publicLotListing.create({
           data: {
             lodatId: lodat.id,
-            slug: await this.uniqueSlug(toPublicSlug(dto.title)),
+            slug: await this.uniqueSlug(toListingPublicSlug(dto.title, dto.location)),
             isPublished: false,
             ...data,
           },
@@ -194,7 +194,7 @@ export class PublicContentService {
       const created = await this.prisma.publicLotListing.create({
         data: {
           lodatId: lodat.id,
-          slug: await this.uniqueSlug(toPublicSlug(title)),
+          slug: await this.uniqueSlug(toListingPublicSlug(title, location)),
           title,
           location,
           isPublished: true,

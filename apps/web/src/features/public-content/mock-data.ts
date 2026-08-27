@@ -10,7 +10,7 @@ import {
   type PublicWebPostRow,
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
-import { toPublicSlug } from './display';
+import { toListingPublicSlug } from './display';
 import { plainTextToListingBodyHtml, suggestPublicExcerpt, suggestPublicPrice } from './listing-copy';
 
 export const MOCK_PUBLIC_WEB_LOTS: PublicWebLotRow[] = [
@@ -191,7 +191,7 @@ export function buildStaffOpenLots(
       return {
         id: listing?.id ?? `pending-${plot.id}`,
         lodatId: plot.id,
-        slug: listing?.slug ?? toPublicSlug(plot.title),
+        slug: listing?.slug ?? toListingPublicSlug(title, location),
         title,
         location,
         coverImageUrl: listing?.coverImageUrl ?? plot.coverImageUrl ?? null,
