@@ -35,7 +35,18 @@ export function listingHeadline(listing: { title: string; location?: string | nu
 export function unpublishedListingMetadata(): Metadata {
   return {
     title: 'Không tìm thấy sản phẩm',
+    description: 'Sản phẩm không tồn tại hoặc đã được gỡ khỏi web An Hưng Land.',
     robots: { index: false, follow: false },
+    // Tránh kế thừa canonical trang chủ từ layout public.
+    alternates: { canonical: null },
+    openGraph: {
+      title: 'Không tìm thấy sản phẩm',
+      description: 'Sản phẩm không tồn tại hoặc đã được gỡ khỏi web An Hưng Land.',
+      url: PUBLIC_SITE_ORIGIN,
+      type: 'website',
+      locale: 'vi_VN',
+      siteName: ANHUNG_BRAND.name,
+    },
   };
 }
 
@@ -133,6 +144,8 @@ export function listingJsonLd(listing: PublicGuestListing) {
     url,
     image,
     inLanguage: 'vi-VN',
+    ...(listing.updatedAt ? { dateModified: listing.updatedAt } : {}),
+    ...(listing.publishedAt ? { datePosted: listing.publishedAt } : {}),
     address: {
       '@type': 'PostalAddress',
       addressLocality: listing.location,

@@ -90,16 +90,16 @@ Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem 
 
 ## Checklist PR (trang public)
 
-- [ ] `title` + `description` riêng, tiếng Việt
-- [ ] `canonical` đúng
-- [ ] OG (+ Twitter) đủ field cơ bản
-- [ ] `h1` một cái; ảnh có `alt`
-- [ ] Nội dung chính có trong HTML SSR/RSC
-- [ ] Cập nhật `sitemap` nếu URL mới
-- [ ] `robots` không chặn nhầm trang cần index
+- [x] `title` + `description` riêng, tiếng Việt
+- [x] `canonical` đúng
+- [x] OG (+ Twitter) đủ field cơ bản
+- [x] `h1` một cái; ảnh có `alt`
+- [x] Nội dung chính có trong HTML SSR/RSC
+- [x] Cập nhật `sitemap` nếu URL mới
+- [x] `robots` không chặn nhầm trang cần index
 - [ ] Kiểm tra nhanh trên mobile viewport
-- [ ] Lô: title / excerpt / canonical / OG bìa / JSON-LD trung thực theo §7
-- [ ] Sitemap chỉ lô đã đăng; lô gỡ → 404 `noindex`
+- [x] Lô: title / excerpt / canonical / OG bìa / JSON-LD trung thực theo §7
+- [x] Sitemap chỉ lô đã đăng; lô gỡ → 404 `noindex`
 
 ---
 

@@ -494,8 +494,26 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 
 ### 16.4 Phase 4 — Lô: QA SEO
 
-- [ ] Checklist PUBLIC-SEO §7 (title, meta, OG, JSON-LD, sitemap, gỡ → 404)
-- [ ] View Source có nội dung; Sharing Debugger
+- [x] Checklist PUBLIC-SEO §7 (title, meta, OG, JSON-LD, sitemap, gỡ → 404)
+- [x] View Source có nội dung; Sharing Debugger (OG tags verified via View Source)
+
+**QA staging `anhungland.com` (2026-08-27) — mẫu `/mua-ban-nha-dat/lo-nha-cap-4-moi-113-8m2`:**
+
+| §7 | Kết quả |
+|----|---------|
+| Title / H1 `{title} tại {location}` | OK — khớp; title có `\| An Hưng Land` |
+| Meta description từ excerpt ~160 | OK |
+| Canonical tuyệt đối | OK |
+| OG / Twitter + ảnh bìa CDN | OK |
+| JSON-LD `RealEstateListing` + `BreadcrumbList` | OK — `1 tỷ xxx` / Liên hệ **không** bịa `Offer.price` |
+| List `/mua-ban-nha-dat` title/H1/canonical/`ItemList` | OK |
+| Sitemap chỉ lô published (5 = API 5) | OK |
+| `/san-pham/…` → `/mua-ban-nha-dat/…` permanent | OK (308) |
+| Slug giả / đã gỡ → 404 + `noindex` | OK |
+| View Source có H1 + excerpt SSR | OK |
+| robots cho phép list; chặn CRM `/login`… | OK (kèm Cloudflare managed) |
+
+Sửa nhỏ kèm Phase 4: metadata 404 rõ hơn (không kế thừa canonical trang chủ); JSON-LD `dateModified` / `datePosted` khi API có.
 
 ### 16.5 Phase 5 — Bài: DB + API
 
