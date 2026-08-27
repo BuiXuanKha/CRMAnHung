@@ -173,7 +173,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồi UI.
 
 1. Chỉ **ADMIN** vào `/dashboard`. Bốn trang CRM **không** thêm UI/quyền admin.
-2. Lô lên web = công tắc tường minh — không auto mọi lô Mở bán.
+2. Lô lên web = công tắc tường minh do **ADMIN** (duyệt copy/ảnh rồi Đăng / Gỡ) — không auto theo Mở bán hay giao dịch.
 3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. Gỡ web = admin tắt Đăng web tường minh. (Khách chỉ thấy lô Đăng web ∩ đang Mở bán.)
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public (chưa mock conflict UI).
