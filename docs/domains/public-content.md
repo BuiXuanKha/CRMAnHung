@@ -555,9 +555,18 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 
 ### 16.8 Phase 8 — Vận hành
 
-- [ ] Lô CRM không còn Mở bán → auto gỡ web + revalidate
-- [ ] Một listing public / số lô kho; không đổi slug sau publish (301 nếu bắt buộc — sau)
-- [ ] Log revalidate fail không rollback DB
+- [x] Lô CRM không còn Mở bán → auto gỡ web + revalidate
+- [x] Một listing public / số lô kho; không đổi slug sau publish (301 nếu bắt buộc — sau)
+- [x] Log revalidate fail không rollback DB
+
+**Triển khai (2026-08-27):**
+
+| Hạng mục | Cách làm |
+|----------|----------|
+| Auto gỡ | `LodatsService` sau `PATCH …/sale-status` hoặc `PATCH …/lodats/:id` đổi map → `status !== DANG_BAN` → `PublicContentService.unpublishIfLotNotOpenForSale` (`isPublished=false`, giữ slug/copy) + revalidate slug/list/sitemap/home |
+| Một listing / ProjectLot | Khi admin **Đăng web**, `unpublishSiblingProjectLotListings` gỡ listing published khác cùng `projectLotId` |
+| Slug ổn định | Slug chỉ sinh lúc `create` listing; `PATCH draft` không có field slug — đổi slug / 301 để sau |
+| Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** — DB CRM/public đã commit |
 
 ### 16.9 Luồng revalidate (chuẩn)
 

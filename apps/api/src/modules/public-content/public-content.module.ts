@@ -12,5 +12,6 @@ import { PublicWebRevalidateService } from './public-web-revalidate.service';
     AdminPublicWebController,
   ],
   providers: [PublicContentService, PublicWebRevalidateService],
+  exports: [PublicContentService],
 })
 export class PublicContentModule {}

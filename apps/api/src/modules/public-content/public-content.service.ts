@@ -190,6 +190,7 @@ export class PublicContentService {
       }
       const title = this.lodatTitle(lodat);
       const location = this.lodatLocation(lodat);
+      await this.unpublishSiblingProjectLotListings(lodat.id, lodat.projectLotId);
       const created = await this.prisma.publicLotListing.create({
         data: {
           lodatId: lodat.id,
@@ -209,6 +210,9 @@ export class PublicContentService {
       return this.toAdminRow(created);
     }
     const wasPublished = existing.isPublished;
+    if (isPublished && !wasPublished) {
+      await this.unpublishSiblingProjectLotListings(lodat.id, lodat.projectLotId);
+    }
     const saved = await this.prisma.publicLotListing.update({
       where: { id: existing.id },
       data: {
@@ -221,6 +225,56 @@ export class PublicContentService {
       includeHome: isPublished !== wasPublished,
     });
     return this.toAdminRow(saved);
+  }
+
+  /**
+   * Phase 8 — lô không còn Mở bán → gỡ web (giữ slug/copy) + revalidate.
+   * Gọi sau khi CRM đổi map status; không throw — revalidate fail chỉ log.
+   */
+  async unpublishIfLotNotOpenForSale(lodatId: string): Promise<void> {
+    const listing = await this.prisma.publicLotListing.findUnique({
+      where: { lodatId },
+      include: {
+        lodat: {
+          include: {
+            maps: {
+              where: { isActive: true },
+              take: 1,
+              select: { status: true },
+            },
+          },
+        },
+      },
+    });
+    if (!listing?.isPublished) return;
+    if (listing.lodat.maps[0]?.status === 'DANG_BAN') return;
+    await this.unpublishListingById(listing.id, listing.slug);
+  }
+
+  private async unpublishListingById(id: string, slug: string): Promise<void> {
+    await this.prisma.publicLotListing.update({
+      where: { id },
+      data: { isPublished: false },
+    });
+    await this.revalidate.revalidateListing(slug, { includeHome: true });
+  }
+
+  /** Một số lô kho (ProjectLot) — chỉ một listing public cùng lúc. */
+  private async unpublishSiblingProjectLotListings(
+    lodatId: string,
+    projectLotId: string | null | undefined,
+  ): Promise<void> {
+    if (!projectLotId) return;
+    const siblings = await this.prisma.publicLotListing.findMany({
+      where: {
+        isPublished: true,
+        lodat: { projectLotId, id: { not: lodatId } },
+      },
+      select: { id: true, slug: true },
+    });
+    for (const row of siblings) {
+      await this.unpublishListingById(row.id, row.slug);
+    }
   }
 
   private async requireOpenLodat(id: string): Promise<LodatLoaded> {
