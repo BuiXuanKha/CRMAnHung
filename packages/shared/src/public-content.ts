@@ -250,3 +250,21 @@ export const updatePublicListingDraftSchema = z
   });
 
 export type UpdatePublicListingDraftInput = z.infer<typeof updatePublicListingDraftSchema>;
+
+/** Upload ảnh public (bìa / ảnh trong TipTap) — POST /admin/public-web/media */
+export const uploadPublicMediaResponseSchema = z.object({
+  url: z.string().url(),
+  objectKey: z.string().min(1).optional(),
+});
+
+export type UploadPublicMediaResponse = z.infer<typeof uploadPublicMediaResponseSchema>;
+
+/** MIME ảnh chấp nhận cho media public web. */
+export const PUBLIC_MEDIA_ACCEPT_MIME = [
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+] as const;
+
+export const PUBLIC_MEDIA_MAX_BYTES = 5 * 1024 * 1024;

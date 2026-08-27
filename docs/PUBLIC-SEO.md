@@ -137,3 +137,39 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 
 **Danh sách `/mua-ban-nha-dat`:** title/H1 `Nhà đất đang bán`; canonical `/mua-ban-nha-dat`; OG + `ItemList` các URL đã đăng.
 
+---
+
+## 8. ISR + revalidate on-demand
+
+Lô / bài ít đổi (giá làm mờ, copy ổn định lâu). **Không** revalidate ngắn theo phút.
+
+| Hạng mục | Quy ước |
+|----------|---------|
+| **Chiến lược** | ISR: `revalidate = false` (hoặc số rất lớn) + **on-demand** khi admin Lưu/Đăng/Gỡ/Xuất bản |
+| **Nguồn sự thật** | PostgreSQL; HTML guest = bản build/cache từ API public |
+| **Trigger** | Nest sau ghi DB thành công → `POST` Next `/api/revalidate` với `REVALIDATE_SECRET` |
+| **Path lô** | `/mua-ban-nha-dat/[slug]`, `/mua-ban-nha-dat`, `/sitemap.xml`, `/` (khi đăng mới) |
+| **Path bài** | `/{category}/[slug]`, list chuyên mục, `/`, sitemap |
+| **Gỡ / về nháp** | Revalidate + lần generate sau → 404; bỏ khỏi sitemap |
+| **HTML** | Nội dung chính (title, H1, bodyHtml) trong response đầu — không chỉ client fetch |
+| **CRM** | `noindex`; không đưa vào sitemap |
+
+Roadmap tick-list: [`docs/domains/public-content.md`](./domains/public-content.md) §16.
+
+---
+
+## 9. Công thức SEO bài viết (khi có trang guest)
+
+Áp dụng khi admin **Xuất bản**. Nháp không index.
+
+| Hạng mục | Công thức |
+|----------|-----------|
+| **URL** | `https://anhungland.com/{category}/{slug}` (category = enum: `tin-tuc`, `du-an`, …) |
+| **Title / H1** | `title` bài + template `\| An Hưng Land` |
+| **Meta description** | `metaDescription` hoặc excerpt (~160) từ body |
+| **OG** | cover + title; thiếu cover → không Xuất bản (UI) |
+| **JSON-LD** | `Article` / `BlogPosting`: headline, image, datePublished, dateModified, author |
+| **Sitemap** | Chỉ `PUBLISHED` |
+
+Slice API + route guest: domain doc §16 Phase 5–7.
+

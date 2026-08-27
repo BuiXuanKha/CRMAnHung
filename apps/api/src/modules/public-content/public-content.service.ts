@@ -2,8 +2,13 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  PayloadTooLargeException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import {
+  PUBLIC_MEDIA_ACCEPT_MIME,
+  PUBLIC_MEDIA_MAX_BYTES,
+} from '@crmanhung/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type { UpdatePublicListingDraftDto } from './dto/public-listing.dto';
@@ -78,6 +83,30 @@ export class PublicContentService {
       orderBy: { updatedAt: 'desc' },
     });
     return rows.map((row) => this.toAdminRow(row));
+  }
+
+  async uploadPublicMedia(file: {
+    buffer: Buffer;
+    mimetype: string;
+    originalname?: string;
+  }) {
+    const mime = String(file.mimetype || '').toLowerCase();
+    if (!(PUBLIC_MEDIA_ACCEPT_MIME as readonly string[]).includes(mime)) {
+      throw new BadRequestException('Chỉ nhận ảnh JPG, PNG, WEBP hoặc GIF.');
+    }
+    if (!file.buffer?.length) {
+      throw new BadRequestException('Thiếu file ảnh.');
+    }
+    if (file.buffer.length > PUBLIC_MEDIA_MAX_BYTES) {
+      throw new PayloadTooLargeException('Ảnh tối đa 5 MB.');
+    }
+    const uploaded = await this.storage.upload({
+      folder: 'public-web',
+      buffer: file.buffer,
+      contentType: mime,
+      originalName: file.originalname,
+    });
+    return { url: uploaded.url, objectKey: uploaded.objectKey };
   }
 
   async updateDraft(id: string, dto: UpdatePublicListingDraftDto) {

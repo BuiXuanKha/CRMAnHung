@@ -132,6 +132,7 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | Method | Path | Auth | Việc |
 |--------|------|------|------|
 | GET | `/admin/public-web/lots` | JWT ADMIN | Overlay bài đăng (nháp + đã đăng) |
+| POST | `/admin/public-web/media` | JWT ADMIN | Upload ảnh public (bìa / TipTap) → CDN R2 |
 | PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN | Đăng / gỡ lô (`isPublished`) — **Postgres** |
 | PATCH | `/admin/public-web/lots/:id/draft` | JWT ADMIN | Lưu copy public — **Postgres** |
 | PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — mock |
@@ -454,5 +455,80 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 4. JSON-LD `RealEstateListing`: giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`).
 5. Sitemap chỉ lô đang hiện. Gỡ web → 404, không còn trong sitemap.
 6. Cấm trên HTML + JSON-LD + meta: giá map CRM, hoa hồng, tên/SĐT khách, ghi chú nội bộ.
+
+---
+
+## 16. Roadmap ISR + SEO (triển khai dần)
+
+**Mục tiêu:** Admin Lưu / Đăng / Xuất bản → Postgres → Next.js **ISR** → Googlebot + khách nhận HTML đầy đủ. **Revalidate on-demand** khi CRM lưu (không revalidate ngắn theo thời gian). Chi tiết SEO: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §8.
+
+**Thứ tự:** Phase 0 → 1 → (2→3→4 Lô) → (5→6→7 Bài) → 8.
+
+### 16.0 Phase 0 — Nền
+
+- [x] CRM `(crm)/layout` `robots: noindex` + `robots.ts` chặn `/dashboard`, CRM routes
+- [x] Docs roadmap (§16 này) + PUBLIC-SEO §8 ISR
+- [ ] Secrets staging: `REVALIDATE_SECRET` (Next + Nest), `NEXT_PUBLIC_USE_MOCK=false` trên prod
+- [ ] `pnpm doctor` + R2 public CDN ổn trên VPS
+
+### 16.1 Phase 1 — Media upload (chung lô + bài)
+
+- [x] Contract: `uploadPublicMediaResponseSchema` `{ url, objectKey? }`
+- [x] `POST /admin/public-web/media` — JWT ADMIN, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 public CDN
+- [x] Web: `uploadPublicPostImage` gọi API khi không mock; mock giữ object URL
+
+### 16.2 Phase 2 — Lô: DB + API
+
+- [ ] Prisma: `bodyHtml`, `publishedAt` trên `PublicLotListing`
+- [ ] Contract: draft = `bodyHtml`; guest catalog trả `bodyHtml`; `listingBodyToExcerpt`
+- [ ] Nest draft/published lưu + guest `GET /public/listings/:slug` trả body
+- [ ] Admin `/dashboard/lo-dat` TipTap + nối API (PR TipTap modal)
+
+### 16.3 Phase 3 — Lô: guest ISR + revalidate
+
+- [ ] `/mua-ban-nha-dat/[slug]`: bỏ `force-dynamic` → ISR (`revalidate = false` hoặc rất dài)
+- [ ] Render `bodyHtml` SSR (sanitize)
+- [ ] `POST /api/revalidate` (secret) + Nest gọi sau draft (nếu đã published) / published / gỡ
+- [ ] Revalidate: slug + `/mua-ban-nha-dat` + sitemap (+ `/` khi đăng mới)
+
+### 16.4 Phase 4 — Lô: QA SEO
+
+- [ ] Checklist PUBLIC-SEO §7 (title, meta, OG, JSON-LD, sitemap, gỡ → 404)
+- [ ] View Source có nội dung; Sharing Debugger
+
+### 16.5 Phase 5 — Bài: DB + API
+
+- [ ] Prisma `PublicPost` (slug, category, status, cover, bodyHtml, excerpt, meta*, publishedAt, authorLabel)
+- [ ] Admin CRUD + status; guest `GET /public/posts`, `GET /public/posts/:category/:slug`
+- [ ] Admin `/dashboard/bai-viet` nối API (bỏ mock RAM)
+
+### 16.6 Phase 6 — Bài: guest ISR
+
+- [ ] Route `/{category}/{slug}` + list chuyên mục; ISR + on-demand revalidate
+- [ ] `generateMetadata` + JSON-LD `Article`; sitemap bài published
+- [ ] Trang chủ teaser từ API
+
+### 16.7 Phase 7 — Bài: QA SEO
+
+- [ ] Cây SEO: title, slug, meta, cover+alt, bodyHtml, canonical, schema, ngày đăng/cập nhật
+
+### 16.8 Phase 8 — Vận hành
+
+- [ ] Lô CRM không còn Mở bán → auto gỡ web + revalidate
+- [ ] Một listing public / số lô kho; không đổi slug sau publish (301 nếu bắt buộc — sau)
+- [ ] Log revalidate fail không rollback DB
+
+### 16.9 Luồng revalidate (chuẩn)
+
+```
+CRM (Lưu / Đăng / Xuất bản / Gỡ / Xóa)
+  → PostgreSQL
+  → Nest gọi Next revalidate (secret)
+  → Next tạo/cập nhật HTML trang đó
+  → Cache
+  → Googlebot + khách
+```
+
+**PR gợi ý:** media → lot bodyHtml API → lot ISR+revalidate → PublicPost API → post guest ISR → admin nối API → auto-unpublish.
 
 
