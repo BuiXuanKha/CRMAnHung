@@ -93,6 +93,18 @@ export function publicListingInternalsHint(priceVnd?: number | string | null): s
   return 'CRM chưa có giá — chọn Liên hệ hoặc nhập giá công khai đã làm mờ. Hoa hồng, ghi chú chủ nhà và thông tin khách không được copy vào bài đăng.';
 }
 
+/** Prefill TipTap when overlay only has plain excerpt. */
+export function plainTextToListingBodyHtml(text: string): string {
+  const t = text.trim();
+  if (!t) return '';
+  if (/<[a-z][\s\S]*>/i.test(t)) return t;
+  const escaped = t
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  return `<p>${escaped}</p>`;
+}
+
 export function suggestPublicListingFields(row: Pick<
   PublicWebStaffLotRow,
   'title' | 'location' | 'kind' | 'areaM2' | 'frontageM' | 'direction' | 'priceVnd'
@@ -102,13 +114,16 @@ export function suggestPublicListingFields(row: Pick<
   priceMode: PublicListingPriceMode;
   priceLabel: string | null;
   excerpt: string;
+  bodyHtml: string;
 } {
   const price = suggestPublicPrice(row.priceVnd);
+  const excerpt = suggestPublicExcerpt(row);
   return {
     title: row.title,
     location: row.location,
     priceMode: price.priceMode,
     priceLabel: price.priceLabel,
-    excerpt: suggestPublicExcerpt(row),
+    excerpt,
+    bodyHtml: plainTextToListingBodyHtml(excerpt),
   };
 }

@@ -55,7 +55,14 @@ export function LotListingPreview({ lot, busy, onPublish }: Props) {
             <CrmBadge tone="amber">{lotKindLabel(lot)}</CrmBadge>
             <span>{lotSpecLine(lot)}</span>
           </p>
-          <p className="pw-preview-excerpt">{lot.excerpt}</p>
+          {lot.bodyHtml?.trim() ? (
+            <div
+              className="pw-preview-rich pw-editor-prose"
+              dangerouslySetInnerHTML={{ __html: lot.bodyHtml }}
+            />
+          ) : (
+            <p className="pw-preview-excerpt">{lot.excerpt}</p>
+          )}
           <p className="pw-preview-contact">
             Hotline {ANHUNG_BRAND.hotlineDisplay} · Zalo {ANHUNG_BRAND.hotlineAltDisplay}
           </p>

@@ -3,6 +3,7 @@ import {
   LodatSaleStatus,
   PublicPostCategory,
   PublicPostStatus,
+  listingBodyToExcerpt,
   type LodatListItem,
   type PublicWebDashboard,
   type PublicWebLotRow,
@@ -10,7 +11,7 @@ import {
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { toPublicSlug } from './display';
-import { suggestPublicExcerpt, suggestPublicPrice } from './listing-copy';
+import { plainTextToListingBodyHtml, suggestPublicExcerpt, suggestPublicPrice } from './listing-copy';
 
 export const MOCK_PUBLIC_WEB_LOTS: PublicWebLotRow[] = [
   {
@@ -172,6 +173,21 @@ export function buildStaffOpenLots(
       const areaM2 = plot.areaM2 ?? null;
       const frontageM = plot.frontageM ?? null;
       const direction = plot.direction ?? null;
+      const suggestedExcerpt = suggestPublicExcerpt({
+        title,
+        location,
+        kind,
+        areaM2,
+        frontageM,
+        direction,
+      });
+      const bodyHtml =
+        listing?.bodyHtml?.trim() ||
+        plainTextToListingBodyHtml(listing?.excerpt?.trim() || suggestedExcerpt);
+      const excerpt =
+        listing?.excerpt?.trim() ||
+        listingBodyToExcerpt(bodyHtml) ||
+        suggestedExcerpt;
       return {
         id: listing?.id ?? `pending-${plot.id}`,
         lodatId: plot.id,
@@ -182,9 +198,8 @@ export function buildStaffOpenLots(
         isPublished: listing?.isPublished ?? false,
         priceMode,
         priceLabel,
-        excerpt:
-          listing?.excerpt?.trim() ||
-          suggestPublicExcerpt({ title, location, kind, areaM2, frontageM, direction }),
+        excerpt,
+        bodyHtml,
         staffName,
         kind,
         areaM2,
@@ -207,6 +222,7 @@ export function listingFromStaffLot(row: PublicWebStaffLotRow): PublicWebLotRow 
     priceMode: row.priceMode,
     priceLabel: row.priceLabel,
     excerpt: row.excerpt,
+    bodyHtml: row.bodyHtml,
   };
 }
 

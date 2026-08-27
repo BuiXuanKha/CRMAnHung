@@ -588,6 +588,20 @@
   line-height: 1.5;
 }
 
+.pw-preview-rich {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #334155;
+  line-height: 1.5;
+}
+
+.pw-preview-rich img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+  margin: 0.35rem 0;
+}
+
 .pw-preview-contact {
   margin: 0;
   font-size: 0.8rem;

@@ -39,8 +39,7 @@ export class UpdatePublicListingDraftDto {
   @MaxLength(80, { message: 'Giá công khai quá dài' })
   priceLabel?: string | null;
 
+  @IsOptional()
   @IsString()
-  @MinLength(1, { message: 'Nhập mô tả công khai' })
-  @MaxLength(2000, { message: 'Mô tả tối đa 2000 ký tự' })
-  excerpt!: string;
+  bodyHtml?: string;
 }

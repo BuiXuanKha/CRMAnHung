@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { ImageOff, PenLine } from 'lucide-react';
 import {
+  listingBodyToExcerpt,
+  stripPublicPostHtmlText,
   updatePublicListingDraftSchema,
   type PublicListingPriceMode,
   type PublicWebStaffLotRow,
@@ -10,7 +12,9 @@ import {
 } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 import { CrmDialog } from '@/shared/ui/dialog';
-import { publicListingInternalsHint } from '../listing-copy';
+import { plainTextToListingBodyHtml, publicListingInternalsHint } from '../listing-copy';
+import { PostRichEditor } from './post-rich-editor';
+import '@/shared/ui/dialog.css';
 
 type Props = {
   lot: PublicWebStaffLotRow | null;
@@ -20,6 +24,13 @@ type Props = {
   onSaveDraft: (input: UpdatePublicListingDraftInput) => Promise<void>;
   onPublish: (input: UpdatePublicListingDraftInput) => Promise<void>;
 };
+
+const TITLE_MAX = 160;
+
+function initialBodyHtml(lot: PublicWebStaffLotRow): string {
+  if (lot.bodyHtml?.trim()) return lot.bodyHtml;
+  return plainTextToListingBodyHtml(lot.excerpt);
+}
 
 export function LotListingEditorDialog({
   lot,
@@ -33,7 +44,7 @@ export function LotListingEditorDialog({
   const [location, setLocation] = useState('');
   const [priceMode, setPriceMode] = useState<PublicListingPriceMode>('CONTACT');
   const [priceLabel, setPriceLabel] = useState('');
-  const [excerpt, setExcerpt] = useState('');
+  const [bodyHtml, setBodyHtml] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
 
@@ -43,27 +54,33 @@ export function LotListingEditorDialog({
     setLocation(lot.location);
     setPriceMode(lot.priceMode);
     setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
-    setExcerpt(lot.excerpt);
+    setBodyHtml(initialBodyHtml(lot));
     setParseError(null);
     const t = window.setTimeout(() => titleRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
   }, [lot]);
 
-  function parsedInput(): UpdatePublicListingDraftInput | null {
+  function parsedInput(requireBody: boolean): UpdatePublicListingDraftInput | null {
     const parsed = updatePublicListingDraftSchema.safeParse({
       title,
       location,
       priceMode,
       priceLabel: priceMode === 'AMOUNT' ? priceLabel.trim() || null : null,
-      excerpt,
+      bodyHtml,
     });
     if (!parsed.success) {
       setParseError(parsed.error.issues[0]?.message ?? 'Dữ liệu không hợp lệ.');
       return null;
     }
+    if (requireBody && !stripPublicPostHtmlText(bodyHtml)) {
+      setParseError('Nhập mô tả công khai trước khi đăng web');
+      return null;
+    }
     setParseError(null);
     return parsed.data;
   }
+
+  const excerptPreview = listingBodyToExcerpt(bodyHtml);
 
   return (
     <CrmDialog
@@ -72,16 +89,22 @@ export function LotListingEditorDialog({
       icon={PenLine}
       onClose={onClose}
       busy={busy}
+      className="crm-dialog--wide crm-dialog--compose"
     >
       {lot ? (
         <form
           onSubmit={(e) => {
             e.preventDefault();
-            const input = parsedInput();
+            const input = parsedInput(false);
             if (input) void onSaveDraft(input);
           }}
         >
+          <p className="crm-form-hint">
+            Copy công khai cho trang khách — không copy hoa hồng, ghi chú chủ nhà hay thông tin khách.
+            Lưu nháp được thiếu mô tả; <strong>Đăng web</strong> cần nội dung.
+          </p>
           <p className="crm-form-hint-box">{publicListingInternalsHint(lot.priceVnd)}</p>
+
           <div className="pw-editor-cover">
             <span className="pw-thumb">
               {lot.coverImageUrl ? (
@@ -95,18 +118,27 @@ export function LotListingEditorDialog({
             </span>
             <span className="pw-editor-cover-note">Ảnh bìa lấy từ lô CRM (không đổi ở đây).</span>
           </div>
+
           <label>
-            Tiêu đề công khai
+            <span className="crm-field-head">
+              <span>
+                Tiêu đề công khai <span className="crm-req" aria-hidden>*</span>
+              </span>
+              <span className="crm-field-meta" aria-live="polite">
+                {title.length}/{TITLE_MAX}
+              </span>
+            </span>
             <input
               ref={titleRef}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="VD: LK5 - 37 mặt sông"
-              maxLength={160}
+              maxLength={TITLE_MAX}
               disabled={busy}
               required
             />
           </label>
+
           <label>
             Địa chỉ công khai
             <input
@@ -117,6 +149,7 @@ export function LotListingEditorDialog({
               disabled={busy}
             />
           </label>
+
           <label>
             Giá trên web khách
             <select
@@ -132,6 +165,7 @@ export function LotListingEditorDialog({
               <option value="CONTACT">Liên hệ</option>
             </select>
           </label>
+
           {priceMode === 'AMOUNT' ? (
             <label>
               Nhãn giá công khai
@@ -144,17 +178,32 @@ export function LotListingEditorDialog({
               />
             </label>
           ) : null}
-          <label>
-            Mô tả công khai
-            <textarea
-              value={excerpt}
-              onChange={(e) => setExcerpt(e.target.value)}
-              maxLength={2000}
+
+          <div className="pw-compose-body-field">
+            <span className="crm-field-head">
+              <span>
+                Mô tả công khai{' '}
+                <span className="crm-field-meta">(bắt buộc khi đăng web · ảnh từ lô hoặc upload)</span>
+              </span>
+            </span>
+            <PostRichEditor
+              value={bodyHtml}
               disabled={busy}
-              rows={5}
+              onChange={setBodyHtml}
+              placeholder="Mô tả lô cho khách… Có thể đậm/nghiêng, tiêu đề phụ, danh sách và chèn ảnh."
+              ariaLabel="Mô tả công khai lô đất"
+              toolbarAriaLabel="Định dạng mô tả bài đăng"
             />
-          </label>
+            {excerptPreview ? (
+              <p className="crm-form-hint">
+                Tóm tắt SEO (~{excerptPreview.length} ký tự): {excerptPreview.slice(0, 120)}
+                {excerptPreview.length > 120 ? '…' : ''}
+              </p>
+            ) : null}
+          </div>
+
           {parseError || error ? <p className="crm-form-error">{parseError || error}</p> : null}
+
           <div className="crm-dialog-actions">
             <button type="button" className="crm-btn" disabled={busy} onClick={onClose}>
               Huỷ
@@ -168,7 +217,7 @@ export function LotListingEditorDialog({
                 className="crm-btn primary"
                 disabled={busy}
                 onClick={() => {
-                  const input = parsedInput();
+                  const input = parsedInput(true);
                   if (input) void onPublish(input);
                 }}
               >
