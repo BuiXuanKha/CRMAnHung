@@ -513,7 +513,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 | Sitemap chỉ lô published (5 = API 5) | OK |
 | `/san-pham/…` → `/mua-ban-nha-dat/…` permanent | OK (308) |
 | Slug giả / đã gỡ → 404 + `noindex` | OK |
-| View Source có H1 + excerpt SSR | OK |
+| View Source có H1 + excerpt SSR | OK — meta/OG dùng excerpt; **on-page**: có `bodyHtml` thì không hiện lead `excerpt` (tránh trùng copy) |
 | robots cho phép list; chặn CRM `/login`… | OK (kèm Cloudflare managed) |
 
 Sửa nhỏ kèm Phase 4: metadata 404 rõ hơn (không kế thừa canonical trang chủ); JSON-LD `dateModified` / `datePosted` khi API có.
