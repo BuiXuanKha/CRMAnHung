@@ -251,6 +251,19 @@ export class PublicContentService {
     await this.unpublishListingById(listing.id, listing.slug);
   }
 
+  /**
+   * Gỡ web theo lodat (Đã cọc / Hoàn tất GD…) — không phụ thuộc map còn Mở bán.
+   * Không tự Đăng lại khi hủy GD; admin bật lại tường minh.
+   */
+  async unpublishListingForLodat(lodatId: string): Promise<void> {
+    const listing = await this.prisma.publicLotListing.findUnique({
+      where: { lodatId },
+      select: { id: true, slug: true, isPublished: true },
+    });
+    if (!listing?.isPublished) return;
+    await this.unpublishListingById(listing.id, listing.slug);
+  }
+
   private async unpublishListingById(id: string, slug: string): Promise<void> {
     await this.prisma.publicLotListing.update({
       where: { id },

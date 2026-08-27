@@ -174,7 +174,7 @@ Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồ
 
 1. Chỉ **ADMIN** vào `/dashboard`. Bốn trang CRM **không** thêm UI/quyền admin.
 2. Lô lên web = công tắc tường minh — không auto mọi lô Mở bán.
-3. Tạm dừng / Đã cọc / Đã bán → gỡ web (chưa mock hành vi; chỉ số đếm).
+3. Tạm dừng / Đã cọc / Đã bán → gỡ web: Tạm dừng qua `LodatsService`; Đã cọc / Đã CC / Hoàn tất qua `TransactionsService` → `unpublishListingForLodat` (không auto Đăng lại khi hủy GD).
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public (chưa mock conflict UI).
 6. Bài viết = một list; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
@@ -564,6 +564,7 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 | Hạng mục | Cách làm |
 |----------|----------|
 | Auto gỡ | `LodatsService` sau `PATCH …/sale-status` hoặc `PATCH …/lodats/:id` đổi map → `status !== DANG_BAN` → `PublicContentService.unpublishIfLotNotOpenForSale` (`isPublished=false`, giữ slug/copy) + revalidate slug/list/sitemap/home |
+| Auto gỡ khi GD | `TransactionsService` sau **tạo** GD (Đã cọc) hoặc **cập nhật** sang Đã cọc / Đã CC / Hoàn tất → `unpublishListingForLodat` (không phụ thuộc map còn Mở bán). Hủy GD / xóa GD **không** tự Đăng lại |
 | Một listing / ProjectLot | Khi admin **Đăng web**, `unpublishSiblingProjectLotListings` gỡ listing published khác cùng `projectLotId` |
 | Slug ổn định | Slug chỉ sinh lúc `create` listing; `PATCH draft` không có field slug — đổi slug / 301 để sau |
 | Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** — DB CRM/public đã commit |

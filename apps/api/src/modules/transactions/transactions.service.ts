@@ -9,6 +9,7 @@ import { Prisma } from '@prisma/client';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
+import { PublicContentService } from '../public-content/public-content.service';
 import { assertCanAccess as assertCustomerAccess } from '../customers/customers-view';
 import type {
   CreateTransactionDto,
@@ -39,7 +40,17 @@ export class TransactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly publicContent: PublicContentService,
   ) {}
+
+  /** Đã cọc / Đã CC / Hoàn tất → gỡ lô khỏi web (không auto đăng lại khi hủy). */
+  private async syncPublicListingAfterTransaction(
+    lodatId: string,
+    status: string,
+  ): Promise<void> {
+    if (status === TX_STATUS.HUY) return;
+    await this.publicContent.unpublishListingForLodat(lodatId);
+  }
 
   async list(user: RequestUser, query: ListTransactionsQueryDto) {
     const where: Prisma.TransactionWhereInput = {
@@ -110,6 +121,7 @@ export class TransactionsService {
         },
         include: DETAIL_INCLUDE,
       });
+      await this.syncPublicListingAfterTransaction(lodat.id, created.status);
       return toDetail(created, this.storage);
     } catch (err) {
       await this.rethrowOpenConflict(err, lodat.id);
@@ -181,6 +193,7 @@ export class TransactionsService {
           include: DETAIL_INCLUDE,
         });
       });
+      await this.syncPublicListingAfterTransaction(current.lodatId, updated.status);
       return toDetail(updated, this.storage);
     } catch (err) {
       await this.rethrowOpenConflict(err, current.lodatId);
