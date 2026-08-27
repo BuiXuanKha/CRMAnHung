@@ -472,8 +472,8 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 
 - [x] CRM `(crm)/layout` `robots: noindex` + `robots.ts` chặn `/dashboard`, CRM routes
 - [x] Docs roadmap (§16 này) + PUBLIC-SEO §8 ISR
-- [ ] Secrets staging: `REVALIDATE_SECRET` (Next + Nest cùng giá trị), `PUBLIC_WEB_ORIGIN=http://127.0.0.1:5001` trên Nest, `NEXT_PUBLIC_USE_MOCK=false` trên prod
-- [ ] `pnpm doctor` + R2 public CDN ổn trên VPS
+- [x] Secrets staging: `REVALIDATE_SECRET` (Next + Nest cùng giá trị), `PUBLIC_WEB_ORIGIN=http://127.0.0.1:5001` trên Nest, `NEXT_PUBLIC_USE_MOCK=false` trên prod — set VPS 2026-08-27; loopback revalidate 200
+- [x] R2 public CDN ổn trên VPS (ảnh lô CDN); `pnpm doctor` local khi cần
 
 ### 16.1 Phase 1 — Media upload (chung lô + bài)
 
