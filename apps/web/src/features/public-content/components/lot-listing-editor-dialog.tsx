@@ -13,6 +13,7 @@ import {
 import { Icon } from '@/shared/ui/icon';
 import { CrmDialog } from '@/shared/ui/dialog';
 import { plainTextToListingBodyHtml, publicListingInternalsHint } from '../listing-copy';
+import { toListingPublicSlug } from '../display';
 import { PostRichEditor } from './post-rich-editor';
 import '@/shared/ui/dialog.css';
 
@@ -81,6 +82,10 @@ export function LotListingEditorDialog({
   }
 
   const excerptPreview = listingBodyToExcerpt(bodyHtml);
+  const slugPreview =
+    lot && !lot.id.startsWith('pending-') && lot.slug
+      ? lot.slug
+      : toListingPublicSlug(title.trim() || 'lo-dat', location);
 
   return (
     <CrmDialog
@@ -149,6 +154,11 @@ export function LotListingEditorDialog({
               disabled={busy}
             />
           </label>
+
+          <p className="crm-slug-preview">
+            <span className="crm-slug-preview__label">Đường dẫn dự kiến</span>
+            <code className="crm-slug-preview__path">/mua-ban-nha-dat/{slugPreview}</code>
+          </p>
 
           <label>
             Giá trên web khách
