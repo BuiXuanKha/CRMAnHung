@@ -185,10 +185,13 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 
 ## 10. SEO hình ảnh (Google Images + OG)
 
-Ảnh lô / bài đã có ngữ cảnh mạnh (tên, xã/huyện, excerpt, giá công bố). Gắn đúng tín hiệu thì Google Images và link chia sẻ dùng được — **không** cần nhồi keyword vào tên file R2.
+Ảnh lô / bài đã có ngữ cảnh mạnh (tên, xã/huyện, excerpt, giá công bố). Gắn đúng tín hiệu thì Google Images và link chia sẻ dùng được.
+
+**Lúc tạo lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server đặt object key CDN theo **tên lô + địa chỉ** (cùng slug trang khách). Ảnh cũ UUID giữ nguyên — alt/sitemap vẫn bù; upload mới thì URL tự mang thông tin.
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
+| **Tên file / CDN** | `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.jpg` — slug = `toListingPublicSlug(title, location)`. `Content-Disposition` cùng tên. Ảnh dự án: `addresses/{id}/…`. Ảnh chat gắn lô: **copy** sang key SEO, giữ file chat gốc | UUID / `IMG_1234` cho ảnh lô mới; nhồi «dat-nen-gia-re-ban-gap» |
 | **Alt** | Lô: `{title} tại {location}` (không lặp địa chỉ nếu đã nằm trong tên); nhiều ảnh → thêm `— ảnh 2`. Bài: `title`. Thumbnail gallery: `alt=""` (trang trí, trùng URL ảnh lớn) | `alt` rỗng trên ảnh chính; «đất nền giá rẻ bán nhanh…»; PII / hoa hồng |
 | **HTML** | Mọi URL gallery nằm trong HTML lần tải đầu (SSR). Ảnh nằm cạnh H1 + địa chỉ + mô tả | Chỉ đổi `src` bằng JS nên bot chỉ thấy 1 ảnh; CSS `background-image` cho ảnh lô |
 | **Sitemap** | Trong `sitemap.xml`, mỗi URL lô/bài published có `image:image` → `image:loc` tuyệt đối (CDN). Bìa + gallery; bài = bìa + `img` trong body | `/og-default.png`; nháp; `data:` URI |
@@ -197,5 +200,5 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | **CDN** | `cdn.anhungland.com` phải **crawl được**. Search Console: xác minh cả property ảnh (CDN) nếu khác apex | `robots` / WAF chặn Googlebot ảnh; hotlink protection chặn bot |
 | **Bảo ảnh** | Ưu tiên ngữ cảnh + CDN public. Watermark nhẹ nếu cần sau — không chặn chuột phải / không `noindex` ảnh | Chặn download làm Google không lấy được file |
 
-Google **bỏ** `image:caption` / `image:title` / `image:geo_location` trong sitemap — caption và địa điểm lấy từ HTML + schema trên trang.
+Google **bỏ** `image:caption` / `image:title` / `image:geo_location` trong sitemap — caption và địa điểm lấy từ HTML + schema trên trang. Tên file trên CDN vẫn là tín hiệu phụ (URL path).
 

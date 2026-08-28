@@ -12,6 +12,9 @@ import {
   listingCommuneHubPath,
   listingPlaceHubPath,
   toPublicSlug,
+  seoImageFileName,
+  seoLotImageObjectKey,
+  seoImageExt,
 } from '../packages/shared/dist/index.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -180,6 +183,37 @@ else bad(`toPublicSlug xã: ${xaSlug}`);
 
 if (kdtSlug.includes('kdt') && kdtSlug.includes('nam-sach')) ok(`toPublicSlug KĐT → ${kdtSlug}`);
 else bad(`toPublicSlug KĐT: ${kdtSlug}`);
+
+console.log('\nSEO image filename at upload');
+const seoName = seoImageFileName({
+  title: 'Lô nhà cấp 4 mới 113,8m²',
+  location: 'KĐT Tây Nam Sách, Nam Trung',
+  index: 1,
+  ext: seoImageExt('IMG_4521.JPG', 'image/jpeg'),
+});
+const seoKey = seoLotImageObjectKey('clxyz123', seoName);
+if (seoName.includes('lo-nha-cap-4') && seoName.includes('nam-trung') && seoName.endsWith('-anh-1.jpg')) {
+  ok(`seoImageFileName → ${seoName}`);
+} else {
+  bad(`seoImageFileName unexpected: ${seoName}`);
+}
+if (seoName.includes('img') || seoName.includes('4521')) {
+  bad('seoImageFileName còn tên file điện thoại');
+} else {
+  ok('seoImageFileName không dùng IMG_4521');
+}
+if (seoKey.startsWith('lodats/clxyz123/') && seoKey.endsWith(seoName)) {
+  ok('seoLotImageObjectKey dưới lodats/{id}/');
+} else {
+  bad(`seoLotImageObjectKey: ${seoKey}`);
+}
+
+const addImageSrc = read('apps/api/src/modules/lodats/lodats.service.ts');
+if (addImageSrc.includes('uniqueSeoLotImageKey') && addImageSrc.includes('copyPublicImageToSeoLotKey')) {
+  ok('upload lô + ảnh chat dùng key SEO');
+} else {
+  bad('lodats.service chưa gắn uniqueSeoLotImageKey');
+}
 
 console.log('\nRoute files');
 const routes = [
