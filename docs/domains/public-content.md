@@ -502,7 +502,7 @@ Slice API Postgres + upload R2 thật = sau khi mock UI ổn.
 
 Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn bài dashboard **không** đổi layout — chỉ có thể thêm `metaDescription` (tuỳ chọn).
 
-1. URL khách: `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — chỉ lô `isPublished`. `/mua-ban-nha-dat` + `/san-pham` 301 sang path mới.
+1. URL khách: `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — chỉ lô `isPublished`.
 2. Title / H1 = tiêu đề public. Meta = `metaDescription` hoặc excerpt.
 3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`.
 4. JSON-LD `RealEstateListing`: giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`).
@@ -673,7 +673,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 2. Gom lô: cấp 3 = `wardId`; cấp 4 = `address.detail` **trong** ward đó. Không parse chuỗi `location` làm nguồn sự thật.
 3. Slug ổn định; trùng tên xã khác huyện → suffix huyện (vd. `nam-trung-nam-sach`). Slug cấp 4 unique trong phạm vi xã.
 4. Related trên chi tiết lô: «cùng xã» → hub xã; «tại KĐT/thôn» → hub `xa/.../slug-c4`.
-5. 301 vĩnh viễn: `/mua-ban-nha-dat` (+ `/:slug`) → path mới; giữ `/san-pham` → path mới.
+5. Path cũ `/mua-ban-nha-dat`, `/san-pham` **không** redirect (site mới — chỉ dùng path mới).
 
 ### 17.3 Checklist triển khai (làm lần lượt)
 
@@ -681,7 +681,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 - [x] `PUBLIC_LISTING_PATH` = `/mua-ban-nha-dat-huyen-nam-sach`
 - [x] Đổi thư mục route Next `app/(public)/mua-ban-nha-dat/` → path mới
-- [x] `next.config` redirects: `/san-pham`, `/mua-ban-nha-dat` → path mới (permanent)
+- [x] `next.config`: **không** redirect `/san-pham`, `/mua-ban-nha-dat` (path cũ → 404)
 - [x] Nest `PublicWebRevalidateService` paths mới
 - [x] Sitemap, Meta Pixel, dashboard preview path, docs PUBLIC-SEO / PUBLIC-WEB
 - [x] Smoke: list + chi tiết + 301 cũ → mới (live anhungland.com 2026-08-28)
@@ -731,7 +731,7 @@ pnpm --filter @crmanhung/web build
 
 | Kiểm tra | Kỳ vọng |
 |----------|---------|
-| `/mua-ban-nha-dat` | 301 → `/mua-ban-nha-dat-huyen-nam-sach` |
+| `/mua-ban-nha-dat`, `/san-pham` | 404 (path cũ đã bỏ) |
 | Hub xã có lô | 200, `robots index`, canonical đúng, trong sitemap |
 | Hub slug sai | 404, noindex |
 | `/du-an` | Bài CMS — canonical `/{category}/{slug}`, khác hub lô |

@@ -118,13 +118,13 @@ CRM layout: khuyến nghị `robots: { index: false, follow: false }` để trá
 
 Áp dụng khi admin **Đăng web**. Khách và Google chỉ thấy field public (title, slug, excerpt, cover, `priceLabel`, vị trí). Không index lô nháp / đã gỡ.
 
-Path gốc: `/mua-ban-nha-dat-huyen-nam-sach` (cũ `/mua-ban-nha-dat` + `/san-pham` → **301**). Hub địa bàn: [`public-content.md`](./domains/public-content.md) §17.
+Path gốc: `/mua-ban-nha-dat-huyen-nam-sach`. Hub địa bàn: [`public-content.md`](./domains/public-content.md) §17.
 
 Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `packages/shared`. Field `metaDescription` **tuỳ chọn** — overlay soạn bài có thể điền sau; trống thì dùng excerpt.
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
-| **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = **tên lô + địa chỉ** (không dấu, unique, ổn định sau khi tạo). Path cũ 301 | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
+| **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = **tên lô + địa chỉ** (không dấu, unique, ổn định sau khi tạo) | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
 | **Title** | `{title} tại {location}` + `\| An Hưng Land` nếu địa chỉ chưa nằm trong tên. Khớp H1. Không đổi slug | Nhồi «đất nền Đồng Nai giá rẻ…»; title chỉ mã lô không có xã/huyện |
 | **Meta description** | `metaDescription` nếu có, không thì **excerpt** public, cắt ~160 ký tự | Copy giống nhau mọi lô; mô tả CRM / hoa hồng |
 | **Canonical** | Đúng URL tuyệt đối ở trên | Hai URL một lô |

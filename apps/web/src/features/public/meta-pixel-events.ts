@@ -8,18 +8,11 @@ export function parseSanPhamPath(
 ): { kind: 'list' } | { kind: 'detail'; slug: string } | null {
   if (
     pathname === PUBLIC_LISTING_PATH ||
-    pathname === `${PUBLIC_LISTING_PATH}/` ||
-    pathname === '/san-pham' ||
-    pathname === '/san-pham/' ||
-    pathname === '/mua-ban-nha-dat' ||
-    pathname === '/mua-ban-nha-dat/'
+    pathname === `${PUBLIC_LISTING_PATH}/`
   ) {
     return { kind: 'list' };
   }
-  const match =
-    pathname.match(LISTING_DETAIL) ||
-    pathname.match(/^\/san-pham\/(?!xa(?:\/|$))([^/]+)\/?$/) ||
-    pathname.match(/^\/mua-ban-nha-dat\/(?!xa(?:\/|$))([^/]+)\/?$/);
+  const match = pathname.match(LISTING_DETAIL);
   if (!match) return null;
   return { kind: 'detail', slug: match[1] };
 }

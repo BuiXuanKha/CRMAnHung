@@ -1,6 +1,5 @@
 import {
   PUBLIC_LISTING_PATH,
-  PUBLIC_LISTING_PATH_LEGACY,
   listingCommuneHubPath,
   listingPlaceHubPath,
 } from '@crmanhung/shared';
@@ -10,7 +9,6 @@ export const PUBLIC_OG_DEFAULT = '/og-default.png';
 
 export {
   PUBLIC_LISTING_PATH,
-  PUBLIC_LISTING_PATH_LEGACY,
   listingCommuneHubPath,
   listingPlaceHubPath,
 };
