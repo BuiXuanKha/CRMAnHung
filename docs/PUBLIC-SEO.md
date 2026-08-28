@@ -100,6 +100,7 @@ Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem 
 - [ ] Kiểm tra nhanh trên mobile viewport
 - [x] Lô: title / excerpt / canonical / OG bìa / JSON-LD trung thực theo §7
 - [x] Sitemap chỉ lô đã đăng; lô gỡ → 404 `noindex`
+- [x] Hub lô: `pnpm qa:public-hubs` (path, robots, sitemap, canonical ≠ `/du-an`) — xem `public-content.md` §17 Slice E
 
 ---
 
