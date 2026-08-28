@@ -47,7 +47,7 @@ Trang khách thể hiện **thương hiệu An Hưng Land**, cho phép ai cũng 
 | Route (gợi ý) | Nội dung | Ưu tiên |
 |---------------|----------|---------|
 | `/` | Brand hero + nổi bật sản phẩm + lối vào các mục phụ | Chính |
-| `/mua-ban-nha-dat-huyen-nam-sach` (+ `/[slug]`, `/xa/[xã]`, `/xa/[xã]/[cấp4]`) | Danh sách + chi tiết nhà đất Nam Sách; hub theo địa chỉ 4 cấp. `/mua-ban-nha-dat` + `/san-pham` 301 | Chính |
+| `/mua-ban-nha-dat-huyen-nam-sach` (+ `/[slug]`, `/xa/[xã]`, `/xa/[xã]/[cấp4]`) | Danh sách + chi tiết nhà đất Nam Sách; hub theo địa chỉ 4 cấp | Chính |
 | `/du-an` (+ `/du-an/[slug]`) | Bài / thông tin dự án | Phụ |
 | `/kien-thuc` (+ bài chi tiết) | Pháp lý, luật, kiến thức BĐS | Phụ |
 | `/kinh-nghiem` (+ bài chi tiết) | Kinh nghiệm mua bán / trao đổi | Phụ |

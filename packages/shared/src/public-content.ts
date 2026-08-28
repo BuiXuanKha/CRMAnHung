@@ -13,11 +13,8 @@ export const META_DESCRIPTION_MAX = 160;
 
 /**
  * Guest catalog URL prefix on anhungland.com (Nam Sách local SEO).
- * Legacy `/mua-ban-nha-dat` and `/san-pham` 301 here — see apps/web next.config.
  */
 export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat-huyen-nam-sach';
-
-export const PUBLIC_LISTING_PATH_LEGACY = '/mua-ban-nha-dat';
 
 /** Reserved path segment under catalog — hub xã / cấp 4; not a lot slug. */
 export const PUBLIC_LISTING_HUB_SEGMENT = 'xa';

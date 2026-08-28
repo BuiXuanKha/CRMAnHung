@@ -97,16 +97,15 @@ if (hubSeo.includes('index: false') && hubSeo.includes('unpublishedHubMetadata')
   bad('hub SEO thiếu unpublished noindex');
 }
 
-console.log('\nLegacy redirects');
+console.log('\nCatalog path (no legacy redirects)');
 const nextConfig = read('apps/web/next.config.ts');
 if (
-  nextConfig.includes('/mua-ban-nha-dat') &&
-  nextConfig.includes('mua-ban-nha-dat-huyen-nam-sach') &&
-  nextConfig.includes('permanent: true')
+  !nextConfig.includes("source: '/mua-ban-nha-dat'") &&
+  !nextConfig.includes("source: '/san-pham'")
 ) {
-  ok('301 /mua-ban-nha-dat → path mới');
+  ok('next.config không redirect /mua-ban-nha-dat hay /san-pham');
 } else {
-  bad('next.config thiếu redirect path cũ');
+  bad('next.config vẫn còn redirect path cũ');
 }
 
 console.log('\nSitemap includes hub segments');
