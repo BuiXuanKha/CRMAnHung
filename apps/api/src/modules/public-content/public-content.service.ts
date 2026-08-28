@@ -161,6 +161,8 @@ export class PublicContentService {
       [dto.title.trim(), dto.location.trim()].filter(Boolean).join('. ');
     const metaDescription =
       dto.metaDescription !== undefined ? dto.metaDescription?.trim() || null : undefined;
+    const seoTitle =
+      dto.seoTitle !== undefined ? dto.seoTitle?.trim() || null : undefined;
     const data: {
       title: string;
       location: string;
@@ -169,6 +171,7 @@ export class PublicContentService {
       excerpt: string;
       bodyHtml: string;
       metaDescription?: string | null;
+      seoTitle?: string | null;
       slug?: string;
     } = {
       title: dto.title.trim(),
@@ -180,6 +183,9 @@ export class PublicContentService {
     };
     if (metaDescription !== undefined) {
       data.metaDescription = metaDescription;
+    }
+    if (seoTitle !== undefined) {
+      data.seoTitle = seoTitle;
     }
     const slugHint = dto.slug?.trim();
     if (existing) {
@@ -370,6 +376,7 @@ export class PublicContentService {
       lodatId: row.lodatId,
       slug: row.slug,
       title: row.title,
+      ...(row.seoTitle ? { seoTitle: row.seoTitle } : {}),
       location: row.location,
       coverImageUrl: this.coverUrl(row.lodat),
       isPublished: row.isPublished,
@@ -397,6 +404,7 @@ export class PublicContentService {
       id: row.id,
       slug: row.slug,
       title: row.title,
+      ...(row.seoTitle ? { seoTitle: row.seoTitle } : {}),
       location: row.location,
       priceLabel,
       excerpt: row.excerpt.trim() || [row.title, row.location].filter(Boolean).join('. '),

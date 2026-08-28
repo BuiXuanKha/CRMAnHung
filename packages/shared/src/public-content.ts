@@ -20,6 +20,8 @@ export const publicWebLotRowSchema = z.object({
   lodatId: z.string(),
   slug: z.string(),
   title: z.string(),
+  /** SEO document title (GPT seoTitle). On-page H1 uses `title` (GPT h1). */
+  seoTitle: z.string().trim().max(160).nullable().optional(),
   location: z.string(),
   coverImageUrl: z.string().nullable(),
   /** Hiện trên web khách */
@@ -122,6 +124,7 @@ export type LotGptContentResult = z.infer<typeof lotGptContentResultSchema>;
 export const publicGuestListingSchema = z.object({
   slug: z.string().min(1),
   title: z.string().min(1),
+  seoTitle: z.string().trim().max(160).nullable().optional(),
   location: z.string(),
   priceLabel: z.string().nullable(),
   excerpt: z.string(),
@@ -179,6 +182,7 @@ export function toGuestListing(row: {
   isPublished: boolean;
   slug: string;
   title: string;
+  seoTitle?: string | null;
   location: string;
   priceLabel: string | null;
   excerpt: string;
@@ -192,6 +196,7 @@ export function toGuestListing(row: {
   return {
     slug: row.slug,
     title: row.title,
+    ...(row.seoTitle != null ? { seoTitle: row.seoTitle } : {}),
     location: row.location,
     priceLabel: row.priceLabel,
     excerpt: row.excerpt,
@@ -321,6 +326,7 @@ export const updatePublicListingDraftSchema = z
     bodyHtml: z.string().optional(),
     slug: z.string().trim().min(1).max(200).optional(),
     metaDescription: z.string().trim().max(320).nullable().optional(),
+    seoTitle: z.string().trim().max(160).nullable().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.priceMode === 'AMOUNT' && !data.priceLabel) {

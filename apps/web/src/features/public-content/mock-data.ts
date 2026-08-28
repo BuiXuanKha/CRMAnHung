@@ -206,6 +206,7 @@ export function buildStaffOpenLots(
         frontageM,
         direction,
         priceVnd: plot.priceVnd ?? null,
+        ...(listing?.seoTitle != null ? { seoTitle: listing.seoTitle } : {}),
       };
     });
 }
@@ -216,6 +217,7 @@ export function listingFromStaffLot(row: PublicWebStaffLotRow): PublicWebLotRow 
     lodatId: row.lodatId,
     slug: row.slug,
     title: row.title,
+    ...(row.seoTitle != null ? { seoTitle: row.seoTitle } : {}),
     location: row.location,
     coverImageUrl: row.coverImageUrl,
     isPublished: row.isPublished,

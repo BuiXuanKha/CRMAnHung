@@ -356,6 +356,8 @@ model PublicLotListing {
   lodatId         String   @unique
   slug            String   @unique
   title           String
+  /// SEO document title (GPT seoTitle) — on-page H1 uses `title` (GPT h1).
+  seoTitle        String?
   location        String   @default("")
   isPublished     Boolean  @default(false)
   /// AMOUNT | CONTACT

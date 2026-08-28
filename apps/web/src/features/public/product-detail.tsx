@@ -6,7 +6,7 @@ import {
 } from './product-detail-client';
 import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
-import { listingHeadline } from './listing-seo';
+import { listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import { htmlToSharePlainText } from './share';
 import { PUBLIC_LISTING_PATH, listingCanonicalUrl, listingHref } from './site';
@@ -48,7 +48,7 @@ export function ProductDetailView({
   const images = listingImages(listing);
   const price = listing.priceLabel ?? 'Liên hệ';
   const area = listing.areaLabel;
-  const headline = listingHeadline(listing);
+  const h1 = listingPageH1(listing);
   const bodyHtml = sanitizeListingHtml(listing.bodyHtml ?? '');
   const fallbackBody = product?.description?.trim() || '';
   const showHtmlBody = Boolean(bodyHtml);
@@ -103,10 +103,10 @@ export function ProductDetailView({
 
         <div className="pd-layout">
           <div className="pd-primary">
-            {images.length > 0 ? <ProductGallery title={headline} images={images} /> : null}
+            {images.length > 0 ? <ProductGallery title={h1} images={images} /> : null}
 
             {product?.postedLabel ? <p className="pd-posted">{product.postedLabel}</p> : null}
-            <h1>{headline}</h1>
+            <h1>{h1}</h1>
             {listing.location ? (
               <p className="pd-location">
                 <span className="pd-location-pin" aria-hidden />

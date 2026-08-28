@@ -55,4 +55,11 @@ export class UpdatePublicListingDraftDto {
   @IsString()
   @MaxLength(320)
   metaDescription?: string | null;
+
+  @Transform(({ value }) => emptyToNull(value))
+  @IsOptional()
+  @ValidateIf((_, v) => v != null)
+  @IsString()
+  @MaxLength(160)
+  seoTitle?: string | null;
 }
