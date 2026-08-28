@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import type { PrismaClient } from '@prisma/client';
 import {
   isSeoNamedImageKey,
   seoAddressImageObjectKey,
@@ -158,6 +159,54 @@ export async function applySeoImageCopy(
       contentFileName: plan.fileName,
     });
   }
+}
+
+async function countPublicImageKeyRefs(
+  db: PrismaClient,
+  objectKey: string,
+): Promise<number> {
+  const [lodat, address, messenger, temp, snapshot] = await Promise.all([
+    db.lodatImage.count({ where: { objectKey } }),
+    db.addressImage.count({ where: { objectKey } }),
+    db.customerMessengerImage.count({ where: { objectKey } }),
+    db.lodatTempImage.count({ where: { objectKey } }),
+    db.transactionSnapshotImage.count({ where: { objectKey } }),
+  ]);
+  return lodat + address + messenger + temp + snapshot;
+}
+
+/**
+ * Copy to SEO key, retarget this row (+ transaction snapshots), then delete the
+ * source object when nothing in DB still points at it (chat originals stay).
+ */
+export async function applySeoImageMove(
+  db: PrismaClient,
+  storage: StorageService,
+  plan: SeoCopyPlan,
+  kind: 'lodat' | 'address',
+): Promise<{ deletedSource: boolean }> {
+  await applySeoImageCopy(storage, plan);
+  if (kind === 'lodat') {
+    await db.lodatImage.update({
+      where: { id: plan.id },
+      data: { objectKey: plan.to },
+    });
+  } else {
+    await db.addressImage.update({
+      where: { id: plan.id },
+      data: { objectKey: plan.to },
+    });
+  }
+  await db.transactionSnapshotImage.updateMany({
+    where: { objectKey: plan.from },
+    data: { objectKey: plan.to },
+  });
+  const leftover = await countPublicImageKeyRefs(db, plan.from);
+  if (leftover === 0 && plan.from !== plan.to) {
+    await storage.delete(plan.from, 'public');
+    return { deletedSource: true };
+  }
+  return { deletedSource: false };
 }
 
 export async function copyPublicImageToSeoLotKey(

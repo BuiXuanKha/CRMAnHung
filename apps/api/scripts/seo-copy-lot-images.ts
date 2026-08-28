@@ -1,13 +1,14 @@
 /**
- * Copy existing lot / project-address photos to SEO CDN filenames.
- * Does NOT delete source keys (chat + old Google URLs keep working).
+ * Move existing lot / project-address photos to SEO CDN filenames.
+ * Copies then deletes the source object when no DB row still points at it
+ * (Messenger chat originals stay). Web mới chưa cần giữ URL Google cũ.
  *
- * Default: dry-run, published listings only.
+ * Default: dry-run, **all** CRM lots.
  *
  * Usage (VPS, from apps/api):
  *   pnpm images:seo-copy
  *   APPLY=1 pnpm images:seo-copy
- *   APPLY=1 SCOPE=all pnpm images:seo-copy
+ *   APPLY=1 SCOPE=published pnpm images:seo-copy
  */
 import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -15,7 +16,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaClient } from '@prisma/client';
 import { StorageService } from '../src/storage/storage.service';
 import {
-  applySeoImageCopy,
+  applySeoImageMove,
   planSeoAddressImageCopy,
   planSeoLotImageCopy,
 } from '../src/modules/lodats/lodat-seo-image-upload';
@@ -61,20 +62,19 @@ const ADDR_INCLUDE = {
 async function main() {
   loadDotEnv(path.join(process.cwd(), '.env'));
   const apply = process.env.APPLY === '1';
-  const scope = process.env.SCOPE === 'all' ? 'all' : 'published';
+  const scope = process.env.SCOPE === 'published' ? 'published' : 'all';
   const storage = new StorageService(new ConfigService());
   if (!storage.isConfigured()) {
     throw new Error('R2 chưa cấu hình (R2_ENDPOINT / keys / bucket / public URL).');
   }
 
-  const listings =
-    scope === 'published'
-      ? await prisma.publicLotListing.findMany({
-          where: { isPublished: true },
-          select: { lodatId: true, title: true, location: true },
-        })
-      : [];
-  const publishedLodatIds = new Set(listings.map((r) => r.lodatId));
+  const listings = await prisma.publicLotListing.findMany({
+    where: scope === 'published' ? { isPublished: true } : undefined,
+    select: { lodatId: true, title: true, location: true, isPublished: true },
+  });
+  const publishedLodatIds = new Set(
+    listings.filter((r) => r.isPublished).map((r) => r.lodatId),
+  );
 
   const lodats = await prisma.lodat.findMany({
     where: scope === 'published' ? { id: { in: [...publishedLodatIds] } } : undefined,
@@ -86,14 +86,17 @@ async function main() {
   });
 
   let planned = 0;
-  let copied = 0;
+  let moved = 0;
+  let deleted = 0;
   let skipped = 0;
   const seenAddress = new Set<string>();
 
   console.log(`seo-copy-lot-images scope=${scope} apply=${apply} lodats=${lodats.length}`);
 
   for (const lodat of lodats) {
-    const listing = listings.find((l) => l.lodatId === lodat.id);
+    const listing =
+      listings.find((l) => l.lodatId === lodat.id && l.isPublished) ||
+      listings.find((l) => l.lodatId === lodat.id);
     const isProject = Boolean(lodat.projectLotId);
     const title =
       listing?.title?.trim() ||
@@ -122,14 +125,11 @@ async function main() {
         continue;
       }
       planned += 1;
-      console.log(`${apply ? 'COPY' : 'DRY'} lodat ${lodat.id} ${plan.from} -> ${plan.to}`);
+      console.log(`${apply ? 'MOVE' : 'DRY'} lodat ${lodat.id} ${plan.from} -> ${plan.to}`);
       if (!apply) continue;
-      await applySeoImageCopy(storage, plan);
-      await prisma.lodatImage.update({
-        where: { id: plan.id },
-        data: { objectKey: plan.to },
-      });
-      copied += 1;
+      const result = await applySeoImageMove(prisma, storage, plan, 'lodat');
+      moved += 1;
+      if (result.deletedSource) deleted += 1;
     }
 
     const addr = lodat.projectLot?.address;
@@ -154,22 +154,19 @@ async function main() {
         continue;
       }
       planned += 1;
-      console.log(`${apply ? 'COPY' : 'DRY'} address ${addr.id} ${plan.from} -> ${plan.to}`);
+      console.log(`${apply ? 'MOVE' : 'DRY'} address ${addr.id} ${plan.from} -> ${plan.to}`);
       if (!apply) continue;
-      await applySeoImageCopy(storage, plan);
-      await prisma.addressImage.update({
-        where: { id: plan.id },
-        data: { objectKey: plan.to },
-      });
-      copied += 1;
+      const result = await applySeoImageMove(prisma, storage, plan, 'address');
+      moved += 1;
+      if (result.deletedSource) deleted += 1;
     }
   }
 
   console.log(
-    `done planned=${planned} copied=${copied} alreadySeo=${skipped} apply=${apply}`,
+    `done planned=${planned} moved=${moved} deletedSource=${deleted} alreadySeo=${skipped} apply=${apply}`,
   );
   if (!apply && planned > 0) {
-    console.log('Chạy lại với APPLY=1 để copy R2 + cập nhật DB. Không xóa file cũ.');
+    console.log('Chạy lại với APPLY=1 để chuyển R2 + cập nhật DB. Xóa file cũ nếu không còn ai trỏ.');
   }
 }
 

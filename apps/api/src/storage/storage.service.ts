@@ -197,7 +197,7 @@ export class StorageService {
 
   /**
    * Server-side copy in the public bucket (old UUID / IMG_* → SEO filename).
-   * Does not delete the source key.
+   * Caller deletes the source after DB retarget when nothing else points at it.
    */
   async copyPublicObject(
     fromKey: string,

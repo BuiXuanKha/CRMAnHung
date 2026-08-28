@@ -189,20 +189,20 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 
 **Lúc tạo lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server đặt object key CDN theo **tên lô + địa chỉ** (cùng slug trang khách).
 
-**Kho ảnh cũ (UUID / `IMG_*` / key chat):** **không đổi tên tại chỗ** — URL đã index / ảnh chat còn trỏ key cũ. Giải pháp: **copy** sang key SEO, DB trỏ file mới, **giữ file cũ**.
+**Kho ảnh cũ (UUID / `IMG_*`):** **chuyển** sang key SEO (copy → DB trỏ file mới → **xóa file cũ** nếu không còn hàng nào trỏ). Web mới đang phát triển — không giữ URL CDN cũ (tránh nhân đôi dung lượng R2). Ảnh chat Messenger: copy sang key lô; **giữ** file `customers/chat/…` vì tin nhắn còn dùng.
 
 | Cách | Khi nào | Lệnh / hành vi |
 |------|---------|----------------|
-| Dry-run | Xem sẽ copy những gì | `pnpm images:seo-copy` (mặc định lô **đã Đăng web**) |
+| Dry-run | Xem sẽ chuyển những gì | `pnpm images:seo-copy` (mặc định **mọi lô CRM**) |
 | Apply | Chạy thật trên VPS | `APPLY=1 pnpm images:seo-copy` |
-| Toàn bộ CRM | Cả lô chưa đăng | `APPLY=1 SCOPE=all pnpm images:seo-copy` |
-| Khi Đăng web | Tự copy ảnh lô (+ ảnh dự án) còn tên xấu | `setPublished` — không chặn đăng nếu copy lỗi |
+| Chỉ lô đã Đăng web | Thu hẹp | `APPLY=1 SCOPE=published pnpm images:seo-copy` |
+| Khi Đăng web | Tự chuyển ảnh lô (+ ảnh dự án) còn tên xấu | `setPublished` — không chặn đăng nếu lỗi |
 
-Không xóa object R2 cũ. Chat Messenger giữ key gốc. Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent).
+Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent). Snapshot giao dịch đổi sang key mới rồi mới xóa nguồn.
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
-| **Tên file / CDN** | `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.jpg` — slug = `toListingPublicSlug(title, location)`. `Content-Disposition` cùng tên. Ảnh dự án: `addresses/{id}/…`. Ảnh chat gắn lô: **copy** sang key SEO, giữ file chat gốc | UUID / `IMG_1234` cho ảnh lô mới; nhồi «dat-nen-gia-re-ban-gap» |
+| **Tên file / CDN** | `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.jpg` — slug = `toListingPublicSlug(title, location)`. `Content-Disposition` cùng tên. Ảnh dự án: `addresses/{id}/…`. Kho cũ: **move** (xóa UUID/`IMG_*` sau khi DB đã trỏ key mới). Ảnh chat gắn lô: copy sang key SEO, giữ file chat nếu Messenger còn trỏ | UUID / `IMG_1234` cho ảnh lô mới; nhồi «dat-nen-gia-re-ban-gap»; giữ 2 file lô vì Google index |
 | **Alt** | Lô: `{title} tại {location}` (không lặp địa chỉ nếu đã nằm trong tên); nhiều ảnh → thêm `— ảnh 2`. Bài: `title`. Thumbnail gallery: `alt=""` (trang trí, trùng URL ảnh lớn) | `alt` rỗng trên ảnh chính; «đất nền giá rẻ bán nhanh…»; PII / hoa hồng |
 | **HTML** | Mọi URL gallery nằm trong HTML lần tải đầu (SSR). Ảnh nằm cạnh H1 + địa chỉ + mô tả | Chỉ đổi `src` bằng JS nên bot chỉ thấy 1 ảnh; CSS `background-image` cho ảnh lô |
 | **Sitemap** | Trong `sitemap.xml`, mỗi URL lô/bài published có `image:image` → `image:loc` tuyệt đối (CDN). Bìa + gallery; bài = bìa + `img` trong body | `/og-default.png`; nháp; `data:` URI |

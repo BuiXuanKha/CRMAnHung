@@ -25,7 +25,7 @@ import {
 } from './public-listing-hub-slugs';
 import { formatM, kindLabel, toListingPublicSlug, toPublicSlug } from './public-slug';
 import {
-  applySeoImageCopy,
+  applySeoImageMove,
   planSeoAddressImageCopy,
   planSeoLotImageCopy,
 } from '../lodats/lodat-seo-image-upload';
@@ -552,7 +552,7 @@ export class PublicContentService {
     return parts.join(', ');
   }
 
-  /** Copy UUID / IMG_* lot (and project address) photos to SEO CDN keys. Keep source objects. */
+  /** Move UUID / IMG_* lot (and project address) photos to SEO CDN keys; drop unused source. */
   private async ensureSeoImageKeysForLodat(lodat: LodatLoaded): Promise<void> {
     if (!this.storage.isConfigured()) return;
     const title = this.lodatTitle(lodat);
@@ -567,11 +567,7 @@ export class PublicContentService {
           index: i + 1,
         });
         if (!plan) continue;
-        await applySeoImageCopy(this.storage, plan);
-        await this.prisma.lodatImage.update({
-          where: { id: plan.id },
-          data: { objectKey: plan.to },
-        });
+        await applySeoImageMove(this.prisma, this.storage, plan, 'lodat');
       }
       const addr =
         lodat.projectLotId && lodat.projectLot?.address ? lodat.projectLot.address : null;
@@ -585,15 +581,11 @@ export class PublicContentService {
           index: i + 1,
         });
         if (!plan) continue;
-        await applySeoImageCopy(this.storage, plan);
-        await this.prisma.addressImage.update({
-          where: { id: plan.id },
-          data: { objectKey: plan.to },
-        });
+        await applySeoImageMove(this.prisma, this.storage, plan, 'address');
       }
     } catch (err) {
       this.logger.warn(
-        `SEO image copy skipped for lodat ${lodat.id}: ${err instanceof Error ? err.message : String(err)}`,
+        `SEO image move skipped for lodat ${lodat.id}: ${err instanceof Error ? err.message : String(err)}`,
       );
     }
   }

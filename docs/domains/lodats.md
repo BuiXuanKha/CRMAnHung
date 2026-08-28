@@ -106,7 +106,7 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 
 Upload **mới** (và ảnh chat gắn lúc tạo lô): object key CDN = `{slug tên+địa chỉ}-anh-{n}` — [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §10. Không tin tên file điện thoại.
 
-**Kho cũ:** copy sang key SEO, không xóa file cũ — `pnpm images:seo-copy` (dry-run) / `APPLY=1` trên VPS. Đăng web cũng copy nốt ảnh xấu.
+**Kho cũ:** chuyển sang key SEO rồi **xóa file cũ** (trừ ảnh chat Messenger còn được tin nhắn trỏ) — `pnpm images:seo-copy` (dry-run, mặc định mọi lô) / `APPLY=1` trên VPS. Đăng web cũng chuyển nốt ảnh xấu.
 
 Hangtag Nhà/Đất trên list = trục khác (nhà vs đất trống), **không** phải dự án vs dân.
 
