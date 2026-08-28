@@ -319,6 +319,8 @@ export const updatePublicListingDraftSchema = z
     priceMode: publicListingPriceModeSchema,
     priceLabel: z.string().trim().max(80, 'Giá công khai quá dài').nullable(),
     bodyHtml: z.string().optional(),
+    slug: z.string().trim().min(1).max(200).optional(),
+    metaDescription: z.string().trim().max(320).nullable().optional(),
   })
   .superRefine((data, ctx) => {
     if (data.priceMode === 'AMOUNT' && !data.priceLabel) {

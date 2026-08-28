@@ -42,4 +42,17 @@ export class UpdatePublicListingDraftDto {
   @IsOptional()
   @IsString()
   bodyHtml?: string;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  slug?: string;
+
+  @Transform(({ value }) => emptyToNull(value))
+  @IsOptional()
+  @ValidateIf((_, v) => v != null)
+  @IsString()
+  @MaxLength(320)
+  metaDescription?: string | null;
 }

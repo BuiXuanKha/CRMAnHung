@@ -159,7 +159,18 @@ export class PublicContentService {
     const excerpt =
       listingBodyToExcerpt(bodyHtml) ||
       [dto.title.trim(), dto.location.trim()].filter(Boolean).join('. ');
-    const data = {
+    const metaDescription =
+      dto.metaDescription !== undefined ? dto.metaDescription?.trim() || null : undefined;
+    const data: {
+      title: string;
+      location: string;
+      priceMode: string;
+      priceLabel: string | null;
+      excerpt: string;
+      bodyHtml: string;
+      metaDescription?: string | null;
+      slug?: string;
+    } = {
       title: dto.title.trim(),
       location: dto.location.trim(),
       priceMode: dto.priceMode,
@@ -167,24 +178,36 @@ export class PublicContentService {
       excerpt,
       bodyHtml,
     };
-    const saved = existing
-      ? await this.prisma.publicLotListing.update({
-          where: { id: existing.id },
-          data,
-          include: { lodat: { include: LODAT_INCLUDE } },
-        })
-      : await this.prisma.publicLotListing.create({
-          data: {
-            lodatId: lodat.id,
-            slug: await this.uniqueSlug(toListingPublicSlug(dto.title, dto.location)),
-            isPublished: false,
-            ...data,
-          },
-          include: { lodat: { include: LODAT_INCLUDE } },
-        });
-    if (saved.isPublished) {
-      await this.revalidate.revalidateListing(saved.slug);
+    if (metaDescription !== undefined) {
+      data.metaDescription = metaDescription;
     }
+    const slugHint = dto.slug?.trim();
+    if (existing) {
+      if (slugHint && slugHint !== existing.slug) {
+        data.slug = await this.uniqueSlug(slugHint);
+      }
+      const saved = await this.prisma.publicLotListing.update({
+        where: { id: existing.id },
+        data,
+        include: { lodat: { include: LODAT_INCLUDE } },
+      });
+      if (saved.isPublished) {
+        await this.revalidate.revalidateListing(saved.slug);
+      }
+      return this.toAdminRow(saved);
+    }
+    const createSlug = slugHint
+      ? await this.uniqueSlug(slugHint)
+      : await this.uniqueSlug(toListingPublicSlug(dto.title, dto.location));
+    const saved = await this.prisma.publicLotListing.create({
+      data: {
+        lodatId: lodat.id,
+        slug: createSlug,
+        isPublished: false,
+        ...data,
+      },
+      include: { lodat: { include: LODAT_INCLUDE } },
+    });
     return this.toAdminRow(saved);
   }
 
