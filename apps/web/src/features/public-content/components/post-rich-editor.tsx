@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -73,11 +73,16 @@ export function PostRichEditor({
     editor.setEditable(!disabled);
   }, [editor, disabled]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!editor) return;
     const current = editor.getHTML();
-    if ((value || '') !== current && value !== undefined) {
-      editor.commands.setContent(value || '', { emitUpdate: false });
+    const next = value || '';
+    // TipTap empty doc is "<p></p>" — treat as empty when syncing external HTML in.
+    const currentEmpty = !current || current === '<p></p>';
+    const nextEmpty = !next || next === '<p></p>';
+    if (nextEmpty && currentEmpty) return;
+    if (next !== current) {
+      editor.commands.setContent(next, { emitUpdate: false });
     }
   }, [editor, value]);
 
