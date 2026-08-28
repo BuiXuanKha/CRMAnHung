@@ -5,6 +5,7 @@ import { PublicListingsController } from './public-listings.controller';
 import { PublicPostsController } from './public-posts.controller';
 import { PublicSlugRedirectsController } from './public-slug-redirects.controller';
 import { PublicWebRevalidateService } from './public-web-revalidate.service';
+import { LotGptService } from './lot-gpt.service';
 
 @Module({
   controllers: [
@@ -13,6 +14,6 @@ import { PublicWebRevalidateService } from './public-web-revalidate.service';
     PublicSlugRedirectsController,
     AdminPublicWebController,
   ],
-  providers: [PublicContentService, PublicWebRevalidateService],
+  providers: [PublicContentService, PublicWebRevalidateService, LotGptService],
 })
 export class PublicContentModule {}

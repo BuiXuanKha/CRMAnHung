@@ -981,6 +981,32 @@
   color: #475569;
 }
 
+.pw-gpt-required {
+  color: #dc2626;
+}
+
+.pw-gpt-extra {
+  display: block;
+  width: 100%;
+  min-height: 72px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  resize: vertical;
+}
+
+.pw-gpt-extra:focus {
+  outline: 2px solid #2563eb;
+  outline-offset: 1px;
+}
+
 .pw-gpt-json {
   display: block;
   width: 100%;
@@ -1003,6 +1029,18 @@
 .pw-gpt-json:focus {
   outline: 2px solid #2563eb;
   outline-offset: 1px;
+}
+
+.pw-gpt-json-response {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.crm-dialog-error {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  color: #b91c1c;
+  line-height: 1.4;
 }
 
 .pw-card-gpt {

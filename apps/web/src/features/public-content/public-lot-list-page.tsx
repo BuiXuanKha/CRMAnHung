@@ -303,7 +303,11 @@ export function PublicLotListPage() {
         onSaveDraft={saveDraft}
         onPublish={saveAndPublish}
       />
-      <LotGptContentDialog lot={gptLot} onClose={() => setGptLot(null)} />
+      <LotGptContentDialog
+        lot={gptLot}
+        onClose={() => setGptLot(null)}
+        onFlash={flash}
+      />
       <LotWebConfirm
         lot={lotConfirm}
         busy={lotMut.isPending}

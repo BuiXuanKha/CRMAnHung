@@ -17,14 +17,19 @@ import {
   SetPublicLotPublishedDto,
   UpdatePublicListingDraftDto,
 } from './dto/public-listing.dto';
+import { LotGptRequestDto } from './dto/lot-gpt.dto';
 import { CreatePublicPostDto, SetPublicPostStatusDto } from './dto/public-post.dto';
+import { LotGptService } from './lot-gpt.service';
 import { PublicContentService } from './public-content.service';
 
 @Controller('admin/public-web')
 @UseGuards(RolesGuard)
 @Roles('ADMIN')
 export class AdminPublicWebController {
-  constructor(private readonly publicContent: PublicContentService) {}
+  constructor(
+    private readonly publicContent: PublicContentService,
+    private readonly lotGpt: LotGptService,
+  ) {}
 
   @Get('lots')
   listLots() {
@@ -70,5 +75,10 @@ export class AdminPublicWebController {
   @Patch('lots/:id/published')
   setPublished(@Param('id') id: string, @Body() dto: SetPublicLotPublishedDto) {
     return this.publicContent.setPublished(id, dto.isPublished);
+  }
+
+  @Post('lots/gpt-content')
+  generateLotGptContent(@Body() dto: LotGptRequestDto) {
+    return this.lotGpt.generateContent(dto);
   }
 }

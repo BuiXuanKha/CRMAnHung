@@ -63,7 +63,8 @@ export const lotGptLocationSchema = z.object({
 
 export type LotGptLocation = z.infer<typeof lotGptLocationSchema>;
 
-export const lotGptRequestPayloadSchema = z.object({
+/** Core lot facts for GPT — preview JSON may omit extraDescription until NV nhập. */
+export const lotGptRequestBaseSchema = z.object({
   title: z.string(),
   location: lotGptLocationSchema,
   area: z.number().nullable(),
@@ -80,7 +81,26 @@ export const lotGptRequestPayloadSchema = z.object({
   slug: z.string().optional(),
 });
 
+export type LotGptRequestDraft = z.infer<typeof lotGptRequestBaseSchema> & {
+  extraDescription?: string;
+};
+
+/** Full payload POST to GPT — extraDescription bắt buộc. */
+export const lotGptRequestPayloadSchema = lotGptRequestBaseSchema.extend({
+  extraDescription: z
+    .string()
+    .trim()
+    .min(1, 'Nhập mô tả thêm để GPT viết bài sinh động hơn.'),
+});
+
 export type LotGptRequestPayload = z.infer<typeof lotGptRequestPayloadSchema>;
+
+/** Raw assistant text from POST /admin/public-web/lots/gpt-content */
+export const lotGptGenerateResponseSchema = z.object({
+  content: z.string(),
+});
+
+export type LotGptGenerateResponse = z.infer<typeof lotGptGenerateResponseSchema>;
 
 /**
  * Published listing as guests and search engines see it.

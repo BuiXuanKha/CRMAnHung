@@ -1,7 +1,7 @@
 import {
   publicPriceLabelToVnd,
   type LotGptLocation,
-  type LotGptRequestPayload,
+  type LotGptRequestDraft,
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { lotPriceDisplay } from './display';
@@ -72,7 +72,10 @@ export function parseResidentialAreaM2(...texts: Array<string | null | undefined
 /**
  * Build GPT request JSON from a staff open-lot row (public-safe fields only).
  */
-export function buildLotGptRequestPayload(lot: PublicWebStaffLotRow): LotGptRequestPayload {
+export function buildLotGptRequestPayload(
+  lot: PublicWebStaffLotRow,
+  extraDescription?: string,
+): LotGptRequestDraft {
   const priceDisplay = lotPriceDisplay(lot);
   const parsedPrice =
     lot.priceMode === 'AMOUNT' ? publicPriceLabelToVnd(lot.priceLabel) : null;
@@ -82,7 +85,7 @@ export function buildLotGptRequestPayload(lot: PublicWebStaffLotRow): LotGptRequ
       ? priceDisplay.text
       : lot.priceLabel?.trim() || LOT_GPT_DEFAULT_PRICE_TEXT;
 
-  const payload: LotGptRequestPayload = {
+  const payload: LotGptRequestDraft = {
     title: lot.title.trim(),
     location: parseLotGptLocation(lot.location),
     area: lot.areaM2 ?? null,
@@ -99,9 +102,15 @@ export function buildLotGptRequestPayload(lot: PublicWebStaffLotRow): LotGptRequ
   const slug = lot.slug?.trim();
   if (slug) payload.slug = slug;
 
+  const extra = extraDescription?.trim();
+  if (extra) payload.extraDescription = extra;
+
   return payload;
 }
 
-export function formatLotGptRequestJson(lot: PublicWebStaffLotRow): string {
-  return `${JSON.stringify(buildLotGptRequestPayload(lot), null, 2)}\n`;
+export function formatLotGptRequestJson(
+  lot: PublicWebStaffLotRow,
+  extraDescription?: string,
+): string {
+  return `${JSON.stringify(buildLotGptRequestPayload(lot, extraDescription), null, 2)}\n`;
 }
