@@ -688,9 +688,9 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 #### Slice B — Docs UI hub + contract shared
 
-- [ ] §17.4 đặc tả màn hub (PC → mobile) đủ Ready for mock
-- [ ] Zod: hub kind `commune` | `area`; list hub sitemap; catalog thêm `communeSlug` / `areaSlug` (hoặc wardId + areaKey)
-- [ ] Helper slugify chung (API + web)
+- [x] §17.4 đặc tả màn hub (PC → mobile) đủ Ready for mock
+- [x] Zod: hub kind `commune` | `place`; list hub sitemap; catalog thêm `communeSlug` / `placeSlug`
+- [x] Helper slugify chung (`toPublicSlug` / `toListingPublicSlug` trong `@crmanhung/shared`)
 
 #### Slice C — Hub xã (UI mock → API → nối)
 
@@ -713,12 +713,42 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 - [ ] Không trùng canonical với `/du-an` (bài)
 - [ ] CRM vẫn noindex; robots allow path catalog mới
 
-### 17.4 UI hub (Draft — chi tiết khi Slice B)
+### 17.4 UI hub (Ready for mock)
 
-**Máy tính:** breadcrumb · H1 (Nhà đất {xã|cấp4}, …) · 1 câu mô tả · grid thẻ lô (reuse list `/mua-ban-nha-dat-huyen-nam-sach`).
+Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
 
-**Mobile:** cùng nội dung, 1 cột.
+#### 17.4.1 Giao diện máy tính — hub xã
 
-Chi tiết control: bổ sung khi làm Slice B (mẫu `customers.md` §12).
+1. Breadcrumb: Trang chủ → Nhà đất đang bán → {tên xã}
+2. H1: `Nhà đất {tên xã}, {huyện}` (thiếu huyện → chỉ tên xã)
+3. Một câu mô tả: số lô đang bán trong xã (vd. «N lô đang giới thiệu trên An Hưng Land.»)
+4. (Tuỳ chọn) Danh sách link hub cấp 4 trong xã có ≥1 lô — chữ, không card
+5. Grid thẻ lô — **cùng** markup/list `/mua-ban-nha-dat-huyen-nam-sach` (`ph-product-grid`)
+6. Empty không xảy ra trên URL public (0 lô → 404)
+
+#### 17.4.2 Giao diện máy tính — hub cấp 4
+
+1. Breadcrumb: Trang chủ → Nhà đất đang bán → {xã} → {thôn|KĐT|dự án}
+2. H1: `Lô đất {tên cấp 4}, {tên xã}`
+3. Một câu mô tả + số lô
+4. Grid thẻ lô — cùng list catalog
+5. 0 lô → 404
+
+#### 17.4.3 Giao diện mobile
+
+1. Breadcrumb / back — cùng 17.4.1–2, wrap dòng
+2. H1 + mô tả — cùng copy
+3. Grid 1 cột (CSS list hiện có)
+4. Thẻ lô — cùng field: ảnh · title · giá · DT · địa chỉ
+
+#### 17.4.4 SEO / hành vi
+
+| Hạng mục | Quy tắc |
+|----------|---------|
+| robots | `index, follow` khi có ≥1 lô |
+| 404 | Slug sai / 0 lô → `notFound` + noindex |
+| Canonical | URL hub tuyệt đối |
+| JSON-LD | `ItemList` URL lô trong hub; `BreadcrumbList` |
+| Sitemap | Chỉ hub có lô; priority xã ~0.75, cấp 4 ~0.7 |
 
 

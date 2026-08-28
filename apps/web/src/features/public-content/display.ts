@@ -193,23 +193,5 @@ export function countActiveStaffLotFilters(filters: StaffLotFilters): number {
   return n;
 }
 
-/** Slug URL bài viết (mock). */
-export function toPublicSlug(title: string, maxLen = 60): string {
-  const slug = title
-    .normalize('NFD')
-    .replace(/\p{M}/gu, '')
-    .replace(/đ/gi, 'd')
-    .replace(/Đ/g, 'd')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, maxLen)
-    .replace(/-+$/g, '');
-  return slug || 'bai-viet';
-}
-
-/** Guest lot URL preview/mock: tên lô + địa chỉ. */
-export function toListingPublicSlug(title: string, location?: string | null): string {
-  const combined = [title.trim(), (location ?? '').trim()].filter(Boolean).join(' ');
-  return toPublicSlug(combined, 80) || 'lo-dat';
-}
+/** Slug URL — shared with API (`@crmanhung/shared`). */
+export { toPublicSlug, toListingPublicSlug } from '@crmanhung/shared';
