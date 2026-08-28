@@ -194,7 +194,7 @@
   display: flex;
   flex-wrap: wrap;
   align-items: stretch;
-  gap: 0;
+  gap: 0 18px;
   margin: 0 0 22px;
   padding: 16px 18px;
   border-radius: 12px;
@@ -202,17 +202,70 @@
   border: 1px solid var(--ph-line);
 }
 
-.pd-summary-item {
-  flex: 1 1 140px;
-  display: grid;
-  gap: 4px;
-  padding: 4px 18px 4px 0;
+.pd-summary-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex: 1 1 180px;
+  min-width: 0;
+  padding-right: 18px;
+  border-right: 1px solid var(--ph-line);
+}
+
+.pd-summary-head:not(:has(+ .pd-summary-grid)) {
+  border-right: none;
+  padding-right: 0;
+}
+
+.pd-summary-grid {
+  display: flex;
+  flex: 2 1 320px;
+  align-items: stretch;
   min-width: 0;
 }
 
-.pd-summary-item + .pd-summary-item {
+.pd-summary-item,
+.pd-summary-cell {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.pd-summary-cell {
+  flex: 1 1 120px;
+  padding: 4px 18px 4px 0;
+}
+
+.pd-summary-cell + .pd-summary-cell {
   border-left: 1px solid var(--ph-line);
   padding-left: 18px;
+}
+
+.pd-summary-item--price {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pd-summary-price-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.pd-summary-kind {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--ph-line);
+  color: var(--ph-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1.2;
 }
 
 .pd-summary-label {
@@ -233,18 +286,10 @@
   color: var(--ph-brand);
 }
 
-.pd-summary-sub {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--ph-muted);
-}
-
 .pd-summary-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin-left: auto;
-  padding-left: 12px;
+  flex-shrink: 0;
 }
 
 .pd-icon-btn {
@@ -575,28 +620,67 @@
 
   .pd-summary {
     flex-direction: column;
-    gap: 14px;
-    padding: 14px;
+    gap: 12px;
+    padding: 12px 14px;
   }
 
-  .pd-summary-item,
-  .pd-summary-item + .pd-summary-item {
-    border-left: none;
-    padding: 0;
-  }
-
-  .pd-summary-actions {
-    margin-left: 0;
-    padding-left: 0;
+  .pd-summary-head {
     width: 100%;
+    padding: 0 0 12px;
+    border-right: none;
+    border-bottom: 1px solid var(--ph-line);
+    align-items: center;
+  }
+
+  .pd-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    width: 100%;
+    flex: none;
+  }
+
+  .pd-summary-cell {
+    padding: 10px 12px;
+    border: 1px solid var(--ph-line);
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .pd-summary-cell + .pd-summary-cell {
+    border-left: 1px solid var(--ph-line);
+    padding-left: 12px;
+  }
+
+  .pd-summary-head:not(:has(+ .pd-summary-grid)) {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .pd-summary-grid .pd-summary-cell:only-child {
+    grid-column: 1 / -1;
+  }
+
+  .pd-summary-grid .pd-summary-cell:last-child:nth-child(odd):not(:only-child) {
+    grid-column: 1 / -1;
   }
 
   .pd-icon-btn {
-    width: 100%;
+    min-height: 38px;
+    padding: 0 12px;
+    font-size: 0.82rem;
   }
 
   .pd-summary-value {
-    font-size: 1.25rem;
+    font-size: 1.08rem;
+  }
+
+  .pd-summary-item--price .pd-summary-value {
+    font-size: 1.35rem;
+  }
+
+  .pd-summary-price-line {
+    gap: 6px;
   }
 
   .pd-aside {
