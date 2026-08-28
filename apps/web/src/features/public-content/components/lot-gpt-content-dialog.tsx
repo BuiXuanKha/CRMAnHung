@@ -28,6 +28,8 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
   const [parseError, setParseError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  const canSend = extraDescription.trim().length > 0 && !busy;
+
   useEffect(() => {
     if (!lot) {
       setExtraDescription('');
@@ -44,11 +46,18 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
 
   function onExtraDescriptionChange(value: string) {
     setExtraDescription(value);
+    setParseError(null);
     if (lot) setJsonText(formatLotGptRequestJson(lot, value));
   }
 
   async function handleSend() {
     setParseError(null);
+    const extra = extraDescription.trim();
+    if (!extra) {
+      setParseError('Nhập mô tả thêm để GPT viết bài sinh động hơn.');
+      return;
+    }
+
     let parsed: unknown;
     try {
       parsed = JSON.parse(jsonText);
@@ -57,9 +66,15 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
       return;
     }
 
-    const validated = lotGptRequestPayloadSchema.safeParse(parsed);
+    const merged =
+      parsed && typeof parsed === 'object'
+        ? { ...(parsed as Record<string, unknown>), extraDescription: extra }
+        : parsed;
+
+    const validated = lotGptRequestPayloadSchema.safeParse(merged);
     if (!validated.success) {
-      setParseError('JSON thiếu hoặc sai trường bắt buộc (title, location, …).');
+      const msg = validated.error.issues[0]?.message;
+      setParseError(msg ?? 'JSON thiếu hoặc sai trường bắt buộc.');
       return;
     }
 
@@ -88,20 +103,23 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
       {lot ? (
         <>
           <p className="crm-dialog-message">
-            Nhập mô tả thêm (nếu có) — JSON bên dưới tự cập nhật. Bấm Gửi để gọi GPT.
+            Nhập <strong>mô tả thêm</strong> (bắt buộc) — điểm nổi bật thực địa để GPT viết bài
+            sinh động. JSON bên dưới tự cập nhật.
           </p>
           <label className="pw-gpt-json-label" htmlFor="pw-gpt-extra">
-            Mô tả thêm (tùy chọn)
+            Mô tả thêm <span className="pw-gpt-required">*</span>
           </label>
           <textarea
             id="pw-gpt-extra"
             className="pw-gpt-extra"
-            rows={3}
-            placeholder="VD: Lô góc, sát mẫu giáo, vỉa hè 3m, đèn cao áp…"
+            rows={4}
+            required
+            placeholder="VD: Lô góc, sát mẫu giáo, vỉa hè 3m, đèn cao áp, khu dân cư mở rộng…"
             value={extraDescription}
             disabled={busy}
             onChange={(e) => onExtraDescriptionChange(e.target.value)}
             aria-label="Mô tả thêm gửi GPT"
+            aria-required="true"
           />
           <label className="pw-gpt-json-label" htmlFor="pw-gpt-json">
             Dữ liệu gửi GPT (JSON)
@@ -140,7 +158,8 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
             <button
               type="button"
               className="crm-btn primary"
-              disabled={busy}
+              disabled={!canSend}
+              title={canSend ? undefined : 'Nhập mô tả thêm trước khi gửi'}
               onClick={() => void handleSend()}
             >
               <Icon icon={Sparkles} size="sm" />

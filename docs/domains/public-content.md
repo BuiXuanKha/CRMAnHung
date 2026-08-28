@@ -357,7 +357,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 
 ### 13.3a Modal Tạo content bằng AI GPT
 
-Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (NV nhập, tùy chọn) + textarea JSON request (tự cập nhật, sửa được) + **Gửi** → `POST /admin/public-web/lots/gpt-content` (ADMIN, Nest gọi OpenAI `gpt-5.6-sol`) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` + `OPENAI_MODEL` trên server — không commit.
+Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (bắt buộc — NV nhập điểm nổi bật thực địa) + textarea JSON request (tự cập nhật, sửa được) + **Gửi** (disabled khi chưa nhập mô tả) → `POST /admin/public-web/lots/gpt-content` (ADMIN, Nest gọi OpenAI `gpt-5.6-sol`) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` + `OPENAI_MODEL` trên server — không commit.
 
 **Request JSON (bắt buộc + tùy chọn):**
 
@@ -382,7 +382,7 @@ Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (
 - `residentialArea`: parse từ tiêu đề/mô tả (`Thổ cư Nm²`) nếu có; không có trong DB → `null`.
 - `price`: số VND từ nhãn giá công khai khi parse được; không thì `null` + `priceText`.
 - `kind`, `excerpt`, `slug`: từ overlay lô khi có.
-- `extraDescription`: **chỉ** từ ô «Mô tả thêm» trong modal — ghi chú thực địa NV bổ sung, không PII khách / giá CRM thô.
+- `extraDescription`: **bắt buộc** — từ ô «Mô tả thêm *» trong modal; ghi chú thực địa NV bổ sung (lô góc, tiện ích…). Không PII khách / giá CRM thô.
 
 Trống: `Không có lô đang mở bán.`
 

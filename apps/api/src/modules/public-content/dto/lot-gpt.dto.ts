@@ -84,8 +84,8 @@ export class LotGptRequestDto {
   @MaxLength(200)
   slug?: string;
 
-  @IsOptional()
   @IsString()
+  @MinLength(1, { message: 'Nhập mô tả thêm để GPT viết bài sinh động hơn.' })
   @MaxLength(4000)
-  extraDescription?: string;
+  extraDescription!: string;
 }

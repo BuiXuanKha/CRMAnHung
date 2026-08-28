@@ -981,6 +981,10 @@
   color: #475569;
 }
 
+.pw-gpt-required {
+  color: #dc2626;
+}
+
 .pw-gpt-extra {
   display: block;
   width: 100%;

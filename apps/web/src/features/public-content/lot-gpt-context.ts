@@ -1,7 +1,7 @@
 import {
   publicPriceLabelToVnd,
   type LotGptLocation,
-  type LotGptRequestPayload,
+  type LotGptRequestDraft,
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { lotPriceDisplay } from './display';
@@ -75,7 +75,7 @@ export function parseResidentialAreaM2(...texts: Array<string | null | undefined
 export function buildLotGptRequestPayload(
   lot: PublicWebStaffLotRow,
   extraDescription?: string,
-): LotGptRequestPayload {
+): LotGptRequestDraft {
   const priceDisplay = lotPriceDisplay(lot);
   const parsedPrice =
     lot.priceMode === 'AMOUNT' ? publicPriceLabelToVnd(lot.priceLabel) : null;
@@ -85,7 +85,7 @@ export function buildLotGptRequestPayload(
       ? priceDisplay.text
       : lot.priceLabel?.trim() || LOT_GPT_DEFAULT_PRICE_TEXT;
 
-  const payload: LotGptRequestPayload = {
+  const payload: LotGptRequestDraft = {
     title: lot.title.trim(),
     location: parseLotGptLocation(lot.location),
     area: lot.areaM2 ?? null,
