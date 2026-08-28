@@ -382,7 +382,25 @@ Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (
 - `residentialArea`: parse từ tiêu đề/mô tả (`Thổ cư Nm²`) nếu có; không có trong DB → `null`.
 - `price`: số VND từ nhãn giá công khai khi parse được; không thì `null` + `priceText`.
 - `kind`, `excerpt`, `slug`: từ overlay lô khi có.
-- `extraDescription`: **bắt buộc** — từ ô «Mô tả thêm *» trong modal; ghi chú thực địa NV bổ sung (lô góc, tiện ích…). Không PII khách / giá CRM thô.
+- `extraDescription`: **bắt buộc** — từ ô «Mô tả thêm *» trong modal.
+
+**System prompt:** chuyên gia SEO An Hưng Land (Nam Sách) — quy tắc dữ liệu, SEO, không bịa pháp lý/quy hoạch; ưu tiên structured fields; `extraDescription` = thực địa NV.
+
+**Response JSON (GPT trả về):**
+
+```json
+{
+  "seoTitle": "…",
+  "h1": "…",
+  "metaDescription": "…",
+  "slug": "ban-lo-…",
+  "excerpt": "…",
+  "bodyHtml": "<p>…</p><h2>…</h2>",
+  "facebookPost": "…"
+}
+```
+
+Map sang editor: `seoTitle`/`h1` → tiêu đề; `metaDescription`; `slug`; `excerpt`; `bodyHtml`. `facebookPost` = slice sau (chia sẻ FB).
 
 Trống: `Không có lô đang mở bán.`
 
