@@ -160,7 +160,11 @@ export function PublicLotListPage() {
     try {
       const updated = await draftMut.mutateAsync({ lodatId: editorLot.lodatId, input });
       setEditorLot(null);
-      flash(`Đã lưu nháp «${updated.title}».`);
+      flash(
+        updated.isPublished
+          ? `Đã cập nhật «${updated.title}» trên web khách.`
+          : `Đã lưu nháp «${updated.title}».`,
+      );
     } catch (err) {
       setEditorError(err instanceof Error ? err.message : 'Không lưu được bài đăng.');
     }

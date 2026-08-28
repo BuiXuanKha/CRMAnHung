@@ -324,7 +324,13 @@ export function LotListingEditorDialog({
               Huỷ
             </button>
             <button type="submit" className="crm-btn" disabled={busy}>
-              {busy ? 'Đang lưu…' : 'Lưu nháp'}
+              {busy
+                ? lot.isPublished
+                  ? 'Đang cập nhật…'
+                  : 'Đang lưu…'
+                : lot.isPublished
+                  ? 'Cập nhật web'
+                  : 'Lưu nháp'}
             </button>
             {lot.isPublished ? null : (
               <button
