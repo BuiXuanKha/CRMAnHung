@@ -42,6 +42,19 @@ export function htmlToSharePlainText(html: string): string {
   return s;
 }
 
+/** Plain-text mô tả lô cho Facebook — cùng logic trang chi tiết. */
+export function listingShareText(listing: {
+  bodyHtml?: string | null;
+  excerpt?: string | null;
+  title?: string | null;
+}): string {
+  const fromHtml = htmlToSharePlainText(listing.bodyHtml ?? '');
+  if (fromHtml) return fromHtml;
+  const excerpt = (listing.excerpt ?? '').trim();
+  if (excerpt) return excerpt;
+  return (listing.title ?? '').trim();
+}
+
 export function buildShareClipboard(pageUrl: string, description?: string | null): string {
   const desc = (description ?? '').replace(/\u00a0/g, ' ').trim();
   if (!desc) return pageUrl;

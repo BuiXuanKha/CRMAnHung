@@ -8,7 +8,7 @@ import type { PublicListingView } from './published-listings';
 import { getProductBySlug } from './mock-data';
 import { listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
-import { htmlToSharePlainText } from './share';
+import { listingShareText } from './share';
 import { PUBLIC_LISTING_PATH, listingCanonicalUrl, listingHref } from './site';
 import './public-home.css';
 import './product-detail.css';
@@ -23,18 +23,6 @@ function listingImages(listing: PublicListingView): string[] {
 
 function zaloLink(telDigits: string): string {
   return `https://zalo.me/${telDigits}`;
-}
-
-/**
- * Nội dung dán Facebook: chỉ mô tả public (giữ xuống dòng như trên web).
- * Không nhồi thêm H1/giá — body đã có đủ và tránh trùng rối.
- */
-function listingShareText(listing: PublicListingView): string {
-  const fromHtml = htmlToSharePlainText(listing.bodyHtml ?? '');
-  if (fromHtml) return fromHtml;
-  const excerpt = listing.excerpt.trim();
-  if (excerpt) return excerpt;
-  return listing.title.trim();
 }
 
 export function ProductDetailView({
@@ -159,7 +147,6 @@ export function ProductDetailView({
                 <ProductShareButton
                   url={shareUrl}
                   text={shareText}
-                  className="pd-icon-btn"
                   label="Chia sẻ"
                 />
               </div>
