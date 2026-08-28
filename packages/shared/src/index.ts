@@ -6,3 +6,4 @@ export * from './lodats.js';
 export * from './transactions.js';
 export * from './title-services.js';
 export * from './public-content.js';
+export * from './lot-gpt-prompt.js';

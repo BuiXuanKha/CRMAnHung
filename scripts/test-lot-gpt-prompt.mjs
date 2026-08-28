@@ -15,16 +15,7 @@ if (!apiKey) {
   process.exit(1);
 }
 
-const { LOT_GPT_SYSTEM_PROMPT } = await import(
-  '../apps/api/dist/modules/public-content/lot-gpt-prompt.js'
-).catch(async () => {
-  const src = readFileSync(
-    resolve(root, 'apps/api/src/modules/public-content/lot-gpt-prompt.ts'),
-    'utf8',
-  );
-  const match = src.match(/export const LOT_GPT_SYSTEM_PROMPT = `([\s\S]*?)`;/);
-  return { LOT_GPT_SYSTEM_PROMPT: match?.[1] ?? '' };
-});
+const { LOT_GPT_SYSTEM_PROMPT } = await import('../packages/shared/dist/lot-gpt-prompt.js');
 
 const payload = {
   title: 'Lô 33 đấu giá Mạn Đê Nam Trung',

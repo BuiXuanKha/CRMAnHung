@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Sparkles, PenLine } from 'lucide-react';
 import {
   lotGptRequestPayloadSchema,
+  LOT_GPT_SYSTEM_PROMPT,
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
@@ -108,7 +109,7 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
       icon={Sparkles}
       onClose={onClose}
       busy={busy}
-      className="crm-dialog--wide"
+      className="crm-dialog--wide crm-dialog--gpt"
     >
       {lot ? (
         <>
@@ -131,14 +132,26 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
             aria-label="Mô tả thêm gửi GPT"
             aria-required="true"
           />
+          <label className="pw-gpt-json-label" htmlFor="pw-gpt-system-prompt">
+            Prompt hệ thống gửi GPT API (system)
+          </label>
+          <textarea
+            id="pw-gpt-system-prompt"
+            className="pw-gpt-json pw-gpt-prompt"
+            spellCheck={false}
+            rows={10}
+            readOnly
+            value={LOT_GPT_SYSTEM_PROMPT}
+            aria-label="System prompt gửi GPT API"
+          />
           <label className="pw-gpt-json-label" htmlFor="pw-gpt-json">
-            Dữ liệu gửi GPT (JSON)
+            Dữ liệu gửi GPT (JSON — user message)
           </label>
           <textarea
             id="pw-gpt-json"
             className="pw-gpt-json"
             spellCheck={false}
-            rows={12}
+            rows={10}
             value={jsonText}
             disabled={busy}
             onChange={(e) => setJsonText(e.target.value)}
@@ -153,7 +166,7 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
                 id="pw-gpt-response"
                 className="pw-gpt-json pw-gpt-json-response"
                 spellCheck={false}
-                rows={12}
+                rows={10}
                 readOnly
                 value={responseText}
                 aria-label="Phản hồi GPT"

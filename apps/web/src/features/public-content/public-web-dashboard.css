@@ -949,7 +949,31 @@
   }
 }
 
-/* GPT content column / modal facts */
+/* GPT modal — wider/taller than default wide dialog */
+.crm-dialog.crm-dialog--gpt {
+  width: min(980px, 100%);
+  max-height: min(96vh, 980px);
+}
+
+.crm-dialog.crm-dialog--gpt .pw-gpt-extra {
+  min-height: 88px;
+}
+
+.crm-dialog.crm-dialog--gpt .pw-gpt-json {
+  min-height: 200px;
+}
+
+.crm-dialog.crm-dialog--gpt .pw-gpt-prompt {
+  min-height: 180px;
+  background: #fffbeb;
+  border-color: #fcd34d;
+  color: #78350f;
+}
+
+.crm-dialog.crm-dialog--gpt .pw-gpt-json-response {
+  min-height: 220px;
+}
+
 .pw-gpt-btn {
   display: inline-flex;
   align-items: center;
