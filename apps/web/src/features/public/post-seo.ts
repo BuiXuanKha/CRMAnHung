@@ -5,6 +5,7 @@ import {
   type PublicGuestPost,
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
+import { postSeoImageUrls } from './listing-image-seo';
 import { publicPostCategoryLabel } from './published-posts';
 import {
   PUBLIC_OG_DEFAULT,
@@ -103,7 +104,17 @@ export function postArticleJsonLd(post: PublicGuestPost) {
     metaDescription: post.metaDescription,
     excerpt: post.excerpt,
   });
-  const image = toAbsoluteUrl(post.coverImageUrl?.trim() || PUBLIC_OG_DEFAULT);
+  const urls = postSeoImageUrls(post);
+  const imageList = urls.length > 0 ? urls : [toAbsoluteUrl(PUBLIC_OG_DEFAULT)];
+  const image = imageList.map((contentUrl, index) => ({
+    '@type': 'ImageObject',
+    contentUrl,
+    url: contentUrl,
+    caption: index === 0 ? post.title : `${post.title} — ảnh ${index + 1}`,
+    description,
+    inLanguage: 'vi-VN',
+    ...(index === 0 ? { representativeOfPage: true } : {}),
+  }));
   return {
     '@context': 'https://schema.org',
     '@type': 'Article',

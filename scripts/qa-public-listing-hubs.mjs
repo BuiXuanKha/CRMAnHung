@@ -117,6 +117,61 @@ if (sitemapSrc.includes('listCommuneHubs') && sitemapSrc.includes('listPlaceHubs
   bad('sitemap thiếu hub lists');
 }
 
+if (
+  sitemapSrc.includes('listingSeoImageUrls') &&
+  sitemapSrc.includes('postSeoImageUrls') &&
+  sitemapSrc.includes('images')
+) {
+  ok('sitemap gắn image:loc lô + bài');
+} else {
+  bad('sitemap thiếu listingSeoImageUrls / postSeoImageUrls');
+}
+
+console.log('\nImage SEO helpers');
+const imageSeo = read('apps/web/src/features/public/listing-image-seo.ts');
+if (imageSeo.includes('uniqueAbsolutePublicImageUrls') && imageSeo.includes('isBrandOgFallback')) {
+  ok('listing-image-seo lọc URL + bỏ og-default');
+} else {
+  bad('listing-image-seo thiếu uniqueAbsolutePublicImageUrls');
+}
+
+const listingSeo = read('apps/web/src/features/public/listing-seo.ts');
+if (listingSeo.includes('ImageObject') && listingSeo.includes('listingImageAltText')) {
+  ok('JSON-LD lô dùng ImageObject + caption');
+} else {
+  bad('listing-seo thiếu ImageObject');
+}
+
+const gallerySrc = read('apps/web/src/features/public/product-detail-client.tsx');
+if (gallerySrc.includes('pd-gallery-slides') && gallerySrc.includes('alts')) {
+  ok('gallery SSR mọi URL + alt');
+} else {
+  bad('gallery chưa SSR đủ ảnh / alt');
+}
+
+function extractHtmlImageSrcs(html) {
+  const out = [];
+  const re = /<img\b[^>]*?\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const src = (match[1] ?? match[2] ?? '').trim();
+    if (src) out.push(src);
+  }
+  return out;
+}
+
+const extracted = extractHtmlImageSrcs(
+  '<p><img src="https://cdn.anhungland.com/a.jpg"><img alt="x" src=\'https://cdn.anhungland.com/b.png\'></p>',
+);
+if (
+  extracted[0] === 'https://cdn.anhungland.com/a.jpg' &&
+  extracted[1] === 'https://cdn.anhungland.com/b.png'
+) {
+  ok('extractHtmlImageSrcs lấy src cover + body');
+} else {
+  bad(`extractHtmlImageSrcs: ${JSON.stringify(extracted)}`);
+}
+
 console.log('\nSlug helper (xã / KĐT)');
 const xaSlug = toPublicSlug('Nam Trung', 60, 'xa');
 const kdtSlug = toPublicSlug('KĐT Tây Nam Sách', 60, 'khu');

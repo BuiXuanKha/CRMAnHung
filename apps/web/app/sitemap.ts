@@ -1,5 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { PublicPostCategory, listingCommuneHubPath, listingPlaceHubPath } from '@crmanhung/shared';
+import { listingSeoImageUrls, postSeoImageUrls } from '@/features/public/listing-image-seo';
 import { listCommuneHubs, listPlaceHubs } from '@/features/public/listing-hubs';
 import { listSitemapListings } from '@/features/public/published-listings';
 import { listSitemapPosts, postHref } from '@/features/public/published-posts';
@@ -20,12 +21,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     listCommuneHubs(),
     listPlaceHubs(),
   ]);
-  const products = listings.map((p) => ({
-    url: listingCanonicalUrl(p.slug),
-    ...(p.updatedAt ? { lastModified: new Date(p.updatedAt) } : {}),
-    changeFrequency: 'daily' as const,
-    priority: 0.85,
-  }));
+  const products = listings.map((p) => {
+    const images = listingSeoImageUrls(p);
+    return {
+      url: listingCanonicalUrl(p.slug),
+      ...(p.updatedAt ? { lastModified: new Date(p.updatedAt) } : {}),
+      changeFrequency: 'daily' as const,
+      priority: 0.85,
+      ...(images.length ? { images } : {}),
+    };
+  });
   const communePages = communeHubs.map((h) => ({
     url: `${PUBLIC_SITE_ORIGIN}${listingCommuneHubPath(h.slug)}`,
     ...(h.updatedAt ? { lastModified: new Date(h.updatedAt) } : {}),
@@ -40,12 +45,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'daily' as const,
       priority: 0.7,
     }));
-  const articles = posts.map((p) => ({
-    url: `${PUBLIC_SITE_ORIGIN}${postHref(p.category, p.slug)}`,
-    ...(p.updatedAt ? { lastModified: new Date(p.updatedAt) } : {}),
-    changeFrequency: 'weekly' as const,
-    priority: 0.65,
-  }));
+  const articles = posts.map((p) => {
+    const images = postSeoImageUrls(p);
+    return {
+      url: `${PUBLIC_SITE_ORIGIN}${postHref(p.category, p.slug)}`,
+      ...(p.updatedAt ? { lastModified: new Date(p.updatedAt) } : {}),
+      changeFrequency: 'weekly' as const,
+      priority: 0.65,
+      ...(images.length ? { images } : {}),
+    };
+  });
   const categoryPages = Object.values(PublicPostCategory).map((category) => ({
     url: `${PUBLIC_SITE_ORIGIN}/${category}`,
     changeFrequency: 'weekly' as const,

@@ -109,6 +109,25 @@
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+.pd-gallery-slides {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.pd-gallery-slides img {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.pd-gallery-slides img.is-active {
+  position: relative;
+  opacity: 1;
+  pointer-events: auto;
   animation: ph-rise 0.45s ease both;
 }
 

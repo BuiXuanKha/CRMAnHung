@@ -6,6 +6,7 @@ import {
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { communeHubDescription, communeHubHeadline, placeHubDescription, placeHubHeadline } from './listing-hubs';
+import { listingCoverAbsoluteUrl } from './listing-image-seo';
 import { listingHeadline, SAN_PHAM_LIST_PATH, SAN_PHAM_LIST_TITLE } from './listing-seo';
 import {
   listingCanonicalUrl,
@@ -77,13 +78,17 @@ export function communeHubItemListJsonLd(hub: PublicListingHubDetail) {
     '@type': 'ItemList',
     name: communeHubHeadline(hub),
     description: communeHubDescription(hub),
-    itemListElement: hub.items.map((listing, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      url: listingCanonicalUrl(listing.slug),
-      name: listingHeadline(listing),
-      description: listingSearchDescription(listing),
-    })),
+    itemListElement: hub.items.map((listing, index) => {
+      const cover = listingCoverAbsoluteUrl(listing);
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        url: listingCanonicalUrl(listing.slug),
+        name: listingHeadline(listing),
+        description: listingSearchDescription(listing),
+        ...(cover ? { image: cover } : {}),
+      };
+    }),
   };
 }
 
@@ -145,12 +150,16 @@ export function placeHubItemListJsonLd(hub: PublicListingHubDetail) {
     '@type': 'ItemList',
     name: placeHubHeadline(hub),
     description: placeHubDescription(hub),
-    itemListElement: hub.items.map((listing, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      url: listingCanonicalUrl(listing.slug),
-      name: listingHeadline(listing),
-      description: listingSearchDescription(listing),
-    })),
+    itemListElement: hub.items.map((listing, index) => {
+      const cover = listingCoverAbsoluteUrl(listing);
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        url: listingCanonicalUrl(listing.slug),
+        name: listingHeadline(listing),
+        description: listingSearchDescription(listing),
+        ...(cover ? { image: cover } : {}),
+      };
+    }),
   };
 }

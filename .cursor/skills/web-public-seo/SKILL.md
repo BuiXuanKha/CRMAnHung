@@ -19,6 +19,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 3. Nội dung chính SSR/RSC — không để bot chỉ thấy shell trống
 4. URL mới → cập nhật `sitemap.ts`; giữ `robots.ts` chặn khu CRM + `/login`
 5. **Lô `/mua-ban-nha-dat-huyen-nam-sach/[slug]`:** làm đúng công thức [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §7 (excerpt → meta; cover → OG; sitemap chỉ `isPublished`; JSON-LD không bịa giá). Hub địa bàn: domain `public-content` §17.
+6. **Ảnh:** `alt` mô tả (lô = tên + địa chỉ); sitemap có `images` (CDN, không `/og-default.png`); JSON-LD `ImageObject` — [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §10. Gallery SSR đủ URL. Không chặn Googlebot trên CDN.
 
 ## Cấm
 

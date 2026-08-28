@@ -504,9 +504,9 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 
 1. URL khách: `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — chỉ lô `isPublished`. `/mua-ban-nha-dat` + `/san-pham` 301 sang path mới.
 2. Title / H1 = tiêu đề public. Meta = `metaDescription` hoặc excerpt.
-3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`.
+3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`. Ảnh SEO: `alt` tên+địa chỉ; sitemap `image:loc` gallery; JSON-LD `ImageObject` — [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §10.
 4. JSON-LD `RealEstateListing`: giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`).
-5. Sitemap chỉ lô đang hiện. Gỡ web → 404, không còn trong sitemap.
+5. Sitemap chỉ lô đang hiện (+ URL ảnh CDN). Gỡ web → 404, không còn trong sitemap.
 6. Cấm trên HTML + JSON-LD + meta: giá map CRM, hoa hồng, tên/SĐT khách, ghi chú nội bộ.
 
 ---

@@ -7,7 +7,7 @@ import {
 import { LotDetailMetaPixel } from './lot-detail-meta-pixel';
 import type { PublicListingView, RelatedListingSection } from './published-listings';
 import { getProductBySlug } from './mock-data';
-import { listingPageH1 } from './listing-seo';
+import { listingHeadline, listingImageAltText, listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import { listingShareText } from './share';
 import { PUBLIC_LISTING_PATH, listingCanonicalUrl, listingHref } from './site';
@@ -96,7 +96,12 @@ export function ProductDetailView({
 
         <div className="pd-layout">
           <div className="pd-primary">
-            {images.length > 0 ? <ProductGallery title={h1} images={images} /> : null}
+            {images.length > 0 ? (
+              <ProductGallery
+                images={images}
+                alts={images.map((_, i) => listingImageAltText(listing, i, images.length))}
+              />
+            ) : null}
 
             {product?.postedLabel ? <p className="pd-posted">{product.postedLabel}</p> : null}
             <h1>{h1}</h1>
@@ -224,7 +229,7 @@ export function ProductDetailView({
                   <Link href={listingHref(p.slug)} className="ph-product-media">
                     {p.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.coverImageUrl} alt={p.title} loading="lazy" />
+                      <img src={p.coverImageUrl} alt={listingHeadline(p)} loading="lazy" />
                     ) : (
                       <span className="ph-product-media-empty">Chưa có ảnh</span>
                     )}

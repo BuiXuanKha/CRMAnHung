@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { PublicListingCard } from '@crmanhung/shared';
+import { listingHeadline } from './listing-seo';
 import { listingHref } from './site';
 
 type Props = {
@@ -18,7 +19,7 @@ export function ListingProductGrid({ listings }: Props) {
           <Link href={listingHref(p.slug)} className="ph-product-media">
             {p.coverImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={p.coverImageUrl} alt={p.title} loading="lazy" />
+              <img src={p.coverImageUrl} alt={listingHeadline(p)} loading="lazy" />
             ) : (
               <span className="ph-product-media-empty">Chưa có ảnh</span>
             )}
