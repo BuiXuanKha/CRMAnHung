@@ -5,7 +5,8 @@ export const LOT_GPT_RESPONSE_SCHEMA = {
   metaDescription: 'string — ~140–160 ký tự',
   slug: 'string — chữ thường, không dấu, gạch ngang',
   excerpt: 'string — đoạn tóm tắt ngắn cho list/teaser',
-  bodyHtml: 'string — HTML: p, h2, strong, ul/li; không emoji, không hashtag',
+  bodyHtml:
+    'string — HTML: p, h2, strong, ul/li; không emoji, không hashtag; không số điện thoại/thông tin liên hệ',
   facebookPost: 'string — bản Facebook ngắn, emoji vừa phải được phép',
 } as const;
 
@@ -55,6 +56,13 @@ QUY TẮC SEO
 - Không viết các câu quảng cáo cường điệu hoặc sáo rỗng.
 - Không kéo dài bài khi dữ liệu đầu vào không đủ.
 
+QUY TẮC THÔNG TIN LIÊN HỆ
+- Không đưa số điện thoại, hotline, địa chỉ văn phòng hoặc thông tin liên hệ vào bodyHtml.
+- Không tạo mục "Liên hệ", "Liên hệ xem đất", "Hotline" hoặc nội dung tương tự trong bodyHtml.
+- Nếu excerpt có số điện thoại hoặc thông tin liên hệ, chỉ coi đó là dữ liệu cũ và không đưa vào bodyHtml.
+- Phần thông tin liên hệ trên website sẽ do hệ thống An Hưng Land tự hiển thị riêng.
+- bodyHtml chỉ tập trung mô tả bất động sản, thông tin lô đất, vị trí và các đặc điểm đáng chú ý.
+
 NỘI DUNG
 Ưu tiên cấu trúc:
 - Giới thiệu ngắn về bất động sản.
@@ -62,9 +70,9 @@ NỘI DUNG
 - Vị trí và kết nối khu vực nếu có dữ liệu.
 - Đặc điểm đáng chú ý nếu có dữ liệu.
 - Giá bán.
-- Liên hệ xem đất.
 
 Không bắt buộc phải tạo tất cả các mục nếu dữ liệu không đủ.
+Không thêm mục liên hệ trong bodyHtml (xem QUY TẮC THÔNG TIN LIÊN HỆ).
 Chất lượng và tính chính xác quan trọng hơn độ dài.
 
 FACEBOOK
@@ -79,5 +87,5 @@ Chỉ trả một JSON hợp lệ (không markdown, không giải thích thêm) 
 - metaDescription (string)
 - slug (string)
 - excerpt (string)
-- bodyHtml (string — HTML đơn giản: p, h2, strong, ul, li)
+- bodyHtml (string — HTML đơn giản: p, h2, strong, ul, li; không thông tin liên hệ)
 - facebookPost (string)`;
