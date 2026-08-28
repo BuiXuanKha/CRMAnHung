@@ -82,6 +82,13 @@ export const lotGptRequestPayloadSchema = z.object({
 
 export type LotGptRequestPayload = z.infer<typeof lotGptRequestPayloadSchema>;
 
+/** Raw assistant text from POST /admin/public-web/lots/gpt-content */
+export const lotGptGenerateResponseSchema = z.object({
+  content: z.string(),
+});
+
+export type LotGptGenerateResponse = z.infer<typeof lotGptGenerateResponseSchema>;
+
 /**
  * Published listing as guests and search engines see it.
  * Never include CRM VND, commission, owner notes, or customer PII.

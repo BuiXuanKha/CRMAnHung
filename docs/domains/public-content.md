@@ -353,11 +353,11 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 | Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM |
 | NV | Tên nhân viên đang rao lô |
 | Web | **Đang hiện** `green` · **Chờ đăng** `gray` |
-| AI GPT | Nút **GPT** (`Sparkles`) → `LotGptContentDialog` — textarea JSON payload gửi GPT; **Gửi** disabled tới khi có API |
+| AI GPT | Nút **GPT** (`Sparkles`) → `LotGptContentDialog` — JSON request + Gửi GPT + phản hồi |
 
 ### 13.3a Modal Tạo content bằng AI GPT
 
-Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = **textarea** (JSON request GPT, sửa được trước khi gửi) + **Đóng** · **Gửi** (disabled — chờ endpoint + schema phản hồi).
+Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = **textarea** JSON request (sửa được) + **Gửi** → `POST /admin/public-web/lots/gpt-content` (ADMIN, Nest gọi OpenAI) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` trên server — không commit.
 
 **Request JSON (bắt buộc):**
 

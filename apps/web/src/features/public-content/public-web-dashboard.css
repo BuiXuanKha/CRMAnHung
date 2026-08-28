@@ -1005,6 +1005,18 @@
   outline-offset: 1px;
 }
 
+.pw-gpt-json-response {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.crm-dialog-error {
+  margin: 0 0 12px;
+  font-size: 0.875rem;
+  color: #b91c1c;
+  line-height: 1.4;
+}
+
 .pw-card-gpt {
   margin-top: 8px;
 }
