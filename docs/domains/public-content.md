@@ -357,7 +357,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 
 ### 13.3a Modal Tạo content bằng AI GPT
 
-Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = **textarea** JSON request (sửa được) + **Gửi** → `POST /admin/public-web/lots/gpt-content` (ADMIN, Nest gọi OpenAI) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` trên server — không commit.
+Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = **textarea** JSON request (sửa được) + **Gửi** → `POST /admin/public-web/lots/gpt-content` (ADMIN, Nest gọi OpenAI `gpt-5.6-sol`) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` + `OPENAI_MODEL` trên server — không commit.
 
 **Request JSON (bắt buộc):**
 
