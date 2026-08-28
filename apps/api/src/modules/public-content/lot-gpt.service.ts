@@ -46,7 +46,6 @@ export class LotGptService {
         },
         body: JSON.stringify({
           model,
-          temperature: 0.6,
           messages: [
             { role: 'system', content: LOT_GPT_SYSTEM_PROMPT },
             { role: 'user', content: userContent },
