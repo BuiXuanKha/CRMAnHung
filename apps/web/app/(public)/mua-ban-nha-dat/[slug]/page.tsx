@@ -11,7 +11,7 @@ import { ProductDetailView } from '@/features/public/product-detail';
 import {
   getPublicListingBySlug,
   getPublicLotSlugRedirect,
-  getRelatedListings,
+  getRelatedListingSection,
 } from '@/features/public/published-listings';
 
 type Props = { params: Promise<{ slug: string }> };
@@ -43,12 +43,12 @@ export default async function MuaBanNhaDatDetailPage({ params }: Props) {
     await redirectIfLegacySlug(slug);
     notFound();
   }
-  const related = await getRelatedListings(listing.slug);
+  const relatedSection = await getRelatedListingSection(listing);
   return (
     <>
       <JsonLd data={listingJsonLd(listing)} />
       <JsonLd data={listingBreadcrumbJsonLd(listing)} />
-      <ProductDetailView listing={listing} related={related} />
+      <ProductDetailView listing={listing} relatedSection={relatedSection} />
     </>
   );
 }
