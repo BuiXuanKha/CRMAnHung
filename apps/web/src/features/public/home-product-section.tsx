@@ -7,6 +7,7 @@ import type { PublicGuestLot } from '@/features/public-content/guest-listing';
 import { publicWebKeys } from '@/features/public-content/query';
 import { ANHUNG_BRAND } from './brand';
 import { ProductShareButton } from './product-detail-client';
+import { listingShareText } from './share';
 import { listingCanonicalUrl, listingHref, PUBLIC_LISTING_PATH } from './site';
 
 export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLot[] }) {
@@ -71,13 +72,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
                   <span>Xem chi tiết</span>
                   <ProductShareButton
                     url={listingCanonicalUrl(lot.slug)}
-                    text={[
-                      lot.title,
-                      [lot.priceLabel, lot.areaLabel, lot.location].filter(Boolean).join(' · '),
-                    ]
-                      .filter(Boolean)
-                      .join('\n')}
-                    className="ph-share"
+                    text={listingShareText(lot)}
                     label="Chia sẻ"
                   />
                 </div>

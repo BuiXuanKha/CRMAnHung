@@ -411,22 +411,6 @@
   font-size: 0.8rem;
 }
 
-.ph-share {
-  border: 1px solid var(--ph-line);
-  background: #fff;
-  color: var(--ph-ink);
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.ph-share:hover {
-  border-color: var(--ph-brand);
-  color: var(--ph-brand);
-}
-
 .ph-project-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));

@@ -7,7 +7,7 @@ import './share.css';
 export function ProductShareButton({
   url,
   text,
-  className = 'ph-btn ph-btn-ghost',
+  className = 'product-share-btn',
   label = 'Chia sẻ',
 }: {
   /** Absolute canonical listing URL (no query/hash). */

@@ -1,4 +1,4 @@
-import type { PublicWebStaffLotRow } from '@crmanhung/shared';
+import type { PublicCatalogListing, PublicWebStaffLotRow } from '@crmanhung/shared';
 import { lotPriceDisplay } from './display';
 
 /**
@@ -14,6 +14,8 @@ export type PublicGuestLot = {
   /** Public price label or «Liên hệ» — not CRM map price. */
   priceLabel: string;
   areaLabel: string | null;
+  excerpt?: string;
+  bodyHtml?: string;
 };
 
 /** Overlay-only card when CRM `/lodats` is not callable (build / unauthenticated SSR). */
@@ -33,6 +35,20 @@ export function overlayRowToGuestLot(row: {
     coverImageUrl: row.coverImageUrl,
     priceLabel: row.priceLabel?.trim() || 'Liên hệ',
     areaLabel: null,
+  };
+}
+
+export function catalogToGuestLot(row: PublicCatalogListing): PublicGuestLot {
+  return {
+    id: row.id,
+    slug: row.slug,
+    title: row.title,
+    location: row.location,
+    coverImageUrl: row.coverImageUrl,
+    priceLabel: row.priceLabel?.trim() || 'Liên hệ',
+    areaLabel: row.areaLabel,
+    excerpt: row.excerpt,
+    ...(row.bodyHtml != null ? { bodyHtml: row.bodyHtml } : {}),
   };
 }
 

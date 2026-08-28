@@ -25,7 +25,7 @@ import { ApiError, apiFetch } from '@/shared/api/client';
 import { isMockPublicWeb } from '@/shared/api/mode';
 import { listLodats } from '@/features/lodats/api';
 import { toPublicSlug } from './display';
-import { overlayRowToGuestLot, type PublicGuestLot } from './guest-listing';
+import { catalogToGuestLot, type PublicGuestLot } from './guest-listing';
 import {
   MOCK_PUBLIC_WEB_LOTS,
   MOCK_PUBLIC_WEB_POSTS,
@@ -150,16 +150,7 @@ export async function getPublicLotSlugRedirect(
 
 export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
   const items = await listPublishedCatalog();
-  return items.map((row) =>
-    overlayRowToGuestLot({
-      id: row.id,
-      slug: row.slug,
-      title: row.title,
-      location: row.location,
-      coverImageUrl: row.coverImageUrl,
-      priceLabel: row.priceLabel,
-    }),
-  );
+  return items.map(catalogToGuestLot);
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {

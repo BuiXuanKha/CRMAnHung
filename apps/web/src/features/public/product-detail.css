@@ -291,25 +291,6 @@
   color: var(--ph-brand);
 }
 
-.pd-icon-btn {
-  appearance: none;
-  border: 1px solid var(--ph-line);
-  background: #fff;
-  color: var(--ph-ink);
-  border-radius: 999px;
-  min-height: 40px;
-  padding: 0 14px;
-  font: inherit;
-  font-size: 0.88rem;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.pd-icon-btn:hover {
-  border-color: var(--ph-brand);
-  color: var(--ph-brand);
-}
-
 .pd-section {
   margin-top: 28px;
 }
@@ -681,12 +662,6 @@
 
   .pd-summary-specs:has(> :nth-child(2):last-child) {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .pd-icon-btn {
-    min-height: 38px;
-    padding: 0 12px;
-    font-size: 0.82rem;
   }
 
   .pd-summary-value {
