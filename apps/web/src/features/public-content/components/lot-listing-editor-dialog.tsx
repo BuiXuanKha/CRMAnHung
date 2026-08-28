@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { ImageOff, PenLine } from 'lucide-react';
 import {
   listingBodyToExcerpt,
@@ -57,12 +57,14 @@ export function LotListingEditorDialog({
   const [slugDraft, setSlugDraft] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
+  const [richEditorReady, setRichEditorReady] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const lotOpenKeyRef = useRef<string | null>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!lot) {
       lotOpenKeyRef.current = null;
+      setRichEditorReady(false);
       setTitle('');
       setLocation('');
       setPriceMode('CONTACT');
@@ -86,6 +88,7 @@ export function LotListingEditorDialog({
       );
       setMetaDescription(gptPrefill.metaDescription.trim() || lot.metaDescription?.trim() || '');
       setParseError(null);
+      setRichEditorReady(true);
     } else {
       const openKey = lot.lodatId;
       if (lotOpenKeyRef.current !== openKey) {
@@ -99,11 +102,15 @@ export function LotListingEditorDialog({
         setMetaDescription(lot.metaDescription?.trim() || '');
         setParseError(null);
       }
+      setRichEditorReady(true);
     }
+  }, [lot, gptPrefill, gptApplyId]);
 
+  useLayoutEffect(() => {
+    if (!lot) return;
     const t = window.setTimeout(() => titleRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
-  }, [lot, gptPrefill, gptApplyId]);
+  }, [lot, gptApplyId]);
 
   function parsedInput(requireBody: boolean): UpdatePublicListingDraftInput | null {
     const slug = slugDraft.trim();
@@ -280,19 +287,23 @@ export function LotListingEditorDialog({
                 <span className="crm-field-meta">(bắt buộc khi đăng web · ảnh từ lô hoặc upload)</span>
               </span>
             </span>
-            <PostRichEditor
-              key={
-                gptPrefill
-                  ? `gpt-${lot.lodatId}-${gptApplyId}`
-                  : `lot-${lot.lodatId}`
-              }
-              value={bodyHtml}
-              disabled={busy}
-              onChange={setBodyHtml}
-              placeholder="Mô tả lô cho khách… Có thể đậm/nghiêng, tiêu đề phụ, danh sách và chèn ảnh."
-              ariaLabel="Mô tả công khai lô đất"
-              toolbarAriaLabel="Định dạng mô tả bài đăng"
-            />
+            {richEditorReady ? (
+              <PostRichEditor
+                key={
+                  gptPrefill
+                    ? `gpt-${lot.lodatId}-${gptApplyId}-${bodyHtml.length}`
+                    : `lot-${lot.lodatId}`
+                }
+                value={bodyHtml}
+                disabled={busy}
+                onChange={setBodyHtml}
+                placeholder="Mô tả lô cho khách… Có thể đậm/nghiêng, tiêu đề phụ, danh sách và chèn ảnh."
+                ariaLabel="Mô tả công khai lô đất"
+                toolbarAriaLabel="Định dạng mô tả bài đăng"
+              />
+            ) : (
+              <p className="crm-form-hint">Đang tải mô tả từ GPT…</p>
+            )}
             {excerptPreview ? (
               <p className="crm-form-hint">
                 Tóm tắt SEO (~{excerptPreview.length} ký tự): {excerptPreview.slice(0, 120)}
