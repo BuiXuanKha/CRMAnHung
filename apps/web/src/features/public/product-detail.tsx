@@ -58,6 +58,9 @@ export function ProductDetailView({
   const brandInitial = ANHUNG_BRAND.shortName.slice(0, 1).toUpperCase();
   const shareUrl = listingCanonicalUrl(listing.slug);
   const shareText = listingShareText(listing);
+  const hasSummaryStats = Boolean(
+    area || listing.frontageLabel || listing.directionLabel || product?.legalLabel,
+  );
 
   return (
     <div className="ph pd">
@@ -115,49 +118,53 @@ export function ProductDetailView({
             ) : null}
 
             <div className="pd-summary" role="group" aria-label="Thông tin chính">
-              <div className="pd-summary-item">
-                <span className="pd-summary-label">Khoảng giá</span>
-                <strong className="pd-summary-value pd-summary-price">{price}</strong>
-                {listing.kindLabel ? (
-                  <span className="pd-summary-sub">{listing.kindLabel}</span>
-                ) : null}
+              <div className="pd-summary-head">
+                <div className="pd-summary-item pd-summary-item--price">
+                  <span className="pd-summary-label">Khoảng giá</span>
+                  <div className="pd-summary-price-line">
+                    <strong className="pd-summary-value pd-summary-price">{price}</strong>
+                    {listing.kindLabel ? (
+                      <span className="pd-summary-kind">{listing.kindLabel}</span>
+                    ) : null}
+                  </div>
+                </div>
+                <div className="pd-summary-actions">
+                  <ProductShareButton
+                    url={shareUrl}
+                    text={shareText}
+                    className="pd-icon-btn"
+                    label="Chia sẻ"
+                  />
+                </div>
               </div>
-              {area ? (
-                <div className="pd-summary-item">
-                  <span className="pd-summary-label">Diện tích</span>
-                  <strong className="pd-summary-value">{area}</strong>
+              {hasSummaryStats ? (
+                <div className="pd-summary-grid">
+                  {area ? (
+                    <div className="pd-summary-cell">
+                      <span className="pd-summary-label">Diện tích</span>
+                      <strong className="pd-summary-value">{area}</strong>
+                    </div>
+                  ) : null}
                   {listing.frontageLabel ? (
-                    <span className="pd-summary-sub">Mặt tiền {listing.frontageLabel}</span>
+                    <div className="pd-summary-cell">
+                      <span className="pd-summary-label">Mặt tiền</span>
+                      <strong className="pd-summary-value">{listing.frontageLabel}</strong>
+                    </div>
                   ) : null}
-                </div>
-              ) : listing.frontageLabel ? (
-                <div className="pd-summary-item">
-                  <span className="pd-summary-label">Mặt tiền</span>
-                  <strong className="pd-summary-value">{listing.frontageLabel}</strong>
-                </div>
-              ) : null}
-              {listing.directionLabel ? (
-                <div className="pd-summary-item">
-                  <span className="pd-summary-label">Hướng</span>
-                  <strong className="pd-summary-value">{listing.directionLabel}</strong>
+                  {listing.directionLabel ? (
+                    <div className="pd-summary-cell">
+                      <span className="pd-summary-label">Hướng</span>
+                      <strong className="pd-summary-value">{listing.directionLabel}</strong>
+                    </div>
+                  ) : null}
                   {product?.legalLabel ? (
-                    <span className="pd-summary-sub">{product.legalLabel}</span>
+                    <div className="pd-summary-cell">
+                      <span className="pd-summary-label">Pháp lý</span>
+                      <strong className="pd-summary-value">{product.legalLabel}</strong>
+                    </div>
                   ) : null}
                 </div>
-              ) : product?.legalLabel ? (
-                <div className="pd-summary-item">
-                  <span className="pd-summary-label">Pháp lý</span>
-                  <strong className="pd-summary-value">{product.legalLabel}</strong>
-                </div>
               ) : null}
-              <div className="pd-summary-actions">
-                <ProductShareButton
-                  url={shareUrl}
-                  text={shareText}
-                  className="pd-icon-btn"
-                  label="Chia sẻ"
-                />
-              </div>
             </div>
 
             {!showHtmlBody && listing.excerpt.trim() ? (
