@@ -9,7 +9,10 @@ import {
   listPublishedCatalog,
 } from '@/features/public-content/api';
 import { isMockPublicWeb } from '@/shared/api/mode';
+import { pickRelatedListingSection, type RelatedListingSection } from './related-listings';
 import { PUBLIC_PRODUCTS, type PublicProduct } from './mock-data';
+
+export type { RelatedListingSection };
 
 export { getPublicLotSlugRedirect };
 
@@ -95,7 +98,9 @@ export async function getPublicListingBySlug(slug: string): Promise<PublicListin
   return product ? productToListingView(product) : null;
 }
 
-export async function getRelatedListings(slug: string, limit = 3): Promise<PublicListingView[]> {
-  const all = await listPublicCatalog();
-  return all.filter((row) => row.slug !== slug).slice(0, limit);
+export async function getRelatedListingSection(
+  listing: PublicListingView,
+): Promise<RelatedListingSection | null> {
+  const catalog = await listPublicCatalog();
+  return pickRelatedListingSection(listing, catalog);
 }

@@ -4,7 +4,7 @@ import {
   ProductGallery,
   ProductShareButton,
 } from './product-detail-client';
-import type { PublicListingView } from './published-listings';
+import type { PublicListingView, RelatedListingSection } from './published-listings';
 import { getProductBySlug } from './mock-data';
 import { listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
@@ -27,10 +27,10 @@ function zaloLink(telDigits: string): string {
 
 export function ProductDetailView({
   listing,
-  related,
+  relatedSection,
 }: {
   listing: PublicListingView;
-  related: PublicListingView[];
+  relatedSection: RelatedListingSection | null;
 }) {
   const product = getProductBySlug(listing.slug);
   const images = listingImages(listing);
@@ -208,16 +208,16 @@ export function ProductDetailView({
           </aside>
         </div>
 
-        {related.length > 0 ? (
+        {relatedSection && relatedSection.items.length > 0 ? (
           <section className="pd-related" aria-labelledby="pd-related-title">
             <div className="ph-section-head">
-              <h2 id="pd-related-title">Bất động sản nổi bật</h2>
+              <h2 id="pd-related-title">{relatedSection.title}</h2>
               <Link href={PUBLIC_LISTING_PATH} className="ph-more">
                 Xem tất cả →
               </Link>
             </div>
             <div className="ph-product-grid pd-related-grid">
-              {related.map((p) => (
+              {relatedSection.items.map((p) => (
                 <article key={p.slug} className="ph-product">
                   <Link href={listingHref(p.slug)} className="ph-product-media">
                     {p.coverImageUrl ? (
