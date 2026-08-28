@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { PublicPostCategory, listingCommuneHubPath } from '@crmanhung/shared';
-import { listCommuneHubs } from '@/features/public/listing-hubs';
+import { PublicPostCategory, listingCommuneHubPath, listingPlaceHubPath } from '@crmanhung/shared';
+import { listCommuneHubs, listPlaceHubs } from '@/features/public/listing-hubs';
 import { listSitemapListings } from '@/features/public/published-listings';
 import { listSitemapPosts, postHref } from '@/features/public/published-posts';
 import {
@@ -14,10 +14,11 @@ export const revalidate = false;
 
 /** URL public ổn định + lô/bài đã xuất bản. Không đưa nháp / đã gỡ. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const [listings, posts, communeHubs] = await Promise.all([
+  const [listings, posts, communeHubs, placeHubs] = await Promise.all([
     listSitemapListings(),
     listSitemapPosts(),
     listCommuneHubs(),
+    listPlaceHubs(),
   ]);
   const products = listings.map((p) => ({
     url: listingCanonicalUrl(p.slug),
@@ -31,6 +32,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     changeFrequency: 'daily' as const,
     priority: 0.75,
   }));
+  const placePages = placeHubs
+    .filter((h) => h.communeSlug?.trim())
+    .map((h) => ({
+      url: `${PUBLIC_SITE_ORIGIN}${listingPlaceHubPath(h.communeSlug!, h.slug)}`,
+      ...(h.updatedAt ? { lastModified: new Date(h.updatedAt) } : {}),
+      changeFrequency: 'daily' as const,
+      priority: 0.7,
+    }));
   const articles = posts.map((p) => ({
     url: `${PUBLIC_SITE_ORIGIN}${postHref(p.category, p.slug)}`,
     ...(p.updatedAt ? { lastModified: new Date(p.updatedAt) } : {}),
@@ -56,6 +65,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...products,
     ...communePages,
+    ...placePages,
     ...categoryPages,
     ...articles,
   ];

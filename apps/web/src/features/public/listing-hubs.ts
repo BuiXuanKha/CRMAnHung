@@ -11,22 +11,19 @@ import { listPublicCatalog, type PublicListingView } from './published-listings'
 export function withHubFieldsFromLocation<T extends PublicListingCard | PublicListingView>(
   row: T,
 ): T {
-  if (row.communeSlug && row.communeLabel) return row;
   const parts = parseLotGptLocation(row.location ?? '');
   const communeLabel = parts.commune.trim();
   const placeLabel = parts.village.trim();
-  if (!communeLabel) return row;
-  return {
-    ...row,
-    communeSlug: row.communeSlug ?? toPublicSlug(communeLabel, 60, 'xa'),
-    communeLabel: row.communeLabel ?? communeLabel,
-    ...(placeLabel
-      ? {
-          placeSlug: row.placeSlug ?? toPublicSlug(placeLabel, 60, 'khu'),
-          placeLabel: row.placeLabel ?? placeLabel,
-        }
-      : {}),
-  };
+  const next = { ...row };
+  if (communeLabel) {
+    if (!next.communeSlug) next.communeSlug = toPublicSlug(communeLabel, 60, 'xa');
+    if (!next.communeLabel) next.communeLabel = communeLabel;
+  }
+  if (placeLabel) {
+    if (!next.placeSlug) next.placeSlug = toPublicSlug(placeLabel, 60, 'khu');
+    if (!next.placeLabel) next.placeLabel = placeLabel;
+  }
+  return next as T;
 }
 
 function sortListings(rows: PublicListingView[]): PublicListingView[] {
@@ -124,5 +121,118 @@ export function communeHubDescription(hub: PublicListingHub): string {
   const where = hub.districtLabel?.trim()
     ? `${hub.label}, ${hub.districtLabel.trim()}`
     : hub.label;
+  return `${n} lô đang giới thiệu tại ${where} trên An Hưng Land. Xem và chia sẻ không cần đăng nhập.`;
+}
+
+type PlaceHubKey = `${string}/${string}`;
+
+function placeHubMapKey(communeSlug: string, placeSlug: string): PlaceHubKey {
+  return `${communeSlug}/${placeSlug}`;
+}
+
+/** Place hubs (cấp 4 — thôn/KĐT/dự án trong xã). Optional filter by commune slug. */
+export async function listPlaceHubs(communeSlug?: string): Promise<PublicListingHub[]> {
+  const filter = communeSlug?.trim();
+  const catalog = (await listPublicCatalog()).map(withHubFieldsFromLocation);
+  const byKey = new Map<
+    PlaceHubKey,
+    PublicListingHub & { district: string; province: string; updatedAt?: string }
+  >();
+
+  for (const row of catalog) {
+    const cSlug = row.communeSlug?.trim();
+    const cLabel = row.communeLabel?.trim();
+    const pSlug = row.placeSlug?.trim();
+    const pLabel = row.placeLabel?.trim();
+    if (!cSlug || !cLabel || !pSlug || !pLabel) continue;
+    if (filter && cSlug !== filter) continue;
+    const parts = parseLotGptLocation(row.location ?? '');
+    const key = placeHubMapKey(cSlug, pSlug);
+    const prev = byKey.get(key);
+    const updatedAt = row.updatedAt;
+    if (prev) {
+      prev.listingCount += 1;
+      if (updatedAt && (!prev.updatedAt || updatedAt > prev.updatedAt)) {
+        prev.updatedAt = updatedAt;
+      }
+    } else {
+      byKey.set(key, {
+        kind: 'place',
+        slug: pSlug,
+        label: pLabel,
+        communeSlug: cSlug,
+        communeLabel: cLabel,
+        listingCount: 1,
+        district: parts.district.trim(),
+        province: parts.province.trim(),
+        ...(updatedAt ? { updatedAt } : {}),
+      });
+    }
+  }
+
+  return [...byKey.values()]
+    .filter((h) => h.listingCount > 0)
+    .map(({ district, province, updatedAt, ...hub }) => ({
+      ...hub,
+      ...(district ? { districtLabel: district } : {}),
+      ...(province ? { provinceLabel: province } : {}),
+      ...(updatedAt ? { updatedAt } : {}),
+    }))
+    .sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+}
+
+export async function getPlaceHubDetail(
+  communeSlug: string,
+  placeSlug: string,
+): Promise<PublicListingHubDetail | null> {
+  const cSlug = communeSlug.trim();
+  const pSlug = placeSlug.trim();
+  if (!cSlug || !pSlug) return null;
+
+  const catalog = (await listPublicCatalog()).map(withHubFieldsFromLocation);
+  const items = sortListings(
+    catalog.filter((row) => row.communeSlug === cSlug && row.placeSlug === pSlug),
+  );
+  if (items.length === 0) return null;
+
+  const sample = items[0]!;
+  const parts = parseLotGptLocation(sample.location ?? '');
+  const label = sample.placeLabel?.trim() || parts.village.trim() || pSlug;
+  const communeLabel = sample.communeLabel?.trim() || parts.commune.trim() || cSlug;
+  const updatedAt = items
+    .map((r) => r.updatedAt)
+    .filter(Boolean)
+    .sort()
+    .at(-1);
+
+  return {
+    kind: 'place',
+    slug: pSlug,
+    label,
+    communeSlug: cSlug,
+    communeLabel,
+    listingCount: items.length,
+    ...(parts.district.trim() ? { districtLabel: parts.district.trim() } : {}),
+    ...(parts.province.trim() ? { provinceLabel: parts.province.trim() } : {}),
+    ...(updatedAt ? { updatedAt } : {}),
+    items,
+  };
+}
+
+export function placeHubHeadline(hub: PublicListingHub): string {
+  const place = hub.label.trim();
+  const commune = hub.communeLabel?.trim();
+  if (commune) return `Lô đất ${place}, ${commune}`;
+  return `Lô đất ${place}`;
+}
+
+export function placeHubDescription(hub: PublicListingHub): string {
+  const n = hub.listingCount;
+  const where =
+    hub.communeLabel?.trim() && hub.districtLabel?.trim()
+      ? `${hub.label}, ${hub.communeLabel.trim()}, ${hub.districtLabel.trim()}`
+      : hub.communeLabel?.trim()
+        ? `${hub.label}, ${hub.communeLabel.trim()}`
+        : hub.label;
   return `${n} lô đang giới thiệu tại ${where} trên An Hưng Land. Xem và chia sẻ không cần đăng nhập.`;
 }

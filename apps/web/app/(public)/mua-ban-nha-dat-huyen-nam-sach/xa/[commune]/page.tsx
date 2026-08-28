@@ -12,9 +12,10 @@ import {
   communeHubDescription,
   communeHubHeadline,
   getCommuneHubDetail,
+  listPlaceHubs,
 } from '@/features/public/listing-hubs';
 import { ListingProductGrid } from '@/features/public/listing-product-grid';
-import { PUBLIC_LISTING_PATH } from '@/features/public/site';
+import { listingPlaceHubPath, PUBLIC_LISTING_PATH } from '@/features/public/site';
 import '@/features/public/public-home.css';
 
 type Props = { params: Promise<{ commune: string }> };
@@ -33,6 +34,7 @@ export default async function CommuneListingHubPage({ params }: Props) {
   const hub = await getCommuneHubDetail(commune);
   if (!hub) notFound();
 
+  const placeHubs = await listPlaceHubs(commune);
   const headline = communeHubHeadline(hub);
 
   return (
@@ -49,6 +51,21 @@ export default async function CommuneListingHubPage({ params }: Props) {
         </nav>
         <h1>{headline}</h1>
         <p>{communeHubDescription(hub)}</p>
+        {placeHubs.length > 0 ? (
+          <nav className="ph-hub-places" aria-label="Khu vực trong xã">
+            <p className="ph-hub-places-label">Theo thôn / KĐT / dự án:</p>
+            <ul>
+              {placeHubs.map((place) => (
+                <li key={place.slug}>
+                  <Link href={listingPlaceHubPath(commune, place.slug)}>
+                    {place.label}
+                    <span className="ph-hub-places-count"> ({place.listingCount})</span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+        ) : null}
         <ListingProductGrid listings={hub.items} />
       </div>
     </div>

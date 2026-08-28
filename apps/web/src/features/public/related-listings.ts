@@ -2,7 +2,7 @@ import { toPublicSlug } from '@crmanhung/shared';
 import { parseLotGptLocation } from '@/features/public-content/lot-gpt-context';
 import { withHubFieldsFromLocation } from './listing-hubs';
 import type { PublicListingView } from './published-listings';
-import { listingCommuneHubPath } from './site';
+import { listingCommuneHubPath, listingPlaceHubPath } from './site';
 
 export type RelatedListingSection = {
   title: string;
@@ -93,13 +93,20 @@ export function pickRelatedListingSection(
   );
   if (sameArea.length === 0) return null;
 
+  const sample = sameArea[0]!;
+  const enrichedSample = withHubFieldsFromLocation(sample);
   const communeSlug =
-    self.communeSlug || (commune ? toPublicSlug(commune, 60, 'xa') : null);
+    enrichedSample.communeSlug ||
+    self.communeSlug ||
+    (commune ? toPublicSlug(commune, 60, 'xa') : null);
+  const placeSlug = enrichedSample.placeSlug || toPublicSlug(areaLabel, 60, 'khu');
 
-  // Place hub ships in Slice D — until then link commune hub when known.
   return {
     title: `Lô đất tại ${areaLabel}`,
     items: sortRelatedListings(sameArea).slice(0, limit),
-    hubHref: communeSlug ? listingCommuneHubPath(communeSlug) : null,
+    hubHref:
+      communeSlug != null
+        ? listingPlaceHubPath(communeSlug, placeSlug)
+        : null,
   };
 }

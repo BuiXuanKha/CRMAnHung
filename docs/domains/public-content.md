@@ -702,10 +702,12 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 #### Slice D — Hub cấp 4 trong xã
 
-- [ ] Route `.../xa/[slug-xa]/[slug-c4]/page.tsx`
-- [ ] API gom theo `detail` trong ward; sitemap hub cấp 4 có lô
-- [ ] Link related «tại KĐT/thôn» → hub cấp 4
-- [ ] Breadcrumb: Trang chủ → Nhà đất → Xã → Cấp 4
+- [x] Route `.../xa/[commune]/[place]/page.tsx`
+- [x] Gom hub theo `detail` trong xã (catalog location → placeSlug); sitemap hub cấp 4 có lô
+- [x] Link related «tại KĐT/thôn» → hub cấp 4
+- [x] Breadcrumb: Trang chủ → Nhà đất → Xã → Cấp 4
+- [x] Trang hub xã: danh sách link thôn/KĐT trong xã (§17.4.1)
+- [ ] Guest API thật theo `wardId` + `address.detail` (thay parse location)
 
 #### Slice E — QA staging SEO
 
