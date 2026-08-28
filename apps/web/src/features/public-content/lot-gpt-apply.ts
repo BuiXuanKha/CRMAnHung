@@ -1,4 +1,9 @@
-import { lotGptContentResultSchema, type LotGptContentResult } from '@crmanhung/shared';
+import {
+  lotGptContentResultSchema,
+  type LotGptContentResult,
+  type PublicWebStaffLotRow,
+} from '@crmanhung/shared';
+import { listingCanonicalUrl } from '@/features/public/site';
 
 /** Parse GPT response JSON (tolerates markdown code fences). */
 export function parseLotGptContentResult(raw: string): LotGptContentResult | null {
@@ -30,4 +35,15 @@ export function lotGptToEditorPrefill(result: LotGptContentResult): LotGptEditor
     slug: result.slug.trim(),
     metaDescription: result.metaDescription.trim(),
   };
+}
+
+/** Slug for share URL — GPT output first, then existing lot overlay. */
+export function lotGptShareSlug(result: LotGptContentResult, lot: PublicWebStaffLotRow): string {
+  return result.slug.trim() || lot.slug?.trim() || '';
+}
+
+/** Absolute listing URL for Facebook paste when slug is known. */
+export function lotGptSharePageUrl(result: LotGptContentResult, lot: PublicWebStaffLotRow): string | null {
+  const slug = lotGptShareSlug(result, lot);
+  return slug ? listingCanonicalUrl(slug) : null;
 }

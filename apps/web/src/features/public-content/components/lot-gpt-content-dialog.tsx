@@ -1,16 +1,21 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sparkles, PenLine } from 'lucide-react';
+import { Sparkles, PenLine, Share2 } from 'lucide-react';
 import {
   lotGptRequestPayloadSchema,
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
 import { Icon } from '@/shared/ui/icon';
+import { copySharePayload, openFacebookForPaste, shareToFacebook } from '@/features/public/share';
 import { generateLotGptContent } from '../api';
 import { formatLotGptRequestJson } from '../lot-gpt-context';
-import { lotGptToEditorPrefill, parseLotGptContentResult } from '../lot-gpt-apply';
+import {
+  lotGptSharePageUrl,
+  lotGptToEditorPrefill,
+  parseLotGptContentResult,
+} from '../lot-gpt-apply';
 import type { LotGptEditorPrefill } from '../lot-gpt-apply';
 import '@/shared/ui/dialog.css';
 
@@ -30,6 +35,7 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
   const [responseText, setResponseText] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [shareStatus, setShareStatus] = useState<'idle' | 'shared' | 'copied'>('idle');
 
   const canSend = extraDescription.trim().length > 0 && !busy;
 
@@ -39,12 +45,14 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
       setJsonText('');
       setResponseText('');
       setParseError(null);
+      setShareStatus('idle');
       return;
     }
     setExtraDescription('');
     setJsonText(formatLotGptRequestJson(lot));
     setResponseText('');
     setParseError(null);
+    setShareStatus('idle');
   }, [lot]);
 
   function onExtraDescriptionChange(value: string) {
@@ -54,10 +62,42 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
   }
 
   const gptResult = responseText ? parseLotGptContentResult(responseText) : null;
+  const facebookPost = gptResult?.facebookPost.trim() ?? '';
 
   function handleApplyToEditor() {
     if (!gptResult || !onApplyToEditor) return;
     onApplyToEditor(lotGptToEditorPrefill(gptResult));
+  }
+
+  async function handleShareFacebook() {
+    if (!gptResult || !lot || !facebookPost) return;
+    const pageUrl = lotGptSharePageUrl(gptResult, lot);
+    try {
+      if (pageUrl) {
+        await shareToFacebook(pageUrl, facebookPost);
+        setShareStatus('shared');
+        onFlash?.('Đã copy — dán vào Facebook');
+      } else {
+        await navigator.clipboard.writeText(facebookPost);
+        openFacebookForPaste(facebookPost);
+        setShareStatus('copied');
+        onFlash?.('Đã copy bài Facebook (chưa có slug — chưa kèm link)');
+      }
+      window.setTimeout(() => setShareStatus('idle'), 3200);
+    } catch {
+      try {
+        if (pageUrl) {
+          await copySharePayload(pageUrl, facebookPost);
+        } else {
+          await navigator.clipboard.writeText(facebookPost);
+        }
+        setShareStatus('copied');
+        onFlash?.('Đã copy nội dung — mở Facebook và dán');
+        window.setTimeout(() => setShareStatus('idle'), 3200);
+      } catch {
+        setParseError('Không copy được — thử chọn và copy thủ công.');
+      }
+    }
   }
 
   async function handleSend() {
@@ -158,6 +198,22 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
                 value={responseText}
                 aria-label="Phản hồi GPT"
               />
+              {facebookPost ? (
+                <>
+                  <label className="pw-gpt-json-label" htmlFor="pw-gpt-facebook">
+                    Bài Facebook
+                  </label>
+                  <textarea
+                    id="pw-gpt-facebook"
+                    className="pw-gpt-json pw-gpt-json-facebook"
+                    spellCheck={false}
+                    rows={6}
+                    readOnly
+                    value={facebookPost}
+                    aria-label="Bài Facebook từ GPT"
+                  />
+                </>
+              ) : null}
             </>
           ) : null}
           {parseError ? <p className="crm-dialog-error">{parseError}</p> : null}
@@ -174,6 +230,22 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
               >
                 <Icon icon={PenLine} size="sm" />
                 Dùng cho bài đăng
+              </button>
+            ) : null}
+            {facebookPost ? (
+              <button
+                type="button"
+                className="crm-btn"
+                disabled={busy}
+                title="Copy bài Facebook + link lô và mở Facebook để dán"
+                onClick={() => void handleShareFacebook()}
+              >
+                <Icon icon={Share2} size="sm" />
+                {shareStatus === 'shared'
+                  ? 'Đã copy — dán vào FB'
+                  : shareStatus === 'copied'
+                    ? 'Đã copy nội dung'
+                    : 'Chia sẻ Facebook'}
               </button>
             ) : null}
             <button
