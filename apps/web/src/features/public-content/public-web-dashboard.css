@@ -603,13 +603,6 @@
   margin: 0.35rem 0;
 }
 
-.pw-preview-contact {
-  margin: 0;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #0f172a;
-}
-
 .pw-preview-actions {
   display: flex;
   flex-direction: column;
