@@ -711,9 +711,29 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 #### Slice E — QA staging SEO
 
-- [ ] Hub có lô index + sitemap; gỡ hết lô → 404 + mất sitemap
-- [ ] Không trùng canonical với `/du-an` (bài)
-- [ ] CRM vẫn noindex; robots allow path catalog mới
+- [x] Script `pnpm qa:public-hubs` — path, robots, CRM noindex, redirects, sitemap, routes
+- [x] Hub canonical dưới `/mua-ban-nha-dat-huyen-nam-sach/xa/…` — không trùng `/du-an`
+- [x] Hub 0 lô / slug sai → `notFound()` + `unpublishedHubMetadata` noindex
+- [x] Sitemap chỉ hub có lô (`listCommuneHubs` / `listPlaceHubs` filter count > 0)
+- [x] `robots.ts` allow `/`; disallow CRM — không chặn catalog mới
+- [ ] Smoke live `anhungland.com` sau merge PR (301, hub HTML, sitemap.xml)
+
+**Chạy local trước deploy:**
+
+```bash
+pnpm qa:public-hubs
+pnpm --filter @crmanhung/web build
+```
+
+**Sau deploy — kiểm tra tay:**
+
+| Kiểm tra | Kỳ vọng |
+|----------|---------|
+| `/mua-ban-nha-dat` | 301 → `/mua-ban-nha-dat-huyen-nam-sach` |
+| Hub xã có lô | 200, `robots index`, canonical đúng, trong sitemap |
+| Hub slug sai | 404, noindex |
+| `/du-an` | Bài CMS — canonical `/{category}/{slug}`, khác hub lô |
+| `/dashboard`, `/lo-dat` | noindex; không trong sitemap |
 
 ### 17.4 UI hub (Ready for mock)
 
