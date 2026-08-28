@@ -2,7 +2,6 @@
 
 import { ExternalLink, Globe, ImageOff } from 'lucide-react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
-import { ANHUNG_BRAND } from '@/features/public/brand';
 import { listingHref } from '@/features/public/site';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
@@ -63,10 +62,6 @@ export function LotListingPreview({ lot, busy, onPublish }: Props) {
           ) : (
             <p className="pw-preview-excerpt">{lot.excerpt}</p>
           )}
-          <p className="pw-preview-contact">
-            Hotline {ANHUNG_BRAND.hotlineDisplay} · Zalo {ANHUNG_BRAND.hotlineAltDisplay}
-          </p>
-          <p className="crm-form-hint">Không hiện tên khách, SĐT khách, NV hay hoa hồng.</p>
           <div className="pw-preview-actions">
             {lot.isPublished ? (
               <a
