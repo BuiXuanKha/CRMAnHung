@@ -502,7 +502,7 @@ Slice API Postgres + upload R2 thật = sau khi mock UI ổn.
 
 Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn bài dashboard **không** đổi layout — chỉ có thể thêm `metaDescription` (tuỳ chọn).
 
-1. URL khách: `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — chỉ lô `isPublished`. `/mua-ban-nha-dat` + `/san-pham` 301 sang path mới.
+1. URL khách: `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — chỉ lô `isPublished`.
 2. Title / H1 = tiêu đề public. Meta = `metaDescription` hoặc excerpt.
 3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`.
 4. JSON-LD `RealEstateListing`: giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`).
