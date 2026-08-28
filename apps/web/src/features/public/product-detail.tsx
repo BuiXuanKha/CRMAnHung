@@ -4,6 +4,7 @@ import {
   ProductGallery,
   ProductShareButton,
 } from './product-detail-client';
+import { LotDetailMetaPixel } from './lot-detail-meta-pixel';
 import type { PublicListingView, RelatedListingSection } from './published-listings';
 import { getProductBySlug } from './mock-data';
 import { listingPageH1 } from './listing-seo';
@@ -52,6 +53,7 @@ export function ProductDetailView({
 
   return (
     <div className="ph pd">
+      <LotDetailMetaPixel slug={listing.slug} title={h1} kindLabel={listing.kindLabel} />
       <header className="ph-header is-solid">
         <div className="ph-header-inner">
           <Link href="/" className="ph-logo" aria-label={ANHUNG_BRAND.name}>

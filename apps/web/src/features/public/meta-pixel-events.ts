@@ -1,4 +1,3 @@
-import { getProductBySlug } from './mock-data';
 import { PUBLIC_LISTING_PATH } from './site';
 
 const LISTING_DETAIL = new RegExp(`^${PUBLIC_LISTING_PATH}/([^/]+)/?$`);
@@ -20,25 +19,29 @@ export function parseSanPhamPath(
   return { kind: 'detail', slug: match[1] };
 }
 
-/** ViewContent (chi tiết) / ViewProductList (danh sách mua bán nhà đất). */
+export function trackListingViewContent(input: {
+  slug: string;
+  title: string;
+  kindLabel?: string | null;
+}): void {
+  if (typeof window === 'undefined' || typeof window.fbq !== 'function') return;
+  const name = input.title.trim() || input.slug;
+  window.fbq('track', 'ViewContent', {
+    content_type: 'product',
+    content_ids: [input.slug],
+    content_name: name,
+    content_category: input.kindLabel?.trim() || 'mua-ban-nha-dat',
+  });
+}
+
+/** ViewProductList on catalog; ViewContent is fired from LotDetailMetaPixel with SSR data. */
 export function trackSanPhamPixel(pathname: string): void {
   if (typeof window === 'undefined' || typeof window.fbq !== 'function') return;
   const parsed = parseSanPhamPath(pathname);
-  if (!parsed) return;
+  if (!parsed || parsed.kind !== 'list') return;
 
-  if (parsed.kind === 'list') {
-    window.fbq('trackCustom', 'ViewProductList', {
-      content_name: 'Danh sách nhà đất',
-      content_category: 'mua-ban-nha-dat',
-    });
-    return;
-  }
-
-  const product = getProductBySlug(parsed.slug);
-  window.fbq('track', 'ViewContent', {
-    content_type: 'product',
-    content_ids: [parsed.slug],
-    content_name: product?.title ?? parsed.slug,
-    content_category: product?.typeLabel ?? 'mua-ban-nha-dat',
+  window.fbq('trackCustom', 'ViewProductList', {
+    content_name: 'Danh sách nhà đất',
+    content_category: 'mua-ban-nha-dat',
   });
 }
