@@ -385,26 +385,3 @@ export async function generateLotGptContent(
     body: JSON.stringify(payload),
   });
 }
-
-export async function generateLotGptContent(
-  payload: LotGptRequestPayload,
-): Promise<LotGptGenerateResponse> {
-  if (isMockPublicWeb()) {
-    return {
-      content: `${JSON.stringify(
-        {
-          title: payload.title,
-          excerpt: `[Mock] ${payload.title} — ${payload.location.commune}, ${payload.location.district}.`,
-          bodyHtml: `<p>Mock GPT cho lô <strong>${payload.title}</strong>.</p>`,
-          metaDescription: `[Mock] ${payload.title}`,
-        },
-        null,
-        2,
-      )}\n`,
-    };
-  }
-  return apiFetch<LotGptGenerateResponse>('/admin/public-web/lots/gpt-content', {
-    method: 'POST',
-    body: JSON.stringify(payload),
-  });
-}
