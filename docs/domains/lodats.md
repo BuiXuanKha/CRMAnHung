@@ -104,6 +104,10 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 | Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng hoặc gắn path ảnh chat (reuse) |
 | Ảnh riêng thửa **dự án** (theo luồng NV) | NV gắn khi tạo/sửa | Ghép với ảnh dự án trên chi tiết (giống CRM cũ) |
 
+Upload **mới** (và ảnh chat gắn lúc tạo lô): object key CDN = `{slug tên+địa chỉ}-anh-{n}` — [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §10. Không tin tên file điện thoại.
+
+**Kho cũ:** chuyển sang key SEO rồi **xóa file cũ** (trừ ảnh chat Messenger còn được tin nhắn trỏ) — `pnpm images:seo-copy` (dry-run, mặc định mọi lô) / `APPLY=1` trên VPS. Đăng web cũng chuyển nốt ảnh xấu.
+
 Hangtag Nhà/Đất trên list = trục khác (nhà vs đất trống), **không** phải dự án vs dân.
 
 ---

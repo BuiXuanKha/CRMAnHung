@@ -6,12 +6,27 @@ import {
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import {
+  listingCoverAbsoluteUrl,
+  listingImageAlt,
+  listingSeoImageUrls,
+} from './listing-image-seo';
+import {
   PUBLIC_LISTING_PATH,
   PUBLIC_OG_DEFAULT,
   PUBLIC_SITE_ORIGIN,
   listingCanonicalUrl,
   toAbsoluteUrl,
 } from './site';
+
+export { listingSeoImageUrls } from './listing-image-seo';
+
+export function listingImageAltText(
+  listing: { title: string; location?: string | null },
+  index: number,
+  total: number,
+): string {
+  return listingImageAlt(listing, index, total, listingHeadline(listing));
+}
 
 export const SAN_PHAM_LIST_PATH = PUBLIC_LISTING_PATH;
 export const SAN_PHAM_LIST_TITLE = 'Nhà đất đang bán';
@@ -129,10 +144,24 @@ function sellerJsonLd() {
   };
 }
 
+function listingImageObjectsJsonLd(listing: PublicGuestListing) {
+  const urls = listingSeoImageUrls(listing);
+  const fallback = listingOgImage(listing).url;
+  const list = urls.length > 0 ? urls : [fallback];
+  return list.map((contentUrl, index) => ({
+    '@type': 'ImageObject',
+    contentUrl,
+    url: contentUrl,
+    caption: listingImageAltText(listing, index, list.length),
+    description: listingSearchDescription(listing),
+    inLanguage: 'vi-VN',
+    ...(index === 0 ? { representativeOfPage: true } : {}),
+  }));
+}
+
 export function listingJsonLd(listing: PublicGuestListing) {
   const url = listingCanonicalUrl(listing.slug);
   const description = listingSearchDescription(listing);
-  const image = listingOgImage(listing).url;
   const priceVnd = publicPriceLabelToVnd(listing.priceLabel);
   const headline = listingHeadline(listing);
   const offers: Record<string, unknown> = {
@@ -154,7 +183,7 @@ export function listingJsonLd(listing: PublicGuestListing) {
     name: headline,
     description,
     url,
-    image,
+    image: listingImageObjectsJsonLd(listing),
     inLanguage: 'vi-VN',
     ...(listing.updatedAt ? { dateModified: listing.updatedAt } : {}),
     ...(listing.publishedAt ? { datePosted: listing.publishedAt } : {}),
@@ -194,12 +223,16 @@ export function listingItemListJsonLd(listings: PublicGuestListing[]) {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: SAN_PHAM_LIST_TITLE,
-    itemListElement: listings.map((listing, index) => ({
-      '@type': 'ListItem',
-      position: index + 1,
-      url: listingCanonicalUrl(listing.slug),
-      name: listingHeadline(listing),
-    })),
+    itemListElement: listings.map((listing, index) => {
+      const cover = listingCoverAbsoluteUrl(listing);
+      return {
+        '@type': 'ListItem',
+        position: index + 1,
+        url: listingCanonicalUrl(listing.slug),
+        name: listingHeadline(listing),
+        ...(cover ? { image: cover } : {}),
+      };
+    }),
   };
 }
 

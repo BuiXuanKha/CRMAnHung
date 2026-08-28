@@ -1,6 +1,7 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
@@ -17,6 +18,10 @@ export type UploadInput = {
   buffer: Buffer;
   contentType: string;
   originalName?: string;
+  /** Server-chosen key (SEO filename). If omitted, UUID under `folder`. */
+  objectKey?: string;
+  /** ASCII filename for Content-Disposition (Google / download). */
+  contentFileName?: string;
 };
 
 export type StorageVisibility = 'public' | 'private';
@@ -93,6 +98,20 @@ export class StorageService {
     return `${safeFolder}/${randomUUID()}${ext}`;
   }
 
+  private sanitizeObjectKey(objectKey: string): string {
+    const clean = objectKey.replace(/\\/g, '/').replace(/^\/+/, '');
+    if (!clean || clean.includes('..') || clean.split('/').some((p) => p === '')) {
+      throw new ServiceUnavailableException('objectKey ảnh không hợp lệ');
+    }
+    return clean;
+  }
+
+  private contentDisposition(fileName?: string): string | undefined {
+    const safe = fileName?.replace(/[^a-zA-Z0-9._-]/g, '');
+    if (!safe) return undefined;
+    return `inline; filename="${safe}"`;
+  }
+
   publicUrl(objectKey: string): string {
     const base = (this.config.get<string>('R2_PUBLIC_BASE_URL') ?? '').replace(
       /\/$/,
@@ -107,7 +126,9 @@ export class StorageService {
   async upload(
     input: UploadInput,
   ): Promise<{ objectKey: string; url: string; visibility: 'public' }> {
-    const objectKey = this.buildObjectKey(input.folder, input.originalName);
+    const objectKey = input.objectKey
+      ? this.sanitizeObjectKey(input.objectKey)
+      : this.buildObjectKey(input.folder, input.originalName);
     await this.putObject('public', objectKey, input);
     return {
       objectKey,
@@ -139,15 +160,82 @@ export class StorageService {
   /** Idempotent public put with a chosen key (migrate avatars, keep filename). */
   async uploadPublicAtKey(
     objectKey: string,
-    input: Omit<UploadInput, 'folder' | 'originalName'>,
+    input: Omit<UploadInput, 'folder' | 'originalName' | 'objectKey'>,
   ): Promise<{ objectKey: string; url: string; visibility: 'public' }> {
-    const key = objectKey.replace(/^\//, '');
+    const key = this.sanitizeObjectKey(objectKey);
     await this.putObject('public', key, {
       folder: '',
       buffer: input.buffer,
       contentType: input.contentType,
+      contentFileName: input.contentFileName,
     });
     return { objectKey: key, url: this.publicUrl(key), visibility: 'public' };
+  }
+
+  /** Read a public object (copy chat image → SEO key). */
+  async getPublicObject(
+    objectKey: string,
+  ): Promise<{ buffer: Buffer; contentType: string } | null> {
+    if (!this.isConfigured()) return null;
+    try {
+      const res = await this.getClient().send(
+        new GetObjectCommand({
+          Bucket: this.publicBucket(),
+          Key: this.sanitizeObjectKey(objectKey),
+        }),
+      );
+      const bytes = await res.Body?.transformToByteArray();
+      if (!bytes?.length) return null;
+      return {
+        buffer: Buffer.from(bytes),
+        contentType: res.ContentType || 'application/octet-stream',
+      };
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Server-side copy in the public bucket (old UUID / IMG_* → SEO filename).
+   * Caller deletes the source after DB retarget when nothing else points at it.
+   */
+  async copyPublicObject(
+    fromKey: string,
+    toKey: string,
+    contentFileName?: string,
+  ): Promise<void> {
+    const from = this.sanitizeObjectKey(fromKey);
+    const to = this.sanitizeObjectKey(toKey);
+    if (from === to) return;
+    const bucket = this.publicBucket();
+    let contentType = 'image/jpeg';
+    try {
+      const head = await this.getClient().send(
+        new HeadObjectCommand({ Bucket: bucket, Key: from }),
+      );
+      if (head.ContentType) contentType = head.ContentType;
+    } catch (err) {
+      this.logger.error(`R2 HeadObject failed for ${from}`, err as Error);
+      throw new ServiceUnavailableException('Không đọc được ảnh nguồn trên R2');
+    }
+    const copySource = `${bucket}/${from.split('/').map(encodeURIComponent).join('/')}`;
+    try {
+      await this.getClient().send(
+        new CopyObjectCommand({
+          Bucket: bucket,
+          CopySource: copySource,
+          Key: to,
+          ContentType: contentType,
+          ContentDisposition: this.contentDisposition(
+            contentFileName || path.basename(to),
+          ),
+          MetadataDirective: 'REPLACE',
+        }),
+      );
+    } catch (err) {
+      this.logger.error(`R2 CopyObject ${from} → ${to} failed`, err as Error);
+      throw new ServiceUnavailableException('Không copy được ảnh sang tên SEO');
+    }
   }
 
   /**
@@ -219,6 +307,9 @@ export class StorageService {
           Key: objectKey,
           Body: input.buffer,
           ContentType: input.contentType,
+          ContentDisposition: this.contentDisposition(
+            input.contentFileName || path.basename(objectKey),
+          ),
         }),
       );
     } catch (err) {

@@ -58,11 +58,11 @@ export function ProductShareButton({
 }
 
 export function ProductGallery({
-  title,
   images,
+  alts,
 }: {
-  title: string;
   images: string[];
+  alts: string[];
 }) {
   const [active, setActive] = useState(0);
   const total = images.length;
@@ -78,8 +78,18 @@ export function ProductGallery({
   return (
     <div className="pd-gallery">
       <div className="pd-gallery-main">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={current} alt={`${title} — ảnh ${active + 1}`} />
+        <div className="pd-gallery-slides">
+          {images.map((src, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={src + i}
+              src={src}
+              alt={alts[i] ?? ''}
+              className={i === active ? 'is-active' : undefined}
+              loading={i === 0 ? 'eager' : 'lazy'}
+            />
+          ))}
+        </div>
         {total > 1 ? (
           <>
             <button

@@ -17,6 +17,7 @@ import type {
   UpdateLodatSaleStatusDto,
 } from './dto/lodat.dto';
 import { listLodatTransactionHistory } from './lodat-transaction-history';
+import { copyPublicImageToSeoLotKey, uniqueSeoLotImageKey } from './lodat-seo-image-upload';
 
 const ADDRESS_INCLUDE = {
   province: { select: { name: true, isHidden: true } },
@@ -901,7 +902,7 @@ export class LodatsService {
       select: { id: true },
     });
 
-    // Ảnh chat reuse (CRM cũ) — chỉ lô dân; giữ objectKey, không copy R2
+    // Ảnh chat reuse — copy sang key SEO; file chat gốc giữ vì Messenger còn trỏ
     if (!isProject && dto.chatImageIds?.length) {
       const chatImages = await this.prisma.customerMessengerImage.findMany({
         where: {
@@ -916,10 +917,31 @@ export class LodatsService {
         .filter((img): img is (typeof chatImages)[number] => Boolean(img))
         .slice(0, 5);
       if (ordered.length) {
+        const createdFull = await this.prisma.lodat.findUniqueOrThrow({
+          where: { id: created.id },
+          include: LIST_INCLUDE,
+        });
+        const title =
+          createdFull.title?.trim() ||
+          createdFull.projectLot?.title?.trim() ||
+          'Lô đất';
+        const location = this.formatAddress(this.resolveAddress(createdFull));
+        const keys: string[] = [];
+        for (let i = 0; i < ordered.length; i += 1) {
+          const img = ordered[i]!;
+          keys.push(
+            await copyPublicImageToSeoLotKey(this.storage, img.objectKey, {
+              lodatId: created.id,
+              title,
+              location,
+              index: i + 1,
+            }),
+          );
+        }
         await this.prisma.lodatImage.createMany({
           data: ordered.map((img, i) => ({
             lodatId: created.id,
-            objectKey: img.objectKey,
+            objectKey: keys[i] ?? img.objectKey,
             sortOrder: i,
             rotationDeg: ((img.rotationDeg % 360) + 360) % 360,
           })),
@@ -1043,7 +1065,7 @@ export class LodatsService {
   ) {
     const row = await this.prisma.lodat.findUnique({
       where: { id: lodatId },
-      include: { images: true },
+      include: LIST_INCLUDE,
     });
     if (!row) throw new NotFoundException('Không tìm thấy lô đất.');
     this.assertCanAccess(user, row.createdByEmployeeId);
@@ -1055,11 +1077,23 @@ export class LodatsService {
     if (row.images.length >= 5) {
       throw new BadRequestException('Tối đa 5 ảnh lô đất.');
     }
+    const title = row.title?.trim() || 'Lô đất';
+    const location = this.formatAddress(this.resolveAddress(row));
+    const { objectKey, fileName } = await uniqueSeoLotImageKey(this.storage, {
+      lodatId,
+      title,
+      location,
+      index: row.images.length + 1,
+      originalName: file.originalname,
+      mime: file.mimetype,
+    });
     const uploaded = await this.storage.upload({
       folder: `lodats/${lodatId}`,
       buffer: file.buffer,
       contentType: file.mimetype,
       originalName: file.originalname,
+      objectKey,
+      contentFileName: fileName,
     });
     await this.prisma.lodatImage.create({
       data: {

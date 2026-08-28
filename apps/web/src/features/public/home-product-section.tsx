@@ -8,6 +8,7 @@ import { publicWebKeys } from '@/features/public-content/query';
 import { ANHUNG_BRAND } from './brand';
 import { ProductShareButton } from './product-detail-client';
 import { listingShareText } from './share';
+import { listingHeadline } from './listing-seo';
 import { listingCanonicalUrl, listingHref, PUBLIC_LISTING_PATH } from './site';
 
 export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLot[] }) {
@@ -47,7 +48,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={lot.coverImageUrl}
-                    alt={lot.title}
+                    alt={listingHeadline(lot)}
                     loading={i < 4 ? 'eager' : 'lazy'}
                   />
                 ) : (

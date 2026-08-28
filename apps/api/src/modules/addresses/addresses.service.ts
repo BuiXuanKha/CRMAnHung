@@ -7,6 +7,11 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
+import {
+  seoAddressImageObjectKey,
+  seoImageExt,
+  seoImageFileName,
+} from '../public-content/public-slug';
 
 type WardChain = {
   wardId: string;
@@ -301,7 +306,14 @@ export class AddressesService {
     addressId: string,
     file: { buffer: Buffer; mimetype: string; originalname?: string },
   ) {
-    const address = await this.prisma.address.findUnique({ where: { id: addressId } });
+    const address = await this.prisma.address.findUnique({
+      where: { id: addressId },
+      include: {
+        ward: { select: { name: true, isHidden: true } },
+        district: { select: { name: true, isHidden: true } },
+        province: { select: { name: true, isHidden: true } },
+      },
+    });
     if (!address) throw new NotFoundException('Không tìm thấy địa chỉ.');
     if (address.kind !== 'PROJECT') {
       throw new BadRequestException('Chỉ địa chỉ dự án được thêm ảnh.');
@@ -313,11 +325,40 @@ export class AddressesService {
     if (count >= 24) {
       throw new BadRequestException('Tối đa 24 ảnh dự án.');
     }
+    const location = [
+      address.ward && !address.ward.isHidden ? address.ward.name : null,
+      address.district && !address.district.isHidden ? address.district.name : null,
+      address.province && !address.province.isHidden ? address.province.name : null,
+    ]
+      .filter(Boolean)
+      .join(', ');
+    const ext = seoImageExt(file.originalname, file.mimetype);
+    let suffix: string | undefined;
+    let fileName = seoImageFileName({
+      title: address.detail?.trim() || 'du-an',
+      location,
+      index: count + 1,
+      ext,
+    });
+    let objectKey = seoAddressImageObjectKey(addressId, fileName);
+    for (let i = 0; i < 6 && (await this.storage.publicObjectExists(objectKey)); i += 1) {
+      suffix = `${Date.now().toString(36)}${i}`.slice(-6);
+      fileName = seoImageFileName({
+        title: address.detail?.trim() || 'du-an',
+        location,
+        index: count + 1,
+        ext,
+        suffix,
+      });
+      objectKey = seoAddressImageObjectKey(addressId, fileName);
+    }
     const uploaded = await this.storage.upload({
       folder: `addresses/${addressId}`,
       buffer: file.buffer,
       contentType: file.mimetype,
       originalName: file.originalname,
+      objectKey,
+      contentFileName: fileName,
     });
     const row = await this.prisma.addressImage.create({
       data: {

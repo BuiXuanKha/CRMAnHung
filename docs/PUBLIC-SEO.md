@@ -100,6 +100,7 @@ Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem 
 - [ ] Kiểm tra nhanh trên mobile viewport
 - [x] Lô: title / excerpt / canonical / OG bìa / JSON-LD trung thực theo §7
 - [x] Sitemap chỉ lô đã đăng; lô gỡ → 404 `noindex`
+- [x] Ảnh lô/bài: `alt` có địa chỉ; sitemap `images`; JSON-LD `ImageObject` — §10
 - [x] Hub lô: `pnpm qa:public-hubs` (path, robots, sitemap, canonical ≠ `/du-an`) — xem `public-content.md` §17 Slice E
 
 ---
@@ -131,9 +132,10 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 | **H1** | Cùng công thức title (tên + địa chỉ) — **một** H1 | H1 khác title hoặc nhiều H1 |
 | **Copy** | Excerpt + mô tả **riêng** từng lô (SSR) | Lặp đoạn khuôn + keyword |
 | **OG / Twitter** | title + description như trên; `og:image` = ảnh bìa; thiếu bìa → `/og-default.png`; `summary_large_image` | Ảnh PII / ảnh nội bộ CRM |
+| **Ảnh / Google Images** | `alt` = tên lô + địa chỉ; gallery SSR đủ URL; sitemap `image:loc`; JSON-LD `ImageObject` (caption từ title/location). Xem §10 | `alt` rỗng / nhồi keyword; chặn Googlebot tải CDN; sitemap `/og-default.png` |
 | **JSON-LD** | `RealEstateListing` + `BreadcrumbList`. `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM |
 | **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → lô; block sản phẩm khác; list + hub `/xa/…` | Orphan URL |
-| **Sitemap** | Chỉ lô `isPublished` (+ hub xã/cấp4 có lô). Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán |
+| **Sitemap** | Chỉ lô `isPublished` (+ hub xã/cấp4 có lô). Mỗi URL lô kèm `image:image` (bìa + gallery CDN). Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán; ảnh brand fallback |
 | **robots** | Cho phép path catalog mới; chặn `/login` + CRM | `Disallow` path catalog |
 
 **Giá trên SERP:** cùng `priceLabel` khách thấy. Chính sách làm mờ (3,2 tỷ → `3 tỷ xxx`) thì meta/OG/JSON-LD cũng mờ — không lộ số CRM.
@@ -172,10 +174,42 @@ Roadmap tick-list: [`docs/domains/public-content.md`](./domains/public-content.m
 | **Title / H1** | `title` bài + template `\| An Hưng Land` |
 | **Meta description** | `metaDescription` hoặc excerpt (~160) từ body |
 | **OG** | cover + title; thiếu cover → không Xuất bản (UI) |
-| **JSON-LD** | `Article` / `BlogPosting`: headline, image, datePublished, dateModified, author |
-| **Sitemap** | Chỉ `PUBLISHED` |
+| **JSON-LD** | `Article` / `BlogPosting`: headline, `ImageObject` (bìa + ảnh body), datePublished, dateModified, author |
+| **Sitemap** | Chỉ `PUBLISHED` + `image:image` (bìa + `img` trong body). Không `/og-default.png` |
 | **List chuyên mục** | title/H1 = nhãn category; canonical `/{category}`; `ItemList` các URL bài đã xuất bản |
 | **404** | Slug giả / nháp / gỡ → `(public)/not-found.tsx` `noindex`, không kế thừa canonical trang chủ |
 
 Slice API + route guest: domain doc §16 Phase 5–7.
+
+---
+
+## 10. SEO hình ảnh (Google Images + OG)
+
+Ảnh lô / bài đã có ngữ cảnh mạnh (tên, xã/huyện, excerpt, giá công bố). Gắn đúng tín hiệu thì Google Images và link chia sẻ dùng được.
+
+**Lúc tạo lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server đặt object key CDN theo **tên lô + địa chỉ** (cùng slug trang khách).
+
+**Kho ảnh cũ (UUID / `IMG_*`):** **chuyển** sang key SEO (copy → DB trỏ file mới → **xóa file cũ** nếu không còn hàng nào trỏ). Web mới đang phát triển — không giữ URL CDN cũ (tránh nhân đôi dung lượng R2). Ảnh chat Messenger: copy sang key lô; **giữ** file `customers/chat/…` vì tin nhắn còn dùng.
+
+| Cách | Khi nào | Lệnh / hành vi |
+|------|---------|----------------|
+| Dry-run | Xem sẽ chuyển những gì | `pnpm images:seo-copy` (mặc định **mọi lô CRM**) |
+| Apply | Chạy thật trên VPS | `APPLY=1 pnpm images:seo-copy` |
+| Chỉ lô đã Đăng web | Thu hẹp | `APPLY=1 SCOPE=published pnpm images:seo-copy` |
+| Khi Đăng web | Tự chuyển ảnh lô (+ ảnh dự án) còn tên xấu | `setPublished` — không chặn đăng nếu lỗi |
+
+Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent). Snapshot giao dịch đổi sang key mới rồi mới xóa nguồn.
+
+| Hạng mục | Công thức | Không làm |
+|----------|-----------|-----------|
+| **Tên file / CDN** | `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.jpg` — slug = `toListingPublicSlug(title, location)`. `Content-Disposition` cùng tên. Ảnh dự án: `addresses/{id}/…`. Kho cũ: **move** (xóa UUID/`IMG_*` sau khi DB đã trỏ key mới). Ảnh chat gắn lô: copy sang key SEO, giữ file chat nếu Messenger còn trỏ | UUID / `IMG_1234` cho ảnh lô mới; nhồi «dat-nen-gia-re-ban-gap»; giữ 2 file lô vì Google index |
+| **Alt** | Lô: `{title} tại {location}` (không lặp địa chỉ nếu đã nằm trong tên); nhiều ảnh → thêm `— ảnh 2`. Bài: `title`. Thumbnail gallery: `alt=""` (trang trí, trùng URL ảnh lớn) | `alt` rỗng trên ảnh chính; «đất nền giá rẻ bán nhanh…»; PII / hoa hồng |
+| **HTML** | Mọi URL gallery nằm trong HTML lần tải đầu (SSR). Ảnh nằm cạnh H1 + địa chỉ + mô tả | Chỉ đổi `src` bằng JS nên bot chỉ thấy 1 ảnh; CSS `background-image` cho ảnh lô |
+| **Sitemap** | Trong `sitemap.xml`, mỗi URL lô/bài published có `image:image` → `image:loc` tuyệt đối (CDN). Bìa + gallery; bài = bìa + `img` trong body | `/og-default.png`; nháp; `data:` URI |
+| **JSON-LD** | `ImageObject`: `contentUrl`, `caption` (= alt), `description` (= meta/excerpt). Ảnh bìa `representativeOfPage` | Bịa EXIF / license; caption khác nội dung trang |
+| **OG** | `og:image` = ảnh bìa CDN; thiếu → `/og-default.png` (không đưa fallback này vào image sitemap) | Ảnh chat / nội bộ CRM |
+| **CDN** | `cdn.anhungland.com` phải **crawl được**. Search Console: xác minh cả property ảnh (CDN) nếu khác apex | `robots` / WAF chặn Googlebot ảnh; hotlink protection chặn bot |
+| **Bảo ảnh** | Ưu tiên ngữ cảnh + CDN public. Watermark nhẹ nếu cần sau — không chặn chuột phải / không `noindex` ảnh | Chặn download làm Google không lấy được file |
+
+Google **bỏ** `image:caption` / `image:title` / `image:geo_location` trong sitemap — caption và địa điểm lấy từ HTML + schema trên trang. Tên file trên CDN vẫn là tín hiệu phụ (URL path).
 

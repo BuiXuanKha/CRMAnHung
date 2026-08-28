@@ -12,6 +12,10 @@ import {
   listingCommuneHubPath,
   listingPlaceHubPath,
   toPublicSlug,
+  seoImageFileName,
+  seoLotImageObjectKey,
+  seoImageExt,
+  isSeoNamedImageKey,
 } from '../packages/shared/dist/index.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -116,6 +120,61 @@ if (sitemapSrc.includes('listCommuneHubs') && sitemapSrc.includes('listPlaceHubs
   bad('sitemap thiếu hub lists');
 }
 
+if (
+  sitemapSrc.includes('listingSeoImageUrls') &&
+  sitemapSrc.includes('postSeoImageUrls') &&
+  sitemapSrc.includes('images')
+) {
+  ok('sitemap gắn image:loc lô + bài');
+} else {
+  bad('sitemap thiếu listingSeoImageUrls / postSeoImageUrls');
+}
+
+console.log('\nImage SEO helpers');
+const imageSeo = read('apps/web/src/features/public/listing-image-seo.ts');
+if (imageSeo.includes('uniqueAbsolutePublicImageUrls') && imageSeo.includes('isBrandOgFallback')) {
+  ok('listing-image-seo lọc URL + bỏ og-default');
+} else {
+  bad('listing-image-seo thiếu uniqueAbsolutePublicImageUrls');
+}
+
+const listingSeo = read('apps/web/src/features/public/listing-seo.ts');
+if (listingSeo.includes('ImageObject') && listingSeo.includes('listingImageAltText')) {
+  ok('JSON-LD lô dùng ImageObject + caption');
+} else {
+  bad('listing-seo thiếu ImageObject');
+}
+
+const gallerySrc = read('apps/web/src/features/public/product-detail-client.tsx');
+if (gallerySrc.includes('pd-gallery-slides') && gallerySrc.includes('alts')) {
+  ok('gallery SSR mọi URL + alt');
+} else {
+  bad('gallery chưa SSR đủ ảnh / alt');
+}
+
+function extractHtmlImageSrcs(html) {
+  const out = [];
+  const re = /<img\b[^>]*?\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
+  let match;
+  while ((match = re.exec(html))) {
+    const src = (match[1] ?? match[2] ?? '').trim();
+    if (src) out.push(src);
+  }
+  return out;
+}
+
+const extracted = extractHtmlImageSrcs(
+  '<p><img src="https://cdn.anhungland.com/a.jpg"><img alt="x" src=\'https://cdn.anhungland.com/b.png\'></p>',
+);
+if (
+  extracted[0] === 'https://cdn.anhungland.com/a.jpg' &&
+  extracted[1] === 'https://cdn.anhungland.com/b.png'
+) {
+  ok('extractHtmlImageSrcs lấy src cover + body');
+} else {
+  bad(`extractHtmlImageSrcs: ${JSON.stringify(extracted)}`);
+}
+
 console.log('\nSlug helper (xã / KĐT)');
 const xaSlug = toPublicSlug('Nam Trung', 60, 'xa');
 const kdtSlug = toPublicSlug('KĐT Tây Nam Sách', 60, 'khu');
@@ -124,6 +183,47 @@ else bad(`toPublicSlug xã: ${xaSlug}`);
 
 if (kdtSlug.includes('kdt') && kdtSlug.includes('nam-sach')) ok(`toPublicSlug KĐT → ${kdtSlug}`);
 else bad(`toPublicSlug KĐT: ${kdtSlug}`);
+
+console.log('\nSEO image filename at upload');
+const seoName = seoImageFileName({
+  title: 'Lô nhà cấp 4 mới 113,8m²',
+  location: 'KĐT Tây Nam Sách, Nam Trung',
+  index: 1,
+  ext: seoImageExt('IMG_4521.JPG', 'image/jpeg'),
+});
+const seoKey = seoLotImageObjectKey('clxyz123', seoName);
+if (seoName.includes('lo-nha-cap-4') && seoName.includes('nam-trung') && seoName.endsWith('-anh-1.jpg')) {
+  ok(`seoImageFileName → ${seoName}`);
+} else {
+  bad(`seoImageFileName unexpected: ${seoName}`);
+}
+if (seoName.includes('img') || seoName.includes('4521')) {
+  bad('seoImageFileName còn tên file điện thoại');
+} else {
+  ok('seoImageFileName không dùng IMG_4521');
+}
+if (seoKey.startsWith('lodats/clxyz123/') && seoKey.endsWith(seoName)) {
+  ok('seoLotImageObjectKey dưới lodats/{id}/');
+} else {
+  bad(`seoLotImageObjectKey: ${seoKey}`);
+}
+
+if (isSeoNamedImageKey(seoName) && !isSeoNamedImageKey('lodats/x/IMG_4521.jpg')) {
+  ok('isSeoNamedImageKey nhận slug-anh-n, bỏ IMG_');
+} else {
+  bad('isSeoNamedImageKey sai');
+}
+
+const addImageSrc = read('apps/api/src/modules/lodats/lodats.service.ts');
+if (addImageSrc.includes('uniqueSeoLotImageKey') && addImageSrc.includes('copyPublicImageToSeoLotKey')) {
+  ok('upload lô + ảnh chat dùng key SEO');
+} else {
+  bad('lodats.service chưa gắn uniqueSeoLotImageKey');
+}
+
+const seoScript = resolve(root, 'apps/api/scripts/seo-copy-lot-images.ts');
+if (existsSync(seoScript)) ok('script images:seo-copy');
+else bad('thiếu scripts/seo-copy-lot-images.ts');
 
 console.log('\nRoute files');
 const routes = [
