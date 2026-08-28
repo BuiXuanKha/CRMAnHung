@@ -6,7 +6,7 @@ import {
 import { ConfigService } from '@nestjs/config';
 import type { LotGptRequestDto } from './dto/lot-gpt.dto';
 
-const DEFAULT_MODEL = 'gpt-4o-mini';
+const DEFAULT_MODEL = 'gpt-5.6-sol';
 
 const LOT_GPT_SYSTEM_PROMPT = `Bạn là copywriter bất động sản Việt Nam cho An Hưng Land.
 Nhận JSON thông tin lô đất (tiêu đề, địa chỉ, diện tích, giá, …).
