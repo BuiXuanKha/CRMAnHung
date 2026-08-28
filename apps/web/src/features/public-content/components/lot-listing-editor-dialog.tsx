@@ -56,6 +56,7 @@ export function LotListingEditorDialog({
   const [bodyHtml, setBodyHtml] = useState('');
   const [slugDraft, setSlugDraft] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
+  const [seoTitle, setSeoTitle] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const [richEditorReady, setRichEditorReady] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
@@ -72,6 +73,7 @@ export function LotListingEditorDialog({
       setBodyHtml('');
       setSlugDraft('');
       setMetaDescription('');
+      setSeoTitle('');
       setParseError(null);
       return;
     }
@@ -87,6 +89,7 @@ export function LotListingEditorDialog({
           (!lot.id.startsWith('pending-') && lot.slug ? lot.slug : ''),
       );
       setMetaDescription(gptPrefill.metaDescription.trim() || lot.metaDescription?.trim() || '');
+      setSeoTitle(gptPrefill.seoTitle.trim() || gptPrefill.title.trim());
       setParseError(null);
       setRichEditorReady(true);
     } else {
@@ -100,6 +103,7 @@ export function LotListingEditorDialog({
         setBodyHtml(lotBodyHtml(lot));
         setSlugDraft(!lot.id.startsWith('pending-') && lot.slug ? lot.slug : '');
         setMetaDescription(lot.metaDescription?.trim() || '');
+        setSeoTitle(lot.seoTitle?.trim() || lot.title.trim());
         setParseError(null);
       }
       setRichEditorReady(true);
@@ -123,6 +127,7 @@ export function LotListingEditorDialog({
       bodyHtml,
       ...(slug ? { slug } : {}),
       metaDescription: meta || null,
+      seoTitle: seoTitle.trim() || null,
     });
     if (!parsed.success) {
       setParseError(parsed.error.issues[0]?.message ?? 'Dữ liệu không hợp lệ.');

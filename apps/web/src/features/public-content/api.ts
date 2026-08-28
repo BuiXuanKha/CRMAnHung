@@ -239,6 +239,7 @@ export async function updatePublicListingDraft(
       bodyHtml,
       ...(draft.slug ? { slug: draft.slug } : {}),
       ...(draft.metaDescription !== undefined ? { metaDescription: draft.metaDescription } : {}),
+      ...(draft.seoTitle !== undefined ? { seoTitle: draft.seoTitle } : {}),
     });
     lots = [created, ...lots];
     return { ...created };
@@ -247,6 +248,7 @@ export async function updatePublicListingDraft(
   lots[index] = {
     ...lots[index],
     title: draft.title,
+    ...(draft.seoTitle !== undefined ? { seoTitle: draft.seoTitle } : {}),
     location: draft.location,
     priceMode: draft.priceMode,
     priceLabel,

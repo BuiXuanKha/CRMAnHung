@@ -25,6 +25,7 @@ function catalogToView(row: PublicCatalogListing): PublicListingView {
   return {
     slug: row.slug,
     title: row.title,
+    ...(row.seoTitle != null ? { seoTitle: row.seoTitle } : {}),
     location: row.location,
     priceLabel: row.priceLabel,
     excerpt: row.excerpt,

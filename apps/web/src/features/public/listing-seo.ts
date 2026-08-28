@@ -32,6 +32,18 @@ export function listingHeadline(listing: { title: string; location?: string | nu
   return `${title} tại ${location}`;
 }
 
+/** On-page H1 — stored `title` (GPT h1), verbatim. */
+export function listingPageH1(listing: { title: string }): string {
+  return listing.title.trim();
+}
+
+/** Document / OG / Twitter title — GPT seoTitle when saved, else title; no location suffix. */
+export function listingSeoTitle(listing: { seoTitle?: string | null; title: string }): string {
+  const seo = listing.seoTitle?.trim();
+  if (seo) return seo;
+  return listing.title.trim();
+}
+
 export function unpublishedListingMetadata(): Metadata {
   return {
     title: 'Không tìm thấy sản phẩm',
@@ -54,10 +66,10 @@ export function listingMetadata(listing: PublicGuestListing): Metadata {
   const description = listingSearchDescription(listing);
   const url = listingCanonicalUrl(listing.slug);
   const image = listingOgImage(listing);
-  const headline = listingHeadline(listing);
-  const branded = `${headline} | ${ANHUNG_BRAND.name}`;
+  const seoTitle = listingSeoTitle(listing);
+  const branded = `${seoTitle} | ${ANHUNG_BRAND.name}`;
   return {
-    title: headline,
+    title: seoTitle,
     description,
     alternates: { canonical: url },
     robots: { index: true, follow: true },
