@@ -56,7 +56,7 @@ Web: công tắc **Đăng web** là việc admin chọn lô nào khách được
 |-----|-----------|
 | Tạm dừng / nháp / thiếu ảnh | Không hiện |
 | Mở bán nhưng chưa Đăng web | Không hiện |
-| Đăng web + đang Mở bán | Hiện `/mua-ban-nha-dat/[slug]` |
+| Đăng web + đang Mở bán | Hiện `/mua-ban-nha-dat-huyen-nam-sach/[slug]` |
 | Đang Đăng web rồi Tạm dừng / Đã cọc / Đã bán | Khách: list/chi tiết chỉ hiện khi **Đăng web ∩ Mở bán**. **Không** tự tắt công tắc Đăng web — admin Gỡ tường minh |
 
 ### 3.2 Bài viết
@@ -82,7 +82,7 @@ Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú
 ## 4. Use cases
 
 1. **Khách vào /** — hero brand + lô đã đăng + teaser tin/bài. Không login.
-2. **Khách xem lô** — `/mua-ban-nha-dat` và `/mua-ban-nha-dat/[slug]`; share OG.
+2. **Khách xem lô** — `/mua-ban-nha-dat-huyen-nam-sach` và `/…/[slug]`; share OG.
 3. **Khách đọc bài** — list + chi tiết theo chuyên mục.
 4. **Admin đăng lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn bài đăng** (prefill copy đã lọc) → Lưu nháp / Đăng web.
 5. **Admin gỡ lô** — tắt Đăng web; URL cũ → không tìm thấy (hoặc 404).
@@ -139,7 +139,7 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | GET | `/admin/public-web/posts` | JWT ADMIN | List bài (nháp + đã xuất bản) — **Postgres** |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục + body) — **Postgres** |
 | GET | `/public/listings` | Không | Lô đã đăng ∩ Mở bán → `publicCatalogListingSchema` |
-| GET | `/public/listings/:slug` | Không | Chi tiết `/mua-ban-nha-dat/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
+| GET | `/public/listings/:slug` | Không | Chi tiết `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
 | GET | `/public/posts` | Không | Bài `PUBLISHED` (`?category=` tuỳ chọn) → `publicGuestPostListResponseSchema` |
 | GET | `/public/posts/:category/:slug` | Không | Chi tiết bài — 404 nếu nháp / sai chuyên mục |
 
@@ -225,7 +225,7 @@ Cùng hình thức thẻ GD: nền trắng, viền `#e2e8f0`, bo 12px. 4 cột.
 
 | Thẻ | Số | Gợi ý |
 |-----|----|--------|
-| Lô đang hiện | `publishedLotCount` | Khách thấy trên `/mua-ban-nha-dat` |
+| Lô đang hiện | `publishedLotCount` | Khách thấy trên `/mua-ban-nha-dat-huyen-nam-sach` |
 | Chờ đăng | `pendingLotCount` | Mở bán CRM, chưa Đăng web |
 | Bài đã đăng | `publishedPostCount` | Khách đọc được |
 | Bài nháp | `draftPostCount` | Chỉ admin |
@@ -410,7 +410,7 @@ Trống: `Không có lô đang mở bán.`
 2. Chưa chọn dòng: `Chọn một lô đang mở bán để xem bài đăng.`
 3. Có chọn: ảnh bìa, hangtag Web, tiêu đề, địa chỉ, giá, DT · MT · hướng, hangtag Nhà/Đất, mô tả public (không PII), hotline công ty
 4. Nút **Đăng web** khi chờ đăng → `CrmConfirm`. **Không** nút Gỡ web trên màn này.
-5. Nếu đang hiện: link `Xem trên anhungland.com` tab mới `/mua-ban-nha-dat/[slug]`
+5. Nếu đang hiện: link `Xem trên anhungland.com` tab mới `/mua-ban-nha-dat-huyen-nam-sach/[slug]`
 
 ### 13.2 Mobile
 
@@ -502,7 +502,7 @@ Slice API Postgres + upload R2 thật = sau khi mock UI ổn.
 
 Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn bài dashboard **không** đổi layout — chỉ có thể thêm `metaDescription` (tuỳ chọn).
 
-1. URL khách: `/mua-ban-nha-dat/[slug]` — chỉ lô `isPublished`. `/san-pham` 301 sang path mới.
+1. URL khách: `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — chỉ lô `isPublished`. `/mua-ban-nha-dat` + `/san-pham` 301 sang path mới.
 2. Title / H1 = tiêu đề public. Meta = `metaDescription` hoặc excerpt.
 3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`.
 4. JSON-LD `RealEstateListing`: giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`).
@@ -633,5 +633,144 @@ CRM (Lưu / Đăng / Xuất bản / Gỡ / Xóa)
 ```
 
 **PR gợi ý:** media → lot bodyHtml API → lot ISR+revalidate → PublicPost API → post guest ISR → admin nối API → auto-unpublish.
+
+---
+
+## 17. Hub địa bàn lô đất (Hướng A) — checklist đã chốt
+
+**Mục tiêu:** SEO local theo sổ địa chỉ **4 cấp** (`addresses.md`). Không đụng `PublicPostCategory` / route bài viết (`/du-an`, `/kien-thuc`…).
+
+### 17.1 Cây URL (chốt)
+
+Path gốc catalog (đổi từ `/mua-ban-nha-dat`):
+
+```
+/mua-ban-nha-dat-huyen-nam-sach                         ← list tất cả lô huyện Nam Sách
+/mua-ban-nha-dat-huyen-nam-sach/[slug]                   ← chi tiết 1 lô
+/mua-ban-nha-dat-huyen-nam-sach/xa/[slug-xa]             ← hub xã (cấp 3)
+/mua-ban-nha-dat-huyen-nam-sach/xa/[slug-xa]/[slug-c4]  ← hub cấp 4 trong xã
+```
+
+Cấp 4 = `Address.detail`: đất dân → thôn/tổ; dự án → tên KĐT/dự án. **KĐT thuộc xã**, không song song với xã.
+
+Ví dụ:
+
+| Trang | URL |
+|-------|-----|
+| List | `/mua-ban-nha-dat-huyen-nam-sach` |
+| Lô | `/mua-ban-nha-dat-huyen-nam-sach/lo-33-dau-gia-man-de-nam-trung` |
+| Xã Nam Trung | `/mua-ban-nha-dat-huyen-nam-sach/xa/nam-trung` |
+| KĐT trong Nam Trung | `/mua-ban-nha-dat-huyen-nam-sach/xa/nam-trung/kdt-tay-nam-sach` |
+| Thôn Mạn Đê trong Nam Trung | `/mua-ban-nha-dat-huyen-nam-sach/xa/nam-trung/man-de` |
+
+**Không** dùng `/mua-ban-nha-dat/khu/...` ngang hàng với `/xa/...`.
+
+Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
+
+### 17.2 Quy tắc nghiệp vụ
+
+1. Hub chỉ **index** khi có ≥ 1 lô Đang hiện (`isPublished` ∩ Mở bán). Hub 0 lô → **404 + noindex**, bỏ khỏi sitemap.
+2. Gom lô: cấp 3 = `wardId`; cấp 4 = `address.detail` **trong** ward đó. Không parse chuỗi `location` làm nguồn sự thật.
+3. Slug ổn định; trùng tên xã khác huyện → suffix huyện (vd. `nam-trung-nam-sach`). Slug cấp 4 unique trong phạm vi xã.
+4. Related trên chi tiết lô: «cùng xã» → hub xã; «tại KĐT/thôn» → hub `xa/.../slug-c4`.
+5. 301 vĩnh viễn: `/mua-ban-nha-dat` (+ `/:slug`) → path mới; giữ `/san-pham` → path mới.
+
+### 17.3 Checklist triển khai (làm lần lượt)
+
+#### Slice A — Đổi path gốc + 301
+
+- [x] `PUBLIC_LISTING_PATH` = `/mua-ban-nha-dat-huyen-nam-sach`
+- [x] Đổi thư mục route Next `app/(public)/mua-ban-nha-dat/` → path mới
+- [x] `next.config` redirects: `/san-pham`, `/mua-ban-nha-dat` → path mới (permanent)
+- [x] Nest `PublicWebRevalidateService` paths mới
+- [x] Sitemap, Meta Pixel, dashboard preview path, docs PUBLIC-SEO / PUBLIC-WEB
+- [ ] Smoke: list + chi tiết + 301 cũ → mới (sau deploy / local)
+
+#### Slice B — Docs UI hub + contract shared
+
+- [x] §17.4 đặc tả màn hub (PC → mobile) đủ Ready for mock
+- [x] Zod: hub kind `commune` | `place`; list hub sitemap; catalog thêm `communeSlug` / `placeSlug`
+- [x] Helper slugify chung (`toPublicSlug` / `toListingPublicSlug` trong `@crmanhung/shared`)
+
+#### Slice C — Hub xã (UI mock → API → nối)
+
+- [x] Route `.../xa/[commune]/page.tsx` + metadata + JSON-LD `ItemList`
+- [x] Hub derive từ catalog (location → communeSlug) — mock/SSR; 0 lô / slug sai → 404 noindex
+- [ ] Guest API thật: list hubs xã + detail hub theo `wardId` (thay parse location)
+- [x] Sitemap hub xã; (revalidate hub path khi API sẵn)
+- [x] Link related «cùng xã» → hub xã
+
+#### Slice D — Hub cấp 4 trong xã
+
+- [x] Route `.../xa/[commune]/[place]/page.tsx`
+- [x] Gom hub theo `detail` trong xã (catalog location → placeSlug); sitemap hub cấp 4 có lô
+- [x] Link related «tại KĐT/thôn» → hub cấp 4
+- [x] Breadcrumb: Trang chủ → Nhà đất → Xã → Cấp 4
+- [x] Trang hub xã: danh sách link thôn/KĐT trong xã (§17.4.1)
+- [ ] Guest API thật theo `wardId` + `address.detail` (thay parse location)
+
+#### Slice E — QA staging SEO
+
+- [x] Script `pnpm qa:public-hubs` — path, robots, CRM noindex, redirects, sitemap, routes
+- [x] Hub canonical dưới `/mua-ban-nha-dat-huyen-nam-sach/xa/…` — không trùng `/du-an`
+- [x] Hub 0 lô / slug sai → `notFound()` + `unpublishedHubMetadata` noindex
+- [x] Sitemap chỉ hub có lô (`listCommuneHubs` / `listPlaceHubs` filter count > 0)
+- [x] `robots.ts` allow `/`; disallow CRM — không chặn catalog mới
+- [ ] Smoke live `anhungland.com` sau merge PR (301, hub HTML, sitemap.xml)
+
+**Chạy local trước deploy:**
+
+```bash
+pnpm qa:public-hubs
+pnpm --filter @crmanhung/web build
+```
+
+**Sau deploy — kiểm tra tay:**
+
+| Kiểm tra | Kỳ vọng |
+|----------|---------|
+| `/mua-ban-nha-dat` | 301 → `/mua-ban-nha-dat-huyen-nam-sach` |
+| Hub xã có lô | 200, `robots index`, canonical đúng, trong sitemap |
+| Hub slug sai | 404, noindex |
+| `/du-an` | Bài CMS — canonical `/{category}/{slug}`, khác hub lô |
+| `/dashboard`, `/lo-dat` | noindex; không trong sitemap |
+
+### 17.4 UI hub (Ready for mock)
+
+Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
+
+#### 17.4.1 Giao diện máy tính — hub xã
+
+1. Breadcrumb: Trang chủ → Nhà đất đang bán → {tên xã}
+2. H1: `Nhà đất {tên xã}, {huyện}` (thiếu huyện → chỉ tên xã)
+3. Một câu mô tả: số lô đang bán trong xã (vd. «N lô đang giới thiệu trên An Hưng Land.»)
+4. (Tuỳ chọn) Danh sách link hub cấp 4 trong xã có ≥1 lô — chữ, không card
+5. Grid thẻ lô — **cùng** markup/list `/mua-ban-nha-dat-huyen-nam-sach` (`ph-product-grid`)
+6. Empty không xảy ra trên URL public (0 lô → 404)
+
+#### 17.4.2 Giao diện máy tính — hub cấp 4
+
+1. Breadcrumb: Trang chủ → Nhà đất đang bán → {xã} → {thôn|KĐT|dự án}
+2. H1: `Lô đất {tên cấp 4}, {tên xã}`
+3. Một câu mô tả + số lô
+4. Grid thẻ lô — cùng list catalog
+5. 0 lô → 404
+
+#### 17.4.3 Giao diện mobile
+
+1. Breadcrumb / back — cùng 17.4.1–2, wrap dòng
+2. H1 + mô tả — cùng copy
+3. Grid 1 cột (CSS list hiện có)
+4. Thẻ lô — cùng field: ảnh · title · giá · DT · địa chỉ
+
+#### 17.4.4 SEO / hành vi
+
+| Hạng mục | Quy tắc |
+|----------|---------|
+| robots | `index, follow` khi có ≥1 lô |
+| 404 | Slug sai / 0 lô → `notFound` + noindex |
+| Canonical | URL hub tuyệt đối |
+| JSON-LD | `ItemList` URL lô trong hub; `BreadcrumbList` |
+| Sitemap | Chỉ hub có lô; priority xã ~0.75, cấp 4 ~0.7 |
 
 

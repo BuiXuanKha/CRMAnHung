@@ -718,6 +718,44 @@
   color: var(--ph-muted);
 }
 
+.ph-hub-places {
+  margin: 0 0 28px;
+  padding: 16px 18px;
+  border: 1px solid var(--ph-line);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.6);
+}
+
+.ph-hub-places-label {
+  margin: 0 0 10px;
+  font-size: 0.92rem;
+  color: var(--ph-muted);
+}
+
+.ph-hub-places ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.ph-hub-places a {
+  color: var(--ph-brand);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.ph-hub-places a:hover {
+  text-decoration: underline;
+}
+
+.ph-hub-places-count {
+  font-weight: 400;
+  color: var(--ph-muted);
+}
+
 @keyframes ph-rise {
   from {
     opacity: 0;

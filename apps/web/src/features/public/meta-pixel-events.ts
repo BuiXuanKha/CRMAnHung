@@ -1,6 +1,7 @@
 import { PUBLIC_LISTING_PATH } from './site';
 
-const LISTING_DETAIL = new RegExp(`^${PUBLIC_LISTING_PATH}/([^/]+)/?$`);
+/** Detail slug — exclude reserved hub segment `xa`. */
+const LISTING_DETAIL = new RegExp(`^${PUBLIC_LISTING_PATH}/(?!xa(?:/|$))([^/]+)/?$`);
 
 export function parseSanPhamPath(
   pathname: string,
@@ -9,12 +10,16 @@ export function parseSanPhamPath(
     pathname === PUBLIC_LISTING_PATH ||
     pathname === `${PUBLIC_LISTING_PATH}/` ||
     pathname === '/san-pham' ||
-    pathname === '/san-pham/'
+    pathname === '/san-pham/' ||
+    pathname === '/mua-ban-nha-dat' ||
+    pathname === '/mua-ban-nha-dat/'
   ) {
     return { kind: 'list' };
   }
   const match =
-    pathname.match(LISTING_DETAIL) || pathname.match(/^\/san-pham\/([^/]+)\/?$/);
+    pathname.match(LISTING_DETAIL) ||
+    pathname.match(/^\/san-pham\/(?!xa(?:\/|$))([^/]+)\/?$/) ||
+    pathname.match(/^\/mua-ban-nha-dat\/(?!xa(?:\/|$))([^/]+)\/?$/);
   if (!match) return null;
   return { kind: 'detail', slug: match[1] };
 }
@@ -30,7 +35,7 @@ export function trackListingViewContent(input: {
     content_type: 'product',
     content_ids: [input.slug],
     content_name: name,
-    content_category: input.kindLabel?.trim() || 'mua-ban-nha-dat',
+    content_category: input.kindLabel?.trim() || 'mua-ban-nha-dat-huyen-nam-sach',
   });
 }
 
@@ -42,6 +47,6 @@ export function trackSanPhamPixel(pathname: string): void {
 
   window.fbq('trackCustom', 'ViewProductList', {
     content_name: 'Danh sách nhà đất',
-    content_category: 'mua-ban-nha-dat',
+    content_category: 'mua-ban-nha-dat-huyen-nam-sach',
   });
 }

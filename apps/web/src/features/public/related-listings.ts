@@ -1,9 +1,14 @@
+import { toPublicSlug } from '@crmanhung/shared';
 import { parseLotGptLocation } from '@/features/public-content/lot-gpt-context';
+import { withHubFieldsFromLocation } from './listing-hubs';
 import type { PublicListingView } from './published-listings';
+import { listingCommuneHubPath, listingPlaceHubPath } from './site';
 
 export type RelatedListingSection = {
   title: string;
   items: PublicListingView[];
+  /** Guest hub URL for «Xem tất cả». */
+  hubHref?: string | null;
 };
 
 const RELATED_LIMIT = 9;
@@ -57,7 +62,10 @@ export function pickRelatedListingSection(
   catalog: PublicListingView[],
   limit = RELATED_LIMIT,
 ): RelatedListingSection | null {
-  const others = catalog.filter((row) => row.slug !== listing.slug);
+  const self = withHubFieldsFromLocation(listing);
+  const others = catalog
+    .map(withHubFieldsFromLocation)
+    .filter((row) => row.slug !== listing.slug);
   if (others.length === 0) return null;
 
   const commune = listingCommune(listing.location);
@@ -67,9 +75,11 @@ export function pickRelatedListingSection(
       (row) => normLocationPart(listingCommune(row.location)) === communeKey,
     );
     if (sameCommune.length > 0) {
+      const communeSlug = self.communeSlug || toPublicSlug(commune, 60, 'xa');
       return {
         title: `Lô đất cùng xã ${commune}`,
         items: sortRelatedListings(sameCommune).slice(0, limit),
+        hubHref: listingCommuneHubPath(communeSlug),
       };
     }
   }
@@ -83,8 +93,20 @@ export function pickRelatedListingSection(
   );
   if (sameArea.length === 0) return null;
 
+  const sample = sameArea[0]!;
+  const enrichedSample = withHubFieldsFromLocation(sample);
+  const communeSlug =
+    enrichedSample.communeSlug ||
+    self.communeSlug ||
+    (commune ? toPublicSlug(commune, 60, 'xa') : null);
+  const placeSlug = enrichedSample.placeSlug || toPublicSlug(areaLabel, 60, 'khu');
+
   return {
     title: `Lô đất tại ${areaLabel}`,
     items: sortRelatedListings(sameArea).slice(0, limit),
+    hubHref:
+      communeSlug != null
+        ? listingPlaceHubPath(communeSlug, placeSlug)
+        : null,
   };
 }

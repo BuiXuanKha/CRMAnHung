@@ -11,6 +11,73 @@ import { LodatKind, PublicPostCategory, PublicPostStatus } from './enums.js';
 /** Google snippet length — clip excerpt / metaDescription to this. */
 export const META_DESCRIPTION_MAX = 160;
 
+/**
+ * Guest catalog URL prefix on anhungland.com (Nam Sách local SEO).
+ * Legacy `/mua-ban-nha-dat` and `/san-pham` 301 here — see apps/web next.config.
+ */
+export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat-huyen-nam-sach';
+
+export const PUBLIC_LISTING_PATH_LEGACY = '/mua-ban-nha-dat';
+
+/** Reserved path segment under catalog — hub xã / cấp 4; not a lot slug. */
+export const PUBLIC_LISTING_HUB_SEGMENT = 'xa';
+
+/** URL slug from Vietnamese label (ward, project, lot title…). */
+export function toPublicSlug(label: string, maxLen = 60, emptyFallback = 'muc'): string {
+  const slug = label
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .replace(/đ/gi, 'd')
+    .replace(/Đ/g, 'd')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, maxLen)
+    .replace(/-+$/g, '');
+  return slug || emptyFallback;
+}
+
+/** Guest lot URL: tên lô + địa chỉ công khai. */
+export function toListingPublicSlug(title: string, location?: string | null): string {
+  const combined = [title.trim(), (location ?? '').trim()].filter(Boolean).join(' ');
+  return toPublicSlug(combined, 80, 'lo-dat');
+}
+
+export function listingCommuneHubPath(communeSlug: string): string {
+  return `${PUBLIC_LISTING_PATH}/${PUBLIC_LISTING_HUB_SEGMENT}/${communeSlug}`;
+}
+
+export function listingPlaceHubPath(communeSlug: string, placeSlug: string): string {
+  return `${listingCommuneHubPath(communeSlug)}/${placeSlug}`;
+}
+
+/** Hub kind: xã (cấp 3) hoặc địa chỉ trong xã (cấp 4 — thôn/KĐT/dự án). */
+export const publicListingHubKindSchema = z.enum(['commune', 'place']);
+
+export type PublicListingHubKind = z.infer<typeof publicListingHubKindSchema>;
+
+export const publicListingHubSchema = z.object({
+  kind: publicListingHubKindSchema,
+  /** Hub URL slug. For `place`, unique within parent commune. */
+  slug: z.string().min(1),
+  label: z.string().min(1),
+  /** Parent xã slug — required when `kind === 'place'`. */
+  communeSlug: z.string().min(1).optional(),
+  communeLabel: z.string().min(1).optional(),
+  districtLabel: z.string().nullable().optional(),
+  provinceLabel: z.string().nullable().optional(),
+  listingCount: z.number().int().nonnegative(),
+  updatedAt: z.string().datetime().optional(),
+});
+
+export type PublicListingHub = z.infer<typeof publicListingHubSchema>;
+
+export const publicListingHubListResponseSchema = z.object({
+  items: z.array(publicListingHubSchema),
+});
+
+export type PublicListingHubListResponse = z.infer<typeof publicListingHubListResponseSchema>;
+
 export const publicListingPriceModeSchema = z.enum(['AMOUNT', 'CONTACT']);
 
 export type PublicListingPriceMode = z.infer<typeof publicListingPriceModeSchema>;
@@ -140,13 +207,25 @@ export const publicGuestListingSchema = z.object({
 
 export type PublicGuestListing = z.infer<typeof publicGuestListingSchema>;
 
-/** Guest catalog card / SEO page — public-safe fields only. */
-export const publicCatalogListingSchema = publicGuestListingSchema.extend({
-  id: z.string(),
+/** Guest listing card fields — list / hub grid (id optional until catalog row). */
+export const publicListingCardSchema = publicGuestListingSchema.extend({
   kindLabel: z.string(),
   areaLabel: z.string().nullable(),
   frontageLabel: z.string().nullable(),
   directionLabel: z.string().nullable(),
+  /** Hub xã (cấp 3) — optional until guest API fills from ward. */
+  communeSlug: z.string().min(1).nullable().optional(),
+  communeLabel: z.string().min(1).nullable().optional(),
+  /** Hub cấp 4 trong xã (thôn/KĐT/dự án) — `Address.detail`. Not area m². */
+  placeSlug: z.string().min(1).nullable().optional(),
+  placeLabel: z.string().min(1).nullable().optional(),
+});
+
+export type PublicListingCard = z.infer<typeof publicListingCardSchema>;
+
+/** Guest catalog card / SEO page — public-safe fields only. */
+export const publicCatalogListingSchema = publicListingCardSchema.extend({
+  id: z.string(),
 });
 
 export type PublicCatalogListing = z.infer<typeof publicCatalogListingSchema>;
@@ -156,6 +235,13 @@ export const publicCatalogListResponseSchema = z.object({
 });
 
 export type PublicCatalogListResponse = z.infer<typeof publicCatalogListResponseSchema>;
+
+/** Guest hub page: meta + published listings in that hub. */
+export const publicListingHubDetailSchema = publicListingHubSchema.extend({
+  items: z.array(publicListingCardSchema),
+});
+
+export type PublicListingHubDetail = z.infer<typeof publicListingHubDetailSchema>;
 
 export function clipMetaDescription(
   text: string,

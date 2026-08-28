@@ -1,3 +1,5 @@
+import { PUBLIC_LISTING_PATH } from '@crmanhung/shared';
+
 type Props = {
   publishedLotCount: number;
   pendingLotCount: number;
@@ -16,7 +18,7 @@ export function DashboardStats({
       <article className="pw-stat">
         <p className="pw-stat-label">Lô đang hiện</p>
         <p className="pw-stat-value">{publishedLotCount}</p>
-        <p className="pw-stat-hint">Khách thấy trên /mua-ban-nha-dat</p>
+        <p className="pw-stat-hint">Khách thấy trên {PUBLIC_LISTING_PATH}</p>
       </article>
       <article className="pw-stat">
         <p className="pw-stat-label">Chờ đăng</p>

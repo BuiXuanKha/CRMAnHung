@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { PUBLIC_LISTING_PATH } from '@crmanhung/shared';
 
 /**
  * Gọi Next on-demand revalidate qua loopback.
@@ -12,7 +13,7 @@ export class PublicWebRevalidateService {
   constructor(private readonly config: ConfigService) {}
 
   async revalidateListing(slug: string, opts?: { includeHome?: boolean }): Promise<void> {
-    const paths = [`/mua-ban-nha-dat/${slug}`, '/mua-ban-nha-dat', '/sitemap.xml'];
+    const paths = [`${PUBLIC_LISTING_PATH}/${slug}`, PUBLIC_LISTING_PATH, '/sitemap.xml'];
     if (opts?.includeHome) paths.push('/');
     await this.revalidatePaths(paths);
   }
