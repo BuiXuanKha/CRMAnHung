@@ -211,7 +211,7 @@ export function ProductDetailView({
               Chat qua Zalo
             </a>
             <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-              Gọi {ANHUNG_BRAND.hotlineDisplay}
+              Bấm là gọi: {ANHUNG_BRAND.hotlineDisplay}
             </a>
           </aside>
         </div>
@@ -267,7 +267,7 @@ export function ProductDetailView({
           Zalo
         </a>
         <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-          Gọi {ANHUNG_BRAND.hotlineDisplay}
+          Bấm là gọi: {ANHUNG_BRAND.hotlineDisplay}
         </a>
       </div>
     </div>
