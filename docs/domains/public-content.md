@@ -400,9 +400,7 @@ Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (
 }
 ```
 
-Map sang editor: nút **Dùng cho bài đăng** (sau khi có phản hồi) → mở modal §13.3 với `h1` → tiêu đề, `bodyHtml`, `slug`, `metaDescription`.
-
-**Bài Facebook (`facebookPost`):** textarea readonly **Bài Facebook** + nút **Chia sẻ Facebook** — copy `facebookPost` + URL `https://anhungland.com/mua-ban-nha-dat/{slug}` (ưu tiên slug GPT, không có thì slug lô) rồi mở Facebook để dán; cùng pattern §16.4 Chia sẻ (không sharer/`navigator.share`).
+Map sang editor: nút **Dùng cho bài đăng** (sau khi có phản hồi) → mở modal §13.3 với `h1` → tiêu đề, **`bodyHtml` → Mô tả công khai** (luôn ghi đè overlay cũ), `slug`, `metaDescription`. `facebookPost` giữ trong JSON — UI chia sẻ Facebook để sau.
 
 Trống: `Không có lô đang mở bán.`
 

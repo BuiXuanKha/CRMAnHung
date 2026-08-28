@@ -20,8 +20,10 @@ import '@/shared/ui/dialog.css';
 
 type Props = {
   lot: PublicWebStaffLotRow | null;
-  /** Prefill from GPT modal — applied once when editor opens. */
+  /** Prefill from GPT modal — applied when editor opens from «Dùng cho bài đăng». */
   gptPrefill?: LotGptEditorPrefill | null;
+  /** Bumps when GPT apply is clicked — remounts rich editor with fresh HTML. */
+  gptApplyId?: number;
   busy: boolean;
   error: string | null;
   onClose: () => void;
@@ -32,8 +34,7 @@ type Props = {
 const TITLE_MAX = 160;
 const META_MAX = 320;
 
-function initialBodyHtml(lot: PublicWebStaffLotRow, prefill?: LotGptEditorPrefill | null): string {
-  if (prefill?.bodyHtml?.trim()) return prefill.bodyHtml;
+function lotBodyHtml(lot: PublicWebStaffLotRow): string {
   if (lot.bodyHtml?.trim()) return lot.bodyHtml;
   return plainTextToListingBodyHtml(lot.excerpt);
 }
@@ -41,6 +42,7 @@ function initialBodyHtml(lot: PublicWebStaffLotRow, prefill?: LotGptEditorPrefil
 export function LotListingEditorDialog({
   lot,
   gptPrefill,
+  gptApplyId = 0,
   busy,
   error,
   onClose,
@@ -56,38 +58,52 @@ export function LotListingEditorDialog({
   const [metaDescription, setMetaDescription] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
-  const prefillKeyRef = useRef<string | null>(null);
+  const lotOpenKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (!lot) {
-      prefillKeyRef.current = null;
+      lotOpenKeyRef.current = null;
+      setTitle('');
+      setLocation('');
+      setPriceMode('CONTACT');
+      setPriceLabel('');
+      setBodyHtml('');
+      setSlugDraft('');
+      setMetaDescription('');
+      setParseError(null);
       return;
     }
-    const prefillKey = gptPrefill
-      ? `${lot.lodatId}:${gptPrefill.title}:${gptPrefill.slug}`
-      : lot.lodatId;
-    const isNewPrefill = prefillKeyRef.current !== prefillKey;
-    prefillKeyRef.current = prefillKey;
 
-    if (isNewPrefill) {
-      setTitle(gptPrefill?.title?.trim() || lot.title);
+    if (gptPrefill) {
+      setTitle(gptPrefill.title.trim() || lot.title);
       setLocation(lot.location);
       setPriceMode(lot.priceMode);
       setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
-      setBodyHtml(initialBodyHtml(lot, gptPrefill));
+      setBodyHtml(gptPrefill.bodyHtml);
       setSlugDraft(
-        gptPrefill?.slug?.trim() ||
+        gptPrefill.slug.trim() ||
           (!lot.id.startsWith('pending-') && lot.slug ? lot.slug : ''),
       );
-      setMetaDescription(
-        gptPrefill?.metaDescription?.trim() || lot.metaDescription?.trim() || '',
-      );
+      setMetaDescription(gptPrefill.metaDescription.trim() || lot.metaDescription?.trim() || '');
       setParseError(null);
+    } else {
+      const openKey = lot.lodatId;
+      if (lotOpenKeyRef.current !== openKey) {
+        lotOpenKeyRef.current = openKey;
+        setTitle(lot.title);
+        setLocation(lot.location);
+        setPriceMode(lot.priceMode);
+        setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
+        setBodyHtml(lotBodyHtml(lot));
+        setSlugDraft(!lot.id.startsWith('pending-') && lot.slug ? lot.slug : '');
+        setMetaDescription(lot.metaDescription?.trim() || '');
+        setParseError(null);
+      }
     }
 
     const t = window.setTimeout(() => titleRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
-  }, [lot, gptPrefill]);
+  }, [lot, gptPrefill, gptApplyId]);
 
   function parsedInput(requireBody: boolean): UpdatePublicListingDraftInput | null {
     const slug = slugDraft.trim();
@@ -265,6 +281,11 @@ export function LotListingEditorDialog({
               </span>
             </span>
             <PostRichEditor
+              key={
+                gptPrefill
+                  ? `gpt-${lot.lodatId}-${gptApplyId}`
+                  : `lot-${lot.lodatId}`
+              }
               value={bodyHtml}
               disabled={busy}
               onChange={setBodyHtml}
