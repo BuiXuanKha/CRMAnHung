@@ -22,6 +22,10 @@ export type PublicListingView = PublicGuestListing & {
   frontageLabel: string | null;
   directionLabel: string | null;
   imageUrls?: string[];
+  communeSlug?: string | null;
+  communeLabel?: string | null;
+  placeSlug?: string | null;
+  placeLabel?: string | null;
 };
 
 function catalogToView(row: PublicCatalogListing): PublicListingView {

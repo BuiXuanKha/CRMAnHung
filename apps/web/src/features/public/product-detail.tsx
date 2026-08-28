@@ -214,7 +214,7 @@ export function ProductDetailView({
           <section className="pd-related" aria-labelledby="pd-related-title">
             <div className="ph-section-head">
               <h2 id="pd-related-title">{relatedSection.title}</h2>
-              <Link href={PUBLIC_LISTING_PATH} className="ph-more">
+              <Link href={relatedSection.hubHref || PUBLIC_LISTING_PATH} className="ph-more">
                 Xem tất cả →
               </Link>
             </div>

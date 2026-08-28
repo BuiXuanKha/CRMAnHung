@@ -207,9 +207,8 @@ export const publicGuestListingSchema = z.object({
 
 export type PublicGuestListing = z.infer<typeof publicGuestListingSchema>;
 
-/** Guest catalog card / SEO page — public-safe fields only. */
-export const publicCatalogListingSchema = publicGuestListingSchema.extend({
-  id: z.string(),
+/** Guest listing card fields — list / hub grid (id optional until catalog row). */
+export const publicListingCardSchema = publicGuestListingSchema.extend({
   kindLabel: z.string(),
   areaLabel: z.string().nullable(),
   frontageLabel: z.string().nullable(),
@@ -222,6 +221,13 @@ export const publicCatalogListingSchema = publicGuestListingSchema.extend({
   placeLabel: z.string().min(1).nullable().optional(),
 });
 
+export type PublicListingCard = z.infer<typeof publicListingCardSchema>;
+
+/** Guest catalog card / SEO page — public-safe fields only. */
+export const publicCatalogListingSchema = publicListingCardSchema.extend({
+  id: z.string(),
+});
+
 export type PublicCatalogListing = z.infer<typeof publicCatalogListingSchema>;
 
 export const publicCatalogListResponseSchema = z.object({
@@ -232,7 +238,7 @@ export type PublicCatalogListResponse = z.infer<typeof publicCatalogListResponse
 
 /** Guest hub page: meta + published listings in that hub. */
 export const publicListingHubDetailSchema = publicListingHubSchema.extend({
-  items: z.array(publicCatalogListingSchema),
+  items: z.array(publicListingCardSchema),
 });
 
 export type PublicListingHubDetail = z.infer<typeof publicListingHubDetailSchema>;
