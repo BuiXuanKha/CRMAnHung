@@ -46,6 +46,10 @@ function catalogToView(row: PublicCatalogListing): PublicListingView {
     areaLabel: row.areaLabel,
     frontageLabel: row.frontageLabel,
     directionLabel: row.directionLabel,
+    ...(row.communeSlug != null ? { communeSlug: row.communeSlug } : {}),
+    ...(row.communeLabel != null ? { communeLabel: row.communeLabel } : {}),
+    ...(row.placeSlug != null ? { placeSlug: row.placeSlug } : {}),
+    ...(row.placeLabel != null ? { placeLabel: row.placeLabel } : {}),
   };
 }
 
