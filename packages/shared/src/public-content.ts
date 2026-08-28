@@ -78,6 +78,8 @@ export const lotGptRequestPayloadSchema = z.object({
   kind: z.string().optional(),
   excerpt: z.string().optional(),
   slug: z.string().optional(),
+  /** Free-text notes from admin — lô góc, tiện ích, vỉa hè… (không có trong CRM). */
+  extraDescription: z.string().optional(),
 });
 
 export type LotGptRequestPayload = z.infer<typeof lotGptRequestPayloadSchema>;

@@ -83,4 +83,9 @@ export class LotGptRequestDto {
   @IsString()
   @MaxLength(200)
   slug?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(4000)
+  extraDescription?: string;
 }

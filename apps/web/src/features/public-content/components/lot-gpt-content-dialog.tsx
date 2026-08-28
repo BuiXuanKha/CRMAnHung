@@ -22,6 +22,7 @@ type Props = {
  * Preview / edit GPT request JSON, send to Nest → OpenAI, show response.
  */
 export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
+  const [extraDescription, setExtraDescription] = useState('');
   const [jsonText, setJsonText] = useState('');
   const [responseText, setResponseText] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
@@ -29,15 +30,22 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
 
   useEffect(() => {
     if (!lot) {
+      setExtraDescription('');
       setJsonText('');
       setResponseText('');
       setParseError(null);
       return;
     }
+    setExtraDescription('');
     setJsonText(formatLotGptRequestJson(lot));
     setResponseText('');
     setParseError(null);
   }, [lot]);
+
+  function onExtraDescriptionChange(value: string) {
+    setExtraDescription(value);
+    if (lot) setJsonText(formatLotGptRequestJson(lot, value));
+  }
 
   async function handleSend() {
     setParseError(null);
@@ -80,10 +88,23 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
       {lot ? (
         <>
           <p className="crm-dialog-message">
-            JSON dưới đây gửi GPT (sửa được). Phản hồi hiện ở ô bên dưới sau khi bấm Gửi.
+            Nhập mô tả thêm (nếu có) — JSON bên dưới tự cập nhật. Bấm Gửi để gọi GPT.
           </p>
+          <label className="pw-gpt-json-label" htmlFor="pw-gpt-extra">
+            Mô tả thêm (tùy chọn)
+          </label>
+          <textarea
+            id="pw-gpt-extra"
+            className="pw-gpt-extra"
+            rows={3}
+            placeholder="VD: Lô góc, sát mẫu giáo, vỉa hè 3m, đèn cao áp…"
+            value={extraDescription}
+            disabled={busy}
+            onChange={(e) => onExtraDescriptionChange(e.target.value)}
+            aria-label="Mô tả thêm gửi GPT"
+          />
           <label className="pw-gpt-json-label" htmlFor="pw-gpt-json">
-            Dữ liệu gửi GPT
+            Dữ liệu gửi GPT (JSON)
           </label>
           <textarea
             id="pw-gpt-json"
