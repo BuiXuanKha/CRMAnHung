@@ -1,8 +1,12 @@
+import {
+  PUBLIC_LISTING_PATH,
+  PUBLIC_LISTING_PATH_LEGACY,
+} from '@crmanhung/shared';
+
 export const PUBLIC_SITE_ORIGIN = 'https://anhungland.com';
 export const PUBLIC_OG_DEFAULT = '/og-default.png';
 
-/** Guest catalog — keyword-friendly; old `/san-pham` 301s here. */
-export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat';
+export { PUBLIC_LISTING_PATH, PUBLIC_LISTING_PATH_LEGACY };
 
 export function listingHref(slug?: string): string {
   return slug ? `${PUBLIC_LISTING_PATH}/${slug}` : PUBLIC_LISTING_PATH;

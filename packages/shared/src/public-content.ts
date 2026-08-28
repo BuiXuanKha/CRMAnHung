@@ -11,6 +11,14 @@ import { LodatKind, PublicPostCategory, PublicPostStatus } from './enums.js';
 /** Google snippet length — clip excerpt / metaDescription to this. */
 export const META_DESCRIPTION_MAX = 160;
 
+/**
+ * Guest catalog URL prefix on anhungland.com (Nam Sách local SEO).
+ * Legacy `/mua-ban-nha-dat` and `/san-pham` 301 here — see apps/web next.config.
+ */
+export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat-huyen-nam-sach';
+
+export const PUBLIC_LISTING_PATH_LEGACY = '/mua-ban-nha-dat';
+
 export const publicListingPriceModeSchema = z.enum(['AMOUNT', 'CONTACT']);
 
 export type PublicListingPriceMode = z.infer<typeof publicListingPriceModeSchema>;

@@ -12,9 +12,12 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(__dirname, '../..'),
   transpilePackages: ['@crmanhung/shared'],
   async redirects() {
+    const list = '/mua-ban-nha-dat-huyen-nam-sach';
     return [
-      { source: '/san-pham', destination: '/mua-ban-nha-dat', permanent: true },
-      { source: '/san-pham/:slug', destination: '/mua-ban-nha-dat/:slug', permanent: true },
+      { source: '/san-pham', destination: list, permanent: true },
+      { source: '/san-pham/:path*', destination: `${list}/:path*`, permanent: true },
+      { source: '/mua-ban-nha-dat', destination: list, permanent: true },
+      { source: '/mua-ban-nha-dat/:path*', destination: `${list}/:path*`, permanent: true },
     ];
   },
 };

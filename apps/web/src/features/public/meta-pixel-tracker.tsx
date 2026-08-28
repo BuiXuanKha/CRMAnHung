@@ -10,7 +10,7 @@ declare global {
   }
 }
 
-/** PageView khi đổi trang; ViewProductList trên /mua-ban-nha-dat; ViewContent từ LotDetailMetaPixel. */
+/** PageView khi đổi trang; ViewProductList trên catalog lô; ViewContent từ LotDetailMetaPixel. */
 export function MetaPixelRouteTracker() {
   const pathname = usePathname();
   const skipFirstPageView = useRef(true);

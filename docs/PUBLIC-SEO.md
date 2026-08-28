@@ -46,7 +46,7 @@ Mỗi route public phải có:
 | Hạng mục | Quy ước |
 |----------|---------|
 | `app/robots.ts` | Cho phép crawl public; chặn `/login`, khu `(crm)` (`/khach-hang`, `/lo-dat`, …) |
-| `app/sitemap.ts` | URL public ổn định + **lô đã đăng** `/mua-ban-nha-dat/[slug]` (không nháp) |
+| `app/sitemap.ts` | URL public ổn định + **lô đã đăng** `/mua-ban-nha-dat-huyen-nam-sach/[slug]` (+ hub `/xa/…` khi có) |
 | HTTPS | Chỉ `https://anhungland.com` (www → apex hoặc ngược lại — một hướng, khớp canonical) |
 | `lang` | `<html lang="vi">` (đã có ở root layout) |
 
@@ -72,10 +72,10 @@ Next.js không có file HTML tĩnh — tương đương: snippet trong `app/layo
 | Pixel ID | `391165622297911` (public, hiện trong View Source) |
 | noscript | Ảnh 1×1 trong `<head>` (fallback tắt JS) |
 | SPA | `MetaPixelRouteTracker` — PageView khi đổi route Next `Link` (bỏ lần tải đầu) |
-| Sản phẩm | URL `/mua-ban-nha-dat` → custom **ViewProductList**; `/mua-ban-nha-dat/[slug]` → chuẩn **ViewContent** (`content_ids` = slug) |
+| Sản phẩm | URL `/mua-ban-nha-dat-huyen-nam-sach` → custom **ViewProductList**; `/…/[slug]` → chuẩn **ViewContent** (`content_ids` = slug) |
 | Dev | Tắt khi `next dev` (`NODE_ENV !== production`) |
 
-Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem chi tiết 1 lô; `ViewProductList` = khách vào danh sách. Có thể tạo conversion URL chứa `/mua-ban-nha-dat` trên `PageView` nếu muốn gom cả hai.
+Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem chi tiết 1 lô; `ViewProductList` = khách vào danh sách. Có thể tạo conversion URL chứa `/mua-ban-nha-dat-huyen-nam-sach` trên `PageView` nếu muốn gom cả hai.
 
 ---
 
@@ -113,15 +113,17 @@ CRM layout: khuyến nghị `robots: { index: false, follow: false }` để trá
 
 ---
 
-## 7. Công thức SEO lô đã đăng (`/mua-ban-nha-dat/[slug]`)
+## 7. Công thức SEO lô đã đăng (`/mua-ban-nha-dat-huyen-nam-sach/[slug]`)
 
 Áp dụng khi admin **Đăng web**. Khách và Google chỉ thấy field public (title, slug, excerpt, cover, `priceLabel`, vị trí). Không index lô nháp / đã gỡ.
+
+Path gốc: `/mua-ban-nha-dat-huyen-nam-sach` (cũ `/mua-ban-nha-dat` + `/san-pham` → **301**). Hub địa bàn: [`public-content.md`](./domains/public-content.md) §17.
 
 Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `packages/shared`. Field `metaDescription` **tuỳ chọn** — overlay soạn bài có thể điền sau; trống thì dùng excerpt.
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
-| **URL** | `https://anhungland.com/mua-ban-nha-dat/{slug}` — slug = **tên lô + địa chỉ** (không dấu, unique, ổn định sau khi tạo). `/san-pham/...` 301 | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
+| **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = **tên lô + địa chỉ** (không dấu, unique, ổn định sau khi tạo). Path cũ 301 | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
 | **Title** | `{title} tại {location}` + `\| An Hưng Land` nếu địa chỉ chưa nằm trong tên. Khớp H1. Không đổi slug | Nhồi «đất nền Đồng Nai giá rẻ…»; title chỉ mã lô không có xã/huyện |
 | **Meta description** | `metaDescription` nếu có, không thì **excerpt** public, cắt ~160 ký tự | Copy giống nhau mọi lô; mô tả CRM / hoa hồng |
 | **Canonical** | Đúng URL tuyệt đối ở trên | Hai URL một lô |
@@ -129,13 +131,13 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 | **Copy** | Excerpt + mô tả **riêng** từng lô (SSR) | Lặp đoạn khuôn + keyword |
 | **OG / Twitter** | title + description như trên; `og:image` = ảnh bìa; thiếu bìa → `/og-default.png`; `summary_large_image` | Ảnh PII / ảnh nội bộ CRM |
 | **JSON-LD** | `RealEstateListing` + `BreadcrumbList`. `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM |
-| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → lô; block sản phẩm khác; list `/mua-ban-nha-dat` | Orphan URL |
-| **Sitemap** | Chỉ lô `isPublished`. Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán |
-| **robots** | Cho phép `/mua-ban-nha-dat`; chặn `/login` + CRM | `Disallow: /mua-ban-nha-dat` |
+| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → lô; block sản phẩm khác; list + hub `/xa/…` | Orphan URL |
+| **Sitemap** | Chỉ lô `isPublished` (+ hub xã/cấp4 có lô). Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán |
+| **robots** | Cho phép path catalog mới; chặn `/login` + CRM | `Disallow` path catalog |
 
 **Giá trên SERP:** cùng `priceLabel` khách thấy. Chính sách làm mờ (3,2 tỷ → `3 tỷ xxx`) thì meta/OG/JSON-LD cũng mờ — không lộ số CRM.
 
-**Danh sách `/mua-ban-nha-dat`:** title/H1 `Nhà đất đang bán`; canonical `/mua-ban-nha-dat`; OG + `ItemList` các URL đã đăng.
+**Danh sách `/mua-ban-nha-dat-huyen-nam-sach`:** title/H1 `Nhà đất đang bán`; canonical đúng path; OG + `ItemList` các URL đã đăng.
 
 ---
 
@@ -148,7 +150,7 @@ Lô / bài ít đổi (giá làm mờ, copy ổn định lâu). **Không** reval
 | **Chiến lược** | ISR: `revalidate = false` (hoặc số rất lớn) + **on-demand** khi admin Lưu/Đăng/Gỡ/Xuất bản |
 | **Nguồn sự thật** | PostgreSQL; HTML guest = bản build/cache từ API public |
 | **Trigger** | Nest sau ghi DB thành công → `POST` Next `/api/revalidate` với `REVALIDATE_SECRET` **qua loopback** `PUBLIC_WEB_ORIGIN` (mặc định `http://127.0.0.1:5001`). Không gọi `https://anhungland.com/api/…` — nginx `/api/` đi Nest. |
-| **Path lô** | `/mua-ban-nha-dat/[slug]`, `/mua-ban-nha-dat`, `/sitemap.xml`, `/` (khi đăng/gỡ đổi trạng thái) |
+| **Path lô** | `/mua-ban-nha-dat-huyen-nam-sach/[slug]`, list + hub `/xa/…`, `/sitemap.xml`, `/` (khi đăng/gỡ đổi trạng thái) |
 | **Path bài** | `/{category}/[slug]`, list chuyên mục, `/`, sitemap |
 | **Gỡ / về nháp** | Revalidate + lần generate sau → 404; bỏ khỏi sitemap |
 | **HTML** | Nội dung chính (title, H1, bodyHtml đã sanitize) trong response đầu — không chỉ client fetch |

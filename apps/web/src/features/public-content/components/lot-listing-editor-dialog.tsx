@@ -6,6 +6,7 @@ import {
   listingBodyToExcerpt,
   stripPublicPostHtmlText,
   updatePublicListingDraftSchema,
+  PUBLIC_LISTING_PATH,
   type PublicListingPriceMode,
   type PublicWebStaffLotRow,
   type UpdatePublicListingDraftInput,
@@ -235,7 +236,9 @@ export function LotListingEditorDialog({
           </label>
           <p className="crm-slug-preview">
             <span className="crm-slug-preview__label">Xem trước URL</span>
-            <code className="crm-slug-preview__path">/mua-ban-nha-dat/{slugPreview}</code>
+            <code className="crm-slug-preview__path">
+              {PUBLIC_LISTING_PATH}/{slugPreview}
+            </code>
           </p>
 
           <label>

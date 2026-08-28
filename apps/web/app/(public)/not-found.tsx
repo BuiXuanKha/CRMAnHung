@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { ANHUNG_BRAND } from '@/features/public/brand';
-import { PUBLIC_SITE_ORIGIN } from '@/features/public/site';
+import { PUBLIC_LISTING_PATH, PUBLIC_SITE_ORIGIN } from '@/features/public/site';
 import '@/features/public/public-home.css';
 
 export const metadata: Metadata = {
@@ -29,7 +29,7 @@ export default function PublicNotFound() {
         <h1>Không tìm thấy trang</h1>
         <p>Liên kết có thể đã hết hạn hoặc nội dung đã được gỡ khỏi web.</p>
         <p>
-          <Link href="/mua-ban-nha-dat">Xem nhà đất đang bán</Link>
+          <Link href={PUBLIC_LISTING_PATH}>Xem nhà đất đang bán</Link>
         </p>
       </div>
     </div>

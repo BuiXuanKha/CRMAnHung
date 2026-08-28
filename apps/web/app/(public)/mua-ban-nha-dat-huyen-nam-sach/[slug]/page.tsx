@@ -13,6 +13,7 @@ import {
   getPublicLotSlugRedirect,
   getRelatedListingSection,
 } from '@/features/public/published-listings';
+import { listingHref } from '@/features/public/site';
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -22,7 +23,7 @@ export const revalidate = false;
 async function redirectIfLegacySlug(slug: string): Promise<void> {
   const toSlug = await getPublicLotSlugRedirect(slug);
   if (toSlug && toSlug !== slug) {
-    permanentRedirect(`/mua-ban-nha-dat/${toSlug}`);
+    permanentRedirect(listingHref(toSlug));
   }
 }
 
