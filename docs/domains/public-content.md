@@ -694,11 +694,11 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 #### Slice C — Hub xã (UI mock → API → nối)
 
-- [ ] Route `.../xa/[slug]/page.tsx` + metadata + JSON-LD `ItemList`
-- [ ] Mock ≥ 2 xã; 0 lô / slug sai → 404 noindex
-- [ ] Guest API: list hubs xã + detail hub xã + lô trong xã
-- [ ] Sitemap hub xã; revalidate khi đăng/gỡ lô
-- [ ] Link related «cùng xã» → hub xã
+- [x] Route `.../xa/[commune]/page.tsx` + metadata + JSON-LD `ItemList`
+- [x] Hub derive từ catalog (location → communeSlug) — mock/SSR; 0 lô / slug sai → 404 noindex
+- [ ] Guest API thật: list hubs xã + detail hub theo `wardId` (thay parse location)
+- [x] Sitemap hub xã; (revalidate hub path khi API sẵn)
+- [x] Link related «cùng xã» → hub xã
 
 #### Slice D — Hub cấp 4 trong xã
 
