@@ -44,6 +44,7 @@ export function PublicLotListPage() {
   const [lotConfirm, setLotConfirm] = useState<PublicWebStaffLotRow | null>(null);
   const [editorLot, setEditorLot] = useState<PublicWebStaffLotRow | null>(null);
   const [editorGptPrefill, setEditorGptPrefill] = useState<LotGptEditorPrefill | null>(null);
+  const [editorGptApplyId, setEditorGptApplyId] = useState(0);
   const [gptLot, setGptLot] = useState<PublicWebStaffLotRow | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
@@ -296,12 +297,14 @@ export function PublicLotListPage() {
       <LotListingEditorDialog
         lot={editorLot}
         gptPrefill={editorGptPrefill}
+        gptApplyId={editorGptApplyId}
         busy={editorBusy}
         error={editorError}
         onClose={() => {
           if (!editorBusy) {
             setEditorLot(null);
             setEditorGptPrefill(null);
+            setEditorGptApplyId(0);
             setEditorError(null);
           }
         }}
@@ -315,6 +318,7 @@ export function PublicLotListPage() {
         onApplyToEditor={(prefill) => {
           if (!gptLot) return;
           setEditorGptPrefill(prefill);
+          setEditorGptApplyId((id) => id + 1);
           setEditorError(null);
           setEditorLot(gptLot);
           setGptLot(null);
