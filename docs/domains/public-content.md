@@ -322,7 +322,7 @@ Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồ
 
 1. **Không** H1 (tên đã có trên menu trái: **Lô đất**).
 2. Ô tìm — khung trắng bo 12px, input viền `#cbd5e1` / focus xanh. Placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc. **Không** nút Đăng lô cạnh ô tìm.
-3. **Giữa — bảng** mọi lô NV đang Mở bán. Lọc cột §4.5.5. Không cột Thao tác / công tắc rao bán. Không tên khách. Cột **AI GPT** (nút GPT) → modal xem thông tin lô sẽ gửi GPT (API sau).
+3. **Giữa — bảng** mọi lô NV đang Mở bán. Lọc cột §4.5.5. Không cột Thao tác / công tắc rao bán. Không tên khách. Cột **AI GPT** (nút GPT) → modal textarea JSON request GPT (§13.3a; API sau).
 4. Bấm hàng một lần → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm / editor.
 5. Double-click hàng → modal **Soạn bài đăng** (§13.3). Lần bấm đầu vẫn chọn + preview.
 6. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list Mở bán).
@@ -353,11 +353,31 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 | Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM |
 | NV | Tên nhân viên đang rao lô |
 | Web | **Đang hiện** `green` · **Chờ đăng** `gray` |
-| AI GPT | Nút **GPT** (`Sparkles`) → `LotGptContentDialog` — hiện payload lô công khai sẽ gửi GPT; **Gửi GPT** disabled tới khi có API |
+| AI GPT | Nút **GPT** (`Sparkles`) → `LotGptContentDialog` — textarea JSON payload gửi GPT; **Gửi** disabled tới khi có API |
 
 ### 13.3a Modal Tạo content bằng AI GPT
 
-Icon Lucide `Sparkles`. `CrmDialog`. Hiện: tiêu đề, địa chỉ, loại, DT, MT·hướng, giá công khai, trạng thái web, excerpt. Không PII khách. Nút **Gửi GPT** (disabled — chờ contract JSON phản hồi).
+Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = **textarea** (JSON request GPT, sửa được trước khi gửi) + **Đóng** · **Gửi** (disabled — chờ endpoint + schema phản hồi).
+
+**Request JSON (bắt buộc):**
+
+```json
+{
+  "title": "…",
+  "location": { "village": "…", "commune": "…", "district": "…", "province": "…" },
+  "area": 107,
+  "residentialArea": 99,
+  "frontage": 4.75,
+  "direction": "Nam",
+  "price": null,
+  "priceText": "Giá đẹp – thương lượng trực tiếp với chủ"
+}
+```
+
+- `location.*` tách từ chuỗi địa chỉ public (detail → village, ward → commune, …); thiếu = `""`.
+- `residentialArea`: parse từ tiêu đề/mô tả (`Thổ cư Nm²`) nếu có; không có trong DB → `null`.
+- `price`: số VND từ nhãn giá công khai khi parse được; không thì `null` + `priceText`.
+- Thêm khi có: `kind`, `excerpt`, `slug`. Không PII khách / giá CRM thô.
 
 Trống: `Không có lô đang mở bán.`
 
