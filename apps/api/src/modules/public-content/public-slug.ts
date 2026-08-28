@@ -6,6 +6,7 @@ export {
   seoImageFileName,
   seoLotImageObjectKey,
   seoAddressImageObjectKey,
+  isSeoNamedImageKey,
 } from '@crmanhung/shared';
 
 export function kindLabel(kind: string): string {

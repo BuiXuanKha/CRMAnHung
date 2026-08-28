@@ -15,6 +15,7 @@ import {
   seoImageFileName,
   seoLotImageObjectKey,
   seoImageExt,
+  isSeoNamedImageKey,
 } from '../packages/shared/dist/index.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -208,12 +209,22 @@ if (seoKey.startsWith('lodats/clxyz123/') && seoKey.endsWith(seoName)) {
   bad(`seoLotImageObjectKey: ${seoKey}`);
 }
 
+if (isSeoNamedImageKey(seoName) && !isSeoNamedImageKey('lodats/x/IMG_4521.jpg')) {
+  ok('isSeoNamedImageKey nhận slug-anh-n, bỏ IMG_');
+} else {
+  bad('isSeoNamedImageKey sai');
+}
+
 const addImageSrc = read('apps/api/src/modules/lodats/lodats.service.ts');
 if (addImageSrc.includes('uniqueSeoLotImageKey') && addImageSrc.includes('copyPublicImageToSeoLotKey')) {
   ok('upload lô + ảnh chat dùng key SEO');
 } else {
   bad('lodats.service chưa gắn uniqueSeoLotImageKey');
 }
+
+const seoScript = resolve(root, 'apps/api/scripts/seo-copy-lot-images.ts');
+if (existsSync(seoScript)) ok('script images:seo-copy');
+else bad('thiếu scripts/seo-copy-lot-images.ts');
 
 console.log('\nRoute files');
 const routes = [

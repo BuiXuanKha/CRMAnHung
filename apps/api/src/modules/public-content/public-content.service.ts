@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
   PayloadTooLargeException,
 } from '@nestjs/common';
@@ -23,6 +24,11 @@ import {
   type HubSlugMaps,
 } from './public-listing-hub-slugs';
 import { formatM, kindLabel, toListingPublicSlug, toPublicSlug } from './public-slug';
+import {
+  applySeoImageCopy,
+  planSeoAddressImageCopy,
+  planSeoLotImageCopy,
+} from '../lodats/lodat-seo-image-upload';
 
 const POST_CATEGORIES = new Set([
   'tin-tuc',
@@ -49,13 +55,14 @@ type PublicPostRow = {
 };
 
 const ADDR_SELECT = {
+  id: true,
   detail: true,
   ward: { select: { id: true, name: true, isHidden: true } },
   district: { select: { id: true, name: true, isHidden: true } },
   province: { select: { name: true, isHidden: true } },
   images: {
     orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
-    select: { objectKey: true },
+    select: { id: true, objectKey: true },
   },
 } satisfies Prisma.AddressSelect;
 
@@ -72,7 +79,7 @@ const LODAT_INCLUDE = {
   },
   images: {
     orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
-    select: { objectKey: true },
+    select: { id: true, objectKey: true },
   },
   maps: {
     where: { isActive: true },
@@ -86,6 +93,8 @@ type ListingRow = Prisma.PublicLotListingGetPayload<{ include: { lodat: { includ
 
 @Injectable()
 export class PublicContentService {
+  private readonly logger = new Logger(PublicContentService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
@@ -415,6 +424,7 @@ export class PublicContentService {
         },
         include: { lodat: { include: LODAT_INCLUDE } },
       });
+      await this.ensureSeoImageKeysForLodat(lodat);
       await this.revalidate.revalidateListing(created.slug, { includeHome: true });
       return this.toAdminRow(created);
     }
@@ -430,6 +440,9 @@ export class PublicContentService {
       },
       include: { lodat: { include: LODAT_INCLUDE } },
     });
+    if (isPublished) {
+      await this.ensureSeoImageKeysForLodat(lodat);
+    }
     await this.revalidate.revalidateListing(saved.slug, {
       includeHome: isPublished !== wasPublished,
     });
@@ -537,6 +550,52 @@ export class PublicContentService {
       addr.province && !addr.province.isHidden ? addr.province.name : null,
     ].filter(Boolean) as string[];
     return parts.join(', ');
+  }
+
+  /** Copy UUID / IMG_* lot (and project address) photos to SEO CDN keys. Keep source objects. */
+  private async ensureSeoImageKeysForLodat(lodat: LodatLoaded): Promise<void> {
+    if (!this.storage.isConfigured()) return;
+    const title = this.lodatTitle(lodat);
+    const location = this.lodatLocation(lodat);
+    try {
+      for (let i = 0; i < lodat.images.length; i += 1) {
+        const img = lodat.images[i]!;
+        const plan = await planSeoLotImageCopy(this.storage, img, {
+          lodatId: lodat.id,
+          title,
+          location,
+          index: i + 1,
+        });
+        if (!plan) continue;
+        await applySeoImageCopy(this.storage, plan);
+        await this.prisma.lodatImage.update({
+          where: { id: plan.id },
+          data: { objectKey: plan.to },
+        });
+      }
+      const addr =
+        lodat.projectLotId && lodat.projectLot?.address ? lodat.projectLot.address : null;
+      if (!addr?.id || !addr.images?.length) return;
+      for (let i = 0; i < addr.images.length; i += 1) {
+        const img = addr.images[i]!;
+        const plan = await planSeoAddressImageCopy(this.storage, img, {
+          addressId: addr.id,
+          title: lodat.projectLot?.title?.trim() || addr.detail?.trim() || title,
+          location,
+          index: i + 1,
+        });
+        if (!plan) continue;
+        await applySeoImageCopy(this.storage, plan);
+        await this.prisma.addressImage.update({
+          where: { id: plan.id },
+          data: { objectKey: plan.to },
+        });
+      }
+    } catch (err) {
+      this.logger.warn(
+        `SEO image copy skipped for lodat ${lodat.id}: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   }
 
   private imageUrls(lodat: LodatLoaded): string[] {

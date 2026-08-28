@@ -1,6 +1,7 @@
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
@@ -191,6 +192,49 @@ export class StorageService {
       };
     } catch {
       return null;
+    }
+  }
+
+  /**
+   * Server-side copy in the public bucket (old UUID / IMG_* → SEO filename).
+   * Does not delete the source key.
+   */
+  async copyPublicObject(
+    fromKey: string,
+    toKey: string,
+    contentFileName?: string,
+  ): Promise<void> {
+    const from = this.sanitizeObjectKey(fromKey);
+    const to = this.sanitizeObjectKey(toKey);
+    if (from === to) return;
+    const bucket = this.publicBucket();
+    let contentType = 'image/jpeg';
+    try {
+      const head = await this.getClient().send(
+        new HeadObjectCommand({ Bucket: bucket, Key: from }),
+      );
+      if (head.ContentType) contentType = head.ContentType;
+    } catch (err) {
+      this.logger.error(`R2 HeadObject failed for ${from}`, err as Error);
+      throw new ServiceUnavailableException('Không đọc được ảnh nguồn trên R2');
+    }
+    const copySource = `${bucket}/${from.split('/').map(encodeURIComponent).join('/')}`;
+    try {
+      await this.getClient().send(
+        new CopyObjectCommand({
+          Bucket: bucket,
+          CopySource: copySource,
+          Key: to,
+          ContentType: contentType,
+          ContentDisposition: this.contentDisposition(
+            contentFileName || path.basename(to),
+          ),
+          MetadataDirective: 'REPLACE',
+        }),
+      );
+    } catch (err) {
+      this.logger.error(`R2 CopyObject ${from} → ${to} failed`, err as Error);
+      throw new ServiceUnavailableException('Không copy được ảnh sang tên SEO');
     }
   }
 

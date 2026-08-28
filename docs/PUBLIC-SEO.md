@@ -187,7 +187,18 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 
 Ảnh lô / bài đã có ngữ cảnh mạnh (tên, xã/huyện, excerpt, giá công bố). Gắn đúng tín hiệu thì Google Images và link chia sẻ dùng được.
 
-**Lúc tạo lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server đặt object key CDN theo **tên lô + địa chỉ** (cùng slug trang khách). Ảnh cũ UUID giữ nguyên — alt/sitemap vẫn bù; upload mới thì URL tự mang thông tin.
+**Lúc tạo lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server đặt object key CDN theo **tên lô + địa chỉ** (cùng slug trang khách).
+
+**Kho ảnh cũ (UUID / `IMG_*` / key chat):** **không đổi tên tại chỗ** — URL đã index / ảnh chat còn trỏ key cũ. Giải pháp: **copy** sang key SEO, DB trỏ file mới, **giữ file cũ**.
+
+| Cách | Khi nào | Lệnh / hành vi |
+|------|---------|----------------|
+| Dry-run | Xem sẽ copy những gì | `pnpm images:seo-copy` (mặc định lô **đã Đăng web**) |
+| Apply | Chạy thật trên VPS | `APPLY=1 pnpm images:seo-copy` |
+| Toàn bộ CRM | Cả lô chưa đăng | `APPLY=1 SCOPE=all pnpm images:seo-copy` |
+| Khi Đăng web | Tự copy ảnh lô (+ ảnh dự án) còn tên xấu | `setPublished` — không chặn đăng nếu copy lỗi |
+
+Không xóa object R2 cũ. Chat Messenger giữ key gốc. Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent).
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|

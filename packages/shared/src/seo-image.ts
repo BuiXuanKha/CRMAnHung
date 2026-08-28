@@ -56,3 +56,11 @@ export function seoLotImageObjectKey(lodatId: string, fileName: string): string 
 export function seoAddressImageObjectKey(addressId: string, fileName: string): string {
   return `addresses/${safeIdSegment(addressId, 'dia-chi')}/${fileName}`;
 }
+
+const SEO_FILE_RE = /^.+-anh-\d+(-[a-z0-9]{1,8})?\.(jpg|jpeg|png|webp|gif)$/i;
+
+/** True when the CDN basename already follows `{slug}-anh-{n}.ext`. */
+export function isSeoNamedImageKey(objectKey: string): boolean {
+  const base = objectKey.replace(/^\/+/, '').split('/').pop() ?? '';
+  return SEO_FILE_RE.test(base);
+}
