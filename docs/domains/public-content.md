@@ -400,7 +400,7 @@ Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (
 }
 ```
 
-Map sang editor: `seoTitle`/`h1` → tiêu đề; `metaDescription`; `slug`; `excerpt`; `bodyHtml`. `facebookPost` = slice sau (chia sẻ FB).
+Map sang editor: nút **Dùng cho bài đăng** (sau khi có phản hồi) → mở modal §13.3 với `h1` → tiêu đề, `bodyHtml`, `slug`, `metaDescription`. `facebookPost` = slice sau.
 
 Trống: `Không có lô đang mở bán.`
 

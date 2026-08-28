@@ -8,6 +8,7 @@ import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { listStaffOpenLots, setPublicLotPublished, updatePublicListingDraft } from './api';
 import { LotGptContentDialog } from './components/lot-gpt-content-dialog';
 import { LotListingEditorDialog } from './components/lot-listing-editor-dialog';
+import type { LotGptEditorPrefill } from './lot-gpt-apply';
 import { LotListingPreview } from './components/lot-listing-preview';
 import { LotWebConfirm } from './components/lot-web-confirm';
 import { StaffLotFilterBar } from './components/staff-lot-filter-bar';
@@ -42,6 +43,7 @@ export function PublicLotListPage() {
   const [selectedId, setSelectedId] = useState<string | null>(peeked?.selectedId ?? null);
   const [lotConfirm, setLotConfirm] = useState<PublicWebStaffLotRow | null>(null);
   const [editorLot, setEditorLot] = useState<PublicWebStaffLotRow | null>(null);
+  const [editorGptPrefill, setEditorGptPrefill] = useState<LotGptEditorPrefill | null>(null);
   const [gptLot, setGptLot] = useState<PublicWebStaffLotRow | null>(null);
   const [editorError, setEditorError] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
@@ -114,6 +116,7 @@ export function PublicLotListPage() {
     setSelectedId(lodatId);
     persist(lodatId);
     setEditorError(null);
+    setEditorGptPrefill(null);
     setEditorLot(row);
   };
 
@@ -292,11 +295,13 @@ export function PublicLotListPage() {
 
       <LotListingEditorDialog
         lot={editorLot}
+        gptPrefill={editorGptPrefill}
         busy={editorBusy}
         error={editorError}
         onClose={() => {
           if (!editorBusy) {
             setEditorLot(null);
+            setEditorGptPrefill(null);
             setEditorError(null);
           }
         }}
@@ -307,6 +312,14 @@ export function PublicLotListPage() {
         lot={gptLot}
         onClose={() => setGptLot(null)}
         onFlash={flash}
+        onApplyToEditor={(prefill) => {
+          if (!gptLot) return;
+          setEditorGptPrefill(prefill);
+          setEditorError(null);
+          setEditorLot(gptLot);
+          setGptLot(null);
+          flash('Đã mở Soạn bài đăng với nội dung GPT.');
+        }}
       />
       <LotWebConfirm
         lot={lotConfirm}

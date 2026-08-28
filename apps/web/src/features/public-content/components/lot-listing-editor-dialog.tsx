@@ -14,11 +14,14 @@ import { Icon } from '@/shared/ui/icon';
 import { CrmDialog } from '@/shared/ui/dialog';
 import { plainTextToListingBodyHtml, publicListingInternalsHint } from '../listing-copy';
 import { toListingPublicSlug } from '../display';
+import type { LotGptEditorPrefill } from '../lot-gpt-apply';
 import { PostRichEditor } from './post-rich-editor';
 import '@/shared/ui/dialog.css';
 
 type Props = {
   lot: PublicWebStaffLotRow | null;
+  /** Prefill from GPT modal — applied once when editor opens. */
+  gptPrefill?: LotGptEditorPrefill | null;
   busy: boolean;
   error: string | null;
   onClose: () => void;
@@ -27,14 +30,17 @@ type Props = {
 };
 
 const TITLE_MAX = 160;
+const META_MAX = 320;
 
-function initialBodyHtml(lot: PublicWebStaffLotRow): string {
+function initialBodyHtml(lot: PublicWebStaffLotRow, prefill?: LotGptEditorPrefill | null): string {
+  if (prefill?.bodyHtml?.trim()) return prefill.bodyHtml;
   if (lot.bodyHtml?.trim()) return lot.bodyHtml;
   return plainTextToListingBodyHtml(lot.excerpt);
 }
 
 export function LotListingEditorDialog({
   lot,
+  gptPrefill,
   busy,
   error,
   onClose,
@@ -46,28 +52,54 @@ export function LotListingEditorDialog({
   const [priceMode, setPriceMode] = useState<PublicListingPriceMode>('CONTACT');
   const [priceLabel, setPriceLabel] = useState('');
   const [bodyHtml, setBodyHtml] = useState('');
+  const [slugDraft, setSlugDraft] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const titleRef = useRef<HTMLInputElement>(null);
+  const prefillKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
-    if (!lot) return;
-    setTitle(lot.title);
-    setLocation(lot.location);
-    setPriceMode(lot.priceMode);
-    setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
-    setBodyHtml(initialBodyHtml(lot));
-    setParseError(null);
+    if (!lot) {
+      prefillKeyRef.current = null;
+      return;
+    }
+    const prefillKey = gptPrefill
+      ? `${lot.lodatId}:${gptPrefill.title}:${gptPrefill.slug}`
+      : lot.lodatId;
+    const isNewPrefill = prefillKeyRef.current !== prefillKey;
+    prefillKeyRef.current = prefillKey;
+
+    if (isNewPrefill) {
+      setTitle(gptPrefill?.title?.trim() || lot.title);
+      setLocation(lot.location);
+      setPriceMode(lot.priceMode);
+      setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
+      setBodyHtml(initialBodyHtml(lot, gptPrefill));
+      setSlugDraft(
+        gptPrefill?.slug?.trim() ||
+          (!lot.id.startsWith('pending-') && lot.slug ? lot.slug : ''),
+      );
+      setMetaDescription(
+        gptPrefill?.metaDescription?.trim() || lot.metaDescription?.trim() || '',
+      );
+      setParseError(null);
+    }
+
     const t = window.setTimeout(() => titleRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
-  }, [lot]);
+  }, [lot, gptPrefill]);
 
   function parsedInput(requireBody: boolean): UpdatePublicListingDraftInput | null {
+    const slug = slugDraft.trim();
+    const meta = metaDescription.trim();
     const parsed = updatePublicListingDraftSchema.safeParse({
       title,
       location,
       priceMode,
       priceLabel: priceMode === 'AMOUNT' ? priceLabel.trim() || null : null,
       bodyHtml,
+      ...(slug ? { slug } : {}),
+      metaDescription: meta || null,
     });
     if (!parsed.success) {
       setParseError(parsed.error.issues[0]?.message ?? 'Dữ liệu không hợp lệ.');
@@ -83,9 +115,10 @@ export function LotListingEditorDialog({
 
   const excerptPreview = listingBodyToExcerpt(bodyHtml);
   const slugPreview =
-    lot && !lot.id.startsWith('pending-') && lot.slug
+    slugDraft.trim() ||
+    (lot && !lot.id.startsWith('pending-') && lot.slug
       ? lot.slug
-      : toListingPublicSlug(title.trim() || 'lo-dat', location);
+      : toListingPublicSlug(title.trim() || 'lo-dat', location));
 
   return (
     <CrmDialog
@@ -104,6 +137,11 @@ export function LotListingEditorDialog({
             if (input) void onSaveDraft(input);
           }}
         >
+          {gptPrefill ? (
+            <p className="crm-form-hint pw-editor-gpt-hint">
+              Đã điền từ GPT — kiểm tra tiêu đề, slug và mô tả trước khi lưu.
+            </p>
+          ) : null}
           <p className="crm-form-hint">
             Copy công khai cho trang khách — không copy hoa hồng, ghi chú chủ nhà hay thông tin khách.
             Lưu nháp được thiếu mô tả; <strong>Đăng web</strong> cần nội dung.
@@ -155,10 +193,40 @@ export function LotListingEditorDialog({
             />
           </label>
 
+          <label>
+            <span className="crm-field-head">
+              <span>Đường dẫn (slug)</span>
+            </span>
+            <input
+              value={slugDraft}
+              onChange={(e) => setSlugDraft(e.target.value)}
+              placeholder="ban-lo-33-dau-gia-man-de"
+              maxLength={200}
+              disabled={busy}
+            />
+          </label>
           <p className="crm-slug-preview">
-            <span className="crm-slug-preview__label">Đường dẫn dự kiến</span>
+            <span className="crm-slug-preview__label">Xem trước URL</span>
             <code className="crm-slug-preview__path">/mua-ban-nha-dat/{slugPreview}</code>
           </p>
+
+          <label>
+            <span className="crm-field-head">
+              <span>Meta description (SEO)</span>
+              <span className="crm-field-meta" aria-live="polite">
+                {metaDescription.length}/{META_MAX}
+              </span>
+            </span>
+            <textarea
+              className="pw-gpt-extra"
+              rows={2}
+              value={metaDescription}
+              onChange={(e) => setMetaDescription(e.target.value)}
+              placeholder="Tóm tắt ~140–160 ký tự cho Google…"
+              maxLength={META_MAX}
+              disabled={busy}
+            />
+          </label>
 
           <label>
             Giá trên web khách

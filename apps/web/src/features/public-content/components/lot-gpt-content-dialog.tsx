@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, PenLine } from 'lucide-react';
 import {
   lotGptRequestPayloadSchema,
   type PublicWebStaffLotRow,
@@ -10,18 +10,21 @@ import { CrmDialog } from '@/shared/ui/dialog';
 import { Icon } from '@/shared/ui/icon';
 import { generateLotGptContent } from '../api';
 import { formatLotGptRequestJson } from '../lot-gpt-context';
+import { lotGptToEditorPrefill, parseLotGptContentResult } from '../lot-gpt-apply';
+import type { LotGptEditorPrefill } from '../lot-gpt-apply';
 import '@/shared/ui/dialog.css';
 
 type Props = {
   lot: PublicWebStaffLotRow | null;
   onClose: () => void;
   onFlash?: (message: string) => void;
+  onApplyToEditor?: (prefill: LotGptEditorPrefill) => void;
 };
 
 /**
  * Preview / edit GPT request JSON, send to Nest → OpenAI, show response.
  */
-export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
+export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: Props) {
   const [extraDescription, setExtraDescription] = useState('');
   const [jsonText, setJsonText] = useState('');
   const [responseText, setResponseText] = useState('');
@@ -48,6 +51,13 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
     setExtraDescription(value);
     setParseError(null);
     if (lot) setJsonText(formatLotGptRequestJson(lot, value));
+  }
+
+  const gptResult = responseText ? parseLotGptContentResult(responseText) : null;
+
+  function handleApplyToEditor() {
+    if (!gptResult || !onApplyToEditor) return;
+    onApplyToEditor(lotGptToEditorPrefill(gptResult));
   }
 
   async function handleSend() {
@@ -155,6 +165,17 @@ export function LotGptContentDialog({ lot, onClose, onFlash }: Props) {
             <button type="button" className="crm-btn" disabled={busy} onClick={onClose}>
               Đóng
             </button>
+            {gptResult && onApplyToEditor ? (
+              <button
+                type="button"
+                className="crm-btn"
+                disabled={busy}
+                onClick={handleApplyToEditor}
+              >
+                <Icon icon={PenLine} size="sm" />
+                Dùng cho bài đăng
+              </button>
+            ) : null}
             <button
               type="button"
               className="crm-btn primary"
