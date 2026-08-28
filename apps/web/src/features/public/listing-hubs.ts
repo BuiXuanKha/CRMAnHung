@@ -4,10 +4,16 @@ import {
   type PublicListingHub,
   type PublicListingHubDetail,
 } from '@crmanhung/shared';
+import {
+  getCommuneHubDetailFromApi,
+  getPlaceHubDetailFromApi,
+  listCommuneHubsFromApi,
+  listPlaceHubsFromApi,
+} from '@/features/public-content/api';
 import { parseLotGptLocation } from '@/features/public-content/lot-gpt-context';
 import { listPublicCatalog, type PublicListingView } from './published-listings';
 
-/** Enrich catalog row with hub fields from public location string (until API fills them). */
+/** Enrich catalog row with hub fields from public location string (mock / fallback). */
 export function withHubFieldsFromLocation<T extends PublicListingCard | PublicListingView>(
   row: T,
 ): T {
@@ -35,51 +41,63 @@ function sortListings(rows: PublicListingView[]): PublicListingView[] {
   });
 }
 
-export async function listCommuneHubs(): Promise<PublicListingHub[]> {
-  const catalog = (await listPublicCatalog()).map(withHubFieldsFromLocation);
-  const bySlug = new Map<
-    string,
-    { label: string; district: string; province: string; count: number; updatedAt?: string }
-  >();
-
-  for (const row of catalog) {
-    const slug = row.communeSlug?.trim();
-    const label = row.communeLabel?.trim();
-    if (!slug || !label) continue;
-    const parts = parseLotGptLocation(row.location ?? '');
-    const prev = bySlug.get(slug);
-    const updatedAt = row.updatedAt;
-    if (prev) {
-      prev.count += 1;
-      if (updatedAt && (!prev.updatedAt || updatedAt > prev.updatedAt)) {
-        prev.updatedAt = updatedAt;
-      }
-    } else {
-      bySlug.set(slug, {
-        label,
-        district: parts.district.trim(),
-        province: parts.province.trim(),
-        count: 1,
-        ...(updatedAt ? { updatedAt } : {}),
-      });
-    }
-  }
-
-  return [...bySlug.entries()]
-    .map(([slug, meta]) => ({
-      kind: 'commune' as const,
-      slug,
-      label: meta.label,
-      listingCount: meta.count,
-      ...(meta.district ? { districtLabel: meta.district } : {}),
-      ...(meta.province ? { provinceLabel: meta.province } : {}),
-      ...(meta.updatedAt ? { updatedAt: meta.updatedAt } : {}),
-    }))
-    .filter((h) => h.listingCount > 0)
-    .sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+function hubDetailItemsToViews(items: PublicListingHubDetail['items']): PublicListingView[] {
+  return sortListings(items as PublicListingView[]);
 }
 
-export async function getCommuneHubDetail(
+function listCommuneHubsFromCatalog(): Promise<PublicListingHub[]> {
+  return listPublicCatalog().then((catalog) => {
+    const enriched = catalog.map(withHubFieldsFromLocation);
+    const bySlug = new Map<
+      string,
+      { label: string; district: string; province: string; count: number; updatedAt?: string }
+    >();
+
+    for (const row of enriched) {
+      const slug = row.communeSlug?.trim();
+      const label = row.communeLabel?.trim();
+      if (!slug || !label) continue;
+      const parts = parseLotGptLocation(row.location ?? '');
+      const prev = bySlug.get(slug);
+      const updatedAt = row.updatedAt;
+      if (prev) {
+        prev.count += 1;
+        if (updatedAt && (!prev.updatedAt || updatedAt > prev.updatedAt)) {
+          prev.updatedAt = updatedAt;
+        }
+      } else {
+        bySlug.set(slug, {
+          label,
+          district: parts.district.trim(),
+          province: parts.province.trim(),
+          count: 1,
+          ...(updatedAt ? { updatedAt } : {}),
+        });
+      }
+    }
+
+    return [...bySlug.entries()]
+      .map(([slug, meta]) => ({
+        kind: 'commune' as const,
+        slug,
+        label: meta.label,
+        listingCount: meta.count,
+        ...(meta.district ? { districtLabel: meta.district } : {}),
+        ...(meta.province ? { provinceLabel: meta.province } : {}),
+        ...(meta.updatedAt ? { updatedAt: meta.updatedAt } : {}),
+      }))
+      .filter((h) => h.listingCount > 0)
+      .sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+  });
+}
+
+export async function listCommuneHubs(): Promise<PublicListingHub[]> {
+  const fromApi = await listCommuneHubsFromApi();
+  if (fromApi != null) return fromApi;
+  return listCommuneHubsFromCatalog();
+}
+
+async function getCommuneHubDetailFromCatalog(
   communeSlug: string,
 ): Promise<PublicListingHubDetail | null> {
   const slug = communeSlug.trim();
@@ -109,6 +127,17 @@ export async function getCommuneHubDetail(
   };
 }
 
+export async function getCommuneHubDetail(
+  communeSlug: string,
+): Promise<PublicListingHubDetail | null> {
+  const fromApi = await getCommuneHubDetailFromApi(communeSlug);
+  if (fromApi === null) return null;
+  if (fromApi) {
+    return { ...fromApi, items: hubDetailItemsToViews(fromApi.items) };
+  }
+  return getCommuneHubDetailFromCatalog(communeSlug);
+}
+
 export function communeHubHeadline(hub: PublicListingHub): string {
   if (hub.districtLabel?.trim()) {
     return `Nhà đất ${hub.label}, ${hub.districtLabel.trim()}`;
@@ -130,58 +159,66 @@ function placeHubMapKey(communeSlug: string, placeSlug: string): PlaceHubKey {
   return `${communeSlug}/${placeSlug}`;
 }
 
-/** Place hubs (cấp 4 — thôn/KĐT/dự án trong xã). Optional filter by commune slug. */
-export async function listPlaceHubs(communeSlug?: string): Promise<PublicListingHub[]> {
-  const filter = communeSlug?.trim();
-  const catalog = (await listPublicCatalog()).map(withHubFieldsFromLocation);
-  const byKey = new Map<
-    PlaceHubKey,
-    PublicListingHub & { district: string; province: string; updatedAt?: string }
-  >();
+function listPlaceHubsFromCatalog(communeSlug?: string): Promise<PublicListingHub[]> {
+  return listPublicCatalog().then((catalog) => {
+    const filter = communeSlug?.trim();
+    const enriched = catalog.map(withHubFieldsFromLocation);
+    const byKey = new Map<
+      PlaceHubKey,
+      PublicListingHub & { district: string; province: string; updatedAt?: string }
+    >();
 
-  for (const row of catalog) {
-    const cSlug = row.communeSlug?.trim();
-    const cLabel = row.communeLabel?.trim();
-    const pSlug = row.placeSlug?.trim();
-    const pLabel = row.placeLabel?.trim();
-    if (!cSlug || !cLabel || !pSlug || !pLabel) continue;
-    if (filter && cSlug !== filter) continue;
-    const parts = parseLotGptLocation(row.location ?? '');
-    const key = placeHubMapKey(cSlug, pSlug);
-    const prev = byKey.get(key);
-    const updatedAt = row.updatedAt;
-    if (prev) {
-      prev.listingCount += 1;
-      if (updatedAt && (!prev.updatedAt || updatedAt > prev.updatedAt)) {
-        prev.updatedAt = updatedAt;
+    for (const row of enriched) {
+      const cSlug = row.communeSlug?.trim();
+      const cLabel = row.communeLabel?.trim();
+      const pSlug = row.placeSlug?.trim();
+      const pLabel = row.placeLabel?.trim();
+      if (!cSlug || !cLabel || !pSlug || !pLabel) continue;
+      if (filter && cSlug !== filter) continue;
+      const parts = parseLotGptLocation(row.location ?? '');
+      const key = placeHubMapKey(cSlug, pSlug);
+      const prev = byKey.get(key);
+      const updatedAt = row.updatedAt;
+      if (prev) {
+        prev.listingCount += 1;
+        if (updatedAt && (!prev.updatedAt || updatedAt > prev.updatedAt)) {
+          prev.updatedAt = updatedAt;
+        }
+      } else {
+        byKey.set(key, {
+          kind: 'place',
+          slug: pSlug,
+          label: pLabel,
+          communeSlug: cSlug,
+          communeLabel: cLabel,
+          listingCount: 1,
+          district: parts.district.trim(),
+          province: parts.province.trim(),
+          ...(updatedAt ? { updatedAt } : {}),
+        });
       }
-    } else {
-      byKey.set(key, {
-        kind: 'place',
-        slug: pSlug,
-        label: pLabel,
-        communeSlug: cSlug,
-        communeLabel: cLabel,
-        listingCount: 1,
-        district: parts.district.trim(),
-        province: parts.province.trim(),
-        ...(updatedAt ? { updatedAt } : {}),
-      });
     }
-  }
 
-  return [...byKey.values()]
-    .filter((h) => h.listingCount > 0)
-    .map(({ district, province, updatedAt, ...hub }) => ({
-      ...hub,
-      ...(district ? { districtLabel: district } : {}),
-      ...(province ? { provinceLabel: province } : {}),
-      ...(updatedAt ? { updatedAt } : {}),
-    }))
-    .sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+    return [...byKey.values()]
+      .filter((h) => h.listingCount > 0)
+      .map(({ district, province, updatedAt, ...hub }) => ({
+        ...hub,
+        ...(district ? { districtLabel: district } : {}),
+        ...(province ? { provinceLabel: province } : {}),
+        ...(updatedAt ? { updatedAt } : {}),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+  });
 }
 
-export async function getPlaceHubDetail(
+/** Place hubs (cấp 4 — thôn/KĐT/dự án trong xã). Optional filter by commune slug. */
+export async function listPlaceHubs(communeSlug?: string): Promise<PublicListingHub[]> {
+  const fromApi = await listPlaceHubsFromApi(communeSlug);
+  if (fromApi != null) return fromApi;
+  return listPlaceHubsFromCatalog(communeSlug);
+}
+
+async function getPlaceHubDetailFromCatalog(
   communeSlug: string,
   placeSlug: string,
 ): Promise<PublicListingHubDetail | null> {
@@ -217,6 +254,18 @@ export async function getPlaceHubDetail(
     ...(updatedAt ? { updatedAt } : {}),
     items,
   };
+}
+
+export async function getPlaceHubDetail(
+  communeSlug: string,
+  placeSlug: string,
+): Promise<PublicListingHubDetail | null> {
+  const fromApi = await getPlaceHubDetailFromApi(communeSlug, placeSlug);
+  if (fromApi === null) return null;
+  if (fromApi) {
+    return { ...fromApi, items: hubDetailItemsToViews(fromApi.items) };
+  }
+  return getPlaceHubDetailFromCatalog(communeSlug, placeSlug);
 }
 
 export function placeHubHeadline(hub: PublicListingHub): string {

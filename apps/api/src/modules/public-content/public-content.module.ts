@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AdminPublicWebController } from './admin-public-web.controller';
 import { PublicContentService } from './public-content.service';
+import { PublicListingHubsController } from './public-listing-hubs.controller';
 import { PublicListingsController } from './public-listings.controller';
 import { PublicPostsController } from './public-posts.controller';
 import { PublicSlugRedirectsController } from './public-slug-redirects.controller';
@@ -9,6 +10,7 @@ import { LotGptService } from './lot-gpt.service';
 
 @Module({
   controllers: [
+    PublicListingHubsController,
     PublicListingsController,
     PublicPostsController,
     PublicSlugRedirectsController,

@@ -1,0 +1,121 @@
+import { toPublicSlug } from './public-slug';
+
+export type AddressGeo = {
+  wardId: string;
+  wardName: string;
+  districtName: string;
+  provinceName: string;
+  detail: string | null;
+};
+
+export type CommuneSlugMeta = {
+  slug: string;
+  label: string;
+  districtLabel: string;
+  provinceLabel: string;
+};
+
+export type PlaceSlugMeta = {
+  slug: string;
+  label: string;
+  communeSlug: string;
+  communeLabel: string;
+};
+
+export type HubSlugMaps = {
+  communeByWardId: Map<string, CommuneSlugMeta>;
+  placeByWardDetail: Map<string, PlaceSlugMeta>;
+};
+
+type AddrLike = {
+  detail?: string | null;
+  ward?: { id: string; name: string; isHidden?: boolean } | null;
+  district?: { name: string; isHidden?: boolean } | null;
+  province?: { name: string; isHidden?: boolean } | null;
+};
+
+export function addressGeo(addr: AddrLike | null | undefined): AddressGeo | null {
+  if (!addr?.ward?.id || addr.ward.isHidden) return null;
+  const wardName = addr.ward.name.trim();
+  if (!wardName) return null;
+  const districtName =
+    addr.district && !addr.district.isHidden ? addr.district.name.trim() : '';
+  const provinceName =
+    addr.province && !addr.province.isHidden ? addr.province.name.trim() : '';
+  const detail = addr.detail?.trim() || null;
+  return {
+    wardId: addr.ward.id,
+    wardName,
+    districtName,
+    provinceName,
+    detail,
+  };
+}
+
+function placeDetailKey(wardId: string, detail: string): string {
+  return `${wardId}|${detail.trim().toLowerCase()}`;
+}
+
+/** Stable commune slug; suffix district when same ward name appears in multiple districts. */
+export function buildHubSlugMaps(geos: AddressGeo[]): HubSlugMaps {
+  const communeByWardId = new Map<string, CommuneSlugMeta>();
+  const placeByWardDetail = new Map<string, PlaceSlugMeta>();
+
+  const wardNameDistricts = new Map<string, Set<string>>();
+  for (const geo of geos) {
+    if (!wardNameDistricts.has(geo.wardName)) {
+      wardNameDistricts.set(geo.wardName, new Set());
+    }
+    if (geo.districtName) {
+      wardNameDistricts.get(geo.wardName)!.add(geo.districtName);
+    }
+  }
+
+  for (const geo of geos) {
+    if (!communeByWardId.has(geo.wardId)) {
+      const base = toPublicSlug(geo.wardName, 60, 'xa');
+      const districts = wardNameDistricts.get(geo.wardName);
+      const slug =
+        districts && districts.size > 1 && geo.districtName
+          ? `${base}-${toPublicSlug(geo.districtName, 30, 'huyen')}`
+          : base;
+      communeByWardId.set(geo.wardId, {
+        slug,
+        label: geo.wardName,
+        districtLabel: geo.districtName,
+        provinceLabel: geo.provinceName,
+      });
+    }
+
+    if (geo.detail) {
+      const commune = communeByWardId.get(geo.wardId)!;
+      const key = placeDetailKey(geo.wardId, geo.detail);
+      if (!placeByWardDetail.has(key)) {
+        placeByWardDetail.set(key, {
+          slug: toPublicSlug(geo.detail, 60, 'khu'),
+          label: geo.detail,
+          communeSlug: commune.slug,
+          communeLabel: commune.label,
+        });
+      }
+    }
+  }
+
+  return { communeByWardId, placeByWardDetail };
+}
+
+export function communeMetaForGeo(
+  maps: HubSlugMaps,
+  geo: AddressGeo | null,
+): CommuneSlugMeta | null {
+  if (!geo) return null;
+  return maps.communeByWardId.get(geo.wardId) ?? null;
+}
+
+export function placeMetaForGeo(
+  maps: HubSlugMaps,
+  geo: AddressGeo | null,
+): PlaceSlugMeta | null {
+  if (!geo?.detail) return null;
+  return maps.placeByWardDetail.get(placeDetailKey(geo.wardId, geo.detail)) ?? null;
+}

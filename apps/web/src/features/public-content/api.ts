@@ -11,6 +11,9 @@ import {
   type PublicCatalogListResponse,
   type PublicGuestPost,
   type PublicGuestPostListResponse,
+  type PublicListingHub,
+  type PublicListingHubDetail,
+  type PublicListingHubListResponse,
   type PublicWebDashboard,
   type PublicWebLotRow,
   type PublicWebPostRow,
@@ -129,6 +132,65 @@ export async function getPublishedCatalogBySlug(
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return null;
     return null;
+  }
+}
+
+/** Guest listing hubs — GET /public/listing-hubs (no JWT). */
+export async function listCommuneHubsFromApi(): Promise<PublicListingHub[] | null> {
+  if (isMockPublicWeb()) return null;
+  try {
+    const res = await apiFetch<PublicListingHubListResponse>('/public/listing-hubs/communes');
+    return res.items;
+  } catch {
+    return null;
+  }
+}
+
+/** null = 404; undefined = API unavailable (fallback). */
+export async function getCommuneHubDetailFromApi(
+  communeSlug: string,
+): Promise<PublicListingHubDetail | null | undefined> {
+  if (isMockPublicWeb()) return undefined;
+  try {
+    return await apiFetch<PublicListingHubDetail>(
+      `/public/listing-hubs/communes/${encodeURIComponent(communeSlug)}`,
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    return undefined;
+  }
+}
+
+export async function listPlaceHubsFromApi(
+  communeSlug?: string,
+): Promise<PublicListingHub[] | null> {
+  if (isMockPublicWeb()) return null;
+  const qs = communeSlug?.trim()
+    ? `?commune=${encodeURIComponent(communeSlug.trim())}`
+    : '';
+  try {
+    const res = await apiFetch<PublicListingHubListResponse>(
+      `/public/listing-hubs/places${qs}`,
+    );
+    return res.items;
+  } catch {
+    return null;
+  }
+}
+
+/** null = 404; undefined = API unavailable (fallback). */
+export async function getPlaceHubDetailFromApi(
+  communeSlug: string,
+  placeSlug: string,
+): Promise<PublicListingHubDetail | null | undefined> {
+  if (isMockPublicWeb()) return undefined;
+  try {
+    return await apiFetch<PublicListingHubDetail>(
+      `/public/listing-hubs/communes/${encodeURIComponent(communeSlug)}/places/${encodeURIComponent(placeSlug)}`,
+    );
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    return undefined;
   }
 }
 

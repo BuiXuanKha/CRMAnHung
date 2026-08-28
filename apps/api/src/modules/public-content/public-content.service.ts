@@ -15,6 +15,13 @@ import { StorageService } from '../../storage/storage.service';
 import type { UpdatePublicListingDraftDto } from './dto/public-listing.dto';
 import type { CreatePublicPostDto } from './dto/public-post.dto';
 import { PublicWebRevalidateService } from './public-web-revalidate.service';
+import {
+  addressGeo,
+  buildHubSlugMaps,
+  communeMetaForGeo,
+  placeMetaForGeo,
+  type HubSlugMaps,
+} from './public-listing-hub-slugs';
 import { formatM, kindLabel, toListingPublicSlug, toPublicSlug } from './public-slug';
 
 const POST_CATEGORIES = new Set([
@@ -43,8 +50,8 @@ type PublicPostRow = {
 
 const ADDR_SELECT = {
   detail: true,
-  ward: { select: { name: true, isHidden: true } },
-  district: { select: { name: true, isHidden: true } },
+  ward: { select: { id: true, name: true, isHidden: true } },
+  district: { select: { id: true, name: true, isHidden: true } },
   province: { select: { name: true, isHidden: true } },
   images: {
     orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
@@ -86,12 +93,8 @@ export class PublicContentService {
   ) {}
 
   async listPublished() {
-    const rows = await this.prisma.publicLotListing.findMany({
-      where: { isPublished: true },
-      include: { lodat: { include: LODAT_INCLUDE } },
-      orderBy: { updatedAt: 'desc' },
-    });
-    return { items: rows.filter((row) => this.isOpenSale(row.lodat)).map((row) => this.toCatalog(row)) };
+    const { items } = await this.loadPublishedCatalog();
+    return { items };
   }
 
   async getPublishedBySlug(slug: string) {
@@ -102,7 +105,175 @@ export class PublicContentService {
     if (!row?.isPublished || !this.isOpenSale(row.lodat)) {
       throw new NotFoundException('Không tìm thấy sản phẩm');
     }
-    return this.toCatalog(row);
+    const { hubMaps } = await this.loadPublishedCatalog();
+    return this.toCatalog(row, hubMaps);
+  }
+
+  async listCommuneHubs() {
+    const { items, hubMaps } = await this.loadPublishedCatalog();
+    const communeMetaBySlug = new Map(
+      [...hubMaps.communeByWardId.values()].map((meta) => [meta.slug, meta]),
+    );
+    const bySlug = new Map<
+      string,
+      {
+        label: string;
+        districtLabel: string;
+        provinceLabel: string;
+        count: number;
+        updatedAt?: string;
+      }
+    >();
+
+    for (const row of items) {
+      const slug = row.communeSlug?.trim();
+      const label = row.communeLabel?.trim();
+      if (!slug || !label) continue;
+      const meta = communeMetaBySlug.get(slug);
+      const prev = bySlug.get(slug);
+      const updatedAt = row.updatedAt;
+      if (prev) {
+        prev.count += 1;
+        if (updatedAt && (!prev.updatedAt || updatedAt > prev.updatedAt)) {
+          prev.updatedAt = updatedAt;
+        }
+      } else {
+        bySlug.set(slug, {
+          label,
+          districtLabel: meta?.districtLabel ?? '',
+          provinceLabel: meta?.provinceLabel ?? '',
+          count: 1,
+          ...(updatedAt ? { updatedAt } : {}),
+        });
+      }
+    }
+
+    const hubs = [...bySlug.entries()]
+      .map(([slug, meta]) => ({
+        kind: 'commune' as const,
+        slug,
+        label: meta.label,
+        listingCount: meta.count,
+        ...(meta.districtLabel ? { districtLabel: meta.districtLabel } : {}),
+        ...(meta.provinceLabel ? { provinceLabel: meta.provinceLabel } : {}),
+        ...(meta.updatedAt ? { updatedAt: meta.updatedAt } : {}),
+      }))
+      .filter((h) => h.listingCount > 0)
+      .sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+
+    return { items: hubs };
+  }
+
+  async getCommuneHubDetail(communeSlug: string) {
+    const slug = communeSlug.trim();
+    if (!slug) throw new NotFoundException('Không tìm thấy khu vực');
+    const { items, hubMaps } = await this.loadPublishedCatalog();
+    const hubItems = items.filter((row) => row.communeSlug === slug);
+    if (hubItems.length === 0) {
+      throw new NotFoundException('Không tìm thấy khu vực');
+    }
+    const meta = [...hubMaps.communeByWardId.values()].find((m) => m.slug === slug);
+    const sample = hubItems[0]!;
+    const updatedAt = hubItems
+      .map((r) => r.updatedAt)
+      .filter(Boolean)
+      .sort()
+      .at(-1);
+    return {
+      kind: 'commune' as const,
+      slug,
+      label: sample.communeLabel ?? meta?.label ?? slug,
+      listingCount: hubItems.length,
+      ...(meta?.districtLabel ? { districtLabel: meta.districtLabel } : {}),
+      ...(meta?.provinceLabel ? { provinceLabel: meta.provinceLabel } : {}),
+      items: hubItems,
+      ...(updatedAt ? { updatedAt } : {}),
+    };
+  }
+
+  async listPlaceHubs(communeSlug?: string) {
+    const filter = communeSlug?.trim();
+    const { items } = await this.loadPublishedCatalog();
+    const byKey = new Map<
+      string,
+      {
+        slug: string;
+        label: string;
+        communeSlug: string;
+        communeLabel: string;
+        count: number;
+        updatedAt?: string;
+      }
+    >();
+
+    for (const row of items) {
+      const cSlug = row.communeSlug?.trim();
+      const cLabel = row.communeLabel?.trim();
+      const pSlug = row.placeSlug?.trim();
+      const pLabel = row.placeLabel?.trim();
+      if (!cSlug || !cLabel || !pSlug || !pLabel) continue;
+      if (filter && cSlug !== filter) continue;
+      const key = `${cSlug}/${pSlug}`;
+      const prev = byKey.get(key);
+      const updatedAt = row.updatedAt;
+      if (prev) {
+        prev.count += 1;
+        if (updatedAt && (!prev.updatedAt || updatedAt > prev.updatedAt)) {
+          prev.updatedAt = updatedAt;
+        }
+      } else {
+        byKey.set(key, {
+          slug: pSlug,
+          label: pLabel,
+          communeSlug: cSlug,
+          communeLabel: cLabel,
+          count: 1,
+          ...(updatedAt ? { updatedAt } : {}),
+        });
+      }
+    }
+
+    const hubs = [...byKey.values()]
+      .filter((h) => h.count > 0)
+      .map(({ count, ...hub }) => ({
+        kind: 'place' as const,
+        slug: hub.slug,
+        label: hub.label,
+        communeSlug: hub.communeSlug,
+        communeLabel: hub.communeLabel,
+        listingCount: count,
+        ...(hub.updatedAt ? { updatedAt: hub.updatedAt } : {}),
+      }))
+      .sort((a, b) => a.label.localeCompare(b.label, 'vi'));
+
+    return { items: hubs };
+  }
+
+  async getPlaceHubDetail(communeSlug: string, placeSlug: string) {
+    const cSlug = communeSlug.trim();
+    const pSlug = placeSlug.trim();
+    if (!cSlug || !pSlug) throw new NotFoundException('Không tìm thấy khu vực');
+    const { items } = await this.loadPublishedCatalog();
+    const hubItems = items.filter((row) => row.communeSlug === cSlug && row.placeSlug === pSlug);
+    if (hubItems.length === 0) {
+      throw new NotFoundException('Không tìm thấy khu vực');
+    }
+    const sample = hubItems[0]!;
+    const updatedAt = hubItems
+      .map((r) => r.updatedAt)
+      .filter(Boolean)
+      .sort()
+      .at(-1);
+    return {
+      kind: 'place' as const,
+      slug: pSlug,
+      label: sample.placeLabel ?? pSlug,
+      communeSlug: cSlug,
+      communeLabel: sample.communeLabel ?? cSlug,
+      listingCount: hubItems.length,
+      items: hubItems,
+      ...(updatedAt ? { updatedAt } : {}),
+    };
   }
 
   /** Old guest lot slug → current slug (Next issues 301). */
@@ -332,10 +503,32 @@ export class PublicContentService {
     );
   }
 
-  private lodatLocation(lodat: LodatLoaded): string {
-    const addr = lodat.projectLotId && lodat.projectLot?.address
+  private lodatAddress(lodat: LodatLoaded) {
+    return lodat.projectLotId && lodat.projectLot?.address
       ? lodat.projectLot.address
       : lodat.address;
+  }
+
+  private async loadPublishedCatalog(): Promise<{
+    items: ReturnType<PublicContentService['toCatalog']>[];
+    hubMaps: HubSlugMaps;
+  }> {
+    const rows = await this.prisma.publicLotListing.findMany({
+      where: { isPublished: true },
+      include: { lodat: { include: LODAT_INCLUDE } },
+      orderBy: { updatedAt: 'desc' },
+    });
+    const open = rows.filter((row) => this.isOpenSale(row.lodat));
+    const geos = open
+      .map((row) => addressGeo(this.lodatAddress(row.lodat)))
+      .filter((g): g is NonNullable<typeof g> => g != null);
+    const hubMaps = buildHubSlugMaps(geos);
+    const items = open.map((row) => this.toCatalog(row, hubMaps));
+    return { items, hubMaps };
+  }
+
+  private lodatLocation(lodat: LodatLoaded): string {
+    const addr = this.lodatAddress(lodat);
     if (!addr) return '';
     const parts = [
       addr.detail?.trim() || null,
@@ -387,7 +580,7 @@ export class PublicContentService {
     };
   }
 
-  private toCatalog(row: ListingRow) {
+  private toCatalog(row: ListingRow, hubMaps?: HubSlugMaps) {
     const lodat = row.lodat;
     const isProject = Boolean(lodat.projectLotId);
     const areaM2 = isProject ? (lodat.projectLot?.areaM2 ?? lodat.areaM2) : lodat.areaM2;
@@ -400,6 +593,11 @@ export class PublicContentService {
     const kind = lodat.propertyKind === 'NHA' ? 'NHA' : 'DAT';
     const priceLabel =
       row.priceMode === 'AMOUNT' && row.priceLabel?.trim() ? row.priceLabel.trim() : null;
+
+    const geo = hubMaps ? addressGeo(this.lodatAddress(lodat)) : null;
+    const commune = hubMaps ? communeMetaForGeo(hubMaps, geo) : null;
+    const place = hubMaps ? placeMetaForGeo(hubMaps, geo) : null;
+
     return {
       id: row.id,
       slug: row.slug,
@@ -418,6 +616,18 @@ export class PublicContentService {
       areaLabel: formatM(areaM2 ?? null, 'm²'),
       frontageLabel: formatM(frontageM ?? null, 'm'),
       directionLabel: direction?.trim() || null,
+      ...(commune
+        ? {
+            communeSlug: commune.slug,
+            communeLabel: commune.label,
+          }
+        : {}),
+      ...(place
+        ? {
+            placeSlug: place.slug,
+            placeLabel: place.label,
+          }
+        : {}),
     };
   }
 

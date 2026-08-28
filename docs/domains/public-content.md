@@ -684,7 +684,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 - [x] `next.config` redirects: `/san-pham`, `/mua-ban-nha-dat` → path mới (permanent)
 - [x] Nest `PublicWebRevalidateService` paths mới
 - [x] Sitemap, Meta Pixel, dashboard preview path, docs PUBLIC-SEO / PUBLIC-WEB
-- [ ] Smoke: list + chi tiết + 301 cũ → mới (sau deploy / local)
+- [x] Smoke: list + chi tiết + 301 cũ → mới (live anhungland.com 2026-08-28)
 
 #### Slice B — Docs UI hub + contract shared
 
@@ -696,7 +696,9 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 - [x] Route `.../xa/[commune]/page.tsx` + metadata + JSON-LD `ItemList`
 - [x] Hub derive từ catalog (location → communeSlug) — mock/SSR; 0 lô / slug sai → 404 noindex
-- [ ] Guest API thật: list hubs xã + detail hub theo `wardId` (thay parse location)
+- [x] Guest API: list hubs xã + detail hub theo `wardId` + `address.detail`
+- [x] Catalog guest trả `communeSlug` / `placeSlug` từ sổ địa chỉ (không parse location)
+- [x] Web hub pages gọi `/public/listing-hubs/*`; fallback parse location khi API chưa sẵn (build/mock)
 - [x] Sitemap hub xã; (revalidate hub path khi API sẵn)
 - [x] Link related «cùng xã» → hub xã
 
@@ -707,7 +709,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 - [x] Link related «tại KĐT/thôn» → hub cấp 4
 - [x] Breadcrumb: Trang chủ → Nhà đất → Xã → Cấp 4
 - [x] Trang hub xã: danh sách link thôn/KĐT trong xã (§17.4.1)
-- [ ] Guest API thật theo `wardId` + `address.detail` (thay parse location)
+- [x] Guest API: hub cấp 4 theo `wardId` + `address.detail` (cùng endpoints `/public/listing-hubs`)
 
 #### Slice E — QA staging SEO
 
@@ -716,7 +718,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 - [x] Hub 0 lô / slug sai → `notFound()` + `unpublishedHubMetadata` noindex
 - [x] Sitemap chỉ hub có lô (`listCommuneHubs` / `listPlaceHubs` filter count > 0)
 - [x] `robots.ts` allow `/`; disallow CRM — không chặn catalog mới
-- [ ] Smoke live `anhungland.com` sau merge PR (301, hub HTML, sitemap.xml)
+- [x] Smoke live `anhungland.com` sau merge PR #153 (301, hub HTML Nam Trung, sitemap hub URLs, hub 404)
 
 **Chạy local trước deploy:**
 
