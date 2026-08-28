@@ -102,6 +102,19 @@ export const lotGptGenerateResponseSchema = z.object({
 
 export type LotGptGenerateResponse = z.infer<typeof lotGptGenerateResponseSchema>;
 
+/** Parsed GPT content — maps to listing editor + Facebook. */
+export const lotGptContentResultSchema = z.object({
+  seoTitle: z.string(),
+  h1: z.string(),
+  metaDescription: z.string(),
+  slug: z.string(),
+  excerpt: z.string(),
+  bodyHtml: z.string(),
+  facebookPost: z.string(),
+});
+
+export type LotGptContentResult = z.infer<typeof lotGptContentResultSchema>;
+
 /**
  * Published listing as guests and search engines see it.
  * Never include CRM VND, commission, owner notes, or customer PII.
