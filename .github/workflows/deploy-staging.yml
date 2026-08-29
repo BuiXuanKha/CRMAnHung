@@ -21,7 +21,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
       SSH_USER: deploy
@@ -104,3 +104,12 @@ jobs:
           source "$HOME/.ssh/deploy.env"
           RSH="$HOME/.ssh/rsh.sh"
           "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/scripts/remote_deploy.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/scripts/remote_deploy.sh"
+
+      # One-shot: only when the triggering commit message includes [seo-copy-published].
+      - name: Rename published lot/address images on R2
+        if: contains(github.event.head_commit.message, '[seo-copy-published]')
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-copy-published.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-copy-published.sh"
