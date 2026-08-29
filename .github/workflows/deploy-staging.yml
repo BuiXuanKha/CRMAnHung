@@ -21,7 +21,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 40
+    timeout-minutes: 90
     env:
       SSH_HOST: ${{ secrets.DEPLOY_SSH_HOST }}
       SSH_USER: deploy
@@ -113,3 +113,12 @@ jobs:
           source "$HOME/.ssh/deploy.env"
           RSH="$HOME/.ssh/rsh.sh"
           "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-copy-published.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-copy-published.sh"
+
+      # One-shot: remaining CRM Lodat photos (not published-only). Skip chat.
+      - name: Rename all CRM lot/address images on R2
+        if: contains(github.event.head_commit.message, '[seo-copy-all]')
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-copy-all.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-copy-all.sh"

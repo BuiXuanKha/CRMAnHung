@@ -197,6 +197,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | Apply | Chạy thật trên VPS | `APPLY=1 pnpm images:seo-copy` |
 | Lô nhỏ | Tránh chạy hết một lần | `APPLY=1 LIMIT=30 pnpm images:seo-copy` |
 | Chỉ lô đã Đăng web | Thu hẹp | `APPLY=1 SCOPE=published pnpm images:seo-copy` |
+| Toàn bộ CRM `/lo-dat` | Mọi Lodat (đã Đăng + chưa); bỏ qua đã SEO và chat | `APPLY=1 SCOPE=all pnpm images:seo-copy` |
 | Khi Đăng web | Tự chuyển ảnh lô/dự án còn tên xấu; **bỏ qua** key chat | `setPublished` — không chặn đăng nếu lỗi |
 
 Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent). Snapshot giao dịch đổi sang key mới rồi mới xóa nguồn.
