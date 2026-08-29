@@ -34,6 +34,7 @@ import {
   toListItem,
 } from './customers-view';
 import { LodatsService } from '../lodats/lodats.service';
+import { FromExtensionService } from './from-extension.service';
 
 const MESSAGE_SENDERS = new Set(['customer', 'me', 'page', 'unknown']);
 
@@ -55,6 +56,7 @@ export class CustomersService {
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
     private readonly lodats: LodatsService,
+    private readonly fromExtension: FromExtensionService,
   ) {}
 
   async list(user: RequestUser, query: ListCustomersQueryDto) {
@@ -266,6 +268,10 @@ export class CustomersService {
 
   create(user: RequestUser, dto: CreateCustomerDto) {
     return createManualCustomer(this.prisma, user, dto, (id) => this.getById(user, id));
+  }
+
+  fromExtensionIngest(user: RequestUser, body: unknown) {
+    return this.fromExtension.ingest(user, body);
   }
 
   listChannels(user: RequestUser) {

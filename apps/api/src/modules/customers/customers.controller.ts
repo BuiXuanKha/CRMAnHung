@@ -28,6 +28,11 @@ export class CustomersController {
     return this.customersService.create(user, dto);
   }
 
+  @Post('from-extension')
+  fromExtension(@CurrentUser() user: RequestUser, @Body() body: Record<string, unknown>) {
+    return this.customersService.fromExtensionIngest(user, body);
+  }
+
   @Post('merge-facebook-into-phone-holder')
   mergeFacebook(@CurrentUser() user: RequestUser, @Body() dto: MergeFacebookDto) {
     return this.customersService.mergeFacebook(user, dto);

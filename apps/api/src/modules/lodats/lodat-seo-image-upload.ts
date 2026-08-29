@@ -91,7 +91,7 @@ function alreadySeoUnder(prefix: string, objectKey: string): boolean {
   );
 }
 
-/** Messenger originals — keep on R2. Lot attach copies to SEO key; do not delete chat. */
+/** Messenger originals (WebP from extension, JPEG from migrate) — keep on R2. */
 export function isChatLibraryObjectKey(objectKey: string): boolean {
   return objectKey.replace(/^\/+/, '').startsWith('customers/chat/');
 }

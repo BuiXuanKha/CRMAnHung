@@ -327,6 +327,59 @@ export const customerMessengerThreadSchema = z.object({
 
 export type CustomerMessengerThread = z.infer<typeof customerMessengerThreadSchema>;
 
+/** Extension scan → `POST /api/v1/customers/from-extension` (ảnh chat raster → WebP trên API). */
+export const extensionChatMessageSchema = z
+  .object({
+    id: z.string().optional(),
+    text: z.string().optional(),
+    sender: z.string().optional(),
+    senderUid: z.string().optional(),
+    dedupeKey: z.string().optional(),
+    imageUrls: z.array(z.string()).optional(),
+  })
+  .passthrough();
+
+export type ExtensionChatMessage = z.infer<typeof extensionChatMessageSchema>;
+
+export const fromExtensionDraftSchema = z
+  .object({
+    scanSource: z.string().optional(),
+    scanSourceLabel: z.string().optional(),
+    pageUrl: z.string().optional(),
+    capturedAt: z.string().optional(),
+    scan: z
+      .object({
+        threadId: z.string().optional(),
+        customerUid: z.string().optional(),
+        customerName: z.string().optional(),
+        threadType: z.string().optional(),
+        avatarUrl: z.string().optional(),
+        employeeUid: z.string().optional(),
+        myPageUid: z.string().optional(),
+        scanSource: z.string().optional(),
+        status: z.string().optional(),
+        scanDebug: z.unknown().optional(),
+      })
+      .passthrough()
+      .optional(),
+    chatMessages: z.array(extensionChatMessageSchema).optional(),
+  })
+  .passthrough();
+
+export type FromExtensionDraft = z.infer<typeof fromExtensionDraftSchema>;
+
+export const fromExtensionResultSchema = z.object({
+  ok: z.literal(true),
+  id: z.string(),
+  updated: z.boolean(),
+  messagesAppended: z.number().int(),
+  messagesUpdated: z.number().int(),
+  imagesStored: z.number().int(),
+  message: z.string(),
+});
+
+export type FromExtensionResult = z.infer<typeof fromExtensionResultSchema>;
+
 /** Lô gắn khách (rail / chi tiết) — tái dùng shape list lô. */
 export const customerLodatListResponseSchema = z.object({
   items: z.array(

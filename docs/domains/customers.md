@@ -32,7 +32,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. `limit` mặc định 50, `offset` từ 0, `total` = COUNT. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (rail). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). **POST `/api/v1/customers`** — thêm khách bằng SĐT (hotline + tên + số + ghi chú). **GET `/api/v1/customers/contact-channels`** — lọc kênh. Extension: phase sau.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. `limit` mặc định 50, `offset` từ 0, `total` = COUNT. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (rail). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). **POST `/api/v1/customers`** — thêm khách bằng SĐT (hotline + tên + số + ghi chú). **GET `/api/v1/customers/contact-channels`** — lọc kênh. **POST `/api/v1/customers/from-extension`** — ingest scan + tin; ảnh chat raster → WebP (`storage.upload`). Scanner Chrome vẫn stub.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -562,6 +562,17 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 `GET /customers` nhận `limit` (mặc định 50, tối đa 200) + `offset`. `total` = COUNT cùng filter. UI: lần đầu 50; cuộn thân bảng/thẻ < 160px đáy thì nối thêm. Đổi tìm/lọc → offset 0. Lọc + vị trí cuộn giữ trong sessionStorage khi rời list (chi tiết, menu, Back, F5 cùng tab); đăng xuất thì xóa.
 
 **Xong staging (2026-08-20).**
+
+### 13.14 Slice này — ingest extension (ảnh chat WebP)
+
+**POST `/api/v1/customers/from-extension`** (JWT). Payload giống CRM cũ: `scan.threadId` hoặc `scan.customerUid` + `chatMessages[].imageUrls` (data URL / Facebook CDN).
+
+- Khớp khách của **NV đang login** theo thread rồi UID. Chưa có → tạo `KHACH_MOI`. **Không** tự khôi phục khách ẩn (hàng đợi §11 mục 16). **Không** đổi SĐT / không tải avatar.
+- Ảnh raster mới → `sharp` WebP (cạnh dài ≤ 2560) → R2 `customers/chat/<customerId>/{mid}-{n}.webp`. Video / path `/img/imgsmessenger/` cũ: bỏ qua.
+- Tin đã có đủ ảnh (kể cả JPEG migrate) → không encode lại. Gắn ảnh chat vào lô: vẫn **copy** SEO WebP, **giữ** file chat.
+- Body JSON tối đa 32MB (data URL). Tối đa 200 tin / lần.
+
+Scanner `apps/extension` vẫn stub — API sẵn khi port scanner.
 
 ---
 
