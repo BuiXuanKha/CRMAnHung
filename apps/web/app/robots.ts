@@ -1,8 +1,9 @@
 import type { MetadataRoute } from 'next';
+import { isPublicSearchIndexEnabled } from '@/features/public/search-index';
 
 const SITE = 'https://anhungland.com';
 
-/** Cho phép crawl web công khai; chặn CRM + login. */
+/** Crawl public HTML so bots can see `noindex`. Do not Disallow `/`. */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
@@ -20,7 +21,7 @@ export default function robots(): MetadataRoute.Robots {
         '/api',
       ],
     },
-    sitemap: `${SITE}/sitemap.xml`,
+    ...(isPublicSearchIndexEnabled() ? { sitemap: `${SITE}/sitemap.xml` } : {}),
     host: SITE,
   };
 }

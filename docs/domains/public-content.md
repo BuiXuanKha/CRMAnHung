@@ -732,7 +732,7 @@ pnpm --filter @crmanhung/web build
 | Kiểm tra | Kỳ vọng |
 |----------|---------|
 | `/mua-ban-nha-dat`, `/san-pham` | 404 (path cũ đã bỏ) |
-| Hub xã có lô | 200, `robots index`, canonical đúng, trong sitemap |
+| Hub xã có lô | 200, canonical đúng; `robots index` + trong sitemap **khi** `PUBLIC_SEO_INDEX=1` (hiện mặc định `noindex`, sitemap rỗng — `PUBLIC-SEO.md` §11) |
 | Hub slug sai | 404, noindex |
 | `/du-an` | Bài CMS — canonical `/{category}/{slug}`, khác hub lô |
 | `/dashboard`, `/lo-dat` | noindex; không trong sitemap |
@@ -769,7 +769,7 @@ Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
 
 | Hạng mục | Quy tắc |
 |----------|---------|
-| robots | `index, follow` khi có ≥1 lô |
+| robots | Khi `PUBLIC_SEO_INDEX=1`: `index, follow` nếu có ≥1 lô. **Hiện mặc định `noindex, follow`** (`PUBLIC-SEO.md` §11) |
 | 404 | Slug sai / 0 lô → `notFound` + noindex |
 | Canonical | URL hub tuyệt đối |
 | JSON-LD | `ItemList` URL lô trong hub; `BreadcrumbList` |

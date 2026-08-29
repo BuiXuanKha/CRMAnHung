@@ -82,6 +82,15 @@ if (robotsSrc.includes('mua-ban-nha-dat-huyen-nam-sach') && robotsSrc.includes('
   ok('robots không disallow catalog mới');
 }
 
+if (
+  robotsSrc.includes('isPublicSearchIndexEnabled') &&
+  robotsSrc.includes('sitemap:')
+) {
+  ok('robots chỉ gắn Sitemap khi PUBLIC_SEO_INDEX bật');
+} else {
+  bad('robots.ts thiếu cổng sitemap theo PUBLIC_SEO_INDEX');
+}
+
 console.log('\nCRM noindex');
 const crmLayout = read('apps/web/app/(crm)/layout.tsx');
 if (
@@ -112,8 +121,32 @@ if (
   bad('next.config vẫn còn redirect path cũ');
 }
 
+console.log('\nPublic search-index gate');
+const searchIndexSrc = read('apps/web/src/features/public/search-index.ts');
+if (
+  searchIndexSrc.includes('PUBLIC_SEO_INDEX') &&
+  searchIndexSrc.includes('isPublicSearchIndexEnabled') &&
+  searchIndexSrc.includes('publicSearchRobots')
+) {
+  ok('search-index.ts cổng PUBLIC_SEO_INDEX');
+} else {
+  bad('thiếu apps/web/src/features/public/search-index.ts');
+}
+
+const publicLayout = read('apps/web/app/(public)/layout.tsx');
+if (publicLayout.includes('publicSearchRobots')) {
+  ok('(public)/layout robots theo cờ index');
+} else {
+  bad('public layout chưa dùng publicSearchRobots');
+}
+
 console.log('\nSitemap includes hub segments');
 const sitemapSrc = read('apps/web/app/sitemap.ts');
+if (sitemapSrc.includes('isPublicSearchIndexEnabled') && sitemapSrc.includes('return []')) {
+  ok('sitemap rỗng khi PUBLIC_SEO_INDEX tắt');
+} else {
+  bad('sitemap.ts thiếu early return khi cờ index tắt');
+}
 if (sitemapSrc.includes('listCommuneHubs') && sitemapSrc.includes('listPlaceHubs')) {
   ok('sitemap gọi listCommuneHubs + listPlaceHubs');
 } else {

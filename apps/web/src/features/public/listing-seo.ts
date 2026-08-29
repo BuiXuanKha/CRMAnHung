@@ -5,6 +5,7 @@ import {
   type PublicGuestListing,
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
+import { publicSearchRobots } from './search-index';
 import {
   isPublicAddressImageUrl,
   listingCoverAbsoluteUrl,
@@ -109,7 +110,7 @@ export function listingMetadata(
     title: seoTitle,
     description,
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: publicSearchRobots(),
     openGraph: {
       title: branded,
       description,
@@ -134,6 +135,7 @@ export function sanPhamListMetadata(): Metadata {
     title: SAN_PHAM_LIST_TITLE,
     description: SAN_PHAM_LIST_DESCRIPTION,
     alternates: { canonical: url },
+    robots: publicSearchRobots(),
     openGraph: {
       title: `${SAN_PHAM_LIST_TITLE} | ${ANHUNG_BRAND.name}`,
       description: SAN_PHAM_LIST_DESCRIPTION,

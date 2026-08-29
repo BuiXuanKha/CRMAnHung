@@ -5,6 +5,7 @@ import {
   type PublicGuestPost,
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
+import { publicSearchRobots } from './search-index';
 import { postSeoImageUrls } from './listing-image-seo';
 import { publicPostCategoryLabel } from './published-posts';
 import {
@@ -51,7 +52,7 @@ export function postMetadata(post: PublicGuestPost): Metadata {
     title: post.title,
     description,
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: publicSearchRobots(),
     openGraph: {
       title: branded,
       description,
@@ -80,6 +81,7 @@ export function categoryListMetadata(category: string): Metadata {
     title: label,
     description,
     alternates: { canonical: url },
+    robots: publicSearchRobots(),
     openGraph: {
       title: `${label} | ${ANHUNG_BRAND.name}`,
       description,

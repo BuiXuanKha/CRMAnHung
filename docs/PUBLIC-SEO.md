@@ -29,7 +29,7 @@ Mỗi route public phải có:
 | `alternates.canonical` | URL tuyệt đối `https://anhungland.com/...` |
 | Open Graph | `openGraph.title`, `.description`, `.url`, `.siteName`, `.locale` (`vi_VN`), `.type` |
 | Twitter card | `twitter.card` = `summary_large_image` (khi có ảnh) + title/description |
-| `robots` | Index trang công khai hữu ích; `noindex` cho trang lỗi / tạm / trùng |
+| `robots` | **Hiện tại:** `noindex` toàn bộ HTML công khai cho đến khi bật `PUBLIC_SEO_INDEX=1` (§11). Sau khi bật: index trang hữu ích; `noindex` trang lỗi / tạm / trùng |
 
 **Không** để title/description mặc định giống nhau mọi trang.
 
@@ -45,8 +45,8 @@ Mỗi route public phải có:
 
 | Hạng mục | Quy ước |
 |----------|---------|
-| `app/robots.ts` | Cho phép crawl public; chặn `/login`, khu `(crm)` (`/khach-hang`, `/lo-dat`, …) |
-| `app/sitemap.ts` | URL public ổn định + **lô đã đăng** `/mua-ban-nha-dat-huyen-nam-sach/[slug]` (+ hub `/xa/…` khi có) |
+| `app/robots.ts` | Cho phép crawl public (để bot đọc `noindex`); chặn `/login`, khu `(crm)` (`/khach-hang`, `/lo-dat`, …). **Không** `Sitemap:` khi cờ index tắt |
+| `app/sitemap.ts` | Khi cờ tắt: rỗng. Khi bật: URL public ổn định + **lô đã đăng** `/mua-ban-nha-dat-huyen-nam-sach/[slug]` (+ hub `/xa/…` khi có) |
 | HTTPS | Chỉ `https://anhungland.com` (www → apex hoặc ngược lại — một hướng, khớp canonical) |
 | `lang` | `<html lang="vi">` (đã có ở root layout) |
 
@@ -82,7 +82,7 @@ Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem 
 ## Không làm trên web công khai
 
 - Nhét toàn bộ CRM / dữ liệu khách lên route public.
-- `noindex` nhầm trang marketing cần xếp hạng.
+- `noindex` nhầm trang marketing cần xếp hạng (ngoại trừ giai đoạn tạm đóng index — §11).
 - Duplicate: cùng nội dung ở nhiều URL mà không canonical.
 - Client-only shell trống rồi mới hydrate nội dung chính.
 
@@ -215,4 +215,26 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | **Bảo ảnh** | Ưu tiên ngữ cảnh + CDN public. Watermark nhẹ nếu cần sau — không chặn chuột phải / không `noindex` ảnh | Chặn download làm Google không lấy được file |
 
 Google **bỏ** `image:caption` / `image:title` / `image:geo_location` trong sitemap — caption và địa điểm lấy từ HTML + schema trên trang. Tên file trên CDN vẫn là tín hiệu phụ (URL path).
+
+---
+
+## 11. Tạm đóng index (đến khi site ổn)
+
+Web công khai đang **chưa** mời Google/Bing xếp hạng. HTML vẫn crawl được; meta là `noindex, follow` để bot đọc tín hiệu và **không** đưa URL vào kết quả tìm kiếm. **Không** `Disallow: /` — nếu chặn crawl thì bot không thấy `noindex`, trang đã index có thể kẹt lâu hơn. **Không** chặn Googlebot trên `cdn.anhungland.com`.
+
+| Hạng mục | Khi cờ tắt (mặc định) | Khi bật |
+|----------|----------------------|---------|
+| Meta `robots` | `noindex, follow` mọi trang `(public)` | `index, follow` trang hữu ích |
+| `robots.txt` | Allow `/`; **không** dòng `Sitemap:` | Allow `/` + `Sitemap: https://anhungland.com/sitemap.xml` |
+| `sitemap.xml` | Rỗng | URL lô/bài/hub đã đăng như §3 / §7 / §9 |
+| 404 / CRM / login | `noindex, nofollow` (không đổi) | không đổi |
+
+**Bật index sau khi hoàn thiện cơ bản** (cần rebuild Next, không chỉ restart PM2):
+
+1. Trên VPS, thêm vào `apps/web/.env.production`: `PUBLIC_SEO_INDEX=1`
+2. **Không** ghi sẵn `=1` trong `scripts/remote_deploy.sh` (file `.env.production` trên server đã tồn tại).
+3. Deploy / rebuild web (`pnpm --filter @crmanhung/web build` trên VPS qua Actions).
+4. Kiểm tra HTML có `index, follow`; `/robots.txt` có `Sitemap:`; `/sitemap.xml` có URL lô.
+
+Cờ cũng nhận `NEXT_PUBLIC_SEO_INDEX=1` / `true`. Tắt = bỏ dòng hoặc đặt khác `1`/`true`.
 

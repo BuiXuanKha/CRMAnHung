@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { publicSearchRobots } from '@/features/public/search-index';
 import { PUBLIC_OG_DEFAULT, PUBLIC_SITE_ORIGIN } from '@/features/public/site';
 import './public.css';
 
@@ -30,10 +31,7 @@ export const metadata: Metadata = {
       'An Hưng Land — mua bán, ký gửi BĐS. Hotline 0977.656.280. Địa chỉ BT6.8 KĐT Tây Nam Sách.',
     images: [PUBLIC_OG_DEFAULT],
   },
-  robots: {
-    index: true,
-    follow: true,
-  },
+  robots: publicSearchRobots(),
 };
 
 /** Layout trang public (landing / marketing) — tách khỏi CRM shell. */

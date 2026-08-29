@@ -4,6 +4,7 @@ import { listingSeoImageUrls, postSeoImageUrls } from '@/features/public/listing
 import { listCommuneHubs, listPlaceHubs } from '@/features/public/listing-hubs';
 import { listSitemapListings } from '@/features/public/published-listings';
 import { listSitemapPosts, postHref } from '@/features/public/published-posts';
+import { isPublicSearchIndexEnabled } from '@/features/public/search-index';
 import {
   PUBLIC_LISTING_PATH,
   PUBLIC_SITE_ORIGIN,
@@ -15,6 +16,8 @@ export const revalidate = false;
 
 /** URL public ổn định + lô/bài đã xuất bản. Không đưa nháp / đã gỡ. */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  if (!isPublicSearchIndexEnabled()) return [];
+
   const [listings, posts, communeHubs, placeHubs] = await Promise.all([
     listSitemapListings(),
     listSitemapPosts(),

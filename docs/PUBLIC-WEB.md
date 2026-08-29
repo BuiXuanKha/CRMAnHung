@@ -3,7 +3,7 @@
 - **Slug:** `public-web`
 - **Status:** Ready for mock (IA khách) — **đăng nội dung:** [`domains/public-content.md`](./domains/public-content.md) (Draft)
 - **URL:** `https://anhungland.com` — **không** cần đăng nhập
-- **SEO:** bắt buộc theo [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) · skill `web-public-seo`
+- **SEO:** bắt buộc theo [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) · skill `web-public-seo`. **Hiện tạm `noindex`** đến khi bật `PUBLIC_SEO_INDEX=1` (§11).
 - **CRM:** sau `/login` — khu nhân viên; **admin đăng web** = domain `public-content`, không phải registry khách
 
 ---

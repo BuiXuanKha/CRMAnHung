@@ -5,6 +5,7 @@ import {
   type PublicListingHubDetail,
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
+import { publicSearchRobots } from './search-index';
 import { communeHubDescription, communeHubHeadline, placeHubDescription, placeHubHeadline } from './listing-hubs';
 import { listingCoverAbsoluteUrl } from './listing-image-seo';
 import { listingHeadline, SAN_PHAM_LIST_PATH, SAN_PHAM_LIST_TITLE } from './listing-seo';
@@ -35,7 +36,7 @@ export function communeHubMetadata(hub: PublicListingHub): Metadata {
     title,
     description,
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: publicSearchRobots(),
     openGraph: {
       title: branded,
       description,
@@ -103,7 +104,7 @@ export function placeHubMetadata(hub: PublicListingHub): Metadata {
     title,
     description,
     alternates: { canonical: url },
-    robots: { index: true, follow: true },
+    robots: publicSearchRobots(),
     openGraph: {
       title: branded,
       description,
