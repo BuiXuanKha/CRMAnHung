@@ -85,7 +85,7 @@ function alreadySeoUnder(prefix: string, objectKey: string): boolean {
   return isSeoNamedImageKey(objectKey) && objectKey.startsWith(`${prefix}/`);
 }
 
-/** Messenger originals — later slice. Do not copy/rename in lot/address pass. */
+/** Messenger originals — keep on R2. Lot attach copies to SEO key; do not delete chat. */
 export function isChatLibraryObjectKey(objectKey: string): boolean {
   return objectKey.replace(/^\/+/, '').startsWith('customers/chat/');
 }
@@ -126,7 +126,6 @@ export async function planSeoLotImageCopy(
     index: number;
   },
 ): Promise<SeoCopyPlan | null> {
-  if (isChatLibraryObjectKey(row.objectKey)) return null;
   const prefix = `lodats/${dest.lodatId}`;
   if (alreadySeoUnder(prefix, row.objectKey)) return null;
   const ext = seoImageExt(row.objectKey, null);
@@ -222,10 +221,13 @@ export async function applySeoImageMove(
       data: { objectKey: plan.to },
     });
   }
+  // Same chat file can be on two lots — only retarget snapshots of *this* lodat image.
+  const fromChat = isChatLibraryObjectKey(plan.from);
   await db.transactionSnapshotImage.updateMany({
-    where: { objectKey: plan.from },
+    where: fromChat ? { sourceLodatImageId: plan.id } : { objectKey: plan.from },
     data: { objectKey: plan.to },
   });
+  if (fromChat) return { deletedSource: false };
   const leftover = await countPublicImageKeyRefs(db, plan.from);
   if (leftover === 0 && plan.from !== plan.to) {
     await storage.delete(plan.from, 'public');

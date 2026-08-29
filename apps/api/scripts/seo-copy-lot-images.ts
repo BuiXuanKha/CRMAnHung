@@ -1,8 +1,6 @@
 /**
- * Move existing **lot** and **project-address** photos to SEO CDN filenames.
- * This slice does **not** touch Messenger `customers/chat/…` (later).
- *
- * Copies then deletes the source object when no DB row still points at it.
+ * Copy lot / project-address photos to SEO CDN filenames.
+ * Chat-sourced lot photos: copy to lodats/ SEO key, **keep** customers/chat/ original.
  *
  * Default: dry-run, **all** CRM lots.
  *
@@ -95,7 +93,7 @@ async function main() {
   let moved = 0;
   let deleted = 0;
   let skipped = 0;
-  let skippedChat = 0;
+  let fromChat = 0;
   const seenAddress = new Set<string>();
   let hitLimit = false;
 
@@ -124,10 +122,6 @@ async function main() {
 
     for (let i = 0; i < lodat.images.length; i += 1) {
       const img = lodat.images[i]!;
-      if (isChatLibraryObjectKey(img.objectKey)) {
-        skippedChat += 1;
-        continue;
-      }
       const plan = await planSeoLotImageCopy(storage, img, {
         lodatId: lodat.id,
         title,
@@ -143,6 +137,7 @@ async function main() {
         break;
       }
       planned += 1;
+      if (isChatLibraryObjectKey(plan.from)) fromChat += 1;
       console.log(`${apply ? 'MOVE' : 'DRY'} lodat ${lodat.id} ${plan.from} -> ${plan.to}`);
       if (!apply) continue;
       const result = await applySeoImageMove(prisma, storage, plan, 'lodat');
@@ -162,10 +157,7 @@ async function main() {
     });
     for (let i = 0; i < addrImages.length; i += 1) {
       const img = addrImages[i]!;
-      if (isChatLibraryObjectKey(img.objectKey)) {
-        skippedChat += 1;
-        continue;
-      }
+      if (isChatLibraryObjectKey(img.objectKey)) continue;
       const project = projectAddressSeoFields(addr);
       const plan = await planSeoAddressImageCopy(storage, img, {
         addressId: addr.id,
@@ -191,11 +183,11 @@ async function main() {
   }
 
   console.log(
-    `done planned=${planned} moved=${moved} deletedSource=${deleted} alreadySeo=${skipped} skippedChat=${skippedChat} apply=${apply} hitLimit=${hitLimit}`,
+    `done planned=${planned} moved=${moved} deletedSource=${deleted} alreadySeo=${skipped} fromChat=${fromChat} apply=${apply} hitLimit=${hitLimit}`,
   );
   if (!apply && planned > 0) {
     console.log(
-      'Chạy APPLY=1 (có thể LIMIT=30) — chỉ ảnh lô + ảnh dự án. Không đụng customers/chat/.',
+      'Chạy APPLY=1 — copy ảnh lô/dự án sang tên SEO. File chat gốc giữ nguyên.',
     );
   }
 }

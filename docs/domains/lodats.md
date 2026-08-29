@@ -104,9 +104,9 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 | Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng hoặc gắn path ảnh chat (reuse) |
 | Ảnh riêng thửa **dự án** (theo luồng NV) | NV gắn khi tạo/sửa | Ghép với ảnh dự án trên chi tiết (giống CRM cũ) |
 
-Upload **mới** từ máy: object key CDN = `{slug tên+địa chỉ}-anh-{n}`. Ảnh gắn từ chat: **giữ** `customers/chat/…` (đổi sau). Ảnh **dự án** (sổ địa chỉ): `{tên dự án}-anh-{n}` từ `Address.detail`.
+Upload **mới** từ máy: object key CDN = `{slug tên+địa chỉ}-anh-{n}`. Ảnh gắn từ chat: **copy** sang key lô SEO, **giữ** file `customers/chat/` (cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}` từ `Address.detail`.
 
-**Kho cũ:** ảnh lô + ảnh dự án gắn lô — `pnpm images:seo-copy` rồi `APPLY=1`. Ảnh dự án còn UUID (không có lô trên `/lo-dat`): `pnpm images:seo-copy-addresses` rồi `APPLY=1`. **Chưa** đổi `customers/chat/…`.
+**Kho cũ:** ảnh lô + ảnh dự án — `pnpm images:seo-copy` rồi `APPLY=1`. Ảnh lô trỏ chat: copy SEO, giữ chat. Ảnh dự án còn UUID: `pnpm images:seo-copy-addresses`.
 
 Hangtag Nhà/Đất trên list = trục khác (nhà vs đất trống), **không** phải dự án vs dân.
 

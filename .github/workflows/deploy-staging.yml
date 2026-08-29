@@ -114,7 +114,7 @@ jobs:
           RSH="$HOME/.ssh/rsh.sh"
           "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-copy-published.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-copy-published.sh"
 
-      # One-shot: remaining CRM Lodat photos (not published-only). Skip chat.
+      # One-shot: remaining CRM Lodat photos. Copy chat-sourced lot images; keep chat files.
       - name: Rename all CRM lot/address images on R2
         if: contains(github.event.head_commit.message, '[seo-copy-all]')
         run: |

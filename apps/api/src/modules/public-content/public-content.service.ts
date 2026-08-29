@@ -553,7 +553,7 @@ export class PublicContentService {
     return parts.join(', ');
   }
 
-  /** Move UUID / IMG_* lot (and project address) photos to SEO CDN keys; drop unused source. */
+  /** Copy lot/address photos to SEO CDN keys. Chat originals stay; UUID sources drop if unused. */
   private async ensureSeoImageKeysForLodat(lodat: LodatLoaded): Promise<void> {
     if (!this.storage.isConfigured()) return;
     const title = this.lodatTitle(lodat);
