@@ -1,13 +1,15 @@
 /**
- * Move existing lot / project-address photos to SEO CDN filenames.
- * Copies then deletes the source object when no DB row still points at it
- * (Messenger chat originals stay). Web mới chưa cần giữ URL Google cũ.
+ * Move existing **lot** and **project-address** photos to SEO CDN filenames.
+ * This slice does **not** touch Messenger `customers/chat/…` (later).
+ *
+ * Copies then deletes the source object when no DB row still points at it.
  *
  * Default: dry-run, **all** CRM lots.
  *
  * Usage (VPS, from apps/api):
  *   pnpm images:seo-copy
  *   APPLY=1 pnpm images:seo-copy
+ *   APPLY=1 LIMIT=30 pnpm images:seo-copy
  *   APPLY=1 SCOPE=published pnpm images:seo-copy
  */
 import { existsSync, readFileSync } from 'node:fs';
@@ -17,6 +19,7 @@ import { PrismaClient } from '@prisma/client';
 import { StorageService } from '../src/storage/storage.service';
 import {
   applySeoImageMove,
+  isChatLibraryObjectKey,
   planSeoAddressImageCopy,
   planSeoLotImageCopy,
 } from '../src/modules/lodats/lodat-seo-image-upload';
@@ -63,6 +66,8 @@ async function main() {
   loadDotEnv(path.join(process.cwd(), '.env'));
   const apply = process.env.APPLY === '1';
   const scope = process.env.SCOPE === 'published' ? 'published' : 'all';
+  const limitRaw = Number(process.env.LIMIT ?? '0');
+  const limit = Number.isFinite(limitRaw) && limitRaw > 0 ? Math.floor(limitRaw) : 0;
   const storage = new StorageService(new ConfigService());
   if (!storage.isConfigured()) {
     throw new Error('R2 chưa cấu hình (R2_ENDPOINT / keys / bucket / public URL).');
@@ -89,9 +94,13 @@ async function main() {
   let moved = 0;
   let deleted = 0;
   let skipped = 0;
+  let skippedChat = 0;
   const seenAddress = new Set<string>();
+  let hitLimit = false;
 
-  console.log(`seo-copy-lot-images scope=${scope} apply=${apply} lodats=${lodats.length}`);
+  console.log(
+    `seo-copy-lot-images scope=${scope} apply=${apply} limit=${limit || 'none'} lodats=${lodats.length}`,
+  );
 
   for (const lodat of lodats) {
     const listing =
@@ -114,6 +123,10 @@ async function main() {
 
     for (let i = 0; i < lodat.images.length; i += 1) {
       const img = lodat.images[i]!;
+      if (isChatLibraryObjectKey(img.objectKey)) {
+        skippedChat += 1;
+        continue;
+      }
       const plan = await planSeoLotImageCopy(storage, img, {
         lodatId: lodat.id,
         title,
@@ -124,6 +137,10 @@ async function main() {
         skipped += 1;
         continue;
       }
+      if (apply && limit > 0 && planned >= limit) {
+        hitLimit = true;
+        break;
+      }
       planned += 1;
       console.log(`${apply ? 'MOVE' : 'DRY'} lodat ${lodat.id} ${plan.from} -> ${plan.to}`);
       if (!apply) continue;
@@ -131,6 +148,7 @@ async function main() {
       moved += 1;
       if (result.deletedSource) deleted += 1;
     }
+    if (hitLimit) break;
 
     const addr = lodat.projectLot?.address;
     if (!addr?.id) continue;
@@ -143,6 +161,10 @@ async function main() {
     });
     for (let i = 0; i < addrImages.length; i += 1) {
       const img = addrImages[i]!;
+      if (isChatLibraryObjectKey(img.objectKey)) {
+        skippedChat += 1;
+        continue;
+      }
       const plan = await planSeoAddressImageCopy(storage, img, {
         addressId: addr.id,
         title: lodat.projectLot?.title?.trim() || addr.detail?.trim() || title,
@@ -152,6 +174,10 @@ async function main() {
       if (!plan) {
         skipped += 1;
         continue;
+      }
+      if (apply && limit > 0 && planned >= limit) {
+        hitLimit = true;
+        break;
       }
       planned += 1;
       console.log(`${apply ? 'MOVE' : 'DRY'} address ${addr.id} ${plan.from} -> ${plan.to}`);
@@ -163,10 +189,12 @@ async function main() {
   }
 
   console.log(
-    `done planned=${planned} moved=${moved} deletedSource=${deleted} alreadySeo=${skipped} apply=${apply}`,
+    `done planned=${planned} moved=${moved} deletedSource=${deleted} alreadySeo=${skipped} skippedChat=${skippedChat} apply=${apply} hitLimit=${hitLimit}`,
   );
   if (!apply && planned > 0) {
-    console.log('Chạy lại với APPLY=1 để chuyển R2 + cập nhật DB. Xóa file cũ nếu không còn ai trỏ.');
+    console.log(
+      'Chạy APPLY=1 (có thể LIMIT=30) — chỉ ảnh lô + ảnh dự án. Không đụng customers/chat/.',
+    );
   }
 }
 

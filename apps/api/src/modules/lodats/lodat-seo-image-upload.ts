@@ -85,6 +85,11 @@ function alreadySeoUnder(prefix: string, objectKey: string): boolean {
   return isSeoNamedImageKey(objectKey) && objectKey.startsWith(`${prefix}/`);
 }
 
+/** Messenger originals — later slice. Do not copy/rename in lot/address pass. */
+export function isChatLibraryObjectKey(objectKey: string): boolean {
+  return objectKey.replace(/^\/+/, '').startsWith('customers/chat/');
+}
+
 export type SeoCopyPlan = {
   id: string;
   from: string;
@@ -103,6 +108,7 @@ export async function planSeoLotImageCopy(
     index: number;
   },
 ): Promise<SeoCopyPlan | null> {
+  if (isChatLibraryObjectKey(row.objectKey)) return null;
   const prefix = `lodats/${dest.lodatId}`;
   if (alreadySeoUnder(prefix, row.objectKey)) return null;
   const ext = seoImageExt(row.objectKey, null);
@@ -127,6 +133,7 @@ export async function planSeoAddressImageCopy(
     index: number;
   },
 ): Promise<SeoCopyPlan | null> {
+  if (isChatLibraryObjectKey(row.objectKey)) return null;
   const prefix = `addresses/${dest.addressId}`;
   if (alreadySeoUnder(prefix, row.objectKey)) return null;
   const ext = seoImageExt(row.objectKey, null);

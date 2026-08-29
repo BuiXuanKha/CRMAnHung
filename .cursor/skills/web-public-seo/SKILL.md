@@ -19,7 +19,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 3. Nội dung chính SSR/RSC — không để bot chỉ thấy shell trống
 4. URL mới → cập nhật `sitemap.ts`; giữ `robots.ts` chặn khu CRM + `/login`
 5. **Lô `/mua-ban-nha-dat-huyen-nam-sach/[slug]`:** làm đúng công thức [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §7 (excerpt → meta; cover → OG; sitemap chỉ `isPublished`; JSON-LD không bịa giá). Hub địa bàn: domain `public-content` §17.
-6. **Ảnh:** lúc **tạo/upload lô** server đặt CDN key `{slug-ten-dia-chi}-anh-n`. Kho cũ: **move** (copy rồi xóa key lô/địa chỉ cũ nếu không còn ai trỏ) bằng `pnpm images:seo-copy` (mặc định mọi lô) — [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §10. Trang khách: `alt`; sitemap `images`; JSON-LD `ImageObject`. Gallery SSR đủ URL. Không chặn Googlebot trên CDN.
+6. **Ảnh:** lúc **tạo/upload lô** server đặt CDN key `{slug-ten-dia-chi}-anh-n`. Kho cũ slice 1: move ảnh lô + ảnh dự án (`pnpm images:seo-copy`); **bỏ qua** `customers/chat/` — [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §10. Trang khách: `alt`; sitemap `images`; JSON-LD `ImageObject`. Gallery SSR đủ URL. Không chặn Googlebot trên CDN.
 
 ## Cấm
 

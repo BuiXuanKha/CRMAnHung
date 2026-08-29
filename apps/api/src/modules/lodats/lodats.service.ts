@@ -902,7 +902,7 @@ export class LodatsService {
       select: { id: true },
     });
 
-    // Ảnh chat reuse — copy sang key SEO; file chat gốc giữ vì Messenger còn trỏ
+    // Ảnh chat reuse — slice này giữ key chat (đổi tên kho chat làm sau)
     if (!isProject && dto.chatImageIds?.length) {
       const chatImages = await this.prisma.customerMessengerImage.findMany({
         where: {
