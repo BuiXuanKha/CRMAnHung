@@ -22,10 +22,20 @@ if not secret:
     raise SystemExit(0)
 
 listings = json.load(urllib.request.urlopen("http://127.0.0.1:5050/api/v1/public/listings"))
+posts = json.load(urllib.request.urlopen("http://127.0.0.1:5050/api/v1/public/posts"))
 base = "/mua-ban-nha-dat-huyen-nam-sach"
 paths = ["/", base, "/sitemap.xml"] + [
     f"{base}/{it['slug']}" for it in listings.get("items", [])
 ]
+cats = set()
+for it in posts.get("items", []):
+    cat = it.get("category") or ""
+    slug = it.get("slug") or ""
+    if cat:
+        cats.add(f"/{cat}")
+    if cat and slug:
+        paths.append(f"/{cat}/{slug}")
+paths.extend(sorted(cats))
 req = urllib.request.Request(
     "http://127.0.0.1:5001/api/revalidate",
     data=json.dumps({"paths": paths}).encode(),

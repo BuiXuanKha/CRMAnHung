@@ -318,6 +318,7 @@ export class PublicContentService {
     if (file.buffer.length > PUBLIC_MEDIA_MAX_BYTES) {
       throw new PayloadTooLargeException('Ảnh tối đa 5 MB.');
     }
+    // Raster → WebP (sharp) inside StorageService.upload; key ends with .webp.
     const uploaded = await this.storage.upload({
       folder: 'public-web',
       buffer: file.buffer,

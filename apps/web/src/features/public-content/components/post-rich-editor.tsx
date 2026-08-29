@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
@@ -38,6 +38,7 @@ export function PostRichEditor({
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const uploading = useRef(false);
+  const [imageError, setImageError] = useState<string | null>(null);
 
   const editor = useEditor({
     extensions: [
@@ -89,9 +90,12 @@ export function PostRichEditor({
   const insertImage = useCallback(async (file: File) => {
     if (!editor || uploading.current) return;
     uploading.current = true;
+    setImageError(null);
     try {
       const url = await uploadPublicPostImage(file);
       editor.chain().focus().setImage({ src: url, alt: '' }).run();
+    } catch (err) {
+      setImageError(err instanceof Error ? err.message : 'Không chèn được ảnh.');
     } finally {
       uploading.current = false;
     }
@@ -184,6 +188,7 @@ export function PostRichEditor({
         />
       </div>
       <EditorContent editor={editor} />
+      {imageError ? <p className="crm-form-error">{imageError}</p> : null}
     </div>
   );
 }

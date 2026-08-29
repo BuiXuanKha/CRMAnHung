@@ -481,7 +481,7 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 |--------|----------|---------|
 | Tiêu đề | Có | Max 160; đếm `n/160` |
 | Chuyên mục | Có | Chip chọn (6 mục) |
-| Ảnh bìa (thumbnail) | **Xuất bản** | ~16:9; upload R2 public CDN. Nháp được trống |
+| Ảnh bìa (thumbnail) | **Xuất bản** | ~16:9; chọn JPG/PNG/WEBP, **lưu CDN WebP**. Nháp được trống |
 | Nội dung | **Xuất bản** | Rich text (TipTap): đậm/nghiêng/H2/H3/list + **ảnh đan xen** |
 | Đường dẫn dự kiến | Chỉ đọc | `/{category}/{slug}` từ tiêu đề |
 
@@ -490,7 +490,7 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 1. Dòng phụ: bài hiện trên web khách theo chuyên mục; nháp chỉ admin; Xuất bản = khách đọc được.
 2. Ảnh bìa: **Chọn ảnh** · **Gỡ ảnh** + preview.
 3. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload → chèn vào vị trí con trỏ).
-4. Ảnh bìa + ảnh trong bài = bucket **public** R2. Mock: URL tạm / stub.
+4. Ảnh bìa + ảnh trong bài = bucket **public** R2, **WebP** (`sharp`). Nguồn JPG/PNG được. Mock: URL tạm / stub.
 5. **Huỷ** · **Lưu nháp** (được thiếu ảnh/nội dung) · **Xuất bản** (thiếu ảnh bìa hoặc nội dung trống → lỗi form).
 6. Lỗi validate / API: `crm-form-error`.
 
@@ -527,7 +527,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 ### 16.1 Phase 1 — Media upload (chung lô + bài)
 
 - [x] Contract: `uploadPublicMediaResponseSchema` `{ url, objectKey? }`
-- [x] `POST /admin/public-web/media` — JWT ADMIN, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 public CDN
+- [x] `POST /admin/public-web/media` — JWT ADMIN, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 **WebP** public CDN
 - [x] Web: `uploadPublicPostImage` gọi API khi không mock; mock giữ object URL
 
 ### 16.2 Phase 2 — Lô: DB + API

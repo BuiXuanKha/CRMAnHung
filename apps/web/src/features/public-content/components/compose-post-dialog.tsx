@@ -191,7 +191,9 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
                   <Icon icon={Trash2} size="sm" /> Gỡ ảnh
                 </button>
               ) : null}
-              <p className="crm-form-hint">JPG / PNG / WEBP · tối đa 5 MB · tỷ lệ ~16:9</p>
+              <p className="crm-form-hint">
+                Chọn JPG / PNG / WEBP — lưu lên bài luôn WebP · tối đa 5 MB · tỷ lệ ~16:9
+              </p>
             </div>
           </div>
           <input

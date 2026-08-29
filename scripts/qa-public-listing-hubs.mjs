@@ -272,6 +272,17 @@ const addrSeoScript = resolve(root, 'apps/api/scripts/seo-copy-orphan-addresses.
 if (existsSync(addrSeoScript)) ok('script images:seo-copy-addresses');
 else bad('thiếu scripts/seo-copy-orphan-addresses.ts');
 
+const webpPostsScript = resolve(root, 'apps/api/scripts/seo-webp-public-media.ts');
+if (existsSync(webpPostsScript)) ok('script images:webp-public-media');
+else bad('thiếu scripts/seo-webp-public-media.ts');
+
+const composePost = read('apps/web/src/features/public-content/components/compose-post-dialog.tsx');
+if (composePost.includes('lưu lên bài luôn WebP')) {
+  ok('modal soạn bài ghi rõ JPG/PNG → WebP');
+} else {
+  bad('compose-post-dialog chưa ghi convert WebP');
+}
+
 const listingSeoSrc = read('apps/web/src/features/public/listing-seo.ts');
 if (
   listingSeoSrc.includes('isPublicAddressImageUrl') &&
