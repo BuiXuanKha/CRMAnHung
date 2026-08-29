@@ -197,7 +197,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | Apply | Chạy thật trên VPS | `APPLY=1 pnpm images:seo-copy` |
 | Lô nhỏ | Tránh chạy hết một lần | `APPLY=1 LIMIT=30 pnpm images:seo-copy` |
 | Chỉ lô đã Đăng web | Thu hẹp | `APPLY=1 SCOPE=published pnpm images:seo-copy` |
-| Toàn bộ CRM `/lo-dat` | Mọi Lodat; copy ảnh chat-gắn-lô sang SEO (giữ chat gốc) | `APPLY=1 SCOPE=all pnpm images:seo-copy` |
+| Toàn bộ CRM `/lo-dat` | Mọi Lodat; copy ảnh chat-gắn-lô sang SEO (giữ chat gốc); xong thì revalidate sitemap | `APPLY=1 SCOPE=all pnpm images:seo-copy` |
 | Ảnh dự án còn UUID (không gắn lô) | Tên file = **tên dự án** (`Address.detail`); không đụng `lodats/` hay chat | `APPLY=1 pnpm images:seo-copy-addresses` (VPS: commit `[seo-copy-orphan-addr]`) |
 | Khi Đăng web | Tự copy ảnh lô/dự án còn tên xấu; ảnh chat gắn lô → copy SEO, giữ chat | `setPublished` — không chặn đăng nếu lỗi |
 

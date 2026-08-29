@@ -11,3 +11,7 @@ SCOPE=all pnpm images:seo-copy
 
 echo "==> SEO copy APPLY SCOPE=all"
 APPLY=1 SCOPE=all pnpm images:seo-copy
+
+echo "==> Revalidate public listing HTML + sitemap"
+chmod +x "${CRMANHUNG_ROOT:-/var/www/crmanhung}/repo/scripts/revalidate-public-listings.sh"
+CRMANHUNG_ROOT="${CRMANHUNG_ROOT:-/var/www/crmanhung}" bash "${CRMANHUNG_ROOT}/repo/scripts/revalidate-public-listings.sh"
