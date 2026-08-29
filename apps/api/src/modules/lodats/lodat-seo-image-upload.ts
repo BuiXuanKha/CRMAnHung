@@ -10,6 +10,7 @@ import {
 } from '../public-content/public-slug';
 import type { StorageService } from '../../storage/storage.service';
 import { toPublicWebp } from '../../storage/to-public-webp';
+import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
 
 export async function uniqueSeoLotImageKey(
   storage: StorageService,
@@ -194,20 +195,6 @@ export async function applySeoImageCopy(
     contentType,
     contentFileName: plan.fileName,
   });
-}
-
-async function countPublicImageKeyRefs(
-  db: PrismaClient,
-  objectKey: string,
-): Promise<number> {
-  const [lodat, address, messenger, temp, snapshot] = await Promise.all([
-    db.lodatImage.count({ where: { objectKey } }),
-    db.addressImage.count({ where: { objectKey } }),
-    db.customerMessengerImage.count({ where: { objectKey } }),
-    db.lodatTempImage.count({ where: { objectKey } }),
-    db.transactionSnapshotImage.count({ where: { objectKey } }),
-  ]);
-  return lodat + address + messenger + temp + snapshot;
 }
 
 /**

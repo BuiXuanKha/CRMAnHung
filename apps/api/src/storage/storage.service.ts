@@ -5,6 +5,7 @@ import {
   DeleteObjectCommand,
   GetObjectCommand,
   HeadObjectCommand,
+  ListObjectsV2Command,
   PutObjectCommand,
   S3Client,
 } from '@aws-sdk/client-s3';
@@ -194,6 +195,29 @@ export class StorageService {
       contentFileName: input.contentFileName,
     });
     return { objectKey: key, url: this.publicUrl(key), visibility: 'public' };
+  }
+
+  /** List public object keys (one-shot convert scripts). */
+  async listPublicObjectKeys(prefix?: string): Promise<string[]> {
+    const keys: string[] = [];
+    let token: string | undefined;
+    const bucket = this.publicBucket();
+    const cleanPrefix = prefix?.replace(/^\/+/, '') || undefined;
+    do {
+      const res = await this.getClient().send(
+        new ListObjectsV2Command({
+          Bucket: bucket,
+          Prefix: cleanPrefix,
+          ContinuationToken: token,
+          MaxKeys: 1000,
+        }),
+      );
+      for (const obj of res.Contents ?? []) {
+        if (obj.Key) keys.push(obj.Key);
+      }
+      token = res.IsTruncated ? res.NextContinuationToken : undefined;
+    } while (token);
+    return keys;
   }
 
   /** Read a public object (copy chat image → SEO key). */

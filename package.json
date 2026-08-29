@@ -33,6 +33,7 @@
     "images:seo-copy": "pnpm --filter @crmanhung/api images:seo-copy",
     "images:seo-copy-addresses": "pnpm --filter @crmanhung/api images:seo-copy-addresses",
     "images:webp-public-media": "pnpm --filter @crmanhung/api images:webp-public-media",
+    "images:webp-replace": "pnpm --filter @crmanhung/api images:webp-replace",
     "transactions:migrate-legacy": "pnpm --filter @crmanhung/api transactions:migrate-legacy",
     "title-services:migrate-legacy": "pnpm --filter @crmanhung/api title-services:migrate-legacy",
     "db:up": "docker compose up -d postgres",

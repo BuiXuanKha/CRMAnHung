@@ -189,7 +189,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 
 **Lúc tạo lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server **convert WebP** (`sharp`) rồi đặt object key CDN theo **tên lô + địa chỉ** (`…-anh-n.webp`, cùng slug trang khách). Cạnh dài tối đa 2560px. Tài liệu mật (sổ đỏ) **không** convert.
 
-**Kho ảnh cũ:** JPEG/PNG trên CDN — `pnpm images:seo-copy` copy sang `…-anh-n.webp` rồi trỏ DB. Ảnh chat **mới từ extension** lưu WebP lúc ingest; JPEG migrate **giữ** đến khi gắn lô. Ảnh lô đang trỏ chat: copy SEO WebP, giữ `customers/chat/`. UUID lô/dự án: copy rồi xóa nguồn nếu không còn ai trỏ. Ảnh dự án không gắn lô: `images:seo-copy-addresses`.
+**Kho ảnh cũ:** JPEG/PNG trên CDN — `pnpm images:seo-copy` copy sang `…-anh-n.webp` rồi trỏ DB. Ảnh chat / avatar JPEG migrate: `APPLY=1 pnpm images:webp-replace` (VPS: commit `[seo-webp-replace]`) — ghi `.webp`, cập nhật DB, **rồi mới** xóa nguồn. Tài liệu mật (sổ đỏ) **không** convert.
 
 | Cách | Khi nào | Lệnh / hành vi |
 |------|---------|----------------|
@@ -201,12 +201,13 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | Ảnh dự án còn UUID (không gắn lô) | Tên file = **tên dự án** (`Address.detail`); không đụng `lodats/` hay chat | `APPLY=1 pnpm images:seo-copy-addresses` (VPS: commit `[seo-copy-orphan-addr]`) |
 | Khi Đăng web | Tự copy ảnh lô/dự án còn tên xấu; ảnh chat gắn lô → copy SEO, giữ chat | `setPublished` — không chặn đăng nếu lỗi |
 | Ảnh bài CMS (`public-web/`) | Bìa + ảnh TipTap: lúc upload convert WebP. Kho JPEG cũ: `APPLY=1 pnpm images:webp-public-media` (VPS: commit `[seo-webp-posts]`) |
+| Ảnh chat / avatar JPEG migrate | Cùng stem `.webp`, cập nhật mọi `objectKey`, xóa JPEG/PNG khi DB hết ref | `APPLY=1 pnpm images:webp-replace` (VPS: `[seo-webp-replace]`) |
 
 Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent). Snapshot giao dịch đổi sang key mới rồi mới xóa nguồn.
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
-| **Tên file / CDN** | Ảnh lô: `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.webp`. Ảnh dự án: `addresses/{id}/{ten-du-an}-anh-n.webp`. Bytes = WebP. Ảnh chat mới (extension): `customers/chat/{id}/….webp`. Ảnh chat gắn lô: **copy** sang key SEO WebP, **giữ** `customers/chat/` | UUID / `IMG_1234` / JPEG public cho ảnh lô mới; nhồi keyword; xóa file chat khi copy sang lô |
+| **Tên file / CDN** | Ảnh lô: `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.webp`. Ảnh dự án: `addresses/{id}/{ten-du-an}-anh-n.webp`. Bytes = WebP. Ảnh chat: `customers/chat/….webp` (migrate JPEG → replace script). Ảnh chat gắn lô: **copy** sang key SEO WebP | UUID / `IMG_1234` / JPEG public cho ảnh lô mới; nhồi keyword |
 | **Alt** | Ảnh lô: `{title} tại {location}` (không lặp địa chỉ nếu đã nằm trong tên); nhiều ảnh → thêm `— ảnh 2`. Ảnh dự án (`/addresses/`): **tên dự án** (`placeLabel` / `Address.detail`). Bài: `title`. Thumbnail gallery: `alt=""` | `alt` rỗng trên ảnh chính; «đất nền giá rẻ bán nhanh…»; PII / hoa hồng |
 | **HTML** | Mọi URL gallery nằm trong HTML lần tải đầu (SSR). Ảnh nằm cạnh H1 + địa chỉ + mô tả | Chỉ đổi `src` bằng JS nên bot chỉ thấy 1 ảnh; CSS `background-image` cho ảnh lô |
 | **Sitemap** | Trong `sitemap.xml`, mỗi URL lô/bài published có `image:image` → `image:loc` tuyệt đối (CDN). Bìa + gallery; bài = bìa + `img` trong body | `/og-default.png`; nháp; `data:` URI |

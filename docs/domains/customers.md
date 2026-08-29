@@ -569,7 +569,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 
 - Khớp khách của **NV đang login** theo thread rồi UID. Chưa có → tạo `KHACH_MOI`. **Không** tự khôi phục khách ẩn (hàng đợi §11 mục 16). **Không** đổi SĐT / không tải avatar.
 - Ảnh raster mới → `sharp` WebP (cạnh dài ≤ 2560) → R2 `customers/chat/<customerId>/{mid}-{n}.webp`. Video / path `/img/imgsmessenger/` cũ: bỏ qua.
-- Tin đã có đủ ảnh (kể cả JPEG migrate) → không encode lại. Gắn ảnh chat vào lô: vẫn **copy** SEO WebP, **giữ** file chat.
+- Tin đã có đủ ảnh (kể cả JPEG migrate đã convert WebP) → không encode lại. Gắn ảnh chat vào lô: **copy** SEO WebP, giữ file chat (cùng key WebP sau `[seo-webp-replace]`).
 - Body JSON tối đa 32MB (data URL). Tối đa 200 tin / lần.
 
 Scanner `apps/extension` vẫn stub — API sẵn khi port scanner.

@@ -32,4 +32,14 @@ export async function toPublicWebp(buffer: Buffer): Promise<{
   return { buffer: out, contentType: PUBLIC_SEO_IMAGE_MIME };
 }
 
+export async function assertDecodedWebp(buffer: Buffer): Promise<void> {
+  if (!buffer.length || buffer.length < 32) {
+    throw new Error('WebP buffer trống');
+  }
+  const meta = await sharp(buffer, { failOn: 'none', animated: false }).metadata();
+  if (meta.format !== 'webp' || !meta.width || !meta.height) {
+    throw new Error('WebP decode không hợp lệ');
+  }
+}
+
 export { withPublicWebpExt };

@@ -30,6 +30,7 @@
     "images:seo-copy": "tsx scripts/seo-copy-lot-images.ts",
     "images:seo-copy-addresses": "tsx scripts/seo-copy-orphan-addresses.ts",
     "images:webp-public-media": "tsx scripts/seo-webp-public-media.ts",
+    "images:webp-replace": "tsx scripts/seo-webp-replace-public.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

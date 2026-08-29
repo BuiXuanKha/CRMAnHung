@@ -141,3 +141,13 @@ jobs:
           source "$HOME/.ssh/deploy.env"
           RSH="$HOME/.ssh/rsh.sh"
           "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-webp-public-media.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-webp-public-media.sh"
+
+      # One-shot: leftover public JPEG/PNG (chat, avatars, snapshots, 3 addresses) → WebP.
+      # Writes .webp, retargets DB, deletes JPEG/PNG only after decode+zero leftover refs.
+      - name: Convert leftover public JPEG/PNG to WebP
+        if: contains(github.event.head_commit.message, '[seo-webp-replace]')
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-webp-replace-public.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-webp-replace-public.sh"
