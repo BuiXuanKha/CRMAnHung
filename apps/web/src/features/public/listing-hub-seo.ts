@@ -8,7 +8,7 @@ import { ANHUNG_BRAND } from './brand';
 import { publicSearchRobots } from './search-index';
 import { communeHubDescription, communeHubHeadline, placeHubDescription, placeHubHeadline } from './listing-hubs';
 import { listingCoverAbsoluteUrl } from './listing-image-seo';
-import { listingHeadline, SAN_PHAM_LIST_PATH, SAN_PHAM_LIST_TITLE } from './listing-seo';
+import { listingPageH1, SAN_PHAM_LIST_PATH, SAN_PHAM_LIST_TITLE } from './listing-seo';
 import {
   listingCanonicalUrl,
   listingCommuneHubUrl,
@@ -85,7 +85,7 @@ export function communeHubItemListJsonLd(hub: PublicListingHubDetail) {
         '@type': 'ListItem',
         position: index + 1,
         url: listingCanonicalUrl(listing.slug),
-        name: listingHeadline(listing),
+        name: listingPageH1(listing),
         description: listingSearchDescription(listing),
         ...(cover ? { image: cover } : {}),
       };
@@ -157,7 +157,7 @@ export function placeHubItemListJsonLd(hub: PublicListingHubDetail) {
         '@type': 'ListItem',
         position: index + 1,
         url: listingCanonicalUrl(listing.slug),
-        name: listingHeadline(listing),
+        name: listingPageH1(listing),
         description: listingSearchDescription(listing),
         ...(cover ? { image: cover } : {}),
       };

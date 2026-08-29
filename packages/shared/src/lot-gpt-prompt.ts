@@ -42,14 +42,21 @@ QUY TẮC DỮ LIỆU
 - Không biến nhận định chủ quan thành sự thật khách quan.
 
 QUY TẮC SEO
-- SEO title ưu tiên ý định tìm kiếm mua/bán + địa danh +
-  đặc điểm nổi bật.
-- H1 tự nhiên, không nhất thiết giống hoàn toàn SEO title.
-- Meta description khoảng 140-160 ký tự khi hợp lý.
+- seoTitle: 50–65 ký tự; ý định mua/bán + địa danh (thôn/xã) +
+  một đặc điểm nổi bật (diện tích / mặt tiền). Không thêm
+  " | An Hưng Land" (hệ thống tự nối brand).
+- H1 tự nhiên; không copy nguyên seoTitle, nhưng PHẢI cùng
+  địa danh chính và diện tích (nếu có) để Google thấy title và
+  H1 nói cùng một lô.
+- Không lặp địa danh: cấm "tại X tại X, …" hoặc viết lại
+  đủ thôn + xã + huyện + tỉnh hai lần trong cùng một trường.
+- Meta description 140-160 ký tự: địa danh + đặc điểm thật +
+  giá công bố (priceText) khi có. Không nhồi từ khóa.
 - Slug ngắn gọn, chữ thường, không dấu, dùng dấu gạch ngang.
-- Nội dung sử dụng H2 hợp lý.
-- Từ khóa chính xuất hiện tự nhiên trong title, H1,
-  phần mở đầu và nội dung khi phù hợp.
+- Nội dung sử dụng H2 hợp lý (Thông tin lô đất, Vị trí, Giá bán
+  khi có dữ liệu).
+- Từ khóa chính xuất hiện tự nhiên trong seoTitle, H1,
+  đoạn mở đầu bodyHtml và nội dung khi phù hợp.
 - Không nhồi từ khóa.
 - Không sử dụng hashtag trong bài website.
 - Không sử dụng emoji trong nội dung website.

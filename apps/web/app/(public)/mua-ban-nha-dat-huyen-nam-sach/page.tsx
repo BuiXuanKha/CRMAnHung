@@ -1,6 +1,10 @@
 import Link from 'next/link';
 import { JsonLd } from '@/features/public/json-ld';
-import { listingItemListJsonLd, sanPhamListMetadata } from '@/features/public/listing-seo';
+import {
+  listingCatalogBreadcrumbJsonLd,
+  listingItemListJsonLd,
+  sanPhamListMetadata,
+} from '@/features/public/listing-seo';
 import { ListingProductGrid } from '@/features/public/listing-product-grid';
 import { listPublicCatalog } from '@/features/public/published-listings';
 import '@/features/public/public-home.css';
@@ -14,6 +18,7 @@ export default async function MuaBanNhaDatListPage() {
   const listings = await listPublicCatalog();
   return (
     <div className="ph">
+      <JsonLd data={listingCatalogBreadcrumbJsonLd()} />
       <JsonLd data={listingItemListJsonLd(listings)} />
       <div className="ph-list-page">
         <Link href="/" className="ph-detail-back">

@@ -72,6 +72,14 @@
   line-height: 1.45;
 }
 
+.pd-location a {
+  color: inherit;
+}
+
+.pd-location a:hover {
+  color: var(--ph-brand);
+}
+
 .pd-location-pin {
   flex: 0 0 auto;
   width: 14px;

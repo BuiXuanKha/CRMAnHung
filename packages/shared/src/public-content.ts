@@ -261,6 +261,86 @@ export function listingSearchDescription(listing: {
   return clipMetaDescription(custom || listing.excerpt);
 }
 
+function foldHeadline(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+/** On-page H1 — stored `title` (GPT h1), verbatim. */
+export function listingPageH1(listing: { title: string }): string {
+  return listing.title.trim();
+}
+
+/**
+ * Title + leftover address parts not already in the title.
+ * Avoids «… tại Nham Cáp tại Nham Cáp, Đồng Lạc, …».
+ */
+export function listingHeadline(listing: {
+  title: string;
+  location?: string | null;
+}): string {
+  const title = listing.title.trim();
+  const location = listing.location?.trim() ?? '';
+  if (!location) return title;
+  const titleFold = foldHeadline(title);
+  const locFold = foldHeadline(location);
+  if (!locFold || titleFold.includes(locFold)) return title;
+
+  const leftover = location
+    .split(',')
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0 && !titleFold.includes(foldHeadline(p)));
+  if (leftover.length === 0) return title;
+
+  const extra = leftover.join(', ');
+  if (/\btại\b/i.test(title)) return `${title}, ${extra}`;
+  return `${title} tại ${extra}`;
+}
+
+/** Document / OG title — GPT seoTitle when saved; strip brand (layout template adds it). */
+export function listingSeoTitle(listing: {
+  seoTitle?: string | null;
+  title: string;
+}): string {
+  const raw = listing.seoTitle?.trim() || listing.title.trim();
+  return raw.replace(/\s*\|\s*An Hưng Land\s*$/i, '').trim() || listing.title.trim();
+}
+
+/**
+ * Parse public area copy (`105 m²`, `70,8 m²`, `1.000 m²`, `12 ha`) to square metres.
+ * Returns null when unparseable.
+ */
+export function publicAreaLabelToM2(label: string | null | undefined): number | null {
+  if (!label) return null;
+  const t = label.trim();
+  const ha = t.match(/^([\d.]+(?:[.,]\d+)?)\s*ha$/i);
+  if (ha) {
+    const n = parseViDecimal(ha[1]);
+    return n != null ? Math.round(n * 10_000) : null;
+  }
+  const m2 = t.match(/^([\d.]+(?:[.,]\d+)?)\s*m²$/i);
+  if (!m2) return null;
+  return parseViDecimal(m2[1]);
+}
+
+function parseViDecimal(raw: string): number | null {
+  const s = raw.trim();
+  if (!s) return null;
+  if (s.includes(',') && s.includes('.')) {
+    const n = Number(s.replace(/\./g, '').replace(',', '.'));
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+  if (s.includes(',')) {
+    const n = Number(s.replace(',', '.'));
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+  if (/^\d{1,3}(\.\d{3})+$/.test(s)) {
+    const n = Number(s.replace(/\./g, ''));
+    return Number.isFinite(n) && n > 0 ? n : null;
+  }
+  const n = Number(s);
+  return Number.isFinite(n) && n > 0 ? n : null;
+}
+
 export function toGuestListing(row: {
   isPublished: boolean;
   slug: string;

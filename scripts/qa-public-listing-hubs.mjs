@@ -17,6 +17,10 @@ import {
   seoImageExt,
   isSeoNamedImageKey,
   PUBLIC_SEO_IMAGE_EXT,
+  listingHeadline,
+  listingPageH1,
+  listingSeoTitle,
+  publicAreaLabelToM2,
 } from '../packages/shared/dist/index.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -292,6 +296,11 @@ if (
 } else {
   bad('listing-seo chưa tách alt ảnh /addresses/');
 }
+if (listingSeoSrc.includes('name: h1') && listingSeoSrc.includes('itemOffered')) {
+  ok('JSON-LD name = H1 + itemOffered');
+} else {
+  bad('listingJsonLd chưa khớp H1 / itemOffered');
+}
 
 const publishSeoSrc = read('apps/api/src/modules/public-content/public-content.service.ts');
 if (
@@ -335,6 +344,45 @@ if (
 } else {
   bad('lodat-seo-image-upload chưa khóa WebP');
 }
+
+console.log('\nListing headline (no duplicated location)');
+const dupCase = listingHeadline({
+  title: 'Lô đất 105m² tại trục chính Nham Cáp, Đồng Lạc',
+  location: 'Nham Cáp, Đồng Lạc, Nam Sách, Hải Dương',
+});
+if (dupCase === 'Lô đất 105m² tại trục chính Nham Cáp, Đồng Lạc, Nam Sách, Hải Dương') {
+  ok('headline leftover address, no double tại');
+} else {
+  bad(`headline leftover: ${dupCase}`);
+}
+
+const exactCase = listingHeadline({
+  title: 'Lô 33 Mạn Đê, Nam Trung, Nam Sách, Hải Dương',
+  location: 'Mạn Đê, Nam Trung, Nam Sách, Hải Dương',
+});
+if (exactCase === 'Lô 33 Mạn Đê, Nam Trung, Nam Sách, Hải Dương') {
+  ok('headline skips when full location already in title');
+} else {
+  bad(`headline exact: ${exactCase}`);
+}
+
+const h1 = listingPageH1({ title: 'Lô đất 105m² tại trục chính Nham Cáp, Đồng Lạc' });
+if (h1 === 'Lô đất 105m² tại trục chính Nham Cáp, Đồng Lạc') ok('H1 = stored title');
+else bad(`H1: ${h1}`);
+
+const seo = listingSeoTitle({
+  seoTitle: 'Bán đất Nham Cáp, Đồng Lạc 105m² | An Hưng Land',
+  title: 'Lô đất 105m² tại trục chính Nham Cáp, Đồng Lạc',
+});
+if (seo === 'Bán đất Nham Cáp, Đồng Lạc 105m²') ok('seoTitle strips brand suffix');
+else bad(`seoTitle: ${seo}`);
+
+if (publicAreaLabelToM2('105 m²') === 105) ok('area 105 m²');
+else bad('area 105');
+if (publicAreaLabelToM2('70,8 m²') === 70.8) ok('area 70,8 m²');
+else bad(`area 70,8: ${publicAreaLabelToM2('70,8 m²')}`);
+if (publicAreaLabelToM2('1.000 m²') === 1000) ok('area 1.000 m²');
+else bad(`area 1000: ${publicAreaLabelToM2('1.000 m²')}`);
 
 console.log('\nRoute files');
 const routes = [

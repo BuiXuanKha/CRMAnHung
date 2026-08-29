@@ -10,7 +10,13 @@ import { getProductBySlug } from './mock-data';
 import { listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import { listingShareText } from './share';
-import { PUBLIC_LISTING_PATH, listingCanonicalUrl, listingHref } from './site';
+import {
+  PUBLIC_LISTING_PATH,
+  listingCanonicalUrl,
+  listingCommuneHubPath,
+  listingHref,
+  listingPlaceHubPath,
+} from './site';
 import './public-home.css';
 import './product-detail.css';
 
@@ -84,14 +90,29 @@ export function ProductDetailView({
           <Link href="/">Trang chủ</Link>
           <span aria-hidden>/</span>
           <Link href={PUBLIC_LISTING_PATH}>Nhà đất đang bán</Link>
-          <span aria-hidden>/</span>
-          {listing.location ? (
+          {listing.communeSlug && listing.communeLabel ? (
             <>
-              <span className="pd-breadcrumb-loc">{listing.location}</span>
               <span aria-hidden>/</span>
+              <Link href={listingCommuneHubPath(listing.communeSlug)}>
+                {listing.communeLabel}
+              </Link>
+            </>
+          ) : listing.location ? (
+            <>
+              <span aria-hidden>/</span>
+              <span className="pd-breadcrumb-loc">{listing.location}</span>
             </>
           ) : null}
-          <span>{listing.title}</span>
+          {listing.communeSlug && listing.placeSlug && listing.placeLabel ? (
+            <>
+              <span aria-hidden>/</span>
+              <Link href={listingPlaceHubPath(listing.communeSlug, listing.placeSlug)}>
+                {listing.placeLabel}
+              </Link>
+            </>
+          ) : null}
+          <span aria-hidden>/</span>
+          <span>{h1}</span>
         </nav>
 
         <div className="pd-layout">
@@ -110,7 +131,13 @@ export function ProductDetailView({
             {listing.location ? (
               <p className="pd-location">
                 <span className="pd-location-pin" aria-hidden />
-                <span>{listing.location}</span>
+                {listing.communeSlug ? (
+                  <Link href={listingCommuneHubPath(listing.communeSlug)}>
+                    {listing.location}
+                  </Link>
+                ) : (
+                  <span>{listing.location}</span>
+                )}
               </p>
             ) : null}
 

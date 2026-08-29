@@ -1,10 +1,15 @@
 import type { Metadata } from 'next';
 import {
+  listingHeadline,
+  listingPageH1,
   listingSearchDescription,
+  listingSeoTitle,
+  publicAreaLabelToM2,
   publicPriceLabelToVnd,
   type PublicGuestListing,
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
+import { parseLotGptLocation } from '@/features/public-content/lot-gpt-context';
 import { publicSearchRobots } from './search-index';
 import {
   isPublicAddressImageUrl,
@@ -17,10 +22,24 @@ import {
   PUBLIC_OG_DEFAULT,
   PUBLIC_SITE_ORIGIN,
   listingCanonicalUrl,
+  listingCommuneHubUrl,
+  listingPlaceHubUrl,
   toAbsoluteUrl,
 } from './site';
 
+export { listingHeadline, listingPageH1, listingSeoTitle } from '@crmanhung/shared';
 export { listingSeoImageUrls } from './listing-image-seo';
+
+type ListingSeoInput = PublicGuestListing & {
+  placeLabel?: string | null;
+  communeLabel?: string | null;
+  communeSlug?: string | null;
+  placeSlug?: string | null;
+  kindLabel?: string | null;
+  areaLabel?: string | null;
+  frontageLabel?: string | null;
+  directionLabel?: string | null;
+};
 
 export function listingImageAltText(
   listing: { title: string; location?: string | null; placeLabel?: string | null },
@@ -57,27 +76,6 @@ function listingOgImage(listing: PublicGuestListing & { placeLabel?: string | nu
 } {
   const src = listing.coverImageUrl?.trim() || PUBLIC_OG_DEFAULT;
   return { url: toAbsoluteUrl(src), alt: listingCoverAlt(listing) };
-}
-
-/** H1 + meta title: tên lô + địa chỉ công khai. Không đổi slug. */
-export function listingHeadline(listing: { title: string; location?: string | null }): string {
-  const title = listing.title.trim();
-  const location = listing.location?.trim() ?? '';
-  if (!location) return title;
-  if (title.toLowerCase().includes(location.toLowerCase())) return title;
-  return `${title} tại ${location}`;
-}
-
-/** On-page H1 — stored `title` (GPT h1), verbatim. */
-export function listingPageH1(listing: { title: string }): string {
-  return listing.title.trim();
-}
-
-/** Document / OG / Twitter title — GPT seoTitle when saved, else title; no location suffix. */
-export function listingSeoTitle(listing: { seoTitle?: string | null; title: string }): string {
-  const seo = listing.seoTitle?.trim();
-  if (seo) return seo;
-  return listing.title.trim();
 }
 
 export function unpublishedListingMetadata(): Metadata {
@@ -124,7 +122,7 @@ export function listingMetadata(
       card: 'summary_large_image',
       title: branded,
       description,
-      images: [image.url],
+      images: [image],
     },
   };
 }
@@ -149,14 +147,14 @@ export function sanPhamListMetadata(): Metadata {
       card: 'summary_large_image',
       title: `${SAN_PHAM_LIST_TITLE} | ${ANHUNG_BRAND.name}`,
       description: SAN_PHAM_LIST_DESCRIPTION,
-      images: [toAbsoluteUrl(PUBLIC_OG_DEFAULT)],
+      images: [{ url: toAbsoluteUrl(PUBLIC_OG_DEFAULT), alt: ANHUNG_BRAND.name }],
     },
   };
 }
 
 function sellerJsonLd() {
   return {
-    '@type': 'RealEstateAgent',
+    '@type': 'RealEstateAgent' as const,
     name: ANHUNG_BRAND.name,
     url: PUBLIC_SITE_ORIGIN,
     telephone: `+84${ANHUNG_BRAND.hotlineTel.replace(/^0/, '')}`,
@@ -168,9 +166,22 @@ function sellerJsonLd() {
   };
 }
 
-function listingImageObjectsJsonLd(
-  listing: PublicGuestListing & { placeLabel?: string | null },
-) {
+function listingPostalAddress(listing: ListingSeoInput) {
+  const parsed = parseLotGptLocation(listing.location ?? '');
+  const street =
+    listing.placeLabel?.trim() || parsed.village.trim() || listing.location?.trim() || '';
+  const locality = listing.communeLabel?.trim() || parsed.commune.trim();
+  const region = parsed.province.trim();
+  return {
+    '@type': 'PostalAddress' as const,
+    ...(street ? { streetAddress: street } : {}),
+    ...(locality ? { addressLocality: locality } : {}),
+    ...(region ? { addressRegion: region } : {}),
+    addressCountry: 'VN',
+  };
+}
+
+function listingImageObjectsJsonLd(listing: ListingSeoInput) {
   const urls = listingSeoImageUrls(listing);
   const fallback = listingOgImage(listing).url;
   const list = urls.length > 0 ? urls : [fallback];
@@ -185,16 +196,56 @@ function listingImageObjectsJsonLd(
   }));
 }
 
-export function listingJsonLd(listing: PublicGuestListing & { placeLabel?: string | null }) {
+function listingItemOfferedJsonLd(listing: ListingSeoInput) {
+  const h1 = listingPageH1(listing);
+  const areaM2 = publicAreaLabelToM2(listing.areaLabel);
+  const offeredType = listing.kindLabel?.trim() === 'Nhà' ? 'House' : 'Place';
+  const extra: Array<Record<string, unknown>> = [];
+  if (listing.frontageLabel?.trim()) {
+    extra.push({
+      '@type': 'PropertyValue',
+      name: 'Mặt tiền',
+      value: listing.frontageLabel.trim(),
+    });
+  }
+  if (listing.directionLabel?.trim()) {
+    extra.push({
+      '@type': 'PropertyValue',
+      name: 'Hướng',
+      value: listing.directionLabel.trim(),
+    });
+  }
+  return {
+    '@type': offeredType,
+    name: h1,
+    address: listingPostalAddress(listing),
+    ...(areaM2 != null
+      ? {
+          floorSize: {
+            '@type': 'QuantitativeValue',
+            value: areaM2,
+            unitCode: 'MTK',
+          },
+        }
+      : {}),
+    ...(extra.length ? { additionalProperty: extra } : {}),
+  };
+}
+
+export function listingJsonLd(listing: ListingSeoInput) {
   const url = listingCanonicalUrl(listing.slug);
   const description = listingSearchDescription(listing);
   const priceVnd = publicPriceLabelToVnd(listing.priceLabel);
-  const headline = listingHeadline(listing);
+  const h1 = listingPageH1(listing);
+  const images = listingImageObjectsJsonLd(listing);
+  const itemOffered = listingItemOfferedJsonLd(listing);
   const offers: Record<string, unknown> = {
     '@type': 'Offer',
     url,
     availability: 'https://schema.org/InStock',
+    businessFunction: 'http://purl.org/goodrelations/v1#Sell',
     seller: sellerJsonLd(),
+    itemOffered,
   };
   if (priceVnd != null) {
     offers.price = priceVnd;
@@ -206,23 +257,65 @@ export function listingJsonLd(listing: PublicGuestListing & { placeLabel?: strin
   return {
     '@context': 'https://schema.org',
     '@type': 'RealEstateListing',
-    name: headline,
+    name: h1,
+    headline: h1,
     description,
     url,
-    image: listingImageObjectsJsonLd(listing),
+    image: images,
+    primaryImageOfPage: images[0],
     inLanguage: 'vi-VN',
     ...(listing.updatedAt ? { dateModified: listing.updatedAt } : {}),
     ...(listing.publishedAt ? { datePosted: listing.publishedAt } : {}),
-    address: {
-      '@type': 'PostalAddress',
-      addressLocality: listing.location,
-      addressCountry: 'VN',
-    },
+    address: listingPostalAddress(listing),
     offers,
+    mainEntity: offers,
   };
 }
 
-export function listingBreadcrumbJsonLd(listing: PublicGuestListing) {
+export function listingBreadcrumbJsonLd(listing: ListingSeoInput) {
+  const items: Array<{ '@type': 'ListItem'; position: number; name: string; item: string }> = [
+    { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: PUBLIC_SITE_ORIGIN },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: SAN_PHAM_LIST_TITLE,
+      item: `${PUBLIC_SITE_ORIGIN}${SAN_PHAM_LIST_PATH}`,
+    },
+  ];
+  const communeSlug = listing.communeSlug?.trim();
+  const communeLabel = listing.communeLabel?.trim();
+  if (communeSlug && communeLabel) {
+    items.push({
+      '@type': 'ListItem',
+      position: items.length + 1,
+      name: communeLabel,
+      item: listingCommuneHubUrl(communeSlug),
+    });
+  }
+  const placeSlug = listing.placeSlug?.trim();
+  const placeLabel = listing.placeLabel?.trim();
+  if (communeSlug && placeSlug && placeLabel) {
+    items.push({
+      '@type': 'ListItem',
+      position: items.length + 1,
+      name: placeLabel,
+      item: listingPlaceHubUrl(communeSlug, placeSlug),
+    });
+  }
+  items.push({
+    '@type': 'ListItem',
+    position: items.length + 1,
+    name: listingPageH1(listing),
+    item: listingCanonicalUrl(listing.slug),
+  });
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: items,
+  };
+}
+
+export function listingCatalogBreadcrumbJsonLd() {
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
@@ -234,12 +327,6 @@ export function listingBreadcrumbJsonLd(listing: PublicGuestListing) {
         name: SAN_PHAM_LIST_TITLE,
         item: `${PUBLIC_SITE_ORIGIN}${SAN_PHAM_LIST_PATH}`,
       },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: listingHeadline(listing),
-        item: listingCanonicalUrl(listing.slug),
-      },
     ],
   };
 }
@@ -249,13 +336,14 @@ export function listingItemListJsonLd(listings: PublicGuestListing[]) {
     '@context': 'https://schema.org',
     '@type': 'ItemList',
     name: SAN_PHAM_LIST_TITLE,
+    numberOfItems: listings.length,
     itemListElement: listings.map((listing, index) => {
       const cover = listingCoverAbsoluteUrl(listing);
       return {
         '@type': 'ListItem',
         position: index + 1,
         url: listingCanonicalUrl(listing.slug),
-        name: listingHeadline(listing),
+        name: listingPageH1(listing),
         ...(cover ? { image: cover } : {}),
       };
     }),

@@ -126,15 +126,15 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
 | **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = **tên lô + địa chỉ** (không dấu, unique, ổn định sau khi tạo) | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
-| **Title** | `{title} tại {location}` + `\| An Hưng Land` nếu địa chỉ chưa nằm trong tên. Khớp H1. Không đổi slug | Nhồi «đất nền Đồng Nai giá rẻ…»; title chỉ mã lô không có xã/huyện |
+| **Title** | `seoTitle` (GPT) + template `\| An Hưng Land`. Không nhồi brand trong field. Cùng địa danh/diện tích với H1, không bắt buộc trùng chữ | Nhồi «đất nền Đồng Nai giá rẻ…»; title chỉ mã lô không có xã/huyện; `title` HTML khác hẳn H1 (thiếu địa danh) |
 | **Meta description** | `metaDescription` nếu có, không thì **excerpt** public, cắt ~160 ký tự | Copy giống nhau mọi lô; mô tả CRM / hoa hồng |
 | **Canonical** | Đúng URL tuyệt đối ở trên | Hai URL một lô |
-| **H1** | Cùng công thức title (tên + địa chỉ) — **một** H1 | H1 khác title hoặc nhiều H1 |
+| **H1** | `title` (GPT h1) — **một** H1. Cùng địa danh chính với seoTitle; không lặp «tại X tại X» | Nhiều H1; H1 không có thôn/xã |
 | **Copy** | Excerpt + mô tả **riêng** từng lô (SSR) | Lặp đoạn khuôn + keyword |
 | **OG / Twitter** | title + description như trên; `og:image` = ảnh bìa; thiếu bìa → `/og-default.png`; `summary_large_image` | Ảnh PII / ảnh nội bộ CRM |
-| **Ảnh / Google Images** | `alt` = tên lô + địa chỉ; gallery SSR đủ URL; sitemap `image:loc`; JSON-LD `ImageObject` (caption từ title/location). Xem §10 | `alt` rỗng / nhồi keyword; chặn Googlebot tải CDN; sitemap `/og-default.png` |
-| **JSON-LD** | `RealEstateListing` + `BreadcrumbList`. `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM |
-| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → lô; block sản phẩm khác; list + hub `/xa/…` | Orphan URL |
+| **Ảnh / Google Images** | `alt` = `listingHeadline` (title + phần địa chỉ **chưa** có trong tên); gallery SSR đủ URL; sitemap `image:loc`; JSON-LD `ImageObject`. Xem §10 | `alt` rỗng / nhồi keyword; chặn Googlebot tải CDN; sitemap `/og-default.png` |
+| **JSON-LD** | `RealEstateListing` (`name` = H1) + `Offer` (`itemOffered` Place/House, `floorSize` khi parse được) + `BreadcrumbList` (kèm hub xã/cấp 4). `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM; `name` lặp địa chỉ |
+| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → hub `/xa/…` → lô; block sản phẩm khác | Orphan URL |
 | **Sitemap** | Chỉ lô `isPublished` (+ hub xã/cấp4 có lô). Mỗi URL lô kèm `image:image` (bìa + gallery CDN). Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán; ảnh brand fallback |
 | **robots** | Cho phép path catalog mới; chặn `/login` + CRM | `Disallow` path catalog |
 
@@ -208,7 +208,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
 | **Tên file / CDN** | Ảnh lô: `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.webp`. Ảnh dự án: `addresses/{id}/{ten-du-an}-anh-n.webp`. Bytes = WebP. Ảnh chat: `customers/chat/….webp` (migrate JPEG → replace script). Ảnh chat gắn lô: **copy** sang key SEO WebP | UUID / `IMG_1234` / JPEG public cho ảnh lô mới; nhồi keyword |
-| **Alt** | Ảnh lô: `{title} tại {location}` (không lặp địa chỉ nếu đã nằm trong tên); nhiều ảnh → thêm `— ảnh 2`. Ảnh dự án (`/addresses/`): **tên dự án** (`placeLabel` / `Address.detail`). Bài: `title`. Thumbnail gallery: `alt=""` | `alt` rỗng trên ảnh chính; «đất nền giá rẻ bán nhanh…»; PII / hoa hồng |
+| **Alt** | Ảnh lô: `listingHeadline` — `{title}` + phần địa chỉ chưa có trong tên (không lặp «tại X tại X»); nhiều ảnh → thêm `— ảnh 2`. Ảnh dự án (`/addresses/`): **tên dự án** (`placeLabel` / `Address.detail`). Bài: `title`. Thumbnail gallery: `alt=""` | `alt` rỗng trên ảnh chính; «đất nền giá rẻ bán nhanh…»; PII / hoa hồng |
 | **HTML** | Mọi URL gallery nằm trong HTML lần tải đầu (SSR). Ảnh nằm cạnh H1 + địa chỉ + mô tả | Chỉ đổi `src` bằng JS nên bot chỉ thấy 1 ảnh; CSS `background-image` cho ảnh lô |
 | **Sitemap** | Trong `sitemap.xml`, mỗi URL lô/bài published có `image:image` → `image:loc` tuyệt đối (CDN). Bìa + gallery; bài = bìa + `img` trong body | `/og-default.png`; nháp; `data:` URI |
 | **JSON-LD** | `ImageObject`: `contentUrl`, `caption` (= alt), `description` (= meta/excerpt). Ảnh bìa `representativeOfPage` | Bịa EXIF / license; caption khác nội dung trang |

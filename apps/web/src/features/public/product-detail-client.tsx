@@ -87,6 +87,10 @@ export function ProductGallery({
               alt={alts[i] ?? ''}
               className={i === active ? 'is-active' : undefined}
               loading={i === 0 ? 'eager' : 'lazy'}
+              fetchPriority={i === 0 ? 'high' : 'low'}
+              decoding="async"
+              width={1600}
+              height={1000}
             />
           ))}
         </div>
