@@ -225,6 +225,30 @@ const seoScript = resolve(root, 'apps/api/scripts/seo-copy-lot-images.ts');
 if (existsSync(seoScript)) ok('script images:seo-copy');
 else bad('thiếu scripts/seo-copy-lot-images.ts');
 
+const addrSeoScript = resolve(root, 'apps/api/scripts/seo-copy-orphan-addresses.ts');
+if (existsSync(addrSeoScript)) ok('script images:seo-copy-addresses');
+else bad('thiếu scripts/seo-copy-orphan-addresses.ts');
+
+const listingSeoSrc = read('apps/web/src/features/public/listing-seo.ts');
+if (
+  listingSeoSrc.includes('isPublicAddressImageUrl') &&
+  listingSeoSrc.includes('placeLabel')
+) {
+  ok('alt ảnh dự án dùng tên dự án (placeLabel)');
+} else {
+  bad('listing-seo chưa tách alt ảnh /addresses/');
+}
+
+const publishSeoSrc = read('apps/api/src/modules/public-content/public-content.service.ts');
+if (
+  publishSeoSrc.includes('projectAddressSeoFields') &&
+  !publishSeoSrc.includes("lodat.projectLot?.title?.trim() || addr.detail")
+) {
+  ok('Đăng web đặt key ảnh dự án theo Address.detail');
+} else {
+  bad('ensureSeoImageKeysForLodat còn lấy tên lô cho ảnh dự án');
+}
+
 console.log('\nRoute files');
 const routes = [
   'apps/web/app/(public)/mua-ban-nha-dat-huyen-nam-sach/page.tsx',

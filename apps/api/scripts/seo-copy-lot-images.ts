@@ -22,6 +22,7 @@ import {
   isChatLibraryObjectKey,
   planSeoAddressImageCopy,
   planSeoLotImageCopy,
+  projectAddressSeoFields,
 } from '../src/modules/lodats/lodat-seo-image-upload';
 
 const prisma = new PrismaClient();
@@ -165,10 +166,11 @@ async function main() {
         skippedChat += 1;
         continue;
       }
+      const project = projectAddressSeoFields(addr);
       const plan = await planSeoAddressImageCopy(storage, img, {
         addressId: addr.id,
-        title: lodat.projectLot?.title?.trim() || addr.detail?.trim() || title,
-        location,
+        title: project.title,
+        location: project.location,
         index: i + 1,
       });
       if (!plan) {

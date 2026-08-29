@@ -28,6 +28,7 @@
     "title-services:migrate-legacy": "tsx scripts/migrate-title-services-from-legacy.ts",
     "lots:regenerate-public-slugs": "tsx scripts/regenerate-public-lot-slugs.ts",
     "images:seo-copy": "tsx scripts/seo-copy-lot-images.ts",
+    "images:seo-copy-addresses": "tsx scripts/seo-copy-orphan-addresses.ts",
     "db:studio": "prisma studio"
   },
   "dependencies": {

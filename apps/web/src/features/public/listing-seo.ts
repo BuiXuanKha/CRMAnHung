@@ -6,6 +6,7 @@ import {
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import {
+  isPublicAddressImageUrl,
   listingCoverAbsoluteUrl,
   listingImageAlt,
   listingSeoImageUrls,
@@ -21,11 +22,27 @@ import {
 export { listingSeoImageUrls } from './listing-image-seo';
 
 export function listingImageAltText(
-  listing: { title: string; location?: string | null },
+  listing: { title: string; location?: string | null; placeLabel?: string | null },
   index: number,
   total: number,
+  imageUrl?: string | null,
 ): string {
+  if (isPublicAddressImageUrl(imageUrl)) {
+    const project =
+      listing.placeLabel?.trim() || listing.location?.trim() || listing.title.trim();
+    return project;
+  }
   return listingImageAlt(listing, index, total, listingHeadline(listing));
+}
+
+/** Cover / OG alt — project name when the file is a project-address photo. */
+export function listingCoverAlt(listing: {
+  title: string;
+  location?: string | null;
+  placeLabel?: string | null;
+  coverImageUrl?: string | null;
+}): string {
+  return listingImageAltText(listing, 0, 1, listing.coverImageUrl);
 }
 
 export const SAN_PHAM_LIST_PATH = PUBLIC_LISTING_PATH;
@@ -33,9 +50,12 @@ export const SAN_PHAM_LIST_TITLE = 'Nhà đất đang bán';
 export const SAN_PHAM_LIST_DESCRIPTION =
   'Nhà đất An Hưng Land đang giới thiệu — xem vị trí, diện tích và giá công bố (hoặc liên hệ). Không cần đăng nhập.';
 
-function listingOgImage(listing: PublicGuestListing): { url: string; alt: string } {
+function listingOgImage(listing: PublicGuestListing & { placeLabel?: string | null }): {
+  url: string;
+  alt: string;
+} {
   const src = listing.coverImageUrl?.trim() || PUBLIC_OG_DEFAULT;
-  return { url: toAbsoluteUrl(src), alt: listingHeadline(listing) };
+  return { url: toAbsoluteUrl(src), alt: listingCoverAlt(listing) };
 }
 
 /** H1 + meta title: tên lô + địa chỉ công khai. Không đổi slug. */
@@ -77,7 +97,9 @@ export function unpublishedListingMetadata(): Metadata {
   };
 }
 
-export function listingMetadata(listing: PublicGuestListing): Metadata {
+export function listingMetadata(
+  listing: PublicGuestListing & { placeLabel?: string | null },
+): Metadata {
   const description = listingSearchDescription(listing);
   const url = listingCanonicalUrl(listing.slug);
   const image = listingOgImage(listing);
@@ -144,7 +166,9 @@ function sellerJsonLd() {
   };
 }
 
-function listingImageObjectsJsonLd(listing: PublicGuestListing) {
+function listingImageObjectsJsonLd(
+  listing: PublicGuestListing & { placeLabel?: string | null },
+) {
   const urls = listingSeoImageUrls(listing);
   const fallback = listingOgImage(listing).url;
   const list = urls.length > 0 ? urls : [fallback];
@@ -152,14 +176,14 @@ function listingImageObjectsJsonLd(listing: PublicGuestListing) {
     '@type': 'ImageObject',
     contentUrl,
     url: contentUrl,
-    caption: listingImageAltText(listing, index, list.length),
+    caption: listingImageAltText(listing, index, list.length, contentUrl),
     description: listingSearchDescription(listing),
     inLanguage: 'vi-VN',
     ...(index === 0 ? { representativeOfPage: true } : {}),
   }));
 }
 
-export function listingJsonLd(listing: PublicGuestListing) {
+export function listingJsonLd(listing: PublicGuestListing & { placeLabel?: string | null }) {
   const url = listingCanonicalUrl(listing.slug);
   const description = listingSearchDescription(listing);
   const priceVnd = publicPriceLabelToVnd(listing.priceLabel);

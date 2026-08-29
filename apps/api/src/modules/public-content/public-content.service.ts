@@ -28,6 +28,7 @@ import {
   applySeoImageMove,
   planSeoAddressImageCopy,
   planSeoLotImageCopy,
+  projectAddressSeoFields,
 } from '../lodats/lodat-seo-image-upload';
 
 const POST_CATEGORIES = new Set([
@@ -572,12 +573,13 @@ export class PublicContentService {
       const addr =
         lodat.projectLotId && lodat.projectLot?.address ? lodat.projectLot.address : null;
       if (!addr?.id || !addr.images?.length) return;
+      const project = projectAddressSeoFields(addr);
       for (let i = 0; i < addr.images.length; i += 1) {
         const img = addr.images[i]!;
         const plan = await planSeoAddressImageCopy(this.storage, img, {
           addressId: addr.id,
-          title: lodat.projectLot?.title?.trim() || addr.detail?.trim() || title,
-          location,
+          title: project.title,
+          location: project.location,
           index: i + 1,
         });
         if (!plan) continue;

@@ -16,6 +16,7 @@ export type PublicGuestLot = {
   areaLabel: string | null;
   excerpt?: string;
   bodyHtml?: string;
+  placeLabel?: string | null;
 };
 
 /** Overlay-only card when CRM `/lodats` is not callable (build / unauthenticated SSR). */
@@ -49,6 +50,7 @@ export function catalogToGuestLot(row: PublicCatalogListing): PublicGuestLot {
     areaLabel: row.areaLabel,
     excerpt: row.excerpt,
     ...(row.bodyHtml != null ? { bodyHtml: row.bodyHtml } : {}),
+    ...(row.placeLabel != null ? { placeLabel: row.placeLabel } : {}),
   };
 }
 

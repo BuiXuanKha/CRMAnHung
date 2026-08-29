@@ -90,6 +90,24 @@ export function isChatLibraryObjectKey(objectKey: string): boolean {
   return objectKey.replace(/^\/+/, '').startsWith('customers/chat/');
 }
 
+/** Filename stem for project-address photos: Address.detail + ward/district/province. */
+export function projectAddressSeoFields(addr: {
+  detail?: string | null;
+  ward?: { name: string; isHidden?: boolean } | null;
+  district?: { name: string; isHidden?: boolean } | null;
+  province?: { name: string; isHidden?: boolean } | null;
+}): { title: string; location: string } {
+  const title = addr.detail?.trim() || 'du-an';
+  const location = [
+    addr.ward && !addr.ward.isHidden ? addr.ward.name : null,
+    addr.district && !addr.district.isHidden ? addr.district.name : null,
+    addr.province && !addr.province.isHidden ? addr.province.name : null,
+  ]
+    .filter((part): part is string => Boolean(part))
+    .join(', ');
+  return { title, location };
+}
+
 export type SeoCopyPlan = {
   id: string;
   from: string;

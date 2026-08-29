@@ -7,7 +7,7 @@ import {
 import { LotDetailMetaPixel } from './lot-detail-meta-pixel';
 import type { PublicListingView, RelatedListingSection } from './published-listings';
 import { getProductBySlug } from './mock-data';
-import { listingHeadline, listingImageAltText, listingPageH1 } from './listing-seo';
+import { listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import { listingShareText } from './share';
 import { PUBLIC_LISTING_PATH, listingCanonicalUrl, listingHref } from './site';
@@ -99,7 +99,9 @@ export function ProductDetailView({
             {images.length > 0 ? (
               <ProductGallery
                 images={images}
-                alts={images.map((_, i) => listingImageAltText(listing, i, images.length))}
+                alts={images.map((url, i) =>
+                  listingImageAltText(listing, i, images.length, url),
+                )}
               />
             ) : null}
 
@@ -229,7 +231,7 @@ export function ProductDetailView({
                   <Link href={listingHref(p.slug)} className="ph-product-media">
                     {p.coverImageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.coverImageUrl} alt={listingHeadline(p)} loading="lazy" />
+                      <img src={p.coverImageUrl} alt={listingCoverAlt(p)} loading="lazy" />
                     ) : (
                       <span className="ph-product-media-empty">Chưa có ảnh</span>
                     )}

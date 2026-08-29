@@ -51,6 +51,18 @@ export function listingCoverAbsoluteUrl(listing: {
   return listingSeoImageUrls({ coverImageUrl: listing.coverImageUrl })[0] ?? null;
 }
 
+/** Project-address CDN keys: `addresses/{addressId}/…` (not lot or chat). */
+export function isPublicAddressImageUrl(url: string | null | undefined): boolean {
+  if (!url?.trim()) return false;
+  const raw = url.trim();
+  try {
+    const path = raw.includes('://') ? new URL(raw).pathname : raw;
+    return /(^|\/)addresses\//.test(path);
+  } catch {
+    return raw.includes('/addresses/');
+  }
+}
+
 export function postSeoImageUrls(post: {
   coverImageUrl?: string | null;
   bodyHtml?: string | null;
