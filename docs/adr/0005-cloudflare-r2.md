@@ -2,7 +2,7 @@
 
 - **Status:** Accepted
 - **Date:** 2026-08-09
-- **Updated:** 2026-08-09 — tách bucket public / private
+- **Updated:** 2026-08-29 — ảnh public encode WebP (`sharp`) trước khi PutObject
 
 ## Quyết định
 
@@ -32,7 +32,7 @@
 | `R2_PRIVATE_BUCKET` | `anhungland-crm-private` |
 | Keys / endpoint | Skill `cloudflare-r2` + `.env` |
 
-Code: `StorageService.upload` (public) · `uploadPrivate` · `getPrivateSignedUrl`.
+Code: `StorageService.upload` (public, raster → WebP via `sharp`) · `uploadPrivate` (không convert) · `getPrivateSignedUrl`.
 
 Hướng dẫn owner: [`../R2-SETUP.md`](../R2-SETUP.md).
 

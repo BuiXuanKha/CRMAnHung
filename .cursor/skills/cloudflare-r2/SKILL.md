@@ -27,8 +27,8 @@ description: CRMAnHung Cloudflare R2 connection and StorageService usage (public
 
 | Loại file | Method | Ghi chú |
 |-----------|--------|---------|
-| Ảnh công khai / CRM không mật | `upload()` | URL = CDN |
-| Hợp đồng, giấy tờ, đính kèm mật | `uploadPrivate()` | Chỉ lưu `objectKey` |
+| Ảnh công khai / CRM không mật | `upload()` | Raster → **WebP** (`sharp`, cạnh dài ≤ 2560) rồi CDN |
+| Hợp đồng, giấy tờ, đính kèm mật | `uploadPrivate()` | Giữ file gốc; chỉ lưu `objectKey` |
 | Xem/tải file mật | `getPrivateSignedUrl(key)` | **Sau** khi API check authz; TTL mặc định 15 phút |
 
 ## Bootstrap `.env`

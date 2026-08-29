@@ -7,11 +7,7 @@ import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
-import {
-  seoAddressImageObjectKey,
-  seoImageExt,
-  seoImageFileName,
-} from '../public-content/public-slug';
+import { uniqueSeoAddressImageKey } from '../lodats/lodat-seo-image-upload';
 
 type WardChain = {
   wardId: string;
@@ -332,26 +328,14 @@ export class AddressesService {
     ]
       .filter(Boolean)
       .join(', ');
-    const ext = seoImageExt(file.originalname, file.mimetype);
-    let suffix: string | undefined;
-    let fileName = seoImageFileName({
+    const { objectKey, fileName } = await uniqueSeoAddressImageKey(this.storage, {
+      addressId,
       title: address.detail?.trim() || 'du-an',
       location,
       index: count + 1,
-      ext,
+      originalName: file.originalname,
+      mime: file.mimetype,
     });
-    let objectKey = seoAddressImageObjectKey(addressId, fileName);
-    for (let i = 0; i < 6 && (await this.storage.publicObjectExists(objectKey)); i += 1) {
-      suffix = `${Date.now().toString(36)}${i}`.slice(-6);
-      fileName = seoImageFileName({
-        title: address.detail?.trim() || 'du-an',
-        location,
-        index: count + 1,
-        ext,
-        suffix,
-      });
-      objectKey = seoAddressImageObjectKey(addressId, fileName);
-    }
     const uploaded = await this.storage.upload({
       folder: `addresses/${addressId}`,
       buffer: file.buffer,

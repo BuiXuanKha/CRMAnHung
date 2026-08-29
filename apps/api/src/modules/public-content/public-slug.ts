@@ -7,6 +7,10 @@ export {
   seoLotImageObjectKey,
   seoAddressImageObjectKey,
   isSeoNamedImageKey,
+  PUBLIC_SEO_IMAGE_EXT,
+  PUBLIC_SEO_IMAGE_MIME,
+  isWebpObjectKey,
+  withPublicWebpExt,
 } from '@crmanhung/shared';
 
 export function kindLabel(kind: string): string {

@@ -2,12 +2,14 @@ import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '@prisma/client';
 import {
   isSeoNamedImageKey,
+  isWebpObjectKey,
+  PUBLIC_SEO_IMAGE_EXT,
   seoAddressImageObjectKey,
-  seoImageExt,
   seoImageFileName,
   seoLotImageObjectKey,
 } from '../public-content/public-slug';
 import type { StorageService } from '../../storage/storage.service';
+import { toPublicWebp } from '../../storage/to-public-webp';
 
 export async function uniqueSeoLotImageKey(
   storage: StorageService,
@@ -20,7 +22,7 @@ export async function uniqueSeoLotImageKey(
     mime?: string | null;
   },
 ): Promise<{ objectKey: string; fileName: string }> {
-  const ext = seoImageExt(input.originalName, input.mime);
+  const ext = PUBLIC_SEO_IMAGE_EXT;
   let suffix: string | undefined;
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const fileName = seoImageFileName({
@@ -56,7 +58,7 @@ export async function uniqueSeoAddressImageKey(
     mime?: string | null;
   },
 ): Promise<{ objectKey: string; fileName: string }> {
-  const ext = seoImageExt(input.originalName, input.mime);
+  const ext = PUBLIC_SEO_IMAGE_EXT;
   let suffix: string | undefined;
   for (let attempt = 0; attempt < 6; attempt += 1) {
     const fileName = seoImageFileName({
@@ -82,7 +84,11 @@ export async function uniqueSeoAddressImageKey(
 }
 
 function alreadySeoUnder(prefix: string, objectKey: string): boolean {
-  return isSeoNamedImageKey(objectKey) && objectKey.startsWith(`${prefix}/`);
+  return (
+    isSeoNamedImageKey(objectKey) &&
+    objectKey.startsWith(`${prefix}/`) &&
+    isWebpObjectKey(objectKey)
+  );
 }
 
 /** Messenger originals — keep on R2. Lot attach copies to SEO key; do not delete chat. */
@@ -128,12 +134,11 @@ export async function planSeoLotImageCopy(
 ): Promise<SeoCopyPlan | null> {
   const prefix = `lodats/${dest.lodatId}`;
   if (alreadySeoUnder(prefix, row.objectKey)) return null;
-  const ext = seoImageExt(row.objectKey, null);
   const fileName = seoImageFileName({
     title: dest.title,
     location: dest.location,
     index: dest.index,
-    ext,
+    ext: PUBLIC_SEO_IMAGE_EXT,
   });
   const to = seoLotImageObjectKey(dest.lodatId, fileName);
   if (to === row.objectKey) return null;
@@ -153,12 +158,11 @@ export async function planSeoAddressImageCopy(
   if (isChatLibraryObjectKey(row.objectKey)) return null;
   const prefix = `addresses/${dest.addressId}`;
   if (alreadySeoUnder(prefix, row.objectKey)) return null;
-  const ext = seoImageExt(row.objectKey, null);
   const fileName = seoImageFileName({
     title: dest.title,
     location: dest.location,
     index: dest.index,
-    ext,
+    ext: PUBLIC_SEO_IMAGE_EXT,
   });
   const to = seoAddressImageObjectKey(dest.addressId, fileName);
   if (to === row.objectKey) return null;
@@ -172,17 +176,24 @@ export async function applySeoImageCopy(
   if (plan.from === plan.to) return;
   const destExists = await storage.publicObjectExists(plan.to);
   if (destExists) return;
+  const src = await storage.getPublicObject(plan.from);
+  if (!src) throw new Error(`Không đọc được ảnh ${plan.from}`);
+  let buffer = src.buffer;
+  let contentType = src.contentType;
   try {
-    await storage.copyPublicObject(plan.from, plan.to, plan.fileName);
-  } catch {
-    const src = await storage.getPublicObject(plan.from);
-    if (!src) throw new Error(`Không đọc được ảnh ${plan.from}`);
-    await storage.uploadPublicAtKey(plan.to, {
-      buffer: src.buffer,
-      contentType: src.contentType,
-      contentFileName: plan.fileName,
-    });
+    const webp = await toPublicWebp(src.buffer);
+    buffer = webp.buffer;
+    contentType = webp.contentType;
+  } catch (err) {
+    throw new Error(
+      `Không chuyển được ảnh ${plan.from} sang WebP${err instanceof Error ? `: ${err.message}` : ''}`,
+    );
   }
+  await storage.uploadPublicAtKey(plan.to, {
+    buffer,
+    contentType,
+    contentFileName: plan.fileName,
+  });
 }
 
 async function countPublicImageKeyRefs(

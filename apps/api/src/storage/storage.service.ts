@@ -11,6 +11,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
+import { isPublicRasterImage, toPublicWebp, withPublicWebpExt } from './to-public-webp';
 
 export type UploadInput = {
   /** Logical folder prefix, e.g. customers, lodats, transactions */
@@ -120,16 +121,39 @@ export class StorageService {
     return `${base}/${objectKey.replace(/^\//, '')}`;
   }
 
+  private async preparePublicRaster(input: UploadInput): Promise<UploadInput> {
+    const hintName = input.objectKey || input.contentFileName || input.originalName;
+    if (!isPublicRasterImage(input.contentType, hintName)) return input;
+    try {
+      const webp = await toPublicWebp(input.buffer);
+      return {
+        ...input,
+        buffer: webp.buffer,
+        contentType: webp.contentType,
+        originalName: input.originalName ? withPublicWebpExt(input.originalName) : input.originalName,
+        objectKey: input.objectKey ? withPublicWebpExt(input.objectKey) : input.objectKey,
+        contentFileName: input.contentFileName
+          ? withPublicWebpExt(input.contentFileName)
+          : input.contentFileName,
+      };
+    } catch (err) {
+      this.logger.warn('WebP convert failed', err as Error);
+      throw new ServiceUnavailableException('Không chuyển được ảnh sang WebP');
+    }
+  }
+
   /**
    * Public assets (ảnh lô đất marketing, avatar…): bucket + cdn.anhungland.com
+   * Raster images are encoded WebP (sharp) before PutObject.
    */
   async upload(
     input: UploadInput,
   ): Promise<{ objectKey: string; url: string; visibility: 'public' }> {
-    const objectKey = input.objectKey
-      ? this.sanitizeObjectKey(input.objectKey)
-      : this.buildObjectKey(input.folder, input.originalName);
-    await this.putObject('public', objectKey, input);
+    const prepared = await this.preparePublicRaster(input);
+    const objectKey = prepared.objectKey
+      ? this.sanitizeObjectKey(prepared.objectKey)
+      : this.buildObjectKey(prepared.folder, prepared.originalName);
+    await this.putObject('public', objectKey, prepared);
     return {
       objectKey,
       url: this.publicUrl(objectKey),

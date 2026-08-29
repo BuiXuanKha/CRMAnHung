@@ -16,6 +16,7 @@ import {
   seoLotImageObjectKey,
   seoImageExt,
   isSeoNamedImageKey,
+  PUBLIC_SEO_IMAGE_EXT,
 } from '../packages/shared/dist/index.js';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -218,15 +219,24 @@ if (kdtSlug.includes('kdt') && kdtSlug.includes('nam-sach')) ok(`toPublicSlug K�
 else bad(`toPublicSlug KĐT: ${kdtSlug}`);
 
 console.log('\nSEO image filename at upload');
-const seoName = seoImageFileName({
+const jpegName = seoImageFileName({
   title: 'Lô nhà cấp 4 mới 113,8m²',
   location: 'KĐT Tây Nam Sách, Nam Trung',
   index: 1,
   ext: seoImageExt('IMG_4521.JPG', 'image/jpeg'),
 });
+if (jpegName.endsWith('-anh-1.jpg')) ok(`seoImageExt JPEG nguồn → ${jpegName.split('-anh-1')[1]}`);
+else bad(`seoImageExt JPEG unexpected: ${jpegName}`);
+
+const seoName = seoImageFileName({
+  title: 'Lô nhà cấp 4 mới 113,8m²',
+  location: 'KĐT Tây Nam Sách, Nam Trung',
+  index: 1,
+  ext: PUBLIC_SEO_IMAGE_EXT,
+});
 const seoKey = seoLotImageObjectKey('clxyz123', seoName);
-if (seoName.includes('lo-nha-cap-4') && seoName.includes('nam-trung') && seoName.endsWith('-anh-1.jpg')) {
-  ok(`seoImageFileName → ${seoName}`);
+if (seoName.includes('lo-nha-cap-4') && seoName.includes('nam-trung') && seoName.endsWith('-anh-1.webp')) {
+  ok(`seoImageFileName public → ${seoName}`);
 } else {
   bad(`seoImageFileName unexpected: ${seoName}`);
 }
@@ -280,6 +290,39 @@ if (
   ok('Đăng web đặt key ảnh dự án theo Address.detail');
 } else {
   bad('ensureSeoImageKeysForLodat còn lấy tên lô cho ảnh dự án');
+}
+
+const webpHelper = read('apps/api/src/storage/to-public-webp.ts');
+if (
+  webpHelper.includes('toPublicWebp') &&
+  webpHelper.includes('.webp(') &&
+  webpHelper.includes('PUBLIC_WEBP_MAX_EDGE')
+) {
+  ok('sharp toPublicWebp (WebP + max edge)');
+} else {
+  bad('thiếu apps/api/src/storage/to-public-webp.ts');
+}
+
+const storageUpload = read('apps/api/src/storage/storage.service.ts');
+if (
+  storageUpload.includes('preparePublicRaster') &&
+  storageUpload.includes('toPublicWebp') &&
+  storageUpload.includes('async uploadPrivate')
+) {
+  ok('upload public convert WebP; private không convert');
+} else {
+  bad('StorageService chưa convert WebP ở upload public');
+}
+
+const seoCopySrc = read('apps/api/src/modules/lodats/lodat-seo-image-upload.ts');
+if (
+  seoCopySrc.includes('PUBLIC_SEO_IMAGE_EXT') &&
+  seoCopySrc.includes('isWebpObjectKey') &&
+  seoCopySrc.includes('toPublicWebp')
+) {
+  ok('SEO copy đích .webp + encode WebP');
+} else {
+  bad('lodat-seo-image-upload chưa khóa WebP');
 }
 
 console.log('\nRoute files');

@@ -21,7 +21,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 3. Nội dung chính SSR/RSC — không để bot chỉ thấy shell trống
 4. URL mới → cập nhật `sitemap.ts` (chỉ phát URL khi `PUBLIC_SEO_INDEX` bật); giữ `robots.ts` chặn khu CRM + `/login`; **không** `Disallow: /`
 5. **Lô `/mua-ban-nha-dat-huyen-nam-sach/[slug]`:** làm đúng công thức [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §7 (excerpt → meta; cover → OG; sitemap chỉ `isPublished`; JSON-LD không bịa giá). Hub địa bàn: domain `public-content` §17.
-6. **Ảnh:** lúc **tạo/upload lô** CDN key `{slug-ten-dia-chi}-anh-n`. Ảnh chat gắn lô: **copy** sang key SEO, **giữ** `customers/chat/`. Ảnh dự án: `{ten-du-an}-anh-n`. Kho cũ: `pnpm images:seo-copy` / `images:seo-copy-addresses` — [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §10. Trang khách: `alt`; sitemap `images`; JSON-LD `ImageObject`. Gallery SSR đủ URL. Không chặn Googlebot trên CDN.
+6. **Ảnh:** lúc **tạo/upload lô** CDN key `{slug-ten-dia-chi}-anh-n.webp` (server convert WebP). Ảnh chat gắn lô: **copy** sang key SEO WebP, **giữ** `customers/chat/` gốc. Ảnh dự án: `{ten-du-an}-anh-n.webp`. Kho JPEG/PNG cũ: `pnpm images:seo-copy` (đích `.webp`). Trang khách: `alt`; sitemap `images`; JSON-LD `ImageObject`. Gallery SSR đủ URL. Không chặn Googlebot trên CDN.
 
 ## Cấm
 

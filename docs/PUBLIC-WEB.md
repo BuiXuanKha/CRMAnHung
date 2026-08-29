@@ -76,7 +76,7 @@ Danh sách sản phẩm: ngay dưới fold hoặc section chính tiếp theo —
 - Mỗi sản phẩm có URL ổn định (`/mua-ban-nha-dat-huyen-nam-sach/[slug]`).
 - **Hub địa bàn:** xã + cấp 4 (KĐT/thôn/dự án trong xã) — [`public-content.md`](./domains/public-content.md) §17.
 - **SEO lô:** công thức title / excerpt / canonical / OG bìa / sitemap chỉ lô đã đăng — [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) §7.
-- **SEO ảnh:** lúc upload, CDN key = slug tên lô + địa chỉ (`…-anh-1.jpg`); trang khách: `alt` + sitemap `image:loc` + JSON-LD `ImageObject` — [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) §10.
+- **SEO ảnh:** lúc upload, CDN key = slug tên lô + địa chỉ (`…-anh-1.webp`, file WebP); trang khách: `alt` + sitemap `image:loc` + JSON-LD `ImageObject` — [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) §10.
 - Metadata + Open Graph đủ để share Facebook / Zalo / Messenger hiện ảnh + title + mô tả.
 - Trang chi tiết: ảnh, giá (nếu công bố), diện tích, vị trí, mô tả — đủ để khách quyết định xem tiếp / liên hệ.
 - Nút chia sẻ (copy link / share) trên FE; **không** cần BE để mock UI.

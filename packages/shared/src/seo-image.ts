@@ -2,6 +2,10 @@ import { toListingPublicSlug } from './public-content.js';
 
 export const SEO_IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'] as const;
 
+/** Public CDN photos are encoded WebP (sharp) before R2. */
+export const PUBLIC_SEO_IMAGE_EXT = '.webp';
+export const PUBLIC_SEO_IMAGE_MIME = 'image/webp';
+
 const EXT_FROM_MIME: Record<string, string> = {
   'image/jpeg': '.jpg',
   'image/jpg': '.jpg',
@@ -25,8 +29,22 @@ export function seoImageExt(originalName?: string | null, mime?: string | null):
   return fromMime ?? '.jpg';
 }
 
+export function isWebpObjectKey(objectKey: string): boolean {
+  const base = objectKey.replace(/^\/+/, '').split('?')[0] ?? '';
+  return base.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT);
+}
+
+/** Swap a path/filename image suffix for the public WebP key. */
+export function withPublicWebpExt(pathOrName: string): string {
+  const cleaned = pathOrName.replace(/\\/g, '/');
+  const slash = cleaned.lastIndexOf('/');
+  const dot = cleaned.lastIndexOf('.');
+  const stem = dot > slash ? cleaned.slice(0, dot) : cleaned;
+  return `${stem}${PUBLIC_SEO_IMAGE_EXT}`;
+}
+
 /**
- * Descriptive CDN filename: `{title+location}-anh-{n}.jpg`
+ * Descriptive CDN filename: `{title+location}-anh-{n}.webp`
  * Uses the same slug rules as the public listing URL — no keyword stuffing.
  */
 export function seoImageFileName(input: {
