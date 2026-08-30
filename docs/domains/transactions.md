@@ -406,7 +406,7 @@ Số VND, format nghìn. RECORD: ô HH disabled.
 
 ##### 7. Người bán / mua
 
-Mỗi bên ≥ 1 hangtag lúc Lưu. **Không** nút «+ Thêm người…». Ô tìm: gõ tên/SĐT → danh sách avatar + tên + SĐT. Chọn → hangtag (`CrmBadge`: khách CRM `blue`, tên tự gõ `gray`) trong ô; × xoá. Gõ tiếp để thêm người. Enter / «Dùng tên này» khi không có trong CRM (`freeTextName`, không `customerId`). **Tạo:** điền sẵn hangtag người bán = chủ lô (`owner`); đổi lô thì thay bên bán. Lô chưa có chủ → báo, khoá Lưu.
+Mỗi bên ≥ 1 hangtag lúc Lưu. **Không** nút «+ Thêm người…». Ô tìm: gõ tên/SĐT → danh sách avatar + tên + SĐT. Chỉ chọn khách trong list → hangtag `CrmBadge` `blue`; × xoá. Gõ tiếp để thêm người. **Không** tạo hangtag từ tên vừa gõ khi không khớp CRM. **Tạo:** điền sẵn hangtag người bán = chủ lô (`owner`); đổi lô thì thay bên bán. Lô chưa có chủ → báo, khoá Lưu.
 
 ##### 8. Ghi chú
 
