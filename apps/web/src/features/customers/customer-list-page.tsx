@@ -44,7 +44,7 @@ import { type CustomerAction } from './components/action-menu';
 import { CustomerTable } from './components/customer-table';
 import { FilterBar } from './components/filter-bar';
 import { CustomerCardList } from './components/customer-card-list';
-import { RightRail, type RailKey } from './components/right-rail';
+import { RightRail, visibleRailTabs, type RailKey } from './components/right-rail';
 import { applyExtraFilters, countCustomerStats, countMobileCustomerFilters, parseSearchKeyword, type ExtraFilters } from './display';
 import { openExternalUrl, facebookInboxChatUrl, messengerComUrl } from './messenger';
 import {
@@ -182,6 +182,15 @@ export function CustomerListPage() {
   });
 
   const selected = items.find((c) => c.id === selectedId) ?? null;
+  const railTabs = useMemo(
+    () => visibleRailTabs(selected),
+    [
+      selected?.id,
+      selected?.messageCount,
+      selected?.careNoteCount,
+      selected?.lodatCount,
+    ],
+  );
   const mobileFilterCount = countMobileCustomerFilters(status, extra);
   const stats = useMemo(() => countCustomerStats(items), [items]);
   const channelOptions = useMemo(
@@ -210,6 +219,11 @@ export function CustomerListPage() {
     queryFn: () => listCustomerLodats(selectedId as string),
     enabled: Boolean(selectedId) && rail === 'lodat',
   });
+
+  useEffect(() => {
+    if (!rail) return;
+    if (!railTabs.includes(rail)) setRail(null);
+  }, [rail, railTabs]);
 
   function flash(msg: string) {
     setToast(msg);
@@ -687,16 +701,18 @@ export function CustomerListPage() {
         </div>
 
         {/* §3.2.2 */}
-        <RightRail
-          open={rail}
-          onToggle={(key) => setRail((cur) => (cur === key ? null : key))}
-          customer={selected}
-          detail={detail.data ?? null}
-          messages={thread.data?.messages ?? []}
-          messagesLoading={thread.isLoading}
-          lodats={customerLodats.data?.items ?? []}
-          lodatsLoading={customerLodats.isLoading}
-        />
+        {railTabs.length > 0 || rail ? (
+          <RightRail
+            open={rail}
+            onToggle={(key) => setRail((cur) => (cur === key ? null : key))}
+            customer={selected}
+            detail={detail.data ?? null}
+            messages={thread.data?.messages ?? []}
+            messagesLoading={thread.isLoading}
+            lodats={customerLodats.data?.items ?? []}
+            lodatsLoading={customerLodats.isLoading}
+          />
+        ) : null}
       </div>
 
       <AddByPhoneModal

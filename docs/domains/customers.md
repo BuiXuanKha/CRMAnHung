@@ -257,8 +257,9 @@ Máy tính và điện thoại **cùng quy tắc**. Ô cuộn: bảng (PC) hoặ
 
 #### 12.1.6 Panel phải
 
-Cột phụ bên phải trang danh sách (máy tính). Một panel: **Nội dung chat** (tin đã lưu) · **Lịch sử chăm sóc** · **Danh sách lô đất**.  
-**Không** nhớ panel vừa mở (không `localStorage`) — cùng [`ARCHITECTURE.md`](../ARCHITECTURE.md) và skill `crm-list-state`. Mobile: ẩn panel này.
+Cột phụ bên phải trang danh sách (máy tính). Tối đa ba thanh tab dọc: **Nội dung chat** · **Lịch sử chăm sóc** · **Danh sách lô đất**.  
+**Hiện thanh khi khách đang chọn có dữ liệu** — chat: `messageCount > 0`; chăm sóc: `careNoteCount > 0`; lô: `lodatCount > 0`. Không có dữ liệu → **ẩn** thanh đó. Chưa chọn dòng, hoặc khách không có mục nào → **ẩn cả cột phụ**. Đang mở panel rồi chọn khách khác không còn mục đó → thu hẹp.  
+**Không** nhớ panel vừa mở (không `localStorage`) — cùng [`ARCHITECTURE.md`](../ARCHITECTURE.md) và skill `crm-list-state`. Mobile: ẩn cột phụ.
 
 ##### Nội dung chat
 
@@ -269,12 +270,15 @@ Thứ tự `SortOrder ASC, id ASC` (CRM cũ). Bong bóng: Khách / Tôi / Page /
 1. Meta `#n · người gửi`
 2. Chữ `MessageText`. Trống + có ảnh → `[Ảnh]`. Trống không ảnh → `—`
 3. Ảnh: thumbnail; bấm → gallery (CrmDialog, prev/next). `RotationDeg` chỉ xoay CSS — chưa lưu xoay mới.
-4. Chưa chọn khách → «Chọn một khách trên bảng để xem.»
-5. Không tin → «Không có tin nhắn trong bản quét này.»
+4. Không tin → ẩn thanh (không hiện «Không có tin nhắn…» trên cột phụ).
+
+##### Lịch sử chăm sóc
+
+`GET /customers/:id` → `careNotes`. Không có lần chăm sóc → **ẩn thanh**.
 
 ##### Danh sách lô đất
 
-`GET /customers/:id/lodats` — map active của khách (cùng quyền xem khách). Không có → «Chưa gắn lô đất.»
+`GET /customers/:id/lodats` — map active của khách (cùng quyền xem khách). Không có lô → **ẩn thanh** (không hiện «Chưa gắn lô đất.» trên cột phụ).
 
 Thẻ (ảnh trái, chữ phải) — **cùng trang chi tiết** §12.3.3 mục 6:
 

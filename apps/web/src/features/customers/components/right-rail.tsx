@@ -19,6 +19,15 @@ const TABS: { key: RailKey; label: string }[] = [
   { key: 'lodat', label: 'Danh sách lô đất' },
 ];
 
+export function visibleRailTabs(customer: CustomerListItem | null): RailKey[] {
+  if (!customer) return [];
+  const tabs: RailKey[] = [];
+  if ((customer.messageCount ?? 0) > 0) tabs.push('chat');
+  if ((customer.careNoteCount ?? 0) > 0) tabs.push('care');
+  if ((customer.lodatCount ?? 0) > 0) tabs.push('lodat');
+  return tabs;
+}
+
 type Props = {
   open: RailKey | null;
   onToggle: (key: RailKey) => void;
@@ -40,6 +49,9 @@ export function RightRail({
   lodats,
   lodatsLoading,
 }: Props) {
+  const tabs = TABS.filter((tab) => visibleRailTabs(customer).includes(tab.key));
+  if (tabs.length === 0 && !open) return null;
+
   return (
     <aside className="kh-s322" aria-label="Panel phụ">
       {open ? (
@@ -63,22 +75,24 @@ export function RightRail({
           </div>
         </div>
       ) : null}
-      <div className="kh-rail-tabs">
-        {TABS.map((tab) => (
-          <button
-            key={tab.key}
-            type="button"
-            className={open === tab.key ? 'active' : undefined}
-            onClick={() => onToggle(tab.key)}
-            title={tab.label}
-          >
-            <span className="chev" aria-hidden>
-              <Icon icon={ChevronLeft} size="sm" />
-            </span>
-            <span className="lbl">{tab.label}</span>
-          </button>
-        ))}
-      </div>
+      {tabs.length > 0 ? (
+        <div className="kh-rail-tabs">
+          {tabs.map((tab) => (
+            <button
+              key={tab.key}
+              type="button"
+              className={open === tab.key ? 'active' : undefined}
+              onClick={() => onToggle(tab.key)}
+              title={tab.label}
+            >
+              <span className="chev" aria-hidden>
+                <Icon icon={ChevronLeft} size="sm" />
+              </span>
+              <span className="lbl">{tab.label}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
     </aside>
   );
 }

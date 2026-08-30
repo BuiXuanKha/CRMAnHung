@@ -29,14 +29,16 @@ export const mockHotlines: EmployeeHotline[] = [
 ];
 
 function staffCustomer(
-  partial: Omit<CustomerDetail, 'employeeId' | 'employeeName'> &
-    Partial<Pick<CustomerDetail, 'employeeId' | 'employeeName'>>,
+  partial: Omit<CustomerDetail, 'employeeId' | 'employeeName' | 'messageCount' | 'careNoteCount'> &
+    Partial<Pick<CustomerDetail, 'employeeId' | 'employeeName' | 'messageCount' | 'careNoteCount'>>,
 ): CustomerDetail {
   return {
     employeeId: MOCK_STAFF.id,
     employeeName: MOCK_STAFF.fullName,
     ...partial,
     latestNeedSummary: partial.latestNeedSummary ?? partial.note ?? null,
+    careNoteCount: partial.careNoteCount ?? (partial.careNotes?.length ?? 0),
+    messageCount: partial.messageCount ?? 0,
   };
 }
 
@@ -564,6 +566,8 @@ export const mockCustomers: CustomerDetail[] = [
     facebook: null,
     latestCareNote: null,
     lodatCount: 0,
+    messageCount: 0,
+    careNoteCount: 0,
     createdAt: '2026-05-01T08:00:00.000Z',
     updatedAt: '2026-07-20T12:00:00.000Z',
     careNotes: [],
@@ -590,6 +594,8 @@ export const mockCustomers: CustomerDetail[] = [
     },
     latestCareNote: null,
     lodatCount: 1,
+    messageCount: 0,
+    careNoteCount: 0,
     createdAt: '2026-07-10T08:00:00.000Z',
     updatedAt: '2026-08-05T08:00:00.000Z',
     careNotes: [],
