@@ -49,7 +49,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 |----|------|------------|
 | 1 | Menu khôi phục khách ẩn (§11 mục 16) | **Xong.** «Khôi phục khách» → `PATCH isHidden: false`. |
 | 2 | Tạo hồ sơ sổ đỏ từ khách (§11 mục 7) | **Xong.** Form `/khach-hang/[id]/dich-vu-so-do`. |
-| 3 | Xoá SĐT (§11 mục 11) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
+| 3 | Xoá / sửa SĐT (§11 mục 11) | **Xong.** Menu Thao tác → modal; icon cam vẫn thêm nhanh. |
 | 4 | Sửa tên Facebook (§11 mục 13) | **Không làm.** Tên FB nhận từ extension khi scan; không modal sửa tay. |
 | 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Chưa làm.** Khi extension kéo lại khách ẩn (API ingest không tự khôi phục — §13.14). |
 | 6 | Inbox Facebook sống (§11 mục 21) | **Cần bàn rõ hơn.** |
@@ -65,7 +65,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 8. **SĐT xanh (máy tính)** — bấm = copy số (tick tạm). Có trên staging khi khách có số.
 9. **SĐT xanh (điện thoại)** — bấm = `tel:`. Có trên staging khi khách có số.
 10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Có trên staging. Trùng số → modal mục 15.
-11. **Xoá SĐT** — thùng rác + modal. **NV phụ trách khách** (không chỉ admin). Chưa làm UI/API.
+11. **Xoá / sửa SĐT** — menu Thao tác (không icon thùng rác trên dòng). **Xong.** NV phụ trách khách. Icon cam vẫn thêm nhanh khi chưa có số.
 12. **Sửa tên khách** — bút trên tên (máy tính). Có trên staging.
 13. **Sửa tên Facebook** — **không làm.** Không bút / modal sửa tay. Tên FB (`facebookName`) do **extension** ghi khi scan.
 14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Có trên staging.
@@ -165,10 +165,12 @@ Hiện khi **đã có** SĐT. Bấm → copy số (tick tạm).
 Hiện khi **chưa có** SĐT (và chưa xoá).  
 Bấm → modal **Thêm số điện thoại**. Trùng số → modal mục 15.
 
-##### 5. Icon thùng rác SĐT
+##### 5. SĐT trên menu Thao tác
 
-Khách chưa xoá, đã có số. **NV phụ trách khách** (STAFF = khách mình; ADMIN = khách đang xem). Không phải thao tác chỉ admin.  
-Bấm → modal **Xoá số điện thoại**. Chưa làm.
+Khách chưa ẩn. **NV phụ trách khách.** Icon cam (mục 4) vẫn thêm nhanh khi chưa có số.
+
+- Chưa có số: mục **Thêm số điện thoại** → cùng modal thêm nhanh.
+- Đã có số: mục **Sửa số điện thoại** → modal 1 ô (prefill) · **Lưu** ghi đè · **Xóa số** (CrmConfirm). Trùng số → modal mục 15.
 
 ##### 6. Icon Map + số lô
 
@@ -206,6 +208,7 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 | Mở chat | Tab `facebook.com/messages/t/{threadId}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert; **ẩn mobile**. Tin đã lưu xem qua rail «Nội dung chat» |
 | Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
+| Thêm / Sửa số điện thoại | Chưa có số: modal thêm. Đã có: sửa (Lưu / Xóa). Icon cam = thêm nhanh |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (lodats.md §12.5). ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` (form tạo hồ sơ) |
 | Ghim / Bỏ ghim | `isPinned` |
@@ -317,9 +320,9 @@ Hiện khi **đã có** SĐT. Bấm → `tel:`.
 
 Cùng 12.1.4 mục 4 (modal thêm số).
 
-##### 4. Icon thùng rác SĐT
+##### 4. SĐT trên menu Thao tác
 
-Cùng 12.1.3 mục 5 (NV phụ trách khách, không chỉ admin).
+Cùng 12.1.4 mục 5. Icon cam trên thẻ vẫn thêm nhanh.
 
 ##### 5. Icon Map + số lô
 
@@ -358,6 +361,7 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 | Mở chat | Tab `facebook.com/messages/t/…` (ẩn mobile; có FB; thiếu mã → CrmAlert) |
 | Mở Messenger | Tab `messenger.com/t/…` (có FB; thiếu mã → CrmAlert) |
 | Cập nhật chăm sóc | Trang `/khach-hang/[id]/cham-soc`. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
+| Thêm / Sửa số điện thoại | Cùng 12.1.4 mục 5 |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat`. ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` |
 | Ghim / Bỏ ghim | `isPinned` |

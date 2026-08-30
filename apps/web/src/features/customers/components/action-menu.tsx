@@ -8,6 +8,7 @@ import {
   MessageCircle,
   MessageSquare,
   NotebookPen,
+  Phone,
   Pin,
   RotateCcw,
   Trash2,
@@ -21,6 +22,7 @@ export type CustomerAction =
   | 'chat'
   | 'messenger'
   | 'care'
+  | 'phone'
   | 'lodat'
   | 'sodo'
   | 'pin'
@@ -131,6 +133,12 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
                 <li>
                   <button type="button" role="menuitem" onClick={() => run('care')}>
                     <Icon icon={NotebookPen} /> Cập nhật chăm sóc
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => run('phone')}>
+                    <Icon icon={Phone} />{' '}
+                    {customer.primaryPhone ? 'Sửa số điện thoại' : 'Thêm số điện thoại'}
                   </button>
                 </li>
                 <li>

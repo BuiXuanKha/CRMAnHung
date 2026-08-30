@@ -188,6 +188,109 @@ export async function addCustomerPhone(
   return loadDetail(id);
 }
 
+export async function deleteCustomerPhones(
+  prisma: PrismaService,
+  user: RequestUser,
+  id: string,
+  loadDetail: (id: string) => Promise<unknown>,
+) {
+  const existing = await prisma.customer.findUnique({
+    where: { id },
+    include: { phones: { select: { id: true } } },
+  });
+  if (!existing) {
+    throw new NotFoundException('Không tìm thấy khách hàng');
+  }
+  assertCanAccess(user, existing.employeeId);
+  if (existing.isHidden) {
+    throw new BadRequestException(
+      'Không xoá số điện thoại của khách đã ẩn. Hãy khôi phục trước.',
+    );
+  }
+  if (existing.phones.length === 0) {
+    throw new BadRequestException('Khách chưa có số điện thoại.');
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.customerPhone.deleteMany({ where: { customerId: id } });
+    await tx.customer.update({
+      where: { id },
+      data: { updatedAt: new Date() },
+    });
+  });
+
+  return loadDetail(id);
+}
+
+export async function replaceCustomerPhone(
+  prisma: PrismaService,
+  user: RequestUser,
+  id: string,
+  dto: AddCustomerPhoneDto,
+  loadDetail: (id: string) => Promise<unknown>,
+) {
+  const phone = dto.phone.trim();
+  const existing = await prisma.customer.findUnique({
+    where: { id },
+    include: {
+      phones: {
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        select: { id: true, phone: true },
+      },
+      facebook: { select: { id: true } },
+    },
+  });
+  if (!existing) {
+    throw new NotFoundException('Không tìm thấy khách hàng');
+  }
+  assertCanAccess(user, existing.employeeId);
+  if (existing.isHidden) {
+    throw new BadRequestException(
+      'Không sửa số điện thoại của khách đã ẩn. Hãy khôi phục trước.',
+    );
+  }
+  if (existing.phones.length === 0) {
+    throw new BadRequestException('Khách chưa có số điện thoại. Hãy thêm số trước.');
+  }
+
+  const primary = existing.phones[0];
+  if (primary.phone === phone) {
+    return loadDetail(id);
+  }
+
+  const taken = await findByPhoneForEmployee(prisma, existing.employeeId, phone);
+  if (taken && taken.id !== id) {
+    const mergeAllowed = !taken.facebook;
+    throwPhoneDuplicate({
+      message: mergeAllowed
+        ? 'Số điện thoại này đã thuộc khách chỉ có SĐT — có thể gộp hồ sơ Facebook vào.'
+        : 'Số điện thoại này đã thuộc khách khác có liên hệ Facebook.',
+      existing: mapExisting(taken),
+      mergeAllowed,
+      phone,
+      source: { id, fullName: existing.fullName },
+    });
+  }
+
+  await prisma.$transaction(async (tx) => {
+    await tx.customerPhone.update({
+      where: { id: primary.id },
+      data: { phone },
+    });
+    if (existing.phones.length > 1) {
+      await tx.customerPhone.deleteMany({
+        where: { customerId: id, id: { not: primary.id } },
+      });
+    }
+    await tx.customer.update({
+      where: { id },
+      data: { updatedAt: new Date() },
+    });
+  });
+
+  return loadDetail(id);
+}
+
 export async function acknowledgePhoneDuplicate(
   prisma: PrismaService,
   user: RequestUser,

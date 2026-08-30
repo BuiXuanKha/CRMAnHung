@@ -103,6 +103,10 @@
   gap: 8px;
 }
 
+.crm-dialog-actions .push-left {
+  margin-right: auto;
+}
+
 .crm-btn {
   border-radius: 8px;
   padding: 8px 14px;
