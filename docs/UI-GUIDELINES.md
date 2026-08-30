@@ -662,11 +662,9 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | Menu trong Dashboard: **Lô đất** (trước: Lô đất public mở bán) |
 | 2026-08-26 | `/dashboard/lo-dat` panel phải: tiêu đề **Preview Post** |
 | 2026-08-26 | `/dashboard/lo-dat`: lọc cột §4.5.5 (ảnh, địa chỉ, phân loại, DT/hướng, giá, NV, Web); mobile Bộ lọc |
-<<<<<<< HEAD
 | 2026-08-30 | Dialog CRM mobile: panel không tràn viewport; ô file dùng hàng «Chọn tệp» + tên (không native width) |
-=======
 | 2026-08-30 | `/dich-vu-so-do` mobile: bấm thẻ / Xem chi tiết → trang `/dich-vu-so-do/[id]` (panel vẫn máy tính) |
->>>>>>> origin/cursor/sd-mobile-detail-c753
+| 2026-08-30 | Docs `/khach-hang` khớp code: tạo lô từ khách STAFF; menu khôi phục ẩn; lô rail/chi tiết = API; không nhớ panel rail; lọc lô/nhu cầu `has|empty` |
 
 ---
 

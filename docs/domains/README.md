@@ -5,7 +5,7 @@
 | Domain | File | Status |
 |--------|------|--------|
 | Users (login) | [users.md](./users.md) | Ready for API — `/login` = bảng User; `/khach-hang` = API khách |
-| Customers | [customers.md](./customers.md) | Ready for API — list + chi tiết `[id]` (lô đất trên chi tiết vẫn mock) |
+| Customers | [customers.md](./customers.md) | Ready for API — list + chi tiết `[id]`; lô đất API; tạo lô từ khách STAFF đã có |
 | Lodats | [lodats.md](./lodats.md) | Draft — model chốt; lịch làm §13 (địa chỉ → kho → lô STAFF) |
 | Addresses | [addresses.md](./addresses.md) | Ready for API — Admin `/cai-dat/dia-chi`; copy data sau |
 | Transactions | [transactions.md](./transactions.md) | Ready for API — Prisma + contract; UI mock list + chi tiết + form |
