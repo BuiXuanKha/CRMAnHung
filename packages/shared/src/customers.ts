@@ -150,6 +150,10 @@ export const addCustomerPhoneSchema = z.object({
 
 export type AddCustomerPhoneInput = z.infer<typeof addCustomerPhoneSchema>;
 
+export const updateCustomerPhoneSchema = addCustomerPhoneSchema;
+
+export type UpdateCustomerPhoneInput = AddCustomerPhoneInput;
+
 export const renameCustomerSchema = z.object({
   fullName: z.string().trim().min(1, 'Tên khách không được để trống.').max(120),
 });

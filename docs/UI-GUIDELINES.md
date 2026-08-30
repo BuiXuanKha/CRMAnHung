@@ -222,6 +222,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 | Mở chat | Tab `facebook.com/messages/t/…` (thread số); ẩn mobile; thiếu mã → CrmAlert |
 | Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu mã → CrmAlert |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
+| Thêm / Sửa số điện thoại | Modal nhỏ. Chưa có số: thêm. Đã có: Lưu ghi đè + Xóa (confirm). Icon cam cạnh tên = thêm nhanh |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (form §12.5 lodats). ADMIN: CrmAlert không tạo từ menu khách |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` (form tạo hồ sơ; ADMIN được tạo) |
 | Ghim khách / Bỏ ghim khách | **Một chỗ**, đổi nhãn theo `isPinned` |
@@ -667,6 +668,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | Docs `/khach-hang` khớp code: tạo lô từ khách STAFF; menu khôi phục ẩn; lô rail/chi tiết = API; không nhớ panel rail; lọc lô/nhu cầu `has|empty` |
 | 2026-08-30 | Khách: **không** modal sửa tên Facebook — tên FB nhận từ extension khi scan |
 | 2026-08-30 | List `/khach-hang`: bỏ icon mess cạnh tên; hangtag **Đã xoá** khi `isHidden`; thẻ mobile **không** tên Facebook |
+| 2026-08-30 | List `/khach-hang`: menu Thao tác **Thêm / Sửa số điện thoại** (Lưu / Xóa); icon cam vẫn thêm nhanh |
 
 ---
 

@@ -7,32 +7,41 @@ import { CrmDialog } from '@/shared/ui/dialog';
 
 type Props = {
   customer: CustomerListItem | null;
+  mode?: 'add' | 'edit';
   busy: boolean;
   error: string | null;
   onClose: () => void;
   onSubmit: (phone: string) => Promise<void>;
+  onDelete?: () => void;
 };
 
 export function AddCustomerPhoneModal({
   customer,
+  mode = 'add',
   busy,
   error,
   onClose,
   onSubmit,
+  onDelete,
 }: Props) {
   const [phone, setPhone] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const name = customer?.fullName?.trim() ?? '';
-  const title = name ? `Thêm số điện thoại — ${name}` : 'Thêm số điện thoại';
+  const isEdit = mode === 'edit';
+  const title = name
+    ? `${isEdit ? 'Sửa số điện thoại' : 'Thêm số điện thoại'} — ${name}`
+    : isEdit
+      ? 'Sửa số điện thoại'
+      : 'Thêm số điện thoại';
 
   useEffect(() => {
     if (!customer) return;
-    setPhone('');
+    setPhone(isEdit ? customer.primaryPhone ?? '' : '');
     setParseError(null);
     const t = window.setTimeout(() => inputRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
-  }, [customer]);
+  }, [customer, isEdit]);
 
   return (
     <CrmDialog
@@ -80,6 +89,16 @@ export function AddCustomerPhoneModal({
             <p className="crm-form-error">{parseError || error}</p>
           ) : null}
           <div className="crm-dialog-actions">
+            {isEdit && onDelete ? (
+              <button
+                type="button"
+                className="crm-btn danger push-left"
+                disabled={busy}
+                onClick={onDelete}
+              >
+                Xóa số
+              </button>
+            ) : null}
             <button type="button" className="crm-btn" disabled={busy} onClick={onClose}>
               Huỷ
             </button>

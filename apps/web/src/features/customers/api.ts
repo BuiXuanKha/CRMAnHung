@@ -7,6 +7,7 @@ import {
   createEmployeeHotlineSchema,
   mergeFacebookIntoPhoneHolderSchema,
   updateCustomerCareSchema,
+  updateCustomerPhoneSchema,
   updateEmployeeHotlineSchema,
   type AcknowledgePhoneDuplicateInput,
   type AddCustomerPhoneInput,
@@ -22,6 +23,7 @@ import {
   type MergeFacebookIntoPhoneHolderInput,
   type UpdateCustomerCareInput,
   type UpdateCustomerInput,
+  type UpdateCustomerPhoneInput,
   type UpdateEmployeeHotlineInput,
   type CustomerMessengerThread,
   UserRole,
@@ -374,6 +376,89 @@ export async function addCustomerPhone(
     method: 'POST',
     body: JSON.stringify(parsed),
   });
+}
+
+export async function updateCustomerPhone(
+  id: string,
+  input: UpdateCustomerPhoneInput,
+): Promise<CustomerDetail> {
+  const parsed = updateCustomerPhoneSchema.parse(input);
+  if (isMockCustomers()) {
+    const user = currentMockUser();
+    const idx = mockStore.findIndex((c) => c.id === id);
+    if (idx < 0) throw new Error('Không tìm thấy khách hàng');
+    const current = mockStore[idx];
+    if (user.role !== UserRole.ADMIN && current.employeeId !== user.id) {
+      throw new Error('Không có quyền');
+    }
+    if (current.isHidden) {
+      throw new Error('Không sửa số điện thoại của khách đã ẩn. Hãy khôi phục trước.');
+    }
+    if (!current.primaryPhone && current.phones.length === 0) {
+      throw new Error('Khách chưa có số điện thoại. Hãy thêm số trước.');
+    }
+    if (current.primaryPhone === parsed.phone) {
+      return current;
+    }
+    const taken = mockStore.find(
+      (c) =>
+        c.employeeId === current.employeeId &&
+        c.id !== id &&
+        c.phones.some((p) => p.phone === parsed.phone),
+    );
+    if (taken) {
+      throwMockDuplicate({
+        existing: taken,
+        message: taken.facebook
+          ? 'Số điện thoại này đã thuộc khách khác có liên hệ Facebook.'
+          : 'Số điện thoại này đã thuộc khách chỉ có SĐT — có thể gộp hồ sơ Facebook vào.',
+        mergeAllowed: !taken.facebook,
+        phone: parsed.phone,
+        source: { id, fullName: current.fullName },
+      });
+    }
+    const now = new Date().toISOString();
+    const firstId = current.phones[0]?.id ?? `ph_${Date.now()}`;
+    const updated: CustomerDetail = {
+      ...current,
+      primaryPhone: parsed.phone,
+      phones: [{ id: firstId, phone: parsed.phone, label: current.phones[0]?.label ?? null }],
+      updatedAt: now,
+    };
+    mockStore = mockStore.map((c, i) => (i === idx ? updated : c));
+    return updated;
+  }
+  return apiFetch<CustomerDetail>(`/customers/${id}/phones`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed),
+  });
+}
+
+export async function deleteCustomerPhone(id: string): Promise<CustomerDetail> {
+  if (isMockCustomers()) {
+    const user = currentMockUser();
+    const idx = mockStore.findIndex((c) => c.id === id);
+    if (idx < 0) throw new Error('Không tìm thấy khách hàng');
+    const current = mockStore[idx];
+    if (user.role !== UserRole.ADMIN && current.employeeId !== user.id) {
+      throw new Error('Không có quyền');
+    }
+    if (current.isHidden) {
+      throw new Error('Không xoá số điện thoại của khách đã ẩn. Hãy khôi phục trước.');
+    }
+    if (!current.primaryPhone && current.phones.length === 0) {
+      throw new Error('Khách chưa có số điện thoại.');
+    }
+    const updated: CustomerDetail = {
+      ...current,
+      primaryPhone: null,
+      phones: [],
+      updatedAt: new Date().toISOString(),
+    };
+    mockStore = mockStore.map((c, i) => (i === idx ? updated : c));
+    return updated;
+  }
+  return apiFetch<CustomerDetail>(`/customers/${id}/phones`, { method: 'DELETE' });
 }
 
 export async function acknowledgePhoneDuplicate(

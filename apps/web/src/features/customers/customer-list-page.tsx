@@ -22,6 +22,7 @@ import {
   acknowledgePhoneDuplicate,
   addCustomerPhone,
   createCustomer,
+  deleteCustomerPhone,
   getCustomer,
   isPhoneDuplicateError,
   listContactChannels,
@@ -32,6 +33,7 @@ import {
   mergeFacebookIntoPhoneHolder,
   updateCustomer,
   updateCustomerCare,
+  updateCustomerPhone,
 } from './api';
 import { AddByPhoneModal } from './components/add-by-phone-modal';
 import { AddCustomerPhoneModal } from './components/add-customer-phone-modal';
@@ -107,6 +109,8 @@ export function CustomerListPage() {
   const [confirmDelete, setConfirmDelete] = useState<ConfirmState>(null);
   const [careEdit, setCareEdit] = useState<CareState>(null);
   const [addPhone, setAddPhone] = useState<CareState>(null);
+  const [phoneMode, setPhoneMode] = useState<'add' | 'edit'>('add');
+  const [confirmDeletePhone, setConfirmDeletePhone] = useState<CareState>(null);
   const [alertBox, setAlertBox] = useState<AlertState>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [careBusy, setCareBusy] = useState(false);
@@ -361,6 +365,14 @@ export function CustomerListPage() {
   function openAddPhone(customer: CustomerListItem) {
     if (customer.isHidden || customer.primaryPhone) return;
     setAddPhoneError(null);
+    setPhoneMode('add');
+    setAddPhone({ customer });
+  }
+
+  function openEditPhone(customer: CustomerListItem) {
+    if (customer.isHidden || !customer.primaryPhone) return;
+    setAddPhoneError(null);
+    setPhoneMode('edit');
     setAddPhone({ customer });
   }
 
@@ -405,6 +417,11 @@ export function CustomerListPage() {
 
     if (action === 'care') {
       openCareEdit(customer);
+      return;
+    }
+    if (action === 'phone') {
+      if (customer.primaryPhone) openEditPhone(customer);
+      else openAddPhone(customer);
       return;
     }
     if (action === 'lodat') {
@@ -478,9 +495,21 @@ export function CustomerListPage() {
 
   async function submitAddPhone(phone: string) {
     if (!addPhone) return;
+    if (phoneMode === 'edit' && phone === addPhone.customer.primaryPhone) {
+      setAddPhone(null);
+      return;
+    }
     setAddPhoneBusy(true);
     setAddPhoneError(null);
     try {
+      if (phoneMode === 'edit') {
+        await updateCustomerPhone(addPhone.customer.id, { phone });
+        await qc.invalidateQueries({ queryKey: ['customers'] });
+        await qc.invalidateQueries({ queryKey: ['customer', addPhone.customer.id] });
+        setAddPhone(null);
+        flash('Đã cập nhật số điện thoại.');
+        return;
+      }
       await addCustomerPhone(addPhone.customer.id, { phone });
       await qc.invalidateQueries({ queryKey: ['customers'] });
       await qc.invalidateQueries({ queryKey: ['customer', addPhone.customer.id] });
@@ -500,6 +529,26 @@ export function CustomerListPage() {
       setAddPhoneError(
         err instanceof Error ? err.message : 'Không lưu được số điện thoại.',
       );
+    } finally {
+      setAddPhoneBusy(false);
+    }
+  }
+
+  async function confirmRemovePhone() {
+    if (!confirmDeletePhone) return;
+    setAddPhoneBusy(true);
+    try {
+      await deleteCustomerPhone(confirmDeletePhone.customer.id);
+      await qc.invalidateQueries({ queryKey: ['customers'] });
+      await qc.invalidateQueries({ queryKey: ['customer', confirmDeletePhone.customer.id] });
+      setConfirmDeletePhone(null);
+      setAddPhone(null);
+      flash('Đã xoá số điện thoại.');
+    } catch (err) {
+      setAddPhoneError(
+        err instanceof Error ? err.message : 'Không xoá được số điện thoại.',
+      );
+      setConfirmDeletePhone(null);
     } finally {
       setAddPhoneBusy(false);
     }
@@ -718,15 +767,41 @@ export function CustomerListPage() {
 
       <AddCustomerPhoneModal
         customer={addPhone?.customer ?? null}
+        mode={phoneMode}
         busy={addPhoneBusy}
         error={addPhoneError}
         onClose={() => {
-          if (!addPhoneBusy) {
+          if (!addPhoneBusy && !confirmDeletePhone) {
             setAddPhone(null);
             setAddPhoneError(null);
           }
         }}
         onSubmit={submitAddPhone}
+        onDelete={
+          phoneMode === 'edit' && addPhone
+            ? () => setConfirmDeletePhone({ customer: addPhone.customer })
+            : undefined
+        }
+      />
+
+      <CrmConfirmDialog
+        open={Boolean(confirmDeletePhone)}
+        title="Xóa số điện thoại"
+        icon={Trash2}
+        message={
+          confirmDeletePhone
+            ? `Xóa số ${confirmDeletePhone.customer.primaryPhone ?? ''} của «${confirmDeletePhone.customer.fullName}»? Sau đó có thể thêm số mới bằng icon cam hoặc menu Thao tác.`
+            : ''
+        }
+        confirmLabel="Xóa số"
+        danger
+        busy={addPhoneBusy}
+        onCancel={() => {
+          if (!addPhoneBusy) setConfirmDeletePhone(null);
+        }}
+        onConfirm={() => {
+          void confirmRemovePhone();
+        }}
       />
 
       <RenameCustomerModal

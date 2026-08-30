@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { CurrentUser, type RequestUser } from '../../common/decorators/current-user.decorator';
 import { ListCustomersQueryDto } from './dto/list-customers-query.dto';
@@ -87,5 +87,19 @@ export class CustomersController {
     @Body() dto: AddCustomerPhoneDto,
   ) {
     return this.customersService.addPhone(user, id, dto);
+  }
+
+  @Patch(':id/phones')
+  replacePhone(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: AddCustomerPhoneDto,
+  ) {
+    return this.customersService.replacePhone(user, id, dto);
+  }
+
+  @Delete(':id/phones')
+  deletePhone(@CurrentUser() user: RequestUser, @Param('id') id: string) {
+    return this.customersService.deletePhone(user, id);
   }
 }
