@@ -1,7 +1,9 @@
 'use client';
 
 import { TransactionType, type TransactionListItem } from '@crmanhung/shared';
+import type { Ref } from 'react';
 import { CrmBadge } from '@/shared/ui/badge';
+import { TransactionListEmpty } from './list-empty';
 import {
   formatCreatedAt,
   formatMoneyVnd,
@@ -23,6 +25,9 @@ type Props = {
   onToggleMenu: (id: string) => void;
   onCloseMenu: () => void;
   onAction: (item: TransactionListItem, action: TransactionAction) => void;
+  filteredEmpty: boolean;
+  scrollRef?: Ref<HTMLDivElement>;
+  onScroll?: () => void;
 };
 
 function PartyNames({ names }: { names: string[] }) {
@@ -61,12 +66,23 @@ export function TransactionCardList({
   onToggleMenu,
   onCloseMenu,
   onAction,
+  filteredEmpty,
+  scrollRef,
+  onScroll,
 }: Props) {
   return (
     <div className="tx-cards-shell">
-      <div className="tx-cards" role="list" aria-label="Danh sách giao dịch">
+      <div
+        className="tx-cards"
+        role="list"
+        aria-label="Danh sách giao dịch"
+        ref={scrollRef}
+        onScroll={onScroll}
+      >
         {items.length === 0 ? (
-          <p className="tx-empty-cards">Không có giao dịch phù hợp.</p>
+          <div className="tx-empty-cards">
+            <TransactionListEmpty filtered={filteredEmpty} />
+          </div>
         ) : (
           items.map((item) => {
             function openCard() {
@@ -77,6 +93,7 @@ export function TransactionCardList({
               <article
                 key={item.id}
                 role="listitem"
+                data-list-row-id={item.id}
                 className={[
                   'tx-card',
                   selectedId === item.id ? 'is-selected' : '',

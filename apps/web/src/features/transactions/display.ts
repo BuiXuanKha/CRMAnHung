@@ -184,6 +184,37 @@ export type ExtraFilters = {
   note: 'all' | 'has' | 'empty';
 };
 
+export const DEFAULT_EXTRA_FILTERS: ExtraFilters = {
+  lodat: 'all',
+  seller: 'all',
+  buyer: 'all',
+  price: 'all',
+  commission: 'all',
+  notary: 'all',
+  note: 'all',
+};
+
+export function extraFiltersActive(extra: ExtraFilters): boolean {
+  return (
+    extra.lodat !== 'all' ||
+    extra.seller !== 'all' ||
+    extra.buyer !== 'all' ||
+    extra.price !== 'all' ||
+    extra.commission !== 'all' ||
+    extra.notary !== 'all' ||
+    extra.note !== 'all'
+  );
+}
+
+export function hasTransactionListFilters(
+  keyword: string,
+  type: string,
+  status: string,
+  extra: ExtraFilters,
+): boolean {
+  return Boolean(keyword.trim() || type || status || extraFiltersActive(extra));
+}
+
 export const LODAT_FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả lô đất' },
   { value: 'has', label: 'Có lô đất' },

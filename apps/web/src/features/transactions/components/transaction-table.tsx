@@ -1,8 +1,9 @@
 'use client';
 
 import { TransactionType, type TransactionListItem } from '@crmanhung/shared';
-import { useState } from 'react';
+import { useState, type Ref } from 'react';
 import { ColumnFilter } from '@/shared/ui/column-filter';
+import { TransactionListEmpty } from './list-empty';
 import { CrmBadge } from '@/shared/ui/badge';
 import {
   BUYER_FILTER_OPTIONS,
@@ -52,6 +53,9 @@ type Props = {
   onToggleMenu: (id: string) => void;
   onCloseMenu: () => void;
   onAction: (item: TransactionListItem, action: TransactionAction) => void;
+  filteredEmpty: boolean;
+  scrollRef?: Ref<HTMLDivElement>;
+  onScroll?: () => void;
 };
 
 function PartyNames({ names }: { names: string[] }) {
@@ -105,6 +109,9 @@ export function TransactionTable({
   onToggleMenu,
   onCloseMenu,
   onAction,
+  filteredEmpty,
+  scrollRef,
+  onScroll,
 }: Props) {
   const [headerFilter, setHeaderFilter] = useState<HeaderFilter>(null);
 
@@ -237,16 +244,17 @@ export function TransactionTable({
         </div>
       </div>
 
-      <div className="tx-table-scroll" role="rowgroup">
+      <div className="tx-table-scroll" role="rowgroup" ref={scrollRef} onScroll={onScroll}>
         {items.length === 0 ? (
           <div className="tx-empty-row" role="row">
-            Không có giao dịch phù hợp.
+            <TransactionListEmpty filtered={filteredEmpty} />
           </div>
         ) : (
           items.map((item) => (
             <div
               key={item.id}
               role="row"
+              data-list-row-id={item.id}
               className={[
                 'tx-grid-row',
                 selectedId === item.id ? 'is-selected' : '',

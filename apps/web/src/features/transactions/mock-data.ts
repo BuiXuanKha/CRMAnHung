@@ -64,7 +64,16 @@ export const mockTransactionDetails: TransactionDetail[] = [
       mapPriceNote: 'Thương lượng',
       mapBrokerFeeNote: '1%',
       mapNote: null,
-      images: [],
+      images: [
+        {
+          id: 'tx_001_img0',
+          objectKey: 'mock/lodats/p1.svg',
+          url: '/mock/lodats/p1.svg',
+          sortOrder: 0,
+          rotationDeg: 0,
+          sourceLodatImageId: null,
+        },
+      ],
     },
   }),
   detail({

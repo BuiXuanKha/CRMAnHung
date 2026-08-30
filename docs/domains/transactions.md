@@ -1,7 +1,7 @@
 # Domain: Transactions (Giao dịch)
 
 - **Slug:** `transactions`
-- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI **nối API** (staging login thật, không mock). Copy CRM cũ xong (2 GD).
+- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI **nối API** (staging login thật, không mock). Copy CRM cũ xong (2 GD **buinam**). STAFF **kha**: list trống đến khi tạo GD từ lô.
 - **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich` (SQLite `tblTransaction*`, 2026-08-25)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
@@ -52,9 +52,9 @@ Gợi ý dưới số 2–3: «Chỉ giao dịch của tôi · Hoàn thành». M
 2. **List `/giao-dich`** — tìm / lọc; STAFF chỉ GD mình; ADMIN tất cả.
 3. **Sửa** — đổi status, giá, thuế, hoa hồng, hẹn CC, bên, ghi chú. Hủy bắt buộc `cancelReason`.
 4. **Xóa cứng** — xóa hàng + nếu GD đang mở (`DA_COC` / `DA_CONG_CHUNG`) thì đưa map về **Mở bán**.
-5. **Lịch sử trên chi tiết lô** — list GD của lô (làm sau).
+5. **Lịch sử trên chi tiết lô** — list GD của lô (lodats.md §12.3.5, đã làm).
 
-Tạo GD: **OWN** bắt buộc ngày hẹn CC; **RECORD** hẹn CC tuỳ chọn, hoa hồng = 0, **không** vào thẻ doanh thu.
+Tạo GD: **OWN** bắt buộc ngày hẹn CC; **RECORD** hẹn CC tuỳ chọn, hoa hồng = 0, **không** vào thẻ doanh thu. Tạo từ lô: điền sẵn người bán = chủ map active (tên + `customerId`); lô chưa có chủ → không lưu.
 
 ## 5. Quan hệ dữ liệu
 
@@ -265,6 +265,12 @@ Một dòng, cắt `…`. Thiếu = `—`.
 
 `Hiển thị N / Tổng M giao dịch`.
 
+**Nhớ vị trí + lọc khi rời list** — cùng helper `list-state` (key `crmanhung:transaction-list-state`): ô tìm, loại, trạng thái, lọc cột, `selectedId`, `scrollTop` + `anchorId`. Dòng/thẻ có `data-list-row-id`. Đổi lọc/tìm → cuộn về 0. Vào lại (Back / menu / F5 cùng tab) khôi phục; che list lúc restore. Đăng xuất xóa.
+
+#### 12.1.6 Trống
+
+Không lọc / ô tìm: «Chưa có giao dịch.» + gợi ý tạo từ nút **Giao dịch** trên lô → link `/lo-dat`. Đang lọc: «Không có giao dịch phù hợp.»
+
 ---
 
 ### 12.2 Giao diện mobile
@@ -313,7 +319,7 @@ Cùng quy tắc 12.1.4 mục 7 và 9.
 
 #### 12.2.5 Footer
 
-Cùng câu `Hiển thị N / Tổng M giao dịch`.
+Cùng câu `Hiển thị N / Tổng M giao dịch`. Trống: cùng 12.1.6.
 
 ---
 
@@ -351,7 +357,7 @@ Người bán / người mua: mỗi tên một dòng. Rỗng = `—`.
 
 ##### 6. Snapshot lô
 
-Địa chỉ, DT · MT · hướng, giá map lúc tạo. Thiếu = ẩn dòng. Ảnh snapshot: mock có thể trống.
+Địa chỉ, DT · MT · hướng, giá map lúc tạo. Thiếu = ẩn dòng. Ảnh snapshot: thumbnail; bấm → tab mới (`url` CDN). Không ảnh = ẩn lưới.
 
 #### 12.3.2 Giao diện mobile
 
@@ -400,7 +406,7 @@ Số VND, format nghìn. RECORD: ô HH disabled.
 
 ##### 7. Người bán / mua
 
-Mỗi bên ≥ 1 tên lúc Lưu. Thêm dòng; xoá nếu còn >1. Gõ tên hoặc chọn khách CRM (điền tên + `customerId`).
+Mỗi bên ≥ 1 tên lúc Lưu. Thêm dòng; xoá nếu còn >1. Gõ tên hoặc chọn khách CRM (điền tên + `customerId`). **Tạo:** điền sẵn người bán = chủ lô (`owner`); đổi lô trên picker thì thay dòng bán. Lô chưa có chủ → báo, khoá Lưu.
 
 ##### 8. Ghi chú
 
