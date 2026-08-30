@@ -23,7 +23,13 @@ import {
   placeMetaForGeo,
   type HubSlugMaps,
 } from './public-listing-hub-slugs';
-import { formatM, kindLabel, toListingPublicSlug, toPublicSlug } from './public-slug';
+import {
+  formatM,
+  kindLabel,
+  reservePublicLotSlug,
+  toListingPublicSlug,
+  toPublicSlug,
+} from './public-slug';
 import {
   applySeoImageMove,
   planSeoAddressImageCopy,
@@ -495,10 +501,11 @@ export class PublicContentService {
   }
 
   private async uniqueSlug(base: string): Promise<string> {
-    let slug = base;
+    const root = reservePublicLotSlug(base);
+    let slug = root;
     let n = 2;
     while (await this.prisma.publicLotListing.findUnique({ where: { slug } })) {
-      slug = `${base.slice(0, 50)}-${n}`;
+      slug = `${root}-${n}`;
       n += 1;
     }
     return slug;

@@ -19,25 +19,60 @@ export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat-huyen-nam-sach';
 /** Reserved path segment under catalog — hub xã / cấp 4; not a lot slug. */
 export const PUBLIC_LISTING_HUB_SEGMENT = 'xa';
 
-/** URL slug from Vietnamese label (ward, project, lot title…). */
+/**
+ * URL slug from Vietnamese label (ward, project, lot title…).
+ * `maxLen <= 0` — no character cap (lot URLs). Hub labels still pass 60.
+ */
 export function toPublicSlug(label: string, maxLen = 60, emptyFallback = 'muc'): string {
-  const slug = label
+  let slug = label
     .normalize('NFD')
     .replace(/\p{M}/gu, '')
     .replace(/đ/gi, 'd')
     .replace(/Đ/g, 'd')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
-    .slice(0, maxLen)
-    .replace(/-+$/g, '');
+    .replace(/^-+|-+$/g, '');
+  if (maxLen > 0 && slug.length > maxLen) {
+    slug = slug.slice(0, maxLen).replace(/-+$/g, '');
+  }
   return slug || emptyFallback;
 }
 
-/** Guest lot URL: tên lô + địa chỉ công khai. */
+function foldSlugText(s: string): string {
+  return s.toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+/** Address parts not already present in title — avoids repeating thôn/xã in the slug. */
+export function listingAddressLeftover(
+  title: string,
+  location?: string | null,
+): string {
+  const titleFold = foldSlugText(title);
+  const loc = location?.trim() ?? '';
+  if (!loc) return '';
+  if (titleFold.includes(foldSlugText(loc))) return '';
+  return loc
+    .split(',')
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0 && !titleFold.includes(foldSlugText(p)))
+    .join(', ');
+}
+
+/** Lot slug must not collide with the hub folder `/xa/…`. */
+export function reservePublicLotSlug(slug: string, emptyFallback = 'lo-dat'): string {
+  const s = slug.trim() || emptyFallback;
+  if (s === PUBLIC_LISTING_HUB_SEGMENT) return `lo-${PUBLIC_LISTING_HUB_SEGMENT}`;
+  return s;
+}
+
+/**
+ * Guest lot URL: title + leftover address (no 80-char cap, no mid-word cut).
+ * Stable after create — regenerate only via `lots:regenerate-public-slugs`.
+ */
 export function toListingPublicSlug(title: string, location?: string | null): string {
-  const combined = [title.trim(), (location ?? '').trim()].filter(Boolean).join(' ');
-  return toPublicSlug(combined, 80, 'lo-dat');
+  const leftover = listingAddressLeftover(title, location);
+  const combined = [title.trim(), leftover].filter(Boolean).join(' ');
+  return reservePublicLotSlug(toPublicSlug(combined, 0, 'lo-dat'));
 }
 
 export function listingCommuneHubPath(communeSlug: string): string {

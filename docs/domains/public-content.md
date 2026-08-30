@@ -617,8 +617,8 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 | Gỡ web | Chỉ admin **Gỡ** / tắt Đăng web trên dashboard. **Không** auto khi Tạm dừng hay tạo/sửa GD |
 | Khách thấy lô | `isPublished` ∩ map `DANG_BAN` (rule guest API sẵn có — không đụng công tắc Đăng web) |
 | Một listing / ProjectLot | Khi admin **Đăng web**, `unpublishSiblingProjectLotListings` gỡ listing published khác cùng `projectLotId` |
-| Slug ổn định | Slug = `toListingPublicSlug(title, location)` lúc **tạo** listing; `PATCH draft` / Đăng lại **không** đổi slug |
-| Đổi URL lô cũ | Migration + `scripts/regenerate-public-lot-slugs.ts` (chạy trong `remote_deploy.sh`): ghi `PublicLotSlugRedirect`; guest `/mua-ban-nha-dat/{slug-cũ}` → **301** sang slug mới (`GET /public/slug-redirects/:fromSlug`) |
+| Slug ổn định | Slug = `toListingPublicSlug(title, leftover location)` lúc **tạo** listing (không trần 80; cấm `xa`). `PATCH draft` / Đăng lại **không** đổi slug trừ khi admin sửa ô slug |
+| Đổi URL lô cũ | `pnpm lots:regenerate-public-slugs` dry-run; `APPLY=1` mới ghi `PublicLotSlugRedirect` + revalidate. Deploy **không** tự APPLY (cần `APPLY_LOT_SLUGS=1`). Guest slug cũ → **301**. **Không** đổi tên file ảnh CDN |
 | Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** |
 
 ### 16.9 Luồng revalidate (chuẩn)

@@ -125,7 +125,7 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
-| **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = **tên lô + địa chỉ** (không dấu, unique, ổn định sau khi tạo) | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
+| **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = title + phần địa chỉ **chưa** có trong title (không dấu, unique, **không cắt 80 ký tự**). Ổn định sau khi tạo | Query tracking làm canonical; đổi slug khi chỉ sửa copy; cắt giữa từ (`hai-duon`) |
 | **Title** | `{title} tại {location}` + `\| An Hưng Land` nếu địa chỉ chưa nằm trong tên. Khớp H1. Không đổi slug | Nhồi «đất nền Đồng Nai giá rẻ…»; title chỉ mã lô không có xã/huyện |
 | **Meta description** | `metaDescription` nếu có, không thì **excerpt** public, cắt ~160 ký tự | Copy giống nhau mọi lô; mô tả CRM / hoa hồng |
 | **Canonical** | Đúng URL tuyệt đối ở trên | Hai URL một lô |

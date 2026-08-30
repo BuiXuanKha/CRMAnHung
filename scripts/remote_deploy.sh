@@ -42,8 +42,13 @@ cd "$API"
 pnpm exec prisma generate
 pnpm exec prisma migrate deploy
 
-echo "==> Regenerate public lot slugs (title+location, idempotent 301)"
-pnpm exec tsx scripts/regenerate-public-lot-slugs.ts
+echo "==> Public lot slugs (dry-run unless APPLY_LOT_SLUGS=1)"
+if [[ "${APPLY_LOT_SLUGS:-}" == "1" ]]; then
+  APPLY=1 pnpm exec tsx scripts/regenerate-public-lot-slugs.ts
+else
+  pnpm exec tsx scripts/regenerate-public-lot-slugs.ts
+  echo "    (no URL rewrite — set APPLY_LOT_SLUGS=1 to apply 301s)"
+fi
 
 echo "==> Build API"
 cd "$API"
