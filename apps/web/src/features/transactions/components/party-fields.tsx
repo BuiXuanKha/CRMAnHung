@@ -67,8 +67,7 @@ export function PartyFields({ label, values, onChange, disabled }: Props) {
   const chips = namedParties(values);
   const selectedKey = chips.map((p) => p.customerId ?? '').join('|');
   const trimmed = query.trim();
-  const canUseTyped = Boolean(trimmed);
-  const optionCount = hits.length + (canUseTyped ? 1 : 0);
+  const optionCount = hits.length;
 
   useEffect(() => {
     if (!open || disabled) {
@@ -121,29 +120,6 @@ export function PartyFields({ label, values, onChange, disabled }: Props) {
     inputRef.current?.focus();
   }
 
-  function addFreeText(name: string) {
-    const n = name.trim();
-    if (!n) return;
-    const dup = chips.some(
-      (p) => !p.customerId && p.freeTextName.trim().toLowerCase() === n.toLowerCase(),
-    );
-    if (dup) {
-      setQuery('');
-      return;
-    }
-    replace([
-      ...chips,
-      {
-        key: `p_txt_${Date.now()}`,
-        freeTextName: n,
-        customerId: null,
-        sortOrder: chips.length,
-      },
-    ]);
-    setQuery('');
-    inputRef.current?.focus();
-  }
-
   function removeAt(key: string) {
     replace(chips.filter((p) => p.key !== key));
   }
@@ -171,11 +147,7 @@ export function PartyFields({ label, values, onChange, disabled }: Props) {
     }
     if (event.key === 'Enter') {
       event.preventDefault();
-      if (open && active < hits.length) {
-        addCustomer(hits[active]);
-        return;
-      }
-      if (canUseTyped) addFreeText(trimmed);
+      if (open && hits[active]) addCustomer(hits[active]);
     }
   }
 
@@ -251,32 +223,14 @@ export function PartyFields({ label, values, onChange, disabled }: Props) {
                 </button>
               </li>
             ))}
-            {canUseTyped ? (
-              <li role="option" aria-selected={active === hits.length}>
-                <button
-                  type="button"
-                  className={
-                    active === hits.length
-                      ? 'is-active tx-party-suggest-free'
-                      : 'tx-party-suggest-free'
-                  }
-                  onMouseEnter={() => setActive(hits.length)}
-                  onClick={() => addFreeText(trimmed)}
-                >
-                  Dùng tên «{trimmed}»
-                </button>
-              </li>
-            ) : null}
             {loading && hits.length === 0 ? (
               <li className="tx-party-suggest-empty">Đang tìm...</li>
             ) : null}
-            {!loading && hits.length === 0 && !canUseTyped ? (
+            {!loading && hits.length === 0 && !trimmed ? (
               <li className="tx-party-suggest-empty">Gõ tên hoặc số điện thoại để tìm.</li>
             ) : null}
-            {!loading && hits.length === 0 && canUseTyped ? (
-              <li className="tx-party-suggest-empty">
-                Không có khách khớp. Enter để dùng tên vừa gõ.
-              </li>
+            {!loading && hits.length === 0 && trimmed ? (
+              <li className="tx-party-suggest-empty">Không có khách khớp.</li>
             ) : null}
           </ul>
         ) : null}
