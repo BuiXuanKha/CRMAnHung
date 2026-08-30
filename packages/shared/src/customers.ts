@@ -85,9 +85,13 @@ export const customerListItemSchema = z.object({
   /** Profile/page NV quét khách — cột Kênh liên hệ khi không có hotline. */
   sourceFacebookProfile: customerSourceFacebookProfileSchema.nullable().optional(),
   /** Cột Nhu cầu = NeedSummary mới nhất (care, không rỗng). */
-  latestNeedSummary: z.string().nullable().optional(),
+    latestNeedSummary: z.string().nullable().optional(),
   latestCareNote: z.string().nullable().optional(),
   lodatCount: z.number().int().nonnegative().default(0),
+  /** Tin đã lưu (rail chat). 0 = ẩn thanh «Nội dung chat». */
+  messageCount: z.number().int().nonnegative().default(0),
+  /** Số lần chăm sóc. 0 = ẩn thanh «Lịch sử chăm sóc». */
+  careNoteCount: z.number().int().nonnegative().default(0),
   createdAt: z.string(),
   updatedAt: z.string(),
 });

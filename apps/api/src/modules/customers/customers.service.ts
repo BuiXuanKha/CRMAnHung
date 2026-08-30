@@ -30,8 +30,10 @@ import {
   assertCanAccess,
   emptyCareSummary,
   loadCareNotes,
+  loadCareNoteCounts,
   loadCareSummaries,
   loadLodatCounts,
+  loadMessageCounts,
   loadProfiles,
   toListItem,
 } from './customers-view';
@@ -129,11 +131,14 @@ export class CustomersService {
     ]);
 
     const ids = rows.map((row) => row.id);
-    const [profiles, careByCustomer, lodatCounts] = await Promise.all([
-      loadProfiles(this.prisma),
-      loadCareSummaries(this.prisma, ids),
-      loadLodatCounts(this.prisma, ids),
-    ]);
+    const [profiles, careByCustomer, lodatCounts, messageCounts, careNoteCounts] =
+      await Promise.all([
+        loadProfiles(this.prisma),
+        loadCareSummaries(this.prisma, ids),
+        loadLodatCounts(this.prisma, ids),
+        loadMessageCounts(this.prisma, ids),
+        loadCareNoteCounts(this.prisma, ids),
+      ]);
     const items = rows.map((row) =>
       toListItem(
         this.storage,
@@ -141,6 +146,8 @@ export class CustomersService {
         profiles,
         careByCustomer.get(row.id) ?? emptyCareSummary(),
         lodatCounts.get(row.id) ?? 0,
+        messageCounts.get(row.id) ?? 0,
+        careNoteCounts.get(row.id) ?? 0,
       ),
     );
     return { items, total };
@@ -156,11 +163,14 @@ export class CustomersService {
     }
     assertCanAccess(user, row.employeeId);
     const profiles = await loadProfiles(this.prisma);
-    const [careSummary, careNotes, lodatCounts] = await Promise.all([
-      loadCareSummaries(this.prisma, [row.id]),
-      loadCareNotes(this.prisma, row.id),
-      loadLodatCounts(this.prisma, [row.id]),
-    ]);
+    const [careSummary, careNotes, lodatCounts, messageCounts, careNoteCounts] =
+      await Promise.all([
+        loadCareSummaries(this.prisma, [row.id]),
+        loadCareNotes(this.prisma, row.id),
+        loadLodatCounts(this.prisma, [row.id]),
+        loadMessageCounts(this.prisma, [row.id]),
+        loadCareNoteCounts(this.prisma, [row.id]),
+      ]);
     return {
       ...toListItem(
         this.storage,
@@ -168,6 +178,8 @@ export class CustomersService {
         profiles,
         careSummary.get(row.id) ?? emptyCareSummary(),
         lodatCounts.get(row.id) ?? 0,
+        messageCounts.get(row.id) ?? 0,
+        careNoteCounts.get(row.id) ?? 0,
       ),
       careNotes,
     };
@@ -251,11 +263,14 @@ export class CustomersService {
       include: LIST_INCLUDE,
     });
     const profiles = await loadProfiles(this.prisma);
-    const [careSummary, careNotes, lodatCounts] = await Promise.all([
-      loadCareSummaries(this.prisma, [row.id]),
-      loadCareNotes(this.prisma, row.id),
-      loadLodatCounts(this.prisma, [row.id]),
-    ]);
+    const [careSummary, careNotes, lodatCounts, messageCounts, careNoteCounts] =
+      await Promise.all([
+        loadCareSummaries(this.prisma, [row.id]),
+        loadCareNotes(this.prisma, row.id),
+        loadLodatCounts(this.prisma, [row.id]),
+        loadMessageCounts(this.prisma, [row.id]),
+        loadCareNoteCounts(this.prisma, [row.id]),
+      ]);
     return {
       ...toListItem(
         this.storage,
@@ -263,6 +278,8 @@ export class CustomersService {
         profiles,
         careSummary.get(row.id) ?? emptyCareSummary(),
         lodatCounts.get(row.id) ?? 0,
+        messageCounts.get(row.id) ?? 0,
+        careNoteCounts.get(row.id) ?? 0,
       ),
       careNotes,
     };

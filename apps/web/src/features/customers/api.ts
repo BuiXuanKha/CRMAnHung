@@ -139,7 +139,11 @@ export async function listCustomers(
 ): Promise<CustomerListResponse> {
   if (isMockCustomers()) {
     const user = currentMockUser();
-    const items = applyQuery(visibleFor(user, mockStore), query);
+    const items = applyQuery(visibleFor(user, mockStore), query).map((c) => ({
+      ...c,
+      messageCount: mockChats[c.id]?.length ?? c.messageCount ?? 0,
+      careNoteCount: c.careNoteCount ?? c.careNotes.length,
+    }));
     const offset = query.offset ?? 0;
     const limit = query.limit ?? 50;
     return { items: items.slice(offset, offset + limit), total: items.length };
@@ -166,7 +170,11 @@ export async function getCustomer(id: string): Promise<CustomerDetail> {
     if (!found) {
       throw new Error('Không tìm thấy khách hàng');
     }
-    return found;
+    return {
+      ...found,
+      messageCount: mockChats[found.id]?.length ?? found.messageCount ?? 0,
+      careNoteCount: found.careNoteCount ?? found.careNotes.length,
+    };
   }
   return apiFetch<CustomerDetail>(`/customers/${id}`);
 }
@@ -286,6 +294,8 @@ export async function createCustomer(
       sourceHotline: { id: hotline.id, phone: hotline.phone, label: hotline.label },
       latestCareNote: null,
       lodatCount: 0,
+      messageCount: 0,
+      careNoteCount: 0,
       createdAt: now,
       updatedAt: now,
       careNotes: [],
@@ -506,6 +516,8 @@ export async function mergeFacebookIntoPhoneHolder(
       latestNeedSummary: source.latestNeedSummary ?? target.latestNeedSummary,
       latestCareNote: source.latestCareNote ?? target.latestCareNote,
       lodatCount: target.lodatCount + source.lodatCount,
+      messageCount: (target.messageCount ?? 0) + (source.messageCount ?? 0),
+      careNoteCount: [...source.careNotes, ...target.careNotes].length,
       isHidden: false,
       updatedAt: new Date().toISOString(),
     };
@@ -669,6 +681,7 @@ export async function updateCustomerCare(
         : current.latestNeedSummary,
       latestCareNote: careChanged ? noteText || current.latestCareNote : current.latestCareNote,
       careNotes,
+      careNoteCount: careNotes.length,
       updatedAt: now,
     };
     mockStore = mockStore.map((c, i) => (i === idx ? updated : c));

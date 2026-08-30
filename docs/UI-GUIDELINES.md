@@ -198,7 +198,7 @@ Không phải sidebar điều hướng (nav chính nằm trên **header** §4.2)
 
 **Khi mở rộng:** panel bung sang trái, hiện dữ liệu của đúng nhãn đó (chat / lịch sử / lô đất). Đóng lại thì thu về thanh dọc.
 
-**Đã chốt:** chỉ **một** panel mở. Bấm thanh khác → **đổi** panel, không chồng. Bấm lại thanh đang mở → thu hẹp. Chưa chọn dòng → «Chọn một khách trên bảng để xem.» Mobile: ẩn rail.
+**Đã chốt:** chỉ **một** panel mở. Bấm thanh khác → **đổi** panel, không chồng. Bấm lại thanh đang mở → thu hẹp. **Ẩn thanh** khi khách đang chọn không có dữ liệu (chat / chăm sóc / lô). Không còn thanh nào → ẩn cả cột phụ. Mobile: ẩn cột phụ.
 
 Implement: một component rail dùng lại được (không copy layout god-file CRM cũ); gắn vào layout nội dung `/khach-hang` (và màn list tương tự khi cần). Chi tiết dữ liệu từng panel: [`customers.md` §12.1.6](./domains/customers.md).
 
@@ -670,6 +670,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | List `/khach-hang`: bỏ icon mess cạnh tên; hangtag **Đã xoá** khi `isHidden`; thẻ mobile **không** tên Facebook |
 | 2026-08-30 | List `/khach-hang`: menu Thao tác **Thêm / Sửa số điện thoại** (Lưu / Xóa); icon cam vẫn thêm nhanh |
 | 2026-08-30 | Panel phải + chi tiết khách: thẻ lô ảnh trái / chữ phải; bấm ảnh = gallery (+N); bấm chữ = `/lo-dat/[id]` |
+| 2026-08-30 | Cột phụ `/khach-hang`: ẩn thanh Chat / Chăm sóc / Lô khi khách không có tin, lịch sử, hoặc lô |
 
 ---
 

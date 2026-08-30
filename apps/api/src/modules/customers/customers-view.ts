@@ -144,12 +144,47 @@ export async function loadLodatCounts(
   return map;
 }
 
+export async function loadMessageCounts(
+  prisma: PrismaService,
+  customerIds: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (customerIds.length === 0) return map;
+  const rows = await prisma.customerFacebook.findMany({
+    where: { customerId: { in: customerIds } },
+    select: { customerId: true, _count: { select: { messages: true } } },
+  });
+  for (const row of rows) {
+    map.set(row.customerId, row._count.messages);
+  }
+  return map;
+}
+
+export async function loadCareNoteCounts(
+  prisma: PrismaService,
+  customerIds: string[],
+): Promise<Map<string, number>> {
+  const map = new Map<string, number>();
+  if (customerIds.length === 0) return map;
+  const rows = await prisma.customerCareNote.groupBy({
+    by: ['customerId'],
+    where: { customerId: { in: customerIds } },
+    _count: { _all: true },
+  });
+  for (const row of rows) {
+    map.set(row.customerId, row._count._all);
+  }
+  return map;
+}
+
 export function toListItem(
   storage: StorageService,
   row: CustomerRow,
   profiles: Map<string, ProfileLookup>,
   care: CareSummary,
   lodatCount = 0,
+  messageCount = 0,
+  careNoteCount = 0,
 ) {
   const facebook = row.facebook
     ? {
@@ -204,6 +239,8 @@ export function toListItem(
     latestNeedSummary: care.latestNeedSummary,
     latestCareNote: care.latestCareNote,
     lodatCount,
+    messageCount,
+    careNoteCount,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
