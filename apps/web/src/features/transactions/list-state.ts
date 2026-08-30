@@ -3,7 +3,7 @@ import {
   getActiveListScrollEl,
   type ListSavedState,
 } from '@/shared/list-state';
-import type { ExtraFilters } from './display';
+import { DEFAULT_EXTRA_FILTERS, type ExtraFilters } from './display';
 
 export const TRANSACTION_LIST_STATE_KEY = 'crmanhung:transaction-list-state';
 
@@ -16,18 +16,8 @@ export type TransactionListFields = {
 
 export type TransactionListSavedState = ListSavedState<TransactionListFields>;
 
-const DEFAULT_EXTRA: ExtraFilters = {
-  lodat: 'all',
-  seller: 'all',
-  buyer: 'all',
-  price: 'all',
-  commission: 'all',
-  notary: 'all',
-  note: 'all',
-};
-
 function parseExtra(raw: unknown): ExtraFilters {
-  if (!raw || typeof raw !== 'object') return { ...DEFAULT_EXTRA };
+  if (!raw || typeof raw !== 'object') return { ...DEFAULT_EXTRA_FILTERS };
   const extra = raw as Partial<ExtraFilters>;
   return {
     lodat: extra.lodat ?? 'all',
@@ -62,3 +52,10 @@ export function saveTransactionListState(
 }
 
 export { getActiveListScrollEl };
+
+export function restoreTransactionListScroll(
+  root: HTMLElement | null,
+  snapshot: { anchorId: string | null; scrollTop: number },
+) {
+  store.restoreScroll(root, snapshot);
+}

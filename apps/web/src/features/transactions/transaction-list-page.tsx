@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
@@ -16,22 +16,24 @@ import { FilterBar } from './components/filter-bar';
 import { TransactionStats } from './components/stats';
 import { TransactionCardList } from './components/transaction-card-list';
 import { TransactionTable } from './components/transaction-table';
-import { applyExtraFilters, countMobileTransactionFilters, type ExtraFilters } from './display';
-import { peekTransactionListState, saveTransactionListState } from './list-state';
+import {
+  applyExtraFilters,
+  countMobileTransactionFilters,
+  DEFAULT_EXTRA_FILTERS,
+  hasTransactionListFilters,
+  type ExtraFilters,
+} from './display';
+import {
+  getActiveListScrollEl,
+  peekTransactionListState,
+  restoreTransactionListScroll,
+  saveTransactionListState,
+  type TransactionListSavedState,
+} from './list-state';
 import './transactions.css';
 import './transactions-table.css';
 import './transactions-mobile.css';
 import '@/shared/ui/money.css';
-
-const DEFAULT_EXTRA: ExtraFilters = {
-  lodat: 'all',
-  seller: 'all',
-  buyer: 'all',
-  price: 'all',
-  commission: 'all',
-  notary: 'all',
-  note: 'all',
-};
 
 type AlertState = {
   title: string;
@@ -44,33 +46,33 @@ export function TransactionListPage() {
   const [keyword, setKeyword] = useState('');
   const [type, setType] = useState('');
   const [status, setStatus] = useState('');
-  const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
+  const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
-  const [alertBox, setAlertBox] = useState<AlertState>(null);
+  const [alertBox, setAlertState] = useState<AlertState>(null);
   const [confirmDelete, setConfirmDelete] = useState<TransactionListItem | null>(null);
   const [filterOpen, setFilterOpen] = useState(false);
-
-  useLayoutEffect(() => {
-    const snap = peekTransactionListState();
-    if (!snap) return;
-    setKeyword(snap.searchKeyword);
-    setType(snap.type);
-    setStatus(snap.status);
-    setExtra(snap.extra);
-    setSelectedId(snap.selectedId);
-  }, []);
-
-  useEffect(() => {
-    saveTransactionListState(null, {
-      searchKeyword: keyword,
-      type,
-      status,
-      extra,
-      selectedId,
-    });
-  }, [keyword, type, status, extra, selectedId]);
+  const [restoreReady, setRestoreReady] = useState(false);
+  const [listConcealed, setListConcealed] = useState(false);
+  const restoreSnap = useRef<TransactionListSavedState | null>(null);
+  const restoreDone = useRef(false);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const cardsScrollRef = useRef<HTMLDivElement>(null);
+  const persistRef = useRef({
+    searchKeyword: keyword,
+    type,
+    status,
+    extra,
+    selectedId,
+  });
+  persistRef.current = {
+    searchKeyword: keyword,
+    type,
+    status,
+    extra,
+    selectedId,
+  };
 
   const listQuery = {
     keyword: keyword.trim() || undefined,
@@ -81,6 +83,7 @@ export function TransactionListPage() {
   const list = useQuery({
     queryKey: ['transactions', listQuery],
     queryFn: () => listTransactions(listQuery),
+    enabled: restoreReady,
   });
 
   const filtered = useMemo(
@@ -90,6 +93,7 @@ export function TransactionListPage() {
 
   const stats = useMemo(() => statsFromItems(filtered), [filtered]);
   const mobileFilterCount = countMobileTransactionFilters(type, status);
+  const filteredEmpty = hasTransactionListFilters(keyword, type, status, extra);
 
   const deleteMut = useMutation({
     mutationFn: (id: string) => deleteTransaction(id),
@@ -98,37 +102,117 @@ export function TransactionListPage() {
     },
   });
 
+  useLayoutEffect(() => {
+    const snap = peekTransactionListState();
+    restoreSnap.current = snap;
+    if (snap) {
+      setKeyword(snap.searchKeyword);
+      setType(snap.type);
+      setStatus(snap.status);
+      setExtra(snap.extra);
+      setSelectedId(snap.selectedId);
+      setListConcealed(true);
+    }
+    setRestoreReady(true);
+  }, []);
+
+  useEffect(() => {
+    if (!listConcealed) return undefined;
+    const timer = window.setTimeout(() => {
+      restoreDone.current = true;
+      restoreSnap.current = null;
+      setListConcealed(false);
+    }, 4000);
+    return () => window.clearTimeout(timer);
+  }, [listConcealed]);
+
+  function getListScrollEl() {
+    return getActiveListScrollEl(tableScrollRef.current, cardsScrollRef.current);
+  }
+
+  function persistListState(selectedOverride?: string | null) {
+    if (!restoreDone.current) return;
+    saveTransactionListState(getListScrollEl(), {
+      ...persistRef.current,
+      selectedId: selectedOverride ?? persistRef.current.selectedId,
+    });
+  }
+
+  function onListScroll() {
+    persistListState();
+  }
+
+  useLayoutEffect(() => {
+    if (!restoreReady || list.isLoading) return;
+    if (restoreDone.current) return;
+    const snap = restoreSnap.current;
+    if (!snap) {
+      restoreDone.current = true;
+      return;
+    }
+    if (filtered.length === 0) {
+      restoreDone.current = true;
+      restoreSnap.current = null;
+      setListConcealed(false);
+      return;
+    }
+    restoreTransactionListScroll(getListScrollEl(), snap);
+    restoreDone.current = true;
+    restoreSnap.current = null;
+    setListConcealed(false);
+  }, [restoreReady, filtered.length, list.isLoading]);
+
+  useLayoutEffect(() => {
+    if (!restoreReady || restoreSnap.current || !restoreDone.current) return;
+    const root = getListScrollEl();
+    if (root) root.scrollTop = 0;
+  }, [keyword, type, status, extra, restoreReady]);
+
+  useEffect(() => {
+    if (!restoreReady || listConcealed || !restoreDone.current) return;
+    persistListState();
+  }, [keyword, type, status, extra, selectedId, restoreReady, listConcealed]);
+
+  useEffect(() => {
+    function persist() {
+      persistListState();
+    }
+    window.addEventListener('pagehide', persist);
+    return () => {
+      persist();
+      window.removeEventListener('pagehide', persist);
+    };
+  }, []);
+
   function flash(msg: string) {
     setToast(msg);
     window.setTimeout(() => setToast(null), 2800);
   }
 
+  function saveListBeforeLeave(id: string) {
+    restoreDone.current = true;
+    persistListState(id);
+  }
+
   function handleAction(item: TransactionListItem, action: TransactionAction) {
     setMenuId(null);
     setSelectedId(item.id);
+    saveListBeforeLeave(item.id);
     if (action === 'detail') {
-      saveTransactionListState(null, {
-        searchKeyword: keyword,
-        type,
-        status,
-        extra,
-        selectedId: item.id,
-      });
       router.push(`/giao-dich/${item.id}`);
       return;
     }
     if (action === 'edit') {
-      saveTransactionListState(null, {
-        searchKeyword: keyword,
-        type,
-        status,
-        extra,
-        selectedId: item.id,
-      });
       router.push(`/giao-dich/${item.id}/sua`);
       return;
     }
     setConfirmDelete(item);
+  }
+
+  function openDetail(id: string) {
+    setSelectedId(id);
+    saveListBeforeLeave(id);
+    router.push(`/giao-dich/${id}`);
   }
 
   async function confirmRemove() {
@@ -141,7 +225,7 @@ export function TransactionListPage() {
       flash(`Đã xóa giao dịch ${code}.`);
     } catch (err) {
       setConfirmDelete(null);
-      setAlertBox({
+      setAlertState({
         title: 'Không xóa được giao dịch',
         message: (err as Error).message,
       });
@@ -175,48 +259,53 @@ export function TransactionListPage() {
           />
         </section>
 
-        {list.isLoading ? <p className="tx-status">Đang tải danh sách…</p> : null}
+        {!restoreReady || list.isLoading ? <p className="tx-status">Đang tải danh sách…</p> : null}
         {list.error ? (
           <p className="tx-status error">{(list.error as Error).message}</p>
         ) : null}
 
-        {!list.isLoading && !list.error ? (
-          <section className="tx-table-shell" aria-label="Danh sách giao dịch">
-            <TransactionTable
+        <div className={listConcealed ? 'tx-list-restore is-restoring' : 'tx-list-restore'}>
+          {restoreReady && !list.isLoading && !list.error ? (
+            <section className="tx-table-shell" aria-label="Danh sách giao dịch">
+              <TransactionTable
+                items={filtered}
+                total={list.data?.total ?? filtered.length}
+                selectedId={selectedId}
+                menuId={menuId}
+                type={type}
+                status={status}
+                extra={extra}
+                filteredEmpty={filteredEmpty}
+                onType={setType}
+                onStatus={setStatus}
+                onExtra={setExtra}
+                onSelect={setSelectedId}
+                onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+                onCloseMenu={() => setMenuId(null)}
+                onAction={handleAction}
+                scrollRef={tableScrollRef}
+                onScroll={onListScroll}
+              />
+            </section>
+          ) : null}
+
+          {restoreReady && !list.isLoading && !list.error ? (
+            <TransactionCardList
               items={filtered}
               total={list.data?.total ?? filtered.length}
               selectedId={selectedId}
               menuId={menuId}
-              type={type}
-              status={status}
-              extra={extra}
-              onType={setType}
-              onStatus={setStatus}
-              onExtra={setExtra}
+              filteredEmpty={filteredEmpty}
               onSelect={setSelectedId}
+              onOpen={openDetail}
               onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
               onCloseMenu={() => setMenuId(null)}
               onAction={handleAction}
+              scrollRef={cardsScrollRef}
+              onScroll={onListScroll}
             />
-          </section>
-        ) : null}
-
-        {!list.isLoading && !list.error ? (
-          <TransactionCardList
-            items={filtered}
-            total={list.data?.total ?? filtered.length}
-            selectedId={selectedId}
-            menuId={menuId}
-            onSelect={setSelectedId}
-            onOpen={(id) => {
-              setSelectedId(id);
-              router.push(`/giao-dich/${id}`);
-            }}
-            onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
-            onCloseMenu={() => setMenuId(null)}
-            onAction={handleAction}
-          />
-        ) : null}
+          ) : null}
+        </div>
       </div>
 
       <CrmConfirmDialog
@@ -244,7 +333,7 @@ export function TransactionListPage() {
         title={alertBox?.title ?? ''}
         icon={AlertTriangle}
         message={alertBox?.message ?? ''}
-        onClose={() => setAlertBox(null)}
+        onClose={() => setAlertState(null)}
       />
 
       <CrmToast message={toast} />

@@ -171,6 +171,33 @@ export function TransactionDetailPage() {
                   </div>
                 ) : null}
               </dl>
+              {snapshot.images.some((img) => img.url) ? (
+                <ul className="tx-detail-photos">
+                  {snapshot.images
+                    .filter((img) => img.url)
+                    .map((img) => (
+                      <li key={img.id}>
+                        <a
+                          href={img.url ?? undefined}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="tx-detail-photo"
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={img.url ?? ''}
+                            alt=""
+                            style={
+                              img.rotationDeg
+                                ? { transform: `rotate(${img.rotationDeg}deg)` }
+                                : undefined
+                            }
+                          />
+                        </a>
+                      </li>
+                    ))}
+                </ul>
+              ) : null}
             </section>
           ) : null}
         </div>

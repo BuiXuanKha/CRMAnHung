@@ -313,4 +313,14 @@
     text-align: center;
     color: #64748b;
   }
+
+  .tx-empty-cards .tx-empty-copy a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .tx-empty-cards .tx-empty-copy a:hover {
+    text-decoration: underline;
+  }
 }

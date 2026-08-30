@@ -111,6 +111,15 @@
   color: #b91c1c;
 }
 
+.tx-list-restore {
+  display: contents;
+}
+
+.tx-list-restore.is-restoring .tx-table-shell,
+.tx-list-restore.is-restoring .tx-cards-shell {
+  opacity: 0;
+}
+
 .tx-placeholder {
   max-width: 40rem;
   display: grid;

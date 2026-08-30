@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -31,7 +31,8 @@ import {
   type TransactionFormValues,
 } from './components/transaction-form';
 import { emptyParty } from './components/party-fields';
-import { dateInputToIso, isoToDateInput } from './display';
+import { dateInputToIso, isoToDateInput, DEFAULT_EXTRA_FILTERS } from './display';
+import { peekTransactionListState, saveTransactionListState } from './list-state';
 import './transaction-form.css';
 
 function zodMessage(err: unknown): string {
@@ -118,10 +119,13 @@ export function TransactionFormPage({ mode }: Props) {
     enabled: mode === 'edit' && Boolean(id),
   });
 
+  const pickedLodatId = queryLodatId || values.lodatId;
+  const lastPrefillLodatRef = useRef('');
+
   const lodatQ = useQuery({
-    queryKey: ['lodat', queryLodatId],
-    queryFn: () => getLodat(queryLodatId),
-    enabled: mode === 'create' && Boolean(queryLodatId),
+    queryKey: ['lodat', pickedLodatId],
+    queryFn: () => getLodat(pickedLodatId),
+    enabled: mode === 'create' && Boolean(pickedLodatId),
   });
 
   const lodatsQ = useQuery({
@@ -146,10 +150,32 @@ export function TransactionFormPage({ mode }: Props) {
     if (mode !== 'create' || !queryLodatId) return;
     if (openQ.data?.id) {
       router.replace(`/giao-dich/${openQ.data.id}/sua`);
-      return;
     }
-    setValues((cur) => ({ ...cur, lodatId: queryLodatId }));
   }, [mode, queryLodatId, openQ.data, router]);
+
+  useEffect(() => {
+    if (mode !== 'create' || !pickedLodatId) return;
+    if (!lodatQ.data || lodatQ.data.id !== pickedLodatId) return;
+    if (lastPrefillLodatRef.current === pickedLodatId) return;
+    lastPrefillLodatRef.current = pickedLodatId;
+    const owner = lodatQ.data.owner;
+    const name = owner?.fullName.trim() ?? '';
+    const seller = owner && name
+      ? [
+          {
+            key: `owner_${owner.customerId}`,
+            freeTextName: name,
+            customerId: owner.customerId,
+            sortOrder: 0,
+          },
+        ]
+      : [emptyParty(0)];
+    setValues((cur) => ({
+      ...cur,
+      lodatId: pickedLodatId,
+      sellers: seller,
+    }));
+  }, [mode, pickedLodatId, lodatQ.data]);
 
   const lodatOptions = useMemo(
     () => (lodatsQ.data?.items ?? []).map((l) => ({ id: l.id, title: l.title })),
@@ -202,8 +228,17 @@ export function TransactionFormPage({ mode }: Props) {
       return updateTransaction(id!, body);
     },
     onSuccess: async (saved) => {
+      const snap = peekTransactionListState();
+      saveTransactionListState(null, {
+        searchKeyword: snap?.searchKeyword ?? '',
+        type: snap?.type ?? '',
+        status: snap?.status ?? '',
+        extra: snap?.extra ?? DEFAULT_EXTRA_FILTERS,
+        selectedId: saved.id,
+      });
       await qc.invalidateQueries({ queryKey: ['transactions'] });
       await qc.invalidateQueries({ queryKey: ['transaction', saved.id] });
+      await qc.invalidateQueries({ queryKey: ['lodat'] });
       setToast(`Đã lưu ${saved.code}.`);
       router.push(`/giao-dich/${saved.id}`);
     },
@@ -219,6 +254,11 @@ export function TransactionFormPage({ mode }: Props) {
 
   const heading =
     mode === 'create' ? 'Tạo giao dịch' : `Sửa ${detailQ.data?.code ?? 'giao dịch'}`;
+  const missingOwner =
+    mode === 'create' &&
+    Boolean(pickedLodatId) &&
+    lodatQ.isSuccess &&
+    !lodatQ.data.owner;
 
   return (
     <div className="tx-form-page">
@@ -233,6 +273,12 @@ export function TransactionFormPage({ mode }: Props) {
         <p className="tx-form-state">Đang tải…</p>
       ) : null}
       {detailQ.error ? <p className="tx-form-state error">{(detailQ.error as Error).message}</p> : null}
+      {lodatQ.error ? <p className="tx-form-state error">{(lodatQ.error as Error).message}</p> : null}
+      {missingOwner ? (
+        <p className="tx-form-state error">
+          Lô này chưa có chủ. Gắn chủ trên chi tiết lô trước khi tạo giao dịch.
+        </p>
+      ) : null}
 
       {(mode === 'create' && (!queryLodatId || (openQ.isFetched && !openQ.data?.id))) ||
       (mode === 'edit' && detailQ.data) ? (
@@ -261,7 +307,7 @@ export function TransactionFormPage({ mode }: Props) {
             >
               Huỷ
             </button>
-            <button type="submit" className="tx-form-save" disabled={saveMut.isPending}>
+            <button type="submit" className="tx-form-save" disabled={saveMut.isPending || missingOwner}>
               {saveMut.isPending ? 'Đang lưu…' : 'Lưu'}
             </button>
           </footer>

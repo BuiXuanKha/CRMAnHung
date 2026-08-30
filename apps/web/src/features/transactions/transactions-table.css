@@ -140,6 +140,28 @@
   padding: 24px 12px;
 }
 
+.tx-empty-copy {
+  margin: 0;
+}
+
+.tx-empty-copy p {
+  margin: 0;
+}
+
+.tx-empty-copy p + p {
+  margin-top: 6px;
+}
+
+.tx-empty-copy a {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.tx-empty-copy a:hover {
+  text-decoration: underline;
+}
+
 .tx-code {
   font-weight: 600;
   color: #0f172a;
@@ -231,7 +253,7 @@
 
 .tx-action-menu {
   position: fixed;
-  z-index: 40;
+  z-index: 100;
   margin: 0;
   padding: 4px;
   list-style: none;
