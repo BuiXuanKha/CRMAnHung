@@ -384,7 +384,7 @@ export const fromExtensionResultSchema = z.object({
 
 export type FromExtensionResult = z.infer<typeof fromExtensionResultSchema>;
 
-/** Lô gắn khách (rail / chi tiết) — tái dùng shape list lô. */
+/** Lô gắn khách (panel phải / chi tiết) — tái dùng shape list lô. */
 export const customerLodatListResponseSchema = z.object({
   items: z.array(
     z.object({
@@ -396,6 +396,7 @@ export const customerLodatListResponseSchema = z.object({
       direction: z.string().nullable().optional(),
       priceVnd: z.union([z.number(), z.string()]).nullable().optional(),
       coverImageUrl: z.string().nullable().optional(),
+      extraPhotoCount: z.number().int().nonnegative().default(0),
       status: z.string(),
     }),
   ),

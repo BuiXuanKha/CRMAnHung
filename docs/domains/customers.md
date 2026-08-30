@@ -76,7 +76,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Có trên staging.
 21. **Rail Nội dung chat** — tin đã lưu + ảnh. Có trên staging. Menu **Mở chat** / **Mở Messenger** = tab ngoài như CRM cũ (`facebook.com/messages` · `messenger.com`), không mở rail.
-22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. **API** (`GET /customers/:id/lodats`).
+22. **Panel phải danh sách lô** — thẻ: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. **API** (`GET /customers/:id/lodats`).
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; lọc lô = icon trên cột Tên; **không** icon mess trên item. **API `lodatCount`.**
 24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Có trên staging.
 25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn. **Chưa làm.** Không phụ thuộc menu khôi phục tay (mục 16). API ingest không tự `isHidden: false` (§13.14).
@@ -255,10 +255,10 @@ Khi **vào lại list** (Back, «Danh sách khách», menu Quản lý khách hà
 
 Máy tính và điện thoại **cùng quy tắc**. Ô cuộn: bảng (PC) hoặc danh sách thẻ (mobile).
 
-#### 12.1.6 Rail phải
+#### 12.1.6 Panel phải
 
-Một panel: **Nội dung chat** (tin đã lưu) · **Lịch sử chăm sóc** · **Danh sách lô đất**.  
-**Không** nhớ panel vừa mở (không `localStorage`) — cùng [`ARCHITECTURE.md`](../ARCHITECTURE.md) và skill `crm-list-state`.
+Cột phụ bên phải trang danh sách (máy tính). Một panel: **Nội dung chat** (tin đã lưu) · **Lịch sử chăm sóc** · **Danh sách lô đất**.  
+**Không** nhớ panel vừa mở (không `localStorage`) — cùng [`ARCHITECTURE.md`](../ARCHITECTURE.md) và skill `crm-list-state`. Mobile: ẩn panel này.
 
 ##### Nội dung chat
 
@@ -274,7 +274,12 @@ Thứ tự `SortOrder ASC, id ASC` (CRM cũ). Bong bóng: Khách / Tôi / Page /
 
 ##### Danh sách lô đất
 
-`GET /customers/:id/lodats` — map active của khách (cùng quyền xem khách). Thẻ: tiêu đề · DT · MT · hướng · giá `crm-money`; bấm → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
+`GET /customers/:id/lodats` — map active của khách (cùng quyền xem khách). Không có → «Chưa gắn lô đất.»
+
+Thẻ (ảnh trái, chữ phải) — **cùng trang chi tiết** §12.3.3 mục 6:
+
+1. **Ảnh** — thumbnail vuông. Overlay `+N` nếu còn ảnh ngoài ảnh bìa (`extraPhotoCount`). Thiếu ảnh = ô xám, không bấm. **Bấm ảnh** (khi có) → gallery lô (cùng modal `/lo-dat`: prev/next, xoay lưu nếu ảnh của lô).
+2. **Chữ** — tiêu đề đậm; địa chỉ (ẩn nếu trống); DT · MT · hướng (chỉ field có); giá `crm-money`. **Bấm chữ** → `/lo-dat/[id]`.
 
 ---
 
@@ -402,7 +407,7 @@ Cùng khối 12.3.3. SĐT bấm = `tel:`. Padding gọn.
 3. **SĐT** — mọi số trên hồ sơ; trống `—`. Điện thoại: từng số là `tel:`
 4. **Tài chính** — khoảng ngân sách; trống `—`
 5. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú
-6. **Danh sách lô đất** — API. Thẻ: tiêu đề, ảnh, DT · giá. Bấm → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
+6. **Danh sách lô đất** — API. Cùng thẻ §12.1.6: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
 7. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Không có → «Chưa có lịch sử chăm sóc.»
 
 Không form chăm sóc trên trang này (form = **§12.4**).
@@ -555,7 +560,7 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 
 `GET /customers/:id` (đã có): hero, SĐT, tài chính, thông tin hiện tại, lịch sử chăm sóc. Mobile bấm thẻ → `/khach-hang/[id]`.
 
-**Lô đất = API** (`GET /customers/:id/lodats`) — map active đã copy. Bấm thẻ → `/lo-dat/[id]`.
+**Lô đất = API** (`GET /customers/:id/lodats`) — map active đã copy. Ảnh trái (+N) / chữ phải; bấm ảnh = gallery; bấm chữ → `/lo-dat/[id]`.
 
 Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /customers?limit=50&offset=`).
 
