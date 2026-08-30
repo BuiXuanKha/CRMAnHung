@@ -257,7 +257,7 @@ Một dòng, cắt `…`. Thiếu = `—`.
 
 | Mục | Việc |
 |-----|------|
-| Xem chi tiết | `/giao-dich/[id]` |
+| Xem chi tiết | `/giao-dich/[id]` — menu portal `document.body` (cùng lô đất), không để overflow bảng cắt |
 | Sửa | `/giao-dich/[id]/sua` |
 | Xóa | Đỏ → confirm → xóa cứng. GD đang mở → map về Mở bán |
 
