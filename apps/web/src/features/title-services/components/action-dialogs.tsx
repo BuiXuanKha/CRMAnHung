@@ -197,14 +197,21 @@ export function ActionDialogs({
             </label>
             <label>
               File
-              <input
-                type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
-                onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-                required
-              />
+              <span className="crm-file-row">
+                <input
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp,image/gif,application/pdf"
+                  aria-label="Chọn tệp tài liệu"
+                  onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                  required
+                />
+                <span className="crm-file-btn">Chọn tệp</span>
+                <span className="crm-file-name">{file?.name || 'Chưa chọn tệp'}</span>
+              </span>
             </label>
-            <p className="crm-form-hint">Ảnh hoặc PDF, tối đa 12 MB. Giấy tờ mật — không đưa lên CDN.</p>
+            <p className="crm-form-hint">
+              Ảnh hoặc PDF, tối đa 12 MB. Giấy tờ mật — không đưa lên CDN.
+            </p>
           </>
         ) : null}
 

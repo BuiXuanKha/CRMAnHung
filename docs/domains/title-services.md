@@ -183,7 +183,7 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 | Thêm tiến độ | Dialog mock |
 | Nhập thu | Dialog mock |
 | Nhập chi phí | Dialog mock |
-| Thêm tài liệu | Dialog mock (tên file, chưa R2) |
+| Thêm tài liệu | Dialog: loại + chọn file (R2 private). Mobile không tràn mép |
 | Sửa thông tin | Dialog mock (trạng thái, giá, nhu cầu) |
 | Xóa hồ sơ | Đỏ → confirm → gỡ list (mock) |
 

@@ -534,7 +534,7 @@ Component: `shared/ui/column-filter.tsx`.
 **Khung chung** (`CrmDialog` / `shared/ui/dialog`):
 
 - Render bằng **portal tới `document.body`** (tránh bị `overflow: hidden` của shell/list cắt mất).
-- Backdrop `#0f172a` / 50%; **z-index 200**; panel trắng, bo **12px**, shadow nhẹ, rộng max **460px**.
+- Backdrop `#0f172a` / 50%; **z-index 200**; panel trắng, bo **12px**, shadow nhẹ, rộng max **460px**. Mobile: `min-width: 0` + `max-width: 100%` — không để ô `file` native đẩy panel tràn mép.
 - Header: nền `#f1f5f9`, chữ **600**, có thể kèm icon Lucide 18px.
 - Body: padding `16–18px`; chữ `#334155`.
 - Footer actions: căn phải; secondary viền `#cbd5e1`; primary `#2563eb`; danger `#b91c1c`.
@@ -662,6 +662,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | Menu trong Dashboard: **Lô đất** (trước: Lô đất public mở bán) |
 | 2026-08-26 | `/dashboard/lo-dat` panel phải: tiêu đề **Preview Post** |
 | 2026-08-26 | `/dashboard/lo-dat`: lọc cột §4.5.5 (ảnh, địa chỉ, phân loại, DT/hướng, giá, NV, Web); mobile Bộ lọc |
+| 2026-08-30 | Dialog CRM mobile: panel không tràn viewport; ô file dùng hàng «Chọn tệp» + tên (không native width) |
 
 ---
 

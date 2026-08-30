@@ -9,10 +9,15 @@
   display: grid;
   place-items: center;
   padding: 16px;
+  box-sizing: border-box;
+  overflow: auto;
 }
 
 .crm-dialog {
   width: min(460px, 100%);
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   background: #fff;
   border-radius: 12px;
   overflow: hidden;
@@ -80,6 +85,8 @@
 
 .crm-dialog-body {
   padding: 16px 18px 18px;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .crm-dialog-message {
@@ -91,6 +98,7 @@
 
 .crm-dialog-actions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: flex-end;
   gap: 8px;
 }
@@ -138,11 +146,13 @@
 .crm-dialog-body form {
   display: grid;
   gap: 12px;
+  min-width: 0;
 }
 
 .crm-dialog-body label {
   display: grid;
   gap: 4px;
+  min-width: 0;
   font-size: 0.82rem;
   font-weight: 600;
   color: #334155;
@@ -151,6 +161,10 @@
 .crm-dialog-body input,
 .crm-dialog-body textarea,
 .crm-dialog-body select {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 8px 10px;
@@ -179,6 +193,54 @@
   font-weight: 400;
   color: #475569;
   line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.crm-file-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  background: #fff;
+}
+
+.crm-file-row input[type='file'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  cursor: pointer;
+  border: 0;
+}
+
+.crm-file-btn {
+  flex: 0 0 auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 6px 10px;
+  background: #f8fafc;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.crm-file-name {
+  flex: 1 1 0;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #64748b;
 }
 
 .crm-form-hint-box {
@@ -320,4 +382,10 @@
   font-size: 0.9rem;
   max-width: min(90vw, 420px);
   text-align: center;
+}
+
+@media (max-width: 480px) {
+  .crm-dialog-backdrop {
+    padding: 12px;
+  }
 }
