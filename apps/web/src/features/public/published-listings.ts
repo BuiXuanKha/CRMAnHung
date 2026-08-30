@@ -9,7 +9,11 @@ import {
   listPublishedCatalog,
 } from '@/features/public-content/api';
 import { isMockPublicWeb } from '@/shared/api/mode';
-import { pickRelatedListingSection, type RelatedListingSection } from './related-listings';
+import {
+  pickRelatedListingSection,
+  pickRelatedListingSections,
+  type RelatedListingSection,
+} from './related-listings';
 import { PUBLIC_PRODUCTS, type PublicProduct } from './mock-data';
 
 export type { RelatedListingSection };
@@ -26,6 +30,7 @@ export type PublicListingView = PublicGuestListing & {
   communeLabel?: string | null;
   placeSlug?: string | null;
   placeLabel?: string | null;
+  addressKind?: PublicCatalogListing['addressKind'];
 };
 
 function catalogToView(row: PublicCatalogListing): PublicListingView {
@@ -50,6 +55,7 @@ function catalogToView(row: PublicCatalogListing): PublicListingView {
     ...(row.communeLabel != null ? { communeLabel: row.communeLabel } : {}),
     ...(row.placeSlug != null ? { placeSlug: row.placeSlug } : {}),
     ...(row.placeLabel != null ? { placeLabel: row.placeLabel } : {}),
+    ...(row.addressKind != null ? { addressKind: row.addressKind } : {}),
   };
 }
 
@@ -111,4 +117,11 @@ export async function getRelatedListingSection(
 ): Promise<RelatedListingSection | null> {
   const catalog = await listPublicCatalog();
   return pickRelatedListingSection(listing, catalog);
+}
+
+export async function getRelatedListingSections(
+  listing: PublicListingView,
+): Promise<RelatedListingSection[]> {
+  const catalog = await listPublicCatalog();
+  return pickRelatedListingSections(listing, catalog);
 }

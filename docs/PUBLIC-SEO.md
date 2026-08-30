@@ -125,7 +125,7 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
-| **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = **tên lô + địa chỉ** (không dấu, unique, ổn định sau khi tạo) | Query tracking làm canonical; đổi slug khi chỉ sửa copy |
+| **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = title + phần địa chỉ **chưa** có trong title (không dấu, unique, **không cắt 80 ký tự**). Ổn định sau khi tạo. Tin cũ: commit `[apply-lot-slugs]` (301 URL cũ) | Query tracking làm canonical; đổi slug khi chỉ sửa copy; cắt giữa từ (`hai-duon`) |
 | **Title** | `seoTitle` (GPT) + template `\| An Hưng Land`. Không nhồi brand trong field. Cùng địa danh/diện tích với H1, không bắt buộc trùng chữ | Nhồi «đất nền Đồng Nai giá rẻ…»; title chỉ mã lô không có xã/huyện; `title` HTML khác hẳn H1 (thiếu địa danh) |
 | **Meta description** | `metaDescription` nếu có, không thì **excerpt** public, cắt ~160 ký tự | Copy giống nhau mọi lô; mô tả CRM / hoa hồng |
 | **Canonical** | Đúng URL tuyệt đối ở trên | Hai URL một lô |
@@ -133,8 +133,8 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 | **Copy** | Excerpt + mô tả **riêng** từng lô (SSR) | Lặp đoạn khuôn + keyword |
 | **OG / Twitter** | title + description như trên; `og:image` = ảnh bìa; thiếu bìa → `/og-default.png`; `summary_large_image` | Ảnh PII / ảnh nội bộ CRM |
 | **Ảnh / Google Images** | `alt` = `listingHeadline` (title + phần địa chỉ **chưa** có trong tên); gallery SSR đủ URL; sitemap `image:loc`; JSON-LD `ImageObject`. Xem §10 | `alt` rỗng / nhồi keyword; chặn Googlebot tải CDN; sitemap `/og-default.png` |
-| **JSON-LD** | `RealEstateListing` (`name` = H1) + `Offer` (`itemOffered` Place/House, `floorSize` khi parse được) + `BreadcrumbList` (kèm hub xã/cấp 4). `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM; `name` lặp địa chỉ |
-| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → hub `/xa/…` → lô; block sản phẩm khác | Orphan URL |
+| **JSON-LD** | `RealEstateListing` (`name` = H1) + `Offer` (`itemOffered` Place/House, `floorSize` khi parse được) + `BreadcrumbList` (hub xã). `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM; `name` lặp địa chỉ |
+| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → **xã** (`/xa/…`) → lô; block sản phẩm khác | Orphan URL; crumb nhồi cả chuỗi thôn + huyện + tỉnh |
 | **Sitemap** | Chỉ lô `isPublished` (+ hub xã/cấp4 có lô). Mỗi URL lô kèm `image:image` (bìa + gallery CDN). Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán; ảnh brand fallback |
 | **robots** | Cho phép path catalog mới; chặn `/login` + CRM | `Disallow` path catalog |
 

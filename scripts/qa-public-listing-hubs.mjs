@@ -12,6 +12,8 @@ import {
   listingCommuneHubPath,
   listingPlaceHubPath,
   toPublicSlug,
+  toListingPublicSlug,
+  reservePublicLotSlug,
   seoImageFileName,
   seoLotImageObjectKey,
   seoImageExt,
@@ -222,6 +224,41 @@ else bad(`toPublicSlug xã: ${xaSlug}`);
 if (kdtSlug.includes('kdt') && kdtSlug.includes('nam-sach')) ok(`toPublicSlug KĐT → ${kdtSlug}`);
 else bad(`toPublicSlug KĐT: ${kdtSlug}`);
 
+const lotSlug = toListingPublicSlug(
+  'Lô đất 105m² tại trục chính Nham Cáp, Đồng Lạc',
+  'Nham Cáp, Đồng Lạc, Nam Sách, Hải Dương',
+);
+if (lotSlug === 'lo-dat-105m-tai-truc-chinh-nham-cap-dong-lac-nam-sach-hai-duong') {
+  ok('listing slug dedup + no 80-char cut');
+} else {
+  bad(`listing slug: ${lotSlug}`);
+}
+if (!lotSlug.includes('nham-cap-dong-lac-nham-cap')) ok('listing slug không lặp địa chỉ');
+else bad('listing slug vẫn lặp địa chỉ');
+if (lotSlug.endsWith('hai-duong')) ok('listing slug đủ hai-duong');
+else bad('listing slug cắt hai-duong');
+if (reservePublicLotSlug('xa') === 'lo-xa') ok('reserve slug xa → lo-xa');
+else bad(`reserve xa: ${reservePublicLotSlug('xa')}`);
+
+const longTitle = `${'Lô đất mặt tiền đường nhựa '.repeat(8)}tại Hồng Phong`;
+const longSlug = toListingPublicSlug(longTitle, 'Hồng Phong, Nam Sách, Hải Dương');
+if (longSlug.length > 80 && longSlug.includes('nam-sach-hai-duong')) {
+  ok(`listing slug không trần 80 (${longSlug.length} chars)`);
+} else {
+  bad(`listing slug length ${longSlug.length}: ${longSlug.slice(-40)}`);
+}
+
+const deploySrc = read('scripts/remote_deploy.sh');
+if (
+  deploySrc.includes('regenerate-public-lot-slugs') &&
+  deploySrc.includes('APPLY_LOT_SLUGS') &&
+  deploySrc.includes('dry-run')
+) {
+  ok('deploy không tự APPLY slug (cần APPLY_LOT_SLUGS=1)');
+} else {
+  bad('remote_deploy.sh vẫn tự regenerate slug mỗi lần deploy');
+}
+
 console.log('\nSEO image filename at upload');
 const jpegName = seoImageFileName({
   title: 'Lô nhà cấp 4 mới 113,8m²',
@@ -300,6 +337,50 @@ if (listingSeoSrc.includes('name: h1') && listingSeoSrc.includes('itemOffered'))
   ok('JSON-LD name = H1 + itemOffered');
 } else {
   bad('listingJsonLd chưa khớp H1 / itemOffered');
+}
+if (
+  listingSeoSrc.includes('listingCommuneHubCrumb') &&
+  listingSeoSrc.includes('listingCommuneHubPath')
+) {
+  ok('JSON-LD breadcrumb lô có hub xã');
+} else {
+  bad('listingBreadcrumbJsonLd chưa nối hub xã');
+}
+
+const lotDetailSrc = read('apps/web/src/features/public/product-detail.tsx');
+if (
+  lotDetailSrc.includes('listingCommuneHubCrumb') &&
+  !lotDetailSrc.includes('pd-breadcrumb-loc')
+) {
+  ok('breadcrumb chi tiết lô = tên xã, không nhồi location');
+} else {
+  bad('product-detail breadcrumb còn location đầy đủ');
+}
+if (
+  lotDetailSrc.includes('relatedSections') &&
+  lotDetailSrc.includes('RelatedListingBlock')
+) {
+  ok('chi tiết lô render nhiều block related');
+} else {
+  bad('product-detail chưa nhận relatedSections');
+}
+
+const relatedSrc = read('apps/web/src/features/public/related-listings.ts');
+if (
+  relatedSrc.includes("Đất dự án khu vực Nam Sách") &&
+  relatedSrc.includes('PROJECT_RELATED_HUB_LIMIT = 3') &&
+  relatedSrc.includes('AddressKind.PROJECT')
+) {
+  ok('related: 3 khu PROJECT nhiều lô nhất');
+} else {
+  bad('related-listings chưa có block đất dự án Nam Sách');
+}
+
+const catalogSchemaSrc = read('packages/shared/src/public-content.ts');
+if (catalogSchemaSrc.includes('addressKind')) {
+  ok('catalog guest có addressKind');
+} else {
+  bad('publicListingCardSchema thiếu addressKind');
 }
 
 const publishSeoSrc = read('apps/api/src/modules/public-content/public-content.service.ts');

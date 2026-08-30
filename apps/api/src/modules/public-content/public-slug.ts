@@ -2,6 +2,7 @@
 export {
   toPublicSlug,
   toListingPublicSlug,
+  reservePublicLotSlug,
   seoImageExt,
   seoImageFileName,
   seoLotImageObjectKey,

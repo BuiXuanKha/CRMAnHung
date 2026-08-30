@@ -7,7 +7,7 @@ import {
 import { LotDetailMetaPixel } from './lot-detail-meta-pixel';
 import type { PublicListingView, RelatedListingSection } from './published-listings';
 import { getProductBySlug } from './mock-data';
-import { listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
+import { listingCommuneHubCrumb, listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import { listingShareText } from './share';
 import {
@@ -15,7 +15,6 @@ import {
   listingCanonicalUrl,
   listingCommuneHubPath,
   listingHref,
-  listingPlaceHubPath,
 } from './site';
 import './public-home.css';
 import './product-detail.css';
@@ -32,18 +31,67 @@ function zaloLink(telDigits: string): string {
   return `https://zalo.me/${telDigits}`;
 }
 
+function RelatedListingBlock({
+  section,
+  headingId,
+}: {
+  section: RelatedListingSection;
+  headingId: string;
+}) {
+  return (
+    <section className="pd-related" aria-labelledby={headingId}>
+      <div className="ph-section-head">
+        <h2 id={headingId}>{section.title}</h2>
+        <Link href={section.hubHref || PUBLIC_LISTING_PATH} className="ph-more">
+          Xem tất cả →
+        </Link>
+      </div>
+      <div className="ph-product-grid pd-related-grid">
+        {section.items.map((p) => (
+          <article key={p.slug} className="ph-product">
+            <Link href={listingHref(p.slug)} className="ph-product-media">
+              {p.coverImageUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={p.coverImageUrl} alt={listingCoverAlt(p)} loading="lazy" />
+              ) : (
+                <span className="ph-product-media-empty">Chưa có ảnh</span>
+              )}
+            </Link>
+            <div className="ph-product-body">
+              <Link href={listingHref(p.slug)}>
+                <h3>{p.title}</h3>
+              </Link>
+              <p className="ph-product-meta">
+                <span>{p.priceLabel ?? 'Liên hệ'}</span>
+                {p.areaLabel ? (
+                  <>
+                    <span aria-hidden>·</span>
+                    <span>{p.areaLabel}</span>
+                  </>
+                ) : null}
+              </p>
+              {p.location ? <p className="ph-product-loc">{p.location}</p> : null}
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export function ProductDetailView({
   listing,
-  relatedSection,
+  relatedSections,
 }: {
   listing: PublicListingView;
-  relatedSection: RelatedListingSection | null;
+  relatedSections: RelatedListingSection[];
 }) {
   const product = getProductBySlug(listing.slug);
   const images = listingImages(listing);
   const price = listing.priceLabel ?? 'Liên hệ';
   const area = listing.areaLabel;
   const h1 = listingPageH1(listing);
+  const communeCrumb = listingCommuneHubCrumb(listing);
   const bodyHtml = sanitizeListingHtml(listing.bodyHtml ?? '');
   const fallbackBody = product?.description?.trim() || '';
   const showHtmlBody = Boolean(bodyHtml);
@@ -90,28 +138,13 @@ export function ProductDetailView({
           <Link href="/">Trang chủ</Link>
           <span aria-hidden>/</span>
           <Link href={PUBLIC_LISTING_PATH}>Nhà đất đang bán</Link>
-          {listing.communeSlug && listing.communeLabel ? (
-            <>
-              <span aria-hidden>/</span>
-              <Link href={listingCommuneHubPath(listing.communeSlug)}>
-                {listing.communeLabel}
-              </Link>
-            </>
-          ) : listing.location ? (
-            <>
-              <span aria-hidden>/</span>
-              <span className="pd-breadcrumb-loc">{listing.location}</span>
-            </>
-          ) : null}
-          {listing.communeSlug && listing.placeSlug && listing.placeLabel ? (
-            <>
-              <span aria-hidden>/</span>
-              <Link href={listingPlaceHubPath(listing.communeSlug, listing.placeSlug)}>
-                {listing.placeLabel}
-              </Link>
-            </>
-          ) : null}
           <span aria-hidden>/</span>
+          {communeCrumb ? (
+            <>
+              <Link href={communeCrumb.href}>{communeCrumb.name}</Link>
+              <span aria-hidden>/</span>
+            </>
+          ) : null}
           <span>{h1}</span>
         </nav>
 
@@ -244,45 +277,15 @@ export function ProductDetailView({
           </aside>
         </div>
 
-        {relatedSection && relatedSection.items.length > 0 ? (
-          <section className="pd-related" aria-labelledby="pd-related-title">
-            <div className="ph-section-head">
-              <h2 id="pd-related-title">{relatedSection.title}</h2>
-              <Link href={relatedSection.hubHref || PUBLIC_LISTING_PATH} className="ph-more">
-                Xem tất cả →
-              </Link>
-            </div>
-            <div className="ph-product-grid pd-related-grid">
-              {relatedSection.items.map((p) => (
-                <article key={p.slug} className="ph-product">
-                  <Link href={listingHref(p.slug)} className="ph-product-media">
-                    {p.coverImageUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={p.coverImageUrl} alt={listingCoverAlt(p)} loading="lazy" />
-                    ) : (
-                      <span className="ph-product-media-empty">Chưa có ảnh</span>
-                    )}
-                  </Link>
-                  <div className="ph-product-body">
-                    <Link href={listingHref(p.slug)}>
-                      <h3>{p.title}</h3>
-                    </Link>
-                    <p className="ph-product-meta">
-                      <span>{p.priceLabel ?? 'Liên hệ'}</span>
-                      {p.areaLabel ? (
-                        <>
-                          <span aria-hidden>·</span>
-                          <span>{p.areaLabel}</span>
-                        </>
-                      ) : null}
-                    </p>
-                    {p.location ? <p className="ph-product-loc">{p.location}</p> : null}
-                  </div>
-                </article>
-              ))}
-            </div>
-          </section>
-        ) : null}
+        {relatedSections
+          .filter((section) => section.items.length > 0)
+          .map((section, index) => (
+            <RelatedListingBlock
+              key={section.title}
+              section={section}
+              headingId={index === 0 ? 'pd-related-title' : `pd-related-title-${index}`}
+            />
+          ))}
       </main>
 
       <div className="pd-mobile-bar">

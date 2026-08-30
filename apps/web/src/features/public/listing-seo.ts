@@ -22,8 +22,7 @@ import {
   PUBLIC_OG_DEFAULT,
   PUBLIC_SITE_ORIGIN,
   listingCanonicalUrl,
-  listingCommuneHubUrl,
-  listingPlaceHubUrl,
+  listingCommuneHubPath,
   toAbsoluteUrl,
 } from './site';
 
@@ -272,7 +271,18 @@ export function listingJsonLd(listing: ListingSeoInput) {
   };
 }
 
+export function listingCommuneHubCrumb(listing: {
+  communeSlug?: string | null;
+  communeLabel?: string | null;
+}): { name: string; href: string } | null {
+  const slug = listing.communeSlug?.trim();
+  if (!slug) return null;
+  const name = listing.communeLabel?.trim() || slug;
+  return { name, href: listingCommuneHubPath(slug) };
+}
+
 export function listingBreadcrumbJsonLd(listing: ListingSeoInput) {
+  const commune = listingCommuneHubCrumb(listing);
   const items: Array<{ '@type': 'ListItem'; position: number; name: string; item: string }> = [
     { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: PUBLIC_SITE_ORIGIN },
     {
@@ -282,24 +292,12 @@ export function listingBreadcrumbJsonLd(listing: ListingSeoInput) {
       item: `${PUBLIC_SITE_ORIGIN}${SAN_PHAM_LIST_PATH}`,
     },
   ];
-  const communeSlug = listing.communeSlug?.trim();
-  const communeLabel = listing.communeLabel?.trim();
-  if (communeSlug && communeLabel) {
+  if (commune) {
     items.push({
       '@type': 'ListItem',
-      position: items.length + 1,
-      name: communeLabel,
-      item: listingCommuneHubUrl(communeSlug),
-    });
-  }
-  const placeSlug = listing.placeSlug?.trim();
-  const placeLabel = listing.placeLabel?.trim();
-  if (communeSlug && placeSlug && placeLabel) {
-    items.push({
-      '@type': 'ListItem',
-      position: items.length + 1,
-      name: placeLabel,
-      item: listingPlaceHubUrl(communeSlug, placeSlug),
+      position: 3,
+      name: commune.name,
+      item: `${PUBLIC_SITE_ORIGIN}${commune.href}`,
     });
   }
   items.push({

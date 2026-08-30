@@ -563,7 +563,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 | `/san-pham/…` → `/mua-ban-nha-dat/…` permanent | OK (308) |
 | Slug giả / đã gỡ → 404 + `noindex` | OK |
 | View Source có H1 + excerpt SSR | OK — meta/OG dùng excerpt; **on-page**: có `bodyHtml` thì không hiện lead `excerpt` (tránh trùng copy) |
-| Layout chi tiết lô | Gallery · breadcrumb · H1 · địa chỉ · **một** strip Giá/DT/Hướng + Zalo/hotline hiện đủ số; không lặp Loại/Hướng ở lưới phụ |
+| Layout chi tiết lô | Gallery · breadcrumb (Trang chủ → Nhà đất đang bán → **tên xã** → H1) · H1 · địa chỉ đủ dưới H1 · **một** strip Giá/DT/Hướng + Zalo/hotline hiện đủ số · related cùng xã + **Đất dự án khu vực Nam Sách** (3 khu PROJECT nhiều lô nhất) |
 | Chia sẻ | Copy **mô tả HTML→plain giữ xuống dòng** + URL (không nhồi H1/giá trùng). Mở Facebook để dán; không dùng sharer/`navigator.share` |
 | robots cho phép list; chặn CRM `/login`… | OK (kèm Cloudflare managed) |
 
@@ -617,8 +617,8 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 | Gỡ web | Chỉ admin **Gỡ** / tắt Đăng web trên dashboard. **Không** auto khi Tạm dừng hay tạo/sửa GD |
 | Khách thấy lô | `isPublished` ∩ map `DANG_BAN` (rule guest API sẵn có — không đụng công tắc Đăng web) |
 | Một listing / ProjectLot | Khi admin **Đăng web**, `unpublishSiblingProjectLotListings` gỡ listing published khác cùng `projectLotId` |
-| Slug ổn định | Slug = `toListingPublicSlug(title, location)` lúc **tạo** listing; `PATCH draft` / Đăng lại **không** đổi slug |
-| Đổi URL lô cũ | Migration + `scripts/regenerate-public-lot-slugs.ts` (chạy trong `remote_deploy.sh`): ghi `PublicLotSlugRedirect`; guest `/mua-ban-nha-dat/{slug-cũ}` → **301** sang slug mới (`GET /public/slug-redirects/:fromSlug`) |
+| Slug ổn định | Slug = `toListingPublicSlug(title, leftover location)` lúc **tạo** listing (không trần 80; cấm `xa`). `PATCH draft` / Đăng lại **không** đổi slug trừ khi admin sửa ô slug |
+| Đổi URL lô cũ | `pnpm lots:regenerate-public-slugs` dry-run; `APPLY=1` mới ghi `PublicLotSlugRedirect` + revalidate. Deploy **không** tự APPLY. VPS: commit `[apply-lot-slugs]` (hoặc `APPLY_LOT_SLUGS=1` trong `remote_deploy.sh`). Guest slug cũ → **301**. **Không** đổi tên file ảnh CDN |
 | Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** |
 
 ### 16.9 Luồng revalidate (chuẩn)
@@ -672,7 +672,10 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 1. Hub chỉ **index** khi có ≥ 1 lô Đang hiện (`isPublished` ∩ Mở bán). Hub 0 lô → **404 + noindex**, bỏ khỏi sitemap.
 2. Gom lô: cấp 3 = `wardId`; cấp 4 = `address.detail` **trong** ward đó. Không parse chuỗi `location` làm nguồn sự thật.
 3. Slug ổn định; trùng tên xã khác huyện → suffix huyện (vd. `nam-trung-nam-sach`). Slug cấp 4 unique trong phạm vi xã.
-4. Related trên chi tiết lô: «cùng xã» → hub xã; «tại KĐT/thôn» → hub `xa/.../slug-c4`.
+4. Related trên chi tiết lô (hai block, dưới gallery):
+   1. «Lô đất cùng xã {xã}» → hub `/xa/…` (tối đa 9 thẻ; trừ lô đang xem).
+   2. «Đất dự án khu vực Nam Sách» — lô `Address.kind = PROJECT` thuộc **3 khu cấp 4** có nhiều lô Đang hiện nhất (hòa: ngày đăng mới hơn). Tối đa 9 thẻ; trừ lô đang xem và lô đã hiện ở block cùng xã. «Xem tất cả» → catalog huyện. Không đoán thôn thường là dự án.
+   Breadcrumb chi tiết lô: Trang chủ → Nhà đất đang bán → **{tên xã}** (link hub `/xa/…`) → H1. Không nhồi `location` đầy đủ vào crumb (thôn/huyện/tỉnh vẫn dưới H1).
 5. Path cũ `/mua-ban-nha-dat`, `/san-pham` **không** redirect (site mới — chỉ dùng path mới).
 
 ### 17.3 Checklist triển khai (làm lần lượt)

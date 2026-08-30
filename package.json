@@ -30,6 +30,7 @@
     "care:migrate-legacy": "pnpm --filter @crmanhung/api care:migrate-legacy",
     "chat:migrate-legacy": "pnpm --filter @crmanhung/api chat:migrate-legacy",
     "lodats:migrate-legacy": "pnpm --filter @crmanhung/api lodats:migrate-legacy",
+    "lots:regenerate-public-slugs": "pnpm --filter @crmanhung/api lots:regenerate-public-slugs",
     "images:seo-copy": "pnpm --filter @crmanhung/api images:seo-copy",
     "images:seo-copy-addresses": "pnpm --filter @crmanhung/api images:seo-copy-addresses",
     "images:webp-public-media": "pnpm --filter @crmanhung/api images:webp-public-media",

@@ -27,13 +27,6 @@
   white-space: nowrap;
 }
 
-.pd-breadcrumb-loc {
-  max-width: min(28ch, 100%);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .pd-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
@@ -546,6 +539,10 @@
   border-top: 1px solid var(--ph-line);
 }
 
+.pd-related + .pd-related {
+  margin-top: 40px;
+}
+
 .pd-related-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -586,8 +583,7 @@
     margin-bottom: 14px;
   }
 
-  .pd-breadcrumb > span:last-child,
-  .pd-breadcrumb-loc {
+  .pd-breadcrumb > span:last-child {
     flex: 1 1 100%;
     max-width: 100%;
     white-space: normal;
