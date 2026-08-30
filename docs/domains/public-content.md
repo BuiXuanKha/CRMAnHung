@@ -138,6 +138,7 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — **Postgres** |
 | GET | `/admin/public-web/posts` | JWT ADMIN | List bài (nháp + đã xuất bản) — **Postgres** |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục + body) — **Postgres** |
+| POST | `/admin/public-web/posts/gpt-content` | JWT ADMIN | Nest gọi OpenAI — bài **dự án** từ tên dự án → JSON SEO |
 | GET | `/public/listings` | Không | Lô đã đăng ∩ Mở bán → `publicCatalogListingSchema` |
 | GET | `/public/listings/:slug` | Không | Chi tiết `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
 | GET | `/public/posts` | Không | Bài `PUBLISHED` (`?category=` tuỳ chọn) → `publicGuestPostListResponseSchema` |
@@ -443,17 +444,18 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 ```
 ┌ H1 Bài viết                                                  ┐
 │ Dòng phụ: Dự án, kiến thức, liên hệ, chính sách bảo mật…     │
-├ Ô tìm                                      [ Soạn bài ]      │
+├ Ô tìm              [ Soạn bài bằng GPT AI ] [ Soạn bài ]     │
 ├ Bảng §4.5: Chuyên mục · Tiêu đề · Trạng thái                 │
 └ Footer đếm                                                   ┘
 ```
 
 1. Ô tìm — `CrmSearchField`, placeholder `Tìm tiêu đề, chuyên mục...`. Gõ là lọc. Hangtag Clear sau caret.
-2. **Soạn bài** — dialog chuyên nghiệp (§14.3): tiêu đề + chuyên mục; Lưu nháp / Xuất bản. Nội dung dài = slice sau.
-3. Hangtag chuyên mục `blue`: Dự án · Kiến thức · Liên hệ · Chính sách bảo mật · Tin tức · Kinh nghiệm
-4. Hangtag trạng thái: Đã xuất bản `green` · Nháp `gray`
-5. Bấm hàng → `CrmConfirm` Xuất bản / Về nháp (12.1.4). Toast khi xong.
-6. Lọc cột §4.5.5 (icon `ListFilter` sát chữ tên cột). Không cột Thao tác.
+2. **Soạn bài bằng GPT AI** — modal §14.4: nhập tên dự án → JSON SEO chuyên mục **Dự án**.
+3. **Soạn bài** — dialog chuyên nghiệp (§14.3): tiêu đề + chuyên mục; Lưu nháp / Xuất bản. GPT «Dùng cho bài soạn» mở dialog này (đã điền).
+4. Hangtag chuyên mục `blue`: Dự án · Kiến thức · Liên hệ · Chính sách bảo mật · Tin tức · Kinh nghiệm
+5. Hangtag trạng thái: Đã xuất bản `green` · Nháp `gray`
+6. Bấm hàng → `CrmConfirm` Xuất bản / Về nháp (12.1.4). Toast khi xong.
+7. Lọc cột §4.5.5 (icon `ListFilter` sát chữ tên cột). Không cột Thao tác.
 
 | Cột | Menu |
 |-----|------|
@@ -495,6 +497,28 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 6. Lỗi validate / API: `crm-form-error`.
 
 Slice API Postgres + upload R2 thật = sau khi mock UI ổn.
+
+### 14.4 Modal Soạn bài bằng GPT AI (dự án)
+
+Cùng máy tính / mobile. Icon Lucide `Sparkles`. `CrmDialog` rộng (`crm-dialog--wide crm-dialog--gpt`). Không `window.confirm`.
+
+**Trường**
+
+| Trường | Bắt buộc | Ghi chú |
+|--------|----------|---------|
+| Tên dự án | Có | Max 160. VD: `Khu đô thị Tây Nam Sách` |
+| Ghi chú thêm | Không | Investor / quy mô / điểm admin biết — GPT được dùng |
+| Prompt hệ thống | Chỉ đọc | `POST_GPT_SYSTEM_PROMPT` |
+| JSON gửi GPT | Sửa được | Tự cập nhật từ tên dự án |
+| Phản hồi GPT | Chỉ đọc | JSON SEO đầy đủ |
+
+**Hành vi**
+
+1. Dòng phụ: GPT viết bài **chuyên mục Dự án** từ tên dự án + kiến thức công khai. Admin phải đọc lại. Không thay Google; không bịa pháp lý / giá / hotline.
+2. **Gửi** (disabled khi chưa nhập tên) → `POST /admin/public-web/posts/gpt-content` (ADMIN, Nest → OpenAI `OPENAI_MODEL`). Cùng key với GPT lô.
+3. JSON trả về: `seoTitle`, `h1`, `metaDescription`, `slug`, `excerpt`, `bodyHtml`, `facebookPost`, `locationLabel`.
+4. **Dùng cho bài soạn** — đóng GPT, mở §14.3 đã điền: chuyên mục Dự án, H1 = title, body, excerpt, meta. Admin thêm ảnh bìa rồi Lưu nháp / Xuất bản.
+5. Ảnh bìa **không** do GPT tạo.
 
 ---
 

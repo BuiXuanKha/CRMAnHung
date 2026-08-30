@@ -6,7 +6,8 @@ import { PublicPostStatus, type PublicWebPostRow } from '@crmanhung/shared';
 import { getActiveListScrollEl } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { createPublicPost, listPublicWebPosts, setPublicPostStatus } from './api';
-import { ComposePostDialog } from './components/compose-post-dialog';
+import { ComposePostDialog, type ComposePostPrefill } from './components/compose-post-dialog';
+import { PostGptContentDialog } from './components/post-gpt-content-dialog';
 import { DashboardPostCards } from './components/dashboard-post-cards';
 import { DashboardPostTable } from './components/dashboard-post-table';
 import { PostFilterBar } from './components/post-filter-bar';
@@ -33,6 +34,8 @@ export function PublicPostListPage() {
   const [selectedId, setSelectedId] = useState<string | null>(peeked?.selectedId ?? null);
   const [postConfirm, setPostConfirm] = useState<PublicWebPostRow | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
+  const [composePrefill, setComposePrefill] = useState<ComposePostPrefill | null>(null);
+  const [gptOpen, setGptOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
@@ -126,6 +129,7 @@ export function PublicPostListPage() {
     onSuccess: async (created) => {
       await invalidatePublicWebQueries(qc);
       setComposeOpen(false);
+      setComposePrefill(null);
       setFormError(null);
       setSelectedId(created.id);
       persist(created.id);
@@ -173,7 +177,12 @@ export function PublicPostListPage() {
           }}
           onCompose={() => {
             setFormError(null);
+            setComposePrefill(null);
             setComposeOpen(true);
+          }}
+          onComposeGpt={() => {
+            setFormError(null);
+            setGptOpen(true);
           }}
         />
       </section>
@@ -228,12 +237,29 @@ export function PublicPostListPage() {
           if (postConfirm && !postMut.isPending) void postMut.mutateAsync(postConfirm);
         }}
       />
+      <PostGptContentDialog
+        open={gptOpen}
+        onClose={() => {
+          if (!gptOpen) return;
+          setGptOpen(false);
+        }}
+        onFlash={flash}
+        onApplyToCompose={(prefill) => {
+          setGptOpen(false);
+          setFormError(null);
+          setComposePrefill(prefill);
+          setComposeOpen(true);
+        }}
+      />
       <ComposePostDialog
         open={composeOpen}
         busy={composeMut.isPending}
         error={formError}
+        prefill={composePrefill}
         onClose={() => {
-          if (!composeMut.isPending) setComposeOpen(false);
+          if (composeMut.isPending) return;
+          setComposeOpen(false);
+          setComposePrefill(null);
         }}
         onSubmit={async (input) => {
           await composeMut.mutateAsync(input);

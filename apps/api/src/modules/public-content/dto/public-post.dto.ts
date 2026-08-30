@@ -51,6 +51,16 @@ export class CreatePublicPostDto {
   @IsString()
   @MaxLength(320)
   excerpt?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  slug?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(160)
+  metaDescription?: string;
 }
 
 export class SetPublicPostStatusDto {

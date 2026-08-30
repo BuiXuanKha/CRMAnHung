@@ -990,6 +990,33 @@
   background: #eff6ff;
 }
 
+.pw-gpt-project {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  font-family: inherit;
+  color: #0f172a;
+  background: #fff;
+}
+
+.pw-gpt-project:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.pw-gpt-project:disabled {
+  opacity: 0.7;
+}
+
+.pw-gpt-optional {
+  font-weight: 400;
+  color: #64748b;
+}
+
 .pw-gpt-json-label {
   display: block;
   margin: 0 0 6px;

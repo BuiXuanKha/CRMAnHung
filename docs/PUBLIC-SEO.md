@@ -171,7 +171,7 @@ Roadmap tick-list: [`docs/domains/public-content.md`](./domains/public-content.m
 | Hạng mục | Công thức |
 |----------|-----------|
 | **URL** | `https://anhungland.com/{category}/{slug}` (category = enum: `tin-tuc`, `du-an`, …) |
-| **Title / H1** | `title` bài + template `\| An Hưng Land` |
+| **Title / H1** | `title` bài + template `\| An Hưng Land`. Bài dự án có thể nháp từ GPT (`/dashboard/bai-viet` §14.4) — admin đọc lại trước Xuất bản |
 | **Meta description** | `metaDescription` hoặc excerpt (~160) từ body |
 | **OG** | cover + title; thiếu cover → không Xuất bản (UI) |
 | **JSON-LD** | `Article` / `BlogPosting`: headline, `ImageObject` (bìa + ảnh body), datePublished, dateModified, author |

@@ -20,6 +20,8 @@ import {
   type PublicWebStaffLotRow,
   type LotGptGenerateResponse,
   type LotGptRequestPayload,
+  type PostGptGenerateResponse,
+  type PostGptRequestPayload,
   type SetPublicLotPublishedInput,
   type SetPublicPostStatusInput,
   type UpdatePublicListingDraftInput,
@@ -440,6 +442,41 @@ export async function generateLotGptContent(
     };
   }
   return apiFetch<LotGptGenerateResponse>('/admin/public-web/lots/gpt-content', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}
+
+export async function generatePostGptContent(
+  payload: PostGptRequestPayload,
+): Promise<PostGptGenerateResponse> {
+  if (isMockPublicWeb()) {
+    const name = payload.projectName.trim();
+    return {
+      content: `${JSON.stringify(
+        {
+          seoTitle: `${name} Nam Sách`,
+          h1: name,
+          metaDescription: `${name} tại Nam Sách, Hải Dương — thông tin vị trí và tiện ích (bản nháp GPT).`,
+          slug: name
+            .toLowerCase()
+            .normalize('NFD')
+            .replace(/\p{M}/gu, '')
+            .replace(/đ/g, 'd')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '')
+            .slice(0, 80),
+          excerpt: `[Mock] Giới thiệu ${name} tại Nam Sách, Hải Dương.`,
+          bodyHtml: `<p>Mock GPT cho dự án <strong>${name}</strong> tại Nam Sách, Hải Dương.</p><h2>Vị trí và kết nối</h2><p>Bản nháp — thay bằng nội dung thật sau khi gửi GPT.</p>`,
+          facebookPost: `[Mock] ${name} — Nam Sách, Hải Dương.`,
+          locationLabel: 'Nam Sách, Hải Dương',
+        },
+        null,
+        2,
+      )}\n`,
+    };
+  }
+  return apiFetch<PostGptGenerateResponse>('/admin/public-web/posts/gpt-content', {
     method: 'POST',
     body: JSON.stringify(payload),
   });

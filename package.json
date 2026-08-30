@@ -40,6 +40,7 @@
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "doctor": "node ./scripts/doctor.mjs",
-    "qa:public-hubs": "pnpm --filter @crmanhung/shared build && node ./scripts/qa-public-listing-hubs.mjs"
+    "qa:public-hubs": "pnpm --filter @crmanhung/shared build && node ./scripts/qa-public-listing-hubs.mjs",
+    "qa:post-gpt": "pnpm --filter @crmanhung/shared build && node ./scripts/qa-post-gpt.mjs"
   }
 }

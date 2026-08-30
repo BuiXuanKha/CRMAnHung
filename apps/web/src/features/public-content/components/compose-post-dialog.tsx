@@ -16,10 +16,20 @@ import { uploadPublicPostImage } from '../upload-image';
 import { PostRichEditor } from './post-rich-editor';
 import '@/shared/ui/dialog.css';
 
+export type ComposePostPrefill = {
+  title: string;
+  category: PublicPostCategory;
+  bodyHtml: string;
+  excerpt?: string;
+  metaDescription?: string;
+  slug?: string;
+};
+
 type Props = {
   open: boolean;
   busy: boolean;
   error: string | null;
+  prefill?: ComposePostPrefill | null;
   onClose: () => void;
   onSubmit: (input: CreatePublicPostInput) => Promise<void>;
 };
@@ -27,11 +37,21 @@ type Props = {
 const CATEGORIES = Object.values(PublicPostCategory);
 const TITLE_MAX = 160;
 
-export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Props) {
+export function ComposePostDialog({
+  open,
+  busy,
+  error,
+  prefill,
+  onClose,
+  onSubmit,
+}: Props) {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState<PublicPostCategory>(PublicPostCategory.TIN_TUC);
   const [coverImageUrl, setCoverImageUrl] = useState<string | null>(null);
   const [bodyHtml, setBodyHtml] = useState('');
+  const [excerpt, setExcerpt] = useState('');
+  const [metaDescription, setMetaDescription] = useState('');
+  const [slug, setSlug] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [coverBusy, setCoverBusy] = useState(false);
@@ -40,17 +60,20 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
 
   useEffect(() => {
     if (!open) return;
-    setTitle('');
-    setCategory(PublicPostCategory.TIN_TUC);
+    setTitle(prefill?.title.trim() ?? '');
+    setCategory(prefill?.category ?? PublicPostCategory.TIN_TUC);
     setCoverImageUrl(null);
-    setBodyHtml('');
+    setBodyHtml(prefill?.bodyHtml ?? '');
+    setExcerpt(prefill?.excerpt?.trim() ?? '');
+    setMetaDescription(prefill?.metaDescription?.trim() ?? '');
+    setSlug(prefill?.slug?.trim() ?? '');
     setParseError(null);
     setUploadError(null);
     const t = window.setTimeout(() => titleRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
-  }, [open]);
+  }, [open, prefill]);
 
-  const slugPreview = toPublicSlug(title.trim() || 'tieu-de-bai-viet');
+  const slugPreview = slug.trim() || toPublicSlug(title.trim() || 'tieu-de-bai-viet');
   const formBusy = busy || coverBusy;
 
   function submit(status: PublicPostStatus) {
@@ -60,6 +83,9 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
       status,
       coverImageUrl,
       bodyHtml,
+      ...(excerpt.trim() ? { excerpt: excerpt.trim() } : {}),
+      ...(metaDescription.trim() ? { metaDescription: metaDescription.trim() } : {}),
+      ...(slug.trim() ? { slug: slug.trim() } : {}),
     });
     if (!parsed.success) {
       setParseError(parsed.error.issues[0]?.message ?? 'Dữ liệu không hợp lệ.');
@@ -100,8 +126,9 @@ export function ComposePostDialog({ open, busy, error, onClose, onSubmit }: Prop
         }}
       >
         <p className="crm-form-hint">
-          Bài hiện trên anhungland.com theo chuyên mục. Lưu nháp chỉ admin thấy; Xuất bản cần ảnh bìa
-          và nội dung — khách đọc được ngay.
+          {prefill
+            ? 'Đã điền từ GPT (chuyên mục Dự án). Đọc lại, thêm ảnh bìa rồi Lưu nháp / Xuất bản.'
+            : 'Bài hiện trên anhungland.com theo chuyên mục. Lưu nháp chỉ admin thấy; Xuất bản cần ảnh bìa và nội dung — khách đọc được ngay.'}
         </p>
 
         <label>

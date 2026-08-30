@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef } from 'react';
-import { FilePlus } from 'lucide-react';
+import { FilePlus, Sparkles } from 'lucide-react';
 import { CrmSearchField } from '@/shared/ui/search-field';
 import { Icon } from '@/shared/ui/icon';
 import {
@@ -21,6 +21,7 @@ type Props = {
   hasActiveFilters: boolean;
   onResetFilters: () => void;
   onCompose: () => void;
+  onComposeGpt: () => void;
 };
 
 export function PostFilterBar({
@@ -35,6 +36,7 @@ export function PostFilterBar({
   hasActiveFilters,
   onResetFilters,
   onCompose,
+  onComposeGpt,
 }: Props) {
   const searchRef = useRef<HTMLInputElement>(null);
 
@@ -70,6 +72,9 @@ export function PostFilterBar({
       </button>
       <button type="button" className="pw-search-btn" onClick={submitSearch}>
         Tìm
+      </button>
+      <button type="button" className="crm-btn" onClick={onComposeGpt}>
+        <Icon icon={Sparkles} size="sm" /> Soạn bài bằng GPT AI
       </button>
       <button type="button" className="crm-btn primary" onClick={onCompose}>
         <Icon icon={FilePlus} size="sm" /> Soạn bài

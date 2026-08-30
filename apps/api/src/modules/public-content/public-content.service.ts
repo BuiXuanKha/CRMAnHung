@@ -709,7 +709,10 @@ export class PublicContentService {
       dto.excerpt?.trim() ||
       listingBodyToExcerpt(bodyHtml) ||
       dto.title.trim();
-    const slug = await this.uniquePostSlug(dto.category, toPublicSlug(dto.title));
+    const slugBase = dto.slug?.trim()
+      ? toPublicSlug(dto.slug, 80)
+      : toPublicSlug(dto.title, 80);
+    const slug = await this.uniquePostSlug(dto.category, slugBase);
     const isPublished = dto.status === 'PUBLISHED';
     const saved = await this.prisma.publicPost.create({
       data: {
@@ -720,6 +723,7 @@ export class PublicContentService {
         bodyHtml,
         excerpt,
         slug,
+        metaDescription: dto.metaDescription?.trim() || null,
         publishedAt: isPublished ? new Date() : null,
       },
     });

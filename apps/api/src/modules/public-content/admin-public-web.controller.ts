@@ -18,8 +18,10 @@ import {
   UpdatePublicListingDraftDto,
 } from './dto/public-listing.dto';
 import { LotGptRequestDto } from './dto/lot-gpt.dto';
+import { PostGptRequestDto } from './dto/post-gpt.dto';
 import { CreatePublicPostDto, SetPublicPostStatusDto } from './dto/public-post.dto';
 import { LotGptService } from './lot-gpt.service';
+import { PostGptService } from './post-gpt.service';
 import { PublicContentService } from './public-content.service';
 
 @Controller('admin/public-web')
@@ -29,6 +31,7 @@ export class AdminPublicWebController {
   constructor(
     private readonly publicContent: PublicContentService,
     private readonly lotGpt: LotGptService,
+    private readonly postGpt: PostGptService,
   ) {}
 
   @Get('lots')
@@ -80,5 +83,10 @@ export class AdminPublicWebController {
   @Post('lots/gpt-content')
   generateLotGptContent(@Body() dto: LotGptRequestDto) {
     return this.lotGpt.generateContent(dto);
+  }
+
+  @Post('posts/gpt-content')
+  generatePostGptContent(@Body() dto: PostGptRequestDto) {
+    return this.postGpt.generateContent(dto);
   }
 }

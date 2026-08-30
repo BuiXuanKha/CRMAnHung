@@ -216,6 +216,40 @@ export const lotGptContentResultSchema = z.object({
 
 export type LotGptContentResult = z.infer<typeof lotGptContentResultSchema>;
 
+/** POST /admin/public-web/posts/gpt-content — tên dự án (+ ghi chú tuỳ chọn). */
+export const postGptRequestPayloadSchema = z.object({
+  projectName: z
+    .string()
+    .trim()
+    .min(1, 'Nhập tên dự án')
+    .max(160, 'Tên dự án tối đa 160 ký tự'),
+  category: z.literal(PublicPostCategory.DU_AN),
+  site: z.string().trim().max(80).optional(),
+  locale: z.string().trim().max(160).optional(),
+  extraNotes: z.string().trim().max(4000).optional(),
+});
+
+export type PostGptRequestPayload = z.infer<typeof postGptRequestPayloadSchema>;
+
+export const postGptGenerateResponseSchema = z.object({
+  content: z.string(),
+});
+
+export type PostGptGenerateResponse = z.infer<typeof postGptGenerateResponseSchema>;
+
+export const postGptContentResultSchema = z.object({
+  seoTitle: z.string(),
+  h1: z.string(),
+  metaDescription: z.string(),
+  slug: z.string(),
+  excerpt: z.string(),
+  bodyHtml: z.string(),
+  facebookPost: z.string(),
+  locationLabel: z.string().optional(),
+});
+
+export type PostGptContentResult = z.infer<typeof postGptContentResultSchema>;
+
 /**
  * Published listing as guests and search engines see it.
  * Never include CRM VND, commission, owner notes, or customer PII.
@@ -485,6 +519,8 @@ export const createPublicPostInputSchema = z
     coverImageUrl: z.string().trim().nullable().optional(),
     bodyHtml: z.string().optional(),
     excerpt: z.string().trim().max(320).optional(),
+    slug: z.string().trim().max(80).optional(),
+    metaDescription: z.string().trim().max(META_DESCRIPTION_MAX).optional(),
   })
   .superRefine((data, ctx) => {
     if (data.status !== PublicPostStatus.PUBLISHED) return;
