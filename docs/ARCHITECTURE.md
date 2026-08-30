@@ -135,7 +135,7 @@ Các màn list (`/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`) dùng 
 - Feature bọc thin store (`createListStateStore`) — xem skill `crm-list-state`
 - **Cuộn tải thêm:** `useCrmInfiniteList` — mỗi lần 50 dòng, gần đáy 160px thì nối trang (`/khach-hang`, `/lo-dat`)
 
-Không nhớ panel rail (chỉ list). Chi tiết domain: `customers.md` §12.1.5, `lodats.md` §12.1.5, `title-services.md` §12.1.6.
+Không nhớ panel cột phụ (chỉ list). Chi tiết domain: `customers.md` §12.1.5, `lodats.md` §12.1.5, `title-services.md` §12.1.6.
 
 ---
 
@@ -155,12 +155,14 @@ Không nhớ panel rail (chỉ list). Chi tiết domain: `customers.md` §12.1.5
 ## 6. Luồng dữ liệu (giữ nguyên ý tưởng)
 
 ```
-Meta Inbox / Messenger
-  → Extension (scan + JWT)
+Meta Inbox / Messenger (tab ngoài / extension)
+  → Extension (scan + JWT) — apps/extension vẫn stub
   → POST /api/v1/customers/from-extension
-  → DB (Person + Facebook + Messenger)
-  → Web quản lý qua /api/v1/*
+  → DB (Customer + Facebook + Messenger)
+  → Web: cột phụ «Nội dung chat» = tin đã lưu
 ```
+
+Web **không** nhúng Inbox Facebook sống. Menu **Mở chat** / **Mở Messenger** mở tab Meta. Inbox sống trong CRM = chưa làm (`customers.md` §11 mục 27).
 
 API version prefix: `/api/v1` — dễ thay contract sau này mà không phá client cũ trong giai đoạn chuyển tiếp.
 

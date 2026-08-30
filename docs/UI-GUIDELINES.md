@@ -72,7 +72,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 │  Trái: logo + «An Hưng Land CRM»                            │
 │  Phải: menu | menu | menu   [avatar]                        │
 ├─────────────────────────────────────────────────────────────┤
-│ NỘI DUNG: tìm/lọc (§4.3.4) + bảng (§4.3.1) + rail (§4.3.2) │
+│ NỘI DUNG: tìm/lọc (§4.3.4) + bảng (§4.3.1) + cột phụ (§4.3.2) │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -95,7 +95,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 1. Header (logo + menu `|` + avatar)  
 2. Nội dung trang  
    - 2.1 Lọc + nút thêm  
-   - 2.2 Hai cột: bảng trái + rail phải  
+   - 2.2 Hai cột: bảng trái + cột phụ phải  
 
 Implement: `apps/web` layout CRM (`(crm)/layout` → `AppShell`). Đổi shell = đổi một chỗ, áp mọi trang CRM.
 
@@ -126,14 +126,14 @@ Mọi bảng list CRM tuân **§4.5** (shared). Dưới đây là **cột / nộ
 
 Cột «Số lô đất» đã bỏ — lô = icon Map + số cạnh tên; lọc lô gắn icon cột Tên.
 
-**Rail:** một panel ([`customers.md` §12.1.6](./domains/customers.md)).
+**Cột phụ:** một panel; ẩn thanh trống ([`customers.md` §12.1.6](./domains/customers.md)).
 
 | Hạng mục | Quyết định | Ghi chú |
 |----------|------------|---------|
 | Cảm giác tổng thể | Workbench, đặc | Theo §4.2 + §4.5 |
 | Màu chủ đạo CRM | Xanh `#2563eb` + vàng ghim | §4.5 |
 | Font | **Noto Sans**, gốc 14px | §4.2 / §4.5 |
-| Trang khách hàng: layout chính | Tìm/lọc trên + **bảng** trái + **rail phải** | §4.3.1–4.3.4 |
+| Trang khách hàng: layout chính | Tìm/lọc trên + **bảng** trái + **cột phụ phải** | §4.3.1–4.3.4 |
 | Thao tác trên dòng | **Menu hành động** (dropdown) | §4.3.3 |
 | Mobile `/khach-hang` | **Thẻ xếp dọc** + Bộ lọc + Tìm + nút Thêm SĐT đáy | Đã chốt theo ảnh mẫu |
 | Mobile `/giao-dich` | **Thẻ xếp dọc** + Bộ lọc + Tìm; 3 thẻ thống kê vẫn 3 cột | Đã chốt theo CRM cũ |
@@ -141,7 +141,7 @@ Cột «Số lô đất» đã bỏ — lô = icon Map + số cạnh tên; lọc
 | Mật độ thông tin | **Đặc** trên desktop | |
 | Tránh tuyệt đối | Invent style bảng khác §4.5; thiếu footer; scroll cắt header cột | |
 
-**Mobile (≤767px) — đã chốt theo ảnh CRM cũ:** **thẻ xếp dọc**, không bảng cuộn ngang. Ẩn rail phải.
+**Mobile (≤767px) — đã chốt theo ảnh CRM cũ:** **thẻ xếp dọc**, không bảng cuộn ngang. Ẩn cột phụ phải.
 
 ```
 ┌─ ô tìm ───── [ Bộ lọc ] [ Tìm ] ─┐
@@ -164,9 +164,9 @@ Cột «Số lô đất» đã bỏ — lô = icon Map + số cạnh tên; lọc
 | Footer | `All N / M` · `KN` · `KM` · `CCS` · `KH` · `ĐG` (ghim) |
 | CTA đáy | Nút full-width xanh lá `#16a34a`: **Thêm khách bằng SĐT** |
 
-Desktop giữ bảng §4.5 + rail.
+Desktop giữ bảng §4.5 + cột phụ (§4.3.2).
 
-#### 4.3.2 Rail phải — mở rộng / thu hẹp (đã chốt — theo ảnh mẫu)
+#### 4.3.2 Cột phụ phải — mở rộng / thu hẹp (đã chốt — theo ảnh mẫu)
 
 Không phải sidebar điều hướng (nav chính nằm trên **header** §4.2). Đây là **cột phụ bên phải** của nội dung trang: nhiều **thanh dọc hẹp** xếp cạnh nhau; bấm để **mở rộng / thu hẹp** panel chi tiết.
 
@@ -200,7 +200,9 @@ Không phải sidebar điều hướng (nav chính nằm trên **header** §4.2)
 
 **Đã chốt:** chỉ **một** panel mở. Bấm thanh khác → **đổi** panel, không chồng. Bấm lại thanh đang mở → thu hẹp. **Ẩn thanh** khi khách đang chọn không có dữ liệu (chat / chăm sóc / lô). Không còn thanh nào → ẩn cả cột phụ. Mobile: ẩn cột phụ.
 
-Implement: một component rail dùng lại được (không copy layout god-file CRM cũ); gắn vào layout nội dung `/khach-hang` (và màn list tương tự khi cần). Chi tiết dữ liệu từng panel: [`customers.md` §12.1.6](./domains/customers.md).
+**Nội dung chat** trên cột phụ = tin **đã lưu**, không phải Inbox Facebook sống (chưa làm — `customers.md` §11 mục 27). Menu **Mở chat** / **Mở Messenger** = tab ngoài.
+
+Implement: một component cột phụ dùng lại được (không copy layout god-file CRM cũ); gắn vào layout nội dung `/khach-hang` (và màn list tương tự khi cần). Chi tiết dữ liệu từng panel: [`customers.md` §12.1.6](./domains/customers.md).
 
 #### 4.3.3 Menu hành động (đã chốt — theo ảnh mẫu)
 
@@ -650,7 +652,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-25 | Ô tìm list CRM: hangtag **Clear** (`CrmBadge` gray) ngay sau con trỏ — `CrmSearchField` |
 | 2026-08-25 | Helper chung nhớ list (`shared/list-state` + skill `crm-list-state`): `/khach-hang` refactor; `/lo-dat` nhớ tìm/lọc/cuộn; logout xóa mọi `*-list-state` |
 | 2026-08-25 | Khách: `lodatCount` API + Map cạnh tên; bỏ cột Số lô; rail/chi tiết lô từ `GET /customers/:id/lodats` |
-| 2026-08-24 | Khách: xoá SĐT + sửa tên FB = **NV phụ trách khách** (không chỉ admin). Khôi phục ẩn / hangtag / inbox FB / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |
+| 2026-08-24 | Khách: xoá SĐT = **NV phụ trách khách** (không chỉ admin). Hangtag «Tự khôi phục» / inbox FB sống / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |
 | 2026-08-26 | Menu khách **Dịch vụ sổ đỏ** → form `/khach-hang/[id]/dich-vu-so-do` (STAFF + ADMIN; không nút Thêm trên list) |
 | 2026-08-26 | List `/dich-vu-so-do`: nhớ tìm / lọc / cuộn (`sessionStorage`, skill `crm-list-state`) |
 | 2026-08-26 | Panel sổ đỏ **File tài liệu:** hangtag loại giấy (Sổ đỏ / CCCD / Giấy tờ khác) trên đầu mỗi file |
@@ -671,6 +673,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | List `/khach-hang`: menu Thao tác **Thêm / Sửa số điện thoại** (Lưu / Xóa); icon cam vẫn thêm nhanh |
 | 2026-08-30 | Panel phải + chi tiết khách: thẻ lô ảnh trái / chữ phải; bấm ảnh = gallery (+N); bấm chữ = `/lo-dat/[id]` |
 | 2026-08-30 | Cột phụ `/khach-hang`: ẩn thanh Chat / Chăm sóc / Lô khi khách không có tin, lịch sử, hoặc lô |
+| 2026-08-30 | Docs khách: Inbox Facebook sống ≠ cột phụ tin đã lưu / menu Mở chat; ô tìm API không khớp tên FB; `Customer.note` không hiện list |
 
 ---
 

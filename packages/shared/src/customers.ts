@@ -73,6 +73,7 @@ export const customerListItemSchema = z.object({
   status: z.nativeEnum(CustomerStatus),
   budgetMinVnd: z.number().int().nullable().optional(),
   budgetMaxVnd: z.number().int().nullable().optional(),
+  /** Cột dư `tblPerson.Note` — không hiện list/chi tiết. Ô tìm API vẫn khớp. */
   note: z.string().nullable().optional(),
   isPinned: z.boolean(),
   isHidden: z.boolean(),
@@ -85,10 +86,10 @@ export const customerListItemSchema = z.object({
   /** Profile/page NV quét khách — cột Kênh liên hệ khi không có hotline. */
   sourceFacebookProfile: customerSourceFacebookProfileSchema.nullable().optional(),
   /** Cột Nhu cầu = NeedSummary mới nhất (care, không rỗng). */
-    latestNeedSummary: z.string().nullable().optional(),
+  latestNeedSummary: z.string().nullable().optional(),
   latestCareNote: z.string().nullable().optional(),
   lodatCount: z.number().int().nonnegative().default(0),
-  /** Tin đã lưu (rail chat). 0 = ẩn thanh «Nội dung chat». */
+  /** Tin đã lưu (cột phụ chat). 0 = ẩn thanh «Nội dung chat». Không phải inbox sống. */
   messageCount: z.number().int().nonnegative().default(0),
   /** Số lần chăm sóc. 0 = ẩn thanh «Lịch sử chăm sóc». */
   careNoteCount: z.number().int().nonnegative().default(0),
