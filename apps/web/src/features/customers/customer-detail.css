@@ -154,8 +154,7 @@
   color: #b91c1c;
 }
 
-.kh-detail-timeline,
-.kh-detail-lots {
+.kh-detail-timeline {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -206,78 +205,6 @@
   letter-spacing: 0.03em;
   color: #475569;
   margin-right: 4px;
-}
-
-.kh-detail-lot {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  background: #f8fafc;
-  text-align: left;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-}
-
-.kh-detail-lot:hover {
-  background: #eef2f7;
-}
-
-.kh-detail-lot h4 {
-  margin: 0;
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #0f172a;
-  line-height: 1.35;
-}
-
-.kh-detail-lot-body {
-  display: flex;
-  gap: 10px;
-  align-items: stretch;
-}
-
-.kh-detail-lot-thumb {
-  width: 76px;
-  height: 76px;
-  border-radius: 8px;
-  background: #e2e8f0;
-  color: #94a3b8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  font-size: 1.1rem;
-  overflow: hidden;
-}
-
-.kh-detail-lot-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.kh-detail-lot-info {
-  flex: 1;
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-}
-
-.kh-detail-lot-addr,
-.kh-detail-lot-spec {
-  font-size: 0.8rem;
-  color: #64748b;
-  word-break: break-word;
-}
-
-.kh-detail-lot-price {
-  font-size: 0.86rem;
 }
 
 @media (max-width: 767px) {

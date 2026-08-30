@@ -669,6 +669,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | Khách: **không** modal sửa tên Facebook — tên FB nhận từ extension khi scan |
 | 2026-08-30 | List `/khach-hang`: bỏ icon mess cạnh tên; hangtag **Đã xoá** khi `isHidden`; thẻ mobile **không** tên Facebook |
 | 2026-08-30 | List `/khach-hang`: menu Thao tác **Thêm / Sửa số điện thoại** (Lưu / Xóa); icon cam vẫn thêm nhanh |
+| 2026-08-30 | Panel phải + chi tiết khách: thẻ lô ảnh trái / chữ phải; bấm ảnh = gallery (+N); bấm chữ = `/lo-dat/[id]` |
 
 ---
 

@@ -490,7 +490,7 @@ export class LodatsService {
   }
 
   /**
-   * Lô đang gắn khách (map active) — rail / chi tiết khách.
+   * Lô đang gắn khách (map active) — panel phải / chi tiết khách.
    * ADMIN xem mọi lô của khách; STAFF chỉ lô mình tạo.
    */
   async listForCustomer(user: RequestUser, customerId: string) {
@@ -519,6 +519,7 @@ export class LodatsService {
         direction: mapped.direction,
         priceVnd: mapped.priceVnd,
         coverImageUrl: mapped.coverImageUrl,
+        extraPhotoCount: mapped.extraPhotoCount,
         status: mapped.status,
       };
     });

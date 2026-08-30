@@ -114,8 +114,7 @@
 }
 
 .kh-chat,
-.kh-care,
-.kh-lots {
+.kh-care {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -212,8 +211,7 @@
   color: #475569;
 }
 
-.kh-care li,
-.kh-lots li {
+.kh-care li {
   border: 1px solid var(--kh-line);
   border-radius: 10px;
   padding: 10px 12px;
@@ -222,27 +220,9 @@
   background: #fff;
 }
 
-.kh-care time,
-.kh-lots span {
+.kh-care time {
   color: #64748b;
   font-size: 0.78rem;
-}
-
-.kh-lot-link {
-  display: grid;
-  gap: 4px;
-  width: 100%;
-  text-align: left;
-  background: none;
-  border: 0;
-  padding: 0;
-  cursor: pointer;
-  font: inherit;
-  color: inherit;
-}
-
-.kh-lot-link:hover strong {
-  color: #2563eb;
 }
 
 .kh-care p {

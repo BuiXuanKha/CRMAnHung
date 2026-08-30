@@ -640,48 +640,14 @@ export const mockChats: Record<string, CustomerMessengerMessage[]> = {
   ],
 };
 
-export type MockLodatBrief = {
-  id: string;
-  title: string;
-  area: string;
-  price: string;
-  address?: string;
-  frontage?: string;
-  direction?: string;
+/** Id lô mock (`lodats/mock-data`) gắn khách — gallery GET `/lodats/:id` khớp. */
+export const mockLodatIdsByCustomer: Record<string, string[]> = {
+  cus_net_phones: ['ld_lk5_37', 'ld_lk3_12'],
+  cus_pin_3: ['ld_no_photo'],
+  cus_6: ['ld_bt08', 'ld_a15', 'ld_no_addr'],
+  cus_8: ['ld_lk7_21', 'ld_lk4_18'],
 };
 
-export const mockLodatsByCustomer: Record<string, MockLodatBrief[]> = {
-  cus_net_phones: [
-    {
-      id: 'ld1',
-      title: 'Lô 38 Quán Táo Đông',
-      area: '80 m²',
-      price: '1,85 tỷ',
-      address: 'Quán Táo Đông, Long Thành',
-      frontage: '5 m',
-      direction: 'Đông Nam',
-    },
-    {
-      id: 'ld2',
-      title: 'Lô 12 đường 21m',
-      area: '90 m²',
-      price: '2,1 tỷ',
-      address: 'Đường 21m, Long Thành',
-      frontage: '6 m',
-    },
-  ],
-  cus_pin_3: [{ id: 'ld3', title: 'Lô gần ĐT 296', area: '72 m²', price: '980 triệu' }],
-  cus_6: [
-    { id: 'ld4', title: 'Lô góc ô tô vào', area: '100 m²', price: '1,35 tỷ' },
-    { id: 'ld5', title: 'Lô 5 thổ cư', area: '88 m²', price: '1,2 tỷ' },
-    { id: 'ld6', title: 'Lô 9 dự án', area: '75 m²', price: '1,15 tỷ' },
-  ],
-  cus_8: [
-    { id: 'ld7', title: 'Liền kề A1', area: '120 m²', price: '3,2 tỷ' },
-    { id: 'ld8', title: 'Liền kề A2', area: '120 m²', price: '3,2 tỷ' },
-  ],
-};
-
-export function listMockLodatsForCustomer(customerId: string): MockLodatBrief[] {
-  return mockLodatsByCustomer[customerId] ?? [];
+export function listMockLodatIdsForCustomer(customerId: string): string[] {
+  return mockLodatIdsByCustomer[customerId] ?? [];
 }

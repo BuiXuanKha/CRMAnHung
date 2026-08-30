@@ -33,7 +33,8 @@ import {
 import { ApiError, apiFetch } from '@/shared/api/client';
 import { isMockCustomers } from '@/shared/api/mode';
 import { matchesBudgetFilter, matchesChannel } from './display';
-import { listMockLodatsForCustomer, mockChats, mockCustomers, mockHotlines } from './mock-data';
+import { mockLodats } from '@/features/lodats/mock-data';
+import { listMockLodatIdsForCustomer, mockChats, mockCustomers, mockHotlines } from './mock-data';
 
 export function isPhoneDuplicateError(
   err: unknown,
@@ -179,28 +180,26 @@ export async function listCustomerLodats(
     if (!found) {
       throw new Error('Không tìm thấy khách hàng');
     }
+    const byId = new Map(mockLodats.map((lot) => [lot.id, lot]));
     return {
-      items: listMockLodatsForCustomer(id).map((lot) => ({
-        id: lot.id,
-        title: lot.title,
-        address: lot.address ?? null,
-        areaM2: null,
-        frontageM: null,
-        direction: [lot.area, lot.frontage ? `MT ${lot.frontage}` : null, lot.direction]
-          .filter(Boolean)
-          .join(' · ') || null,
-        priceVnd: null,
-        coverImageUrl: null,
-        status: 'DANG_BAN',
-        // Mock price kept as free text in broker-style note via address line when no address
-        ...(lot.price
-          ? {
-              address: lot.address
-                ? `${lot.address} · ${lot.price}`
-                : lot.price,
-            }
-          : {}),
-      })),
+      items: listMockLodatIdsForCustomer(id).flatMap((lotId) => {
+        const lot = byId.get(lotId);
+        if (!lot) return [];
+        return [
+          {
+            id: lot.id,
+            title: lot.title,
+            address: lot.address ?? null,
+            areaM2: lot.areaM2 ?? null,
+            frontageM: lot.frontageM ?? null,
+            direction: lot.direction ?? null,
+            priceVnd: lot.priceVnd ?? null,
+            coverImageUrl: lot.coverImageUrl ?? null,
+            extraPhotoCount: lot.extraPhotoCount ?? 0,
+            status: lot.status,
+          },
+        ];
+      }),
     };
   }
   return apiFetch<CustomerLodatListResponse>(`/customers/${id}/lodats`);
