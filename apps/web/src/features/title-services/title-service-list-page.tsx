@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
@@ -50,6 +50,7 @@ type AlertState = { title: string; message: string } | null;
 export function TitleServiceListPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
+  const router = useRouter();
   const search = useSearchParams();
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState('');
@@ -261,10 +262,18 @@ export function TitleServiceListPage() {
     setDialog({ kind, item });
   }
 
+  function openDetail(item: TitleServiceListItem) {
+    selectRow(item.id);
+    router.push(`/dich-vu-so-do/${item.id}`);
+  }
+
   function handleAction(item: TitleServiceListItem, action: TitleServiceAction) {
     setMenuId(null);
+    if (action === 'detail') {
+      openDetail(item);
+      return;
+    }
     selectRow(item.id);
-    if (action === 'detail') return;
     if (action === 'pin') {
       void pinMut.mutateAsync(item).then((updated) => {
         flash(updated.isPinned ? `Đã ghim ${item.code}.` : `Đã bỏ ghim ${item.code}.`);
@@ -379,7 +388,12 @@ export function TitleServiceListPage() {
                 total={list.data?.total ?? filtered.length}
                 selectedId={selectedId}
                 menuId={menuId}
-                onSelect={selectRow}
+                onSelect={(cardId) => {
+                  const item =
+                    filtered.find((row) => row.id === cardId) ??
+                    list.data?.items.find((row) => row.id === cardId);
+                  if (item) openDetail(item);
+                }}
                 onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
                 onCloseMenu={() => setMenuId(null)}
                 onAction={handleAction}

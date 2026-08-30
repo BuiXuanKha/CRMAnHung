@@ -406,7 +406,7 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 | Đầu thẻ | Tên đậm; hangtag trạng thái; chevron thao tác §4.3.7 |
 | Meta | Mã hồ sơ · số ngày (`30 ngày` / `Hôm nay`) · SĐT nếu có |
 | Thân | Nhu cầu (2 dòng); một hàng Giá `crm-money` / Thu xanh `#047857` / Chi đỏ `#b91c1c`; bước tiến độ mới nhất; `N file` hoặc `Chưa có` |
-| Bấm thẻ | Chọn dòng (không nhảy placeholder). Chevron = menu đầy đủ |
+| Bấm thẻ | `/dich-vu-so-do/[id]`. Chevron = menu đầy đủ |
 | Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel inline: select Trạng thái, **ADMIN** thêm select NV, nút Xoá lọc khi đang lọc. Desktop không hiện Bộ lọc / Tìm (ADMIN vẫn thấy select NV cạnh ô tìm) |
 | Footer | «Hiển thị N / Tổng M hồ sơ sổ đỏ». Không nút Thêm hồ sơ |
 
@@ -662,6 +662,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | Menu trong Dashboard: **Lô đất** (trước: Lô đất public mở bán) |
 | 2026-08-26 | `/dashboard/lo-dat` panel phải: tiêu đề **Preview Post** |
 | 2026-08-26 | `/dashboard/lo-dat`: lọc cột §4.5.5 (ảnh, địa chỉ, phân loại, DT/hướng, giá, NV, Web); mobile Bộ lọc |
+| 2026-08-30 | `/dich-vu-so-do` mobile: bấm thẻ / Xem chi tiết → trang `/dich-vu-so-do/[id]` (panel vẫn máy tính) |
 
 ---
 
