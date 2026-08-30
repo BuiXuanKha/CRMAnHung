@@ -18,8 +18,8 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 | Actor | List | Không |
 |-------|------|--------|
-| STAFF | Khách của mình; **sửa/xoá SĐT** và **sửa tên Facebook** của khách mình | Khách NV khác; tạo lô khi là admin; hard-delete |
-| ADMIN | Tất cả khách (cùng thao tác SĐT / tên FB trên khách đang xem) | Hard-delete / registry — **chưa làm** |
+| STAFF | Khách của mình; **sửa/xoá SĐT** của khách mình | Khách NV khác; tạo lô khi là admin; hard-delete; **không** sửa tên Facebook tay |
+| ADMIN | Tất cả khách (cùng thao tác SĐT trên khách đang xem) | Hard-delete / registry — **chưa làm**; **không** sửa tên Facebook tay |
 
 ## 3. Khái niệm
 
@@ -50,7 +50,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 | 1 | Menu khôi phục khách ẩn (§11 mục 16) | **Xong.** «Khôi phục khách» → `PATCH isHidden: false`. |
 | 2 | Tạo hồ sơ sổ đỏ từ khách (§11 mục 7) | **Xong.** Form `/khach-hang/[id]/dich-vu-so-do`. |
 | 3 | Xoá SĐT (§11 mục 11) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
-| 4 | Sửa tên Facebook (§11 mục 13) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
+| 4 | Sửa tên Facebook (§11 mục 13) | **Không làm.** Tên FB nhận từ extension khi scan; không modal sửa tay. |
 | 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Chưa làm.** Khi extension kéo lại khách ẩn (API ingest không tự khôi phục — §13.14). |
 | 6 | Inbox Facebook sống (§11 mục 21) | **Cần bàn rõ hơn.** |
 | 7 | Quản trị khách / hard-delete (§11 mục 26) | **Chưa làm** (phần admin). |
@@ -67,7 +67,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Có trên staging. Trùng số → modal mục 15.
 11. **Xoá SĐT** — thùng rác + modal. **NV phụ trách khách** (không chỉ admin). Chưa làm UI/API.
 12. **Sửa tên khách** — bút trên tên (máy tính). Có trên staging.
-13. **Sửa tên Facebook** — bút trên tên FB (máy tính). **NV phụ trách khách** (không chỉ admin). Chưa làm UI/API.
+13. **Sửa tên Facebook** — **không làm.** Không bút / modal sửa tay. Tên FB (`facebookName`) do **extension** ghi khi scan.
 14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Có trên staging.
 15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Có trên staging.
 16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách» → `PATCH isHidden: false`. **Xong.** Tìm lại bằng `@` / `@@`. Extension **không** tự khôi phục (hangtag = mục 25).
@@ -183,7 +183,7 @@ Khách nét / mới / cần chăm sóc / Khác.
 ##### 8. Tên Facebook (dòng phụ)
 
 Hiện nếu khác tên CRM, hoặc có hồ sơ FB.  
-**NV phụ trách khách:** bút (máy tính) → modal **Sửa tên Facebook**. Không phải thao tác chỉ admin. Chưa làm.
+**Không** bút sửa. Tên do extension ghi khi scan.
 
 ##### 9. Nhu cầu
 
@@ -331,7 +331,7 @@ Cùng 12.1.3 mục 7.
 
 ##### 7. Tên Facebook (dòng phụ)
 
-Cùng điều kiện 12.1.3 mục 8. **Không** bút sửa FB trên thẻ.
+Cùng 12.1.4 mục 8. **Không** bút sửa (máy tính cũng không).
 
 ##### 8. Nhu cầu
 

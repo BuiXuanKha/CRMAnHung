@@ -665,6 +665,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | Dialog CRM mobile: panel không tràn viewport; ô file dùng hàng «Chọn tệp» + tên (không native width) |
 | 2026-08-30 | `/dich-vu-so-do` mobile: bấm thẻ / Xem chi tiết → trang `/dich-vu-so-do/[id]` (panel vẫn máy tính) |
 | 2026-08-30 | Docs `/khach-hang` khớp code: tạo lô từ khách STAFF; menu khôi phục ẩn; lô rail/chi tiết = API; không nhớ panel rail; lọc lô/nhu cầu `has|empty` |
+| 2026-08-30 | Khách: **không** modal sửa tên Facebook — tên FB nhận từ extension khi scan |
 
 ---
 
