@@ -11,6 +11,9 @@ import { AddressKind, LodatKind, PublicPostCategory, PublicPostStatus } from './
 /** Google snippet length — clip excerpt / metaDescription to this. */
 export const META_DESCRIPTION_MAX = 160;
 
+/** Stored post excerpt max (schema + auto-generate). Lot listings still use listingBodyToExcerpt. */
+export const PUBLIC_POST_EXCERPT_MAX = 320;
+
 /**
  * Guest catalog URL prefix on anhungland.com (Nam Sách local SEO).
  */
@@ -518,7 +521,7 @@ export const createPublicPostInputSchema = z
     status: z.nativeEnum(PublicPostStatus),
     coverImageUrl: z.string().trim().nullable().optional(),
     bodyHtml: z.string().optional(),
-    excerpt: z.string().trim().max(320).optional(),
+    excerpt: z.string().trim().max(PUBLIC_POST_EXCERPT_MAX).optional(),
     slug: z.string().trim().max(80).optional(),
     metaDescription: z.string().trim().max(META_DESCRIPTION_MAX).optional(),
   })
@@ -545,12 +548,29 @@ export type CreatePublicPostInput = z.infer<typeof createPublicPostInputSchema>;
 
 export { stripHtmlText as stripPublicPostHtmlText };
 
-/** Plain excerpt for SEO / catalog from TipTap HTML. */
+/** Plain excerpt for SEO / catalog from TipTap HTML (lot listings — up to 2000). */
 export function listingBodyToExcerpt(bodyHtml?: string | null): string {
   const text = stripHtmlText(bodyHtml ?? '');
   if (!text) return '';
   if (text.length <= 2000) return text;
   return `${text.slice(0, 1999).trim()}…`;
+}
+
+/** Auto-generated post excerpt — schema max, not listingBodyToExcerpt (2000). */
+export function postBodyToExcerpt(bodyHtml?: string | null): string {
+  return clipMetaDescription(stripHtmlText(bodyHtml ?? ''), PUBLIC_POST_EXCERPT_MAX);
+}
+
+/** Hide article lead when stored excerpt dumps the full body (legacy auto-excerpt). */
+export function shouldShowPostLead(post: {
+  excerpt?: string | null;
+  bodyHtml?: string | null;
+}): boolean {
+  const excerpt = post.excerpt?.trim() ?? '';
+  if (!excerpt) return false;
+  const body = stripHtmlText(post.bodyHtml ?? '');
+  if (!body) return true;
+  return excerpt.length <= PUBLIC_POST_EXCERPT_MAX;
 }
 
 export const updatePublicListingDraftSchema = z

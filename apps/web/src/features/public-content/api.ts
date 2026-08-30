@@ -3,6 +3,7 @@ import {
   LodatSaleStatus,
   createPublicPostInputSchema,
   listingBodyToExcerpt,
+  postBodyToExcerpt,
   setPublicLotPublishedSchema,
   setPublicPostStatusSchema,
   updatePublicListingDraftSchema,
@@ -359,7 +360,10 @@ export async function createPublicPost(
     status: parsed.data.status,
     coverImageUrl: parsed.data.coverImageUrl ?? null,
     bodyHtml: parsed.data.bodyHtml ?? '',
-    excerpt: parsed.data.excerpt,
+    excerpt:
+      parsed.data.excerpt?.trim() ||
+      postBodyToExcerpt(parsed.data.bodyHtml) ||
+      parsed.data.title.trim(),
   };
   posts = [row, ...posts];
   return { ...row };
