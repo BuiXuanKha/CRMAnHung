@@ -129,6 +129,14 @@
   background: #fef3c7;
 }
 
+.kh-table-scroll .kh-grid-row.is-hidden {
+  color: #94a3b8;
+}
+
+.kh-table-scroll .kh-grid-row.is-hidden .kh-name-row strong {
+  text-decoration: line-through;
+}
+
 .kh-cell {
   padding: 8px 10px;
   display: flex;
@@ -249,8 +257,11 @@
   font: inherit;
 }
 
-.kh-mini-icon.chat {
-  color: #16a34a;
+.kh-hangtags {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
 }
 
 .kh-mini-icon.lodat {

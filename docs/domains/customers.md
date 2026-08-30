@@ -1,7 +1,7 @@
 # Domain: Customers (Khách hàng)
 
 - **Slug:** `customers`
-- **Status:** Ready for API — list `/khach-hang` + trang chi tiết `[id]`; **lô đất trên list/rail/chi tiết = API** (đếm + danh sách thật). **Tạo lô từ khách** vẫn chưa (menu → đang phát triển).
+- **Status:** Ready for API — list `/khach-hang` + chi tiết `[id]` trên anhungland.com; **lô đất list/rail/chi tiết = API**; **tạo lô từ khách** STAFF = form `/khach-hang/[id]/them-lo-dat`.
 - **Nguồn nghiệp vụ:** CRM đang chạy [`/khach-hang`](https://crm.anhungland.com/khach-hang) (repo `facebookcustomercrm` — đọc hiểu, không copy god-file)
 - **UI visual mới:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.1–4.3.4
 - **Contract:** `packages/shared/src/customers.ts`
@@ -18,8 +18,8 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 | Actor | List | Không |
 |-------|------|--------|
-| STAFF | Khách của mình; **sửa/xoá SĐT** và **sửa tên Facebook** của khách mình | Khách NV khác; tạo lô khi là admin; hard-delete |
-| ADMIN | Tất cả khách (cùng thao tác SĐT / tên FB trên khách đang xem) | Hard-delete / registry — **chưa làm** |
+| STAFF | Khách của mình; **sửa/xoá SĐT** của khách mình | Khách NV khác; tạo lô khi là admin; hard-delete; **không** sửa tên Facebook tay |
+| ADMIN | Tất cả khách (cùng thao tác SĐT trên khách đang xem) | Hard-delete / registry — **chưa làm**; **không** sửa tên Facebook tay |
 
 ## 3. Khái niệm
 
@@ -36,22 +36,22 @@ Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN t
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
-Đối chiếu mock [`anhungland.com/khach-hang`](https://anhungland.com/khach-hang) với CRM đang chạy [`crm.anhungland.com/khach-hang`](https://crm.anhungland.com/khach-hang).  
+Đối chiếu CRM mới [`anhungland.com/khach-hang`](https://anhungland.com/khach-hang) với CRM cũ [`crm.anhungland.com/khach-hang`](https://crm.anhungland.com/khach-hang).  
 Hành vi đích = **§12**. Làm dần theo số.
 
-Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, thêm khách (tên + SĐT), rail 3 panel (dữ liệu tĩnh), menu 7 mục.
+Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), ghim, ẩn mềm + khôi phục tay, thêm khách (tên + SĐT), rail 3 panel (API), menu thao tác.
 
-**Lô đất trên list/rail/chi tiết — đã nối API** (đếm map active, rail + thẻ chi tiết). **Tạo lô từ khách** (mục 6) vẫn tạm dừng / đang phát triển.
+**Lô đất trên list/rail/chi tiết — API** (đếm map active, rail + thẻ chi tiết). **Tạo lô từ khách** (mục 6) — STAFF form `/khach-hang/[id]/them-lo-dat`.
 
-**Hàng đợi còn lại (chốt 2026-08-24)** — không làm cho đến khi chủ bảo:
+**Hàng đợi còn lại (chốt 2026-08-24, cập nhật 2026-08-30)** — không làm cho đến khi chủ bảo:
 
 | TT | Việc | Quyết định |
 |----|------|------------|
-| 1 | Khôi phục khách ẩn (§11 mục 16) | **Chưa làm.** Phụ thuộc extension kéo khách cũ. |
+| 1 | Menu khôi phục khách ẩn (§11 mục 16) | **Xong.** «Khôi phục khách» → `PATCH isHidden: false`. |
 | 2 | Tạo hồ sơ sổ đỏ từ khách (§11 mục 7) | **Xong.** Form `/khach-hang/[id]/dich-vu-so-do`. |
 | 3 | Xoá SĐT (§11 mục 11) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
-| 4 | Sửa tên Facebook (§11 mục 13) | **Làm khi được bảo.** NV phụ trách khách (không phải thao tác chỉ admin). |
-| 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Sau** khi đã xong mục 1 (khôi phục ẩn). |
+| 4 | Sửa tên Facebook (§11 mục 13) | **Không làm.** Tên FB nhận từ extension khi scan; không modal sửa tay. |
+| 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Chưa làm.** Khi extension kéo lại khách ẩn (API ingest không tự khôi phục — §13.14). |
 | 6 | Inbox Facebook sống (§11 mục 21) | **Cần bàn rõ hơn.** |
 | 7 | Quản trị khách / hard-delete (§11 mục 26) | **Chưa làm** (phần admin). |
 
@@ -67,10 +67,10 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 10. **SĐT cam khi chưa có số** — bấm = modal thêm SĐT. Có trên staging. Trùng số → modal mục 15.
 11. **Xoá SĐT** — thùng rác + modal. **NV phụ trách khách** (không chỉ admin). Chưa làm UI/API.
 12. **Sửa tên khách** — bút trên tên (máy tính). Có trên staging.
-13. **Sửa tên Facebook** — bút trên tên FB (máy tính). **NV phụ trách khách** (không chỉ admin). Chưa làm UI/API.
+13. **Sửa tên Facebook** — **không làm.** Không bút / modal sửa tay. Tên FB (`facebookName`) do **extension** ghi khi scan.
 14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Có trên staging.
 15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Có trên staging.
-16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách». **Chưa làm** — phụ thuộc extension (chốt 2026-08-24).
+16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách» → `PATCH isHidden: false`. **Xong.** Tìm lại bằng `@` / `@@`. Extension **không** tự khôi phục (hangtag = mục 25).
 17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care, không rỗng). Có trên staging (237 khách có lịch sử).
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
@@ -79,7 +79,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc trạng thái, ghim, ẩn mềm, th
 22. **Rail danh sách lô** — thẻ lô, bấm → `/lo-dat/[id]`. **API** (`GET /customers/:id/lodats`).
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; lọc lô = icon trên cột Tên; **không** icon mess trên item. **API `lodatCount`.**
 24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Có trên staging.
-25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn. **Sau** mục 16 / hàng đợi mục 1.
+25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn. **Chưa làm.** Không phụ thuộc menu khôi phục tay (mục 16). API ingest không tự `isHidden: false` (§13.14).
 26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder. **Chưa làm** (chốt 2026-08-24).
 
 ---
@@ -137,13 +137,13 @@ Bấm → modal **Thêm khách hàng bằng số điện**: hotline * (bắt bu�
 
 #### 12.1.3 Bộ lọc
 
-CRM cũ: select trên thanh lọc. Mock mới: icon cột (cùng nghĩa).
+CRM cũ: select trên thanh lọc. CRM mới: icon cột trên desktop (cùng nghĩa); mobile = sheet Bộ lọc.
 
 - Trạng thái
-- Tài chính: chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ
+- Tài chính: tất cả / chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ
 - Kênh liên hệ: danh sách page FB + hotline của NV (API)
-- Lô đất: tất cả / chưa gắn
-- Nhu cầu: tất cả / chưa có nhu cầu
+- Lô đất: tất cả / đã gắn / chưa gắn (`lodatFilter=has|empty`)
+- Nhu cầu: tất cả / có nhu cầu / chưa có (`needFilter=has|empty`)
 
 #### 12.1.4 Item (dòng bảng)
 
@@ -183,7 +183,7 @@ Khách nét / mới / cần chăm sóc / Khác.
 ##### 8. Tên Facebook (dòng phụ)
 
 Hiện nếu khác tên CRM, hoặc có hồ sơ FB.  
-**NV phụ trách khách:** bút (máy tính) → modal **Sửa tên Facebook**. Không phải thao tác chỉ admin. Chưa làm.
+**Không** bút sửa. Tên do extension ghi khi scan.
 
 ##### 9. Nhu cầu
 
@@ -255,7 +255,7 @@ Máy tính và điện thoại **cùng quy tắc**. Ô cuộn: bảng (PC) hoặ
 #### 12.1.6 Rail phải
 
 Một panel: **Nội dung chat** (tin đã lưu) · **Lịch sử chăm sóc** · **Danh sách lô đất**.  
-Nhớ panel vừa mở (localStorage).
+**Không** nhớ panel vừa mở (không `localStorage`) — cùng [`ARCHITECTURE.md`](../ARCHITECTURE.md) và skill `crm-list-state`.
 
 ##### Nội dung chat
 
@@ -271,7 +271,7 @@ Thứ tự `SortOrder ASC, id ASC` (CRM cũ). Bong bóng: Khách / Tôi / Page /
 
 ##### Danh sách lô đất
 
-`GET /customers/:id/lodats` — map active của khách (cùng quyền xem khách). Thẻ: tiêu đề · DT · giá `crm-money`; bấm → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
+`GET /customers/:id/lodats` — map active của khách (cùng quyền xem khách). Thẻ: tiêu đề · DT · MT · hướng · giá `crm-money`; bấm → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
 
 ---
 
@@ -327,11 +327,11 @@ Cùng 12.1.3 mục 6.
 
 ##### 6. Hangtag trạng thái
 
-Cùng 12.1.3 mục 7.
+Cùng 12.1.4 mục 7 (kể hangtag **Đã xoá**).
 
 ##### 7. Tên Facebook (dòng phụ)
 
-Cùng điều kiện 12.1.3 mục 8. **Không** bút sửa FB trên thẻ.
+**Không** hiện trên thẻ.
 
 ##### 8. Nhu cầu
 
@@ -379,7 +379,7 @@ Cuộn tải 50 + nhớ vị trí/lọc: **cùng 12.1.5**. Vùng cuộn = danh s
 
 Mở: **điện thoại bấm thẻ**. Máy tính: chọn dòng + rail (không bắt buộc vào trang này).
 
-Dữ liệu khách + lịch sử: `GET /customers/:id`. **Lô đất trên trang này = mock** (chưa copy; rail list cũng mock).
+Dữ liệu khách + lịch sử: `GET /customers/:id`. **Lô đất trên trang này và rail = API** (`GET /customers/:id/lodats`).
 
 Quay lại = `/khach-hang` (mục 24 sẽ khôi phục cuộn/lọc).
 
@@ -543,7 +543,7 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 - **GET `/api/v1/users/me/hotlines`**. Chưa có hotline → Cài đặt → Quản lý SĐT (thêm / bật-tắt).
 - Thêm SĐT cam trùng: `409` kèm `mergeAllowed`. Gộp Facebook → khách chỉ có SĐT: **POST `/customers/merge-facebook-into-phone-holder`**.
 - Sửa tên: bút Lucide trên máy tính → `PATCH /customers/:id` `{ fullName }`. Không bút trên thẻ mobile.
-- Lọc tài chính: `budgetFilter=none|has|lt_1b|1b_2b|gt_2b` (khoảng chồng). Lọc kênh: `contactChannel=fb:<uid>|hotline:<id>` từ **GET `/customers/contact-channels`**.
+- Lọc tài chính: `budgetFilter=none|has|lt_1b|1b_2b|gt_2b` (khoảng chồng). Lọc kênh: `contactChannel=fb:<uid>|hotline:<id>` từ **GET `/customers/contact-channels`**. Lọc lô: `lodatFilter=has|empty`. Lọc nhu cầu: `needFilter=has|empty`.
 
 **Xong staging (2026-08-20)** — `/khach-hang` trên `anhungland.com`.
 
@@ -567,7 +567,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 
 **POST `/api/v1/customers/from-extension`** (JWT). Payload giống CRM cũ: `scan.threadId` hoặc `scan.customerUid` + `chatMessages[].imageUrls` (data URL / Facebook CDN).
 
-- Khớp khách của **NV đang login** theo thread rồi UID. Chưa có → tạo `KHACH_MOI`. **Không** tự khôi phục khách ẩn (hàng đợi §11 mục 16). **Không** đổi SĐT / không tải avatar.
+- Khớp khách của **NV đang login** theo thread rồi UID. Chưa có → tạo `KHACH_MOI`. **Không** tự khôi phục khách ẩn (hangtag §11 mục 25; menu khôi phục tay = mục 16 đã có). **Không** đổi SĐT / không tải avatar.
 - Ảnh raster mới → `sharp` WebP (cạnh dài ≤ 2560) → R2 `customers/chat/<customerId>/{mid}-{n}.webp`. Video / path `/img/imgsmessenger/` cũ: bỏ qua.
 - Tin đã có đủ ảnh (kể cả JPEG migrate đã convert WebP) → không encode lại. Gắn ảnh chat vào lô: **copy** SEO WebP, giữ file chat (cùng key WebP sau `[seo-webp-replace]`).
 - Body JSON tối đa 32MB (data URL). Tối đa 200 tin / lần.

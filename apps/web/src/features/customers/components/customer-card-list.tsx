@@ -1,7 +1,7 @@
 'use client';
 
 import type { Ref } from 'react';
-import { Map, MessageCircle, Phone, Plus, SquarePen } from 'lucide-react';
+import { Map, Phone, Plus, SquarePen } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
@@ -114,11 +114,6 @@ export function CustomerCardList({
                         <Icon icon={Phone} size={12} />
                       </button>
                     ) : null}
-                    {c.facebook ? (
-                      <span className="kh-card-chat" title="Có Facebook">
-                        <Icon icon={MessageCircle} size={12} />
-                      </span>
-                    ) : null}
                     {c.lodatCount > 0 ? (
                       <span className="kh-card-lodat" title={`${c.lodatCount} lô đất`}>
                         <Icon icon={Map} size={12} />
@@ -128,7 +123,12 @@ export function CustomerCardList({
                   </div>
                   <div className="kh-card-meta">
                     <span className="kh-card-channel">{channelLabel(c)}</span>
-                    <CrmBadge tone={statusTone(c.status)}>{statusLabel(c.status)}</CrmBadge>
+                    <span className="kh-hangtags">
+                      <CrmBadge tone={statusTone(c.status)}>{statusLabel(c.status)}</CrmBadge>
+                      {c.isHidden ? (
+                        <CrmBadge tone="red">Đã xoá</CrmBadge>
+                      ) : null}
+                    </span>
                   </div>
                   {budget !== '—' ? <span className="kh-card-budget">{budget}</span> : null}
                   {demand !== '—' ? <span className="kh-card-need">{demand}</span> : null}

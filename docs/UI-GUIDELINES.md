@@ -145,7 +145,7 @@ Cột «Số lô đất» đã bỏ — lô = icon Map + số cạnh tên; lọc
 
 ```
 ┌─ ô tìm ───── [ Bộ lọc ] [ Tìm ] ─┐
-│ thẻ: avatar  tên + gọi/chat      │
+│ thẻ: avatar  tên + gọi          │
 │              kênh    [hangtag]   │
 │              ngân sách           │
 │              nhu cầu     [sửa][▾]│
@@ -158,7 +158,7 @@ Cột «Số lô đất» đã bỏ — lô = icon Map + số cạnh tên; lọc
 | Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel lọc inline: trạng thái, tài chính, kênh, lô đất, nhu cầu. Ẩn nút «Thêm khách…» trên thanh (chuyển xuống đáy) |
 | Thẻ | Grid `48px / 1fr / auto`. Ghim: nền `#fef9c3` + viền trái `#ca8a04`. **Không** `<button>` chứa `<div>`. `flex-shrink: 0` |
 | Trái | Avatar tròn 48px (ảnh FB hoặc initials) |
-| Giữa | Tên; SĐT **xanh** = gọi `tel:`; SĐT **cam** = thêm số; Map+số nếu có lô; hangtag; kênh; ngân sách; nhu cầu |
+| Giữa | Tên; SĐT **xanh** = gọi `tel:`; SĐT **cam** = thêm số; Map+số nếu có lô; hangtag (kể **Đã xoá**); kênh; ngân sách; nhu cầu. **Không** tên Facebook; **không** icon mess |
 | Phải | `SquarePen` = Cập nhật chăm sóc; chevron = menu §4.3.3 |
 | Bấm thẻ | Mở `/khach-hang/[id]` |
 | Footer | `All N / M` · `KN` · `KM` · `CCS` · `KH` · `ĐG` (ghim) |
@@ -473,7 +473,7 @@ Icon trong bảng / menu: **chỉ Lucide** (§4.7). Avatar giữ quy tắc dư�
 | Phần | Quy tắc |
 |------|---------|
 | Avatar | Tròn **32×32**; ảnh hoặc chữ tắt; nền `#e2e8f0` |
-| Icon phụ cạnh tên | Lucide **12px**; SĐT `Phone` **xanh** `#047857` khi đã có số (bấm = copy + tick); **cam** `#ea580c` khi chưa có số (bấm = modal thêm SĐT); chat/FB `MessageCircle` màu `#16a34a` — **cấm** emoji |
+| Icon phụ cạnh tên | Lucide **12px**; SĐT `Phone` **xanh** `#047857` khi đã có số (bấm = copy + tick); **cam** `#ea580c` khi chưa có số (bấm = modal thêm SĐT). List `/khach-hang`: **không** icon `MessageCircle` cạnh tên — chat chỉ trong menu thao tác. **Cấm** emoji |
 | Hangtag | Component `CrmBadge` — pill bo tròn; padding `2px 10px`; **không** shadow |
 | Tone `green` | Nền `#dcfce7` / chữ `#166534` (vd. Khách nét) |
 | Tone `blue` | Nền `#dbeafe` / chữ `#1e3a8a` (vd. Khách mới) |
@@ -662,11 +662,11 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | Menu trong Dashboard: **Lô đất** (trước: Lô đất public mở bán) |
 | 2026-08-26 | `/dashboard/lo-dat` panel phải: tiêu đề **Preview Post** |
 | 2026-08-26 | `/dashboard/lo-dat`: lọc cột §4.5.5 (ảnh, địa chỉ, phân loại, DT/hướng, giá, NV, Web); mobile Bộ lọc |
-<<<<<<< HEAD
 | 2026-08-30 | Dialog CRM mobile: panel không tràn viewport; ô file dùng hàng «Chọn tệp» + tên (không native width) |
-=======
 | 2026-08-30 | `/dich-vu-so-do` mobile: bấm thẻ / Xem chi tiết → trang `/dich-vu-so-do/[id]` (panel vẫn máy tính) |
->>>>>>> origin/cursor/sd-mobile-detail-c753
+| 2026-08-30 | Docs `/khach-hang` khớp code: tạo lô từ khách STAFF; menu khôi phục ẩn; lô rail/chi tiết = API; không nhớ panel rail; lọc lô/nhu cầu `has|empty` |
+| 2026-08-30 | Khách: **không** modal sửa tên Facebook — tên FB nhận từ extension khi scan |
+| 2026-08-30 | List `/khach-hang`: bỏ icon mess cạnh tên; hangtag **Đã xoá** khi `isHidden`; thẻ mobile **không** tên Facebook |
 
 ---
 
