@@ -27,13 +27,6 @@
   white-space: nowrap;
 }
 
-.pd-breadcrumb-loc {
-  max-width: min(28ch, 100%);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 .pd-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(280px, 320px);
@@ -578,8 +571,7 @@
     margin-bottom: 14px;
   }
 
-  .pd-breadcrumb > span:last-child,
-  .pd-breadcrumb-loc {
+  .pd-breadcrumb > span:last-child {
     flex: 1 1 100%;
     max-width: 100%;
     white-space: normal;

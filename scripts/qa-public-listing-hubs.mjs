@@ -329,6 +329,24 @@ if (
 } else {
   bad('listing-seo chưa tách alt ảnh /addresses/');
 }
+if (
+  listingSeoSrc.includes('listingCommuneHubCrumb') &&
+  listingSeoSrc.includes('listingCommuneHubPath')
+) {
+  ok('JSON-LD breadcrumb lô có hub xã');
+} else {
+  bad('listingBreadcrumbJsonLd chưa nối hub xã');
+}
+
+const lotDetailSrc = read('apps/web/src/features/public/product-detail.tsx');
+if (
+  lotDetailSrc.includes('listingCommuneHubCrumb') &&
+  !lotDetailSrc.includes('pd-breadcrumb-loc')
+) {
+  ok('breadcrumb chi tiết lô = tên xã, không nhồi location');
+} else {
+  bad('product-detail breadcrumb còn location đầy đủ');
+}
 
 const publishSeoSrc = read('apps/api/src/modules/public-content/public-content.service.ts');
 if (

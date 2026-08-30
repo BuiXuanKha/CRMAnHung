@@ -7,7 +7,7 @@ import {
 import { LotDetailMetaPixel } from './lot-detail-meta-pixel';
 import type { PublicListingView, RelatedListingSection } from './published-listings';
 import { getProductBySlug } from './mock-data';
-import { listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
+import { listingCommuneHubCrumb, listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import { listingShareText } from './share';
 import { PUBLIC_LISTING_PATH, listingCanonicalUrl, listingHref } from './site';
@@ -38,6 +38,7 @@ export function ProductDetailView({
   const price = listing.priceLabel ?? 'Liên hệ';
   const area = listing.areaLabel;
   const h1 = listingPageH1(listing);
+  const communeCrumb = listingCommuneHubCrumb(listing);
   const bodyHtml = sanitizeListingHtml(listing.bodyHtml ?? '');
   const fallbackBody = product?.description?.trim() || '';
   const showHtmlBody = Boolean(bodyHtml);
@@ -85,9 +86,9 @@ export function ProductDetailView({
           <span aria-hidden>/</span>
           <Link href={PUBLIC_LISTING_PATH}>Nhà đất đang bán</Link>
           <span aria-hidden>/</span>
-          {listing.location ? (
+          {communeCrumb ? (
             <>
-              <span className="pd-breadcrumb-loc">{listing.location}</span>
+              <Link href={communeCrumb.href}>{communeCrumb.name}</Link>
               <span aria-hidden>/</span>
             </>
           ) : null}

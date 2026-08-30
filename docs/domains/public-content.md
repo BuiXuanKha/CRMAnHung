@@ -563,7 +563,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 | `/san-pham/…` → `/mua-ban-nha-dat/…` permanent | OK (308) |
 | Slug giả / đã gỡ → 404 + `noindex` | OK |
 | View Source có H1 + excerpt SSR | OK — meta/OG dùng excerpt; **on-page**: có `bodyHtml` thì không hiện lead `excerpt` (tránh trùng copy) |
-| Layout chi tiết lô | Gallery · breadcrumb · H1 · địa chỉ · **một** strip Giá/DT/Hướng + Zalo/hotline hiện đủ số; không lặp Loại/Hướng ở lưới phụ |
+| Layout chi tiết lô | Gallery · breadcrumb (Trang chủ → Nhà đất đang bán → **tên xã** → H1) · H1 · địa chỉ đủ dưới H1 · **một** strip Giá/DT/Hướng + Zalo/hotline hiện đủ số; không lặp Loại/Hướng ở lưới phụ |
 | Chia sẻ | Copy **mô tả HTML→plain giữ xuống dòng** + URL (không nhồi H1/giá trùng). Mở Facebook để dán; không dùng sharer/`navigator.share` |
 | robots cho phép list; chặn CRM `/login`… | OK (kèm Cloudflare managed) |
 
@@ -672,7 +672,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 1. Hub chỉ **index** khi có ≥ 1 lô Đang hiện (`isPublished` ∩ Mở bán). Hub 0 lô → **404 + noindex**, bỏ khỏi sitemap.
 2. Gom lô: cấp 3 = `wardId`; cấp 4 = `address.detail` **trong** ward đó. Không parse chuỗi `location` làm nguồn sự thật.
 3. Slug ổn định; trùng tên xã khác huyện → suffix huyện (vd. `nam-trung-nam-sach`). Slug cấp 4 unique trong phạm vi xã.
-4. Related trên chi tiết lô: «cùng xã» → hub xã; «tại KĐT/thôn» → hub `xa/.../slug-c4`.
+4. Related trên chi tiết lô: «cùng xã» → hub xã; «tại KĐT/thôn» → hub `xa/.../slug-c4`. Breadcrumb chi tiết lô: Trang chủ → Nhà đất đang bán → **{tên xã}** (link hub `/xa/…`) → H1. Không nhồi `location` đầy đủ vào crumb (thôn/huyện/tỉnh vẫn dưới H1).
 5. Path cũ `/mua-ban-nha-dat`, `/san-pham` **không** redirect (site mới — chỉ dùng path mới).
 
 ### 17.3 Checklist triển khai (làm lần lượt)

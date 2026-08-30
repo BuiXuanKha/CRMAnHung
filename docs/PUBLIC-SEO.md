@@ -134,7 +134,7 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 | **OG / Twitter** | title + description như trên; `og:image` = ảnh bìa; thiếu bìa → `/og-default.png`; `summary_large_image` | Ảnh PII / ảnh nội bộ CRM |
 | **Ảnh / Google Images** | `alt` = tên lô + địa chỉ; gallery SSR đủ URL; sitemap `image:loc`; JSON-LD `ImageObject` (caption từ title/location). Xem §10 | `alt` rỗng / nhồi keyword; chặn Googlebot tải CDN; sitemap `/og-default.png` |
 | **JSON-LD** | `RealEstateListing` + `BreadcrumbList`. `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số | AggregateRating giả; giá map CRM |
-| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → lô; block sản phẩm khác; list + hub `/xa/…` | Orphan URL |
+| **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → **xã** (`/xa/…`) → lô; block sản phẩm khác | Orphan URL; crumb nhồi cả chuỗi thôn + huyện + tỉnh |
 | **Sitemap** | Chỉ lô `isPublished` (+ hub xã/cấp4 có lô). Mỗi URL lô kèm `image:image` (bìa + gallery CDN). Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán; ảnh brand fallback |
 | **robots** | Cho phép path catalog mới; chặn `/login` + CRM | `Disallow` path catalog |
 

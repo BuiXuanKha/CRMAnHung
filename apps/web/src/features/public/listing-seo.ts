@@ -17,6 +17,7 @@ import {
   PUBLIC_OG_DEFAULT,
   PUBLIC_SITE_ORIGIN,
   listingCanonicalUrl,
+  listingCommuneHubPath,
   toAbsoluteUrl,
 } from './site';
 
@@ -222,25 +223,50 @@ export function listingJsonLd(listing: PublicGuestListing & { placeLabel?: strin
   };
 }
 
-export function listingBreadcrumbJsonLd(listing: PublicGuestListing) {
+export function listingCommuneHubCrumb(listing: {
+  communeSlug?: string | null;
+  communeLabel?: string | null;
+}): { name: string; href: string } | null {
+  const slug = listing.communeSlug?.trim();
+  if (!slug) return null;
+  const name = listing.communeLabel?.trim() || slug;
+  return { name, href: listingCommuneHubPath(slug) };
+}
+
+export function listingBreadcrumbJsonLd(
+  listing: PublicGuestListing & {
+    communeSlug?: string | null;
+    communeLabel?: string | null;
+  },
+) {
+  const commune = listingCommuneHubCrumb(listing);
+  const items: Array<{ '@type': 'ListItem'; position: number; name: string; item: string }> = [
+    { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: PUBLIC_SITE_ORIGIN },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: SAN_PHAM_LIST_TITLE,
+      item: `${PUBLIC_SITE_ORIGIN}${SAN_PHAM_LIST_PATH}`,
+    },
+  ];
+  if (commune) {
+    items.push({
+      '@type': 'ListItem',
+      position: 3,
+      name: commune.name,
+      item: `${PUBLIC_SITE_ORIGIN}${commune.href}`,
+    });
+  }
+  items.push({
+    '@type': 'ListItem',
+    position: items.length + 1,
+    name: listingPageH1(listing),
+    item: listingCanonicalUrl(listing.slug),
+  });
   return {
     '@context': 'https://schema.org',
     '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Trang chủ', item: PUBLIC_SITE_ORIGIN },
-      {
-        '@type': 'ListItem',
-        position: 2,
-        name: SAN_PHAM_LIST_TITLE,
-        item: `${PUBLIC_SITE_ORIGIN}${SAN_PHAM_LIST_PATH}`,
-      },
-      {
-        '@type': 'ListItem',
-        position: 3,
-        name: listingHeadline(listing),
-        item: listingCanonicalUrl(listing.slug),
-      },
-    ],
+    itemListElement: items,
   };
 }
 
