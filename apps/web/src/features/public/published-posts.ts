@@ -1,6 +1,7 @@
 import {
   PublicPostCategory,
   PUBLIC_POST_CATEGORY_LABELS,
+  clipMetaDescription,
   type PublicGuestPost,
 } from '@crmanhung/shared';
 import {
@@ -9,6 +10,8 @@ import {
 } from '@/features/public-content/api';
 import { isMockPublicWeb } from '@/shared/api/mode';
 import { PUBLIC_ARTICLES } from './mock-data';
+
+export { shouldShowPostLead } from '@crmanhung/shared';
 
 const CATEGORY_SET = new Set<string>(Object.values(PublicPostCategory));
 
@@ -23,6 +26,11 @@ export function publicPostCategoryLabel(category: string): string {
 
 export function postHref(category: string, slug: string): string {
   return `/${category}/${slug}`;
+}
+
+/** Card teaser only — never dump a stored 2000-char body into list UI. */
+export function teaserExcerpt(text: string): string {
+  return clipMetaDescription(text);
 }
 
 function mockArticlesAsGuest(): PublicGuestPost[] {

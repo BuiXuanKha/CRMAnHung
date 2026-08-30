@@ -2,7 +2,12 @@ import Link from 'next/link';
 import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { sanitizeListingHtml } from './sanitize-listing-html';
-import { postHref, publicPostCategoryLabel } from './published-posts';
+import {
+  postHref,
+  publicPostCategoryLabel,
+  shouldShowPostLead,
+  teaserExcerpt,
+} from './published-posts';
 import './public-home.css';
 import './product-detail.css';
 
@@ -70,7 +75,7 @@ export function PostArticleView({
             ) : null}
           </p>
           <h1>{post.title}</h1>
-          {post.excerpt ? <p className="pd-lead">{post.excerpt}</p> : null}
+          {shouldShowPostLead(post) ? <p className="pd-lead">{post.excerpt}</p> : null}
 
           {post.coverImageUrl ? (
             <div className="pd-gallery" style={{ marginBottom: 24 }}>
@@ -113,7 +118,7 @@ export function PostArticleView({
                     <span className="ph-article-idx">{String(idx + 1).padStart(2, '0')}</span>
                     <div>
                       <h3>{item.title}</h3>
-                      <p className="ph-article-excerpt">{item.excerpt}</p>
+                      <p className="ph-article-excerpt">{teaserExcerpt(item.excerpt)}</p>
                     </div>
                   </div>
                 </Link>

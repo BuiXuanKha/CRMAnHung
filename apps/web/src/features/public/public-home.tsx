@@ -7,7 +7,7 @@ import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { HomeProductSection } from './home-product-section';
 import { PUBLIC_LISTING_PATH } from './site';
-import { postHref, publicPostCategoryLabel } from './published-posts';
+import { postHref, publicPostCategoryLabel, teaserExcerpt } from './published-posts';
 import {
   PROJECT_STATUS_LABEL,
   PUBLIC_PROJECTS,
@@ -168,7 +168,7 @@ export function PublicHome({
                   <div>
                     <p className="ph-article-cat">{publicPostCategoryLabel(a.category)}</p>
                     <h3>{a.title}</h3>
-                    <p className="ph-article-excerpt">{a.excerpt}</p>
+                    <p className="ph-article-excerpt">{teaserExcerpt(a.excerpt)}</p>
                   </div>
                 </div>
               </Link>

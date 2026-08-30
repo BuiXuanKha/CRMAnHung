@@ -9,6 +9,7 @@ import {
   PUBLIC_MEDIA_ACCEPT_MIME,
   PUBLIC_MEDIA_MAX_BYTES,
   listingBodyToExcerpt,
+  postBodyToExcerpt,
 } from '@crmanhung/shared';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -707,7 +708,7 @@ export class PublicContentService {
     const bodyHtml = dto.bodyHtml ?? '';
     const excerpt =
       dto.excerpt?.trim() ||
-      listingBodyToExcerpt(bodyHtml) ||
+      postBodyToExcerpt(bodyHtml) ||
       dto.title.trim();
     const slugBase = dto.slug?.trim()
       ? toPublicSlug(dto.slug, 80)

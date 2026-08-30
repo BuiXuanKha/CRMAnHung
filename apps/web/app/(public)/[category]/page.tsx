@@ -11,6 +11,7 @@ import {
   listPublicGuestPosts,
   postHref,
   publicPostCategoryLabel,
+  teaserExcerpt,
 } from '@/features/public/published-posts';
 import { JsonLd } from '@/features/public/json-ld';
 import { categoryListMetadata, postItemListJsonLd } from '@/features/public/post-seo';
@@ -96,7 +97,7 @@ export default async function PublicCategoryListPage({ params }: Props) {
                   <span className="ph-article-idx">{String(idx + 1).padStart(2, '0')}</span>
                   <div>
                     <h3>{a.title}</h3>
-                    <p className="ph-article-excerpt">{a.excerpt}</p>
+                    <p className="ph-article-excerpt">{teaserExcerpt(a.excerpt)}</p>
                   </div>
                 </div>
               </Link>
