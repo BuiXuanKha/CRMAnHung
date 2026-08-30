@@ -63,6 +63,7 @@ type PublicPostRow = {
 
 const ADDR_SELECT = {
   id: true,
+  kind: true,
   detail: true,
   ward: { select: { id: true, name: true, isHidden: true } },
   district: { select: { id: true, name: true, isHidden: true } },
@@ -655,7 +656,8 @@ export class PublicContentService {
     const priceLabel =
       row.priceMode === 'AMOUNT' && row.priceLabel?.trim() ? row.priceLabel.trim() : null;
 
-    const geo = hubMaps ? addressGeo(this.lodatAddress(lodat)) : null;
+    const addr = this.lodatAddress(lodat);
+    const geo = hubMaps ? addressGeo(addr) : null;
     const commune = hubMaps ? communeMetaForGeo(hubMaps, geo) : null;
     const place = hubMaps ? placeMetaForGeo(hubMaps, geo) : null;
 
@@ -689,6 +691,7 @@ export class PublicContentService {
             placeLabel: place.label,
           }
         : {}),
+      ...(addr?.kind ? { addressKind: addr.kind } : {}),
     };
   }
 

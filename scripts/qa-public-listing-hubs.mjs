@@ -347,6 +347,32 @@ if (
 } else {
   bad('product-detail breadcrumb còn location đầy đủ');
 }
+if (
+  lotDetailSrc.includes('relatedSections') &&
+  lotDetailSrc.includes('RelatedListingBlock')
+) {
+  ok('chi tiết lô render nhiều block related');
+} else {
+  bad('product-detail chưa nhận relatedSections');
+}
+
+const relatedSrc = read('apps/web/src/features/public/related-listings.ts');
+if (
+  relatedSrc.includes("Đất dự án khu vực Nam Sách") &&
+  relatedSrc.includes('PROJECT_RELATED_HUB_LIMIT = 3') &&
+  relatedSrc.includes('AddressKind.PROJECT')
+) {
+  ok('related: 3 khu PROJECT nhiều lô nhất');
+} else {
+  bad('related-listings chưa có block đất dự án Nam Sách');
+}
+
+const catalogSchemaSrc = read('packages/shared/src/public-content.ts');
+if (catalogSchemaSrc.includes('addressKind')) {
+  ok('catalog guest có addressKind');
+} else {
+  bad('publicListingCardSchema thiếu addressKind');
+}
 
 const publishSeoSrc = read('apps/api/src/modules/public-content/public-content.service.ts');
 if (

@@ -6,7 +6,7 @@
  * SERP snippet falls back to `excerpt`. Editor modal may fill it later.
  */
 import { z } from 'zod';
-import { LodatKind, PublicPostCategory, PublicPostStatus } from './enums.js';
+import { AddressKind, LodatKind, PublicPostCategory, PublicPostStatus } from './enums.js';
 
 /** Google snippet length — clip excerpt / metaDescription to this. */
 export const META_DESCRIPTION_MAX = 160;
@@ -251,6 +251,8 @@ export const publicListingCardSchema = publicGuestListingSchema.extend({
   /** Hub cấp 4 trong xã (thôn/KĐT/dự án) — `Address.detail`. Not area m². */
   placeSlug: z.string().min(1).nullable().optional(),
   placeLabel: z.string().min(1).nullable().optional(),
+  /** `PROJECT` = lô kho / KĐT; `REGULAR` = đất dân. Guest-safe. */
+  addressKind: z.nativeEnum(AddressKind).nullable().optional(),
 });
 
 export type PublicListingCard = z.infer<typeof publicListingCardSchema>;
