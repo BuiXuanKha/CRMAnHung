@@ -327,11 +327,11 @@ Cùng 12.1.3 mục 6.
 
 ##### 6. Hangtag trạng thái
 
-Cùng 12.1.3 mục 7.
+Cùng 12.1.4 mục 7 (kể hangtag **Đã xoá**).
 
 ##### 7. Tên Facebook (dòng phụ)
 
-Cùng 12.1.4 mục 8. **Không** bút sửa (máy tính cũng không).
+**Không** hiện trên thẻ.
 
 ##### 8. Nhu cầu
 

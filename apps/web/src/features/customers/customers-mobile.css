@@ -250,7 +250,6 @@
 
   .kh-card-call,
   .kh-card-call-add,
-  .kh-card-chat,
   .kh-card-lodat {
     flex-shrink: 0;
     display: inline-flex;
@@ -280,12 +279,6 @@
     font: inherit;
   }
 
-  .kh-card-chat {
-    border: 1px solid #bbf7d0;
-    background: #f0fdf4;
-    color: #15803d;
-  }
-
   .kh-card-lodat {
     width: auto;
     padding: 0 6px;
@@ -299,6 +292,10 @@
     align-items: center;
     gap: 8px;
     min-width: 0;
+  }
+
+  .kh-card-meta .kh-hangtags {
+    flex-shrink: 0;
   }
 
   .kh-card-channel {

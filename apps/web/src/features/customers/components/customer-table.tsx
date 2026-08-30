@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, type Ref } from 'react';
-import { Check, Map, MessageCircle, Pencil, Phone } from 'lucide-react';
+import { Check, Map, Pencil, Phone } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
 import { ColumnFilter, type ColumnFilterOption } from '@/shared/ui/column-filter';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -195,6 +195,7 @@ export function CustomerTable({
                 'kh-grid-row',
                 c.isPinned ? 'is-hot' : '',
                 selectedId === c.id ? 'is-selected' : '',
+                c.isHidden ? 'is-hidden' : '',
                 menuId === c.id ? 'is-menu-open' : '',
               ]
                 .filter(Boolean)
@@ -281,13 +282,13 @@ export function CustomerTable({
                           <span className="kh-lodat-count">{c.lodatCount}</span>
                         </span>
                       ) : null}
-                      {c.facebook ? (
-                        <span className="kh-mini-icon chat" title="Có Facebook">
-                          <Icon icon={MessageCircle} size="mini" />
-                        </span>
+                    </div>
+                    <div className="kh-hangtags">
+                      <CrmBadge tone={statusTone(c.status)}>{statusLabel(c.status)}</CrmBadge>
+                      {c.isHidden ? (
+                        <CrmBadge tone="red">Đã xoá</CrmBadge>
                       ) : null}
                     </div>
-                    <CrmBadge tone={statusTone(c.status)}>{statusLabel(c.status)}</CrmBadge>
                     {c.facebook?.facebookName ? (
                       <span className="kh-sub">{c.facebook.facebookName}</span>
                     ) : null}
