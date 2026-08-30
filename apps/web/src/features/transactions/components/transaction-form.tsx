@@ -179,14 +179,12 @@ export function TransactionFormFields({
         <div className="tx-form-row2">
           <PartyFields
             label="Người bán"
-            addLabel="Thêm người bán"
             values={values.sellers}
             disabled={busy}
             onChange={(sellers) => onChange({ ...values, sellers })}
           />
           <PartyFields
             label="Người mua"
-            addLabel="Thêm người mua"
             values={values.buyers}
             disabled={busy}
             onChange={(buyers) => onChange({ ...values, buyers })}

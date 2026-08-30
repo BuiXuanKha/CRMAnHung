@@ -375,7 +375,7 @@ Tạo: status luôn **Đã cọc**; không chọn trạng thái. OWN bắt buộ
 ┌ ← Quay lại · tiêu đề Tạo / Sửa mã GD ────────────────────────┐
 ├ Thẻ loại · lô (picker khi tạo) · trạng thái (chỉ sửa)        │
 ├ Giá · thuế · HH · hẹn CC                                     │
-├ Người bán · Người mua (thêm dòng / chọn khách)               │
+├ Người bán · Người mua (ô tìm → hangtag)                      │
 ├ Ghi chú · lý do hủy (khi HUY)                                │
 └ Huỷ · Lưu ───────────────────────────────────────────────────┘
 ```
@@ -406,7 +406,7 @@ Số VND, format nghìn. RECORD: ô HH disabled.
 
 ##### 7. Người bán / mua
 
-Mỗi bên ≥ 1 tên lúc Lưu. Thêm dòng; xoá nếu còn >1. Gõ tên hoặc chọn khách CRM (điền tên + `customerId`). **Tạo:** điền sẵn người bán = chủ lô (`owner`); đổi lô trên picker thì thay dòng bán. Lô chưa có chủ → báo, khoá Lưu.
+Mỗi bên ≥ 1 hangtag lúc Lưu. **Không** nút «+ Thêm người…». Ô tìm: gõ tên/SĐT → danh sách avatar + tên + SĐT. Chọn → hangtag (`CrmBadge`: khách CRM `blue`, tên tự gõ `gray`) trong ô; × xoá. Gõ tiếp để thêm người. Enter / «Dùng tên này» khi không có trong CRM (`freeTextName`, không `customerId`). **Tạo:** điền sẵn hangtag người bán = chủ lô (`owner`); đổi lô thì thay bên bán. Lô chưa có chủ → báo, khoá Lưu.
 
 ##### 8. Ghi chú
 
