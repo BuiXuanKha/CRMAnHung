@@ -178,7 +178,7 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 
 | Mục | Việc |
 |-----|------|
-| Xem chi tiết | Chọn + mở panel. Route `[id]` vẫn placeholder |
+| Xem chi tiết | Chọn + mở panel. Route `[id]` vẫn placeholder. Menu portal `document.body` (cùng lô/GD), không để overflow bảng cắt |
 | Ghim / Bỏ ghim | `isPinned` |
 | Thêm tiến độ | Dialog mock |
 | Nhập thu | Dialog mock |
