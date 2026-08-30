@@ -178,7 +178,7 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 
 | Mục | Việc |
 |-----|------|
-| Xem chi tiết | Chọn + mở panel. Route `[id]` vẫn placeholder. Menu portal `document.body` (cùng lô/GD), không để overflow bảng cắt |
+| Xem chi tiết | `/dich-vu-so-do/[id]`. Máy tính: bấm dòng vẫn mở panel. Menu portal `document.body` |
 | Ghim / Bỏ ghim | `isPinned` |
 | Thêm tiến độ | Dialog mock |
 | Nhập thu | Dialog mock |
@@ -231,7 +231,7 @@ Máy tính (thân bảng) và mobile (danh sách thẻ) cùng quy tắc.
 └ Không bảng, không panel, không nút thêm ─────────────────────┘
 ```
 
-**Bấm thẻ** (không phải menu) → chọn dòng. **Không** nhảy `[id]`.
+**Bấm thẻ** (không phải menu) → `/dich-vu-so-do/[id]`. Chevron = menu.
 
 #### 12.2.1 Ô tìm + nút Tìm
 
@@ -267,9 +267,15 @@ Nhớ tìm / lọc / cuộn: **cùng 12.1.6**. Vùng cuộn = danh sách thẻ.
 
 ### 12.3 Chi tiết `/dich-vu-so-do/[id]`
 
-Placeholder: mã + quay lại. Làm việc hàng ngày = list + panel (máy tính) / menu (cả hai).
+Cùng nội dung panel: tên + mã · SĐT; Trạng thái / Giá / Thu / Chi; nhu cầu; `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline, file, thu/chi. Quay lại `/dich-vu-so-do` (giữ list-state).
 
-Link `/dich-vu-so-do`. Giữ ô tìm / lọc list (list-state).
+#### 12.3.1 Máy tính
+
+Một cột, max ~720px. Cùng field panel.
+
+#### 12.3.2 Mobile
+
+Cùng 12.3.1. Ô/nút 16px. Nút nhanh 2×2.
 
 ---
 
