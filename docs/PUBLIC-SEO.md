@@ -29,7 +29,7 @@ Mỗi route public phải có:
 | `alternates.canonical` | URL tuyệt đối `https://anhungland.com/...` |
 | Open Graph | `openGraph.title`, `.description`, `.url`, `.siteName`, `.locale` (`vi_VN`), `.type` |
 | Twitter card | `twitter.card` = `summary_large_image` (khi có ảnh) + title/description |
-| `robots` | **Hiện tại:** `noindex` toàn bộ HTML công khai cho đến khi bật `PUBLIC_SEO_INDEX=1` (§11). Sau khi bật: index trang hữu ích; `noindex` trang lỗi / tạm / trùng |
+| `robots` | Production: `index, follow` trang hữu ích khi `PUBLIC_SEO_INDEX=1` (§11). Local mặc định `noindex`. `noindex` trang lỗi / tạm / trùng / CRM |
 
 **Không** để title/description mặc định giống nhau mọi trang.
 
@@ -45,7 +45,7 @@ Mỗi route public phải có:
 
 | Hạng mục | Quy ước |
 |----------|---------|
-| `app/robots.ts` | Cho phép crawl public (để bot đọc `noindex`); chặn `/login`, khu `(crm)` (`/khach-hang`, `/lo-dat`, …). **Không** `Sitemap:` khi cờ index tắt |
+| `app/robots.ts` | Cho phép crawl public; chặn `/login`, khu `(crm)` (`/khach-hang`, `/lo-dat`, …). Dòng `Sitemap:` chỉ khi cờ index bật |
 | `app/sitemap.ts` | Khi cờ tắt: rỗng. Khi bật: URL public ổn định + **lô đã đăng** `/mua-ban-nha-dat-huyen-nam-sach/[slug]` (+ hub `/xa/…` khi có) |
 | HTTPS | Chỉ `https://anhungland.com` (www → apex hoặc ngược lại — một hướng, khớp canonical) |
 | `lang` | `<html lang="vi">` (đã có ở root layout) |
@@ -82,7 +82,7 @@ Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem 
 ## Không làm trên web công khai
 
 - Nhét toàn bộ CRM / dữ liệu khách lên route public.
-- `noindex` nhầm trang marketing cần xếp hạng (ngoại trừ giai đoạn tạm đóng index — §11).
+- `noindex` nhầm trang marketing cần xếp hạng (trừ khi cờ index tắt — §11).
 - Duplicate: cùng nội dung ở nhiều URL mà không canonical.
 - Client-only shell trống rồi mới hydrate nội dung chính.
 
@@ -220,23 +220,26 @@ Google **bỏ** `image:caption` / `image:title` / `image:geo_location` trong sit
 
 ---
 
-## 11. Tạm đóng index (đến khi site ổn)
+## 11. Cờ index công khai (`PUBLIC_SEO_INDEX`)
 
-Web công khai đang **chưa** mời Google/Bing xếp hạng. HTML vẫn crawl được; meta là `noindex, follow` để bot đọc tín hiệu và **không** đưa URL vào kết quả tìm kiếm. **Không** `Disallow: /` — nếu chặn crawl thì bot không thấy `noindex`, trang đã index có thể kẹt lâu hơn. **Không** chặn Googlebot trên `cdn.anhungland.com`.
+Production `anhungland.com` **đang mời Google/Bing xếp hạng** (owner bật 2026-08-30). HTML public hữu ích = `index, follow`. `/robots.txt` có `Sitemap:`. `/sitemap.xml` có URL lô/bài/hub đã đăng. **Không** `Disallow: /`. **Không** chặn Googlebot trên `cdn.anhungland.com`.
 
-| Hạng mục | Khi cờ tắt (mặc định) | Khi bật |
-|----------|----------------------|---------|
+Local/dev không set cờ → `noindex, follow` + sitemap rỗng (tránh index máy dev).
+
+| Hạng mục | Cờ tắt | Cờ bật (production) |
+|----------|--------|---------------------|
 | Meta `robots` | `noindex, follow` mọi trang `(public)` | `index, follow` trang hữu ích |
 | `robots.txt` | Allow `/`; **không** dòng `Sitemap:` | Allow `/` + `Sitemap: https://anhungland.com/sitemap.xml` |
 | `sitemap.xml` | Rỗng | URL lô/bài/hub đã đăng như §3 / §7 / §9 |
 | 404 / CRM / login | `noindex, nofollow` (không đổi) | không đổi |
 
-**Bật index sau khi hoàn thiện cơ bản** (cần rebuild Next, không chỉ restart PM2):
+`remote_deploy.sh` ghi `PUBLIC_SEO_INDEX=1` vào `apps/web/.env.production` **nếu chưa có dòng đó**. Không ghi đè `PUBLIC_SEO_INDEX=0`. Cần rebuild Next (deploy), không chỉ restart PM2.
 
-1. Trên VPS, thêm vào `apps/web/.env.production`: `PUBLIC_SEO_INDEX=1`
-2. **Không** ghi sẵn `=1` trong `scripts/remote_deploy.sh` (file `.env.production` trên server đã tồn tại).
-3. Deploy / rebuild web (`pnpm --filter @crmanhung/web build` trên VPS qua Actions).
-4. Kiểm tra HTML có `index, follow`; `/robots.txt` có `Sitemap:`; `/sitemap.xml` có URL lô.
+**Tắt lại** (cần rebuild):
 
-Cờ cũng nhận `NEXT_PUBLIC_SEO_INDEX=1` / `true`. Tắt = bỏ dòng hoặc đặt khác `1`/`true`.
+1. Trên VPS, trong `apps/web/.env.production`: đặt `PUBLIC_SEO_INDEX=0` (đừng xóa dòng — lần deploy sau sẽ ghi lại `=1` nếu thiếu).
+2. Deploy / rebuild web (`pnpm --filter @crmanhung/web build` trên VPS qua Actions).
+3. Kiểm tra HTML có `noindex, follow`; `/robots.txt` không có `Sitemap:`; `/sitemap.xml` rỗng.
+
+Cờ cũng nhận `NEXT_PUBLIC_SEO_INDEX=1` / `true`. Tắt = `0` / `false` / khác `1`/`true`.
 

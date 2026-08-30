@@ -140,6 +140,23 @@ if (
   bad('thiếu apps/web/src/features/public/search-index.ts');
 }
 
+const remoteDeploy = read('scripts/remote_deploy.sh');
+if (
+  remoteDeploy.includes('PUBLIC_SEO_INDEX=1') &&
+  remoteDeploy.includes('^PUBLIC_SEO_INDEX=')
+) {
+  ok('remote_deploy.sh ghi PUBLIC_SEO_INDEX=1 nếu chưa có');
+} else {
+  bad('remote_deploy.sh chưa ensure PUBLIC_SEO_INDEX');
+}
+
+const webEcosystem = read('apps/web/ecosystem.config.cjs');
+if (webEcosystem.includes('PUBLIC_SEO_INDEX')) {
+  ok('PM2 web truyền PUBLIC_SEO_INDEX lúc ISR');
+} else {
+  bad('ecosystem.config.cjs chưa truyền PUBLIC_SEO_INDEX');
+}
+
 const publicLayout = read('apps/web/app/(public)/layout.tsx');
 if (publicLayout.includes('publicSearchRobots')) {
   ok('(public)/layout robots theo cờ index');

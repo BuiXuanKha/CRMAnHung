@@ -12,7 +12,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 - **Có:** route `(public)/`, landing, trang khách không login trên `anhungland.com`
 - **Không:** màn CRM sau login (ưu tiên UX/auth, thường `noindex`)
 
-**Tạm đóng index:** mặc định `noindex, follow` + sitemap rỗng. Chỉ bật khi owner bảo index: `PUBLIC_SEO_INDEX=1` trong `apps/web/.env.production` rồi rebuild — [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §11. Không `Disallow: /`. Không chặn Googlebot trên CDN.
+**Index:** production `anhungland.com` đang `PUBLIC_SEO_INDEX=1` (`index, follow` + sitemap). Local mặc định `noindex`. Tắt: `PUBLIC_SEO_INDEX=0` trên VPS rồi rebuild — [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §11. Không `Disallow: /`. Không chặn Googlebot trên CDN.
 
 ## Khi sửa trang public — bắt buộc
 

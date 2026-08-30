@@ -150,6 +150,7 @@ Và trên **apps/web** (PM2 / `.env`):
 
 ```env
 REVALIDATE_SECRET=<cùng giá trị Nest>
+PUBLIC_SEO_INDEX=1
 ```
 
 Nest gọi Next qua **loopback** — không dùng `https://anhungland.com/api/…` (nginx `/api/` → Nest).

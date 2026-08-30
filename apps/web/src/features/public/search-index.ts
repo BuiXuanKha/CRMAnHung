@@ -6,8 +6,8 @@ function envFlagOn(name: string): boolean {
 }
 
 /**
- * Public HTML is `noindex` until the site is ready.
- * Turn on later: set `PUBLIC_SEO_INDEX=1` in `apps/web/.env.production` and rebuild.
+ * Public HTML is indexable when `PUBLIC_SEO_INDEX=1` (production anhungland.com).
+ * Local/dev omit the flag → `noindex`. Turn off: `PUBLIC_SEO_INDEX=0` and rebuild.
  * Do not block Googlebot on the CDN — this only gates HTML metadata / sitemap.
  */
 export function isPublicSearchIndexEnabled(): boolean {

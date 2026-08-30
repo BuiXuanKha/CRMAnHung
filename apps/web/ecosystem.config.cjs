@@ -3,7 +3,8 @@
  * Port 5001 — nginx proxy `/` tới process này.
  * Không đụng anhungland static web của hệ cũ.
  *
- * Loads `apps/web/.env` (server-only, rsync-excluded) for REVALIDATE_SECRET.
+ * Loads `apps/web/.env` (server-only, rsync-excluded) for REVALIDATE_SECRET
+ * and `apps/web/.env.production` for PUBLIC_SEO_INDEX (ISR revalidate).
  */
 const fs = require('fs');
 const path = require('path');
@@ -29,7 +30,18 @@ function loadEnvFile(file) {
   return out;
 }
 
-const fileEnv = loadEnvFile(path.join(__dirname, '.env'));
+const fileEnv = {
+  ...loadEnvFile(path.join(__dirname, '.env.production')),
+  ...loadEnvFile(path.join(__dirname, '.env')),
+};
+
+function pickEnv(keys) {
+  const extra = {};
+  for (const key of keys) {
+    if (fileEnv[key]) extra[key] = fileEnv[key];
+  }
+  return extra;
+}
 
 module.exports = {
   apps: [
@@ -44,9 +56,7 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 5001,
         HOSTNAME: '0.0.0.0',
-        ...(fileEnv.REVALIDATE_SECRET
-          ? { REVALIDATE_SECRET: fileEnv.REVALIDATE_SECRET }
-          : {}),
+        ...pickEnv(['REVALIDATE_SECRET', 'PUBLIC_SEO_INDEX', 'NEXT_PUBLIC_SEO_INDEX']),
       },
     },
   ],

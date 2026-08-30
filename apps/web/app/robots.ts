@@ -3,7 +3,7 @@ import { isPublicSearchIndexEnabled } from '@/features/public/search-index';
 
 const SITE = 'https://anhungland.com';
 
-/** Crawl public HTML so bots can see `noindex`. Do not Disallow `/`. */
+/** Allow crawl of public HTML. Do not Disallow `/`. Sitemap line only when index is on. */
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
