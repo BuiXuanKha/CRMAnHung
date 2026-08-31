@@ -194,4 +194,4 @@ export function countActiveStaffLotFilters(filters: StaffLotFilters): number {
 }
 
 /** Slug URL — shared with API (`@crmanhung/shared`). */
-export { toPublicSlug, toListingPublicSlug } from '@crmanhung/shared';
+export { toPublicSlug, toListingPublicSlug, toPublicPostSlug } from '@crmanhung/shared';

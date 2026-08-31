@@ -29,7 +29,7 @@ import {
   kindLabel,
   reservePublicLotSlug,
   toListingPublicSlug,
-  toPublicSlug,
+  toPublicPostSlug,
 } from './public-slug';
 import {
   applySeoImageMove,
@@ -37,6 +37,10 @@ import {
   planSeoLotImageCopy,
   projectAddressSeoFields,
 } from '../lodats/lodat-seo-image-upload';
+import {
+  rewritePostSeoImages,
+  uniqueSeoPostImageKey,
+} from './post-seo-image-upload';
 
 const POST_CATEGORIES = new Set([
   'tin-tuc',
@@ -311,11 +315,14 @@ export class PublicContentService {
     return rows.map((row) => this.toAdminRow(row));
   }
 
-  async uploadPublicMedia(file: {
-    buffer: Buffer;
-    mimetype: string;
-    originalname?: string;
-  }) {
+  async uploadPublicMedia(
+    file: {
+      buffer: Buffer;
+      mimetype: string;
+      originalname?: string;
+    },
+    opts?: { title?: string; index?: number },
+  ) {
     const mime = String(file.mimetype || '').toLowerCase();
     if (!(PUBLIC_MEDIA_ACCEPT_MIME as readonly string[]).includes(mime)) {
       throw new BadRequestException('Chỉ nhận ảnh JPG, PNG, WEBP hoặc GIF.');
@@ -325,6 +332,22 @@ export class PublicContentService {
     }
     if (file.buffer.length > PUBLIC_MEDIA_MAX_BYTES) {
       throw new PayloadTooLargeException('Ảnh tối đa 5 MB.');
+    }
+    const title = opts?.title?.trim();
+    if (title) {
+      const { objectKey, fileName } = await uniqueSeoPostImageKey(this.storage, {
+        title,
+        index: opts?.index ?? 1,
+      });
+      const uploaded = await this.storage.upload({
+        folder: 'public-web',
+        buffer: file.buffer,
+        contentType: mime,
+        originalName: file.originalname,
+        objectKey,
+        contentFileName: fileName,
+      });
+      return { url: uploaded.url, objectKey: uploaded.objectKey };
     }
     // Raster → WebP (sharp) inside StorageService.upload; key ends with .webp.
     const uploaded = await this.storage.upload({
@@ -705,22 +728,37 @@ export class PublicContentService {
 
   async createPost(dto: CreatePublicPostDto) {
     this.assertPublishablePost(dto.status, dto.coverImageUrl, dto.bodyHtml);
-    const bodyHtml = dto.bodyHtml ?? '';
+    let bodyHtml = dto.bodyHtml ?? '';
+    let coverImageUrl = dto.coverImageUrl?.trim() || null;
+    const title = dto.title.trim();
+    try {
+      const rewritten = await rewritePostSeoImages(this.storage, {
+        title,
+        coverImageUrl,
+        bodyHtml,
+      });
+      coverImageUrl = rewritten.coverImageUrl;
+      bodyHtml = rewritten.bodyHtml;
+    } catch (err) {
+      this.logger.warn(
+        `Post SEO image rewrite skipped: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
     const excerpt =
       dto.excerpt?.trim() ||
       postBodyToExcerpt(bodyHtml) ||
-      dto.title.trim();
+      title;
     const slugBase = dto.slug?.trim()
-      ? toPublicSlug(dto.slug, 80)
-      : toPublicSlug(dto.title, 80);
+      ? toPublicPostSlug(dto.slug)
+      : toPublicPostSlug(title);
     const slug = await this.uniquePostSlug(dto.category, slugBase);
     const isPublished = dto.status === 'PUBLISHED';
     const saved = await this.prisma.publicPost.create({
       data: {
-        title: dto.title.trim(),
+        title,
         category: dto.category,
         status: dto.status,
-        coverImageUrl: dto.coverImageUrl?.trim() || null,
+        coverImageUrl,
         bodyHtml,
         excerpt,
         slug,
@@ -811,7 +849,7 @@ export class PublicContentService {
         where: { category_slug: { category, slug } },
       })
     ) {
-      slug = `${root.slice(0, 50)}-${n}`;
+      slug = `${root}-${n}`;
       n += 1;
     }
     return slug;

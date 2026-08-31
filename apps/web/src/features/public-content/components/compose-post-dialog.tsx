@@ -11,7 +11,7 @@ import {
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
 import { Icon } from '@/shared/ui/icon';
-import { toPublicSlug } from '../display';
+import { toPublicPostSlug } from '../display';
 import { uploadPublicPostImage } from '../upload-image';
 import { PostRichEditor } from './post-rich-editor';
 import '@/shared/ui/dialog.css';
@@ -51,12 +51,12 @@ export function ComposePostDialog({
   const [bodyHtml, setBodyHtml] = useState('');
   const [excerpt, setExcerpt] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
-  const [slug, setSlug] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [coverBusy, setCoverBusy] = useState(false);
   const titleRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
+  const nextBodyImageIndex = useRef(2);
 
   useEffect(() => {
     if (!open) return;
@@ -66,14 +66,14 @@ export function ComposePostDialog({
     setBodyHtml(prefill?.bodyHtml ?? '');
     setExcerpt(prefill?.excerpt?.trim() ?? '');
     setMetaDescription(prefill?.metaDescription?.trim() ?? '');
-    setSlug(prefill?.slug?.trim() ?? '');
     setParseError(null);
     setUploadError(null);
+    nextBodyImageIndex.current = 2;
     const t = window.setTimeout(() => titleRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
   }, [open, prefill]);
 
-  const slugPreview = slug.trim() || toPublicSlug(title.trim() || 'tieu-de-bai-viet');
+  const slugPreview = toPublicPostSlug(title.trim() || 'tieu-de-bai-viet');
   const formBusy = busy || coverBusy;
 
   function submit(status: PublicPostStatus) {
@@ -85,7 +85,7 @@ export function ComposePostDialog({
       bodyHtml,
       ...(excerpt.trim() ? { excerpt: excerpt.trim() } : {}),
       ...(metaDescription.trim() ? { metaDescription: metaDescription.trim() } : {}),
-      ...(slug.trim() ? { slug: slug.trim() } : {}),
+      slug: slugPreview,
     });
     if (!parsed.success) {
       setParseError(parsed.error.issues[0]?.message ?? 'Dữ liệu không hợp lệ.');
@@ -101,7 +101,10 @@ export function ComposePostDialog({
     setUploadError(null);
     setCoverBusy(true);
     try {
-      const url = await uploadPublicPostImage(file);
+      const url = await uploadPublicPostImage(file, {
+        title: title.trim(),
+        index: 1,
+      });
       setCoverImageUrl(url);
     } catch (err) {
       setUploadError(err instanceof Error ? err.message : 'Không tải được ảnh bìa.');
@@ -156,6 +159,9 @@ export function ComposePostDialog({
           <span className="crm-slug-preview__label">Đường dẫn dự kiến</span>
           <code className="crm-slug-preview__path">/{category}/{slugPreview}</code>
         </p>
+        <p className="crm-form-hint">
+          Đường dẫn giữ nguyên tiêu đề đã bỏ dấu — không cắt giữa từ.
+        </p>
 
         <fieldset className="pw-compose-categories" disabled={formBusy}>
           <legend>
@@ -194,7 +200,7 @@ export function ComposePostDialog({
             <div className="pw-compose-cover-preview">
               {coverImageUrl ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={coverImageUrl} alt="" />
+                <img src={coverImageUrl} alt={title.trim() || 'Ảnh bìa'} />
               ) : (
                 <span className="pw-compose-cover-empty">Chưa chọn ảnh</span>
               )}
@@ -219,7 +225,9 @@ export function ComposePostDialog({
                 </button>
               ) : null}
               <p className="crm-form-hint">
-                Chọn JPG / PNG / WEBP — lưu lên bài luôn WebP · tối đa 5 MB · tỷ lệ ~16:9
+                Chọn JPG / PNG / WEBP — lưu WebP · tối đa 5 MB · tỷ lệ ~16:9. Nhập tiêu đề
+                trước khi chọn ảnh: tên file CDN lấy từ tiêu đề (vd.{' '}
+                {slugPreview}-anh-1.webp). Alt trên trang khách = tiêu đề bài.
               </p>
             </div>
           </div>
@@ -242,7 +250,13 @@ export function ComposePostDialog({
               Nội dung <span className="crm-field-meta">(bắt buộc khi xuất bản)</span>
             </span>
           </span>
-          <PostRichEditor value={bodyHtml} disabled={formBusy} onChange={setBodyHtml} />
+          <PostRichEditor
+            value={bodyHtml}
+            disabled={formBusy}
+            onChange={setBodyHtml}
+            postTitle={title}
+            nextImageIndexRef={nextBodyImageIndex}
+          />
         </div>
 
         {parseError || error || uploadError ? (

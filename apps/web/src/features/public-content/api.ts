@@ -30,7 +30,7 @@ import {
 import { ApiError, apiFetch } from '@/shared/api/client';
 import { isMockPublicWeb } from '@/shared/api/mode';
 import { listLodats } from '@/features/lodats/api';
-import { toPublicSlug } from './display';
+import { toPublicPostSlug } from './display';
 import { catalogToGuestLot, type PublicGuestLot } from './guest-listing';
 import {
   MOCK_PUBLIC_WEB_LOTS,
@@ -51,8 +51,8 @@ function clonePosts(): PublicWebPostRow[] {
   return posts.map((row) => ({ ...row }));
 }
 
-function uniquePostSlug(title: string): string {
-  const base = toPublicSlug(title);
+function uniquePostSlug(title: string, hint?: string): string {
+  const base = toPublicPostSlug(hint?.trim() || title);
   const used = new Set(posts.map((row) => row.slug));
   if (!used.has(base)) return base;
   let n = 2;
@@ -354,7 +354,7 @@ export async function createPublicPost(
   }
   const row: PublicWebPostRow = {
     id: `pp-${Date.now()}`,
-    slug: uniquePostSlug(parsed.data.title),
+    slug: uniquePostSlug(parsed.data.title, parsed.data.slug),
     title: parsed.data.title,
     category: parsed.data.category,
     status: parsed.data.status,
