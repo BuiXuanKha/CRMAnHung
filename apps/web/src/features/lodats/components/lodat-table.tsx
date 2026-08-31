@@ -13,6 +13,7 @@ import {
   PRICE_BRACKET_OPTIONS,
   STATUS_FILTER_OPTIONS,
   formatArea,
+  formatBrokerFee,
   formatFrontageDir,
   formatPriceVnd,
   kindLabel,
@@ -25,6 +26,12 @@ import { SaleToggle } from './sale-toggle';
 import { SpecsColumnFilter } from './specs-column-filter';
 
 type HeaderFilter = 'photo' | 'address' | 'kind' | 'specs' | 'price' | 'status' | null;
+
+function BrokerFeeLine({ plot }: { plot: LodatListItem }) {
+  const fee = formatBrokerFee(plot.brokerFeeNote, plot.commissionPercent);
+  if (!fee) return null;
+  return <span className="ld-sub">Hoa hồng: {fee}</span>;
+}
 
 type Props = {
   items: LodatListItem[];
@@ -244,9 +251,7 @@ export function LodatTable({
                   {p.priceNote?.trim() ? (
                     <span className="ld-sub">Ghi chú giá: {p.priceNote}</span>
                   ) : null}
-                  {p.commissionPercent != null ? (
-                    <span className="ld-sub">Hoa hồng: {p.commissionPercent}%</span>
-                  ) : null}
+                  <BrokerFeeLine plot={p} />
                 </div>
               </div>
               <div className="ld-cell" role="cell">

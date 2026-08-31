@@ -259,7 +259,7 @@ Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
 
 ##### 5. Giá bán
 
-`crm-money`. Phụ: ghi chú giá, hoa hồng `%`. Thiếu giá = `—`.
+`crm-money`. Phụ: ghi chú giá; hoa hồng chữ đã lưu (ví dụ `1%` · `Chưa trao đổi`). Thiếu giá = `—`. Thiếu hoa hồng = ẩn dòng.
 
 ##### 6. Trạng thái (công tắc)
 

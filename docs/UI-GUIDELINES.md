@@ -272,7 +272,7 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 | `Tiêu đề / Địa chỉ` | **Tiêu đề đậm**; dòng phụ nhạt = địa chỉ / khu |
 | `Phân loại` | Hangtag `CrmBadge`: **Nhà** `blue` · **Đất** `amber`; lọc cột Tất cả / Nhà / Đất |
 | `DT · MT · Hướng` | Dòng 1: diện tích (`90 m²`); dòng 2: `MT 4,5 m · Bắc` — thiếu = `—`. Lọc cột: **khoảng DT** (1–100 / 100–200 / &gt;200) + **hướng** (Đông…Khác), AND |
-| `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng `%`. Lọc cột: khoảng giá bước **500tr** + «Chưa có giá» (đồng bộ mobile) |
+| `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng chữ đã lưu (`1%` / `2%` / `Chưa trao đổi`). Lọc cột: khoảng giá bước **500tr** + «Chưa có giá» (đồng bộ mobile) |
 | `Trạng thái` | **Chỉ** Mở bán ↔ Tạm dừng (công tắc). **Không** phải đã bán / đặt cọc. Track xanh `#10b981` khi Mở bán; xám khi Tạm dừng |
 | `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Giao dịch**, **Sửa** |
 
@@ -674,6 +674,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | Panel phải + chi tiết khách: thẻ lô ảnh trái / chữ phải; bấm ảnh = gallery (+N); bấm chữ = `/lo-dat/[id]` |
 | 2026-08-30 | Cột phụ `/khach-hang`: ẩn thanh Chat / Chăm sóc / Lô khi khách không có tin, lịch sử, hoặc lô |
 | 2026-08-30 | Docs khách: Inbox Facebook sống ≠ cột phụ tin đã lưu / menu Mở chat; ô tìm API không khớp tên FB; `Customer.note` không hiện list |
+| 2026-08-31 | List `/lo-dat` cột Giá bán: dòng hoa hồng = chữ đã lưu (`brokerFeeNote`), không phải `%` số `commissionPercent` |
 
 ---
 

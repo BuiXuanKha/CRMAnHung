@@ -18,6 +18,17 @@ export function formatPriceVnd(n?: number | string | null): string {
   return `${v.toLocaleString('vi-VN')} đ`;
 }
 
+/** Dòng hoa hồng trên list — chữ đã lưu (`1%`, `Chưa trao đổi`); mock cũ còn số %. */
+export function formatBrokerFee(
+  brokerFeeNote?: string | null,
+  commissionPercent?: number | null,
+): string | null {
+  const note = brokerFeeNote?.trim();
+  if (note) return note;
+  if (commissionPercent != null) return `${commissionPercent}%`;
+  return null;
+}
+
 export function formatArea(n?: number | null): string {
   if (n == null) return '—';
   return `${n.toLocaleString('vi-VN')} m²`;

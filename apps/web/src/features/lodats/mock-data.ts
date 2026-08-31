@@ -6,6 +6,9 @@ function plot(
   return {
     createdByEmployeeName: 'Bùi Xuân Khả',
     ...partial,
+    brokerFeeNote:
+      partial.brokerFeeNote ??
+      (partial.commissionPercent != null ? `${partial.commissionPercent}%` : null),
   };
 }
 
