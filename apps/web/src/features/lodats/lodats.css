@@ -111,30 +111,3 @@
 .ld-status.error {
   color: #b91c1c;
 }
-
-.ld-placeholder {
-  max-width: 40rem;
-  display: grid;
-  gap: 10px;
-}
-
-.ld-placeholder h1 {
-  margin: 0;
-  font-size: 1.35rem;
-}
-
-.ld-placeholder p {
-  margin: 0;
-  color: #64748b;
-  line-height: 1.5;
-}
-
-.ld-placeholder a {
-  color: var(--ld-blue);
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.ld-placeholder a:hover {
-  text-decoration: underline;
-}

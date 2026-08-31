@@ -1,5 +1,4 @@
 import {
-  LODAT_KIND_LABELS,
   LodatKind,
   LodatSaleStatus,
   changeLodatOwnerSchema,
@@ -158,7 +157,6 @@ function applyQuery(items: LodatListItem[], query: LodatListQuery = {}): LodatLi
         p.address ?? '',
         p.customerHint ?? '',
         p.direction ?? '',
-        LODAT_KIND_LABELS[p.kind],
       ]
         .join(' ')
         .toLowerCase();

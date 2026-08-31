@@ -1,7 +1,7 @@
 # Domain: Lodats (Lô đất)
 
 - **Slug:** `lodats`
-- **Status:** Ready for API — list + chi tiết (kể **lịch sử GD**) + gallery + lô cùng xã + **trang sửa** `/sua` (kể **đổi chủ**) + **form tạo lô từ khách** (§12.5) + **tạo GD từ list/chi tiết**; **chưa bàn** list ADMIN
+- **Status:** Done — list `/lo-dat` STAFF + chi tiết + gallery + cùng xã + sửa `/sua` (đổi chủ) + tạo từ khách + tạo GD; **chưa bàn** list ADMIN
 - **Nguồn:** màn [`/lo-dat`](https://anhungland.com/lo-dat) (web mới) + CRM cũ `/lo-dat` (học, không copy god-file)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 + §4.5
 - **Contract:** `packages/shared/src/lodats.ts` (`LodatListItem` + `LodatDetail`)
@@ -131,7 +131,7 @@ Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo
 |-----|----------------|------|
 | Loại thửa | `Lodat.projectLotId` trống = dân; có FK = dự án (đọc thông số từ `ProjectLot`) | Không phải hangtag Nhà/Đất |
 | Rao bán | `DANG_BAN` / `TAM_DUNG` trên **map** | Công tắc **Mở bán** ↔ **Tạm dừng** |
-| Phân loại | `NHA` / `DAT` | Hangtag Nhà / Đất — **web mới**; CRM cũ không có |
+| Phân loại | `Lodat.propertyKind` `NHA` / `DAT` (cột Postgres; mặc định `DAT`) | Hangtag Nhà / Đất — **web mới**. CRM cũ không có → copy gán hết `DAT`. Lọc hangtag = **icon cột Phân loại**, không phải ô tìm |
 | Đã cọc / Đã bán | — | **Không** trên list; thuộc giao dịch |
 | Chủ hiện tại | map `isActive` | Gợi ý tên khách (`customerHint`) |
 
@@ -139,7 +139,7 @@ Mặc định **ẩn** lô tạm dừng. Giá / hoa hồng / ghi chú giá nằm
 
 ## 4–10.
 
-List mock §12 đã có. **GET `/lodats`**: `limit` mặc định 50, tối đa 200, `offset` từ 0, `total` = COUNT cùng filter (kể cả lọc cột). Nest + Prisma **sau** khi §11 chốt. Không extension.
+List §12 + **GET `/lodats`** đã nối (login thật). `limit` mặc định 50, tối đa 200, `offset` từ 0, `total` = COUNT cùng filter (kể cả lọc cột). Không extension.
 
 Copy: đơn vị hành chính → địa chỉ (+ ảnh dự án) → **`ProjectLot` kho** → `Lodat` (+ map chủ) → ảnh lô → R2. Giá `BIGINT`. Hoa hồng CRM cũ = chữ (`BrokerFeeNote`).
 
@@ -148,7 +148,7 @@ Copy: đơn vị hành chính → địa chỉ (+ ảnh dự án) → **`Project
 List:
 
 - Cũ: chỉ `@` (gồm tạm dừng). Mới: thêm `@@` = chỉ tạm dừng.
-- Cũ: tìm Title + địa chỉ (API **không** tìm tên khách). Mới: mock tìm thêm `customerHint`.
+- Cũ: tìm Title + địa chỉ (API **không** tìm tên khách). Mới: ô tìm còn tên chủ + hướng + ghi chú lô; hangtag Nhà/Đất **không** qua ô tìm.
 - Cũ: bấm hàng → chi tiết; nút **GD** / **Sửa** trên dòng. Mới: menu chevron; bấm hàng PC = chọn.
 - Cũ: lọc gồm Đang bán / Đã cọc / Đã bán / Tạm dừng. Mới: **chỉ** Mở bán / Tạm dừng.
 
@@ -197,10 +197,12 @@ Hangtag **Clear** (`CrmBadge` gray) **ngay sau con trỏ** khi ô không trống
 
 ##### 1. Tìm theo
 
-- Tiêu đề lô
-- Địa chỉ
-- Tên khách (`customerHint` — mock mới)
-- Hướng, nhãn Nhà/Đất
+- Tiêu đề lô (dân: `Lodat.title`; dự án: tiêu đề kho)
+- Địa chỉ (chi tiết / xã / huyện / tỉnh)
+- Tên chủ hiện tại (`customerHint` ← `fullName` map active)
+- Hướng, ghi chú lô (`note`)
+
+**Không** tìm hangtag Nhà/Đất trong ô này — dùng lọc cột **Phân loại**. Copy CRM cũ không có Nhà/Đất nên hầu hết lô là `DAT`.
 
 Substring, không phân biệt hoa thường, **giữ dấu**.
 
@@ -243,7 +245,7 @@ Cột **Giá bán** — khoảng giá bước **500 triệu** (cùng bộ lọc 
 
 ##### 1. Ảnh
 
-Thumbnail. Thiếu = ô trống. `+N` nếu còn ảnh. **Bấm ảnh** → mở gallery full (cùng modal chi tiết); không có ảnh → không mở.
+Thumbnail. Thiếu = ô xám + icon Lucide `ImageOff` (không chữ `—`). `+N` nếu còn ảnh. **Bấm ảnh** → mở gallery full; không có ảnh → không mở.
 
 ##### 2. Tiêu đề / Địa chỉ
 
@@ -511,7 +513,7 @@ Xếp dọc như §12.4.2 (một cột; Huỷ/Tạo cuối form; nút «Thêm �
 
 ## 13. Lịch làm — thứ tự DB (STAFF trước)
 
-**Có: phải có sổ địa chỉ trước lô.** Prisma + copy kho/map/ảnh **xong staging**. API list `/lo-dat` STAFF trong PR này. Còn: Admin import kho, list ADMIN.
+**Có: phải có sổ địa chỉ trước lô.** Prisma + copy kho/map/ảnh + API list `/lo-dat` STAFF **đã lên anhungland.com**. Còn: Admin import kho, list ADMIN.
 
 Khách (`Customer`) **đã có** — map chủ mới gắn được.
 
@@ -546,7 +548,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **8** | Copy **lô dân** `tblLodats` REGULAR → `Lodat` + map | List dân | 1 lodat cũ + maps |
 | **9** | Copy **map NV–khách** PROJECT: mỗi map active → 1 `Lodat` trỏ `ProjectLot` + `LodatCustomerMap` | Luồng độc lập theo NV | Cũ: 1 `tblLodats` + nhiều map. Mới: nhiều `Lodat` cùng `projectLotId` |
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
-| **11** | API + nối UI **list `/lo-dat` STAFF** (mock §12 → API) | Màn hình NV | `GET/PATCH /api/v1/lodats` — lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
+| **11** | API + nối UI **list `/lo-dat` STAFF** | Màn hình NV | **Done** — `GET/PATCH /api/v1/lodats`; lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | **Done** — §12.5; `POST /lodats` + picker kho |
 | **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + form sửa + **đổi chủ** + **lịch sử GD** (GET kèm detail). Nút Giao dịch = open-or-create |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |

@@ -268,7 +268,7 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 
 | Cột | Nội dung ô |
 |-----|------------|
-| `Ảnh` | Thumbnail vuông bo góc; overlay `+N` nếu còn ảnh; thiếu ảnh = ô xám + `—` trong lọc «chưa có ảnh» |
+| `Ảnh` | Thumbnail vuông bo góc; overlay `+N` nếu còn ảnh; thiếu ảnh = ô xám `#e2e8f0` + icon Lucide `ImageOff`. Lọc cột «Chưa có ảnh» |
 | `Tiêu đề / Địa chỉ` | **Tiêu đề đậm**; dòng phụ nhạt = địa chỉ / khu |
 | `Phân loại` | Hangtag `CrmBadge`: **Nhà** `blue` · **Đất** `amber`; lọc cột Tất cả / Nhà / Đất |
 | `DT · MT · Hướng` | Dòng 1: diện tích (`90 m²`); dòng 2: `MT 4,5 m · Bắc` — thiếu = `—`. Lọc cột: **khoảng DT** (1–100 / 100–200 / &gt;200) + **hướng** (Đông…Khác), AND |
@@ -278,7 +278,7 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 
 **Không** hiện cột `Cập nhật` trên list `/lo-dat` (timestamp vẫn dùng cho sort API).
 
-**Thanh tìm (§4.3.4, biến thể lô đất):** desktop chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới. Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Không rail phải trên màn này. Không nút «Thêm lô» (chưa có trên ảnh mẫu).
+**Thanh tìm (§4.3.4, biến thể lô đất):** desktop chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới. Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Ô tìm: tiêu đề, địa chỉ, tên chủ, hướng, ghi chú — **không** chữ Nhà/Đất → hangtag (lọc cột Phân loại). Không rail phải trên màn này. Không nút «Thêm lô».
 
 **Mobile (≤767px) — đã chốt theo ảnh CRM cũ:** **thẻ xếp dọc**, không bảng cuộn ngang. Header CRM vẫn §4.2.
 
@@ -675,6 +675,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | Cột phụ `/khach-hang`: ẩn thanh Chat / Chăm sóc / Lô khi khách không có tin, lịch sử, hoặc lô |
 | 2026-08-30 | Docs khách: Inbox Facebook sống ≠ cột phụ tin đã lưu / menu Mở chat; ô tìm API không khớp tên FB; `Customer.note` không hiện list |
 | 2026-08-31 | List `/lo-dat` cột Giá bán: dòng hoa hồng = chữ đã lưu (`brokerFeeNote`), không phải `%` số `commissionPercent` |
+| 2026-08-31 | `/lo-dat`: thiếu ảnh = ô xám + `ImageOff`; ô tìm không map chữ Nhà/Đất sang hangtag (lọc cột Phân loại) |
 
 ---
 
