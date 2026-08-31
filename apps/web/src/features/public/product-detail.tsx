@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Phone } from 'lucide-react';
 import { ANHUNG_BRAND } from './brand';
 import {
   ProductGallery,
@@ -29,6 +30,35 @@ function listingImages(listing: PublicListingView): string[] {
 
 function zaloLink(telDigits: string): string {
   return `https://zalo.me/${telDigits}`;
+}
+
+function ListingZaloBtn({ label }: { label: string }) {
+  return (
+    <a
+      className="pd-zalo-btn"
+      href={zaloLink(ANHUNG_BRAND.hotlineTel)}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {label}
+    </a>
+  );
+}
+
+function ListingPhoneBtn() {
+  return (
+    <a
+      className="pd-phone-btn"
+      href={`tel:${ANHUNG_BRAND.hotlineTel}`}
+      aria-label={`Gọi ${ANHUNG_BRAND.hotlineDisplay}`}
+    >
+      <Phone className="pd-phone-btn-icon" size={18} strokeWidth={2} aria-hidden />
+      <span className="pd-phone-btn-copy">
+        <span className="pd-phone-btn-action">Bấm là gọi:</span>
+        <span className="pd-phone-btn-num">{ANHUNG_BRAND.hotlineDisplay}</span>
+      </span>
+    </a>
+  );
 }
 
 function RelatedListingBlock({
@@ -263,17 +293,8 @@ export function ProductDetailView({
               </div>
             </div>
             <p className="pd-aside-lead">Xem đất thực tế · tư vấn miễn phí</p>
-            <a
-              className="pd-zalo-btn"
-              href={zaloLink(ANHUNG_BRAND.hotlineTel)}
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Chat qua Zalo
-            </a>
-            <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-              Bấm là gọi: {ANHUNG_BRAND.hotlineDisplay}
-            </a>
+            <ListingZaloBtn label="Chat qua Zalo" />
+            <ListingPhoneBtn />
           </aside>
         </div>
 
@@ -289,17 +310,8 @@ export function ProductDetailView({
       </main>
 
       <div className="pd-mobile-bar">
-        <a
-          className="pd-zalo-btn"
-          href={zaloLink(ANHUNG_BRAND.hotlineTel)}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Zalo
-        </a>
-        <a className="pd-phone-btn" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-          Bấm là gọi: {ANHUNG_BRAND.hotlineDisplay}
-        </a>
+        <ListingZaloBtn label="Liên hệ Zalo" />
+        <ListingPhoneBtn />
       </div>
     </div>
   );

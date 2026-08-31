@@ -496,7 +496,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: 8px;
   min-height: 46px;
   padding: 0 14px;
   border-radius: 10px;
@@ -506,6 +506,7 @@
   font: inherit;
   font-weight: 700;
   font-size: 0.95rem;
+  text-align: center;
   text-decoration: none;
   cursor: pointer;
   width: 100%;
@@ -522,6 +523,22 @@
   text-shadow:
     0 1px 0 rgba(255, 255, 255, 0.22),
     0 2px 8px rgba(0, 0, 0, 0.42);
+}
+
+.pd-phone-btn-icon {
+  flex: 0 0 auto;
+  width: 18px;
+  height: 18px;
+}
+
+.pd-phone-btn-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35em;
+  min-width: 0;
+  text-align: center;
+  line-height: 1.2;
 }
 
 .pd-phone-btn-num {
@@ -734,6 +751,28 @@
   .pd-mobile-bar .pd-phone-btn {
     width: 100%;
     min-height: 46px;
+  }
+
+  .pd-mobile-bar .pd-zalo-btn {
+    font-size: 0.88rem;
+    padding: 0 10px;
+  }
+
+  .pd-mobile-bar .pd-phone-btn {
+    padding: 6px 10px;
+  }
+
+  .pd-mobile-bar .pd-phone-btn-copy {
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+  }
+
+  .pd-mobile-bar .pd-phone-btn-action,
+  .pd-mobile-bar .pd-phone-btn-num {
+    display: block;
+    width: 100%;
+    text-align: center;
   }
 }
 

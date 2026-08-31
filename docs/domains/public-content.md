@@ -587,7 +587,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 | `/san-pham/…` → `/mua-ban-nha-dat/…` permanent | OK (308) |
 | Slug giả / đã gỡ → 404 + `noindex` | OK |
 | View Source có H1 + excerpt SSR | OK — meta/OG dùng excerpt; **on-page**: có `bodyHtml` thì không hiện lead `excerpt` (tránh trùng copy) |
-| Layout chi tiết lô | Gallery · breadcrumb (Trang chủ → Nhà đất đang bán → **tên xã** → H1) · H1 · địa chỉ đủ dưới H1 · **một** strip Giá/DT/Hướng + Zalo/hotline hiện đủ số · related cùng xã + **Đất dự án khu vực Nam Sách** (3 khu PROJECT nhiều lô nhất) |
+| Layout chi tiết lô | Gallery · breadcrumb (Trang chủ → Nhà đất đang bán → **tên xã** → H1) · H1 · địa chỉ đủ dưới H1 · **một** strip Giá/DT/Hướng + Zalo/hotline hiện đủ số · related cùng xã + **Đất dự án khu vực Nam Sách** (3 khu PROJECT nhiều lô nhất). **Mobile thanh đáy:** «Liên hệ Zalo» + «Bấm là gọi» căn giữa + icon Lucide `Phone` |
 | Chia sẻ | Copy **mô tả HTML→plain giữ xuống dòng** + URL (không nhồi H1/giá trùng). Mở Facebook để dán; không dùng sharer/`navigator.share` |
 | robots cho phép list; chặn CRM `/login`… | OK (kèm Cloudflare managed) |
 
