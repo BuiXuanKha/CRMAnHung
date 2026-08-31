@@ -26,6 +26,9 @@ type Props = {
   placeholder?: string;
   ariaLabel?: string;
   toolbarAriaLabel?: string;
+  /** Used for CDN `{slug}-anh-n.webp` and img alt. */
+  postTitle?: string;
+  nextImageIndexRef?: { current: number };
 };
 
 export function PostRichEditor({
@@ -35,6 +38,8 @@ export function PostRichEditor({
   placeholder = 'Viết nội dung bài viết… Có thể chèn ảnh giữa các đoạn.',
   ariaLabel = 'Nội dung bài viết',
   toolbarAriaLabel = 'Định dạng bài viết',
+  postTitle = '',
+  nextImageIndexRef,
 }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
   const uploading = useRef(false);
@@ -92,14 +97,20 @@ export function PostRichEditor({
     uploading.current = true;
     setImageError(null);
     try {
-      const url = await uploadPublicPostImage(file);
-      editor.chain().focus().setImage({ src: url, alt: '' }).run();
+      const index = nextImageIndexRef?.current ?? 2;
+      if (nextImageIndexRef) nextImageIndexRef.current = index + 1;
+      const alt = postTitle.trim();
+      const url = await uploadPublicPostImage(file, {
+        title: alt,
+        index,
+      });
+      editor.chain().focus().setImage({ src: url, alt }).run();
     } catch (err) {
       setImageError(err instanceof Error ? err.message : 'Không chèn được ảnh.');
     } finally {
       uploading.current = false;
     }
-  }, [editor]);
+  }, [editor, nextImageIndexRef, postTitle]);
 
   if (!editor) return <p className="crm-form-hint">Đang tải trình soạn thảo…</p>;
 

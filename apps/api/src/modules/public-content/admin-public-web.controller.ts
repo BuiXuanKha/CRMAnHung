@@ -63,11 +63,17 @@ export class AdminPublicWebController {
   uploadMedia(
     @UploadedFile()
     file?: { buffer: Buffer; mimetype: string; originalname?: string },
+    @Body('title') title?: string,
+    @Body('index') index?: string,
   ) {
     if (!file?.buffer?.length) {
       throw new BadRequestException('Thiếu file ảnh.');
     }
-    return this.publicContent.uploadPublicMedia(file);
+    const n = Number.parseInt(String(index ?? ''), 10);
+    return this.publicContent.uploadPublicMedia(file, {
+      title,
+      index: Number.isFinite(n) && n > 0 ? n : 1,
+    });
   }
 
   @Patch('lots/:id/draft')

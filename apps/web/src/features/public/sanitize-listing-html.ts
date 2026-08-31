@@ -77,8 +77,18 @@ function sanitizeAttrs(tag: string, attrChunk: string): string {
   return attrs.length ? ` ${attrs.join(' ')}` : '';
 }
 
-/** Safe HTML subset for guest SSR of listing bodyHtml. */
-export function sanitizeListingHtml(html: string): string {
+function escapeAttr(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;');
+}
+
+/** Safe HTML subset for guest SSR of listing / post bodyHtml. */
+export function sanitizeListingHtml(
+  html: string,
+  options?: { defaultImgAlt?: string },
+): string {
   if (!html?.trim()) return '';
   let out = html
     .replace(/<script[\s\S]*?<\/script>/gi, '')
@@ -93,8 +103,17 @@ export function sanitizeListingHtml(html: string): string {
     if (closing) return `</${tag}>`;
     if (tag === 'br') return '<br>';
     if (tag === 'img') {
-      const safe = sanitizeAttrs(tag, attrs);
-      return safe.includes('src=') ? `<img${safe}>` : '';
+      let safe = sanitizeAttrs(tag, attrs);
+      if (!safe.includes('src=')) return '';
+      const defaultAlt = options?.defaultImgAlt?.trim();
+      if (defaultAlt) {
+        const altMatch = safe.match(/\salt="([^"]*)"/i);
+        if (!altMatch || !altMatch[1].trim()) {
+          safe = safe.replace(/\salt="[^"]*"/i, '').trimEnd();
+          safe = `${safe} alt="${escapeAttr(defaultAlt)}"`;
+        }
+      }
+      return `<img${safe}>`;
     }
     if (tag === 'a') {
       const safe = sanitizeAttrs(tag, attrs);

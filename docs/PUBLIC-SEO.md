@@ -183,7 +183,7 @@ Roadmap tick-list: [`docs/domains/public-content.md`](./domains/public-content.m
 
 | Hạng mục | Công thức |
 |----------|-----------|
-| **URL** | `https://anhungland.com/{category}/{slug}` (category = enum: `tin-tuc`, `du-an`, …) |
+| **URL** | `https://anhungland.com/{category}/{slug}` — slug = `toPublicPostSlug(title)` (không dấu, unique trong chuyên mục, **không cắt 60/80 ký tự**). Category = enum: `tin-tuc`, `du-an`, … |
 | **Title / H1** | `title` bài + template `\| An Hưng Land`. Bài dự án có thể nháp từ GPT (`/dashboard/bai-viet` §14.4) — admin đọc lại trước Xuất bản |
 | **Meta description** | `metaDescription` hoặc excerpt (~160) từ body |
 | **OG** | cover + title; thiếu cover → không Xuất bản (UI) |
@@ -213,14 +213,14 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | Toàn bộ CRM `/lo-dat` | Mọi Lodat; copy ảnh chat-gắn-lô sang SEO (giữ chat gốc); xong thì revalidate sitemap | `APPLY=1 SCOPE=all pnpm images:seo-copy` |
 | Ảnh dự án còn UUID (không gắn lô) | Tên file = **tên dự án** (`Address.detail`); không đụng `lodats/` hay chat | `APPLY=1 pnpm images:seo-copy-addresses` (VPS: commit `[seo-copy-orphan-addr]`) |
 | Khi Đăng web | Tự copy ảnh lô/dự án còn tên xấu; ảnh chat gắn lô → copy SEO, giữ chat | `setPublished` — không chặn đăng nếu lỗi |
-| Ảnh bài CMS (`public-web/`) | Bìa + ảnh TipTap: lúc upload convert WebP. Kho JPEG cũ: `APPLY=1 pnpm images:webp-public-media` (VPS: commit `[seo-webp-posts]`) |
+| Ảnh bài CMS (`public-web/`) | Bìa + ảnh TipTap: lúc upload convert WebP **và** đặt key `{slug-tieu-de}-anh-n.webp` (modal Soạn bài gửi `title` + `index`). Lưu bài copy UUID còn sót sang tên SEO. Alt guest = `title` (không ô Alt/Title trong admin). Kho JPEG cũ: `APPLY=1 pnpm images:webp-public-media` (VPS: commit `[seo-webp-posts]`) |
 | Ảnh chat / avatar JPEG migrate | Cùng stem `.webp`, cập nhật mọi `objectKey`, xóa JPEG/PNG khi DB hết ref | `APPLY=1 pnpm images:webp-replace` (VPS: `[seo-webp-replace]`) |
 
 Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent). Snapshot giao dịch đổi sang key mới rồi mới xóa nguồn.
 
 | Hạng mục | Công thức | Không làm |
 |----------|-----------|-----------|
-| **Tên file / CDN** | Ảnh lô: `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.webp`. Ảnh dự án: `addresses/{id}/{ten-du-an}-anh-n.webp`. Bytes = WebP. Ảnh chat: `customers/chat/….webp` (migrate JPEG → replace script). Ảnh chat gắn lô: **copy** sang key SEO WebP | UUID / `IMG_1234` / JPEG public cho ảnh lô mới; nhồi keyword |
+| **Tên file / CDN** | Ảnh lô: `lodats/{id}/{slug-ten-dia-chi}-anh-{n}.webp`. Ảnh dự án: `addresses/{id}/{ten-du-an}-anh-n.webp`. Ảnh bài CMS: `public-web/{slug-tieu-de}-anh-{n}.webp` (bìa = 1, ảnh TipTap = 2…). Bytes = WebP. Ảnh chat: `customers/chat/….webp` (migrate JPEG → replace script). Ảnh chat gắn lô: **copy** sang key SEO WebP | UUID / `IMG_1234` / JPEG public cho ảnh lô/bài mới; nhồi keyword |
 | **Alt** | Ảnh lô: `listingHeadline` — `{title}` + phần địa chỉ chưa có trong tên (không lặp «tại X tại X»); nhiều ảnh → thêm `— ảnh 2`. Ảnh dự án (`/addresses/`): **tên dự án** (`placeLabel` / `Address.detail`). Bài: `title`. Thumbnail gallery: `alt=""` | `alt` rỗng trên ảnh chính; «đất nền giá rẻ bán nhanh…»; PII / hoa hồng |
 | **HTML** | Mọi URL gallery nằm trong HTML lần tải đầu (SSR). Ảnh nằm cạnh H1 + địa chỉ + mô tả | Chỉ đổi `src` bằng JS nên bot chỉ thấy 1 ảnh; CSS `background-image` cho ảnh lô |
 | **Sitemap** | Trong `sitemap.xml`, mỗi URL lô/bài published có `image:image` → `image:loc` tuyệt đối (CDN). Bìa + gallery; bài = bìa + `img` trong body | `/og-default.png`; nháp; `data:` URI |

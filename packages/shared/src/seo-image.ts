@@ -1,4 +1,4 @@
-import { toListingPublicSlug } from './public-content.js';
+import { toListingPublicSlug, toPublicPostSlug } from './public-content.js';
 
 export const SEO_IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'] as const;
 
@@ -73,6 +73,26 @@ export function seoLotImageObjectKey(lodatId: string, fileName: string): string 
 
 export function seoAddressImageObjectKey(addressId: string, fileName: string): string {
   return `addresses/${safeIdSegment(addressId, 'dia-chi')}/${fileName}`;
+}
+
+/**
+ * CMS post cover / TipTap photos: `{post-slug}-anh-{n}.webp` under `public-web/`.
+ */
+export function seoPostImageFileName(input: {
+  title: string;
+  index: number;
+  suffix?: string;
+}): string {
+  const stem = toPublicPostSlug(input.title);
+  const n = Number.isFinite(input.index) ? Math.max(1, Math.floor(input.index)) : 1;
+  const extra = input.suffix?.replace(/[^a-z0-9]/gi, '').slice(0, 8);
+  const tail = extra ? `-${extra.toLowerCase()}` : '';
+  return `${stem}-anh-${n}${tail}${PUBLIC_SEO_IMAGE_EXT}`;
+}
+
+export function seoPostImageObjectKey(fileName: string): string {
+  const base = fileName.replace(/^\/+/, '').split('/').pop() ?? fileName;
+  return `public-web/${base}`;
 }
 
 const SEO_FILE_RE = /^.+-anh-\d+(-[a-z0-9]{1,8})?\.(jpg|jpeg|png|webp|gif)$/i;

@@ -483,16 +483,16 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 |--------|----------|---------|
 | Tiêu đề | Có | Max 160; đếm `n/160` |
 | Chuyên mục | Có | Chip chọn (6 mục) |
-| Ảnh bìa (thumbnail) | **Xuất bản** | ~16:9; chọn JPG/PNG/WEBP, **lưu CDN WebP**. Nháp được trống |
-| Nội dung | **Xuất bản** | Rich text (TipTap): đậm/nghiêng/H2/H3/list + **ảnh đan xen** |
-| Đường dẫn dự kiến | Chỉ đọc | `/{category}/{slug}` từ tiêu đề |
+| Ảnh bìa (thumbnail) | **Xuất bản** | ~16:9; JPG/PNG/WEBP → CDN WebP `{slug}-anh-1.webp`. Alt trang khách = tiêu đề. Nháp được trống. Không ô Alt/Title riêng |
+| Nội dung | **Xuất bản** | Rich text (TipTap): đậm/nghiêng/H2/H3/list + **ảnh đan xen** (`{slug}-anh-n.webp`, alt = tiêu đề) |
+| Đường dẫn dự kiến | Chỉ đọc | `/{category}/{slug}` từ tiêu đề qua `toPublicPostSlug` — **không cắt** 60/80 ký tự |
 
 **Hành vi**
 
 1. Dòng phụ: bài hiện trên web khách theo chuyên mục; nháp chỉ admin; Xuất bản = khách đọc được.
 2. Ảnh bìa: **Chọn ảnh** · **Gỡ ảnh** + preview.
 3. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload → chèn vào vị trí con trỏ).
-4. Ảnh bìa + ảnh trong bài = bucket **public** R2, **WebP** (`sharp`). Nguồn JPG/PNG được. Mock: URL tạm / stub.
+4. Ảnh bìa + ảnh trong bài = bucket **public** R2, **WebP** (`sharp`), tên file `{slug-tieu-de}-anh-n.webp`. Alt trên trang khách = tiêu đề. Mock: URL tạm / stub.
 5. **Huỷ** · **Lưu nháp** (được thiếu ảnh/nội dung) · **Xuất bản** (thiếu ảnh bìa hoặc nội dung trống → lỗi form).
 6. Lỗi validate / API: `crm-form-error`.
 
@@ -551,8 +551,8 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 ### 16.1 Phase 1 — Media upload (chung lô + bài)
 
 - [x] Contract: `uploadPublicMediaResponseSchema` `{ url, objectKey? }`
-- [x] `POST /admin/public-web/media` — JWT ADMIN, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 **WebP** public CDN
-- [x] Web: `uploadPublicPostImage` gọi API khi không mock; mock giữ object URL
+- [x] `POST /admin/public-web/media` — JWT ADMIN, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 **WebP** public CDN. Bài: optional `title` + `index` → `{slug}-anh-n.webp`
+- [x] Web: `uploadPublicPostImage` gọi API khi không mock (kèm title/index từ modal Soạn bài); mock giữ object URL
 
 ### 16.2 Phase 2 — Lô: DB + API
 
@@ -717,7 +717,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 - [x] §17.4 đặc tả màn hub (PC → mobile) đủ Ready for mock
 - [x] Zod: hub kind `commune` | `place`; list hub sitemap; catalog thêm `communeSlug` / `placeSlug`
-- [x] Helper slugify chung (`toPublicSlug` / `toListingPublicSlug` trong `@crmanhung/shared`)
+- [x] Helper slugify chung (`toPublicSlug` / `toListingPublicSlug` / `toPublicPostSlug` trong `@crmanhung/shared`)
 
 #### Slice C — Hub xã (UI mock → API → nối)
 

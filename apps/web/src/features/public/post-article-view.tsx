@@ -18,7 +18,7 @@ export function PostArticleView({
   post: PublicGuestPost;
   related: PublicGuestPost[];
 }) {
-  const bodyHtml = sanitizeListingHtml(post.bodyHtml ?? '');
+  const bodyHtml = sanitizeListingHtml(post.bodyHtml ?? '', { defaultImgAlt: post.title });
   const categoryLabel = publicPostCategoryLabel(post.category);
   const publishedLabel = post.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString('vi-VN', {

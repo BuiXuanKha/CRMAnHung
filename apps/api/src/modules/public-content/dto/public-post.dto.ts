@@ -54,7 +54,7 @@ export class CreatePublicPostDto {
 
   @IsOptional()
   @IsString()
-  @MaxLength(80)
+  @MaxLength(200)
   slug?: string;
 
   @IsOptional()

@@ -21,7 +21,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 3. Nội dung chính SSR/RSC — không để bot chỉ thấy shell trống
 4. URL mới → cập nhật `sitemap.ts` (chỉ phát URL khi `PUBLIC_SEO_INDEX` bật); giữ `robots.ts` chặn khu CRM + `/login`; **không** `Disallow: /`
 5. **Lô `/mua-ban-nha-dat-huyen-nam-sach/[slug]`:** làm đúng công thức [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §7 (excerpt → meta; cover → OG; sitemap chỉ `isPublished`; JSON-LD không bịa giá). Hub địa bàn: domain `public-content` §17.
-6. **Ảnh:** lúc **tạo/upload lô** CDN key `{slug-ten-dia-chi}-anh-n.webp` (server convert WebP). Ảnh chat **mới từ extension** → WebP lúc ingest (`customers/chat/`). JPEG/PNG chat+avatar cũ: `pnpm images:webp-replace` (ghi WebP, cập nhật DB, rồi xóa nguồn). Ảnh chat gắn lô: **copy** sang key SEO WebP. Ảnh dự án: `{ten-du-an}-anh-n.webp`. Kho JPEG/PNG lô cũ: `pnpm images:seo-copy`. Trang khách: `alt`; sitemap `images`; JSON-LD `ImageObject`. Gallery SSR đủ URL. Không chặn Googlebot trên CDN.
+6. **Ảnh:** lúc **tạo/upload lô** CDN key `{slug-ten-dia-chi}-anh-n.webp` (server convert WebP). **Bài CMS** (modal Soạn bài): `{slug-tieu-de}-anh-n.webp` dưới `public-web/`; `alt` guest = tiêu đề — không thêm ô Alt/Title. Ảnh chat **mới từ extension** → WebP lúc ingest (`customers/chat/`). JPEG/PNG chat+avatar cũ: `pnpm images:webp-replace` (ghi WebP, cập nhật DB, rồi xóa nguồn). Ảnh chat gắn lô: **copy** sang key SEO WebP. Ảnh dự án: `{ten-du-an}-anh-n.webp`. Kho JPEG/PNG lô cũ: `pnpm images:seo-copy`. Trang khách: `alt`; sitemap `images`; JSON-LD `ImageObject`. Gallery SSR đủ URL. Không chặn Googlebot trên CDN.
 
 ## Cấm
 

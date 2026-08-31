@@ -78,6 +78,17 @@ export function toListingPublicSlug(title: string, location?: string | null): st
   return reservePublicLotSlug(toPublicSlug(combined, 0, 'lo-dat'));
 }
 
+/** Stored / submitted post slug max (title 160 → slug typically shorter). */
+export const PUBLIC_POST_SLUG_MAX = 200;
+
+/**
+ * Guest article URL slug from title — no character cap, no mid-word cut.
+ * Same rules as lots (`toPublicSlug(..., 0)`), fallback `bai-viet`.
+ */
+export function toPublicPostSlug(title: string): string {
+  return toPublicSlug(title, 0, 'bai-viet');
+}
+
 export function listingCommuneHubPath(communeSlug: string): string {
   return `${PUBLIC_LISTING_PATH}/${PUBLIC_LISTING_HUB_SEGMENT}/${communeSlug}`;
 }
@@ -522,7 +533,7 @@ export const createPublicPostInputSchema = z
     coverImageUrl: z.string().trim().nullable().optional(),
     bodyHtml: z.string().optional(),
     excerpt: z.string().trim().max(PUBLIC_POST_EXCERPT_MAX).optional(),
-    slug: z.string().trim().max(80).optional(),
+    slug: z.string().trim().max(PUBLIC_POST_SLUG_MAX).optional(),
     metaDescription: z.string().trim().max(META_DESCRIPTION_MAX).optional(),
   })
   .superRefine((data, ctx) => {
