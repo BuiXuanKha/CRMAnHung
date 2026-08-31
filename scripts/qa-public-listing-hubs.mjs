@@ -164,6 +164,19 @@ if (publicLayout.includes('publicSearchRobots')) {
   bad('public layout chưa dùng publicSearchRobots');
 }
 
+console.log('\nGA4');
+const rootLayout = read('apps/web/app/layout.tsx');
+const ga4Snippet = read('apps/web/src/features/public/ga4-snippet.ts');
+if (
+  rootLayout.includes('GA4_SCRIPT_SRC') &&
+  rootLayout.includes('Ga4RouteTracker') &&
+  ga4Snippet.includes('G-97SWKBK2DB')
+) {
+  ok('GA4 gtag G-97SWKBK2DB trong layout gốc + tracker SPA');
+} else {
+  bad('thiếu GA4 trong app/layout.tsx / ga4-snippet.ts');
+}
+
 console.log('\nSitemap includes hub segments');
 const sitemapSrc = read('apps/web/app/sitemap.ts');
 if (sitemapSrc.includes('isPublicSearchIndexEnabled') && sitemapSrc.includes('return []')) {

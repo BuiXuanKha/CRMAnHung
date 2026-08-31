@@ -77,6 +77,19 @@ Next.js không có file HTML tĩnh — tương đương: snippet trong `app/layo
 
 Trong Events Manager: Test events / số sự kiện `ViewContent` = khách xem chi tiết 1 lô; `ViewProductList` = khách vào danh sách. Có thể tạo conversion URL chứa `/mua-ban-nha-dat-huyen-nam-sach` trên `PageView` nếu muốn gom cả hai.
 
+### 6.1 Google Analytics 4 (GA4)
+
+Snippet Google tag (gtag.js) trong `<head>` layout gốc — cùng chỗ Meta Pixel — mọi URL `anhungland.com`.
+
+| Hạng mục | Quy ước |
+|----------|---------|
+| Vị trí | `<head>` `app/layout.tsx` — `gtag/js` + `gtag('config')` |
+| Measurement ID | `G-97SWKBK2DB` (public, hiện trong View Source) |
+| SPA | `Ga4RouteTracker` — `page_view` khi đổi route Next `Link` (bỏ lần tải đầu; `config` đã gửi) |
+| Dev | Tắt khi `next dev` (`NODE_ENV !== production`) |
+
+Trong GA4: Báo cáo thời gian thực / DebugView trên production sau deploy.
+
 ---
 
 ## Không làm trên web công khai

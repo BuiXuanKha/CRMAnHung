@@ -33,7 +33,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 
 Next.js App Router — dùng `metadata` API, `next/image`, `app/robots.ts`, `app/sitemap.ts`.
 
-Meta Pixel Facebook: mã cơ sở trong `<head>` `app/layout.tsx`. Catalog lô → `ViewProductList`; chi tiết lô → `ViewContent`. Chi tiết [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §6.
+Meta Pixel Facebook: mã cơ sở trong `<head>` `app/layout.tsx`. Catalog lô → `ViewProductList`; chi tiết lô → `ViewContent`. GA4 (`G-97SWKBK2DB`) cùng `<head>` + `Ga4RouteTracker` khi đổi route. Chi tiết [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §6.
 
 ## Sau khi làm
 

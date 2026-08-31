@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from 'next';
 import { Be_Vietnam_Pro, Noto_Sans } from 'next/font/google';
 import { Providers } from './providers';
+import { Ga4RouteTracker } from '@/features/public/ga4-tracker';
+import { GA4_HEAD_INLINE, GA4_SCRIPT_SRC } from '@/features/public/ga4-snippet';
 import { MetaPixelRouteTracker } from '@/features/public/meta-pixel-tracker';
 import {
   META_PIXEL_HEAD_SCRIPT,
@@ -49,6 +51,11 @@ export default function RootLayout({
       <head>
         {process.env.NODE_ENV === 'production' ? (
           <>
+            <script async src={GA4_SCRIPT_SRC} />
+            <script
+              id="ga4-gtag"
+              dangerouslySetInnerHTML={{ __html: GA4_HEAD_INLINE }}
+            />
             <script
               id="meta-pixel"
               dangerouslySetInnerHTML={{ __html: META_PIXEL_HEAD_SCRIPT }}
@@ -62,7 +69,12 @@ export default function RootLayout({
         ) : null}
       </head>
       <body className={beVietnam.className}>
-        {process.env.NODE_ENV === 'production' ? <MetaPixelRouteTracker /> : null}
+        {process.env.NODE_ENV === 'production' ? (
+          <>
+            <Ga4RouteTracker />
+            <MetaPixelRouteTracker />
+          </>
+        ) : null}
         <Providers>{children}</Providers>
       </body>
     </html>
