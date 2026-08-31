@@ -3,10 +3,6 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PublicPostCategory } from '@crmanhung/shared';
 import {
-  PROJECT_STATUS_LABEL,
-  PUBLIC_PROJECTS,
-} from '@/features/public/mock-data';
-import {
   isPublicPostCategory,
   listPublicGuestPosts,
   postHref,
@@ -39,7 +35,6 @@ export default async function PublicCategoryListPage({ params }: Props) {
 
   const posts = await listPublicGuestPosts(category);
   const label = publicPostCategoryLabel(category);
-  const showProjects = category === PublicPostCategory.DU_AN;
 
   return (
     <div className="ph">
@@ -50,34 +45,6 @@ export default async function PublicCategoryListPage({ params }: Props) {
         </Link>
         <h1>{label}</h1>
         <p>Bài đã xuất bản trên An Hưng Land — chuyên mục {label.toLowerCase()}.</p>
-
-        {showProjects ? (
-          <div className="ph-project-row" style={{ marginBottom: 40 }}>
-            {PUBLIC_PROJECTS.map((pj) => (
-              <div key={pj.id} className="ph-project">
-                <div className="ph-project-media">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={pj.imageUrl} alt={pj.title} loading="lazy" />
-                </div>
-                <div className="ph-project-body">
-                  <span
-                    className={
-                      pj.status === 'DANG_MO_BAN'
-                        ? 'ph-badge ph-badge-open'
-                        : 'ph-badge ph-badge-soon'
-                    }
-                  >
-                    {PROJECT_STATUS_LABEL[pj.status]}
-                  </span>
-                  <h3>{pj.title}</h3>
-                  <p>
-                    {pj.areaLabel} · {pj.location}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : null}
 
         {posts.length === 0 ? (
           <p>Hiện chưa có bài trong chuyên mục này.</p>

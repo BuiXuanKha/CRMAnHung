@@ -21,17 +21,6 @@ export type PublicProduct = {
   metaDescription?: string | null;
 };
 
-export type PublicProject = {
-  id: string;
-  slug: string;
-  title: string;
-  status: 'DANG_MO_BAN' | 'SAP_MO_BAN';
-  areaLabel: string;
-  location: string;
-  imageUrl: string;
-  photoCount: number;
-};
-
 export type PublicArticle = {
   id: string;
   slug: string;
@@ -239,42 +228,6 @@ export const PUBLIC_PRODUCTS: PublicProduct[] = [
   },
 ];
 
-export const PUBLIC_PROJECTS: PublicProject[] = [
-  {
-    id: 'pj1',
-    slug: 'khu-dan-cu-an-hung-long-thanh',
-    title: 'Khu dân cư An Hưng Long Thành',
-    status: 'DANG_MO_BAN',
-    areaLabel: '12 ha',
-    location: 'Long Thành, Đồng Nai',
-    imageUrl:
-      'https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?auto=format&fit=crop&w=900&q=80',
-    photoCount: 12,
-  },
-  {
-    id: 'pj2',
-    slug: 'khu-do-thi-ven-song-cam-my',
-    title: 'Khu đô thị ven sông Cẩm Mỹ',
-    status: 'SAP_MO_BAN',
-    areaLabel: '8,5 ha',
-    location: 'Cẩm Mỹ, Đồng Nai',
-    imageUrl:
-      'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&w=900&q=80',
-    photoCount: 7,
-  },
-  {
-    id: 'pj3',
-    slug: 'nha-pho-thuong-mai-bien-hoa',
-    title: 'Nhà phố thương mại Biên Hòa',
-    status: 'DANG_MO_BAN',
-    areaLabel: '3,2 ha',
-    location: 'Biên Hòa, Đồng Nai',
-    imageUrl:
-      'https://images.unsplash.com/photo-1570129477492-45c003edd2be?auto=format&fit=crop&w=900&q=80',
-    photoCount: 9,
-  },
-];
-
 export const PUBLIC_ARTICLES: PublicArticle[] = [
   {
     id: 'a1',
@@ -307,11 +260,6 @@ export const PUBLIC_ARTICLES: PublicArticle[] = [
     publishedLabel: '2 tuần trước',
   },
 ];
-
-export const PROJECT_STATUS_LABEL: Record<PublicProject['status'], string> = {
-  DANG_MO_BAN: 'Đang mở bán',
-  SAP_MO_BAN: 'Sắp mở bán',
-};
 
 export const ARTICLE_CATEGORY_LABEL: Record<PublicArticle['category'], string> = {
   'du-an': 'Dự án',

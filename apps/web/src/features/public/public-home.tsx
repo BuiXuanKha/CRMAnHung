@@ -8,10 +8,6 @@ import { ANHUNG_BRAND } from './brand';
 import { HomeProductSection } from './home-product-section';
 import { PUBLIC_LISTING_PATH } from './site';
 import { postHref, publicPostCategoryLabel, teaserExcerpt } from './published-posts';
-import {
-  PROJECT_STATUS_LABEL,
-  PUBLIC_PROJECTS,
-} from './mock-data';
 import './public-home.css';
 
 function BrandLogo({
@@ -35,9 +31,11 @@ function BrandLogo({
 
 export function PublicHome({
   initialLots,
+  initialProjectPosts,
   initialPosts,
 }: {
   initialLots: PublicGuestLot[];
+  initialProjectPosts: PublicGuestPost[];
   initialPosts: PublicGuestPost[];
 }) {
   const [scrolled, setScrolled] = useState(false);
@@ -103,51 +101,46 @@ export function PublicHome({
 
       <HomeProductSection initialLots={initialLots} />
 
-      <section id="du-an" className="ph-section ph-section-muted">
-        <div className="ph-section-head">
-          <h2>Dự án nổi bật</h2>
-          <Link href="/du-an" className="ph-more">
-            Xem thêm →
-          </Link>
-        </div>
-        <div className="ph-project-row">
-          {PUBLIC_PROJECTS.map((pj) => (
-            <Link key={pj.id} href="/du-an" className="ph-project">
-              <div className="ph-project-media">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={pj.imageUrl} alt={pj.title} loading="lazy" />
-                <span className="ph-photo-count">{pj.photoCount} ảnh</span>
-              </div>
-              <div className="ph-project-body">
-                <span
-                  className={
-                    pj.status === 'DANG_MO_BAN'
-                      ? 'ph-badge ph-badge-open'
-                      : 'ph-badge ph-badge-soon'
-                  }
-                >
-                  {PROJECT_STATUS_LABEL[pj.status]}
-                </span>
-                <h3>{pj.title}</h3>
-                <p>
-                  {pj.areaLabel} · {pj.location}
-                </p>
-              </div>
+      {initialProjectPosts.length > 0 ? (
+        <section id="du-an" className="ph-section ph-section-muted">
+          <div className="ph-section-head">
+            <h2>Dự án nổi bật</h2>
+            <Link href="/du-an" className="ph-more">
+              Xem thêm →
             </Link>
-          ))}
-        </div>
-      </section>
+          </div>
+          <div className="ph-project-row">
+            {initialProjectPosts.map((pj) => (
+              <Link key={pj.id} href={postHref(pj.category, pj.slug)} className="ph-project">
+                <div className="ph-project-media">
+                  {pj.coverImageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={pj.coverImageUrl} alt={pj.title} loading="lazy" />
+                  ) : (
+                    <span className="ph-product-media-empty">Chưa có ảnh</span>
+                  )}
+                </div>
+                <div className="ph-project-body">
+                  <span className="ph-badge ph-badge-open">
+                    {publicPostCategoryLabel(pj.category)}
+                  </span>
+                  <h3>{pj.title}</h3>
+                  <p>{teaserExcerpt(pj.excerpt)}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      ) : null}
 
-      <section id="bai-viet" className="ph-section">
-        <div className="ph-section-head">
-          <h2>Tin dự án · Kiến thức · Kinh nghiệm</h2>
-          <Link href="/kien-thuc" className="ph-more">
-            Xem thêm →
-          </Link>
-        </div>
-        {initialPosts.length === 0 ? (
-          <p className="ph-article-excerpt">Hiện chưa có bài viết xuất bản.</p>
-        ) : (
+      {initialPosts.length > 0 ? (
+        <section id="bai-viet" className="ph-section">
+          <div className="ph-section-head">
+            <h2>Tin dự án · Kiến thức · Kinh nghiệm</h2>
+            <Link href="/kien-thuc" className="ph-more">
+              Xem thêm →
+            </Link>
+          </div>
           <div className="ph-article-row">
             {initialPosts.map((a, idx) => (
               <Link
@@ -174,8 +167,8 @@ export function PublicHome({
               </Link>
             ))}
           </div>
-        )}
-      </section>
+        </section>
+      ) : null}
 
       <footer className="ph-footer">
         <div className="ph-footer-inner">

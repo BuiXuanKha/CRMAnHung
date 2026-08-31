@@ -113,7 +113,7 @@ PublicPost                        (category, slug, status, cover, body) — khô
 | **Dashboard** | `/dashboard` | Tổng quan + menu trái. §12 |
 | **Lô đất** | `/dashboard/lo-dat` | List lô đăng web. §13 |
 | **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). §14 |
-| Trang chủ khách | `/` | Lô đã Đăng web (`listPublishedPublicLots`) |
+| Trang chủ khách | `/` | Lô đã Đăng web (`listPublishedPublicLots`) · **Dự án nổi bật** = bài `PUBLISHED` chuyên mục `/du-an` (tối đa 3, mới nhất) |
 
 **Tạm thời không** thêm hành vi/quyền admin trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 

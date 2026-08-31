@@ -1,7 +1,7 @@
 import { listPublishedPublicLots } from '@/features/public-content/api';
 import { JsonLd } from '@/features/public/json-ld';
 import { organizationJsonLd, websiteJsonLd } from '@/features/public/listing-seo';
-import { listHomeTeaserPosts } from '@/features/public/published-posts';
+import { listHomeProjectPosts, listHomeTeaserPosts } from '@/features/public/published-posts';
 import { PublicHome } from '@/features/public/public-home';
 
 /**
@@ -12,15 +12,16 @@ import { PublicHome } from '@/features/public/public-home';
 export const revalidate = false;
 
 export default async function PublicHomePage() {
-  const [lots, posts] = await Promise.all([
+  const [lots, projectPosts, posts] = await Promise.all([
     listPublishedPublicLots(),
+    listHomeProjectPosts(3),
     listHomeTeaserPosts(6),
   ]);
   return (
     <>
       <JsonLd data={organizationJsonLd()} />
       <JsonLd data={websiteJsonLd()} />
-      <PublicHome initialLots={lots} initialPosts={posts} />
+      <PublicHome initialLots={lots} initialProjectPosts={projectPosts} initialPosts={posts} />
     </>
   );
 }

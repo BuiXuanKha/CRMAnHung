@@ -107,9 +107,10 @@ Chi tiết quyền + công tắc Đăng web: [`domains/public-content.md`](./dom
 ## 8. Mock FE (chưa BE)
 
 - Trang `/`: lô khách = `listPublishedPublicLots` — overlay Đăng web (`isPublished`) ∩ lô CRM đang Mở bán (cùng store dashboard). **Không** dùng mảng `PUBLIC_PRODUCTS` giả trên homepage.
+- **Dự án nổi bật:** bài `PUBLISHED` chuyên mục `/du-an` (SSR, tối đa 3). Không mock Unsplash. 0 bài → ẩn khối. Card: ảnh bìa · hangtag «Dự án» · tiêu đề · excerpt; bấm → `/{category}/{slug}`. «Xem thêm» → `/du-an`.
 - Chưa có lô đăng → empty state tiếng Việt (không hàng mock). Có lô → card title / giá public / DT / địa chỉ; không PII, hoa hồng, ghi chú chủ.
 - Chi tiết sản phẩm có nút share (UI).
-- `NEXT_PUBLIC_USE_MOCK` / bài phụ + dự án teaser vẫn data cứng trong `features/public/` cho đến CMS bài.
+- Teaser kiến thức / kinh nghiệm trên `/` **không** lặp bài `/du-an` đã hiện ở khối dự án.
 - API / CMS thật: phase sau (ngoài scope khi chỉ làm FE).
 
 ---

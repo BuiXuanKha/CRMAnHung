@@ -754,7 +754,7 @@ export class PublicContentService {
     });
     if (wasPublished || status === 'PUBLISHED') {
       await this.revalidate.revalidatePost(saved.category, saved.slug, {
-        includeHome: wasPublished !== (status === 'PUBLISHED'),
+        includeHome: true,
       });
     }
     return this.toAdminPost(saved);

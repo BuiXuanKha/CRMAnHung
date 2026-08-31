@@ -72,7 +72,16 @@ export async function listSitemapPosts(): Promise<PublicGuestPost[]> {
   return isMockPublicWeb() ? mockArticlesAsGuest() : [];
 }
 
+/** Homepage «Dự án nổi bật» — bài chuyên mục Dự án, mới nhất trước. */
+export async function listHomeProjectPosts(limit = 3): Promise<PublicGuestPost[]> {
+  const items = await listPublicGuestPosts(PublicPostCategory.DU_AN);
+  return items.slice(0, limit);
+}
+
+/** Homepage tin/kiến thức — không lặp bài đã hiện ở «Dự án nổi bật». */
 export async function listHomeTeaserPosts(limit = 6): Promise<PublicGuestPost[]> {
   const items = await listPublicGuestPosts();
-  return items.slice(0, limit);
+  return items
+    .filter((row) => row.category !== PublicPostCategory.DU_AN)
+    .slice(0, limit);
 }
