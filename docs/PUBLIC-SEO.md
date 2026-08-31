@@ -213,7 +213,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | Toàn bộ CRM `/lo-dat` | Mọi Lodat; copy ảnh chat-gắn-lô sang SEO (giữ chat gốc); xong thì revalidate sitemap | `APPLY=1 SCOPE=all pnpm images:seo-copy` |
 | Ảnh dự án còn UUID (không gắn lô) | Tên file = **tên dự án** (`Address.detail`); không đụng `lodats/` hay chat | `APPLY=1 pnpm images:seo-copy-addresses` (VPS: commit `[seo-copy-orphan-addr]`) |
 | Khi Đăng web | Tự copy ảnh lô/dự án còn tên xấu; ảnh chat gắn lô → copy SEO, giữ chat | `setPublished` — không chặn đăng nếu lỗi |
-| Ảnh bài CMS (`public-web/`) | Bìa + ảnh TipTap: lúc upload convert WebP **và** đặt key `{slug-tieu-de}-anh-n.webp` (modal Soạn bài gửi `title` + `index`). Lưu bài copy UUID còn sót sang tên SEO. Alt guest = `title` (không ô Alt/Title trong admin). Kho JPEG cũ: `APPLY=1 pnpm images:webp-public-media` (VPS: commit `[seo-webp-posts]`) |
+| Ảnh bài CMS (`public-web/`) | Bìa + ảnh TipTap: lúc upload convert WebP **và** đặt key `{slug-tieu-de}-anh-n.webp`. Bài cũ UUID: `APPLY=1 pnpm images:seo-copy-posts` (VPS: commit `[seo-copy-posts]`) — copy từng bài (file dùng chung không xóa). Alt guest = `title`. Kho JPEG cũ: `APPLY=1 pnpm images:webp-public-media` (VPS: commit `[seo-webp-posts]`) |
 | Ảnh chat / avatar JPEG migrate | Cùng stem `.webp`, cập nhật mọi `objectKey`, xóa JPEG/PNG khi DB hết ref | `APPLY=1 pnpm images:webp-replace` (VPS: `[seo-webp-replace]`) |
 
 Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent). Snapshot giao dịch đổi sang key mới rồi mới xóa nguồn.

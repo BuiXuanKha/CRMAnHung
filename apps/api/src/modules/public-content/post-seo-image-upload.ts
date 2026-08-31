@@ -9,8 +9,13 @@ import { toPublicWebp } from '../../storage/to-public-webp';
 import type { StorageService } from '../../storage/storage.service';
 
 const IMG_SRC_RE = /<img\b[^>]*?\bsrc\s*=\s*(?:"([^"]*)"|'([^']*)')/gi;
-const UUID_PUBLIC_WEBP_RE =
-  /^public-web\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.webp$/i;
+
+export type PostSeoImageMove = {
+  fromKey: string;
+  toKey: string;
+  fromUrl: string;
+  toUrl: string;
+};
 
 export async function uniqueSeoPostImageKey(
   storage: StorageService,
@@ -80,21 +85,30 @@ function alreadySeoPostKey(objectKey: string): boolean {
 /**
  * Copy leftover UUID / generic `public-web/` keys to `{slug}-anh-n.webp`
  * and rewrite cover + TipTap HTML. Leaves already-SEO names in place.
+ * Does **not** delete UUID sources — several posts may share one file.
  */
 export async function rewritePostSeoImages(
   storage: StorageService,
   input: { title: string; coverImageUrl: string | null; bodyHtml: string },
-): Promise<{ coverImageUrl: string | null; bodyHtml: string }> {
-  if (!storage.isConfigured()) {
-    return { coverImageUrl: input.coverImageUrl, bodyHtml: input.bodyHtml };
-  }
+  opts?: { dryRun?: boolean },
+): Promise<{
+  coverImageUrl: string | null;
+  bodyHtml: string;
+  moves: PostSeoImageMove[];
+}> {
+  const empty = {
+    coverImageUrl: input.coverImageUrl,
+    bodyHtml: input.bodyHtml,
+    moves: [] as PostSeoImageMove[],
+  };
+  if (!storage.isConfigured()) return empty;
   const title = input.title.trim();
-  if (!title) {
-    return { coverImageUrl: input.coverImageUrl, bodyHtml: input.bodyHtml };
-  }
+  if (!title) return empty;
 
+  const dryRun = Boolean(opts?.dryRun);
   let coverImageUrl = input.coverImageUrl;
   let bodyHtml = input.bodyHtml;
+  const moves: PostSeoImageMove[] = [];
   let index = 1;
 
   for (const url of collectPostMediaUrls(coverImageUrl, bodyHtml)) {
@@ -110,24 +124,24 @@ export async function rewritePostSeoImages(
     });
     index += 1;
     if (objectKey === fromKey) continue;
-    const destExists = await storage.publicObjectExists(objectKey);
-    if (!destExists) {
-      const src = await storage.getPublicObject(fromKey);
-      if (!src) continue;
-      const webp = await toPublicWebp(src.buffer);
-      await storage.uploadPublicAtKey(objectKey, {
-        buffer: webp.buffer,
-        contentType: webp.contentType,
-        contentFileName: fileName,
-      });
+    if (!dryRun) {
+      const destExists = await storage.publicObjectExists(objectKey);
+      if (!destExists) {
+        const src = await storage.getPublicObject(fromKey);
+        if (!src) continue;
+        const webp = await toPublicWebp(src.buffer);
+        await storage.uploadPublicAtKey(objectKey, {
+          buffer: webp.buffer,
+          contentType: webp.contentType,
+          contentFileName: fileName,
+        });
+      }
     }
     const nextUrl = storage.publicUrl(objectKey);
+    moves.push({ fromKey, toKey: objectKey, fromUrl: url, toUrl: nextUrl });
     if (coverImageUrl === url) coverImageUrl = nextUrl;
     bodyHtml = bodyHtml.split(url).join(nextUrl);
-    if (UUID_PUBLIC_WEBP_RE.test(fromKey) && fromKey !== objectKey) {
-      await storage.delete(fromKey, 'public').catch(() => undefined);
-    }
   }
 
-  return { coverImageUrl, bodyHtml };
+  return { coverImageUrl, bodyHtml, moves };
 }

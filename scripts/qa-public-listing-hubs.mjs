@@ -348,11 +348,15 @@ if (existsSync(webpPostsScript)) ok('script images:webp-public-media');
 else bad('thiếu scripts/seo-webp-public-media.ts');
 
 const composePost = read('apps/web/src/features/public-content/components/compose-post-dialog.tsx');
-if (composePost.includes('lưu lên bài luôn WebP')) {
-  ok('modal soạn bài ghi rõ JPG/PNG → WebP');
+if (composePost.includes('lưu WebP') && composePost.includes('anh-1.webp')) {
+  ok('modal soạn bài ghi rõ JPG/PNG → WebP + tên file SEO');
 } else {
-  bad('compose-post-dialog chưa ghi convert WebP');
+  bad('compose-post-dialog chưa ghi convert WebP / tên file SEO');
 }
+
+const postSeoScript = resolve(root, 'apps/api/scripts/seo-copy-post-images.ts');
+if (existsSync(postSeoScript)) ok('script images:seo-copy-posts');
+else bad('thiếu scripts/seo-copy-post-images.ts');
 
 const listingSeoSrc = read('apps/web/src/features/public/listing-seo.ts');
 if (
