@@ -1,14 +1,12 @@
 # CRMAnHung
 
-Viết lại **FacebookCustomerCRM**: CRM nhân viên + web khách trên cùng monorepo.
-
-Hệ cũ vẫn phục vụ nhân viên tại **https://crm.anhungland.com**. Repo này chạy **song song** — không ghi đè CRM cũ.
+CRM nhân viên + web khách của **An Hưng Land**. Viết lại từ FacebookCustomerCRM (NestJS, Postgres, R2, Next.js) — đã **cutover**: nhân viên dùng hệ mới.
 
 | Bề mặt | URL | Ghi chú |
 |--------|-----|---------|
 | Web khách | [anhungland.com](https://anhungland.com) | Không login. Index Google. Ảnh CDN `cdn.anhungland.com` |
-| CRM mới | [anhungland.com/login](https://anhungland.com/login) | Nhân viên / admin |
-| CRM cũ | [crm.anhungland.com](https://crm.anhungland.com) | Giữ đến cutover |
+| CRM (production) | [anhungland.com/login](https://anhungland.com/login) | Nhân viên / admin |
+| Hệ cũ (FacebookCustomerCRM) | [crm.anhungland.com](https://crm.anhungland.com) | Không còn là CRM production. Giữ cây VPS để rollback; **không** deploy đè lên |
 
 **Bắt đầu đọc:** [`docs/FOUNDATION.md`](docs/FOUNDATION.md) · [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) · [`AGENTS.md`](AGENTS.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · web khách: [`docs/PUBLIC-WEB.md`](docs/PUBLIC-WEB.md) + [`docs/PUBLIC-SEO.md`](docs/PUBLIC-SEO.md)
 
@@ -79,18 +77,17 @@ Load unpacked thư mục `apps/extension/dist` trong `chrome://extensions`.
 
 | Hạng mục | Trạng thái |
 |----------|------------|
-| Foundation, auth, CI, deploy `anhungland.com` | Đang chạy |
-| Khách, lô đất, địa chỉ, giao dịch, sổ đỏ (CRM mới) | Đang dùng |
-| Web khách: lô đăng web, bài CMS, SEO ảnh/slug | Live trên `anhungland.com` |
+| Foundation, auth, CI, deploy | Production trên `anhungland.com` |
+| CRM nhân viên (khách, lô, địa chỉ, giao dịch, sổ đỏ) | **Đang dùng** — đã chuyển từ hệ cũ |
+| Web khách: lô đăng web, bài CMS, SEO ảnh/slug | Live |
 | Extension ingest Meta | Còn làm |
-| Registry NV / xóa cứng khách (P4) | Chưa |
-| Cutover tắt `crm.anhungland.com` (P5) | Chưa — không đụng CRM cũ khi deploy |
+| Registry NV / xóa cứng khách | Chưa |
 
 ## Deploy
 
 Gộp vào `main` → GitHub Actions lên VPS (`anhungland.com`). Chi tiết: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) · skill `deploy-staging`.
 
-**Cấm** đụng `crm.anhungland.com`, `/var/www/anhungland-crm`, PM2 `anhungland-api`.
+Deploy **chỉ** cây CRMAnHung (`/var/www/crmanhung`). **Không** đụng `/var/www/anhungland-crm` hay PM2 `anhungland-api` (bản cũ, để rollback).
 
 ## Ghi chú
 
