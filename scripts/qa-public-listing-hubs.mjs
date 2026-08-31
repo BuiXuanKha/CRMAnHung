@@ -170,9 +170,9 @@ const ga4Snippet = read('apps/web/src/features/public/ga4-snippet.ts');
 if (
   rootLayout.includes('GA4_SCRIPT_SRC') &&
   rootLayout.includes('Ga4RouteTracker') &&
-  ga4Snippet.includes('G-97SWKBK2DB')
+  ga4Snippet.includes('G-W3L76S9YTD')
 ) {
-  ok('GA4 gtag G-97SWKBK2DB trong layout gốc + tracker SPA');
+  ok('GA4 gtag G-W3L76S9YTD trong layout gốc + tracker SPA');
 } else {
   bad('thiếu GA4 trong app/layout.tsx / ga4-snippet.ts');
 }

@@ -80,7 +80,7 @@ Danh sách sản phẩm: ngay dưới fold hoặc section chính tiếp theo —
 - Metadata + Open Graph đủ để share Facebook / Zalo / Messenger hiện ảnh + title + mô tả.
 - Trang chi tiết: ảnh, giá (nếu công bố), diện tích, vị trí, mô tả — đủ để khách quyết định xem tiếp / liên hệ.
 - Nút chia sẻ (copy link / share) trên FE; **không** cần BE để mock UI.
-- Meta Pixel Facebook (`391165622297911`) và GA4 (`G-97SWKBK2DB`) trong `<head>` layout gốc — xem [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) §6.
+- Meta Pixel Facebook (`391165622297911`) và GA4 (`G-W3L76S9YTD`) trong `<head>` layout gốc — xem [`PUBLIC-SEO.md`](./PUBLIC-SEO.md) §6.
 
 ---
 

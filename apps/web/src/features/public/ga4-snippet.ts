@@ -1,5 +1,5 @@
 /** GA4 measurement ID — public (có trong HTML). Mã cơ sở dán vào `<head>` layout gốc. */
-export const GA4_MEASUREMENT_ID = 'G-97SWKBK2DB';
+export const GA4_MEASUREMENT_ID = 'G-W3L76S9YTD';
 
 export const GA4_SCRIPT_SRC = `https://www.googletagmanager.com/gtag/js?id=${GA4_MEASUREMENT_ID}`;
 

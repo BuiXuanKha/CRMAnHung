@@ -84,7 +84,7 @@ Snippet Google tag (gtag.js) trong `<head>` layout gốc — cùng chỗ Meta Pi
 | Hạng mục | Quy ước |
 |----------|---------|
 | Vị trí | `<head>` `app/layout.tsx` — `gtag/js` + `gtag('config')` |
-| Measurement ID | `G-97SWKBK2DB` (public, hiện trong View Source) |
+| Measurement ID | `G-W3L76S9YTD` (public, hiện trong View Source) |
 | SPA | `Ga4RouteTracker` — `page_view` khi đổi route Next `Link` (bỏ lần tải đầu; `config` đã gửi) |
 | Dev | Tắt khi `next dev` (`NODE_ENV !== production`) |
 
