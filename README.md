@@ -1,10 +1,16 @@
 # CRMAnHung
 
-Viết lại **FacebookCustomerCRM** với kiến trúc chuyên nghiệp hơn, dễ mở rộng và bảo mật hơn.
+Viết lại **FacebookCustomerCRM**: CRM nhân viên + web khách trên cùng monorepo.
 
-> Hệ cũ vẫn chạy production. Repo này phát triển song song.
+Hệ cũ vẫn phục vụ nhân viên tại **https://crm.anhungland.com**. Repo này chạy **song song** — không ghi đè CRM cũ.
 
-**Bắt đầu đọc:** [`docs/FOUNDATION.md`](docs/FOUNDATION.md) · [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) · [`AGENTS.md`](AGENTS.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+| Bề mặt | URL | Ghi chú |
+|--------|-----|---------|
+| Web khách | [anhungland.com](https://anhungland.com) | Không login. Index Google. Ảnh CDN `cdn.anhungland.com` |
+| CRM mới | [anhungland.com/login](https://anhungland.com/login) | Nhân viên / admin |
+| CRM cũ | [crm.anhungland.com](https://crm.anhungland.com) | Giữ đến cutover |
+
+**Bắt đầu đọc:** [`docs/FOUNDATION.md`](docs/FOUNDATION.md) · [`docs/PLAYBOOK.md`](docs/PLAYBOOK.md) · [`AGENTS.md`](AGENTS.md) · [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) · web khách: [`docs/PUBLIC-WEB.md`](docs/PUBLIC-WEB.md) + [`docs/PUBLIC-SEO.md`](docs/PUBLIC-SEO.md)
 
 ## Cách chúng ta làm việc
 
@@ -59,14 +65,7 @@ pnpm dev
 - Web: http://localhost:5001  
 - API: http://localhost:5050/api/v1/health  
 
-Tài khoản seed mặc định:
-
-| User | Password | Role |
-|------|----------|------|
-| `admin` | `admin123` | ADMIN |
-| `staff` | `staff123` | STAFF |
-
-**Đổi mật khẩu ngay** trước khi dùng trên môi trường thật.
+`pnpm db:seed` tạo user local `admin` / `staff` (mật khẩu in ra terminal). **Không** dùng seed trên server; production đã đổi mật khẩu.
 
 ### Extension (dev)
 
@@ -76,23 +75,22 @@ pnpm --filter @crmanhung/extension build
 
 Load unpacked thư mục `apps/extension/dist` trong `chrome://extensions`.
 
-## Lộ trình
+## Hiện trạng
 
-| Phase | Nội dung |
-|-------|----------|
-| **P0** | Foundation (monorepo, auth, shell) — xong khung |
-| **P0b** | Deploy staging Mắt Bão (`anhungland.com`) song song với CRM cũ |
-| **P1** | Customers + extension ingest — đang làm (docs + mock UI) |
-| **P2** | Lodats + Addresses |
-| **P3** | Transactions + Title services |
-| **P4** | Admin registry, CI, migrate data |
-| **P5** | Cutover production `crm.anhungland.com` |
+| Hạng mục | Trạng thái |
+|----------|------------|
+| Foundation, auth, CI, deploy `anhungland.com` | Đang chạy |
+| Khách, lô đất, địa chỉ, giao dịch, sổ đỏ (CRM mới) | Đang dùng |
+| Web khách: lô đăng web, bài CMS, SEO ảnh/slug | Live trên `anhungland.com` |
+| Extension ingest Meta | Còn làm |
+| Registry NV / xóa cứng khách (P4) | Chưa |
+| Cutover tắt `crm.anhungland.com` (P5) | Chưa — không đụng CRM cũ khi deploy |
 
-## Deploy (Mắt Bão)
+## Deploy
 
-Production hiện tại vẫn là FacebookCustomerCRM tại **https://crm.anhungland.com**.
+Gộp vào `main` → GitHub Actions lên VPS (`anhungland.com`). Chi tiết: [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) · skill `deploy-staging`.
 
-CRMAnHung deploy **song song** trên cùng VPS tại **`anhungland.com`** — xem [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+**Cấm** đụng `crm.anhungland.com`, `/var/www/anhungland-crm`, PM2 `anhungland-api`.
 
 ## Ghi chú
 
