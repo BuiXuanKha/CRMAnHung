@@ -33,6 +33,7 @@
     "lots:regenerate-public-slugs": "pnpm --filter @crmanhung/api lots:regenerate-public-slugs",
     "images:seo-copy": "pnpm --filter @crmanhung/api images:seo-copy",
     "images:seo-copy-addresses": "pnpm --filter @crmanhung/api images:seo-copy-addresses",
+    "images:seo-copy-posts": "pnpm --filter @crmanhung/api images:seo-copy-posts",
     "images:webp-public-media": "pnpm --filter @crmanhung/api images:webp-public-media",
     "images:webp-replace": "pnpm --filter @crmanhung/api images:webp-replace",
     "transactions:migrate-legacy": "pnpm --filter @crmanhung/api transactions:migrate-legacy",

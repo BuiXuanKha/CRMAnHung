@@ -553,6 +553,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 - [x] Contract: `uploadPublicMediaResponseSchema` `{ url, objectKey? }`
 - [x] `POST /admin/public-web/media` — JWT ADMIN, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 **WebP** public CDN. Bài: optional `title` + `index` → `{slug}-anh-n.webp`
 - [x] Web: `uploadPublicPostImage` gọi API khi không mock (kèm title/index từ modal Soạn bài); mock giữ object URL
+- [x] Bài cũ UUID: `pnpm images:seo-copy-posts` (`APPLY=1` trên VPS qua `[seo-copy-posts]`) — copy `{slug}-anh-n.webp` từng bài, không xóa file dùng chung
 
 ### 16.2 Phase 2 — Lô: DB + API
 
