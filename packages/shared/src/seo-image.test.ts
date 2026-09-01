@@ -4,6 +4,10 @@ import {
   isSeoNamedImageKey,
   seoPostImageFileName,
   seoPostImageObjectKey,
+  canonicalSeoLotImageObjectKey,
+  seoImageObjectKeyNeedsRetarget,
+  objectKeyMatchesSeoStem,
+  seoImageSlugStem,
 } from './seo-image.js';
 
 describe('seoPostImageFileName', () => {
@@ -17,5 +21,53 @@ describe('seoPostImageFileName', () => {
     );
     assert.equal(seoPostImageObjectKey(fileName), `public-web/${fileName}`);
     assert.equal(isSeoNamedImageKey(`public-web/${fileName}`), true);
+  });
+});
+
+describe('lot image SEO keys at create/edit', () => {
+  const lodatId = 'lot1';
+  const title = 'Lô đất 105m² Nham Cáp';
+  const location = 'Đồng Lạc, Nam Sách, Hải Dương';
+
+  it('builds the canonical CDN key from title + address', () => {
+    const key = canonicalSeoLotImageObjectKey({
+      lodatId,
+      title,
+      location,
+      index: 1,
+    });
+    assert.equal(
+      key,
+      'lodats/lot1/lo-dat-105m-nham-cap-dong-lac-nam-sach-hai-duong-anh-1.webp',
+    );
+    assert.equal(isSeoNamedImageKey(key), true);
+  });
+
+  it('retargets when the key still has an old title slug', () => {
+    const desired = canonicalSeoLotImageObjectKey({
+      lodatId,
+      title,
+      location,
+      index: 1,
+    });
+    const oldKey =
+      'lodats/lot1/lo-dat-cu-ten-cu-dong-lac-nam-sach-hai-duong-anh-1.webp';
+    assert.equal(isSeoNamedImageKey(oldKey), true);
+    assert.equal(seoImageObjectKeyNeedsRetarget(oldKey, desired), true);
+    assert.equal(objectKeyMatchesSeoStem(oldKey, seoImageSlugStem(title, location)), false);
+  });
+
+  it('does not retarget when the key already matches the current slug', () => {
+    const desired = canonicalSeoLotImageObjectKey({
+      lodatId,
+      title,
+      location,
+      index: 2,
+    });
+    assert.equal(seoImageObjectKeyNeedsRetarget(desired, desired), false);
+    assert.equal(
+      objectKeyMatchesSeoStem(desired, seoImageSlugStem(title, location)),
+      true,
+    );
   });
 });

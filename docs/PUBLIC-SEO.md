@@ -1,7 +1,7 @@
 # Web công khai — chuẩn SEO
 
 Áp dụng cho mọi trang **public** trên `anhungland.com` (route `(public)/`, không cần login).  
-CRM sau login **không** ưu tiên SEO.
+Trang CRM sau login là `noindex` (Google không vào `/lo-dat`). **Ảnh lô vẫn làm SEO lúc tạo/sửa** (tên file CDN WebP theo tên + địa chỉ) — khi **Đăng web** không làm lại SEO ảnh.
 
 Tham chiếu: ADR [0006-nextjs-web](./adr/0006-nextjs-web.md) · skill `web-public-seo`.
 
@@ -200,7 +200,9 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 
 Ảnh lô / bài đã có ngữ cảnh mạnh (tên, xã/huyện, excerpt, giá công bố). Gắn đúng tín hiệu thì Google Images và link chia sẻ dùng được.
 
-**Lúc tạo lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server **convert WebP** (`sharp`) rồi đặt object key CDN theo **tên lô + địa chỉ** (`…-anh-n.webp`, cùng slug trang khách). Cạnh dài tối đa 2560px. Tài liệu mật (sổ đỏ) **không** convert.
+**Lúc tạo lô và sửa lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server **convert WebP** (`sharp`) rồi đặt object key CDN theo **tên lô + địa chỉ** (`…-anh-n.webp`, cùng slug trang khách). Đổi tiêu đề / địa chỉ rồi **Lưu** → đổi key CDN cho khớp slug mới. Cạnh dài tối đa 2560px. Tài liệu mật (sổ đỏ) **không** convert.
+
+**Đăng web không phải bước SEO ảnh.** Nhân viên không làm SEO lần nữa khi bật đăng bán. `setPublished` chỉ copy nốt nếu còn UUID / JPEG / slug cũ (lô kho cũ) — không chặn đăng nếu lỗi.
 
 **Kho ảnh cũ:** JPEG/PNG trên CDN — `pnpm images:seo-copy` copy sang `…-anh-n.webp` rồi trỏ DB. Ảnh chat / avatar JPEG migrate: `APPLY=1 pnpm images:webp-replace` (VPS: commit `[seo-webp-replace]`) — ghi `.webp`, cập nhật DB, **rồi mới** xóa nguồn. Tài liệu mật (sổ đỏ) **không** convert.
 
@@ -212,7 +214,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | Chỉ lô đã Đăng web | Thu hẹp | `APPLY=1 SCOPE=published pnpm images:seo-copy` |
 | Toàn bộ CRM `/lo-dat` | Mọi Lodat; copy ảnh chat-gắn-lô sang SEO (giữ chat gốc); xong thì revalidate sitemap | `APPLY=1 SCOPE=all pnpm images:seo-copy` |
 | Ảnh dự án còn UUID (không gắn lô) | Tên file = **tên dự án** (`Address.detail`); không đụng `lodats/` hay chat | `APPLY=1 pnpm images:seo-copy-addresses` (VPS: commit `[seo-copy-orphan-addr]`) |
-| Khi Đăng web | Tự copy ảnh lô/dự án còn tên xấu; ảnh chat gắn lô → copy SEO, giữ chat | `setPublished` — không chặn đăng nếu lỗi |
+| Khi Đăng web | **Không** làm SEO ảnh. Chỉ copy nốt UUID / slug cũ nếu còn (an toàn) | `setPublished` — không chặn đăng nếu lỗi |
 | Ảnh bài CMS (`public-web/`) | Bìa + ảnh TipTap: lúc upload convert WebP **và** đặt key `{slug-tieu-de}-anh-n.webp`. Bài cũ UUID: `APPLY=1 pnpm images:seo-copy-posts` (VPS: commit `[seo-copy-posts]`) — copy từng bài (file dùng chung không xóa). Alt guest = `title`. Kho JPEG cũ: `APPLY=1 pnpm images:webp-public-media` (VPS: commit `[seo-webp-posts]`) |
 | Ảnh chat / avatar JPEG migrate | Cùng stem `.webp`, cập nhật mọi `objectKey`, xóa JPEG/PNG khi DB hết ref | `APPLY=1 pnpm images:webp-replace` (VPS: `[seo-webp-replace]`) |
 

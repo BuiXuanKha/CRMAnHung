@@ -75,6 +75,72 @@ export function seoAddressImageObjectKey(addressId: string, fileName: string): s
   return `addresses/${safeIdSegment(addressId, 'dia-chi')}/${fileName}`;
 }
 
+/** Same stem as the public listing slug: `{title+location}`. */
+export function seoImageSlugStem(title: string, location?: string | null): string {
+  return toListingPublicSlug(title, location);
+}
+
+export function canonicalSeoLotImageObjectKey(input: {
+  lodatId: string;
+  title: string;
+  location?: string | null;
+  index: number;
+  suffix?: string;
+}): string {
+  return seoLotImageObjectKey(
+    input.lodatId,
+    seoImageFileName({
+      title: input.title,
+      location: input.location,
+      index: input.index,
+      ext: PUBLIC_SEO_IMAGE_EXT,
+      suffix: input.suffix,
+    }),
+  );
+}
+
+export function canonicalSeoAddressImageObjectKey(input: {
+  addressId: string;
+  title: string;
+  location?: string | null;
+  index: number;
+  suffix?: string;
+}): string {
+  return seoAddressImageObjectKey(
+    input.addressId,
+    seoImageFileName({
+      title: input.title,
+      location: input.location,
+      index: input.index,
+      ext: PUBLIC_SEO_IMAGE_EXT,
+      suffix: input.suffix,
+    }),
+  );
+}
+
+function normalizeObjectKey(objectKey: string): string {
+  return objectKey.replace(/^\/+/, '').split('?')[0] ?? '';
+}
+
+/** True when the CDN key is not yet the desired `{slug}-anh-n.webp`. */
+export function seoImageObjectKeyNeedsRetarget(
+  currentObjectKey: string,
+  desiredObjectKey: string,
+): boolean {
+  return normalizeObjectKey(currentObjectKey) !== normalizeObjectKey(desiredObjectKey);
+}
+
+/** True when the file is already `{stem}-anh-n.webp` for this title+location (any index / suffix). */
+export function objectKeyMatchesSeoStem(objectKey: string, stem: string): boolean {
+  const base = normalizeObjectKey(objectKey).split('/').pop() ?? '';
+  return (
+    Boolean(stem) &&
+    base.startsWith(`${stem}-anh-`) &&
+    isSeoNamedImageKey(objectKey) &&
+    isWebpObjectKey(objectKey)
+  );
+}
+
 /**
  * CMS post cover / TipTap photos: `{post-slug}-anh-{n}.webp` under `public-web/`.
  */

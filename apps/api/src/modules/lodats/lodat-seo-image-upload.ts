@@ -1,11 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import type { PrismaClient } from '@prisma/client';
 import {
-  isSeoNamedImageKey,
-  isWebpObjectKey,
+  objectKeyMatchesSeoStem,
   PUBLIC_SEO_IMAGE_EXT,
   seoAddressImageObjectKey,
   seoImageFileName,
+  seoImageObjectKeyNeedsRetarget,
+  seoImageSlugStem,
   seoLotImageObjectKey,
 } from '../public-content/public-slug';
 import type { StorageService } from '../../storage/storage.service';
@@ -84,14 +85,6 @@ export async function uniqueSeoAddressImageKey(
   return { objectKey: seoAddressImageObjectKey(input.addressId, fileName), fileName };
 }
 
-function alreadySeoUnder(prefix: string, objectKey: string): boolean {
-  return (
-    isSeoNamedImageKey(objectKey) &&
-    objectKey.startsWith(`${prefix}/`) &&
-    isWebpObjectKey(objectKey)
-  );
-}
-
 /** Messenger originals (WebP from extension, JPEG from migrate) — keep on R2. */
 export function isChatLibraryObjectKey(objectKey: string): boolean {
   return objectKey.replace(/^\/+/, '').startsWith('customers/chat/');
@@ -122,7 +115,11 @@ export type SeoCopyPlan = {
   fileName: string;
 };
 
-/** Canonical SEO key for an existing object. Reuses dest if already copied (idempotent). */
+/**
+ * Canonical SEO key for an existing object.
+ * Skip only when the file is already the desired key (or a unique suffix of the
+ * same title+location stem). A `*-anh-n.webp` with an *old* slug still copies.
+ */
 export async function planSeoLotImageCopy(
   storage: StorageService,
   row: { id: string; objectKey: string },
@@ -133,8 +130,6 @@ export async function planSeoLotImageCopy(
     index: number;
   },
 ): Promise<SeoCopyPlan | null> {
-  const prefix = `lodats/${dest.lodatId}`;
-  if (alreadySeoUnder(prefix, row.objectKey)) return null;
   const fileName = seoImageFileName({
     title: dest.title,
     location: dest.location,
@@ -142,8 +137,29 @@ export async function planSeoLotImageCopy(
     ext: PUBLIC_SEO_IMAGE_EXT,
   });
   const to = seoLotImageObjectKey(dest.lodatId, fileName);
-  if (to === row.objectKey) return null;
-  return { id: row.id, from: row.objectKey, to, fileName };
+  if (!seoImageObjectKeyNeedsRetarget(row.objectKey, to)) return null;
+
+  const destTaken = await storage.publicObjectExists(to);
+  if (!destTaken) {
+    return { id: row.id, from: row.objectKey, to, fileName };
+  }
+
+  const stem = seoImageSlugStem(dest.title, dest.location);
+  if (objectKeyMatchesSeoStem(row.objectKey, stem)) return null;
+
+  const unique = await uniqueSeoLotImageKey(storage, {
+    lodatId: dest.lodatId,
+    title: dest.title,
+    location: dest.location,
+    index: dest.index,
+  });
+  if (!seoImageObjectKeyNeedsRetarget(row.objectKey, unique.objectKey)) return null;
+  return {
+    id: row.id,
+    from: row.objectKey,
+    to: unique.objectKey,
+    fileName: unique.fileName,
+  };
 }
 
 export async function planSeoAddressImageCopy(
@@ -157,8 +173,6 @@ export async function planSeoAddressImageCopy(
   },
 ): Promise<SeoCopyPlan | null> {
   if (isChatLibraryObjectKey(row.objectKey)) return null;
-  const prefix = `addresses/${dest.addressId}`;
-  if (alreadySeoUnder(prefix, row.objectKey)) return null;
   const fileName = seoImageFileName({
     title: dest.title,
     location: dest.location,
@@ -166,8 +180,57 @@ export async function planSeoAddressImageCopy(
     ext: PUBLIC_SEO_IMAGE_EXT,
   });
   const to = seoAddressImageObjectKey(dest.addressId, fileName);
-  if (to === row.objectKey) return null;
-  return { id: row.id, from: row.objectKey, to, fileName };
+  if (!seoImageObjectKeyNeedsRetarget(row.objectKey, to)) return null;
+
+  const destTaken = await storage.publicObjectExists(to);
+  if (!destTaken) {
+    return { id: row.id, from: row.objectKey, to, fileName };
+  }
+
+  const stem = seoImageSlugStem(dest.title, dest.location);
+  if (objectKeyMatchesSeoStem(row.objectKey, stem)) return null;
+
+  const unique = await uniqueSeoAddressImageKey(storage, {
+    addressId: dest.addressId,
+    title: dest.title,
+    location: dest.location,
+    index: dest.index,
+  });
+  if (!seoImageObjectKeyNeedsRetarget(row.objectKey, unique.objectKey)) return null;
+  return {
+    id: row.id,
+    from: row.objectKey,
+    to: unique.objectKey,
+    fileName: unique.fileName,
+  };
+}
+
+/** Copy/move lodat photos onto `{title+location}-anh-n.webp` after create/edit. */
+export async function retargetLodatSeoImages(
+  db: PrismaClient,
+  storage: StorageService,
+  input: {
+    lodatId: string;
+    title: string;
+    location?: string | null;
+    images: { id: string; objectKey: string }[];
+  },
+): Promise<number> {
+  if (!storage.isConfigured() || !input.images.length) return 0;
+  let moved = 0;
+  for (let i = 0; i < input.images.length; i += 1) {
+    const img = input.images[i]!;
+    const plan = await planSeoLotImageCopy(storage, img, {
+      lodatId: input.lodatId,
+      title: input.title,
+      location: input.location,
+      index: i + 1,
+    });
+    if (!plan) continue;
+    await applySeoImageMove(db, storage, plan, 'lodat');
+    moved += 1;
+  }
+  return moved;
 }
 
 export async function applySeoImageCopy(

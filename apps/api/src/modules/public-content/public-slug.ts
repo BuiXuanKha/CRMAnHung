@@ -15,6 +15,11 @@ export {
   PUBLIC_SEO_IMAGE_MIME,
   isWebpObjectKey,
   withPublicWebpExt,
+  seoImageSlugStem,
+  canonicalSeoLotImageObjectKey,
+  canonicalSeoAddressImageObjectKey,
+  seoImageObjectKeyNeedsRetarget,
+  objectKeyMatchesSeoStem,
 } from '@crmanhung/shared';
 
 export function kindLabel(kind: string): string {

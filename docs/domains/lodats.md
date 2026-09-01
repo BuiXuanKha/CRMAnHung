@@ -104,7 +104,7 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 | Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng hoặc gắn path ảnh chat (reuse) |
 | Ảnh riêng thửa **dự án** (theo luồng NV) | NV gắn khi tạo/sửa | Ghép với ảnh dự án trên chi tiết (giống CRM cũ) |
 
-Upload **mới** từ máy: object key CDN = `{slug tên+địa chỉ}-anh-{n}.webp` (API convert WebP). Ảnh gắn từ chat: **copy** sang key lô SEO WebP, **giữ** file `customers/chat/` (WebP sau `images:webp-replace`; cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}.webp` từ `Address.detail`.
+Upload **mới** từ máy (tạo lô hoặc sửa lô): object key CDN = `{slug tên+địa chỉ}-anh-{n}.webp` (API convert WebP). Đổi tiêu đề / địa chỉ rồi Lưu → đổi lại key cho khớp. Ảnh gắn từ chat: **copy** sang key lô SEO WebP, **giữ** file `customers/chat/` (WebP sau `images:webp-replace`; cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}.webp` từ `Address.detail`. **Đăng web không làm SEO ảnh lần nữa.**
 
 **Kho cũ:** ảnh lô + ảnh dự án — `pnpm images:seo-copy` rồi `APPLY=1`. Ảnh lô trỏ chat: copy SEO, giữ chat. Ảnh dự án còn UUID: `pnpm images:seo-copy-addresses`.
 

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -17,7 +18,11 @@ import type {
   UpdateLodatSaleStatusDto,
 } from './dto/lodat.dto';
 import { listLodatTransactionHistory } from './lodat-transaction-history';
-import { copyPublicImageToSeoLotKey, uniqueSeoLotImageKey } from './lodat-seo-image-upload';
+import {
+  copyPublicImageToSeoLotKey,
+  retargetLodatSeoImages,
+  uniqueSeoLotImageKey,
+} from './lodat-seo-image-upload';
 
 const ADDRESS_INCLUDE = {
   province: { select: { name: true, isHidden: true } },
@@ -71,6 +76,8 @@ type GalleryImage = {
 
 @Injectable()
 export class LodatsService {
+  private readonly logger = new Logger(LodatsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
@@ -109,6 +116,31 @@ export class LodatsService {
       return row.projectLot.address;
     }
     return row.address;
+  }
+
+  /** CDN keys follow title+address at create/edit — not deferred to Đăng web. */
+  private async retargetImagesAfterWrite(row: LodatRow): Promise<LodatRow> {
+    if (row.projectLotId || !row.images.length) return row;
+    try {
+      const moved = await retargetLodatSeoImages(this.prisma, this.storage, {
+        lodatId: row.id,
+        title: row.title?.trim() || 'Lô đất',
+        location: this.formatAddress(this.resolveAddress(row)),
+        images: row.images,
+      });
+      if (!moved) return row;
+      return this.prisma.lodat.findUniqueOrThrow({
+        where: { id: row.id },
+        include: LIST_INCLUDE,
+      });
+    } catch (err) {
+      this.logger.warn(
+        `SEO image retarget skipped for lodat ${row.id}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+      return row;
+    }
   }
 
   /** Keys for cover thumbnail — keep object-key merge order. */
@@ -1056,7 +1088,7 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
-    return this.mapDetail(refreshed, user);
+    return this.mapDetail(await this.retargetImagesAfterWrite(refreshed), user);
   }
 
   async addImage(
@@ -1108,7 +1140,7 @@ export class LodatsService {
       where: { id: lodatId },
       include: LIST_INCLUDE,
     });
-    return this.mapDetail(refreshed, user);
+    return this.mapDetail(await this.retargetImagesAfterWrite(refreshed), user);
   }
 
   async deleteImage(user: RequestUser, lodatId: string, imageId: string) {
@@ -1141,6 +1173,6 @@ export class LodatsService {
       where: { id: lodatId },
       include: LIST_INCLUDE,
     });
-    return this.mapDetail(refreshed, user);
+    return this.mapDetail(await this.retargetImagesAfterWrite(refreshed), user);
   }
 }

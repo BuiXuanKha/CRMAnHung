@@ -34,8 +34,8 @@ import {
 import {
   applySeoImageMove,
   planSeoAddressImageCopy,
-  planSeoLotImageCopy,
   projectAddressSeoFields,
+  retargetLodatSeoImages,
 } from '../lodats/lodat-seo-image-upload';
 import {
   rewritePostSeoImages,
@@ -586,23 +586,18 @@ export class PublicContentService {
     return parts.join(', ');
   }
 
-  /** Copy lot/address photos to SEO CDN keys. Chat originals stay; UUID sources drop if unused. */
+  /** Leftover UUID/old-slug keys only — create/edit already writes SEO names. */
   private async ensureSeoImageKeysForLodat(lodat: LodatLoaded): Promise<void> {
     if (!this.storage.isConfigured()) return;
     const title = this.lodatTitle(lodat);
     const location = this.lodatLocation(lodat);
     try {
-      for (let i = 0; i < lodat.images.length; i += 1) {
-        const img = lodat.images[i]!;
-        const plan = await planSeoLotImageCopy(this.storage, img, {
-          lodatId: lodat.id,
-          title,
-          location,
-          index: i + 1,
-        });
-        if (!plan) continue;
-        await applySeoImageMove(this.prisma, this.storage, plan, 'lodat');
-      }
+      await retargetLodatSeoImages(this.prisma, this.storage, {
+        lodatId: lodat.id,
+        title,
+        location,
+        images: lodat.images,
+      });
       const addr =
         lodat.projectLotId && lodat.projectLot?.address ? lodat.projectLot.address : null;
       if (!addr?.id || !addr.images?.length) return;

@@ -19,6 +19,10 @@ import {
   seoImageExt,
   isSeoNamedImageKey,
   PUBLIC_SEO_IMAGE_EXT,
+  canonicalSeoLotImageObjectKey,
+  seoImageObjectKeyNeedsRetarget,
+  objectKeyMatchesSeoStem,
+  seoImageSlugStem,
   listingHeadline,
   listingPageH1,
   listingSeoTitle,
@@ -328,11 +332,54 @@ if (isSeoNamedImageKey(seoName) && !isSeoNamedImageKey('lodats/x/IMG_4521.jpg'))
   bad('isSeoNamedImageKey sai');
 }
 
-const addImageSrc = read('apps/api/src/modules/lodats/lodats.service.ts');
-if (addImageSrc.includes('uniqueSeoLotImageKey') && addImageSrc.includes('copyPublicImageToSeoLotKey')) {
-  ok('upload lô + ảnh chat dùng key SEO');
+const oldSlugKey =
+  'lodats/clxyz123/lo-dat-cu-kdt-tay-nam-sach-nam-trung-anh-1.webp';
+const desiredKey = canonicalSeoLotImageObjectKey({
+  lodatId: 'clxyz123',
+  title: 'Lô nhà cấp 4 mới 113,8m²',
+  location: 'KĐT Tây Nam Sách, Nam Trung',
+  index: 1,
+});
+if (seoImageObjectKeyNeedsRetarget(oldSlugKey, desiredKey) && isSeoNamedImageKey(oldSlugKey)) {
+  ok('slug-anh-n cũ vẫn phải đổi key khi sửa title');
 } else {
-  bad('lodats.service chưa gắn uniqueSeoLotImageKey');
+  bad('seoImageObjectKeyNeedsRetarget không bắt slug cũ');
+}
+if (!seoImageObjectKeyNeedsRetarget(desiredKey, desiredKey)) {
+  ok('key đã khớp slug hiện tại thì thôi');
+} else {
+  bad('seoImageObjectKeyNeedsRetarget còn đòi copy khi đã đúng');
+}
+const stem = seoImageSlugStem('Lô nhà cấp 4 mới 113,8m²', 'KĐT Tây Nam Sách, Nam Trung');
+if (
+  objectKeyMatchesSeoStem(desiredKey, stem) &&
+  !objectKeyMatchesSeoStem(oldSlugKey, stem)
+) {
+  ok('objectKeyMatchesSeoStem chỉ nhận stem title hiện tại');
+} else {
+  bad('objectKeyMatchesSeoStem sai stem');
+}
+
+const addImageSrc = read('apps/api/src/modules/lodats/lodats.service.ts');
+if (
+  addImageSrc.includes('uniqueSeoLotImageKey') &&
+  addImageSrc.includes('copyPublicImageToSeoLotKey') &&
+  addImageSrc.includes('retargetLodatSeoImages') &&
+  addImageSrc.includes('retargetImagesAfterWrite')
+) {
+  ok('tạo/sửa/upload lô ghi key SEO; Lưu title đổi lại key');
+} else {
+  bad('lodats.service chưa retarget SEO lúc sửa lô');
+}
+
+const seoPlanSrc = read('apps/api/src/modules/lodats/lodat-seo-image-upload.ts');
+if (
+  seoPlanSrc.includes('seoImageObjectKeyNeedsRetarget') &&
+  !seoPlanSrc.includes('alreadySeoUnder')
+) {
+  ok('planSeoLotImageCopy không bỏ qua *-anh-n.webp slug cũ');
+} else {
+  bad('planSeoLotImageCopy còn alreadySeoUnder (bỏ qua slug cũ)');
 }
 
 const seoScript = resolve(root, 'apps/api/scripts/seo-copy-lot-images.ts');
@@ -452,10 +499,10 @@ if (
 const seoCopySrc = read('apps/api/src/modules/lodats/lodat-seo-image-upload.ts');
 if (
   seoCopySrc.includes('PUBLIC_SEO_IMAGE_EXT') &&
-  seoCopySrc.includes('isWebpObjectKey') &&
-  seoCopySrc.includes('toPublicWebp')
+  seoCopySrc.includes('toPublicWebp') &&
+  seoCopySrc.includes('seoImageObjectKeyNeedsRetarget')
 ) {
-  ok('SEO copy đích .webp + encode WebP');
+  ok('SEO copy đích .webp + encode WebP; đổi key khi slug title đổi');
 } else {
   bad('lodat-seo-image-upload chưa khóa WebP');
 }
