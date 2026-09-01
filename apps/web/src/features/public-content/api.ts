@@ -2,8 +2,6 @@ import {
   LODAT_LIST_MAX_PAGE_SIZE,
   LodatSaleStatus,
   createPublicPostInputSchema,
-  listingBodyToExcerpt,
-  postBodyToExcerpt,
   setPublicLotPublishedSchema,
   setPublicPostStatusSchema,
   updatePublicListingDraftSchema,
@@ -28,58 +26,9 @@ import {
   type UpdatePublicListingDraftInput,
 } from '@crmanhung/shared';
 import { ApiError, apiFetch } from '@/shared/api/client';
-import { isMockPublicWeb } from '@/shared/api/mode';
 import { listLodats } from '@/features/lodats/api';
-import { toPublicPostSlug } from './display';
 import { catalogToGuestLot, type PublicGuestLot } from './guest-listing';
-import {
-  MOCK_PUBLIC_WEB_LOTS,
-  MOCK_PUBLIC_WEB_POSTS,
-  buildPublicWebDashboard,
-  buildStaffOpenLots,
-  listingFromStaffLot,
-} from './mock-data';
-
-let lots: PublicWebLotRow[] = structuredClone(MOCK_PUBLIC_WEB_LOTS);
-let posts: PublicWebPostRow[] = structuredClone(MOCK_PUBLIC_WEB_POSTS);
-
-function cloneLots(): PublicWebLotRow[] {
-  return lots.map((row) => ({ ...row }));
-}
-
-function clonePosts(): PublicWebPostRow[] {
-  return posts.map((row) => ({ ...row }));
-}
-
-function uniquePostSlug(title: string, hint?: string): string {
-  const base = toPublicPostSlug(hint?.trim() || title);
-  const used = new Set(posts.map((row) => row.slug));
-  if (!used.has(base)) return base;
-  let n = 2;
-  while (used.has(`${base}-${n}`)) n += 1;
-  return `${base}-${n}`;
-}
-
-function overlayToCatalog(row: PublicWebLotRow): PublicCatalogListing | null {
-  if (!row.isPublished) return null;
-  const priceLabel =
-    row.priceMode === 'CONTACT' || !row.priceLabel?.trim() ? null : row.priceLabel;
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    location: row.location,
-    priceLabel,
-    excerpt: row.excerpt?.trim() || [row.title, row.location].filter(Boolean).join('. '),
-    bodyHtml: row.bodyHtml ?? '',
-    coverImageUrl: row.coverImageUrl,
-    ...(row.coverImageUrl ? { imageUrls: [row.coverImageUrl] } : {}),
-    kindLabel: 'Nhà đất',
-    areaLabel: null,
-    frontageLabel: null,
-    directionLabel: null,
-  };
-}
+import { buildPublicWebDashboard, buildStaffOpenLots } from './staff-lots';
 
 async function loadOpenPlots() {
   const res = await listLodats({
@@ -90,7 +39,6 @@ async function loadOpenPlots() {
 }
 
 export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
-  if (isMockPublicWeb()) return cloneLots();
   return apiFetch<PublicWebLotRow[]>('/admin/public-web/lots');
 }
 
@@ -105,13 +53,8 @@ export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
   return buildStaffOpenLots(await loadOpenPlots(), await listPublicWebLots());
 }
 
-/** Guest catalog — GET /public/listings (no JWT). Mock overlay when login giả. */
+/** Guest catalog — GET /public/listings (no JWT). */
 export async function listPublishedCatalog(): Promise<PublicCatalogListing[]> {
-  if (isMockPublicWeb()) {
-    return cloneLots()
-      .map(overlayToCatalog)
-      .filter((row): row is PublicCatalogListing => row != null);
-  }
   try {
     const res = await apiFetch<PublicCatalogListResponse>('/public/listings');
     return res.items;
@@ -124,10 +67,6 @@ export async function listPublishedCatalog(): Promise<PublicCatalogListing[]> {
 export async function getPublishedCatalogBySlug(
   slug: string,
 ): Promise<PublicCatalogListing | null> {
-  if (isMockPublicWeb()) {
-    const row = cloneLots().find((item) => item.slug === slug);
-    return row ? overlayToCatalog(row) : null;
-  }
   try {
     return await apiFetch<PublicCatalogListing>(
       `/public/listings/${encodeURIComponent(slug)}`,
@@ -140,7 +79,6 @@ export async function getPublishedCatalogBySlug(
 
 /** Guest listing hubs — GET /public/listing-hubs (no JWT). */
 export async function listCommuneHubsFromApi(): Promise<PublicListingHub[] | null> {
-  if (isMockPublicWeb()) return null;
   try {
     const res = await apiFetch<PublicListingHubListResponse>('/public/listing-hubs/communes');
     return res.items;
@@ -153,7 +91,6 @@ export async function listCommuneHubsFromApi(): Promise<PublicListingHub[] | nul
 export async function getCommuneHubDetailFromApi(
   communeSlug: string,
 ): Promise<PublicListingHubDetail | null | undefined> {
-  if (isMockPublicWeb()) return undefined;
   try {
     return await apiFetch<PublicListingHubDetail>(
       `/public/listing-hubs/communes/${encodeURIComponent(communeSlug)}`,
@@ -167,7 +104,6 @@ export async function getCommuneHubDetailFromApi(
 export async function listPlaceHubsFromApi(
   communeSlug?: string,
 ): Promise<PublicListingHub[] | null> {
-  if (isMockPublicWeb()) return null;
   const qs = communeSlug?.trim()
     ? `?commune=${encodeURIComponent(communeSlug.trim())}`
     : '';
@@ -186,7 +122,6 @@ export async function getPlaceHubDetailFromApi(
   communeSlug: string,
   placeSlug: string,
 ): Promise<PublicListingHubDetail | null | undefined> {
-  if (isMockPublicWeb()) return undefined;
   try {
     return await apiFetch<PublicListingHubDetail>(
       `/public/listing-hubs/communes/${encodeURIComponent(communeSlug)}/places/${encodeURIComponent(placeSlug)}`,
@@ -201,7 +136,6 @@ export async function getPlaceHubDetailFromApi(
 export async function getPublicLotSlugRedirect(
   fromSlug: string,
 ): Promise<string | null> {
-  if (isMockPublicWeb()) return null;
   try {
     const row = await apiFetch<{ toSlug: string }>(
       `/public/slug-redirects/${encodeURIComponent(fromSlug)}`,
@@ -219,7 +153,6 @@ export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {
-  if (isMockPublicWeb()) return clonePosts();
   return apiFetch<PublicWebPostRow[]>('/admin/public-web/posts');
 }
 
@@ -231,30 +164,10 @@ export async function setPublicLotPublished(
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không đổi được trạng thái lô.');
   }
-  if (!isMockPublicWeb()) {
-    return apiFetch<PublicWebLotRow>(`/admin/public-web/lots/${encodeURIComponent(id)}/published`, {
-      method: 'PATCH',
-      body: JSON.stringify(parsed.data),
-    });
-  }
-
-  const staff = buildStaffOpenLots(await loadOpenPlots(), lots);
-  const source = staff.find((row) => row.id === id || row.lodatId === id);
-  if (!source) throw new Error('Không tìm thấy lô đang mở bán.');
-
-  const index = lots.findIndex((row) => row.lodatId === source.lodatId);
-
-  if (index < 0) {
-    const created = listingFromStaffLot({
-      ...source,
-      isPublished: parsed.data.isPublished,
-    });
-    lots = [created, ...lots];
-    return { ...created };
-  }
-
-  lots[index] = { ...lots[index], isPublished: parsed.data.isPublished };
-  return { ...lots[index] };
+  return apiFetch<PublicWebLotRow>(`/admin/public-web/lots/${encodeURIComponent(id)}/published`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed.data),
+  });
 }
 
 export async function updatePublicListingDraft(
@@ -265,55 +178,10 @@ export async function updatePublicListingDraft(
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không lưu được bài đăng.');
   }
-  if (!isMockPublicWeb()) {
-    return apiFetch<PublicWebLotRow>(`/admin/public-web/lots/${encodeURIComponent(id)}/draft`, {
-      method: 'PATCH',
-      body: JSON.stringify(parsed.data),
-    });
-  }
-
-  const staff = buildStaffOpenLots(await loadOpenPlots(), lots);
-  const source = staff.find((row) => row.id === id || row.lodatId === id);
-  if (!source) throw new Error('Không tìm thấy lô đang mở bán.');
-
-  const draft = parsed.data;
-  const priceLabel = draft.priceMode === 'CONTACT' ? null : draft.priceLabel;
-  const bodyHtml = draft.bodyHtml ?? '';
-  const excerpt =
-    listingBodyToExcerpt(bodyHtml) ||
-    [draft.title, draft.location].filter(Boolean).join('. ');
-  const index = lots.findIndex((row) => row.lodatId === source.lodatId);
-
-  if (index < 0) {
-    const created = listingFromStaffLot({
-      ...source,
-      title: draft.title,
-      location: draft.location,
-      priceMode: draft.priceMode,
-      priceLabel,
-      excerpt,
-      bodyHtml,
-      ...(draft.slug ? { slug: draft.slug } : {}),
-      ...(draft.metaDescription !== undefined ? { metaDescription: draft.metaDescription } : {}),
-      ...(draft.seoTitle !== undefined ? { seoTitle: draft.seoTitle } : {}),
-    });
-    lots = [created, ...lots];
-    return { ...created };
-  }
-
-  lots[index] = {
-    ...lots[index],
-    title: draft.title,
-    ...(draft.seoTitle !== undefined ? { seoTitle: draft.seoTitle } : {}),
-    location: draft.location,
-    priceMode: draft.priceMode,
-    priceLabel,
-    excerpt,
-    bodyHtml,
-    ...(draft.slug ? { slug: draft.slug } : {}),
-    ...(draft.metaDescription !== undefined ? { metaDescription: draft.metaDescription } : {}),
-  };
-  return { ...lots[index] };
+  return apiFetch<PublicWebLotRow>(`/admin/public-web/lots/${encodeURIComponent(id)}/draft`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed.data),
+  });
 }
 
 export async function setPublicPostStatus(
@@ -324,19 +192,13 @@ export async function setPublicPostStatus(
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không đổi được trạng thái bài.');
   }
-  if (!isMockPublicWeb()) {
-    return apiFetch<PublicWebPostRow>(
-      `/admin/public-web/posts/${encodeURIComponent(id)}/status`,
-      {
-        method: 'PATCH',
-        body: JSON.stringify(parsed.data),
-      },
-    );
-  }
-  const index = posts.findIndex((row) => row.id === id);
-  if (index < 0) throw new Error('Không tìm thấy bài viết.');
-  posts[index] = { ...posts[index], status: parsed.data.status };
-  return { ...posts[index] };
+  return apiFetch<PublicWebPostRow>(
+    `/admin/public-web/posts/${encodeURIComponent(id)}/status`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(parsed.data),
+    },
+  );
 }
 
 export async function createPublicPost(
@@ -346,47 +208,16 @@ export async function createPublicPost(
   if (!parsed.success) {
     throw new Error(parsed.error.issues[0]?.message ?? 'Không lưu được bài viết.');
   }
-  if (!isMockPublicWeb()) {
-    return apiFetch<PublicWebPostRow>('/admin/public-web/posts', {
-      method: 'POST',
-      body: JSON.stringify(parsed.data),
-    });
-  }
-  const row: PublicWebPostRow = {
-    id: `pp-${Date.now()}`,
-    slug: uniquePostSlug(parsed.data.title, parsed.data.slug),
-    title: parsed.data.title,
-    category: parsed.data.category,
-    status: parsed.data.status,
-    coverImageUrl: parsed.data.coverImageUrl ?? null,
-    bodyHtml: parsed.data.bodyHtml ?? '',
-    excerpt:
-      parsed.data.excerpt?.trim() ||
-      postBodyToExcerpt(parsed.data.bodyHtml) ||
-      parsed.data.title.trim(),
-  };
-  posts = [row, ...posts];
-  return { ...row };
+  return apiFetch<PublicWebPostRow>('/admin/public-web/posts', {
+    method: 'POST',
+    body: JSON.stringify(parsed.data),
+  });
 }
 
 /** Guest published posts — GET /public/posts (no JWT). */
 export async function listPublishedPosts(
   category?: string,
 ): Promise<PublicGuestPost[]> {
-  if (isMockPublicWeb()) {
-    return clonePosts()
-      .filter((row) => row.status === 'PUBLISHED')
-      .filter((row) => !category || row.category === category)
-      .map((row) => ({
-        id: row.id,
-        slug: row.slug,
-        title: row.title,
-        category: row.category,
-        coverImageUrl: row.coverImageUrl,
-        bodyHtml: row.bodyHtml,
-        excerpt: row.excerpt?.trim() || row.title,
-      }));
-  }
   try {
     const qs = category ? `?category=${encodeURIComponent(category)}` : '';
     const res = await apiFetch<PublicGuestPostListResponse>(`/public/posts${qs}`);
@@ -400,24 +231,6 @@ export async function getPublishedPostByCategorySlug(
   category: string,
   slug: string,
 ): Promise<PublicGuestPost | null> {
-  if (isMockPublicWeb()) {
-    const row = clonePosts().find(
-      (item) =>
-        item.category === category &&
-        item.slug === slug &&
-        item.status === 'PUBLISHED',
-    );
-    if (!row) return null;
-    return {
-      id: row.id,
-      slug: row.slug,
-      title: row.title,
-      category: row.category,
-      coverImageUrl: row.coverImageUrl,
-      bodyHtml: row.bodyHtml,
-      excerpt: row.excerpt?.trim() || row.title,
-    };
-  }
   try {
     return await apiFetch<PublicGuestPost>(
       `/public/posts/${encodeURIComponent(category)}/${encodeURIComponent(slug)}`,
@@ -431,20 +244,6 @@ export async function getPublishedPostByCategorySlug(
 export async function generateLotGptContent(
   payload: LotGptRequestPayload,
 ): Promise<LotGptGenerateResponse> {
-  if (isMockPublicWeb()) {
-    return {
-      content: `${JSON.stringify(
-        {
-          title: payload.title,
-          excerpt: `[Mock] ${payload.title} — ${payload.location.commune}, ${payload.location.district}.`,
-          bodyHtml: `<p>Mock GPT cho lô <strong>${payload.title}</strong>.</p>`,
-          metaDescription: `[Mock] ${payload.title}`,
-        },
-        null,
-        2,
-      )}\n`,
-    };
-  }
   return apiFetch<LotGptGenerateResponse>('/admin/public-web/lots/gpt-content', {
     method: 'POST',
     body: JSON.stringify(payload),
@@ -454,32 +253,6 @@ export async function generateLotGptContent(
 export async function generatePostGptContent(
   payload: PostGptRequestPayload,
 ): Promise<PostGptGenerateResponse> {
-  if (isMockPublicWeb()) {
-    const name = payload.projectName.trim();
-    return {
-      content: `${JSON.stringify(
-        {
-          seoTitle: `${name} Nam Sách`,
-          h1: name,
-          metaDescription: `${name} tại Nam Sách, Hải Dương — thông tin vị trí và tiện ích (bản nháp GPT).`,
-          slug: name
-            .toLowerCase()
-            .normalize('NFD')
-            .replace(/\p{M}/gu, '')
-            .replace(/đ/g, 'd')
-            .replace(/[^a-z0-9]+/g, '-')
-            .replace(/^-|-$/g, '')
-            .slice(0, 80),
-          excerpt: `[Mock] Giới thiệu ${name} tại Nam Sách, Hải Dương.`,
-          bodyHtml: `<p>Mock GPT cho dự án <strong>${name}</strong> tại Nam Sách, Hải Dương.</p><h2>Vị trí và kết nối</h2><p>Bản nháp — thay bằng nội dung thật sau khi gửi GPT.</p>`,
-          facebookPost: `[Mock] ${name} — Nam Sách, Hải Dương.`,
-          locationLabel: 'Nam Sách, Hải Dương',
-        },
-        null,
-        2,
-      )}\n`,
-    };
-  }
   return apiFetch<PostGptGenerateResponse>('/admin/public-web/posts/gpt-content', {
     method: 'POST',
     body: JSON.stringify(payload),

@@ -12,18 +12,15 @@ import {
 import { type AuthUser, type LoginResponse } from '@crmanhung/shared';
 import {
   apiFetch,
-  ApiError,
   clearTokens,
   getAccessToken,
   getRefreshToken,
   setTokens,
 } from '@/shared/api/client';
-import { isMockAuth } from '@/shared/api/mode';
-import { MOCK_ADMIN, MOCK_STAFF } from '@/features/customers/mock-data';
 import { clearAllListStates } from '@/shared/list-state';
 
 const SESSION_USER_KEY = 'crmanhung_session_user';
-const MOCK_USER_KEY = 'crmanhung_mock_user';
+const LEGACY_MOCK_USER_KEY = 'crmanhung_mock_user';
 
 type AuthContextValue = {
   user: AuthUser | null;
@@ -34,28 +31,14 @@ type AuthContextValue = {
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
-function readSessionUser(): AuthUser | null {
-  if (typeof window === 'undefined') return null;
-  const raw =
-    sessionStorage.getItem(SESSION_USER_KEY) ?? sessionStorage.getItem(MOCK_USER_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as AuthUser;
-  } catch {
-    return null;
-  }
-}
-
 function writeSessionUser(user: AuthUser | null) {
   if (typeof window === 'undefined') return;
+  sessionStorage.removeItem(LEGACY_MOCK_USER_KEY);
   if (!user) {
     sessionStorage.removeItem(SESSION_USER_KEY);
-    sessionStorage.removeItem(MOCK_USER_KEY);
     return;
   }
-  const json = JSON.stringify(user);
-  sessionStorage.setItem(SESSION_USER_KEY, json);
-  sessionStorage.setItem(MOCK_USER_KEY, json);
+  sessionStorage.setItem(SESSION_USER_KEY, JSON.stringify(user));
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -64,13 +47,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const boot = async () => {
-      if (isMockAuth()) {
-        setUser(readSessionUser());
-        setLoading(false);
-        return;
-      }
-
       if (!getAccessToken() && !getRefreshToken()) {
+        writeSessionUser(null);
         setLoading(false);
         return;
       }
@@ -80,6 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setUser(me);
       } catch {
         clearTokens();
+        writeSessionUser(null);
         setUser(null);
       } finally {
         setLoading(false);
@@ -89,20 +68,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = useCallback(async (username: string, password: string) => {
-    if (isMockAuth()) {
-      const u = username.trim().toLowerCase();
-      let mock: AuthUser | null = null;
-      if (u === 'admin' && password === 'admin123') mock = MOCK_ADMIN;
-      if (u === 'staff' && password === 'staff123') mock = MOCK_STAFF;
-      if (!mock) {
-        throw new ApiError(401, 'Sai tài khoản hoặc mật khẩu (mock)');
-      }
-      writeSessionUser(mock);
-      setTokens('mock-access', 'mock-refresh');
-      setUser(mock);
-      return mock;
-    }
-
     const data = await apiFetch<LoginResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ username, password }),
@@ -114,14 +79,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    if (isMockAuth()) {
-    writeSessionUser(null);
-    clearTokens();
-    clearAllListStates();
-    setUser(null);
-    return;
-    }
-
     const refreshToken = getRefreshToken();
     try {
       if (refreshToken) {

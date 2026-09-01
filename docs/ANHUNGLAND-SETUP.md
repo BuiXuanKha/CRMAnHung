@@ -34,7 +34,7 @@ cdn.anhungland.com  → R2 (đã xong)
 Sau DNS apex: mở https://anhungland.com  
 CRM cũ: https://crm.anhungland.com (đã chạy trên cùng VPS).
 
-Tài khoản seed (đổi ngay): `admin` / `admin123` hoặc `staff` / `staff123`
+Đăng nhập CRM: tài khoản đã copy từ CRM cũ (`kha`, `buinam`, `admin`). Không dùng user nháp `staff` / `admin123`.
 
 ---
 

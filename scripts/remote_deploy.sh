@@ -60,12 +60,8 @@ cd "$WEB"
 rm -rf "$WEB/.next-build"
 rm -rf "$WEB/.next/types" 2>/dev/null || true
 if [[ ! -f .env.production ]]; then
-  # Staging/prod: API thật. Mock chỉ bật local qua .env thủ công.
-  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=false\nNEXT_PUBLIC_USE_MOCK_AUTH=false\nPUBLIC_SEO_INDEX=1\n' > .env.production
+  printf 'NEXT_PUBLIC_API_URL=/api/v1\nPUBLIC_SEO_INDEX=1\n' > .env.production
 else
-  if ! grep -q '^NEXT_PUBLIC_USE_MOCK_AUTH=' .env.production; then
-    echo 'NEXT_PUBLIC_USE_MOCK_AUTH=false' >> .env.production
-  fi
   # Owner bật index 2026-08-30. Chỉ ghi nếu chưa có dòng — không đè PUBLIC_SEO_INDEX=0.
   if ! grep -q '^PUBLIC_SEO_INDEX=' .env.production; then
     echo 'PUBLIC_SEO_INDEX=1' >> .env.production

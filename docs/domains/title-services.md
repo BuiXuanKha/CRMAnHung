@@ -70,9 +70,9 @@ Ownership list = `CreatedByEmployeeId`, không phải `Customer.employeeId` (tr�
 
 Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim / xóa + tiến độ / thu-chi + file private (multipart, signed GET, xóa object).
 
-## 8. Mock data
+## 8. Dữ liệu
 
-`mock-data.ts` cho local khi `NEXT_PUBLIC_USE_MOCK_AUTH=true`. Staging login thật → API (`isMockTitleServices` = `isMockAuth`). List kha trống cho đến khi copy `SD-2026-0001`.
+List `/dich-vu-so-do` gọi API. Không RAM mock / user nháp. List kha trống cho đến khi copy `SD-2026-0001`.
 
 ## 9. Extension?
 
@@ -353,7 +353,7 @@ Khách + User **đã có**. List mock §12 **đã có**.
 | **4** | ~~Nest CRUD hồ sơ~~ **xong** — list / get / tạo / sửa / ghim / xóa — **chưa** file | Xương ownership |
 | **5** | ~~Nest tiến độ + thu/chi~~ **xong** | Nhật ký / tiền trên hồ sơ sống |
 | **6** | ~~Nest file~~ **xong** — upload private R2 + signed URL + xóa object | Giấy tờ mật |
-| **7** | ~~Nối UI `/dich-vu-so-do`~~ **xong** — `isMockTitleServices` = login giả | List/panel thật |
+| **7** | ~~Nối UI `/dich-vu-so-do`~~ **xong** — API | List/panel thật |
 | **8** | ~~Tạo hồ sơ từ khách~~ **xong** — `/khach-hang/[id]/dich-vu-so-do` | Không nút Thêm trên list |
 | **9** | ~~Copy 1 hồ sơ SQLite~~ **script xong** — `pnpm title-services:migrate-legacy` (chạy VPS khi gộp `main`) | Data kha `SD-2026-0001` |
 | **10** | ~~ADMIN lọc NV + audit xem file~~ **xong** — select NV trên list; ghi `TitleServiceAttachmentView` khi cấp signed URL | Không chặn 1–9 |

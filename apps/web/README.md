@@ -13,4 +13,4 @@ pnpm build    # next build (standalone)
 pnpm start    # next start -p 5001
 ```
 
-Env: xem `.env.example` (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_USE_MOCK`).
+Env: xem `.env.example` (`NEXT_PUBLIC_API_URL`). Login CRM = API + bảng User (không mock `staff`/`admin123`).

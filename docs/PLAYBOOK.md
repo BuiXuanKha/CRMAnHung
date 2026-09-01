@@ -38,11 +38,11 @@ Tham chiếu nhanh:
     ↓
 ③ Contract shared (Zod + types)  ← “API giả định”
     ↓
-④ UI + mock data (Web chạy được không cần API thật)
+④ UI (Web; CRM hiện tại nối API — không login giả staff/admin123)
     ↓
 ⑤ API thật (Nest module) implement đúng contract
     ↓
-⑥ Nối Web bỏ mock → API
+⑥ Nối Web → API (nếu slice còn tách UI/API)
     ↓
 ⑦ Extension (nếu domain liên quan ingest)
     ↓
@@ -74,7 +74,8 @@ Tham chiếu nhanh:
 
 - **Đọc** [`UI-GUIDELINES.md`](./UI-GUIDELINES.md) trước (quy tắc visual / UX đã chốt). Bảng list CRM → §4.5 + skill `crm-data-table`; icon Lucide §4.6; dialog → §4.7 + skill `crm-dialog`.
 - Feature trong `apps/web/src/features/<domain>/`.
-- `mocks/` hoặc `mock-api.ts` — bật bằng `NEXT_PUBLIC_USE_MOCK=true` (mặc định dev có thể bật).
+- CRM: `api.ts` gọi Nest (`apiFetch`). **Không** thêm login giả `staff`/`admin123` hay RAM store theo 2 user đó.
+- Catalog marketing public (`features/public/mock-data.ts`) không phải user CRM.
 - UI phải dùng type từ `@crmanhung/shared`, không invent shape riêng.
 
 ### ⑤ API
@@ -133,9 +134,9 @@ Trong mỗi phase domain: **luôn** đi ①→⑨, không code API trước docs
 
 - [ ] Domain doc cập nhật
 - [ ] Shared contract có schema + export
-- [ ] UI mock demo được luồng chính
+- [ ] UI demo được luồng chính
 - [ ] API implement + ownership/role đúng
-- [ ] Web nối API (hoặc flag mock rõ)
+- [ ] Web nối API
 - [ ] Không lộ secret; không phá CRM production
 - [ ] PR mô tả slice + cách thử
 

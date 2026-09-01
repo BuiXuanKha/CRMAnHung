@@ -146,14 +146,9 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 
 ---
 
-## 8. Mock data
+## 8. Dữ liệu
 
-Khi mock UI admin (sau Ready for mock):
-
-- 3–5 lô CRM: chưa đăng / đã đăng / Mở bán vs Tạm dừng
-- 1 lô kho hai NV — chỉ một listing public
-- Bài: nháp + đã đăng, đủ 4 chuyên mục
-- Khách `/` không thấy nháp — chỉ lô `isPublished` đang Mở bán; trống thì empty state, không hàng marketing giả
+Overlay Đăng web + catalog khách gọi API. Không RAM mock theo user nháp. Trống thì empty state.
 
 ---
 
@@ -545,14 +540,14 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 
 - [x] CRM `(crm)/layout` `robots: noindex` + `robots.ts` chặn `/dashboard`, CRM routes
 - [x] Docs roadmap (§16 này) + PUBLIC-SEO §8 ISR
-- [x] Secrets staging: `REVALIDATE_SECRET` (Next + Nest cùng giá trị), `PUBLIC_WEB_ORIGIN=http://127.0.0.1:5001` trên Nest, `NEXT_PUBLIC_USE_MOCK=false` trên prod — set VPS 2026-08-27; loopback revalidate 200
+- [x] Secrets staging: `REVALIDATE_SECRET` (Next + Nest cùng giá trị), `PUBLIC_WEB_ORIGIN=http://127.0.0.1:5001` trên Nest — set VPS 2026-08-27; loopback revalidate 200
 - [x] R2 public CDN ổn trên VPS (ảnh lô CDN); `pnpm doctor` local khi cần
 
 ### 16.1 Phase 1 — Media upload (chung lô + bài)
 
 - [x] Contract: `uploadPublicMediaResponseSchema` `{ url, objectKey? }`
 - [x] `POST /admin/public-web/media` — JWT ADMIN, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 **WebP** public CDN. Bài: optional `title` + `index` → `{slug}-anh-n.webp`
-- [x] Web: `uploadPublicPostImage` gọi API khi không mock (kèm title/index từ modal Soạn bài); mock giữ object URL
+- [x] Web: `uploadPublicPostImage` gọi API (kèm title/index từ modal Soạn bài)
 - [x] Bài cũ UUID: `pnpm images:seo-copy-posts` (`APPLY=1` trên VPS qua `[seo-copy-posts]`) — copy `{slug}-anh-n.webp` từng bài, không xóa file dùng chung
 
 ### 16.2 Phase 2 — Lô: DB + API

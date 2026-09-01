@@ -44,4 +44,4 @@ apps/api/src/modules/<domain>/
 
 ## After
 
-Nối Web (`NEXT_PUBLIC_USE_MOCK=false`), smoke test STAFF + ADMIN.
+Nối Web, smoke test STAFF + ADMIN.

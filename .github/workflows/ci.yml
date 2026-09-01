@@ -64,7 +64,6 @@ jobs:
         working-directory: apps/web
         env:
           NEXT_PUBLIC_API_URL: /api/v1
-          NEXT_PUBLIC_USE_MOCK: 'false'
         run: pnpm run build
 
       - name: Build Extension

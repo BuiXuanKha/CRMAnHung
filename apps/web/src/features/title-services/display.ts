@@ -192,9 +192,6 @@ export function todayInputValue(): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 }
 
-const MOCK_STAFF_ID = 'user_staff_1';
-const MOCK_STAFF_NAME = 'Bùi Xuân Khả';
-
 export function hydrateTitleServiceDetail(
   row: Omit<
     TitleServiceDetail,
@@ -226,8 +223,8 @@ export function hydrateTitleServiceDetail(
   const progress = [...row.progress].sort((a, b) => b.happenedAt.localeCompare(a.happenedAt));
   return {
     ...row,
-    createdByEmployeeId: row.createdByEmployeeId ?? MOCK_STAFF_ID,
-    createdByName: row.createdByName ?? MOCK_STAFF_NAME,
+    createdByEmployeeId: row.createdByEmployeeId ?? '',
+    createdByName: row.createdByName ?? '',
     expectedDoneAt: row.expectedDoneAt ?? null,
     pinnedAt: row.pinnedAt ?? (row.isPinned ? row.updatedAt : null),
     daysWorking: computeDaysWorking(row.startedAt, row.completedAt, row.status),

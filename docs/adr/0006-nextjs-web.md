@@ -20,7 +20,7 @@
 
 ## Hệ quả
 
-- Env: `NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_USE_MOCK`.
+- Env: `NEXT_PUBLIC_API_URL`. CRM login + list gọi API (không mock `staff`/`admin123`).
 - Route public và route `(crm)` tách rõ; auth bắt buộc chỉ trong khu CRM.
 - Chuẩn SEO web công khai: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) + skill `web-public-seo`.
 - Dev: `pnpm --filter @crmanhung/web dev` → http://localhost:5001

@@ -63,7 +63,7 @@ pnpm dev
 - Web: http://localhost:5001  
 - API: http://localhost:5050/api/v1/health  
 
-`pnpm db:seed` tạo user local `admin` / `staff` (mật khẩu in ra terminal). **Không** dùng seed trên server; production đã đổi mật khẩu.
+`pnpm db:seed` không tạo user nháp. Tài khoản CRM lấy từ copy DB cũ (`kha`, `buinam`, `admin`) — xem `docs/MIGRATION.md`.
 
 ### Extension (dev)
 

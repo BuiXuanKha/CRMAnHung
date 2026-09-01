@@ -8,13 +8,12 @@ import {
   getPublicLotSlugRedirect,
   listPublishedCatalog,
 } from '@/features/public-content/api';
-import { isMockPublicWeb } from '@/shared/api/mode';
 import {
   pickRelatedListingSection,
   pickRelatedListingSections,
   type RelatedListingSection,
 } from './related-listings';
-import { PUBLIC_PRODUCTS, type PublicProduct } from './mock-data';
+import type { PublicProduct } from './mock-data';
 
 export type { RelatedListingSection };
 
@@ -81,35 +80,22 @@ export function productToListingView(product: PublicProduct): PublicListingView 
   };
 }
 
-function fallbackMarketingCatalog(): PublicListingView[] {
-  return PUBLIC_PRODUCTS.map(productToListingView).filter(
-    (row): row is PublicListingView => row != null,
-  );
-}
-
 export async function listPublishedOverlayListings(): Promise<PublicListingView[]> {
   const items = await listPublishedCatalog();
   return items.map(catalogToView);
 }
 
 export async function listSitemapListings(): Promise<PublicGuestListing[]> {
-  const overlay = await listPublishedOverlayListings();
-  if (overlay.length > 0) return overlay;
-  return isMockPublicWeb() ? fallbackMarketingCatalog() : [];
+  return listPublishedOverlayListings();
 }
 
 export async function listPublicCatalog(): Promise<PublicListingView[]> {
-  const overlay = await listPublishedOverlayListings();
-  if (overlay.length > 0) return overlay;
-  return isMockPublicWeb() ? fallbackMarketingCatalog() : [];
+  return listPublishedOverlayListings();
 }
 
 export async function getPublicListingBySlug(slug: string): Promise<PublicListingView | null> {
   const fromApi = await getPublishedCatalogBySlug(slug);
-  if (fromApi) return catalogToView(fromApi);
-  if (!isMockPublicWeb()) return null;
-  const product = PUBLIC_PRODUCTS.find((row) => row.slug === slug);
-  return product ? productToListingView(product) : null;
+  return fromApi ? catalogToView(fromApi) : null;
 }
 
 export async function getRelatedListingSection(

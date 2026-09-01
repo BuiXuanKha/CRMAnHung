@@ -85,11 +85,9 @@ Prefix `/api/v1`. Schema Zod khi làm mock/API sổ địa chỉ.
 | POST/DELETE | `/addresses/:id/images` | ADMIN |
 | GET | `/admin-units/provinces\|districts\|wards` | STAFF + ADMIN (đọc); POST tạo đơn vị = ADMIN |
 
-## 8. Mock data
+## 8. Dữ liệu
 
-- ≥ 1 dự án có ảnh + vài lô kho (có/chưa chủ)
-- ≥ 1 đất dân (có thôn / không thôn)
-- Picker rỗng / không quyền Admin
+Sổ địa chỉ gọi API (copy CRM cũ). Không RAM mock.
 
 ## 9. Extension?
 

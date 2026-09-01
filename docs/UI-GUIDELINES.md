@@ -59,7 +59,7 @@ Phạm vi ưu tiên hiện tại: màn sau login, đặc biệt **Quản lý kh�
 
 - Không bắt buộc giống pixel CRM cũ từng chi tiết; **cấu trúc shell** theo mục 4.2 (đã chốt).
 - Admin UI: **chưa làm** cho đến khi STAFF ổn.
-- Mock được (`NEXT_PUBLIC_USE_MOCK`); không gọi API production CRM cũ.
+- CRM gọi API mới; không gọi API production CRM cũ (`crm.anhungland.com`).
 - **UI list `/khach-hang`:** visual §4.3.1–4.3.4. **Từng control:** [`domains/customers.md`](./domains/customers.md) **§12**. Chi tiết `[id]`: §12.3.
 
 ### 4.2 Shell CRM chung (đã chốt) — mọi trang sau login

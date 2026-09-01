@@ -70,7 +70,6 @@ Copy data: **User trước** (`employeeId` bắt buộc). Hotline nguồn có th
 3. Ô mật khẩu
 4. Nút Đăng nhập → ADMIN `/dashboard`, STAFF `/khach-hang`
 5. Lỗi dưới form (tiếng Việt)
-6. Khối demo `staff` / `admin` **chỉ khi mock**
 
 ### 6.2 Giao diện mobile — `/login`
 
@@ -90,10 +89,11 @@ Prefix `/api/v1`
 
 Zod: `packages/shared/src/auth.ts`.
 
-## 8. Seed / mock
+## 8. Tài khoản
 
-- Seed Prisma: `admin` / `admin123`, `staff` / `staff123` — **đổi trên môi trường thật**
-- Web mock auth: `NEXT_PUBLIC_USE_MOCK_AUTH=true` (dev). Staging: `false` → login API.
+- Login CRM gọi API `/auth/login` + bảng `User` (copy từ CRM cũ: `kha`, `buinam`, `admin`).
+- **Không** seed / login giả `staff`/`staff123` hay `admin`/`admin123`.
+- Local trống User: chạy migrate legacy (`docs/MIGRATION.md`), không tạo user nháp.
 
 ## 9. Extension?
 
@@ -115,7 +115,6 @@ Sau freeze CRM cũ:
 3. ~~Copy hotline nguồn + gắn `sourceHotlineId`~~
 4. Copy profile Facebook NV + metadata FB khách (cột Kênh liên hệ)
 5. Bảng phụ theo todo `MIGRATION.md` (SĐT, chăm sóc, …)
-6. Tắt mock **list** khi API khách hàng sẵn
-7. P4: CRUD nhân viên như modal CRM cũ
+6. P4: CRUD nhân viên như modal CRM cũ
 
 Không làm CRUD user trước khi login + khách ổn.

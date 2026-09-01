@@ -232,4 +232,4 @@ Chi tiết data: [`MIGRATION.md`](./MIGRATION.md).
 - [ ] CORS chỉ origin `https://anhungland.com` (thêm `crm` nếu còn redirect tạm)
 - [ ] `DATABASE_URL` trỏ Postgres (không `file:`)
 - [ ] R2 keys chỉ nằm trên server / secrets — không commit
-- [ ] Đổi mật khẩu seed `admin123` / `staff123` trên production
+- [ ] Không seed user nháp `staff`/`admin123`; login = User đã copy từ CRM cũ

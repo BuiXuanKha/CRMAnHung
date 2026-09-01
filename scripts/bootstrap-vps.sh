@@ -89,7 +89,7 @@ fi
 # --- Web env production hint ---
 WEB_ENV="$REPO/apps/web/.env.production"
 if [[ -d "$REPO/apps/web" && ! -f "$WEB_ENV" ]]; then
-  printf 'NEXT_PUBLIC_API_URL=/api/v1\nNEXT_PUBLIC_USE_MOCK=false\nPUBLIC_SEO_INDEX=1\n' > "$WEB_ENV"
+  printf 'NEXT_PUBLIC_API_URL=/api/v1\nPUBLIC_SEO_INDEX=1\n' > "$WEB_ENV"
   if id "$DEPLOY_USER" >/dev/null 2>&1; then
     chown "$DEPLOY_USER:$DEPLOY_USER" "$WEB_ENV"
   fi

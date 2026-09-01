@@ -114,9 +114,9 @@ Prefix `/api/v1`. Zod: `packages/shared/src/transactions.ts`. Nest: `apps/api/sr
 
 Tạo: status = `DA_COC`; sinh `code`; copy snapshot từ lô + map active. RECORD: `commissionVnd = 0`.
 
-## 8. Mock data
+## 8. Dữ liệu
 
-`mock-data.ts` cho local khi `NEXT_PUBLIC_USE_MOCK_AUTH=true`. Staging login thật → API (`isMockTransactions` = `isMockAuth`).
+List `/giao-dich` gọi API. Không RAM mock / user nháp.
 
 ## 9. Extension?
 
