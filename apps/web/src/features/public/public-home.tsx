@@ -6,6 +6,7 @@ import type { PublicGuestLot } from '@/features/public-content/guest-listing';
 import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { HomeProductSection } from './home-product-section';
+import { PublicAuthNavLink } from './public-auth-nav';
 import { PUBLIC_LISTING_PATH } from './site';
 import { postHref, publicPostCategoryLabel, teaserExcerpt } from './published-posts';
 import './public-home.css';
@@ -62,9 +63,7 @@ export function PublicHome({
               <a href="#mua-ban-nha-dat">Sản phẩm</a>
               <a href="#du-an">Dự án</a>
               <a href="#bai-viet">Kiến thức</a>
-              <Link href="/login" className="ph-nav-login">
-                Đăng nhập
-              </Link>
+              <PublicAuthNavLink />
             </nav>
           </div>
         </div>
@@ -191,7 +190,7 @@ export function PublicHome({
             <Link href="/du-an">Dự án</Link>
             <Link href="/kien-thuc">Kiến thức</Link>
             <Link href="/kinh-nghiem">Kinh nghiệm</Link>
-            <Link href="/login">Đăng nhập CRM</Link>
+            <PublicAuthNavLink className="" loginLabel="Đăng nhập CRM" />
           </div>
         </div>
         <p className="ph-copy">

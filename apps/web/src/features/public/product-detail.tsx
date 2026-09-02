@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Phone } from 'lucide-react';
 import { LodatSaleStatus, type LotShareContact } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
+import { PublicAuthNavLink } from './public-auth-nav';
 import {
   ProductGallery,
   ProductShareButton,
@@ -194,9 +195,7 @@ export function ProductDetailView({
             </a>
             <nav className="ph-nav" aria-label="Menu">
               <Link href={PUBLIC_LISTING_PATH}>Sản phẩm</Link>
-              <Link href="/login" className="ph-nav-login">
-                Đăng nhập
-              </Link>
+              <PublicAuthNavLink />
             </nav>
           </div>
         </div>

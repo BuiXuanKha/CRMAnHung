@@ -3,13 +3,15 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { CreditCard, FileText, Globe, Map, Menu, UserCog, Users } from 'lucide-react';
+import { CreditCard, FileText, Globe, Home, Map, Menu, UserCog, Users } from 'lucide-react';
 import { useAuth } from '@/features/auth/auth-context';
 import { crmHomePath } from '@/features/auth/home-path';
 import { Icon } from './icon';
 import { UserMenu } from './user-menu';
 import { SettingsHubDialog } from '@/features/settings/settings-hub-dialog';
 import './layout.css';
+
+const homeNavItem = { href: '/', label: 'Trang chủ', icon: Home };
 
 const navItems = [
   { href: '/khach-hang', label: 'Quản lý khách hàng', icon: Users },
@@ -46,6 +48,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }
 
   const links = [
+    ...(user.role === 'STAFF' ? [homeNavItem] : []),
     ...navItems,
     ...(user.role === 'ADMIN'
       ? [
