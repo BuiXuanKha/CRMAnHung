@@ -174,7 +174,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public. ADMIN đăng luồng mới thì gỡ sibling. STAFF không gỡ luồng NV khác đang hiện — báo lỗi.
 6. Bài viết CMS = **chỉ ADMIN**; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
-7. Liên hệ khách: vào thẳng domain → hotline + Zalo công ty. Vào bằng link share NV → SĐT + avatar NV đó trên **mọi** lô trong phiên. NV đã login CRM xem trang khách → tên + SĐT + avatar **chính mình** (ưu tiên hơn cookie share) (§18). Chưa form SĐT.
+7. Liên hệ khách: hết cookie → hotline công ty. Còn cookie share NV → SĐT + avatar NV trên **trang chủ** (header + thẻ) và **chi tiết lô** trong **30 ngày**. Link NV khác ghi đè và đếm lại 30 ngày; cùng NV không reset. NV đã login CRM → số mình (thắng cookie) (§18). Chưa form SĐT.
 8. Soạn bài đăng: double-click hàng/thẻ → modal copy public. Giá CRM **làm mờ**. Không copy hoa hồng, ghi chú nội bộ / chủ nhà, tên/SĐT khách.
 
 ---
@@ -805,17 +805,21 @@ Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
 
 ## 18. Share NV + liên hệ trên trang khách (chốt 2026-09-02)
 
-NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang chủ (cùng catalog). Nút **Chia sẻ**: mã cố định `(NV + listing)`, URL **`https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}?share=CODE`**. Cookie phiên ghi ở middleware trên path catalog. Không dùng `PUBLIC_WEB_ORIGIN` (loopback — chỉ ISR). Copy = mô tả public (HTML→plain) + URL canonical. Đổi slug overlay → 301 slug cũ.
+NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang chủ (cùng catalog). Nút **Chia sẻ**: mã cố định `(NV + listing)`, URL **`https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}?share=CODE`**. Cookie last-click ghi ở middleware khi URL có `?share=`. Không dùng `PUBLIC_WEB_ORIGIN` (loopback — chỉ ISR). Copy = mô tả public (HTML→plain) + URL canonical. Đổi slug overlay → 301 slug cũ.
 
-| Khách vào | Liên hệ trên **mọi** trang chi tiết lô (Zalo / gọi / hotline header) + thẻ list khi NV login |
-|-----------|---------------------------------------------------------------------|
-| Thẳng `anhungland.com` (không `?share=`, không cookie phiên, chưa login CRM) | Hotline công ty `ANHUNG_BRAND` (chữ cái, không avatar NV) |
-| Link share của NV A (khách, chưa login) | Avatar (khi có) + SĐT + tên **A** trên **chi tiết lô** — cả khi lô do NV B đăng. Thẻ list **không** hiện dòng NV (chỉ khi NV login) |
-| **NV B đã login CRM** (xem trang khách) | Avatar (khi có) + SĐT + tên **B** — mọi thẻ bài đăng / chi tiết. Ưu tiên hơn cookie share. Không ảnh → chữ cái họ tên |
+| Khách vào | Liên hệ |
+|-----------|---------|
+| Không cookie / hết 30 ngày / máy khác / ẩn danh; chưa login CRM | Hotline công ty |
+| Link share **NV A** | A trên **trang chủ** (header + thẻ sản phẩm) và **chi tiết lô** (header + khối liên hệ / Zalo / gọi) — 30 ngày. Catalog / hub cùng thẻ. Vào thẳng domain **không** cần `?share=` nếu cookie còn hạn |
+| Link share **cùng NV A**, lô khác | Giữ A, **không** đếm lại 30 ngày (chỉ cập nhật mã share) |
+| Link share **NV B** | Đổi thành B, **đếm lại 30 ngày** từ lần bấm B |
+| NV đã login CRM | Số + avatar **chính mình** — thắng cookie |
 
-Cách giữ phiên: cookie first-party `crmanhung_share` (httpOnly, SameSite=Lax, **hết khi đóng trình duyệt**). `?share=` mới ghi đè cookie. Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). Đếm visit chỉ khi mở đúng lô gốc của mã đó. Chi tiết lô `force-dynamic` (đọc cookie); Google không gửi cookie → HTML bot = hotline công ty.
+Cookie `crmanhung_share` (httpOnly, SameSite=Lax, path `/`): `maxAge` = thời hạn còn lại tới `expiresAt`. Chỉ **ghi** khi `?share=` hợp lệ. Lướt web không `?share=` **không** gia hạn. Google không gửi cookie → HTML bot = hotline công ty. JSON-LD / canonical luôn công ty.
 
-Thứ tự: NV đã login (có SĐT) → cookie/`?share=` → hotline công ty. JSON-LD/canonical không đổi. Avatar = `User.avatarObjectKey` → CDN `avatarUrl` (`/auth/me` khi NV login; `GET /public/lot-shares/:code` khi khách share). Không ảnh → chữ cái.
+Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). Đếm visit chỉ khi mở đúng lô gốc của mã đó. Chi tiết lô `force-dynamic`.
+
+Thứ tự: NV đã login (có SĐT) → cookie/`?share=` → hotline công ty. Avatar = CDN khi có; không ảnh → chữ cái.
 
 ---
 

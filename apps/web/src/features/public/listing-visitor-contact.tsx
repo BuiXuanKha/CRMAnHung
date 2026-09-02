@@ -98,9 +98,9 @@ export function ListingContactMobileBar({
   );
 }
 
-/** Name + phone on listing cards — only when a staff session is active. */
+/** Name + phone on listing cards — logged-in staff or guest share cookie. */
 export function PublicCardContact() {
-  const { name, phoneDisplay, phone, isStaff, contact } = usePublicContact(null);
+  const { name, phoneDisplay, phone, isStaff, contact } = usePublicContact();
   if (!isStaff) return null;
   return (
     <p className="ph-product-staff">

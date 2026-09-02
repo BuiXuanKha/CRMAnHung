@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import { shareContactFrom, getShareAttribution } from '@/features/lot-shares/share-referrer';
+import { PublicShareContactProvider } from '@/features/public/share-contact-context';
 import { publicSearchRobots } from '@/features/public/search-index';
 import { PUBLIC_OG_DEFAULT, PUBLIC_SITE_ORIGIN } from '@/features/public/site';
 import './public.css';
@@ -34,7 +36,14 @@ export const metadata: Metadata = {
   robots: publicSearchRobots(),
 };
 
-/** Layout trang public (landing / marketing) — tách khỏi CRM shell. */
-export default function PublicLayout({ children }: { children: ReactNode }) {
-  return <div className="public-shell">{children}</div>;
+/** Layout trang public (landing / marketing) — tách khỏi CRM shell. Cookie share → liên hệ NV. */
+export default async function PublicLayout({ children }: { children: ReactNode }) {
+  const attribution = await getShareAttribution();
+  return (
+    <div className="public-shell">
+      <PublicShareContactProvider contact={shareContactFrom(attribution)}>
+        {children}
+      </PublicShareContactProvider>
+    </div>
+  );
 }

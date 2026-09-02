@@ -14,8 +14,87 @@ export const lotShareContactSchema = z.object({
   avatarUrl: z.string().url().nullable().optional(),
 });
 
-/** First-party cookie: khách vào bằng `?share=` — liên hệ NV trên mọi lô trong phiên. */
+/** First-party cookie: khách `?share=` — liên hệ NV trên trang chủ + chi tiết lô. */
 export const PUBLIC_SHARE_COOKIE = 'crmanhung_share';
+
+/** 30 calendar days from first click of that employee (reset only when employee changes). */
+export const PUBLIC_SHARE_COOKIE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
+
+export const PUBLIC_SHARE_COOKIE_MAX_AGE_SEC = 30 * 24 * 60 * 60;
+
+export type PublicShareCookiePayload = {
+  shareCode: string;
+  employeeId: string;
+  expiresAtMs: number;
+};
+
+const shareCookieWireSchema = z.object({
+  c: z.string(),
+  e: z.string().min(1),
+  x: z.number().int().positive(),
+});
+
+export function serializePublicShareCookie(payload: PublicShareCookiePayload): string {
+  return JSON.stringify({
+    c: payload.shareCode,
+    e: payload.employeeId,
+    x: payload.expiresAtMs,
+  });
+}
+
+export function parsePublicShareCookie(
+  raw: string | null | undefined,
+): PublicShareCookiePayload | null {
+  const s = raw?.trim() ?? '';
+  if (!s) return null;
+  const legacy = normalizeShareCode(s);
+  if (legacy) {
+    return { shareCode: legacy, employeeId: '', expiresAtMs: 0 };
+  }
+  try {
+    const parsed = shareCookieWireSchema.safeParse(JSON.parse(s));
+    if (!parsed.success) return null;
+    const shareCode = normalizeShareCode(parsed.data.c);
+    if (!shareCode) return null;
+    return { shareCode, employeeId: parsed.data.e, expiresAtMs: parsed.data.x };
+  } catch {
+    return null;
+  }
+}
+
+export function shareCodeFromCookieValue(raw: string | null | undefined): string {
+  return parsePublicShareCookie(raw)?.shareCode ?? '';
+}
+
+export function remainingShareCookieMaxAgeSec(
+  expiresAtMs: number,
+  nowMs = Date.now(),
+): number {
+  return Math.max(0, Math.floor((expiresAtMs - nowMs) / 1000));
+}
+
+/** Last-click: new employee → 30 days; same employee with valid window → keep expiry. */
+export function nextPublicShareCookie(input: {
+  nowMs: number;
+  shareCode: string;
+  employeeId: string;
+  existing: PublicShareCookiePayload | null;
+}): PublicShareCookiePayload {
+  const shareCode = normalizeShareCode(input.shareCode);
+  const employeeId = input.employeeId.trim();
+  const existing = input.existing;
+  const sameStaff =
+    Boolean(existing?.employeeId) &&
+    existing!.employeeId === employeeId &&
+    existing!.expiresAtMs > input.nowMs;
+  return {
+    shareCode,
+    employeeId,
+    expiresAtMs: sameStaff
+      ? existing!.expiresAtMs
+      : input.nowMs + PUBLIC_SHARE_COOKIE_TTL_MS,
+  };
+}
 
 /** Same alphabet as API share codes (no I/O/0/1). */
 export const SHARE_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{4,12}$/i;
@@ -30,7 +109,7 @@ export function pickShareCode(
   fromQuery: string | null | undefined,
   fromCookie: string | null | undefined,
 ): string {
-  return normalizeShareCode(fromQuery) || normalizeShareCode(fromCookie);
+  return normalizeShareCode(fromQuery) || shareCodeFromCookieValue(fromCookie);
 }
 
 export type LotShareContact = z.infer<typeof lotShareContactSchema>;
@@ -46,6 +125,7 @@ export type LotShareLinkResponse = z.infer<typeof lotShareLinkResponseSchema>;
 export const publicLotShareResolveSchema = z.object({
   shareCode: z.string().min(4).max(12),
   listingSlug: z.string().min(1),
+  employeeId: z.string().min(1),
   employee: lotShareContactSchema,
   visitCount: z.number().int().nonnegative(),
 });

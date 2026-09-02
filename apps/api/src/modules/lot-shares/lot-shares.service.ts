@@ -123,6 +123,7 @@ export class LotSharesService {
     return {
       shareCode: row.shareCode,
       listingSlug: row.publicListing.slug,
+      employeeId: row.employeeId,
       employee: {
         fullName: row.employee.fullName,
         phone,

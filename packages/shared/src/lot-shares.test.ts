@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+  PUBLIC_SHARE_COOKIE_TTL_MS,
   buildLotShareUrl,
   contactFromAuthUser,
   guestLotShareUrl,
+  nextPublicShareCookie,
   normalizeShareCode,
   pickShareCode,
   resolvePublicShareOrigin,
+  serializePublicShareCookie,
 } from './lot-shares.js';
 
 describe('normalizeShareCode', () => {
@@ -28,6 +31,15 @@ describe('pickShareCode', () => {
   it('falls back to cookie when query is empty', () => {
     assert.equal(pickShareCode('', 'ab2k9'), 'AB2K9');
     assert.equal(pickShareCode(null, 'ab2k9'), 'AB2K9');
+  });
+
+  it('reads shareCode from a JSON cookie payload', () => {
+    const raw = serializePublicShareCookie({
+      shareCode: 'AB2K9',
+      employeeId: 'emp-a',
+      expiresAtMs: 1_900_000_000_000,
+    });
+    assert.equal(pickShareCode('', raw), 'AB2K9');
   });
 
   it('returns empty when neither is a share code', () => {
@@ -95,5 +107,53 @@ describe('contactFromAuthUser', () => {
     assert.equal(contactFromAuthUser({ fullName: 'B', phone: '' }), null);
     assert.equal(contactFromAuthUser({ fullName: 'B', phone: null }), null);
     assert.equal(contactFromAuthUser(null), null);
+  });
+});
+
+describe('nextPublicShareCookie', () => {
+  const now = 1_700_000_000_000;
+
+  it('starts a 30-day window on first click', () => {
+    const next = nextPublicShareCookie({
+      nowMs: now,
+      shareCode: 'ab2k9',
+      employeeId: 'emp-a',
+      existing: null,
+    });
+    assert.equal(next.shareCode, 'AB2K9');
+    assert.equal(next.employeeId, 'emp-a');
+    assert.equal(next.expiresAtMs, now + PUBLIC_SHARE_COOKIE_TTL_MS);
+  });
+
+  it('keeps expiry when the same employee shares another listing', () => {
+    const existing = {
+      shareCode: 'AB2K9',
+      employeeId: 'emp-a',
+      expiresAtMs: now + 10 * 24 * 60 * 60 * 1000,
+    };
+    const next = nextPublicShareCookie({
+      nowMs: now,
+      shareCode: 'xy34z',
+      employeeId: 'emp-a',
+      existing,
+    });
+    assert.equal(next.shareCode, 'XY34Z');
+    assert.equal(next.expiresAtMs, existing.expiresAtMs);
+  });
+
+  it('restarts 30 days when the employee changes', () => {
+    const existing = {
+      shareCode: 'AB2K9',
+      employeeId: 'emp-a',
+      expiresAtMs: now + 10 * 24 * 60 * 60 * 1000,
+    };
+    const next = nextPublicShareCookie({
+      nowMs: now,
+      shareCode: 'xy34z',
+      employeeId: 'emp-b',
+      existing,
+    });
+    assert.equal(next.employeeId, 'emp-b');
+    assert.equal(next.expiresAtMs, now + PUBLIC_SHARE_COOKIE_TTL_MS);
   });
 });
