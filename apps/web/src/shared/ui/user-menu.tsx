@@ -8,6 +8,7 @@ import './user-menu.css';
 type Props = {
   fullName: string;
   roleLabel: string;
+  avatarUrl?: string | null;
   onLogout: () => void;
   onOpenSettings?: () => void;
 };
@@ -19,7 +20,7 @@ function initials(name: string): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export function UserMenu({ fullName, roleLabel, onLogout, onOpenSettings }: Props) {
+export function UserMenu({ fullName, roleLabel, avatarUrl, onLogout, onOpenSettings }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -43,7 +44,12 @@ export function UserMenu({ fullName, roleLabel, onLogout, onOpenSettings }: Prop
         title={fullName}
         onClick={() => setOpen((v) => !v)}
       >
-        {initials(fullName)}
+        {avatarUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={avatarUrl} alt="" />
+        ) : (
+          initials(fullName)
+        )}
       </button>
       {open ? (
         <div className="shell-user-dropdown" role="menu">

@@ -11,9 +11,11 @@ import { Icon } from '@/shared/ui/icon';
 import {
   createUser,
   deleteUser,
+  deleteUserAvatar,
   listUsers,
   resetUserPassword,
   updateUser,
+  uploadUserAvatar,
 } from './api';
 import { ResetPasswordDialog } from './components/reset-password-dialog';
 import { UserFormDialog, type UserFormValues } from './components/user-form-dialog';
@@ -22,7 +24,7 @@ import './users.css';
 import './users-table.css';
 
 export function UserAdminPage() {
-  const { user, loading: authLoading } = useAuth();
+  const { user, loading: authLoading, reloadMe } = useAuth();
   const router = useRouter();
   const qc = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
@@ -51,26 +53,54 @@ export function UserAdminPage() {
     enabled: !authLoading && user?.role === UserRole.ADMIN,
   });
 
-  const createMut = useMutation({
-    mutationFn: createUser,
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ['users-admin'] });
-      await qc.invalidateQueries({ queryKey: ['user-directory'] });
-      setFormOpen(false);
-      setToast('Đã thêm người dùng.');
+  const saveMut = useMutation({
+    mutationFn: async ({
+      mode,
+      editingId,
+      values,
+    }: {
+      mode: 'create' | 'edit';
+      editingId: string | null;
+      values: UserFormValues;
+    }) => {
+      if (mode === 'create') {
+        const created = await createUser({
+          username: values.username.trim(),
+          fullName: values.fullName.trim(),
+          phone: values.phone,
+          password: values.password,
+          role: values.role,
+          isActive: true,
+        });
+        if (values.avatarFile) {
+          await uploadUserAvatar(created.id, values.avatarFile);
+        }
+        return { kind: 'create' as const, userId: created.id };
+      }
+      if (!editingId) throw new Error('Thiếu người dùng cần sửa.');
+      await updateUser(editingId, {
+        username: values.username.trim(),
+        fullName: values.fullName.trim(),
+        phone: values.phone,
+        role: values.role,
+        isActive: values.isActive,
+      });
+      if (values.avatarFile) {
+        await uploadUserAvatar(editingId, values.avatarFile);
+      } else if (values.removeAvatar) {
+        await deleteUserAvatar(editingId);
+      }
+      return { kind: 'edit' as const, userId: editingId };
     },
-    onError: (err: Error) => setFormError(err.message),
-  });
-
-  const updateMut = useMutation({
-    mutationFn: ({ id, input }: { id: string; input: Parameters<typeof updateUser>[1] }) =>
-      updateUser(id, input),
-    onSuccess: async () => {
+    onSuccess: async (res) => {
       await qc.invalidateQueries({ queryKey: ['users-admin'] });
       await qc.invalidateQueries({ queryKey: ['user-directory'] });
+      if (res.userId === user?.id) {
+        await reloadMe();
+      }
       setFormOpen(false);
       setEditing(null);
-      setToast('Đã cập nhật người dùng.');
+      setToast(res.kind === 'create' ? 'Đã thêm người dùng.' : 'Đã cập nhật người dùng.');
     },
     onError: (err: Error) => setFormError(err.message),
   });
@@ -104,7 +134,7 @@ export function UserAdminPage() {
   }
 
   const items = usersQuery.data ?? [];
-  const formBusy = createMut.isPending || updateMut.isPending;
+  const formBusy = saveMut.isPending;
 
   function openCreate() {
     setFormMode('create');
@@ -122,27 +152,10 @@ export function UserAdminPage() {
 
   function handleFormSubmit(values: UserFormValues) {
     setFormError(null);
-    if (formMode === 'create') {
-      createMut.mutate({
-        username: values.username.trim(),
-        fullName: values.fullName.trim(),
-        phone: values.phone,
-        password: values.password,
-        role: values.role,
-        isActive: true,
-      });
-      return;
-    }
-    if (!editing) return;
-    updateMut.mutate({
-      id: editing.id,
-      input: {
-        username: values.username.trim(),
-        fullName: values.fullName.trim(),
-        phone: values.phone,
-        role: values.role,
-        isActive: values.isActive,
-      },
+    saveMut.mutate({
+      mode: formMode,
+      editingId: editing?.id ?? null,
+      values,
     });
   }
 
@@ -153,7 +166,7 @@ export function UserAdminPage() {
           <h1>
             <Icon icon={Users} size="sm" /> Quản lý người dùng
           </h1>
-          <p>Tài khoản nhân viên và admin — user, mật khẩu, họ tên, SĐT.</p>
+          <p>Tài khoản nhân viên và admin — user, mật khẩu, họ tên, SĐT, avatar.</p>
         </div>
         <button type="button" className="crm-btn primary nv-add-btn" onClick={openCreate}>
           <Icon icon={Plus} size="sm" />

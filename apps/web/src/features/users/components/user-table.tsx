@@ -2,6 +2,7 @@
 
 import { UserRole, type UserAdminListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
+import { UserAvatar } from './user-avatar';
 
 type Props = {
   items: UserAdminListItem[];
@@ -32,6 +33,7 @@ export function UserTable({
         <div className="nv-table-head">
           <div className="nv-grid-row nv-grid-header">
             <div>#</div>
+            <div>Avatar</div>
             <div>User</div>
             <div>Họ tên</div>
             <div>SĐT</div>
@@ -51,6 +53,9 @@ export function UserTable({
               return (
                 <div key={user.id} className="nv-grid-row">
                   <div>{index + 1}</div>
+                  <div>
+                    <UserAvatar name={user.fullName} url={user.avatarUrl} />
+                  </div>
                   <div className="nv-username">{user.username}</div>
                   <div>{user.fullName}</div>
                   <div>{user.phone ?? '—'}</div>

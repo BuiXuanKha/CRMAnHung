@@ -1,7 +1,7 @@
 # Domain: Users (Đăng nhập / nhân viên)
 
 - **Slug:** `users`
-- **Status:** Ready for API — `/login` nối bảng User; quản lý NV `/quan-tri/nguoi-dung` (ADMIN)
+- **Status:** Ready for API — `/login` nối bảng User; quản lý NV `/quan-tri/nguoi-dung` (ADMIN); avatar NV
 - **Nguồn:** CRM cũ `/login` + quản trị user (đọc hiểu, không copy god-file)
 - **UI:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) login; shell avatar
 - **Contract:** `packages/shared/src/auth.ts`
@@ -29,8 +29,9 @@ Nhân viên / admin vào CRM bằng username + mật khẩu. Mọi khách / lô 
 
 | Thứ | Nghĩa |
 |-----|--------|
-| User | `tblUsers` cũ → Prisma `User` (username, họ tên, SĐT, mật khẩu hash) |
+| User | `tblUsers` cũ → Prisma `User` (username, họ tên, SĐT, mật khẩu hash, avatar) |
 | STAFF / ADMIN | `UserRole` |
+| Avatar | Ảnh NV public R2 (`avatarObjectKey`) → CDN `avatarUrl`. Trống = chữ tắt họ tên |
 | Refresh token | Hash trong DB; rotation; revoke lúc logout |
 
 Mật khẩu: bcrypt cost ≥ 12. Không lưu plaintext.
@@ -79,19 +80,21 @@ Cùng control 6.1. Ô nhập ≥ 16px (không zoom). Nút đủ vùng chạm.
 
 ```
 ┌ Quản lý người dùng ─────────────── [ + Thêm mới ] ─┐
-├ # │ User │ Họ tên │ SĐT │ Vai trò │ Trạng thái │ Sửa │ Reset MK │ Xoá ┤
-└────────────────────────────────────────────────────┘
+├ # │ Avatar │ User │ Họ tên │ SĐT │ Vai trò │ Trạng thái │ Sửa │ Reset MK │ Xoá ┤
+└──────────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. Chỉ ADMIN; STAFF redirect `/khach-hang`
-2. Nút **Thêm mới** → modal: user, mật khẩu, họ tên, SĐT, vai trò
-3. **Sửa** → modal (không đổi mật khẩu ở đây)
+2. Nút **Thêm mới** → modal: user, mật khẩu, họ tên, SĐT, vai trò, avatar
+3. **Sửa** → modal (không đổi mật khẩu ở đây); đổi / gỡ avatar
 4. **Reset MK** → modal nhập mật khẩu mới
 5. **Xoá** → confirm; không xoá NV đã có khách/lô/giao dịch/sổ đỏ hoặc chính mình
+6. Cột **Avatar** — ảnh tròn 32px (CDN); trống = chữ tắt. Chỉ thể hiện; bấm **Sửa** để đổi
+7. Modal avatar — chọn jpg/png/webp; preview; **Gỡ ảnh** khi đã có. Lưu: PATCH field; file mới → `POST /users/:id/avatar`; gỡ → `DELETE /users/:id/avatar`
 
 ### 6.4 Giao diện mobile — `/quan-tri/nguoi-dung`
 
-Cùng cột; cuộn ngang bảng. Nút thêm full-width trên header.
+Cùng cột (kể cả Avatar 32px); cuộn ngang bảng. Nút thêm full-width trên header.
 
 ## 7. API (đã có)
 
@@ -106,8 +109,12 @@ Prefix `/api/v1`
 | GET | `/users` | ADMIN — list NV |
 | POST | `/users` | ADMIN — tạo NV |
 | PATCH | `/users/:id` | ADMIN — sửa NV |
+| POST | `/users/:id/avatar` | ADMIN — multipart `file` (ảnh → WebP R2) |
+| DELETE | `/users/:id/avatar` | ADMIN — gỡ avatar |
 | DELETE | `/users/:id` | ADMIN — xoá NV (nếu không còn dữ liệu) |
 | POST | `/users/:id/reset-password` | ADMIN — đặt lại mật khẩu |
+
+`GET /users`, `POST /users`, `PATCH /users/:id`, `/auth/me` trả `avatarUrl` (CDN) khi có ảnh. Header CRM dùng ảnh đó; không nhét URL vào JWT.
 
 Zod: `packages/shared/src/auth.ts`.
 

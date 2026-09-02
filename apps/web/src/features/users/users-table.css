@@ -13,6 +13,7 @@
   --nv-chrome: #f1f5f9;
   --nv-cols:
     50px
+    56px
     minmax(120px, 160px)
     minmax(140px, 1fr)
     120px
@@ -44,7 +45,7 @@
 .nv-grid-row {
   display: grid;
   grid-template-columns: var(--nv-cols);
-  min-width: 960px;
+  min-width: 1020px;
   border-bottom: 1px solid var(--kh-line, #e2e8f0);
 }
 
@@ -106,4 +107,31 @@
   padding: 24px;
   text-align: center;
   color: #64748b;
+}
+
+.nv-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: 0 0 32px;
+}
+
+.nv-avatar-lg {
+  width: 64px;
+  height: 64px;
+  flex-basis: 64px;
+  font-size: 1rem;
+}
+
+.nv-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }

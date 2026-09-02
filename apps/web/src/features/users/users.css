@@ -58,6 +58,31 @@
   gap: 8px !important;
 }
 
+.nv-avatar-field {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.nv-avatar-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.nv-avatar-actions .crm-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nv-avatar-hint {
+  flex-basis: 100%;
+  font-size: 0.8rem;
+  color: #64748b;
+}
+
 @media (max-width: 720px) {
   .nv-add-btn {
     width: 100%;

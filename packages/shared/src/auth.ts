@@ -15,6 +15,8 @@ export const authUserSchema = z.object({
   role: z.nativeEnum(UserRole),
   /** SĐT NV — hiện liên hệ trên trang khách khi NV đã login. */
   phone: z.string().trim().min(1).max(20).optional(),
+  /** CDN avatar; trống = chữ tắt trên header / list. */
+  avatarUrl: z.string().url().nullable().optional(),
 });
 
 export type AuthUser = z.infer<typeof authUserSchema>;
@@ -64,6 +66,7 @@ export const userDirectoryItemSchema = z.object({
   phone: z.string().nullable().optional(),
   role: z.nativeEnum(UserRole),
   isActive: z.boolean().optional(),
+  avatarUrl: z.string().url().nullable().optional(),
 });
 
 export type UserDirectoryItem = z.infer<typeof userDirectoryItemSchema>;

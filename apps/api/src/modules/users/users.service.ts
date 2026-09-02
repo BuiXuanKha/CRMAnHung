@@ -6,6 +6,9 @@ import {
 import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../../storage/storage.service';
+import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
+import { toAdminUser } from './users-view';
 import type { CreateHotlineDto } from './dto/create-hotline.dto';
 import type { UpdateHotlineDto } from './dto/update-hotline.dto';
 import type { CreateUserDto, ResetUserPasswordDto, UpdateUserDto } from './dto/user-admin.dto';
@@ -20,17 +23,22 @@ const userSelect = {
   role: true,
   isActive: true,
   createdAt: true,
+  avatarObjectKey: true,
 } as const;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly storage: StorageService,
+  ) {}
 
-  list() {
-    return this.prisma.user.findMany({
+  async list() {
+    const rows = await this.prisma.user.findMany({
       select: userSelect,
       orderBy: { createdAt: 'asc' },
     });
+    return rows.map((row) => toAdminUser(row, this.storage));
   }
 
   async create(dto: CreateUserDto) {
@@ -39,7 +47,7 @@ export class UsersService {
     const phone = dto.phone.trim();
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     try {
-      return await this.prisma.user.create({
+      const row = await this.prisma.user.create({
         data: {
           username,
           fullName,
@@ -50,6 +58,7 @@ export class UsersService {
         },
         select: userSelect,
       });
+      return toAdminUser(row, this.storage);
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
         throw new BadRequestException('Tên đăng nhập đã tồn tại.');
@@ -105,7 +114,7 @@ export class UsersService {
       if (dto.isActive === false) {
         await this.revokeRefreshTokens(id);
       }
-      return user;
+      return toAdminUser(user, this.storage);
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
         throw new BadRequestException('Tên đăng nhập đã tồn tại.');
@@ -139,7 +148,7 @@ export class UsersService {
 
     const user = await this.prisma.user.findUnique({
       where: { id },
-      select: { id: true, role: true, isActive: true },
+      select: { id: true, role: true, isActive: true, avatarObjectKey: true },
     });
     if (!user) {
       throw new NotFoundException('Không tìm thấy người dùng.');
@@ -169,7 +178,68 @@ export class UsersService {
 
     await this.revokeRefreshTokens(id);
     await this.prisma.user.delete({ where: { id } });
+    await this.deleteAvatarObject(user.avatarObjectKey);
     return { ok: true };
+  }
+
+  async setAvatar(
+    id: string,
+    file: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    const existing = await this.prisma.user.findUnique({
+      where: { id },
+      select: userSelect,
+    });
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy người dùng.');
+    }
+    const uploaded = await this.storage.upload({
+      folder: `users/avatars/${id}`,
+      buffer: file.buffer,
+      contentType: file.mimetype,
+      originalName: file.originalname,
+    });
+    const row = await this.prisma.user.update({
+      where: { id },
+      data: { avatarObjectKey: uploaded.objectKey },
+      select: userSelect,
+    });
+    if (existing.avatarObjectKey && existing.avatarObjectKey !== uploaded.objectKey) {
+      await this.deleteAvatarObject(existing.avatarObjectKey);
+    }
+    return toAdminUser(row, this.storage);
+  }
+
+  async removeAvatar(id: string) {
+    const existing = await this.prisma.user.findUnique({
+      where: { id },
+      select: userSelect,
+    });
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy người dùng.');
+    }
+    if (!existing.avatarObjectKey) {
+      return toAdminUser(existing, this.storage);
+    }
+    const row = await this.prisma.user.update({
+      where: { id },
+      data: { avatarObjectKey: null },
+      select: userSelect,
+    });
+    await this.deleteAvatarObject(existing.avatarObjectKey);
+    return toAdminUser(row, this.storage);
+  }
+
+  private async deleteAvatarObject(objectKey: string | null | undefined) {
+    const key = objectKey?.trim();
+    if (!key) return;
+    const refs = await countPublicImageKeyRefs(this.prisma, key);
+    if (refs > 0) return;
+    try {
+      await this.storage.delete(key, 'public');
+    } catch {
+      // orphan ok
+    }
   }
 
   private async revokeRefreshTokens(userId: string) {

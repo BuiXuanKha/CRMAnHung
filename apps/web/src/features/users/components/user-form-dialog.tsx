@@ -1,9 +1,11 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { UserPlus, UserRoundCog } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { ImagePlus, UserPlus, UserRoundCog } from 'lucide-react';
 import { UserRole, type UserAdminListItem } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
+import { Icon } from '@/shared/ui/icon';
+import { UserAvatar } from './user-avatar';
 
 export type UserFormValues = {
   username: string;
@@ -12,6 +14,8 @@ export type UserFormValues = {
   password: string;
   role: UserRole;
   isActive: boolean;
+  avatarFile: File | null;
+  removeAvatar: boolean;
 };
 
 type Props = {
@@ -31,6 +35,8 @@ const emptyForm: UserFormValues = {
   password: '',
   role: UserRole.STAFF,
   isActive: true,
+  avatarFile: null,
+  removeAvatar: false,
 };
 
 export function UserFormDialog({
@@ -43,6 +49,8 @@ export function UserFormDialog({
   onSubmit,
 }: Props) {
   const [form, setForm] = useState<UserFormValues>(emptyForm);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -54,11 +62,23 @@ export function UserFormDialog({
         password: '',
         role: user.role as UserRole,
         isActive: user.isActive !== false,
+        avatarFile: null,
+        removeAvatar: false,
       });
+      setPreviewUrl(null);
       return;
     }
     setForm(emptyForm);
+    setPreviewUrl(null);
   }, [open, mode, user]);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    };
+  }, [previewUrl]);
+
+  const shownUrl = previewUrl ?? (form.removeAvatar ? null : user?.avatarUrl ?? null);
 
   return (
     <CrmDialog
@@ -76,6 +96,49 @@ export function UserFormDialog({
         }}
       >
         {error ? <p className="crm-form-error">{error}</p> : null}
+        <div className="nv-avatar-field">
+          <UserAvatar name={form.fullName || user?.fullName || '?'} url={shownUrl} size="lg" />
+          <div className="nv-avatar-actions">
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              hidden
+              disabled={busy}
+              onChange={(e) => {
+                const file = e.target.files?.[0] ?? null;
+                e.target.value = '';
+                if (previewUrl) URL.revokeObjectURL(previewUrl);
+                setPreviewUrl(file ? URL.createObjectURL(file) : null);
+                setForm((f) => ({ ...f, avatarFile: file, removeAvatar: false }));
+              }}
+            />
+            <button
+              type="button"
+              className="crm-btn"
+              disabled={busy}
+              onClick={() => fileRef.current?.click()}
+            >
+              <Icon icon={ImagePlus} size="sm" />
+              Chọn ảnh
+            </button>
+            {shownUrl ? (
+              <button
+                type="button"
+                className="crm-btn"
+                disabled={busy}
+                onClick={() => {
+                  if (previewUrl) URL.revokeObjectURL(previewUrl);
+                  setPreviewUrl(null);
+                  setForm((f) => ({ ...f, avatarFile: null, removeAvatar: true }));
+                }}
+              >
+                Gỡ ảnh
+              </button>
+            ) : null}
+            <span className="nv-avatar-hint">JPG, PNG hoặc WebP — tối đa 2 MB.</span>
+          </div>
+        </div>
         <label>
           Tên đăng nhập
           <input
