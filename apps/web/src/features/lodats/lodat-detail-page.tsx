@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Copy, Phone, SquarePen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Copy, Phone, Share2, SquarePen } from 'lucide-react';
 import {
   LodatSaleStatus,
   UserRole,
@@ -15,6 +15,7 @@ import { useAuth } from '@/features/auth/auth-context';
 import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, listSameWardLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
+import { createLodatShareLink } from '@/features/lot-shares/api';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTransactionHistory } from './components/lodat-transaction-history';
 import { SameWardList } from './components/same-ward-list';
@@ -46,6 +47,7 @@ export function LodatDetailPage() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [shareBusy, setShareBusy] = useState(false);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
 
   const q = useQuery({
@@ -132,6 +134,20 @@ export function LodatDetailPage() {
     }
   }
 
+  async function handleShare() {
+    if (!detail || shareBusy) return;
+    setShareBusy(true);
+    try {
+      const res = await createLodatShareLink(detail.id);
+      await copyTextToClipboard(res.url);
+      flash('Đã copy link share.');
+    } catch (err) {
+      setAlertMsg(err instanceof Error ? err.message : 'Không tạo được link share.');
+    } finally {
+      setShareBusy(false);
+    }
+  }
+
   const hero = galleryImages[heroIdx] ?? galleryImages[0] ?? null;
   const heroUrl = hero?.url ?? '';
   const heroRotation = hero?.rotationDeg ?? 0;
@@ -196,6 +212,15 @@ export function LodatDetailPage() {
                 >
                   <Copy size={14} aria-hidden />
                   Copy thông tin
+                </button>
+                <button
+                  type="button"
+                  className="ld-detail-copy-btn"
+                  disabled={shareBusy}
+                  onClick={() => void handleShare()}
+                >
+                  <Share2 size={14} aria-hidden />
+                  {shareBusy ? 'Đang tạo…' : 'Share link'}
                 </button>
               </div>
             </header>

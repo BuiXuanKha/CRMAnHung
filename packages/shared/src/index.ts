@@ -7,6 +7,7 @@ export * from './lodats.js';
 export * from './transactions.js';
 export * from './title-services.js';
 export * from './public-content.js';
+export * from './lot-shares.js';
 export * from './seo-image.js';
 export * from './lot-gpt-prompt.js';
 export * from './post-gpt-prompt.js';

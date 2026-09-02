@@ -381,7 +381,7 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-**Giao dịch** → `/giao-dich/tao?lodatId=` (open-or-create, cùng §12.1.3 mục 7). **Sửa lô đất** → `/lo-dat/[id]/sua`.
+**Giao dịch** → `/giao-dich/tao?lodatId=` (open-or-create, cùng §12.1.3 mục 7). **Sửa lô đất** → `/lo-dat/[id]/sua`. **Share link** — chỉ khi lô đã publish web; mã cố định theo (NV + lô); URL `/dat/{slug}?share=CODE`; khách thấy liên hệ NV (`User.phone`). Lô Tạm dừng / Đã bán — link vẫn mở.
 
 #### 12.3.2 Mobile
 

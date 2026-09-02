@@ -26,10 +26,14 @@ import {
   ChangeLodatOwnerDto,
 } from './dto/lodat.dto';
 import { LodatsService } from './lodats.service';
+import { LotSharesService } from '../lot-shares/lot-shares.service';
 
 @Controller('lodats')
 export class LodatsController {
-  constructor(private readonly lodats: LodatsService) {}
+  constructor(
+    private readonly lodats: LodatsService,
+    private readonly lotShares: LotSharesService,
+  ) {}
 
   @Get()
   list(@CurrentUser() user: RequestUser, @Query() query: ListLodatsQueryDto) {
@@ -53,6 +57,11 @@ export class LodatsController {
   @Get(':id/same-ward')
   listSameWard(@CurrentUser() user: RequestUser, @Param('id') id: string) {
     return this.lodats.listSameWard(user, id);
+  }
+
+  @Post(':id/share-link')
+  createShareLink(@CurrentUser() user: RequestUser, @Param('id') id: string) {
+    return this.lotShares.createOrGetShareLink(user, id);
   }
 
   @Get(':id')
