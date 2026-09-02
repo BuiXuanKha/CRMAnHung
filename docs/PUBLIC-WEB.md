@@ -96,9 +96,9 @@ Danh sách sản phẩm: ngay dưới fold hoặc section chính tiếp theo —
 
 | Ai | Được | Không |
 |----|------|--------|
-| Khách / công chúng | Xem tin, bài, lô **đã admin đăng**; share | Vào CRM; xem nháp; sửa |
-| STAFF | Như khách trên public + CRM của mình | Đăng / gỡ web |
-| ADMIN | Như STAFF + **đăng / gỡ** lô và bài lên web | Lộ PII khách lên public |
+| Khách / công chúng | Xem tin, bài, lô **đã Đăng web**; share | Vào CRM; xem nháp; sửa |
+| STAFF | Như khách trên public + CRM của mình + Đăng / gỡ **lô mình tạo** | Bài CMS; lô NV khác |
+| ADMIN | Mọi lô + **đăng / gỡ** bài CMS | Lộ PII khách lên public |
 
 Chi tiết quyền + công tắc Đăng web: [`domains/public-content.md`](./domains/public-content.md).
 
@@ -117,10 +117,10 @@ Chi tiết quyền + công tắc Đăng web: [`domains/public-content.md`](./dom
 
 ## 9. Open questions
 
-**Đã chốt (2026-08-26):** khách trên `/` thấy tin tức, bài đăng, lô cần bán. **Admin** mới được public dữ liệu đó. Không catalogue marketing tách khỏi CRM — lô web = lô CRM được chọn đăng.
+**Đã chốt (2026-08-26 + 2026-09-02):** khách trên `/` thấy tin tức, bài đăng, lô cần bán. STAFF đăng **lô của mình**; ADMIN đăng mọi lô + bài CMS. Không catalogue marketing tách khỏi CRM — lô web = lô CRM được chọn đăng.
 
-Còn lại (mặc định đề xuất trong [`public-content.md`](./domains/public-content.md) §11):
+Còn lại (mặc định trong [`public-content.md`](./domains/public-content.md) §11):
 
-- Chỉ ADMIN bấm Đăng web? Công tắc tường minh (không auto Mở bán)?
-- Giá: hiện số hoặc «Liên hệ» từng lô?
-- Liên hệ: hotline + Zalo công ty; chưa form SĐT?
+- Công tắc Đăng web tường minh (không auto Mở bán) — đã chốt.
+- Giá: hiện số đã làm mờ hoặc «Liên hệ» từng lô.
+- Liên hệ: hotline + Zalo công ty; chưa form SĐT.

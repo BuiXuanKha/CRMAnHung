@@ -81,7 +81,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 | Kiểu shell | **Một hàng header**, **full chiều ngang viewport** (workbench) |
 | Header trái | Logo + tên ứng dụng **An Hưng Land CRM** |
 | Header phải | Menu chính **cạnh avatar**, mục cách nhau **vạch đứng 1px** (không dùng ký tự `|` trong DOM); **cũng có vạch trước avatar** |
-| Menu | Quản lý khách hàng \| Quản lý lô đất \| Quản lý giao dịch \| Dịch vụ sổ đỏ (+ Admin nếu có) |
+| Menu | Quản lý khách hàng \| Quản lý lô đất \| Quản lý giao dịch \| Dịch vụ sổ đỏ (+ **Đăng web** STAFF → `/dashboard/lo-dat`; + Dashboard / quản trị nếu ADMIN) |
 | Active | Chữ **xanh** `#2563eb` **700** — không pill nền riêng |
 | Avatar | Click → menu: tên + vai trò; **Cài đặt**; **Đăng xuất** cuối (đỏ) |
 | Typography CRM | **Noto Sans**, gốc **14px** (public vẫn Be Vietnam Pro) |
@@ -569,7 +569,7 @@ Hai việc **khác nhau** — không gộp một màn:
 
 | Việc | Trạng thái |
 |------|------------|
-| **Đăng web công khai** (tin, bài, lô bán) | **Dashboard** `/dashboard` — menu: Tổng quan, Lô đất, Bài viết. [`public-content.md`](./domains/public-content.md). Chỉ ADMIN. **Không** thêm UI admin trên 4 trang CRM. |
+| **Đăng web công khai** (tin, bài, lô bán) | **Dashboard** `/dashboard` — ADMIN: Tổng quan, Lô đất, Bài viết. STAFF: header **Đăng web** → `/dashboard/lo-dat` (chỉ lô mình). Bài CMS chỉ ADMIN. [`public-content.md`](./domains/public-content.md). **Không** thêm công tắc Đăng web trên 4 trang CRM. |
 | Registry / xóa cứng khách, CRUD NV | **Tạm hoãn** (P4). `/quan-tri/khach-hang` vẫn placeholder. |
 
 Khi mock Đăng web: shell CRM §4.2; bảng list §4.5; dialog §4.7. Không dùng layout marketing public cho màn admin.
@@ -676,6 +676,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | Docs khách: Inbox Facebook sống ≠ cột phụ tin đã lưu / menu Mở chat; ô tìm API không khớp tên FB; `Customer.note` không hiện list |
 | 2026-08-31 | List `/lo-dat` cột Giá bán: dòng hoa hồng = chữ đã lưu (`brokerFeeNote`), không phải `%` số `commissionPercent` |
 | 2026-08-31 | `/lo-dat`: thiếu ảnh = ô xám + `ImageOff`; ô tìm không map chữ Nhà/Đất sang hangtag (lọc cột Phân loại) |
+| 2026-09-02 | STAFF header **Đăng web** → `/dashboard/lo-dat` (lô mình tạo). Preview **Gỡ web** khi đang hiện. Bài CMS + Tổng quan vẫn ADMIN |
 
 ---
 

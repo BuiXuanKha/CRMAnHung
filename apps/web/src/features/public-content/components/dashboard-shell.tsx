@@ -15,10 +15,17 @@ const MENU = [
   { href: '/dashboard/bai-viet', label: 'Bài viết', icon: FileText, exact: false },
 ] as const;
 
+function isDashboardLotPath(pathname: string) {
+  return pathname === '/dashboard/lo-dat' || pathname.startsWith('/dashboard/lo-dat/');
+}
+
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useAuth();
+  const isAdmin = user?.role === UserRole.ADMIN;
+  const isStaff = user?.role === UserRole.STAFF;
+  const staffOnLots = Boolean(isStaff && isDashboardLotPath(pathname));
 
   useEffect(() => {
     if (loading) return;
@@ -26,19 +33,29 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       router.replace('/login');
       return;
     }
-    if (user.role !== UserRole.ADMIN) {
-      router.replace('/khach-hang');
+    if (user.role === UserRole.ADMIN) return;
+    if (user.role === UserRole.STAFF) {
+      if (!isDashboardLotPath(pathname)) {
+        router.replace('/dashboard/lo-dat');
+      }
+      return;
     }
-  }, [loading, user, router]);
+    router.replace('/khach-hang');
+  }, [loading, user, router, pathname]);
 
-  if (loading || !user || user.role !== UserRole.ADMIN) {
+  if (loading || !user) {
     return <div className="boot-screen">Đang tải…</div>;
   }
+  if (!isAdmin && !staffOnLots) {
+    return <div className="boot-screen">Đang tải…</div>;
+  }
+
+  const menu = isAdmin ? MENU : MENU.filter((item) => item.href === '/dashboard/lo-dat');
 
   return (
     <div className="pw-shell">
       <nav className="pw-side" aria-label="Menu dashboard">
-        {MENU.map((item) => {
+        {menu.map((item) => {
           const active = item.exact
             ? pathname === item.href
             : pathname === item.href || pathname.startsWith(`${item.href}/`);

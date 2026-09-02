@@ -1,7 +1,7 @@
-# Domain: Nội dung web công khai (Khách / Admin đăng)
+# Domain: Nội dung web công khai (Khách / đăng web)
 
 - **Slug:** `public-content`
-- **Status:** Ready for mock — **Dashboard** `/dashboard` (ADMIN). Bốn trang CRM không thêm quyền admin.
+- **Status:** Done — STAFF soạn/đăng **lô của mình** trên `/dashboard/lo-dat`; ADMIN full dashboard + bài CMS. Bốn trang CRM không thêm công tắc Đăng web.
 - **Owner:** An Hưng Land
 - **IA khách:** [`PUBLIC-WEB.md`](../PUBLIC-WEB.md) · SEO: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md)
 - **Lô nguồn:** [`lodats.md`](./lodats.md) — **không** tự đẩy mọi lô Mở bán lên web
@@ -17,8 +17,9 @@ Hai chế độ trên cùng domain `anhungland.com`:
 
 | Chế độ | Ai | Thấy |
 |--------|----|------|
-| **Khách** | Chưa login | Tin tức, bài đăng, lô đất **đã được admin đăng** |
-| **Admin đăng web** | ADMIN đã login CRM | Chọn lô / soạn bài rồi **public** hoặc **gỡ** |
+| **Khách** | Chưa login | Tin tức, bài đăng, lô đất **đã Đăng web** |
+| **NV đăng lô** | STAFF đã login CRM | Soạn / Đăng / Gỡ **lô mình tạo** đang Mở bán (`/dashboard/lo-dat`) |
+| **Admin đăng web** | ADMIN đã login CRM | Mọi lô NV + soạn **bài CMS** rồi public / gỡ |
 
 Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên khách, SĐT, NV, hoa hồng, GD, chăm sóc).
 
@@ -29,10 +30,10 @@ Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên k
 | Actor | Được | Không |
 |-------|------|--------|
 | Khách (chưa login) | Đọc bài / lô **đã public**; share URL | Sửa, xem bản nháp, vào CRM |
-| STAFF | Làm CRM như hiện tại | Đăng / gỡ web; sửa copy public |
-| ADMIN | Như STAFF trên CRM + **đăng / gỡ** lô và bài | — |
+| STAFF | CRM của mình + soạn / Đăng / Gỡ web **lô `createdByEmployeeId` = mình** | Bài CMS (`/dashboard/bai-viet`); lô NV khác; Tổng quan dashboard |
+| ADMIN | Mọi lô (mọi NV) + bài CMS + Gỡ luồng kho trùng | — |
 
-Đề xuất quyền (§11, dùng cho mock): **chỉ ADMIN** bấm Đăng web — trang khách là thương hiệu công ty, không phải sàn từng NV.
+Chốt (2026-09-02): STAFF tự đăng lô của mình. Bài viết CMS vẫn **chỉ ADMIN**. Trang khách vẫn thương hiệu công ty — không lộ PII / hoa hồng / tên NV.
 
 ---
 
@@ -42,7 +43,7 @@ Ba loại nội dung khách thấy:
 
 | Loại | Nguồn | Public khi |
 |------|--------|------------|
-| **Lô đất cần bán** | Một `Lodat` CRM (luồng NV) | Admin bật **Đăng web** |
+| **Lô đất cần bán** | Một `Lodat` CRM (luồng NV) | NV của lô (hoặc ADMIN) bật **Đăng web** |
 | **Tin tức** | Bài CMS (`PublicPost`, chuyên mục tin) | Admin **Xuất bản** |
 | **Bài đăng** | Cùng CMS; chuyên mục dự án / kiến thức / kinh nghiệm | Admin **Xuất bản** |
 
@@ -50,14 +51,14 @@ Ba loại nội dung khách thấy:
 
 CRM: công tắc **Mở bán / Tạm dừng** là việc nội bộ NV–khách.
 
-Web: công tắc **Đăng web** là việc admin chọn lô nào khách được thấy.
+Web: công tắc **Đăng web** là việc NV của lô (hoặc ADMIN) chọn lô nào khách được thấy.
 
 | CRM | Web khách |
 |-----|-----------|
 | Tạm dừng / nháp / thiếu ảnh | Không hiện |
 | Mở bán nhưng chưa Đăng web | Không hiện |
 | Đăng web + đang Mở bán | Hiện `/mua-ban-nha-dat-huyen-nam-sach/[slug]` |
-| Đang Đăng web rồi Tạm dừng / Đã cọc / Đã bán | Khách: list/chi tiết chỉ hiện khi **Đăng web ∩ Mở bán**. **Không** tự tắt công tắc Đăng web — admin Gỡ tường minh |
+| Đang Đăng web rồi Tạm dừng / Đã cọc / Đã bán | Khách: list/chi tiết chỉ hiện khi **Đăng web ∩ Mở bán**. **Không** tự tắt công tắc Đăng web — Gỡ tường minh trên dashboard |
 
 ### 3.2 Bài viết
 
@@ -75,7 +76,7 @@ Cùng entity `PublicPost`:
 
 Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú nội bộ lô/map, lịch sử GD, chat, file mật.
 
-Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** admin chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi hotline công ty.
+Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi hotline công ty.
 
 ---
 
@@ -84,10 +85,10 @@ Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú
 1. **Khách vào /** — hero brand + lô đã đăng + teaser tin/bài. Không login.
 2. **Khách xem lô** — `/mua-ban-nha-dat-huyen-nam-sach` và `/…/[slug]`; share OG.
 3. **Khách đọc bài** — list + chi tiết theo chuyên mục.
-4. **Admin đăng lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn bài đăng** (prefill copy đã lọc) → Lưu nháp / Đăng web.
-5. **Admin gỡ lô** — tắt Đăng web; URL cũ → không tìm thấy (hoặc 404).
-6. **Admin soạn bài** — nháp → Xuất bản / Gỡ về nháp.
-7. **Lô đổi trạng thái CRM** — không tự tắt Đăng web; admin Gỡ trên dashboard nếu cần.
+4. **NV / admin đăng lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn bài đăng** (prefill copy đã lọc) → Lưu nháp / Đăng web. STAFF chỉ thấy lô mình tạo; ADMIN thấy mọi NV.
+5. **Gỡ lô** — tắt Đăng web (NV của lô hoặc ADMIN); URL cũ → không tìm thấy (hoặc 404).
+6. **Admin soạn bài** — nháp → Xuất bản / Gỡ về nháp. Chỉ ADMIN.
+7. **Lô đổi trạng thái CRM** — không tự tắt Đăng web; Gỡ tường minh trên dashboard nếu cần.
 
 ---
 
@@ -99,8 +100,8 @@ PublicPost                        (category, slug, status, cover, body) — khô
 ```
 
 - Một `Lodat` tối đa một listing.
-- Lô **kho** (`ProjectLot`): tối đa **một** listing đang public trên cùng số lô (tránh LK12 hiện 2 lần vì hai NV). Admin chọn luồng nào đăng.
-- Ownership listing: `publishedByEmployeeId` (admin). Không theo `employeeId` của lô để STAFF tự đăng.
+- Lô **kho** (`ProjectLot`): tối đa **một** listing đang public trên cùng số lô (tránh LK12 hiện 2 lần vì hai NV). ADMIN đăng luồng mới thì gỡ listing sibling. STAFF gặp luồng NV khác đang hiện → lỗi, liên hệ admin gỡ rồi đăng.
+- Ownership listing theo `Lodat.createdByEmployeeId` (cùng `/lo-dat`). STAFF không đọc/sửa overlay lô người khác.
 
 Ảnh public = ảnh lô + ảnh dự án đã có trên CRM (R2 public CDN). Không copy file.
 
@@ -110,16 +111,16 @@ PublicPost                        (category, slug, status, cover, body) — khô
 
 | Màn | Route | Việc |
 |-----|--------|------|
-| **Dashboard** | `/dashboard` | Tổng quan + menu trái. §12 |
-| **Lô đất** | `/dashboard/lo-dat` | List lô đăng web. §13 |
-| **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). §14 |
+| **Dashboard** | `/dashboard` | Tổng quan + menu trái. **ADMIN.** §12 |
+| **Lô đất** | `/dashboard/lo-dat` | List lô đăng web. STAFF + ADMIN. §13 |
+| **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). **ADMIN.** §14 |
 | Trang chủ khách | `/` | Lô đã Đăng web (`listPublishedPublicLots`) · **Dự án nổi bật** = bài `PUBLISHED` chuyên mục `/du-an` (tối đa 3, mới nhất) |
 
-**Tạm thời không** thêm hành vi/quyền admin trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
+**Không** thêm công tắc Đăng web trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
-Menu **trong** Dashboard (không gắn lên 4 trang CRM): Tổng quan · Lô đất · Bài viết.
+Menu **trong** Dashboard: ADMIN = Tổng quan · Lô đất · Bài viết. STAFF = chỉ **Lô đất** (vào `/dashboard` hoặc `/dashboard/bai-viet` → `/dashboard/lo-dat`).
 
-Header CRM: bốn mục NV. ADMIN thêm **Dashboard**. STAFF vào URL `/dashboard` → `/khach-hang`.
+Header CRM: bốn mục NV. STAFF thêm **Đăng web** → `/dashboard/lo-dat`. ADMIN thêm **Dashboard** (không thêm mục Đăng web trùng).
 
 **Sau login thành công:** ADMIN vào **`/dashboard` trước** (trang đầu). STAFF vào `/khach-hang`. Logo CRM (góc trái) của admin cũng về `/dashboard`.
 
@@ -131,10 +132,11 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 
 | Method | Path | Auth | Việc |
 |--------|------|------|------|
-| GET | `/admin/public-web/lots` | JWT ADMIN | Overlay bài đăng (nháp + đã đăng) |
-| POST | `/admin/public-web/media` | JWT ADMIN | Upload ảnh public (bìa / TipTap) → CDN R2 |
-| PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN | Đăng / gỡ lô (`isPublished`) — **Postgres** |
-| PATCH | `/admin/public-web/lots/:id/draft` | JWT ADMIN | Lưu copy public — **Postgres** |
+| GET | `/admin/public-web/lots` | JWT ADMIN, STAFF | Overlay bài đăng (STAFF = lô mình tạo) |
+| POST | `/admin/public-web/media` | JWT ADMIN, STAFF | Upload ảnh public (TipTap lô / bìa bài) → CDN R2 |
+| PATCH | `/admin/public-web/lots/:id/published` | JWT ADMIN, STAFF | Đăng / gỡ lô (`isPublished`) — ownership lô |
+| PATCH | `/admin/public-web/lots/:id/draft` | JWT ADMIN, STAFF | Lưu copy public — ownership lô |
+| POST | `/admin/public-web/lots/gpt-content` | JWT ADMIN, STAFF | Nest gọi OpenAI — JSON SEO lô |
 | PATCH | `/admin/public-web/posts/:id/status` | JWT ADMIN | Xuất bản / về nháp — **Postgres** |
 | GET | `/admin/public-web/posts` | JWT ADMIN | List bài (nháp + đã xuất bản) — **Postgres** |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục + body) — **Postgres** |
@@ -164,16 +166,14 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 ---
 
-## 11. Luật dùng cho mock dashboard (2026-08-26)
+## 11. Luật dashboard (chốt 2026-09-02)
 
-Chủ chuyển sang mock; dùng mặc định dưới. Bác thì sửa docs rồi UI.
-
-1. Chỉ **ADMIN** vào `/dashboard`. Bốn trang CRM **không** thêm UI/quyền admin.
-2. Lô lên web = công tắc tường minh do **ADMIN** (duyệt copy/ảnh rồi Đăng / Gỡ) — không auto theo Mở bán hay giao dịch.
-3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. Gỡ web = admin tắt Đăng web tường minh. (Khách chỉ thấy lô Đăng web ∩ đang Mở bán.)
+1. STAFF vào `/dashboard/lo-dat` (header **Đăng web**). `/dashboard` và `/dashboard/bai-viet` của STAFF → `/dashboard/lo-dat`. Bốn trang CRM **không** thêm công tắc Đăng web.
+2. Lô lên web = công tắc tường minh (STAFF lô mình / ADMIN mọi NV) — không auto theo Mở bán hay giao dịch.
+3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. Gỡ web = tắt Đăng web tường minh. (Khách chỉ thấy lô Đăng web ∩ đang Mở bán.)
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
-5. Cùng số lô kho → một listing public (chưa mock conflict UI).
-6. Bài viết = một list; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
+5. Cùng số lô kho → một listing public. ADMIN đăng luồng mới thì gỡ sibling. STAFF không gỡ luồng NV khác đang hiện — báo lỗi.
+6. Bài viết CMS = **chỉ ADMIN**; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
 7. Liên hệ khách: hotline + Zalo công ty; chưa form SĐT.
 8. Soạn bài đăng: double-click hàng/thẻ → modal copy public. Giá CRM **làm mờ**. Không copy hoa hồng, ghi chú nội bộ / chủ nhà, tên/SĐT khách.
 
@@ -187,13 +187,17 @@ Không H1 lặp tên menu trên thanh tìm. H1 trên Tổng quan và Bài viết
 
 ### 12.0 Menu trong Dashboard (mọi màn `/dashboard/*`)
 
-**Máy tính:** cột trái, 3 mục. Active chữ xanh `#2563eb` **700** + nền `#eff6ff`.
+**Máy tính:** cột trái. Active chữ xanh `#2563eb` **700** + nền `#eff6ff`.
+
+ADMIN — 3 mục:
 
 1. **Tổng quan** → `/dashboard`
 2. **Lô đất** → `/dashboard/lo-dat`
 3. **Bài viết** → `/dashboard/bai-viet`
 
-**Mobile:** cùng 3 mục, cuộn ngang trên đầu nội dung.
+STAFF — chỉ **Lô đất** → `/dashboard/lo-dat`.
+
+**Mobile:** cùng mục, cuộn ngang trên đầu nội dung.
 
 ---
 
@@ -302,7 +306,7 @@ Footer đếm dưới list bài.
 
 ## 13. List `/dashboard/lo-dat`
 
-Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (ADMIN thấy mọi NV). Overlay đăng web (slug, copy, `isPublished`) vẫn mock. Một lần bấm hàng → preview phải. Double-click → modal **Soạn bài đăng**. **Đăng web** từ preview (lô chờ đăng) hoặc từ modal (lưu copy rồi `CrmConfirm`).
+Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (STAFF = lô mình tạo; ADMIN = mọi NV). Overlay đăng web (slug, copy, `isPublished`) từ API. Một lần bấm hàng → preview phải. Double-click → modal **Soạn bài đăng**. **Đăng web** từ preview (lô chờ đăng) hoặc từ modal (lưu copy rồi `CrmConfirm`).
 
 Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồng, ghi chú nội bộ / thương lượng chủ nhà. Giá cột + preview = giá **công khai** (đã làm mờ), không đúng số CRM.
 
@@ -318,7 +322,7 @@ Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồ
 
 1. **Không** H1 (tên đã có trên menu trái: **Lô đất**).
 2. Ô tìm — khung trắng bo 12px, input viền `#cbd5e1` / focus xanh. Placeholder `Tìm tiêu đề, địa chỉ, nhân viên...`. Hangtag Clear sau caret. Gõ là lọc. **Không** nút Đăng lô cạnh ô tìm.
-3. **Giữa — bảng** mọi lô NV đang Mở bán. Lọc cột §4.5.5. Không cột Thao tác / công tắc rao bán. Không tên khách. Cột **AI GPT** (nút GPT) → modal textarea JSON request GPT (§13.3a; API sau).
+3. **Giữa — bảng** lô đang Mở bán (STAFF: của mình; ADMIN: mọi NV). Lọc cột §4.5.5. Không cột Thao tác / công tắc rao bán. Không tên khách. Cột **AI GPT** (nút GPT) → modal textarea JSON request GPT (§13.3a).
 4. Bấm hàng một lần → chọn dòng (nền `#eff6ff`) + cập nhật preview. **Không** mở confirm / editor.
 5. Double-click hàng → modal **Soạn bài đăng** (§13.3). Lần bấm đầu vẫn chọn + preview.
 6. Footer: `Hiển thị N / Tổng M lô` (N đã lọc, M cả list Mở bán).
@@ -353,7 +357,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 
 ### 13.3a Modal Tạo content bằng AI GPT
 
-Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (bắt buộc — NV nhập điểm nổi bật thực địa) + textarea JSON request (tự cập nhật, sửa được) + **Gửi** (disabled khi chưa nhập mô tả) → `POST /admin/public-web/lots/gpt-content` (ADMIN, Nest gọi OpenAI `gpt-5.6-sol`) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` + `OPENAI_MODEL` trên server — không commit.
+Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (bắt buộc — NV nhập điểm nổi bật thực địa) + textarea JSON request (tự cập nhật, sửa được) + **Gửi** (disabled khi chưa nhập mô tả) → `POST /admin/public-web/lots/gpt-content` (ADMIN + STAFF, Nest gọi OpenAI `gpt-5.6-sol`) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` + `OPENAI_MODEL` trên server — không commit.
 
 **Request JSON (bắt buộc + tùy chọn):**
 
@@ -405,8 +409,7 @@ Trống: `Không có lô đang mở bán.`
 1. Nhãn `Preview Post`
 2. Chưa chọn dòng: `Chọn một lô đang mở bán để xem bài đăng.`
 3. Có chọn: ảnh bìa, hangtag Web, tiêu đề, địa chỉ, giá, DT · MT · hướng, hangtag Nhà/Đất, mô tả public (không PII), hotline công ty
-4. Nút **Đăng web** khi chờ đăng → `CrmConfirm`. **Không** nút Gỡ web trên màn này.
-5. Nếu đang hiện: link `Xem trên anhungland.com` tab mới `/mua-ban-nha-dat-huyen-nam-sach/[slug]`
+4. Nút **Đăng web** khi chờ đăng → `CrmConfirm`. Nút **Gỡ web** khi đang hiện → `CrmConfirm` (STAFF không vào Tổng quan). Link `Xem trên anhungland.com` khi đang hiện.
 
 ### 13.2 Mobile
 
@@ -424,7 +427,7 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 
 1. Prefill copy **công khai** từ lô đang Mở bán: tiêu đề, địa chỉ, giá đã làm mờ, mô tả (DT · MT · hướng · loại + CTA hotline công ty).
 2. **Không** copy: hoa hồng, ghi chú giá / broker, ghi chú thương lượng chủ nhà, tên/SĐT khách, tên NV.
-3. Ô chỉ đọc: giá gốc CRM không hiện đúng cho khách; admin phải duyệt giá công khai.
+3. Ô chỉ đọc: giá gốc CRM không hiện đúng cho khách; người soạn duyệt giá công khai.
 4. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, **mô tả rich text (TipTap)**. Ảnh bìa = ảnh lô (không upload slice này).
 5. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload mock/R2 public CDN).
 6. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`; được thiếu mô tả) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng — **bắt buộc** có nội dung mô tả).
@@ -546,7 +549,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 ### 16.1 Phase 1 — Media upload (chung lô + bài)
 
 - [x] Contract: `uploadPublicMediaResponseSchema` `{ url, objectKey? }`
-- [x] `POST /admin/public-web/media` — JWT ADMIN, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 **WebP** public CDN. Bài: optional `title` + `index` → `{slug}-anh-n.webp`
+- [x] `POST /admin/public-web/media` — JWT ADMIN + STAFF, multipart, JPG/PNG/WEBP/GIF ≤ 5 MB → R2 **WebP** public CDN. Bài: optional `title` + `index` → `{slug}-anh-n.webp`
 - [x] Web: `uploadPublicPostImage` gọi API (kèm title/index từ modal Soạn bài)
 - [x] Bài cũ UUID: `pnpm images:seo-copy-posts` (`APPLY=1` trên VPS qua `[seo-copy-posts]`) — copy `{slug}-anh-n.webp` từng bài, không xóa file dùng chung
 
@@ -626,7 +629,7 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 
 ### 16.8 Phase 8 — Vận hành
 
-- [x] ~~Lô CRM không còn Mở bán → auto gỡ Đăng web~~ — **không làm** (chủ bác): chỉ admin Gỡ tường minh
+- [x] ~~Lô CRM không còn Mở bán → auto gỡ Đăng web~~ — **không làm** (chủ bác): Gỡ tường minh trên dashboard
 - [x] Một listing public / số lô kho; không đổi slug sau publish (301 nếu bắt buộc — sau)
 - [x] Log revalidate fail không rollback DB
 
@@ -634,9 +637,9 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 
 | Hạng mục | Cách làm |
 |----------|----------|
-| Gỡ web | Chỉ admin **Gỡ** / tắt Đăng web trên dashboard. **Không** auto khi Tạm dừng hay tạo/sửa GD |
+| Gỡ web | NV của lô hoặc ADMIN tắt Đăng web trên `/dashboard/lo-dat`. **Không** auto khi Tạm dừng hay tạo/sửa GD |
 | Khách thấy lô | `isPublished` ∩ map `DANG_BAN` (rule guest API sẵn có — không đụng công tắc Đăng web) |
-| Một listing / ProjectLot | Khi admin **Đăng web**, `unpublishSiblingProjectLotListings` gỡ listing published khác cùng `projectLotId` |
+| Một listing / ProjectLot | ADMIN **Đăng web** → `unpublishSiblingProjectLotListings` gỡ listing published khác cùng `projectLotId`. STAFF không gỡ luồng NV khác đang hiện |
 | Slug ổn định | Slug = `toListingPublicSlug(title, leftover location)` lúc **tạo** listing (không trần 80; cấm `xa`). `PATCH draft` / Đăng lại **không** đổi slug trừ khi admin sửa ô slug |
 | Đổi URL lô cũ | `pnpm lots:regenerate-public-slugs` dry-run; `APPLY=1` mới ghi `PublicLotSlugRedirect` + revalidate. Deploy **không** tự APPLY. VPS: commit `[apply-lot-slugs]` (hoặc `APPLY_LOT_SLUGS=1` trong `remote_deploy.sh`). Guest slug cũ → **301**. **Không** đổi tên file ảnh CDN |
 | Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** |

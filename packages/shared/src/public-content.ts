@@ -1,6 +1,7 @@
 /**
- * Public web content — admin dashboard + listings/posts.
- * Guest reads published only. ADMIN publishes. See docs/domains/public-content.md.
+ * Public web content — dashboard listings/posts.
+ * Guest reads published only. STAFF publishes own lots; ADMIN all lots + CMS posts.
+ * See docs/domains/public-content.md.
  *
  * Non-breaking: `metaDescription` is optional on staff overlay + guest listing.
  * SERP snippet falls back to `excerpt`. Editor modal may fill it later.

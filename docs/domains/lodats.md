@@ -120,7 +120,7 @@ Nhân viên xem / tìm lô đang rao: ảnh, địa chỉ, DT·MT·hướng, gi�
 
 | Actor | Được | Không |
 |-------|------|--------|
-| STAFF | List lô đã gắn chủ của mình; tạo lô dân từ khách; gắn chủ lô kho; đổi chủ (khi đã chốt quyền); sửa DT·MT lô dân mình tạo; công tắc Mở bán/Tạm dừng trên map mình | Tạo địa chỉ; import kho; sửa/xoá ảnh dự án; thêm lô vào dự án; hard-delete thửa |
+| STAFF | List lô đã gắn chủ của mình; tạo lô dân từ khách; gắn chủ lô kho; đổi chủ (khi đã chốt quyền); sửa DT·MT lô dân mình tạo; công tắc Mở bán/Tạm dừng trên map mình; soạn/Đăng/Gỡ web lô mình trên `/dashboard/lo-dat` | Tạo địa chỉ; import kho; sửa/xoá ảnh dự án; thêm lô vào dự án; hard-delete thửa; bài CMS |
 | ADMIN | Sổ địa chỉ; import/sửa kho dự án; ảnh dự án; xem mọi lô đã gắn chủ; dọn lô kho tạo nhầm | Tạo lô từ menu khách |
 
 Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo-dat`.
@@ -158,10 +158,11 @@ Quyền đã siết so với cũ: **chỉ Admin** tạo địa chỉ và import 
 
 Đã chốt: 4 cấp địa chỉ; nhiều NV / nhiều chủ độc lập trên cùng dòng kho; **`Lodat` trỏ `ProjectLot`**, không copy DT/MT (§0.4). Admin xoá kho khi còn NV đang trỏ = **cấm**.
 
-Tạm hoãn (chưa bàn — trước mắt chỉ làm UI cho STAFF):
+Tạm hoãn (chưa bàn):
 
 1. List **ADMIN** `/lo-dat`: hiển thị theo cách nào (tách theo NV/luồng hay gộp theo LK12)? — **chờ bàn sau**.
-2. **Đăng lô lên web khách** — không tự theo Mở bán. Domain riêng [`public-content.md`](./public-content.md).
+
+Đăng lô lên web khách — không tự theo Mở bán. STAFF/ADMIN soạn trên `/dashboard/lo-dat` — [`public-content.md`](./public-content.md).
 
 Nhẹ hơn (mặc định nếu không bác): hangtag Nhà/Đất copy = `DAT`; số lô trùng trong kho = cấm; admin được bổ sung lô vào dự án đã import; `DAT_COC`/`DA_BAN` cũ giữ khi copy, list chỉ hiện Mở bán/Tạm dừng. Giá `BIGINT`; hoa hồng chữ.
 

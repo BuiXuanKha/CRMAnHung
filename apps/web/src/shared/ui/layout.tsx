@@ -50,6 +50,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const links = [
     ...(user.role === 'STAFF' ? [homeNavItem] : []),
     ...navItems,
+    ...(user.role === 'STAFF'
+      ? [{ href: '/dashboard/lo-dat', label: 'Đăng web', icon: Globe }]
+      : []),
     ...(user.role === 'ADMIN'
       ? [
           { href: '/dashboard', label: 'Dashboard', icon: Globe },

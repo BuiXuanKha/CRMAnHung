@@ -11,6 +11,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { CurrentUser, type RequestUser } from '../../common/decorators/current-user.decorator';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import {
@@ -35,8 +36,9 @@ export class AdminPublicWebController {
   ) {}
 
   @Get('lots')
-  listLots() {
-    return this.publicContent.listAdminLots();
+  @Roles('ADMIN', 'STAFF')
+  listLots(@CurrentUser() user: RequestUser) {
+    return this.publicContent.listAdminLots(user);
   }
 
   @Get('posts')
@@ -55,6 +57,7 @@ export class AdminPublicWebController {
   }
 
   @Post('media')
+  @Roles('ADMIN', 'STAFF')
   @UseInterceptors(
     FileInterceptor('file', {
       limits: { fileSize: 5 * 1024 * 1024 },
@@ -77,16 +80,27 @@ export class AdminPublicWebController {
   }
 
   @Patch('lots/:id/draft')
-  updateDraft(@Param('id') id: string, @Body() dto: UpdatePublicListingDraftDto) {
-    return this.publicContent.updateDraft(id, dto);
+  @Roles('ADMIN', 'STAFF')
+  updateDraft(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: UpdatePublicListingDraftDto,
+  ) {
+    return this.publicContent.updateDraft(user, id, dto);
   }
 
   @Patch('lots/:id/published')
-  setPublished(@Param('id') id: string, @Body() dto: SetPublicLotPublishedDto) {
-    return this.publicContent.setPublished(id, dto.isPublished);
+  @Roles('ADMIN', 'STAFF')
+  setPublished(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: SetPublicLotPublishedDto,
+  ) {
+    return this.publicContent.setPublished(user, id, dto.isPublished);
   }
 
   @Post('lots/gpt-content')
+  @Roles('ADMIN', 'STAFF')
   generateLotGptContent(@Body() dto: LotGptRequestDto) {
     return this.lotGpt.generateContent(dto);
   }

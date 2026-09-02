@@ -1,10 +1,12 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
   PayloadTooLargeException,
 } from '@nestjs/common';
+import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import {
   PUBLIC_MEDIA_ACCEPT_MIME,
   PUBLIC_MEDIA_MAX_BYTES,
@@ -307,8 +309,12 @@ export class PublicContentService {
     return row ?? null;
   }
 
-  async listAdminLots() {
+  async listAdminLots(user: RequestUser) {
     const rows = await this.prisma.publicLotListing.findMany({
+      where:
+        user.role === 'ADMIN'
+          ? undefined
+          : { lodat: { createdByEmployeeId: user.id } },
       include: { lodat: { include: LODAT_INCLUDE } },
       orderBy: { updatedAt: 'desc' },
     });
@@ -359,11 +365,11 @@ export class PublicContentService {
     return { url: uploaded.url, objectKey: uploaded.objectKey };
   }
 
-  async updateDraft(id: string, dto: UpdatePublicListingDraftDto) {
+  async updateDraft(user: RequestUser, id: string, dto: UpdatePublicListingDraftDto) {
     if (dto.priceMode === 'AMOUNT' && !dto.priceLabel?.trim()) {
       throw new BadRequestException('Nhập giá công khai hoặc chọn Liên hệ');
     }
-    const lodat = await this.requireOpenLodat(id);
+    const lodat = await this.requireOpenLodat(id, user);
     const existing = await this.prisma.publicLotListing.findUnique({
       where: { lodatId: lodat.id },
     });
@@ -430,8 +436,8 @@ export class PublicContentService {
     return this.toAdminRow(saved);
   }
 
-  async setPublished(id: string, isPublished: boolean) {
-    const lodat = await this.requireOpenLodat(id);
+  async setPublished(user: RequestUser, id: string, isPublished: boolean) {
+    const lodat = await this.requireOpenLodat(id, user);
     const existing = await this.prisma.publicLotListing.findUnique({
       where: { lodatId: lodat.id },
     });
@@ -439,6 +445,7 @@ export class PublicContentService {
       if (!isPublished) {
         throw new NotFoundException('Chưa có bài đăng cho lô này');
       }
+      await this.assertStaffCanPublishProjectLot(user, lodat);
       const title = this.lodatTitle(lodat);
       const location = this.lodatLocation(lodat);
       await this.unpublishSiblingProjectLotListings(lodat.id, lodat.projectLotId);
@@ -463,6 +470,7 @@ export class PublicContentService {
     }
     const wasPublished = existing.isPublished;
     if (isPublished && !wasPublished) {
+      await this.assertStaffCanPublishProjectLot(user, lodat);
       await this.unpublishSiblingProjectLotListings(lodat.id, lodat.projectLotId);
     }
     const saved = await this.prisma.publicLotListing.update({
@@ -508,7 +516,7 @@ export class PublicContentService {
     }
   }
 
-  private async requireOpenLodat(id: string): Promise<LodatLoaded> {
+  private async requireOpenLodat(id: string, user: RequestUser): Promise<LodatLoaded> {
     const byListing = await this.prisma.publicLotListing.findFirst({
       where: { OR: [{ id }, { lodatId: id }] },
       select: { lodatId: true },
@@ -519,10 +527,35 @@ export class PublicContentService {
       include: LODAT_INCLUDE,
     });
     if (!lodat) throw new NotFoundException('Không tìm thấy lô đang mở bán.');
+    this.assertCanAccessLodat(user, lodat.createdByEmployeeId);
     if (!this.isOpenSale(lodat)) {
       throw new BadRequestException('Chỉ đăng lô đang Mở bán.');
     }
     return lodat;
+  }
+
+  private assertCanAccessLodat(user: RequestUser, createdByEmployeeId: string) {
+    if (user.role === 'ADMIN') return;
+    if (createdByEmployeeId !== user.id) {
+      throw new ForbiddenException('Không có quyền với lô đất này.');
+    }
+  }
+
+  /** STAFF cannot take down another NV's published kho lot. ADMIN still unpublishes siblings. */
+  private async assertStaffCanPublishProjectLot(user: RequestUser, lodat: LodatLoaded) {
+    if (user.role === 'ADMIN' || !lodat.projectLotId) return;
+    const sibling = await this.prisma.publicLotListing.findFirst({
+      where: {
+        isPublished: true,
+        lodat: { projectLotId: lodat.projectLotId, id: { not: lodat.id } },
+      },
+      select: { id: true },
+    });
+    if (sibling) {
+      throw new BadRequestException(
+        'Số lô này đang hiện trên web ở luồng nhân viên khác. Liên hệ admin để gỡ rồi đăng.',
+      );
+    }
   }
 
   private async uniqueSlug(base: string): Promise<string> {
