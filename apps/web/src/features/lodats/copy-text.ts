@@ -33,6 +33,31 @@ export function buildLodatCopyText(detail: LodatDetail): string {
   return `${body}\n\n${LODAT_COPY_FOOTER}`;
 }
 
+/** Copy Zalo/Facebook — mô tả lô + link share có mã NV. */
+export function buildLodatShareClipboard(detail: LodatDetail, shareUrl: string): string {
+  const lines: string[] = [];
+  const title = detail.title?.trim();
+  if (title) lines.push(title);
+  const address = detail.address?.trim();
+  if (address) lines.push(address);
+
+  const specs: string[] = [];
+  if (detail.areaM2 != null) specs.push(`Diện tích: ${formatArea(detail.areaM2)}`);
+  if (detail.frontageM != null) {
+    specs.push(`Mặt tiền: MT ${detail.frontageM.toLocaleString('vi-VN')} m`);
+  }
+  const direction = detail.direction?.trim();
+  if (direction) specs.push(`Hướng: ${direction}`);
+  if (specs.length) {
+    if (lines.length) lines.push('');
+    lines.push(...specs);
+  }
+
+  const body = lines.join('\n').trim();
+  const prefix = body ? `${body}\n\n` : '';
+  return `${prefix}${shareUrl.trim()}`;
+}
+
 export async function copyTextToClipboard(text: string): Promise<void> {
   if (!text) return;
   if (navigator.clipboard?.writeText) {

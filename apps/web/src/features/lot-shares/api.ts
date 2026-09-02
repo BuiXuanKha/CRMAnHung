@@ -5,6 +5,15 @@ import type {
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 
+export async function createListingShareLinkBySlug(
+  slug: string,
+): Promise<LotShareLinkResponse> {
+  return apiFetch<LotShareLinkResponse>(
+    `/public/listings/${encodeURIComponent(slug)}/share-link`,
+    { method: 'POST' },
+  );
+}
+
 export async function createLodatShareLink(lodatId: string): Promise<LotShareLinkResponse> {
   return apiFetch<LotShareLinkResponse>(`/lodats/${encodeURIComponent(lodatId)}/share-link`, {
     method: 'POST',

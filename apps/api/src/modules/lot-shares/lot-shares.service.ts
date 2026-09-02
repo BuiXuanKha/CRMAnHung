@@ -34,12 +34,31 @@ export class LotSharesService {
 
     const listing = await this.prisma.publicLotListing.findUnique({
       where: { lodatId },
-      select: { id: true, slug: true, publishedAt: true, isPublished: true },
+      select: { id: true, slug: true, publishedAt: true },
     });
     if (!listing?.publishedAt) {
       throw new BadRequestException('Lô chưa đăng lên web khách — cần publish trước khi share.');
     }
 
+    return this.createOrGetShareLinkForListing(user, listing);
+  }
+
+  /** NV đăng nhập share từ trang công khai (theo slug). */
+  async createOrGetShareLinkBySlug(user: RequestUser, slug: string) {
+    const listing = await this.prisma.publicLotListing.findUnique({
+      where: { slug: slug.trim() },
+      select: { id: true, slug: true, publishedAt: true },
+    });
+    if (!listing?.publishedAt) {
+      throw new BadRequestException('Lô chưa đăng lên web khách — cần publish trước khi share.');
+    }
+    return this.createOrGetShareLinkForListing(user, listing);
+  }
+
+  private async createOrGetShareLinkForListing(
+    user: RequestUser,
+    listing: { id: string; slug: string },
+  ) {
     const employee = await this.prisma.user.findUnique({
       where: { id: user.id },
       select: { id: true, fullName: true, phone: true, isActive: true },

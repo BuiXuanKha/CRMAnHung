@@ -74,6 +74,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
                   <ProductShareButton
                     url={listingCanonicalUrl(lot.slug)}
                     text={listingShareText(lot)}
+                    slug={lot.slug}
                     label="Chia sẻ"
                   />
                 </div>
