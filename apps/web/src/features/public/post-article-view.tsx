@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
+import { PublicAuthNavLink } from './public-auth-nav';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import {
   postHref,
@@ -47,9 +48,7 @@ export function PostArticleView({
             </a>
             <nav className="ph-nav" aria-label="Menu">
               <Link href={`/${post.category}`}>{categoryLabel}</Link>
-              <Link href="/login" className="ph-nav-login">
-                Đăng nhập
-              </Link>
+              <PublicAuthNavLink />
             </nav>
           </div>
         </div>
