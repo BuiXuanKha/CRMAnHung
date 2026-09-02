@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { LotSharesModule } from '../lot-shares/lot-shares.module';
 import { AdminPublicWebController } from './admin-public-web.controller';
 import { PublicContentService } from './public-content.service';
 import { PublicListingHubsController } from './public-listing-hubs.controller';
@@ -10,6 +11,7 @@ import { LotGptService } from './lot-gpt.service';
 import { PostGptService } from './post-gpt.service';
 
 @Module({
+  imports: [LotSharesModule],
   controllers: [
     PublicListingHubsController,
     PublicListingsController,

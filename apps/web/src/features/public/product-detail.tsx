@@ -286,6 +286,7 @@ export function ProductDetailView({
                 <ProductShareButton
                   url={shareUrl}
                   text={shareText}
+                  slug={listing.slug}
                   label="Chia sẻ"
                 />
               </div>

@@ -1,36 +1,62 @@
 'use client';
 
 import { useState } from 'react';
+import { useAuth } from '@/features/auth/auth-context';
+import { createListingShareLinkBySlug } from '@/features/lot-shares/api';
 import { copySharePayload, shareToFacebook } from './share';
 import './share.css';
 
 export function ProductShareButton({
   url,
   text,
+  slug,
   className = 'product-share-btn',
   label = 'Chia sẻ',
 }: {
-  /** Absolute canonical listing URL (no query/hash). */
+  /** Fallback URL khi khách (chưa login) hoặc không tạo được mã share. */
   url: string;
   /** Plain-text mô tả lô (không gồm URL — helper tự nối URL). */
   text?: string;
+  /** Slug listing — NV đăng nhập dùng tạo link ?share= */
+  slug: string;
   className?: string;
   label?: string;
 }) {
-  const [status, setStatus] = useState<'idle' | 'shared' | 'copied'>('idle');
+  const { user, loading } = useAuth();
+  const [status, setStatus] = useState<'idle' | 'shared' | 'copied' | 'error'>('idle');
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const flash = (next: 'shared' | 'copied') => {
     setStatus(next);
+    setErrorMsg(null);
     window.setTimeout(() => setStatus('idle'), 3200);
   };
 
   const onShareFacebook = async () => {
+    setErrorMsg(null);
+    let shareUrl = url;
+    if (!loading && user) {
+      try {
+        const res = await createListingShareLinkBySlug(slug);
+        shareUrl = res.url;
+      } catch (err) {
+        const msg =
+          err instanceof Error ? err.message : 'Không tạo được link share có mã nhân viên.';
+        setErrorMsg(msg);
+        setStatus('error');
+        window.setTimeout(() => {
+          setStatus('idle');
+          setErrorMsg(null);
+        }, 5000);
+        return;
+      }
+    }
     try {
-      await shareToFacebook(url, text);
+      await shareToFacebook(shareUrl, text);
       flash('shared');
     } catch {
       try {
-        await copySharePayload(url, text);
+        await copySharePayload(shareUrl, text);
         flash('copied');
       } catch {
         // clipboard may be blocked
@@ -40,20 +66,31 @@ export function ProductShareButton({
 
   const buttonLabel =
     status === 'shared'
-      ? 'Đã copy — dán vào Facebook'
+      ? user
+        ? 'Đã copy link share — dán Facebook'
+        : 'Đã copy — dán vào Facebook'
       : status === 'copied'
         ? 'Đã copy nội dung'
-        : label;
+        : status === 'error'
+          ? 'Không tạo link share'
+          : label;
 
   return (
-    <button
-      type="button"
-      className={className}
-      title="Copy mô tả + link và mở Facebook để dán"
-      onClick={() => void onShareFacebook()}
-    >
-      {buttonLabel}
-    </button>
+    <span className="product-share-wrap">
+      <button
+        type="button"
+        className={className}
+        title={
+          user
+            ? 'Copy mô tả + link share (?share=mã NV) và mở Facebook'
+            : 'Copy mô tả + link và mở Facebook để dán'
+        }
+        onClick={() => void onShareFacebook()}
+      >
+        {buttonLabel}
+      </button>
+      {errorMsg ? <span className="product-share-error">{errorMsg}</span> : null}
+    </span>
   );
 }
 

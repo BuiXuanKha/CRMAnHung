@@ -20,7 +20,7 @@ import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTransactionHistory } from './components/lodat-transaction-history';
 import { SameWardList } from './components/same-ward-list';
 import { SaleToggle } from './components/sale-toggle';
-import { buildLodatCopyText, copyTextToClipboard } from './copy-text';
+import { buildLodatCopyText, buildLodatShareClipboard, copyTextToClipboard } from './copy-text';
 import { createTransactionHref } from './transaction-href';
 import {
   formatArea,
@@ -139,8 +139,8 @@ export function LodatDetailPage() {
     setShareBusy(true);
     try {
       const res = await createLodatShareLink(detail.id);
-      await copyTextToClipboard(res.url);
-      flash('Đã copy link share.');
+      await copyTextToClipboard(buildLodatShareClipboard(detail, res.url));
+      flash('Đã copy nội dung + link share.');
     } catch (err) {
       setAlertMsg(err instanceof Error ? err.message : 'Không tạo được link share.');
     } finally {
@@ -220,7 +220,7 @@ export function LodatDetailPage() {
                   onClick={() => void handleShare()}
                 >
                   <Share2 size={14} aria-hidden />
-                  {shareBusy ? 'Đang tạo…' : 'Share link'}
+                  {shareBusy ? 'Đang tạo…' : 'Chia sẻ'}
                 </button>
               </div>
             </header>
