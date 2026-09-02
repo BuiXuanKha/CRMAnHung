@@ -3,8 +3,10 @@ import { describe, it } from 'node:test';
 import {
   buildLotShareUrl,
   contactFromAuthUser,
+  guestLotShareUrl,
   normalizeShareCode,
   pickShareCode,
+  resolvePublicShareOrigin,
 } from './lot-shares.js';
 
 describe('normalizeShareCode', () => {
@@ -38,6 +40,30 @@ describe('buildLotShareUrl', () => {
     assert.equal(
       buildLotShareUrl('https://anhungland.com', 'lo-33', 'ab2k9'),
       'https://anhungland.com/dat/lo-33?share=AB2K9',
+    );
+  });
+
+  it('rewrites loopback origin to the public site', () => {
+    assert.equal(
+      buildLotShareUrl('http://127.0.0.1:5001', 'lo-33', 'D4XD7'),
+      'https://anhungland.com/dat/lo-33?share=D4XD7',
+    );
+  });
+});
+
+describe('resolvePublicShareOrigin', () => {
+  it('defaults empty and loopback to anhungland.com', () => {
+    assert.equal(resolvePublicShareOrigin(undefined), 'https://anhungland.com');
+    assert.equal(resolvePublicShareOrigin('http://127.0.0.1:5001'), 'https://anhungland.com');
+    assert.equal(resolvePublicShareOrigin('http://localhost:5001'), 'https://anhungland.com');
+  });
+});
+
+describe('guestLotShareUrl', () => {
+  it('ignores a loopback origin override', () => {
+    assert.equal(
+      guestLotShareUrl('ban-dat-136m2-van-tai-dong-hong-phong', 'd4xd7', 'http://127.0.0.1:5001'),
+      'https://anhungland.com/dat/ban-dat-136m2-van-tai-dong-hong-phong?share=D4XD7',
     );
   });
 });

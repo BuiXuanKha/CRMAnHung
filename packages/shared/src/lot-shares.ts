@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LodatSaleStatus } from './enums.js';
-import { PUBLIC_LISTING_SHORT_PATH } from './public-content.js';
+import { PUBLIC_LISTING_SHORT_PATH, PUBLIC_SITE_ORIGIN } from './public-content.js';
 
 /**
  * Staff share links (`?share=CODE`) + guest contact attribution.
@@ -68,17 +68,46 @@ export function contactFromAuthUser(
   return { fullName, phone };
 }
 
+function isLoopbackHost(hostname: string): boolean {
+  const host = hostname.toLowerCase();
+  return host === '127.0.0.1' || host === 'localhost' || host === '::1';
+}
+
+/**
+ * Origin for guest share URLs.
+ * Loopback (`PUBLIC_WEB_ORIGIN` for ISR) must never leak into clipboard / Facebook.
+ */
+export function resolvePublicShareOrigin(raw?: string | null): string {
+  const s = raw?.trim();
+  if (!s) return PUBLIC_SITE_ORIGIN;
+  try {
+    if (isLoopbackHost(new URL(s).hostname)) return PUBLIC_SITE_ORIGIN;
+  } catch {
+    return PUBLIC_SITE_ORIGIN;
+  }
+  return s.replace(/\/$/, '');
+}
+
 /** Build guest share URL (short path + query). */
 export function buildLotShareUrl(
   origin: string,
   slug: string,
   shareCode: string,
 ): string {
-  const base = origin.replace(/\/$/, '');
+  const base = resolvePublicShareOrigin(origin);
   const path = `${PUBLIC_LISTING_SHORT_PATH}/${encodeURIComponent(slug)}`;
   const code = normalizeShareCode(shareCode);
   const qs = new URLSearchParams({ share: code || shareCode.trim() });
   return `${base}${path}?${qs.toString()}`;
+}
+
+/** Share URL for clipboard — always public origin, never revalidate loopback. */
+export function guestLotShareUrl(
+  slug: string,
+  shareCode: string,
+  origin?: string | null,
+): string {
+  return buildLotShareUrl(resolvePublicShareOrigin(origin), slug, shareCode);
 }
 
 /** Guest listing sale badge — lô đã publish vẫn mở khi Tạm dừng / Đã bán. */

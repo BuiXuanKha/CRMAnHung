@@ -171,7 +171,7 @@ Lô / bài ít đổi (giá làm mờ, copy ổn định lâu). **Không** reval
 | **Gỡ / về nháp** | Revalidate + lần generate sau → 404; bỏ khỏi sitemap |
 | **HTML** | Nội dung chính (title, H1, bodyHtml đã sanitize) trong response đầu — không chỉ client fetch |
 | **CRM** | `noindex`; không đưa vào sitemap |
-| **Env** | Cùng `REVALIDATE_SECRET` trên Nest (`apps/api/.env`) và Next (`apps/web/.env`); `PUBLIC_WEB_ORIGIN` trên Nest |
+| **Env** | Cùng `REVALIDATE_SECRET` trên Nest (`apps/api/.env`) và Next (`apps/web/.env`); `PUBLIC_WEB_ORIGIN` trên Nest (ISR loopback). Link share khách = `PUBLIC_SITE_ORIGIN` `https://anhungland.com`, không loopback. |
 
 Roadmap tick-list: [`docs/domains/public-content.md`](./domains/public-content.md) §16.
 

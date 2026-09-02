@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
+import { guestLotShareUrl } from '@crmanhung/shared';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
@@ -87,9 +88,8 @@ export class LotSharesService {
       existing?.shareCode ??
       (await this.createShareCode(user.id, listing.id));
 
-    const origin =
-      this.config.get<string>('PUBLIC_WEB_ORIGIN')?.trim() || 'https://anhungland.com';
-    const url = `${origin.replace(/\/$/, '')}/dat/${encodeURIComponent(listing.slug)}?share=${encodeURIComponent(shareCode)}`;
+    const origin = this.config.get<string>('PUBLIC_SITE_ORIGIN');
+    const url = guestLotShareUrl(listing.slug, shareCode, origin);
 
     return {
       shareCode,

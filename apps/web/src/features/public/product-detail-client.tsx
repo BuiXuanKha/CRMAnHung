@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { guestLotShareUrl } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { createListingShareLinkBySlug } from '@/features/lot-shares/api';
 import { copySharePayload, shareToFacebook } from './share';
@@ -38,7 +39,7 @@ export function ProductShareButton({
     if (!loading && user) {
       try {
         const res = await createListingShareLinkBySlug(slug);
-        shareUrl = res.url;
+        shareUrl = guestLotShareUrl(res.slug, res.shareCode);
       } catch (err) {
         const msg =
           err instanceof Error ? err.message : 'Không tạo được link share có mã nhân viên.';

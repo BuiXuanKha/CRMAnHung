@@ -1,14 +1,15 @@
 import {
   PUBLIC_LISTING_PATH,
+  PUBLIC_SITE_ORIGIN,
   listingCommuneHubPath,
   listingPlaceHubPath,
 } from '@crmanhung/shared';
 
-export const PUBLIC_SITE_ORIGIN = 'https://anhungland.com';
 export const PUBLIC_OG_DEFAULT = '/og-default.png';
 
 export {
   PUBLIC_LISTING_PATH,
+  PUBLIC_SITE_ORIGIN,
   listingCommuneHubPath,
   listingPlaceHubPath,
 };

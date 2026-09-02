@@ -805,7 +805,7 @@ Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
 
 ## 18. Share NV + liên hệ trên trang khách (chốt 2026-09-02)
 
-NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang chủ (cùng catalog). Nút **Chia sẻ** giữ luồng đã làm: mã cố định `(NV + listing)`, URL `/dat/{slug}?share=CODE`.
+NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang chủ (cùng catalog). Nút **Chia sẻ** giữ luồng đã làm: mã cố định `(NV + listing)`, URL **`https://anhungland.com/dat/{slug}?share=CODE`**. Không dùng `PUBLIC_WEB_ORIGIN` (loopback `127.0.0.1:5001` — chỉ ISR). Copy = mô tả public (HTML→plain) + URL đó.
 
 | Khách vào | Liên hệ trên **mọi** trang chi tiết lô (Zalo / gọi / hotline header) + thẻ list khi NV login |
 |-----------|---------------------------------------------------------------------|

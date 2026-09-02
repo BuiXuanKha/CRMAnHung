@@ -23,6 +23,9 @@ export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat-huyen-nam-sach';
 /** Short guest lot URL — `/dat/{slug}?share=CODE`. */
 export const PUBLIC_LISTING_SHORT_PATH = '/dat';
 
+/** Guest canonical / share origin. Not Nest→Next revalidate loopback (`PUBLIC_WEB_ORIGIN`). */
+export const PUBLIC_SITE_ORIGIN = 'https://anhungland.com';
+
 /** Reserved path segment under catalog — hub xã / cấp 4; not a lot slug. */
 export const PUBLIC_LISTING_HUB_SEGMENT = 'xa';
 

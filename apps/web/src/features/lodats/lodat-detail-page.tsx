@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight, Copy, Phone, Share2, SquarePen } from 'lucid
 import {
   LodatSaleStatus,
   UserRole,
+  guestLotShareUrl,
   type LodatDetail,
   type LodatListingStatus,
 } from '@crmanhung/shared';
@@ -139,7 +140,9 @@ export function LodatDetailPage() {
     setShareBusy(true);
     try {
       const res = await createLodatShareLink(detail.id);
-      await copyTextToClipboard(buildLodatShareClipboard(detail, res.url));
+      await copyTextToClipboard(
+        buildLodatShareClipboard(detail, guestLotShareUrl(res.slug, res.shareCode)),
+      );
       flash('Đã copy nội dung + link share.');
     } catch (err) {
       setAlertMsg(err instanceof Error ? err.message : 'Không tạo được link share.');

@@ -382,7 +382,7 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-**Giao dịch** → `/giao-dich/tao?lodatId=` (open-or-create, cùng §12.1.3 mục 7). **Sửa lô đất** → `/lo-dat/[id]/sua`. **Share link** — chỉ khi lô đã publish web; mã cố định theo (NV + lô); URL `/dat/{slug}?share=CODE`. Khách vào bằng mã NV A → liên hệ A trên **mọi** lô trong phiên (kể cả lô NV B). Vào thẳng domain → hotline công ty. [`public-content.md`](./public-content.md) §18. Lô Tạm dừng / Đã bán — link vẫn mở.
+**Giao dịch** → `/giao-dich/tao?lodatId=` (open-or-create, cùng §12.1.3 mục 7). **Sửa lô đất** → `/lo-dat/[id]/sua`. **Share link** — chỉ khi lô đã publish web; mã cố định theo (NV + lô); URL `https://anhungland.com/dat/{slug}?share=CODE`. Khách vào bằng mã NV A → liên hệ A trên **mọi** lô trong phiên (kể cả lô NV B). Vào thẳng domain → hotline công ty. [`public-content.md`](./public-content.md) §18. Lô Tạm dừng / Đã bán — link vẫn mở.
 
 #### 12.3.2 Mobile
 
