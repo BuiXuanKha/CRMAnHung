@@ -223,3 +223,24 @@ export function guestLotShareUrl(
 export const publicListingSaleStatusSchema = z.nativeEnum(LodatSaleStatus);
 
 export type PublicListingSaleStatus = z.infer<typeof publicListingSaleStatusSchema>;
+
+/** ADMIN `/dashboard/thong-ke` — số lô mỗi NV đã tạo link share. */
+export const shareEmployeeStatSchema = z.object({
+  employeeId: z.string().min(1),
+  fullName: z.string(),
+  username: z.string(),
+  phone: z.string().nullable(),
+  role: z.string(),
+  isActive: z.boolean(),
+  avatarUrl: z.string().url().nullable().optional(),
+  sharedListingCount: z.number().int().nonnegative(),
+});
+
+export type ShareEmployeeStat = z.infer<typeof shareEmployeeStatSchema>;
+
+export const shareEmployeeStatsResponseSchema = z.object({
+  items: z.array(shareEmployeeStatSchema),
+  total: z.number().int().nonnegative(),
+});
+
+export type ShareEmployeeStatsResponse = z.infer<typeof shareEmployeeStatsResponseSchema>;

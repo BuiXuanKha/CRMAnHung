@@ -181,6 +181,48 @@ export class LotSharesService {
     throw new BadRequestException('Không tạo được mã share — thử lại sau.');
   }
 
+  /** ADMIN thống kê: mỗi NV, số listing đã tạo mã share. */
+  async listEmployeeShareStats() {
+    const [users, grouped] = await Promise.all([
+      this.prisma.user.findMany({
+        where: { role: { in: ['STAFF', 'ADMIN'] } },
+        select: {
+          id: true,
+          fullName: true,
+          username: true,
+          phone: true,
+          role: true,
+          isActive: true,
+          avatarObjectKey: true,
+        },
+      }),
+      this.prisma.publicLotShare.groupBy({
+        by: ['employeeId'],
+        _count: { _all: true },
+      }),
+    ]);
+    const countByEmployee = new Map(
+      grouped.map((row) => [row.employeeId, row._count._all]),
+    );
+    const items = users
+      .map((user) => ({
+        employeeId: user.id,
+        fullName: user.fullName,
+        username: user.username,
+        phone: user.phone,
+        role: user.role,
+        isActive: user.isActive,
+        avatarUrl: userAvatarUrl(this.storage, user.avatarObjectKey),
+        sharedListingCount: countByEmployee.get(user.id) ?? 0,
+      }))
+      .sort((a, b) => {
+        const byCount = b.sharedListingCount - a.sharedListingCount;
+        if (byCount !== 0) return byCount;
+        return a.fullName.localeCompare(b.fullName, 'vi');
+      });
+    return { items, total: items.length };
+  }
+
   private randomShareCode(): string {
     const bytes = randomBytes(SHARE_CODE_LEN);
     return Array.from(bytes, (b) => SHARE_CODE_CHARS[b % SHARE_CODE_CHARS.length]!).join('');

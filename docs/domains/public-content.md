@@ -114,11 +114,12 @@ PublicPost                        (category, slug, status, cover, body) — khô
 | **Dashboard** | `/dashboard` | Tổng quan + menu trái. **ADMIN.** §12 |
 | **Lô đất** | `/dashboard/lo-dat` | List lô đăng web. STAFF + ADMIN. §13 |
 | **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). **ADMIN.** §14 |
+| **Thống kê** | `/dashboard/thong-ke` | List NV + số lô đã tạo link share. **ADMIN.** §20 |
 | Trang chủ khách | `/` | Ô tìm bài đăng (trên «Sản phẩm dành cho bạn») → catalog `?q=` · lô đã Đăng web · **Dự án nổi bật** = bài `PUBLISHED` `/du-an` (tối đa 3) |
 
 **Không** thêm công tắc Đăng web trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
-Menu **trong** Dashboard: ADMIN = Tổng quan · Lô đất · Bài viết. STAFF = chỉ **Lô đất** (vào `/dashboard` hoặc `/dashboard/bai-viet` → `/dashboard/lo-dat`).
+Menu **trong** Dashboard: ADMIN = Tổng quan · Lô đất · Bài viết · Thống kê. STAFF = chỉ **Lô đất** (vào `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` → `/dashboard/lo-dat`).
 
 Header CRM: bốn mục NV. STAFF thêm **Đăng web** → `/dashboard/lo-dat`. ADMIN thêm **Dashboard** (không thêm mục Đăng web trùng).
 
@@ -141,6 +142,7 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | GET | `/admin/public-web/posts` | JWT ADMIN | List bài (nháp + đã xuất bản) — **Postgres** |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục + body) — **Postgres** |
 | POST | `/admin/public-web/posts/gpt-content` | JWT ADMIN | Nest gọi OpenAI — bài **dự án** từ tên dự án → JSON SEO |
+| GET | `/admin/lot-shares/employee-stats` | JWT ADMIN | List NV + `sharedListingCount` (số mã share đã tạo) |
 | GET | `/public/listings` | Không | Lô đã đăng ∩ Mở bán → `publicCatalogListingSchema` |
 | GET | `/public/listings/:slug` | Không | Chi tiết `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
 | GET | `/public/posts` | Không | Bài `PUBLISHED` (`?category=` tuỳ chọn) → `publicGuestPostListResponseSchema` |
@@ -189,11 +191,12 @@ Không H1 lặp tên menu trên thanh tìm. H1 trên Tổng quan và Bài viết
 
 **Máy tính:** cột trái. Active chữ xanh `#2563eb` **700** + nền `#eff6ff`.
 
-ADMIN — 3 mục:
+ADMIN — 4 mục:
 
 1. **Tổng quan** → `/dashboard`
 2. **Lô đất** → `/dashboard/lo-dat`
 3. **Bài viết** → `/dashboard/bai-viet`
+4. **Thống kê** → `/dashboard/thong-ke`
 
 STAFF — chỉ **Lô đất** → `/dashboard/lo-dat`.
 
@@ -858,5 +861,50 @@ Khách tìm **lô đã Đăng web** (không phải bài CMS). Không login.
 | JSON-LD `ItemList` catalog | Trang không `q` = mọi lô; có `q` = đúng lô đang hiện |
 
 Contract: `matchPublicListingSearch` + `listingCatalogSearchPath` (`packages/shared` `public-content.ts`). API `GET /public/listings` không thêm query — lọc trên list đã published.
+
+---
+
+## 20. Thống kê share `/dashboard/thong-ke` (chốt 2026-09-02)
+
+**ADMIN.** STAFF không vào (redirect `/dashboard/lo-dat`). Slice đầu: danh sách NV + số lô đã bấm **Chia sẻ** (mỗi NV × mỗi listing = 1 dòng `PublicLotShare`). **Không** đếm lượt xem lô khác, cookie 30 ngày, Gọi/Zalo.
+
+Zod: `shareEmployeeStatsResponseSchema` — `GET /admin/lot-shares/employee-stats`.
+
+Thứ tự: **20.1 máy tính** → **20.2 mobile**. Không H1 trùng chữ menu trái.
+
+### 20.1 Giao diện máy tính
+
+```
+┌ Thống kê                                                    ┐
+│ Dòng phụ: số lô mỗi NV đã tạo link share                    │
+├ Bảng §4.5 — không lọc cột, không Thao tác                    │
+└ Footer đếm NV                                               │
+```
+
+#### 20.1.1 Thanh đầu
+
+1. **H1** `Thống kê`
+2. Dòng phụ: `Số lô đã tạo link share (mỗi lô một mã). Chưa đếm khách xem lô khác.`
+
+#### 20.1.2 Bảng
+
+§4.5. Không icon lọc. Không bấm dòng.
+
+| Cột | Ô |
+|-----|---|
+| `#` | STT sau khi sắp xếp |
+| Nhân viên | Avatar 32px + **tên**; dòng phụ username. Hangtag **Đã khóa** `red` nếu `isActive = false` |
+| Đã share | Số nguyên; `0` khi chưa tạo link |
+
+Sắp xếp: `sharedListingCount` giảm dần, rồi tên `vi`. Mọi User `STAFF` + `ADMIN` (kể cả 0 share).
+
+Trống: `Không có nhân viên.`
+
+Footer: `Hiển thị N / Tổng M nhân viên`.
+
+### 20.2 Giao diện mobile
+
+Cùng dữ liệu. Thẻ xếp dọc: avatar · tên · số đã share. Footer cùng 20.1.2. Menu dashboard cuộn ngang (mục **Thống kê**).
+
 
 

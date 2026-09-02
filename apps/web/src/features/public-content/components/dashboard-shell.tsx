@@ -3,7 +3,7 @@
 import { useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileText, LayoutDashboard, Map } from 'lucide-react';
+import { FileText, LayoutDashboard, Map, BarChart3 } from 'lucide-react';
 import { UserRole } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from '@/shared/ui/icon';
@@ -13,6 +13,7 @@ const MENU = [
   { href: '/dashboard', label: 'Tổng quan', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/lo-dat', label: 'Lô đất', icon: Map, exact: false },
   { href: '/dashboard/bai-viet', label: 'Bài viết', icon: FileText, exact: false },
+  { href: '/dashboard/thong-ke', label: 'Thống kê', icon: BarChart3, exact: false },
 ] as const;
 
 function isDashboardLotPath(pathname: string) {

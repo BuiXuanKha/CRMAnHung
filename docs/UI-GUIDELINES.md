@@ -677,6 +677,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-31 | List `/lo-dat` cột Giá bán: dòng hoa hồng = chữ đã lưu (`brokerFeeNote`), không phải `%` số `commissionPercent` |
 | 2026-08-31 | `/lo-dat`: thiếu ảnh = ô xám + `ImageOff`; ô tìm không map chữ Nhà/Đất sang hangtag (lọc cột Phân loại) |
 | 2026-09-02 | STAFF header **Đăng web** → `/dashboard/lo-dat` (lô mình tạo). Preview **Gỡ web** khi đang hiện. Bài CMS + Tổng quan vẫn ADMIN |
+| 2026-09-02 | Dashboard menu **Thống kê** `/dashboard/thong-ke` (ADMIN): list NV + cột số lô đã tạo link share |
 
 ---
 

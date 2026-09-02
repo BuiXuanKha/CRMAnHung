@@ -2,6 +2,7 @@ import type {
   LotShareLinkResponse,
   PublicLotShareResolve,
   PublicLotShareVisitResponse,
+  ShareEmployeeStatsResponse,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 
@@ -43,4 +44,8 @@ export async function recordPublicLotShareVisit(
   } catch {
     return null;
   }
+}
+
+export async function listShareEmployeeStats(): Promise<ShareEmployeeStatsResponse> {
+  return apiFetch<ShareEmployeeStatsResponse>('/admin/lot-shares/employee-stats');
 }
