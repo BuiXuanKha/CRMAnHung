@@ -153,7 +153,7 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 
 **Giá trên SERP:** cùng `priceLabel` khách thấy. Chính sách làm mờ (3,2 tỷ → `3 tỷ xxx`) thì meta/OG/JSON-LD cũng mờ — không lộ số CRM.
 
-**Danh sách `/mua-ban-nha-dat-huyen-nam-sach`:** title/H1 `Nhà đất đang bán`; canonical đúng path; OG + `ItemList` các URL đã đăng.
+**Danh sách `/mua-ban-nha-dat-huyen-nam-sach`:** title/H1 `Nhà đất đang bán`; canonical đúng path (**không** `?q=`); OG + `ItemList`. Ô tìm `?q=` lọc lô đã đăng — không đưa `q` vào sitemap / canonical / OG url. `WebSite` JSON-LD có `SearchAction` → `{path}?q={search_term_string}`.
 
 ---
 

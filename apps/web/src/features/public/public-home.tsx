@@ -6,6 +6,7 @@ import type { PublicGuestLot } from '@/features/public-content/guest-listing';
 import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { HomeProductSection } from './home-product-section';
+import { HomeListingSearch } from './listing-search';
 import { PublicAuthNavLink } from './public-auth-nav';
 import { PublicHotlineLink } from './public-hotline-link';
 import { PUBLIC_LISTING_PATH } from './site';
@@ -94,6 +95,8 @@ export function PublicHome({
           </p>
         </div>
       </section>
+
+      <HomeListingSearch />
 
       <HomeProductSection initialLots={initialLots} />
 

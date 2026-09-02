@@ -370,5 +370,13 @@ export function websiteJsonLd() {
     name: ANHUNG_BRAND.name,
     url: PUBLIC_SITE_ORIGIN,
     inLanguage: 'vi-VN',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${PUBLIC_SITE_ORIGIN}${PUBLIC_LISTING_PATH}?q={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
   };
 }

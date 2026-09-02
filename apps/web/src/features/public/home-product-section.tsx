@@ -21,7 +21,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
   const lots = query.data ?? initialLots;
 
   return (
-    <section id="mua-ban-nha-dat" className="ph-section">
+    <section id="mua-ban-nha-dat" className="ph-section ph-section-after-search">
       <div className="ph-section-head">
         <h2>Sản phẩm dành cho bạn</h2>
         {lots.length > 0 ? (

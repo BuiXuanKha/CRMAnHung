@@ -69,6 +69,8 @@ Một composition (không dashboard):
 
 Danh sách sản phẩm: ngay dưới fold hoặc section chính tiếp theo — không để stats / lịch / badge lộn xộn trên hero.
 
+**Ô tìm bài đăng:** một section **dưới hero, trên** «Sản phẩm dành cho bạn» — tìm lô đã Đăng web (xã, thôn, tiêu đề…). Submit → `/mua-ban-nha-dat-huyen-nam-sach?q=`. Chi tiết [`public-content.md`](./domains/public-content.md) §19. `?q=` **không** vào canonical.
+
 ---
 
 ## 5. Sản phẩm & chia sẻ MXH

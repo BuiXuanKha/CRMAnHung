@@ -20,6 +20,52 @@ export const PUBLIC_POST_EXCERPT_MAX = 320;
  */
 export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat-huyen-nam-sach';
 
+/** Guest catalog search query (`?q=`). Never in canonical / sitemap / JSON-LD URL. */
+export const PUBLIC_LISTING_SEARCH_PARAM = 'q';
+
+export function listingCatalogSearchPath(keyword: string): string {
+  const q = keyword.trim();
+  if (!q) return PUBLIC_LISTING_PATH;
+  const qs = new URLSearchParams({ [PUBLIC_LISTING_SEARCH_PARAM]: q });
+  return `${PUBLIC_LISTING_PATH}?${qs.toString()}`;
+}
+
+export type PublicListingSearchFields = {
+  title?: string | null;
+  location?: string | null;
+  areaLabel?: string | null;
+  placeLabel?: string | null;
+  communeLabel?: string | null;
+  excerpt?: string | null;
+  kindLabel?: string | null;
+  priceLabel?: string | null;
+  directionLabel?: string | null;
+};
+
+/** Match guest listing cards by title / address / area — public fields only. */
+export function matchPublicListingSearch(
+  row: PublicListingSearchFields,
+  keyword: string,
+): boolean {
+  const q = keyword.trim().toLocaleLowerCase('vi');
+  if (!q) return true;
+  const hay = [
+    row.title,
+    row.location,
+    row.areaLabel,
+    row.placeLabel,
+    row.communeLabel,
+    row.excerpt,
+    row.kindLabel,
+    row.priceLabel,
+    row.directionLabel,
+  ]
+    .filter((v): v is string => Boolean(v?.trim()))
+    .join(' ')
+    .toLocaleLowerCase('vi');
+  return hay.includes(q);
+}
+
 /** Guest canonical / share origin. Not Nest→Next revalidate loopback (`PUBLIC_WEB_ORIGIN`). */
 export const PUBLIC_SITE_ORIGIN = 'https://anhungland.com';
 

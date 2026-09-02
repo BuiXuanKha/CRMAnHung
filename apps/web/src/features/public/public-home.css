@@ -246,6 +246,112 @@
   padding: 64px 24px;
 }
 
+.ph-section-after-search {
+  padding-top: 36px;
+}
+
+.ph-search {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 28px 24px 0;
+}
+
+.ph-search-card {
+  padding: 18px 18px 16px;
+  border: 1px solid var(--ph-line);
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 32px rgba(20, 16, 12, 0.08);
+}
+
+.ph-list-search {
+  margin: 0 0 16px;
+}
+
+.ph-search-form {
+  display: grid;
+  gap: 10px;
+}
+
+.ph-search-label {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ph-muted);
+}
+
+.ph-search-row {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+}
+
+.ph-search-field {
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ph-search-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  color: var(--ph-muted);
+  pointer-events: none;
+}
+
+.ph-search-field input[type='search'] {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px 0 42px;
+  border: 1px solid var(--ph-line);
+  border-radius: 999px;
+  background: var(--ph-soft);
+  color: var(--ph-ink);
+  font: inherit;
+  font-size: 1rem;
+  appearance: none;
+}
+
+.ph-search-field input[type='search']::-webkit-search-decoration,
+.ph-search-field input[type='search']::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.ph-search-field input[type='search']::placeholder {
+  color: #8a827c;
+}
+
+.ph-search-field input[type='search']:focus {
+  outline: none;
+  border-color: var(--ph-brand);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(185, 28, 34, 0.12);
+}
+
+.ph-search-submit {
+  flex: 0 0 auto;
+  height: 48px;
+  padding: 0 22px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--ph-brand);
+  color: #fff;
+  font: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.ph-search-submit:hover {
+  background: var(--ph-brand-deep);
+}
+
 .ph-section-muted {
   max-width: none;
   background: var(--ph-soft);
@@ -934,6 +1040,22 @@
     margin-top: 22px;
   }
 
+  .ph-search {
+    padding: 20px 16px 0;
+  }
+
+  .ph-search-card {
+    padding: 14px;
+  }
+
+  .ph-search-row {
+    flex-direction: column;
+  }
+
+  .ph-search-submit {
+    width: 100%;
+  }
+
   .ph-hero-cta .ph-btn {
     width: 100%;
     min-height: 46px;
@@ -941,6 +1063,10 @@
 
   .ph-section {
     padding: 44px 16px;
+  }
+
+  .ph-section-after-search {
+    padding-top: 24px;
   }
 
   .ph-section-muted .ph-section-head,

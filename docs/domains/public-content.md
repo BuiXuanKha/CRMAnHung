@@ -82,7 +82,7 @@ Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú
 
 ## 4. Use cases
 
-1. **Khách vào /** — hero brand + lô đã đăng + teaser tin/bài. Không login.
+1. **Khách vào /** — hero brand + **ô tìm bài đăng** + lô đã đăng + teaser tin/bài. Không login.
 2. **Khách xem lô** — `/mua-ban-nha-dat-huyen-nam-sach` và `/…/[slug]`; share OG.
 3. **Khách đọc bài** — list + chi tiết theo chuyên mục.
 4. **NV / admin đăng lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn bài đăng** (prefill copy đã lọc) → Lưu nháp / Đăng web. STAFF chỉ thấy lô mình tạo; ADMIN thấy mọi NV.
@@ -114,7 +114,7 @@ PublicPost                        (category, slug, status, cover, body) — khô
 | **Dashboard** | `/dashboard` | Tổng quan + menu trái. **ADMIN.** §12 |
 | **Lô đất** | `/dashboard/lo-dat` | List lô đăng web. STAFF + ADMIN. §13 |
 | **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). **ADMIN.** §14 |
-| Trang chủ khách | `/` | Lô đã Đăng web (`listPublishedPublicLots`) · **Dự án nổi bật** = bài `PUBLISHED` chuyên mục `/du-an` (tối đa 3, mới nhất) |
+| Trang chủ khách | `/` | Ô tìm bài đăng (trên «Sản phẩm dành cho bạn») → catalog `?q=` · lô đã Đăng web · **Dự án nổi bật** = bài `PUBLISHED` `/du-an` (tối đa 3) |
 
 **Không** thêm công tắc Đăng web trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
@@ -816,5 +816,43 @@ NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang c
 Cách giữ phiên: cookie first-party `crmanhung_share` (httpOnly, SameSite=Lax, **hết khi đóng trình duyệt**). `?share=` mới ghi đè cookie. Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). Đếm visit chỉ khi mở đúng lô gốc của mã đó. Chi tiết lô `force-dynamic` (đọc cookie); Google không gửi cookie → HTML bot = hotline công ty.
 
 Thứ tự: NV đã login (có SĐT) → cookie/`?share=` → hotline công ty. JSON-LD/canonical không đổi. Avatar = `User.avatarObjectKey` → CDN `avatarUrl` (`/auth/me` khi NV login; `GET /public/lot-shares/:code` khi khách share). Không ảnh → chữ cái.
+
+---
+
+## 19. Tìm bài đăng trên trang chủ (chốt 2026-09-02)
+
+Khách tìm **lô đã Đăng web** (không phải bài CMS). Không login.
+
+### 19.1 Giao diện máy tính — `/`
+
+1. Vị trí: **dưới hero**, **trên** «Sản phẩm dành cho bạn». Không nhét ô tìm vào hero / header.
+2. Nhãn: `Tìm bài đăng` (không thêm H1/H2 — H1 vẫn hero; H2 vẫn «Sản phẩm dành cho bạn»).
+3. Ô một dòng — placeholder `Nhập xã, thôn, dự án, diện tích, tiêu đề…`. Icon Lucide `Search` trong ô.
+4. Nút **Tìm kiếm** — đỏ brand. Enter = cùng nút.
+5. Gửi `GET` `/mua-ban-nha-dat-huyen-nam-sach?q=…`. Trống → catalog không `q`.
+6. Lưới «Sản phẩm dành cho bạn» **không** lọc theo ô tìm (vẫn toàn bộ lô đã đăng).
+
+### 19.2 Giao diện máy tính — catalog `/mua-ban-nha-dat-huyen-nam-sach`
+
+1. Cùng ô tìm, điền sẵn `q`.
+2. Lọc client/server trên field public: tiêu đề, địa chỉ, xã, thôn/KĐT, DT, giá làm mờ, hangtag Nhà/Đất, excerpt. **Không** bodyHtml, PII, tên NV.
+3. Có `q`: câu `N bài đăng phù hợp với «…».` · 0 kết quả: `Không tìm thấy bài đăng phù hợp.`
+4. Không `q`: copy cũ «Xem và chia sẻ…» + mọi lô.
+
+### 19.3 Giao diện mobile
+
+1. Cùng 19.1–19.2. Ô + nút xếp dọc; nút full ngang.
+2. Placeholder / hành vi Submit giống máy tính.
+
+### 19.4 SEO
+
+| Hạng mục | Quy tắc |
+|----------|---------|
+| Canonical catalog | Luôn path sạch — **không** `?q=` |
+| Sitemap / OG | Không URL có `q` |
+| JSON-LD `WebSite` | `SearchAction` → `{catalog}?q={search_term_string}` |
+| JSON-LD `ItemList` catalog | Trang không `q` = mọi lô; có `q` = đúng lô đang hiện |
+
+Contract: `matchPublicListingSearch` + `listingCatalogSearchPath` (`packages/shared` `public-content.ts`). API `GET /public/listings` không thêm query — lọc trên list đã published.
 
 

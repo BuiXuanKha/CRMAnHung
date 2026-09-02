@@ -6,12 +6,13 @@ import { listingHref } from './site';
 
 type Props = {
   listings: PublicListingCard[];
+  emptyText?: string;
 };
 
 /** Shared guest product grid — catalog list + hub pages. */
-export function ListingProductGrid({ listings }: Props) {
+export function ListingProductGrid({ listings, emptyText }: Props) {
   if (listings.length === 0) {
-    return <p>Hiện chưa có lô đăng bán trên web.</p>;
+    return <p>{emptyText ?? 'Hiện chưa có lô đăng bán trên web.'}</p>;
   }
   return (
     <div className="ph-product-grid">
