@@ -6,7 +6,7 @@ type Props = {
   searchParams: Promise<{ share?: string }>;
 };
 
-/** Short share URL — 301 to the canonical catalog path (keep `?share=`). */
+/** Legacy `/dat/{slug}` — 308 to canonical catalog (old Facebook posts). */
 export const revalidate = false;
 
 export default async function DatShortListingPage({ params, searchParams }: Props) {

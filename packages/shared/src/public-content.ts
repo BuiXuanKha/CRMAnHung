@@ -20,7 +20,10 @@ export const PUBLIC_POST_EXCERPT_MAX = 320;
  */
 export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat-huyen-nam-sach';
 
-/** Short guest lot URL — `/dat/{slug}?share=CODE`. */
+/**
+ * Legacy short path. Do not use for new share URLs.
+ * Old `/dat/{slug}` links 308 to `PUBLIC_LISTING_PATH`.
+ */
 export const PUBLIC_LISTING_SHORT_PATH = '/dat';
 
 /** Guest canonical / share origin. Not Nest→Next revalidate loopback (`PUBLIC_WEB_ORIGIN`). */

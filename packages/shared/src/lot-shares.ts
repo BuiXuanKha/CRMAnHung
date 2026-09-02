@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { LodatSaleStatus } from './enums.js';
-import { PUBLIC_LISTING_SHORT_PATH, PUBLIC_SITE_ORIGIN } from './public-content.js';
+import { PUBLIC_LISTING_PATH, PUBLIC_SITE_ORIGIN } from './public-content.js';
 
 /**
  * Staff share links (`?share=CODE`) + guest contact attribution.
@@ -88,14 +88,14 @@ export function resolvePublicShareOrigin(raw?: string | null): string {
   return s.replace(/\/$/, '');
 }
 
-/** Build guest share URL (short path + query). */
+/** Build guest share URL (canonical catalog path + `?share=`). */
 export function buildLotShareUrl(
   origin: string,
   slug: string,
   shareCode: string,
 ): string {
   const base = resolvePublicShareOrigin(origin);
-  const path = `${PUBLIC_LISTING_SHORT_PATH}/${encodeURIComponent(slug)}`;
+  const path = `${PUBLIC_LISTING_PATH}/${encodeURIComponent(slug)}`;
   const code = normalizeShareCode(shareCode);
   const qs = new URLSearchParams({ share: code || shareCode.trim() });
   return `${base}${path}?${qs.toString()}`;

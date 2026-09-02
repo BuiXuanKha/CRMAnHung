@@ -146,7 +146,7 @@ REVALIDATE_SECRET=<random ≥ 32 ký tự>
 PUBLIC_WEB_ORIGIN=http://127.0.0.1:5001
 ```
 
-`PUBLIC_WEB_ORIGIN` chỉ để Nest gọi Next **revalidate** qua loopback. Link share khách luôn `https://anhungland.com/dat/…` (`PUBLIC_SITE_ORIGIN`, mặc định trong code — không lấy loopback).
+`PUBLIC_WEB_ORIGIN` chỉ để Nest gọi Next **revalidate** qua loopback. Link share khách luôn `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/…?share=` (`PUBLIC_SITE_ORIGIN`, mặc định trong code — không lấy loopback).
 
 Và trên **apps/web** (PM2 / `.env`):
 
