@@ -309,6 +309,21 @@ export class PublicContentService {
     return row ?? null;
   }
 
+  /** Keep old guest URLs working when staff/GPT đổi slug overlay. */
+  private async recordLotSlugChange(oldSlug: string, newSlug: string): Promise<void> {
+    if (!oldSlug || !newSlug || oldSlug === newSlug) return;
+    await this.prisma.publicLotSlugRedirect.deleteMany({ where: { fromSlug: newSlug } });
+    await this.prisma.publicLotSlugRedirect.upsert({
+      where: { fromSlug: oldSlug },
+      create: { fromSlug: oldSlug, toSlug: newSlug },
+      update: { toSlug: newSlug },
+    });
+    await this.prisma.publicLotSlugRedirect.updateMany({
+      where: { toSlug: oldSlug },
+      data: { toSlug: newSlug },
+    });
+  }
+
   async listAdminLots(user: RequestUser) {
     const rows = await this.prisma.publicLotListing.findMany({
       where:
@@ -408,8 +423,12 @@ export class PublicContentService {
     }
     const slugHint = dto.slug?.trim();
     if (existing) {
+      const previousSlug = existing.slug;
       if (slugHint && slugHint !== existing.slug) {
         data.slug = await this.uniqueSlug(slugHint);
+      }
+      if (data.slug && data.slug !== previousSlug) {
+        await this.recordLotSlugChange(previousSlug, data.slug);
       }
       const saved = await this.prisma.publicLotListing.update({
         where: { id: existing.id },
@@ -418,6 +437,9 @@ export class PublicContentService {
       });
       if (saved.isPublished) {
         await this.revalidate.revalidateListing(saved.slug);
+        if (data.slug && data.slug !== previousSlug) {
+          await this.revalidate.revalidateListing(previousSlug);
+        }
       }
       return this.toAdminRow(saved);
     }

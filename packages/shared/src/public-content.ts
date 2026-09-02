@@ -39,6 +39,8 @@ export function toPublicSlug(label: string, maxLen = 60, emptyFallback = 'muc'):
     .replace(/\p{M}/gu, '')
     .replace(/đ/gi, 'd')
     .replace(/Đ/g, 'd')
+    .replace(/[²]/g, '2')
+    .replace(/[³]/g, '3')
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-+|-+$/g, '');

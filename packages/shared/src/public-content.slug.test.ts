@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { toPublicPostSlug, toPublicSlug } from './public-content.js';
+import { toListingPublicSlug, toPublicPostSlug, toPublicSlug } from './public-content.js';
 
 describe('toPublicPostSlug', () => {
   it('keeps a long Vietnamese title without the default 60-char cut', () => {
@@ -30,5 +30,14 @@ describe('toPublicPostSlug', () => {
 
   it('falls back when the title has no latin letters', () => {
     assert.equal(toPublicPostSlug('!!!'), 'bai-viet');
+  });
+});
+
+describe('toListingPublicSlug', () => {
+  it('keeps m2 when the title uses m²', () => {
+    assert.equal(
+      toListingPublicSlug('Lô đất 105m² tại Nham Cáp, Đồng Lạc', 'Nham Cáp, Đồng Lạc, Nam Sách, Hải Dương'),
+      'lo-dat-105m2-tai-nham-cap-dong-lac-nam-sach-hai-duong',
+    );
   });
 });

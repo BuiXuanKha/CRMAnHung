@@ -1,18 +1,16 @@
-import { buildListingDetailMetadata, ListingDetailRoute } from '@/features/public/listing-detail-route';
+import { permanentRedirect } from 'next/navigation';
+import { listingHref } from '@/features/public/site';
 
 type Props = {
   params: Promise<{ slug: string }>;
   searchParams: Promise<{ share?: string }>;
 };
 
+/** Short share URL — 301 to the canonical catalog path (keep `?share=`). */
 export const revalidate = false;
-export const dynamic = 'force-dynamic';
 
-export async function generateMetadata({ params }: Props) {
+export default async function DatShortListingPage({ params, searchParams }: Props) {
   const { slug } = await params;
-  return buildListingDetailMetadata(slug);
-}
-
-export default function DatShortListingPage(props: Props) {
-  return <ListingDetailRoute {...props} />;
+  const { share } = await searchParams;
+  permanentRedirect(listingHref(slug, share));
 }
