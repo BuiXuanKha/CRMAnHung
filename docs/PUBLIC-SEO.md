@@ -141,7 +141,7 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 | **URL** | `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}` — slug = title + phần địa chỉ **chưa** có trong title (không dấu, unique, **không cắt 80 ký tự**). Ổn định sau khi tạo. Tin cũ: commit `[apply-lot-slugs]` (301 URL cũ) | Query tracking làm canonical; đổi slug khi chỉ sửa copy; cắt giữa từ (`hai-duon`) |
 | **Title** | `seoTitle` (GPT) + template `\| An Hưng Land`. Không nhồi brand trong field. Cùng địa danh/diện tích với H1, không bắt buộc trùng chữ | Nhồi «đất nền Đồng Nai giá rẻ…»; title chỉ mã lô không có xã/huyện; `title` HTML khác hẳn H1 (thiếu địa danh) |
 | **Meta description** | `metaDescription` nếu có, không thì **excerpt** public, cắt ~160 ký tự | Copy giống nhau mọi lô; mô tả CRM / hoa hồng |
-| **Canonical** | Đúng URL tuyệt đối ở trên. Share dùng cùng path + `?share=` (không vào canonical). Link `/dat/{slug}` cũ **308** sang đây. | Hai URL 200 một lô; `?share=` trong canonical |
+| **Canonical** | Đúng URL tuyệt đối ở trên. Share dùng cùng path + `?share=` (không vào canonical). | Hai URL 200 một lô; `?share=` trong canonical |
 | **JSON-LD** | `RealEstateListing` (`name` = H1) + `Offer` (`itemOffered` Place/House, `floorSize` khi parse được) + `BreadcrumbList` (hub xã). `Offer.price` **chỉ** khi `priceLabel` parse được (vd. `2,85 tỷ`). `Liên hệ` / `3 tỷ xxx` → không bịa số. `telephone` = hotline **công ty** (không SĐT NV từ `?share=`) | AggregateRating giả; giá map CRM; `name` lặp địa chỉ |
 | **H1** | `title` (GPT h1) — **một** H1. Cùng địa danh chính với seoTitle; không lặp «tại X tại X» | Nhiều H1; H1 không có thôn/xã |
 | **Copy** | Excerpt + mô tả **riêng** từng lô (SSR) | Lặp đoạn khuôn + keyword |

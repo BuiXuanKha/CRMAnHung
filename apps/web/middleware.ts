@@ -21,6 +21,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // `/dat` is legacy 308 only; cookie still set so old Facebook links keep `?share=`.
-  matcher: ['/dat/:path*', '/mua-ban-nha-dat-huyen-nam-sach/:path*'],
+  matcher: ['/mua-ban-nha-dat-huyen-nam-sach/:path*'],
 };

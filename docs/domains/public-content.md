@@ -805,7 +805,7 @@ Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
 
 ## 18. Share NV + liên hệ trên trang khách (chốt 2026-09-02)
 
-NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang chủ (cùng catalog). Nút **Chia sẻ**: mã cố định `(NV + listing)`, URL **`https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}?share=CODE`**. Không invent path `/dat`. Link `/dat/…` cũ (nếu đã share) **308** sang canonical, giữ `?share=`. Cookie phiên ghi ở middleware trên path catalog. Không dùng `PUBLIC_WEB_ORIGIN` (loopback — chỉ ISR). Copy = mô tả public (HTML→plain) + URL canonical. Đổi slug overlay → 301 slug cũ.
+NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang chủ (cùng catalog). Nút **Chia sẻ**: mã cố định `(NV + listing)`, URL **`https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}?share=CODE`**. Cookie phiên ghi ở middleware trên path catalog. Không dùng `PUBLIC_WEB_ORIGIN` (loopback — chỉ ISR). Copy = mô tả public (HTML→plain) + URL canonical. Đổi slug overlay → 301 slug cũ.
 
 | Khách vào | Liên hệ trên **mọi** trang chi tiết lô (Zalo / gọi / hotline header) + thẻ list khi NV login |
 |-----------|---------------------------------------------------------------------|
