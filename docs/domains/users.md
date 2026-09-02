@@ -1,12 +1,12 @@
 # Domain: Users (Đăng nhập / nhân viên)
 
 - **Slug:** `users`
-- **Status:** Ready for API — `/login` nối bảng User; `/khach-hang` đọc khách đã copy
+- **Status:** Ready for API — `/login` nối bảng User; quản lý NV `/quan-tri/nguoi-dung` (ADMIN)
 - **Nguồn:** CRM cũ `/login` + quản trị user (đọc hiểu, không copy god-file)
 - **UI:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) login; shell avatar
 - **Contract:** `packages/shared/src/auth.ts`
 
-Slice này **chỉ đăng nhập / đăng xuất**. Tạo-sửa-xoá NV (modal admin CRM cũ) = P4, chưa làm.
+Slice này: **đăng nhập / đăng xuất** + **quản lý nhân viên** (ADMIN). CRM cũ: modal user tương đương.
 
 **Thứ tự copy:** User **trước** (FK `employeeId` bắt buộc). Hotline nguồn **trước hoặc sau** khách (`sourceHotlineId` cho phép trống). SĐT / FB / chăm sóc **sau** map khách. `MIGRATION.md`.
 
@@ -29,7 +29,7 @@ Nhân viên / admin vào CRM bằng username + mật khẩu. Mọi khách / lô 
 
 | Thứ | Nghĩa |
 |-----|--------|
-| User | `tblUsers` cũ → Prisma `User` |
+| User | `tblUsers` cũ → Prisma `User` (username, họ tên, SĐT, mật khẩu hash) |
 | STAFF / ADMIN | `UserRole` |
 | Refresh token | Hash trong DB; rotation; revoke lúc logout |
 
@@ -54,7 +54,7 @@ Copy data: **User trước** (`employeeId` bắt buộc). Hotline nguồn có th
 |-----|-------|------|
 | Login | `/login` | Form đăng nhập |
 | CRM | sau login | ADMIN → `/dashboard` (trang đầu); STAFF → `/khach-hang` |
-| Quản lý NV | — | **Chưa** (P4) |
+| Quản lý NV | `/quan-tri/nguoi-dung` | ADMIN — bảng NV; thêm / sửa / xoá / reset MK |
 
 ### 6.1 Giao diện máy tính — `/login`
 
@@ -75,6 +75,24 @@ Copy data: **User trước** (`employeeId` bắt buộc). Hotline nguồn có th
 
 Cùng control 6.1. Ô nhập ≥ 16px (không zoom). Nút đủ vùng chạm.
 
+### 6.3 Giao diện máy tính — `/quan-tri/nguoi-dung` (ADMIN)
+
+```
+┌ Quản lý người dùng ─────────────── [ + Thêm mới ] ─┐
+├ # │ User │ Họ tên │ SĐT │ Vai trò │ Trạng thái │ Sửa │ Reset MK │ Xoá ┤
+└────────────────────────────────────────────────────┘
+```
+
+1. Chỉ ADMIN; STAFF redirect `/khach-hang`
+2. Nút **Thêm mới** → modal: user, mật khẩu, họ tên, SĐT, vai trò
+3. **Sửa** → modal (không đổi mật khẩu ở đây)
+4. **Reset MK** → modal nhập mật khẩu mới
+5. **Xoá** → confirm; không xoá NV đã có khách/lô/giao dịch/sổ đỏ hoặc chính mình
+
+### 6.4 Giao diện mobile — `/quan-tri/nguoi-dung`
+
+Cùng cột; cuộn ngang bảng. Nút thêm full-width trên header.
+
 ## 7. API (đã có)
 
 Prefix `/api/v1`
@@ -85,7 +103,11 @@ Prefix `/api/v1`
 | POST | `/auth/refresh` | Public |
 | POST | `/auth/logout` | Public (body refresh) |
 | GET | `/auth/me` | JWT |
-| GET | `/users` | ADMIN — list; **chưa** dùng trên UI |
+| GET | `/users` | ADMIN — list NV |
+| POST | `/users` | ADMIN — tạo NV |
+| PATCH | `/users/:id` | ADMIN — sửa NV |
+| DELETE | `/users/:id` | ADMIN — xoá NV (nếu không còn dữ liệu) |
+| POST | `/users/:id/reset-password` | ADMIN — đặt lại mật khẩu |
 
 Zod: `packages/shared/src/auth.ts`.
 
@@ -115,6 +137,4 @@ Sau freeze CRM cũ:
 3. ~~Copy hotline nguồn + gắn `sourceHotlineId`~~
 4. Copy profile Facebook NV + metadata FB khách (cột Kênh liên hệ)
 5. Bảng phụ theo todo `MIGRATION.md` (SĐT, chăm sóc, …)
-6. P4: CRUD nhân viên như modal CRM cũ
-
-Không làm CRUD user trước khi login + khách ổn.
+6. ~~P4: CRUD nhân viên~~ — `/quan-tri/nguoi-dung`

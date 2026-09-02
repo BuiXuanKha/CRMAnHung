@@ -1,10 +1,25 @@
-import { Body, Controller, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { UsersService } from './users.service';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUser, type RequestUser } from '../../common/decorators/current-user.decorator';
 import { CreateHotlineDto } from './dto/create-hotline.dto';
 import { UpdateHotlineDto } from './dto/update-hotline.dto';
+import {
+  CreateUserDto,
+  ResetUserPasswordDto,
+  UpdateUserDto,
+} from './dto/user-admin.dto';
+import { UsersService } from './users.service';
 
 @Controller('users')
 @UseGuards(RolesGuard)
@@ -38,5 +53,29 @@ export class UsersController {
     @Body() dto: UpdateHotlineDto,
   ) {
     return this.usersService.updateHotline(user.id, id, dto);
+  }
+
+  @Post()
+  @Roles('ADMIN')
+  create(@Body() dto: CreateUserDto) {
+    return this.usersService.create(dto);
+  }
+
+  @Patch(':id')
+  @Roles('ADMIN')
+  update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
+    return this.usersService.update(id, dto);
+  }
+
+  @Post(':id/reset-password')
+  @Roles('ADMIN')
+  resetPassword(@Param('id') id: string, @Body() dto: ResetUserPasswordDto) {
+    return this.usersService.resetPassword(id, dto);
+  }
+
+  @Delete(':id')
+  @Roles('ADMIN')
+  remove(@Param('id') id: string, @CurrentUser() user: RequestUser) {
+    return this.usersService.remove(id, user.id);
   }
 }
