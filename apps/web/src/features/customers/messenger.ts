@@ -1,37 +1,29 @@
-import type { CustomerListItem } from '@crmanhung/shared';
+import {
+  facebookInboxChatUrl as resolveFacebookInboxChatUrl,
+  messengerComUrl as resolveMessengerComUrl,
+  numericMessengerId,
+  type CustomerListItem,
+} from '@crmanhung/shared';
 
 /**
  * Khớp CRM cũ (`crm.anhungland.com`):
- * - Mở chat → facebook.com/messages/t/{threadId} (mã số ≥ 5 chữ số)
+ * - Mở chat → Inbox Facebook / Business Suite (pageUrl khi khách từ Page)
+ * - E2EE → facebook.com/messages/e2ee/t/{threadId}
+ * - Messenger cá nhân → facebook.com/messages/t/{threadId}
  * - Mở Messenger → messenger.com/t/{threadId | customerUid}
  * Cả hai: mở tab mới trong cùng user gesture.
  */
 
-/** Lấy mã số Messenger/Inbox từ threadId hoặc UID (cho phép chuỗi lẫn chữ nếu có cụm số đủ dài). */
-export function numericMessengerId(raw?: string | null): string | null {
-  const t = String(raw ?? '').trim();
-  if (!t) return null;
-  if (/^\d{5,}$/.test(t)) return t;
-  // Ví dụ "t_1000…" / "fb:1000…" — lấy cụm chữ số dài nhất ≥ 5
-  const runs = t.match(/\d{5,}/g);
-  if (!runs?.length) return null;
-  return runs.reduce((a, b) => (b.length >= a.length ? b : a));
-}
+export { numericMessengerId };
 
-/** URL «Mở chat» — Facebook Inbox web (CRM cũ). */
+/** URL «Mở chat». */
 export function facebookInboxChatUrl(customer: CustomerListItem): string | null {
-  const id = numericMessengerId(customer.facebook?.threadId);
-  if (!id) return null;
-  return `https://www.facebook.com/messages/t/${id}`;
+  return resolveFacebookInboxChatUrl(customer.facebook);
 }
 
-/** URL «Mở Messenger» — messenger.com (CRM cũ). */
+/** URL «Mở Messenger». */
 export function messengerComUrl(customer: CustomerListItem): string | null {
-  const fromThread = numericMessengerId(customer.facebook?.threadId);
-  if (fromThread) return `https://www.messenger.com/t/${fromThread}`;
-  const fromUid = numericMessengerId(customer.facebook?.customerUid);
-  if (fromUid) return `https://www.messenger.com/t/${fromUid}`;
-  return null;
+  return resolveMessengerComUrl(customer.facebook);
 }
 
 /**

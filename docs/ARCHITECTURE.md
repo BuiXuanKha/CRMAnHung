@@ -162,7 +162,7 @@ Meta Inbox / Messenger (tab ngoài / extension)
   → Web: cột phụ «Nội dung chat» = tin đã lưu
 ```
 
-Web **không** nhúng Inbox Facebook sống. Menu **Mở chat** / **Mở Messenger** mở tab Meta. Inbox sống trong CRM = chưa làm (`customers.md` §11 mục 27).
+Web **không** nhúng Inbox Facebook sống. Menu **Mở chat** / **Mở Messenger** mở tab Meta (khách Page → URL Business Suite đã quét). Inbox sống trong CRM = chưa làm (`customers.md` §11 mục 27).
 
 API version prefix: `/api/v1` — dễ thay contract sau này mà không phá client cũ trong giai đoạn chuyển tiếp.
 

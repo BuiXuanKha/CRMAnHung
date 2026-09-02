@@ -32,6 +32,8 @@ export const customerFacebookSchema = z.object({
   scanSource: z.string().nullable().optional(),
   scanSourceLabel: z.string().nullable().optional(),
   employeeFacebookUid: z.string().nullable().optional(),
+  /** URL inbox lúc quét (Business Suite / e2ee). Dùng cho menu Mở chat. */
+  pageUrl: z.string().nullable().optional(),
 });
 
 export type CustomerFacebookMeta = z.infer<typeof customerFacebookSchema>;

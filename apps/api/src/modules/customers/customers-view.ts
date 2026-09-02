@@ -1,5 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { facebookPageUrlFromRawMeta } from '@crmanhung/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
@@ -195,6 +196,7 @@ export function toListItem(
         scanSource: row.facebook.scanSource,
         scanSourceLabel: row.facebook.scanSourceLabel,
         employeeFacebookUid: row.facebook.employeeFacebookUid,
+        pageUrl: facebookPageUrlFromRawMeta(row.facebook.rawMeta),
       }
     : null;
   const sourceFacebookProfile =

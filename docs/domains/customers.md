@@ -52,7 +52,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 | Chỗ | Là gì | Trạng thái |
 |-----|--------|------------|
 | Cột phụ **Nội dung chat** | Tin **đã lưu** (copy CRM cũ + ingest). Ẩn nếu `messageCount = 0` | **Có** (mục 21) |
-| Menu **Mở chat** / **Mở Messenger** | Tab **ngoài** `facebook.com/messages` · `messenger.com` | **Có** (mục 21) |
+| Menu **Mở chat** / **Mở Messenger** | Tab **ngoài** (Page → Business Suite `pageUrl`; E2EE → `/messages/e2ee/t/…`; còn lại `facebook.com/messages` · `messenger.com`) | **Có** (mục 21) |
 | **Inbox Facebook sống** | Hội thoại Meta **đang chạy** nhúng trong CRM (như Business Suite Inbox) | **Chưa làm** (mục 27) |
 
 **Hàng đợi còn lại (chốt 2026-08-24, cập nhật 2026-08-30)** — không làm cho đến khi chủ bảo:
@@ -87,7 +87,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
 20. **Lọc kênh liên hệ** — page FB + hotline thật của NV. Có trên staging.
-21. **Cột phụ Nội dung chat** — tin **đã lưu** + ảnh R2. Có trên staging. Ẩn thanh khi `messageCount = 0`. Menu **Mở chat** / **Mở Messenger** = tab ngoài (`facebook.com/messages` · `messenger.com`), **không** mở cột phụ, **không** phải inbox sống.
+21. **Cột phụ Nội dung chat** — tin **đã lưu** + ảnh R2. Có trên staging. Ẩn thanh khi `messageCount = 0`. Menu **Mở chat** / **Mở Messenger** = tab ngoài (Page dùng URL Business Suite; E2EE / Messenger thường dùng `facebook.com/messages…`), **không** mở cột phụ, **không** phải inbox sống.
 22. **Cột phụ danh sách lô** — thẻ: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. **API** (`GET /customers/:id/lodats`). Ẩn thanh khi `lodatCount = 0`.
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; lọc lô = icon trên cột Tên; **không** icon mess trên item. **API `lodatCount`.**
 24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Có trên staging.
@@ -220,7 +220,7 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 | Mục | Việc |
 |-----|------|
-| Mở chat | Tab `facebook.com/messages/t/{threadId}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert; **ẩn mobile**. Tin đã lưu xem cột phụ «Nội dung chat». **Không** phải inbox sống |
+| Mở chat | Tab ngoài. Khách **Page** (Business Suite): URL inbox lúc quét (`pageUrl`). Messenger E2EE: `facebook.com/messages/e2ee/t/{threadId}`. Messenger thường: `facebook.com/messages/t/{threadId}`. Hiện khi khách có Facebook; thiếu URL → CrmAlert; **ẩn mobile**. Tin đã lưu xem cột phụ «Nội dung chat». **Không** phải inbox sống |
 | Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
 | Thêm / Sửa số điện thoại | Chưa có số: modal thêm. Đã có: sửa (Lưu / Xóa). Icon cam = thêm nhanh |
@@ -382,7 +382,7 @@ Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
 
 | Mục | Việc |
 |-----|------|
-| Mở chat | Tab `facebook.com/messages/t/…` (ẩn mobile; có FB; thiếu mã → CrmAlert) |
+| Mở chat | **Ẩn mobile.** Máy tính: Page → URL Business Suite; E2EE `/messages/e2ee/t/…`; còn lại `facebook.com/messages/t/…` |
 | Mở Messenger | Tab `messenger.com/t/…` (có FB; thiếu mã → CrmAlert) |
 | Cập nhật chăm sóc | Trang `/khach-hang/[id]/cham-soc`. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
 | Thêm / Sửa số điện thoại | Cùng 12.1.4 mục 5 |

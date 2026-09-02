@@ -13,6 +13,7 @@ export type ScanFields = {
   scanSource: string;
   scanSourceLabel: string;
   employeeUid: string;
+  pageUrl: string;
   rawMeta: string | null;
   messages: FromExtensionDraft['chatMessages'];
 };
@@ -29,6 +30,28 @@ export type ExistingMessage = {
 
 export function trimText(value: unknown): string {
   return String(value ?? '').trim();
+}
+
+/** Keep existing rawMeta keys (pageUrl, assetId, …) and stamp the latest inbox URL. */
+export function mergeFacebookRawMeta(
+  existing: string | null | undefined,
+  pageUrl?: string | null,
+): string | null {
+  let obj: Record<string, unknown> = {};
+  if (existing?.trim()) {
+    try {
+      const parsed = JSON.parse(existing) as unknown;
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        obj = { ...(parsed as Record<string, unknown>) };
+      }
+    } catch {
+      obj = {};
+    }
+  }
+  const url = trimText(pageUrl);
+  if (url) obj.pageUrl = url;
+  if (!Object.keys(obj).length) return existing?.trim() || null;
+  return JSON.stringify(obj).slice(0, 8000);
 }
 
 export function parseScan(draft: FromExtensionDraft): ScanFields {
@@ -52,6 +75,7 @@ export function parseScan(draft: FromExtensionDraft): ScanFields {
     customerUid: isE2ee ? rawUid : rawUid || threadId,
     threadId,
     employeeUid: trimText(scan.employeeUid) || trimText(scan.myPageUid),
+    pageUrl: trimText(draft.pageUrl),
     rawMeta,
     messages: draft.chatMessages,
   };

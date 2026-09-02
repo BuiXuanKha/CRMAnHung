@@ -15,6 +15,7 @@ import {
   MAX_MESSAGES,
   messageStorageKey,
   originalPathHint,
+  mergeFacebookRawMeta,
   parseScan,
   toSender,
   trimText,
@@ -112,7 +113,7 @@ export class FromExtensionService {
         scanSource: fields.scanSource || fb.scanSource,
         scanSourceLabel: fields.scanSourceLabel || fb.scanSourceLabel,
         employeeFacebookUid: fb.employeeFacebookUid || fields.employeeUid || null,
-        rawMeta: fields.rawMeta || fb.rawMeta,
+        rawMeta: mergeFacebookRawMeta(fields.rawMeta || fb.rawMeta, fields.pageUrl),
       },
     });
     await this.prisma.customer.update({
@@ -138,7 +139,7 @@ export class FromExtensionService {
             scanSource: fields.scanSource || null,
             scanSourceLabel: fields.scanSourceLabel || null,
             employeeFacebookUid: fields.employeeUid || null,
-            rawMeta: fields.rawMeta,
+            rawMeta: mergeFacebookRawMeta(fields.rawMeta, fields.pageUrl),
           },
         },
       },

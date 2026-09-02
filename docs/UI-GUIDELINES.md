@@ -221,7 +221,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 
 | Mục | Ghi chú UI |
 |-----|------------|
-| Mở chat | Tab `facebook.com/messages/t/…` (thread số); ẩn mobile; thiếu mã → CrmAlert |
+| Mở chat | Tab ngoài: Page → URL Business Suite; E2EE → `/messages/e2ee/t/…`; còn lại `facebook.com/messages/t/…`. Ẩn mobile; thiếu URL → CrmAlert |
 | Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu mã → CrmAlert |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
 | Thêm / Sửa số điện thoại | Modal nhỏ. Chưa có số: thêm. Đã có: Lưu ghi đè + Xóa (confirm). Icon cam cạnh tên = thêm nhanh |
