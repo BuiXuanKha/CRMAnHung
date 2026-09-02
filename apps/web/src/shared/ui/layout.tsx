@@ -106,6 +106,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <UserMenu
                 fullName={user.fullName}
                 roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
+                avatarUrl={user.avatarUrl}
                 onOpenSettings={() => setSettingsOpen(true)}
                 onLogout={() => {
                   void logout().then(() => router.replace('/login'));

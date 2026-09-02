@@ -52,3 +52,21 @@ export async function resetUserPassword(
     },
   );
 }
+
+export async function uploadUserAvatar(
+  id: string,
+  file: File,
+): Promise<UserAdminListItem> {
+  const body = new FormData();
+  body.append('file', file);
+  return apiFetch<UserAdminListItem>(`/users/${encodeURIComponent(id)}/avatar`, {
+    method: 'POST',
+    body,
+  });
+}
+
+export async function deleteUserAvatar(id: string): Promise<UserAdminListItem> {
+  return apiFetch<UserAdminListItem>(`/users/${encodeURIComponent(id)}/avatar`, {
+    method: 'DELETE',
+  });
+}

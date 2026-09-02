@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../../storage/storage.service';
+import { userAvatarUrl } from '../users/users-view';
 import { LoginDto } from './dto/auth.dto';
 
 export type AuthTokens = {
@@ -17,22 +19,29 @@ export type AuthUserPayload = {
   fullName: string;
   role: string;
   phone?: string;
+  avatarUrl?: string | null;
 };
 
-function toAuthUser(user: {
-  id: string;
-  username: string;
-  fullName: string;
-  role: string;
-  phone?: string | null;
-}): AuthUserPayload {
+function toAuthUser(
+  user: {
+    id: string;
+    username: string;
+    fullName: string;
+    role: string;
+    phone?: string | null;
+    avatarObjectKey?: string | null;
+  },
+  storage: StorageService,
+): AuthUserPayload {
   const phone = user.phone?.trim();
+  const avatarUrl = userAvatarUrl(storage, user.avatarObjectKey);
   return {
     id: user.id,
     username: user.username,
     fullName: user.fullName,
     role: user.role,
     ...(phone ? { phone } : {}),
+    ...(avatarUrl ? { avatarUrl } : {}),
   };
 }
 
@@ -42,6 +51,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
+    private readonly storage: StorageService,
   ) {}
 
   async login(dto: LoginDto) {
@@ -58,7 +68,7 @@ export class AuthService {
       throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không đúng');
     }
 
-    const payload: AuthUserPayload = toAuthUser(user);
+    const payload: AuthUserPayload = toAuthUser(user, this.storage);
 
     const tokens = await this.issueTokens(payload);
     return { ...tokens, user: payload };
@@ -85,7 +95,7 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
-    const payload: AuthUserPayload = toAuthUser(stored.user);
+    const payload: AuthUserPayload = toAuthUser(stored.user, this.storage);
 
     const tokens = await this.issueTokens(payload);
     return { ...tokens, user: payload };
@@ -113,12 +123,13 @@ export class AuthService {
         role: true,
         phone: true,
         isActive: true,
+        avatarObjectKey: true,
       },
     });
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Phiên đăng nhập không hợp lệ');
     }
-    return toAuthUser(user);
+    return toAuthUser(user, this.storage);
   }
 
   private async issueTokens(payload: AuthUserPayload): Promise<AuthTokens> {

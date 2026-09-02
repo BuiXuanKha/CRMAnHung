@@ -5,7 +5,7 @@ export async function countPublicImageKeyRefs(
   db: PrismaClient,
   objectKey: string,
 ): Promise<number> {
-  const [lodat, address, messenger, temp, snapshot, attachment, avatar, rotation] =
+  const [lodat, address, messenger, temp, snapshot, attachment, avatar, userAvatar, rotation] =
     await Promise.all([
       db.lodatImage.count({ where: { objectKey } }),
       db.addressImage.count({ where: { objectKey } }),
@@ -14,9 +14,20 @@ export async function countPublicImageKeyRefs(
       db.transactionSnapshotImage.count({ where: { objectKey } }),
       db.transactionAttachment.count({ where: { objectKey } }),
       db.customerFacebook.count({ where: { avatarObjectKey: objectKey } }),
+      db.user.count({ where: { avatarObjectKey: objectKey } }),
       db.imageRotation.count({ where: { objectKey } }),
     ]);
-  return lodat + address + messenger + temp + snapshot + attachment + avatar + rotation;
+  return (
+    lodat +
+    address +
+    messenger +
+    temp +
+    snapshot +
+    attachment +
+    avatar +
+    userAvatar +
+    rotation
+  );
 }
 
 /** Point every DB row at `to` then return leftover refs on `from`. */
@@ -47,6 +58,10 @@ export async function retargetPublicImageKey(
       data: { objectKey: to },
     });
     await tx.customerFacebook.updateMany({
+      where: { avatarObjectKey: from },
+      data: { avatarObjectKey: to },
+    });
+    await tx.user.updateMany({
       where: { avatarObjectKey: from },
       data: { avatarObjectKey: to },
     });

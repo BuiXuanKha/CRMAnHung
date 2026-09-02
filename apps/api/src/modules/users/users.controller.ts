@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,8 +8,11 @@ import {
   Patch,
   Post,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { Roles } from '../../common/decorators/roles.decorator';
 import { RolesGuard } from '../../common/guards/roles.guard';
 import { CurrentUser, type RequestUser } from '../../common/decorators/current-user.decorator';
@@ -65,6 +69,34 @@ export class UsersController {
   @Roles('ADMIN')
   update(@Param('id') id: string, @Body() dto: UpdateUserDto) {
     return this.usersService.update(id, dto);
+  }
+
+  @Post(':id/avatar')
+  @Roles('ADMIN')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 2 * 1024 * 1024 },
+    }),
+  )
+  setAvatar(
+    @Param('id') id: string,
+    @UploadedFile()
+    file?: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Thiếu file ảnh.');
+    }
+    const mime = String(file.mimetype || '');
+    if (!mime.startsWith('image/')) {
+      throw new BadRequestException('Chỉ nhận file ảnh.');
+    }
+    return this.usersService.setAvatar(id, file);
+  }
+
+  @Delete(':id/avatar')
+  @Roles('ADMIN')
+  removeAvatar(@Param('id') id: string) {
+    return this.usersService.removeAvatar(id);
   }
 
   @Post(':id/reset-password')

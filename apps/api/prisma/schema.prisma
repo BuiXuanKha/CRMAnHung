@@ -17,6 +17,8 @@ model User {
   phone        String?
   passwordHash String
   role         String   @default("STAFF") // STAFF | ADMIN
+  /// Public R2 key — CDN avatar NV (quản lý `/quan-tri/nguoi-dung`).
+  avatarObjectKey String?
   isActive     Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
