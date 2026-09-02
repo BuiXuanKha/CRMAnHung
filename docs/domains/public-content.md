@@ -142,7 +142,8 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | GET | `/admin/public-web/posts` | JWT ADMIN | List bài (nháp + đã xuất bản) — **Postgres** |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục + body) — **Postgres** |
 | POST | `/admin/public-web/posts/gpt-content` | JWT ADMIN | Nest gọi OpenAI — bài **dự án** từ tên dự án → JSON SEO |
-| GET | `/admin/lot-shares/employee-stats` | JWT ADMIN | List NV + `sharedListingCount` (số mã share đã tạo) |
+| GET | `/admin/lot-shares/employee-stats` | JWT ADMIN | List NV + `sharedListingCount` + `attributedViewCount` |
+| POST | `/public/lot-shares/:code/page-view` | Không (bỏ nếu có JWT NV) | +1 lượt xem cho NV của mã share |
 | GET | `/public/listings` | Không | Lô đã đăng ∩ Mở bán → `publicCatalogListingSchema` |
 | GET | `/public/listings/:slug` | Không | Chi tiết `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
 | GET | `/public/posts` | Không | Bài `PUBLISHED` (`?category=` tuỳ chọn) → `publicGuestPostListResponseSchema` |
@@ -170,7 +171,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 ## 11. Luật dashboard (chốt 2026-09-02)
 
-1. STAFF vào `/dashboard/lo-dat` (header **Đăng web**). `/dashboard` và `/dashboard/bai-viet` của STAFF → `/dashboard/lo-dat`. Bốn trang CRM **không** thêm công tắc Đăng web.
+1. STAFF vào `/dashboard/lo-dat` (header **Đăng web**). `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` của STAFF → `/dashboard/lo-dat`. Bốn trang CRM **không** thêm công tắc Đăng web.
 2. Lô lên web = công tắc tường minh (STAFF lô mình / ADMIN mọi NV) — không auto theo Mở bán hay giao dịch.
 3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. Gỡ web = tắt Đăng web tường minh. (Khách chỉ thấy lô Đăng web ∩ đang Mở bán.)
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
@@ -185,7 +186,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 Thứ tự: **12.1 máy tính** → **12.2 mobile**. Không trộn PC/mobile trong một mục.
 
-Không H1 lặp tên menu trên thanh tìm. H1 trên Tổng quan và Bài viết; **`/dashboard/lo-dat` không H1** (tên đã có trên menu trái).
+Không H1 lặp tên menu trên thanh tìm. H1 trên Tổng quan, Bài viết, Thống kê; **`/dashboard/lo-dat` không H1** (tên đã có trên menu trái).
 
 ### 12.0 Menu trong Dashboard (mọi màn `/dashboard/*`)
 
@@ -820,7 +821,7 @@ NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang c
 
 Cookie `crmanhung_share` (httpOnly, SameSite=Lax, path `/`): payload `CODE~employeeId~expiresAt` (không JSON). Middleware gọi Nest loopback `:5050`, **ghi cookie** khi `?share=` đúng format (kể cả lúc lookup NV chậm). `maxAge` = thời hạn còn lại tới `expiresAt`. Lướt web không `?share=` **không** gia hạn. Google không gửi cookie → HTML bot = hotline công ty. JSON-LD / canonical luôn công ty.
 
-Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). Đếm visit chỉ khi mở đúng lô gốc của mã đó. Chi tiết lô `force-dynamic`.
+Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). **Lượt xem** (`attributedViewCount`): khách còn cookie share → mỗi lần tải hoặc chuyển trang public (trang chủ, catalog, chi tiết lô, bài viết…) cộng 1, **kể cả F5**. NV đã login CRM không đếm. Googlebot không cookie → không đếm. Chi tiết lô `force-dynamic`.
 
 Thứ tự: NV đã login (có SĐT) → cookie/`?share=` → hotline công ty. Avatar = CDN khi có; không ảnh → chữ cái.
 
@@ -866,7 +867,7 @@ Contract: `matchPublicListingSearch` + `listingCatalogSearchPath` (`packages/sha
 
 ## 20. Thống kê share `/dashboard/thong-ke` (chốt 2026-09-02)
 
-**ADMIN.** STAFF không vào (redirect `/dashboard/lo-dat`). Slice đầu: danh sách NV + số lô đã bấm **Chia sẻ** (mỗi NV × mỗi listing = 1 dòng `PublicLotShare`). **Không** đếm lượt xem lô khác, cookie 30 ngày, Gọi/Zalo.
+**ADMIN.** STAFF không vào (redirect `/dashboard/lo-dat`). List NV + số lô đã bấm **Chia sẻ** + **lượt xem** trang khách khi còn cookie NV. Không đếm Gọi/Zalo.
 
 Zod: `shareEmployeeStatsResponseSchema` — `GET /admin/lot-shares/employee-stats`.
 
@@ -876,7 +877,7 @@ Thứ tự: **20.1 máy tính** → **20.2 mobile**. Không H1 trùng chữ menu
 
 ```
 ┌ Thống kê                                                    ┐
-│ Dòng phụ: số lô mỗi NV đã tạo link share                    │
+│ Dòng phụ: số lô đã share + lượt xem khách (cookie)          │
 ├ Bảng §4.5 — không lọc cột, không Thao tác                    │
 └ Footer đếm NV                                               │
 ```
@@ -884,7 +885,7 @@ Thứ tự: **20.1 máy tính** → **20.2 mobile**. Không H1 trùng chữ menu
 #### 20.1.1 Thanh đầu
 
 1. **H1** `Thống kê`
-2. Dòng phụ: `Số lô đã tạo link share (mỗi lô một mã). Chưa đếm khách xem lô khác.`
+2. Dòng phụ: `Số lô đã tạo link share và lượt khách xem trang khi còn cookie NV. F5 cũng cộng 1.`
 
 #### 20.1.2 Bảng
 
@@ -894,9 +895,10 @@ Thứ tự: **20.1 máy tính** → **20.2 mobile**. Không H1 trùng chữ menu
 |-----|---|
 | `#` | STT sau khi sắp xếp |
 | Nhân viên | Avatar 32px + **tên**; dòng phụ username. Hangtag **Đã khóa** `red` nếu `isActive = false` |
-| Đã share | Số nguyên; `0` khi chưa tạo link |
+| Đã share | Số lô đã tạo mã (`sharedListingCount`); `0` khi chưa |
+| Lượt xem | Mỗi lần khách (cookie) tải/đổi trang public (`attributedViewCount`); F5 = +1; `0` khi chưa |
 
-Sắp xếp: `sharedListingCount` giảm dần, rồi tên `vi`. Mọi User `STAFF` + `ADMIN` (kể cả 0 share).
+Sắp xếp: `attributedViewCount` giảm dần, rồi `sharedListingCount`, rồi tên `vi`. Mọi User `STAFF` + `ADMIN` (kể cả 0 share / 0 xem).
 
 Trống: `Không có nhân viên.`
 
@@ -904,7 +906,7 @@ Footer: `Hiển thị N / Tổng M nhân viên`.
 
 ### 20.2 Giao diện mobile
 
-Cùng dữ liệu. Thẻ xếp dọc: avatar · tên · số đã share. Footer cùng 20.1.2. Menu dashboard cuộn ngang (mục **Thống kê**).
+Cùng dữ liệu. Thẻ xếp dọc: avatar · tên · Share / Xem. Footer cùng 20.1.2. Menu dashboard cuộn ngang (mục **Thống kê**).
 
 
 

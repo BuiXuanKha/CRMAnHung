@@ -234,6 +234,8 @@ export const shareEmployeeStatSchema = z.object({
   isActive: z.boolean(),
   avatarUrl: z.string().url().nullable().optional(),
   sharedListingCount: z.number().int().nonnegative(),
+  /** Mỗi lần khách (cookie share) tải hoặc đổi trang public — kể cả F5. */
+  attributedViewCount: z.number().int().nonnegative(),
 });
 
 export type ShareEmployeeStat = z.infer<typeof shareEmployeeStatSchema>;
@@ -244,3 +246,10 @@ export const shareEmployeeStatsResponseSchema = z.object({
 });
 
 export type ShareEmployeeStatsResponse = z.infer<typeof shareEmployeeStatsResponseSchema>;
+
+export const publicSharePageViewResponseSchema = z.object({
+  ok: z.literal(true),
+  viewCount: z.number().int().nonnegative(),
+});
+
+export type PublicSharePageViewResponse = z.infer<typeof publicSharePageViewResponseSchema>;

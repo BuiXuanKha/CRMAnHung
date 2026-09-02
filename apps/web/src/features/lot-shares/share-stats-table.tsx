@@ -16,6 +16,7 @@ export function ShareStatsTable({
             <div>#</div>
             <div>Nhân viên</div>
             <div>Đã share</div>
+            <div>Lượt xem</div>
           </div>
         </div>
         <div className="pw-table-scroll">
@@ -32,6 +33,9 @@ export function ShareStatsTable({
                 </div>
                 <div>
                   <span className="pw-share-count">{row.sharedListingCount}</span>
+                </div>
+                <div>
+                  <span className="pw-share-count">{row.attributedViewCount}</span>
                 </div>
               </div>
             ))

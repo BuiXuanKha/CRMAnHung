@@ -160,11 +160,11 @@
 }
 
 .pw-table-wrap--share-stats {
-  --pw-cols: 52px minmax(200px, 1fr) 110px;
+  --pw-cols: 52px minmax(200px, 1fr) 100px 110px;
 }
 
 .pw-table-wrap--share-stats .pw-grid-row {
-  min-width: 420px;
+  min-width: 520px;
 }
 
 .pw-table-head {
@@ -273,6 +273,21 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+.pw-share-metrics {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  color: #475569;
+}
+
+.pw-share-metrics strong {
+  font-variant-numeric: tabular-nums;
+  color: #1e40af;
 }
 
 .pw-share-count {

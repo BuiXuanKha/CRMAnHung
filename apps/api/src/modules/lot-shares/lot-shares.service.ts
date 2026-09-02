@@ -153,6 +153,32 @@ export class LotSharesService {
     }
   }
 
+  /** Cookie share còn hạn: mỗi lần khách đổi/tải trang public → +1 cho NV. */
+  async recordAttributedPageView(shareCode: string, hasBearerToken: boolean) {
+    if (hasBearerToken) {
+      return { ok: true as const, viewCount: 0 };
+    }
+    const code = shareCode.trim().toUpperCase();
+    const share = await this.prisma.publicLotShare.findUnique({
+      where: { shareCode: code },
+      select: {
+        employeeId: true,
+        employee: { select: { isActive: true } },
+        publicListing: { select: { isPublished: true } },
+      },
+    });
+    if (!share || !share.publicListing.isPublished || !share.employee.isActive) {
+      throw new NotFoundException('Link share không hợp lệ.');
+    }
+    const row = await this.prisma.publicShareViewStat.upsert({
+      where: { employeeId: share.employeeId },
+      create: { employeeId: share.employeeId, viewCount: 1 },
+      update: { viewCount: { increment: 1 } },
+      select: { viewCount: true },
+    });
+    return { ok: true as const, viewCount: row.viewCount };
+  }
+
   private async createShareCode(employeeId: string, publicListingId: string): Promise<string> {
     for (let attempt = 0; attempt < MAX_CODE_ATTEMPTS; attempt += 1) {
       const shareCode = this.randomShareCode();
@@ -183,7 +209,7 @@ export class LotSharesService {
 
   /** ADMIN thống kê: mỗi NV, số listing đã tạo mã share. */
   async listEmployeeShareStats() {
-    const [users, grouped] = await Promise.all([
+    const [users, grouped, viewRows] = await Promise.all([
       this.prisma.user.findMany({
         where: { role: { in: ['STAFF', 'ADMIN'] } },
         select: {
@@ -200,9 +226,15 @@ export class LotSharesService {
         by: ['employeeId'],
         _count: { _all: true },
       }),
+      this.prisma.publicShareViewStat.findMany({
+        select: { employeeId: true, viewCount: true },
+      }),
     ]);
     const countByEmployee = new Map(
       grouped.map((row) => [row.employeeId, row._count._all]),
+    );
+    const viewsByEmployee = new Map(
+      viewRows.map((row) => [row.employeeId, row.viewCount]),
     );
     const items = users
       .map((user) => ({
@@ -214,10 +246,13 @@ export class LotSharesService {
         isActive: user.isActive,
         avatarUrl: userAvatarUrl(this.storage, user.avatarObjectKey),
         sharedListingCount: countByEmployee.get(user.id) ?? 0,
+        attributedViewCount: viewsByEmployee.get(user.id) ?? 0,
       }))
       .sort((a, b) => {
-        const byCount = b.sharedListingCount - a.sharedListingCount;
-        if (byCount !== 0) return byCount;
+        const byViews = b.attributedViewCount - a.attributedViewCount;
+        if (byViews !== 0) return byViews;
+        const byShare = b.sharedListingCount - a.sharedListingCount;
+        if (byShare !== 0) return byShare;
         return a.fullName.localeCompare(b.fullName, 'vi');
       });
     return { items, total: items.length };

@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
 import { shareContactFrom, getShareAttribution } from '@/features/lot-shares/share-referrer';
 import { PublicShareContactProvider } from '@/features/public/share-contact-context';
+import { ShareAttributedViewTracker } from '@/features/lot-shares/share-attributed-view-tracker';
 import { publicSearchRobots } from '@/features/public/search-index';
 import { PUBLIC_OG_DEFAULT, PUBLIC_SITE_ORIGIN } from '@/features/public/site';
 import './public.css';
@@ -42,6 +43,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
   return (
     <div className="public-shell">
       <PublicShareContactProvider contact={shareContactFrom(attribution)}>
+        {attribution ? <ShareAttributedViewTracker shareCode={attribution.code} /> : null}
         {children}
       </PublicShareContactProvider>
     </div>

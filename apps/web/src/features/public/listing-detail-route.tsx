@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { JsonLd } from '@/features/public/json-ld';
-import { LotShareVisitTracker } from '@/features/public/lot-share-visit-tracker';
 import {
   listingBreadcrumbJsonLd,
   listingJsonLd,
@@ -56,17 +55,11 @@ export async function ListingDetailRoute({ params, searchParams }: Props) {
 
   const attribution = await getShareAttribution(shareFromQuery);
   const shareContact = shareContactFrom(attribution);
-  const trackVisit = Boolean(
-    attribution?.fromQuery && attribution.resolved.listingSlug === slug,
-  );
 
   const relatedSections = await getRelatedListingSections(listing);
 
   return (
     <>
-      {trackVisit && attribution ? (
-        <LotShareVisitTracker shareCode={attribution.code} />
-      ) : null}
       <JsonLd data={listingJsonLd(listing)} />
       <JsonLd data={listingBreadcrumbJsonLd(listing)} />
       <ProductDetailView

@@ -2,6 +2,7 @@ import type {
   LotShareLinkResponse,
   PublicLotShareResolve,
   PublicLotShareVisitResponse,
+  PublicSharePageViewResponse,
   ShareEmployeeStatsResponse,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
@@ -39,6 +40,19 @@ export async function recordPublicLotShareVisit(
   try {
     return await apiFetch<PublicLotShareVisitResponse>(
       `/public/lot-shares/${encodeURIComponent(shareCode.trim())}/visit`,
+      { method: 'POST' },
+    );
+  } catch {
+    return null;
+  }
+}
+
+export async function recordSharePageView(
+  shareCode: string,
+): Promise<PublicSharePageViewResponse | null> {
+  try {
+    return await apiFetch<PublicSharePageViewResponse>(
+      `/public/lot-shares/${encodeURIComponent(shareCode.trim())}/page-view`,
       { method: 'POST' },
     );
   } catch {

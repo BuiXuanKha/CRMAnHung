@@ -18,8 +18,13 @@ export function ShareStatsCards({
             <li key={row.employeeId}>
               <div className="pw-card pw-card-static">
                 <ShareStatsPerson row={row} />
-                <span className="pw-share-count" aria-label="Đã share">
-                  {row.sharedListingCount}
+                <span className="pw-share-metrics">
+                  <span>
+                    Share <strong>{row.sharedListingCount}</strong>
+                  </span>
+                  <span>
+                    Xem <strong>{row.attributedViewCount}</strong>
+                  </span>
                 </span>
               </div>
             </li>

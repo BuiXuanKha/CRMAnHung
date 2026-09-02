@@ -42,6 +42,7 @@ model User {
   createdTitleServiceAttachments TitleServiceAttachment[] @relation("TitleServiceAttachmentCreator")
   viewedTitleServiceAttachments TitleServiceAttachmentView[] @relation("TitleServiceAttachmentViewer")
   publicLotShares           PublicLotShare[]
+  publicShareViewStat       PublicShareViewStat?
 }
 
 model RefreshToken {
@@ -397,6 +398,15 @@ model PublicLotShare {
 
   @@unique([employeeId, publicListingId])
   @@index([publicListingId])
+}
+
+/// Lượt xem trang khách gắn cookie share — cộng mỗi lần tải/đổi trang (kể cả F5).
+model PublicShareViewStat {
+  employeeId String   @id
+  viewCount  Int      @default(0)
+  updatedAt  DateTime @updatedAt
+
+  employee User @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
 /// 301 slug lô cũ → slug mới (sau khi đổi công thức tên+địa chỉ).

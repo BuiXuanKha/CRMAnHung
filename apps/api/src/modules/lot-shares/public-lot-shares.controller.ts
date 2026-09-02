@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Post } from '@nestjs/common';
+import { Controller, Get, Headers, Param, Post } from '@nestjs/common';
 import { Public } from '../../common/decorators/public.decorator';
 import { LotSharesService } from './lot-shares.service';
 
@@ -16,5 +16,15 @@ export class PublicLotSharesController {
   @Post(':code/visit')
   recordVisit(@Param('code') code: string) {
     return this.lotShares.recordVisit(code);
+  }
+
+  @Public()
+  @Post(':code/page-view')
+  recordPageView(
+    @Param('code') code: string,
+    @Headers('authorization') authorization?: string,
+  ) {
+    const hasBearerToken = Boolean(authorization?.toLowerCase().startsWith('bearer '));
+    return this.lotShares.recordAttributedPageView(code, hasBearerToken);
   }
 }

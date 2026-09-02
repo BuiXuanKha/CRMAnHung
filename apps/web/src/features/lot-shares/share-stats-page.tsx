@@ -20,7 +20,10 @@ export function ShareStatsPage() {
       <header className="pw-head">
         <div>
           <h1>Thống kê</h1>
-          <p>Số lô đã tạo link share (mỗi lô một mã). Chưa đếm khách xem lô khác.</p>
+          <p>
+            Số lô đã tạo link share và lượt khách xem trang (trang chủ, lô, bài…) khi còn cookie
+            NV. F5 cũng cộng 1.
+          </p>
         </div>
       </header>
 
