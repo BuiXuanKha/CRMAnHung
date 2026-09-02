@@ -123,4 +123,4 @@ Còn lại (mặc định trong [`public-content.md`](./domains/public-content.m
 
 - Công tắc Đăng web tường minh (không auto Mở bán) — đã chốt.
 - Giá: hiện số đã làm mờ hoặc «Liên hệ» từng lô.
-- Liên hệ: vào thẳng domain → hotline + Zalo công ty; vào bằng link share NV → SĐT NV đó trên mọi lô trong phiên. Chưa form SĐT.
+- Liên hệ: vào thẳng domain → hotline + Zalo công ty; vào bằng link share NV → SĐT NV đó trên mọi lô trong phiên; NV đã login CRM → tên + SĐT mình trên list/chi tiết. Chưa form SĐT.

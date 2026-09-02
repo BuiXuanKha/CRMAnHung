@@ -13,6 +13,8 @@ export const authUserSchema = z.object({
   username: z.string(),
   fullName: z.string(),
   role: z.nativeEnum(UserRole),
+  /** SĐT NV — hiện liên hệ trên trang khách khi NV đã login. */
+  phone: z.string().trim().min(1).max(20).optional(),
 });
 
 export type AuthUser = z.infer<typeof authUserSchema>;

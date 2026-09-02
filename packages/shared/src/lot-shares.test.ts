@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
   buildLotShareUrl,
+  contactFromAuthUser,
   normalizeShareCode,
   pickShareCode,
 } from './lot-shares.js';
@@ -38,5 +39,20 @@ describe('buildLotShareUrl', () => {
       buildLotShareUrl('https://anhungland.com', 'lo-33', 'ab2k9'),
       'https://anhungland.com/dat/lo-33?share=AB2K9',
     );
+  });
+});
+
+describe('contactFromAuthUser', () => {
+  it('returns name and phone when both are present', () => {
+    assert.deepEqual(
+      contactFromAuthUser({ fullName: 'Bùi Xuân Khả', phone: '0977656280' }),
+      { fullName: 'Bùi Xuân Khả', phone: '0977656280' },
+    );
+  });
+
+  it('returns null without a usable phone', () => {
+    assert.equal(contactFromAuthUser({ fullName: 'B', phone: '' }), null);
+    assert.equal(contactFromAuthUser({ fullName: 'B', phone: null }), null);
+    assert.equal(contactFromAuthUser(null), null);
   });
 });

@@ -16,7 +16,25 @@ export type AuthUserPayload = {
   username: string;
   fullName: string;
   role: string;
+  phone?: string;
 };
+
+function toAuthUser(user: {
+  id: string;
+  username: string;
+  fullName: string;
+  role: string;
+  phone?: string | null;
+}): AuthUserPayload {
+  const phone = user.phone?.trim();
+  return {
+    id: user.id,
+    username: user.username,
+    fullName: user.fullName,
+    role: user.role,
+    ...(phone ? { phone } : {}),
+  };
+}
 
 @Injectable()
 export class AuthService {
@@ -40,12 +58,7 @@ export class AuthService {
       throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không đúng');
     }
 
-    const payload: AuthUserPayload = {
-      id: user.id,
-      username: user.username,
-      fullName: user.fullName,
-      role: user.role,
-    };
+    const payload: AuthUserPayload = toAuthUser(user);
 
     const tokens = await this.issueTokens(payload);
     return { ...tokens, user: payload };
@@ -72,12 +85,7 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
 
-    const payload: AuthUserPayload = {
-      id: stored.user.id,
-      username: stored.user.username,
-      fullName: stored.user.fullName,
-      role: stored.user.role,
-    };
+    const payload: AuthUserPayload = toAuthUser(stored.user);
 
     const tokens = await this.issueTokens(payload);
     return { ...tokens, user: payload };
@@ -103,18 +111,14 @@ export class AuthService {
         username: true,
         fullName: true,
         role: true,
+        phone: true,
         isActive: true,
       },
     });
     if (!user || !user.isActive) {
       throw new UnauthorizedException('Phiên đăng nhập không hợp lệ');
     }
-    return {
-      id: user.id,
-      username: user.username,
-      fullName: user.fullName,
-      role: user.role,
-    };
+    return toAuthUser(user);
   }
 
   private async issueTokens(payload: AuthUserPayload): Promise<AuthTokens> {

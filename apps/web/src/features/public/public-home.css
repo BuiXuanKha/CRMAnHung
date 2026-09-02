@@ -399,6 +399,22 @@
   font-size: 0.88rem;
 }
 
+.ph-product-staff {
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ph-ink);
+}
+
+.ph-product-staff a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.ph-product-staff a:hover {
+  color: var(--ph-brand);
+}
+
 .ph-product-foot {
   margin-top: auto;
   padding-top: 10px;

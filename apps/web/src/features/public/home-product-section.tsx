@@ -5,7 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import { listPublishedPublicLots } from '@/features/public-content/api';
 import type { PublicGuestLot } from '@/features/public-content/guest-listing';
 import { publicWebKeys } from '@/features/public-content/query';
-import { ANHUNG_BRAND } from './brand';
+import { PublicCardContact } from './listing-visitor-contact';
+import { PublicHotlineLink } from './public-hotline-link';
 import { ProductShareButton } from './product-detail-client';
 import { listingShareText } from './share';
 import { listingCoverAlt } from './listing-seo';
@@ -32,8 +33,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
       {lots.length === 0 ? (
         <p className="ph-product-empty">
           Hiện chưa có sản phẩm đăng bán trên web.{' '}
-          <a href={`tel:${ANHUNG_BRAND.hotlineTel}`}>Liên hệ {ANHUNG_BRAND.hotlineDisplay}</a> để
-          được tư vấn.
+          <PublicHotlineLink className="" prefix="Liên hệ" /> để được tư vấn.
         </p>
       ) : (
         <div className="ph-product-grid">
@@ -69,6 +69,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
                   ) : null}
                 </p>
                 {lot.location ? <p className="ph-product-loc">{lot.location}</p> : null}
+                <PublicCardContact />
                 <div className="ph-product-foot">
                   <span>Xem chi tiết</span>
                   <ProductShareButton

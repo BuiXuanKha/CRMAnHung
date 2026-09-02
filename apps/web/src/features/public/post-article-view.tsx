@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { PublicAuthNavLink } from './public-auth-nav';
+import { PublicHotlineLink } from './public-hotline-link';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import {
   postHref,
@@ -43,9 +44,7 @@ export function PostArticleView({
             />
           </Link>
           <div className="ph-header-right">
-            <a className="ph-hotline" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-              Hotline {ANHUNG_BRAND.hotlineDisplay}
-            </a>
+            <PublicHotlineLink />
             <nav className="ph-nav" aria-label="Menu">
               <Link href={`/${post.category}`}>{categoryLabel}</Link>
               <PublicAuthNavLink />

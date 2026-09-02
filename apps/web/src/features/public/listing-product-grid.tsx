@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { PublicListingCard } from '@crmanhung/shared';
+import { PublicCardContact } from './listing-visitor-contact';
 import { listingCoverAlt } from './listing-seo';
 import { listingHref } from './site';
 
@@ -38,6 +39,7 @@ export function ListingProductGrid({ listings }: Props) {
               ) : null}
             </p>
             {p.location ? <p className="ph-product-loc">{p.location}</p> : null}
+            <PublicCardContact />
           </div>
         </article>
       ))}

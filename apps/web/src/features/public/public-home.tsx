@@ -7,6 +7,7 @@ import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { HomeProductSection } from './home-product-section';
 import { PublicAuthNavLink } from './public-auth-nav';
+import { PublicHotlineLink } from './public-hotline-link';
 import { PUBLIC_LISTING_PATH } from './site';
 import { postHref, publicPostCategoryLabel, teaserExcerpt } from './published-posts';
 import './public-home.css';
@@ -56,9 +57,7 @@ export function PublicHome({
             <BrandLogo onLight />
           </Link>
           <div className="ph-header-right">
-            <a className="ph-hotline" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-              Hotline {ANHUNG_BRAND.hotlineDisplay}
-            </a>
+            <PublicHotlineLink />
             <nav className="ph-nav" aria-label="Menu chính">
               <a href="#mua-ban-nha-dat">Sản phẩm</a>
               <a href="#du-an">Dự án</a>
@@ -87,13 +86,11 @@ export function PublicHome({
             <a className="ph-btn ph-btn-primary" href="#mua-ban-nha-dat">
               Xem sản phẩm
             </a>
-            <a className="ph-btn ph-btn-ghost" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-              Gọi {ANHUNG_BRAND.hotlineDisplay}
-            </a>
+            <PublicHotlineLink className="ph-btn ph-btn-ghost" prefix="Gọi" />
           </div>
           <p className="ph-hero-contact">
             {ANHUNG_BRAND.address} ·{' '}
-            <a href={`tel:${ANHUNG_BRAND.hotlineTel}`}>{ANHUNG_BRAND.hotlineDisplay}</a>
+            <PublicHotlineLink className="" prefix="" />
           </p>
         </div>
       </section>
@@ -178,9 +175,7 @@ export function PublicHome({
             <p className="ph-footer-legal">{ANHUNG_BRAND.legalLine}</p>
             <p>{ANHUNG_BRAND.services}</p>
             <p className="ph-footer-contact">
-              <a href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-                Hotline: {ANHUNG_BRAND.hotlineDisplay}
-              </a>
+              <PublicHotlineLink className="" prefix="Hotline:" />
               <br />
               Địa chỉ: {ANHUNG_BRAND.address}
             </p>

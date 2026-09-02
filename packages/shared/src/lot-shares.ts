@@ -57,6 +57,17 @@ export const publicLotShareVisitResponseSchema = z.object({
 
 export type PublicLotShareVisitResponse = z.infer<typeof publicLotShareVisitResponseSchema>;
 
+/** Logged-in staff contact for public listing CTAs. Missing/short phone → null. */
+export function contactFromAuthUser(
+  user: { fullName?: string | null; phone?: string | null } | null | undefined,
+): LotShareContact | null {
+  const fullName = user?.fullName?.trim() ?? '';
+  const phone = user?.phone?.trim() ?? '';
+  const digits = phone.replace(/\D/g, '');
+  if (!fullName || digits.length < 9) return null;
+  return { fullName, phone };
+}
+
 /** Build guest share URL (short path + query). */
 export function buildLotShareUrl(
   origin: string,

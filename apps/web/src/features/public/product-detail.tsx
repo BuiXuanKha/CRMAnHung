@@ -1,8 +1,9 @@
 import Link from 'next/link';
-import { Phone } from 'lucide-react';
 import { LodatSaleStatus, type LotShareContact } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { PublicAuthNavLink } from './public-auth-nav';
+import { PublicHotlineLink } from './public-hotline-link';
+import { ListingContactAside, ListingContactMobileBar, PublicCardContact } from './listing-visitor-contact';
 import {
   ProductGallery,
   ProductShareButton,
@@ -30,62 +31,12 @@ function listingImages(listing: PublicListingView): string[] {
   return [];
 }
 
-function zaloLink(telDigits: string): string {
-  return `https://zalo.me/${telDigits}`;
-}
-
-function phoneToTelDigits(phone: string): string {
-  const digits = phone.replace(/\D/g, '');
-  if (digits.startsWith('84')) return digits;
-  if (digits.startsWith('0')) return `84${digits.slice(1)}`;
-  return digits;
-}
-
-function formatPhoneDisplay(phone: string): string {
-  const d = phone.replace(/\D/g, '');
-  if (d.length === 10 && d.startsWith('0')) {
-    return `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7)}`;
-  }
-  return phone.trim();
-}
-
 function saleStatusLabel(status?: LodatSaleStatus): string | null {
   if (!status || status === LodatSaleStatus.DANG_BAN) return null;
   if (status === LodatSaleStatus.TAM_DUNG) return 'Tạm dừng bán';
   if (status === LodatSaleStatus.DA_BAN) return 'Đã bán';
   if (status === LodatSaleStatus.DAT_COC) return 'Đã cọc';
   return null;
-}
-
-function ListingZaloBtn({ label, phone }: { label: string; phone: string }) {
-  return (
-    <a
-      className="pd-zalo-btn"
-      href={zaloLink(phoneToTelDigits(phone))}
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      {label}
-    </a>
-  );
-}
-
-function ListingPhoneBtn({ phone }: { phone: string }) {
-  const display = formatPhoneDisplay(phone);
-  const tel = phone.replace(/\D/g, '');
-  return (
-    <a
-      className="pd-phone-btn"
-      href={`tel:${tel}`}
-      aria-label={`Gọi ${display}`}
-    >
-      <Phone className="pd-phone-btn-icon" size={18} strokeWidth={2} aria-hidden />
-      <span className="pd-phone-btn-copy">
-        <span className="pd-phone-btn-action">Bấm là gọi:</span>
-        <span className="pd-phone-btn-num">{display}</span>
-      </span>
-    </a>
-  );
 }
 
 function RelatedListingBlock({
@@ -128,6 +79,7 @@ function RelatedListingBlock({
                 ) : null}
               </p>
               {p.location ? <p className="ph-product-loc">{p.location}</p> : null}
+              <PublicCardContact />
             </div>
           </article>
         ))}
@@ -160,17 +112,6 @@ export function ProductDetailView({
   const shareUrl = listingCanonicalUrl(listing.slug);
   const shareText = listingShareText(listing);
   const saleLabel = saleStatusLabel(listing.saleStatus);
-  const contactPhone = shareContact?.phone ?? ANHUNG_BRAND.hotlineTel;
-  const contactPhoneDisplay = shareContact?.phone
-    ? formatPhoneDisplay(shareContact.phone)
-    : ANHUNG_BRAND.hotlineDisplay;
-  const contactName = shareContact?.fullName ?? ANHUNG_BRAND.name;
-  const contactRole = shareContact
-    ? 'Nhân viên tư vấn An Hưng Land'
-    : ANHUNG_BRAND.legalLine;
-  const contactLead = shareContact
-    ? `Liên hệ ${shareContact.fullName}`
-    : 'Xem đất thực tế · tư vấn miễn phí';
   const hasSummaryStats = Boolean(
     area || listing.frontageLabel || listing.directionLabel || product?.legalLabel,
   );
@@ -190,9 +131,7 @@ export function ProductDetailView({
             />
           </Link>
           <div className="ph-header-right">
-            <a className="ph-hotline" href={`tel:${contactPhone.replace(/\D/g, '')}`}>
-              Hotline {contactPhoneDisplay}
-            </a>
+            <PublicHotlineLink shareContact={shareContact} />
             <nav className="ph-nav" aria-label="Menu">
               <Link href={PUBLIC_LISTING_PATH}>Sản phẩm</Link>
               <PublicAuthNavLink />
@@ -322,20 +261,7 @@ export function ProductDetailView({
             ) : null}
           </div>
 
-          <aside className="pd-aside" aria-label="Liên hệ tư vấn">
-            <div className="pd-agent">
-              <span className="pd-agent-avatar" aria-hidden>
-                {contactName.slice(0, 1).toUpperCase()}
-              </span>
-              <div className="pd-agent-meta">
-                <p className="pd-agent-name">{contactName}</p>
-                <p className="pd-agent-role">{contactRole}</p>
-              </div>
-            </div>
-            <p className="pd-aside-lead">{contactLead}</p>
-            <ListingZaloBtn label="Chat qua Zalo" phone={contactPhone} />
-            <ListingPhoneBtn phone={contactPhone} />
-          </aside>
+          <ListingContactAside shareContact={shareContact} />
         </div>
 
         {relatedSections
@@ -349,10 +275,7 @@ export function ProductDetailView({
           ))}
       </main>
 
-      <div className="pd-mobile-bar">
-        <ListingZaloBtn label="Liên hệ Zalo" phone={contactPhone} />
-        <ListingPhoneBtn phone={contactPhone} />
-      </div>
+      <ListingContactMobileBar shareContact={shareContact} />
     </div>
   );
 }

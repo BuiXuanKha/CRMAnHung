@@ -22,6 +22,19 @@ import { clearAllListStates } from '@/shared/list-state';
 const SESSION_USER_KEY = 'crmanhung_session_user';
 const LEGACY_MOCK_USER_KEY = 'crmanhung_mock_user';
 
+export function peekSessionUser(): AuthUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(SESSION_USER_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as AuthUser;
+    if (!parsed?.id || !parsed.fullName) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 type AuthContextValue = {
   user: AuthUser | null;
   loading: boolean;
