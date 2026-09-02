@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { CreditCard, FileText, Globe, Map, Menu, Users } from 'lucide-react';
+import { CreditCard, FileText, Globe, Map, Menu, UserCog, Users } from 'lucide-react';
 import { useAuth } from '@/features/auth/auth-context';
 import { crmHomePath } from '@/features/auth/home-path';
 import { Icon } from './icon';
@@ -51,6 +51,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       ? [
           { href: '/dashboard', label: 'Dashboard', icon: Globe },
           { href: '/quan-tri/khach-hang', label: 'Quản trị khách', icon: null },
+          { href: '/quan-tri/nguoi-dung', label: 'Người dùng', icon: UserCog },
         ]
       : []),
   ];

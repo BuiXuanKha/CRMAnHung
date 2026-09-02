@@ -4,7 +4,7 @@
 
 | Domain | File | Status |
 |--------|------|--------|
-| Users (login) | [users.md](./users.md) | Ready for API — `/login` = bảng User; `/khach-hang` = API khách |
+| Users (login + quản lý NV) | [users.md](./users.md) | Ready — `/login`; ADMIN `/quan-tri/nguoi-dung` |
 | Customers | [customers.md](./customers.md) | Ready for API — list + chi tiết `[id]`; lô đất API; tạo lô từ khách STAFF đã có |
 | Lodats | [lodats.md](./lodats.md) | Done STAFF `/lo-dat`; list ADMIN chưa bàn |
 | Addresses | [addresses.md](./addresses.md) | Ready for API — Admin `/cai-dat/dia-chi`; copy data sau |

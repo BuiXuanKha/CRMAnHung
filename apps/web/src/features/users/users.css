@@ -1,0 +1,66 @@
+.nv-page {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 0;
+  flex: 1;
+}
+
+.nv-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.nv-page-head h1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.nv-page-head p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.nv-add-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nv-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.nv-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.9rem;
+}
+
+.nv-form input,
+.nv-form select {
+  font-size: 16px;
+}
+
+.nv-checkbox {
+  flex-direction: row !important;
+  align-items: center;
+  gap: 8px !important;
+}
+
+@media (max-width: 720px) {
+  .nv-add-btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
