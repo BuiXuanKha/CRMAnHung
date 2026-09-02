@@ -126,7 +126,7 @@ export class PublicContentService {
       where: { slug },
       include: { lodat: { include: LODAT_INCLUDE } },
     });
-    if (!row?.publishedAt) {
+    if (!row?.isPublished) {
       throw new NotFoundException('Không tìm thấy sản phẩm');
     }
     const hubMaps = await this.loadHubMapsForPublished();
@@ -613,7 +613,7 @@ export class PublicContentService {
 
   private async loadHubMapsForPublished(): Promise<HubSlugMaps> {
     const rows = await this.prisma.publicLotListing.findMany({
-      where: { publishedAt: { not: null } },
+      where: { isPublished: true },
       include: { lodat: { include: LODAT_INCLUDE } },
     });
     const geos = rows

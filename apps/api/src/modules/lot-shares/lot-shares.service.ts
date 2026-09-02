@@ -35,9 +35,9 @@ export class LotSharesService {
 
     const listing = await this.prisma.publicLotListing.findUnique({
       where: { lodatId },
-      select: { id: true, slug: true, publishedAt: true },
+      select: { id: true, slug: true, isPublished: true },
     });
-    if (!listing?.publishedAt) {
+    if (!listing?.isPublished) {
       throw new BadRequestException('Lô chưa đăng lên web khách — cần publish trước khi share.');
     }
 
@@ -48,9 +48,9 @@ export class LotSharesService {
   async createOrGetShareLinkBySlug(user: RequestUser, slug: string) {
     const listing = await this.prisma.publicLotListing.findUnique({
       where: { slug: slug.trim() },
-      select: { id: true, slug: true, publishedAt: true },
+      select: { id: true, slug: true, isPublished: true },
     });
-    if (!listing?.publishedAt) {
+    if (!listing?.isPublished) {
       throw new BadRequestException('Lô chưa đăng lên web khách — cần publish trước khi share.');
     }
     return this.createOrGetShareLinkForListing(user, listing);
@@ -104,10 +104,10 @@ export class LotSharesService {
       where: { shareCode: code },
       include: {
         employee: { select: { fullName: true, phone: true, isActive: true } },
-        publicListing: { select: { slug: true, publishedAt: true } },
+        publicListing: { select: { slug: true, isPublished: true } },
       },
     });
-    if (!row || !row.publicListing.publishedAt || !row.employee.isActive) {
+    if (!row || !row.publicListing.isPublished || !row.employee.isActive) {
       throw new NotFoundException('Link share không hợp lệ.');
     }
     const phone = row.employee.phone?.trim();
@@ -131,9 +131,9 @@ export class LotSharesService {
       const row = await this.prisma.publicLotShare.update({
         where: { shareCode: code },
         data: { visitCount: { increment: 1 } },
-        select: { visitCount: true, publicListing: { select: { publishedAt: true } } },
+        select: { visitCount: true, publicListing: { select: { isPublished: true } } },
       });
-      if (!row.publicListing.publishedAt) {
+      if (!row.publicListing.isPublished) {
         throw new NotFoundException('Link share không hợp lệ.');
       }
       return { ok: true as const, visitCount: row.visitCount };

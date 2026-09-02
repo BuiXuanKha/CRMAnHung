@@ -524,7 +524,7 @@ Cùng máy tính / mobile. Icon Lucide `Sparkles`. `CrmDialog` rộng (`crm-dial
 
 Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn bài dashboard **không** đổi layout — chỉ có thể thêm `metaDescription` (tuỳ chọn).
 
-1. URL khách: `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — chỉ lô `isPublished`.
+1. URL khách: `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — chỉ lô `isPublished` (không phụ thuộc `publishedAt`; cột đó = lần đăng đầu, có thể trống trên tin cũ).
 2. Title = `seoTitle` (GPT) + `\| An Hưng Land`. H1 = `title` (GPT h1) — cùng địa danh, không bắt buộc trùng chữ. Meta = `metaDescription` hoặc excerpt.
 3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`. Ảnh SEO: **tạo/sửa lô** đặt CDN key `{slug}-anh-n` (đổi title/địa chỉ rồi Lưu thì đổi key); Đăng web không làm lại. `alt` = `listingHeadline` (không lặp địa chỉ); sitemap `image:loc`; JSON-LD `ImageObject` — [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §10.
 4. JSON-LD `RealEstateListing`: `name` = H1; giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`); `itemOffered` Place/House + `floorSize` khi parse được.
