@@ -76,7 +76,7 @@ Cùng entity `PublicPost`:
 
 Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú nội bộ lô/map, lịch sử GD, chat, file mật.
 
-Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi khách vào thẳng anhungland.com; **SĐT nhân viên share** khi khách vào bằng `?share=` (cả lô NV khác trong cùng phiên); **tên + SĐT NV đã login** khi NV xem trang khách (§18). JSON-LD/canonical luôn hotline công ty.
+Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi khách vào thẳng anhungland.com; **SĐT nhân viên share** khi khách vào bằng `?share=` (cả lô NV khác trong cùng phiên); **tên + SĐT + avatar NV đã login** khi NV xem trang khách (§18). JSON-LD/canonical luôn hotline công ty.
 
 ---
 
@@ -174,7 +174,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public. ADMIN đăng luồng mới thì gỡ sibling. STAFF không gỡ luồng NV khác đang hiện — báo lỗi.
 6. Bài viết CMS = **chỉ ADMIN**; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
-7. Liên hệ khách: vào thẳng domain → hotline + Zalo công ty. Vào bằng link share NV → SĐT NV đó trên **mọi** lô trong phiên. NV đã login CRM xem trang khách → tên + SĐT **chính mình** (ưu tiên hơn cookie share) (§18). Chưa form SĐT.
+7. Liên hệ khách: vào thẳng domain → hotline + Zalo công ty. Vào bằng link share NV → SĐT + avatar NV đó trên **mọi** lô trong phiên. NV đã login CRM xem trang khách → tên + SĐT + avatar **chính mình** (ưu tiên hơn cookie share) (§18). Chưa form SĐT.
 8. Soạn bài đăng: double-click hàng/thẻ → modal copy public. Giá CRM **làm mờ**. Không copy hoa hồng, ghi chú nội bộ / chủ nhà, tên/SĐT khách.
 
 ---
@@ -809,12 +809,12 @@ NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang c
 
 | Khách vào | Liên hệ trên **mọi** trang chi tiết lô (Zalo / gọi / hotline header) + thẻ list khi NV login |
 |-----------|---------------------------------------------------------------------|
-| Thẳng `anhungland.com` (không `?share=`, không cookie phiên, chưa login CRM) | Hotline công ty `ANHUNG_BRAND` |
-| Link share của NV A (khách, chưa login) | SĐT + tên **A** — cả khi lô do NV B đăng |
-| **NV B đã login CRM** (xem trang khách) | SĐT + tên **B** — mọi bài đăng / chi tiết. Ưu tiên hơn cookie share |
+| Thẳng `anhungland.com` (không `?share=`, không cookie phiên, chưa login CRM) | Hotline công ty `ANHUNG_BRAND` (chữ cái, không avatar NV) |
+| Link share của NV A (khách, chưa login) | Avatar (khi có) + SĐT + tên **A** trên **chi tiết lô** — cả khi lô do NV B đăng. Thẻ list **không** hiện dòng NV (chỉ khi NV login) |
+| **NV B đã login CRM** (xem trang khách) | Avatar (khi có) + SĐT + tên **B** — mọi thẻ bài đăng / chi tiết. Ưu tiên hơn cookie share. Không ảnh → chữ cái họ tên |
 
 Cách giữ phiên: cookie first-party `crmanhung_share` (httpOnly, SameSite=Lax, **hết khi đóng trình duyệt**). `?share=` mới ghi đè cookie. Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). Đếm visit chỉ khi mở đúng lô gốc của mã đó. Chi tiết lô `force-dynamic` (đọc cookie); Google không gửi cookie → HTML bot = hotline công ty.
 
-Thứ tự: NV đã login (có SĐT) → cookie/`?share=` → hotline công ty. JSON-LD/canonical không đổi.
+Thứ tự: NV đã login (có SĐT) → cookie/`?share=` → hotline công ty. JSON-LD/canonical không đổi. Avatar = `User.avatarObjectKey` → CDN `avatarUrl` (`/auth/me` khi NV login; `GET /public/lot-shares/:code` khi khách share). Không ảnh → chữ cái.
 
 

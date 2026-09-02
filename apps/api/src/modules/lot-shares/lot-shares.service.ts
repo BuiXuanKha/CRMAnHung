@@ -8,7 +8,9 @@ import { Prisma } from '@prisma/client';
 import { guestLotShareUrl } from '@crmanhung/shared';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
+import { StorageService } from '../../storage/storage.service';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
+import { userAvatarUrl } from '../users/users-view';
 
 const SHARE_CODE_CHARS = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 const SHARE_CODE_LEN = 5;
@@ -19,6 +21,7 @@ export class LotSharesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly config: ConfigService,
+    private readonly storage: StorageService,
   ) {}
 
   async createOrGetShareLink(user: RequestUser, lodatId: string) {
@@ -103,7 +106,9 @@ export class LotSharesService {
     const row = await this.prisma.publicLotShare.findUnique({
       where: { shareCode: code },
       include: {
-        employee: { select: { fullName: true, phone: true, isActive: true } },
+        employee: {
+          select: { fullName: true, phone: true, isActive: true, avatarObjectKey: true },
+        },
         publicListing: { select: { slug: true, isPublished: true } },
       },
     });
@@ -114,12 +119,14 @@ export class LotSharesService {
     if (!phone) {
       throw new NotFoundException('Link share không hợp lệ.');
     }
+    const avatarUrl = userAvatarUrl(this.storage, row.employee.avatarObjectKey);
     return {
       shareCode: row.shareCode,
       listingSlug: row.publicListing.slug,
       employee: {
         fullName: row.employee.fullName,
         phone,
+        ...(avatarUrl ? { avatarUrl } : {}),
       },
       visitCount: row.visitCount,
     };

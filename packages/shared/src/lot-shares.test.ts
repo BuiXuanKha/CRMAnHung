@@ -76,6 +76,21 @@ describe('contactFromAuthUser', () => {
     );
   });
 
+  it('passes through avatarUrl when present', () => {
+    assert.deepEqual(
+      contactFromAuthUser({
+        fullName: 'Bùi Xuân Khả',
+        phone: '0977656280',
+        avatarUrl: 'https://cdn.anhungland.com/users/avatars/x.webp',
+      }),
+      {
+        fullName: 'Bùi Xuân Khả',
+        phone: '0977656280',
+        avatarUrl: 'https://cdn.anhungland.com/users/avatars/x.webp',
+      },
+    );
+  });
+
   it('returns null without a usable phone', () => {
     assert.equal(contactFromAuthUser({ fullName: 'B', phone: '' }), null);
     assert.equal(contactFromAuthUser({ fullName: 'B', phone: null }), null);

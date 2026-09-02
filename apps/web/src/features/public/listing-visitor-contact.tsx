@@ -17,6 +17,27 @@ function phoneToTelDigits(phone: string): string {
   return digits;
 }
 
+function StaffContactAvatar({
+  name,
+  url,
+  className,
+}: {
+  name: string;
+  url?: string | null;
+  className: string;
+}) {
+  return (
+    <span className={className} aria-hidden>
+      {url ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={url} alt="" />
+      ) : (
+        name.slice(0, 1).toUpperCase()
+      )}
+    </span>
+  );
+}
+
 function ListingZaloBtn({ label, phone }: { label: string; phone: string }) {
   return (
     <a
@@ -44,15 +65,13 @@ function ListingPhoneBtn({ phone }: { phone: string }) {
 }
 
 export function ListingContactAside({ shareContact }: { shareContact?: LotShareContact | null }) {
-  const { name, phone, isStaff } = usePublicContact(shareContact);
+  const { name, phone, isStaff, contact } = usePublicContact(shareContact);
   const role = isStaff ? 'Nhân viên tư vấn An Hưng Land' : ANHUNG_BRAND.legalLine;
   const lead = isStaff ? `Liên hệ ${name}` : 'Xem đất thực tế · tư vấn miễn phí';
   return (
     <aside className="pd-aside" aria-label="Liên hệ tư vấn">
       <div className="pd-agent">
-        <span className="pd-agent-avatar" aria-hidden>
-          {name.slice(0, 1).toUpperCase()}
-        </span>
+        <StaffContactAvatar name={name} url={contact?.avatarUrl} className="pd-agent-avatar" />
         <div className="pd-agent-meta">
           <p className="pd-agent-name">{name}</p>
           <p className="pd-agent-role">{role}</p>
@@ -81,12 +100,19 @@ export function ListingContactMobileBar({
 
 /** Name + phone on listing cards — only when a staff session is active. */
 export function PublicCardContact() {
-  const { name, phoneDisplay, phone, isStaff } = usePublicContact(null);
+  const { name, phoneDisplay, phone, isStaff, contact } = usePublicContact(null);
   if (!isStaff) return null;
   return (
     <p className="ph-product-staff">
       <a href={phoneTelHref(phone)}>
-        {name} · {phoneDisplay}
+        <StaffContactAvatar
+          name={name}
+          url={contact?.avatarUrl}
+          className="ph-product-staff-avatar"
+        />
+        <span>
+          {name} · {phoneDisplay}
+        </span>
       </a>
     </p>
   );

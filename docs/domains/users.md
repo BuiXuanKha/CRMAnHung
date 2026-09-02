@@ -114,7 +114,7 @@ Prefix `/api/v1`
 | DELETE | `/users/:id` | ADMIN — xoá NV (nếu không còn dữ liệu) |
 | POST | `/users/:id/reset-password` | ADMIN — đặt lại mật khẩu |
 
-`GET /users`, `POST /users`, `PATCH /users/:id`, `/auth/me` trả `avatarUrl` (CDN) khi có ảnh. Header CRM dùng ảnh đó; không nhét URL vào JWT.
+`GET /users`, `POST /users`, `PATCH /users/:id`, `/auth/me` trả `avatarUrl` (CDN) khi có ảnh. Header CRM + khối liên hệ trang khách (chi tiết lô, thẻ khi NV login) dùng ảnh đó. `GET /public/lot-shares/:code` cũng trả `employee.avatarUrl`. Không nhét URL vào JWT.
 
 Zod: `packages/shared/src/auth.ts`.
 

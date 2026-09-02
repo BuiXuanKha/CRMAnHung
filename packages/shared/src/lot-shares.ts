@@ -10,6 +10,8 @@ import { PUBLIC_LISTING_PATH, PUBLIC_SITE_ORIGIN } from './public-content.js';
 export const lotShareContactSchema = z.object({
   fullName: z.string(),
   phone: z.string(),
+  /** CDN avatar NV; trống = chữ cái trên thẻ / khối liên hệ. */
+  avatarUrl: z.string().url().nullable().optional(),
 });
 
 /** First-party cookie: khách vào bằng `?share=` — liên hệ NV trên mọi lô trong phiên. */
@@ -59,13 +61,17 @@ export type PublicLotShareVisitResponse = z.infer<typeof publicLotShareVisitResp
 
 /** Logged-in staff contact for public listing CTAs. Missing/short phone → null. */
 export function contactFromAuthUser(
-  user: { fullName?: string | null; phone?: string | null } | null | undefined,
+  user:
+    | { fullName?: string | null; phone?: string | null; avatarUrl?: string | null }
+    | null
+    | undefined,
 ): LotShareContact | null {
   const fullName = user?.fullName?.trim() ?? '';
   const phone = user?.phone?.trim() ?? '';
   const digits = phone.replace(/\D/g, '');
   if (!fullName || digits.length < 9) return null;
-  return { fullName, phone };
+  const avatarUrl = user?.avatarUrl?.trim() || undefined;
+  return avatarUrl ? { fullName, phone, avatarUrl } : { fullName, phone };
 }
 
 function isLoopbackHost(hostname: string): boolean {
