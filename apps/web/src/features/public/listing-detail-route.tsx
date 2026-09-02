@@ -14,7 +14,10 @@ import {
   getPublicLotSlugRedirect,
   getRelatedListingSections,
 } from '@/features/public/published-listings';
-import { resolvePublicLotShare } from '@/features/lot-shares/api';
+import {
+  getShareAttribution,
+  shareContactFrom,
+} from '@/features/lot-shares/share-referrer';
 import { listingHref } from '@/features/public/site';
 
 type Props = {
@@ -24,10 +27,10 @@ type Props = {
 
 export const revalidate = false;
 
-async function redirectIfLegacySlug(slug: string): Promise<void> {
+async function redirectIfLegacySlug(slug: string, shareCode?: string): Promise<void> {
   const toSlug = await getPublicLotSlugRedirect(slug);
   if (toSlug && toSlug !== slug) {
-    permanentRedirect(listingHref(toSlug));
+    permanentRedirect(listingHref(toSlug, shareCode));
   }
 }
 
@@ -43,30 +46,33 @@ export async function buildListingDetailMetadata(slug: string): Promise<Metadata
 export async function ListingDetailRoute({ params, searchParams }: Props) {
   const { slug } = await params;
   const { share: shareRaw } = await searchParams;
-  const shareCode = shareRaw?.trim() ?? '';
+  const shareFromQuery = shareRaw?.trim() ?? '';
 
   const listing = await getPublicListingBySlug(slug);
   if (!listing) {
-    await redirectIfLegacySlug(slug);
+    await redirectIfLegacySlug(slug, shareFromQuery);
     notFound();
   }
 
-  const shareResolved = shareCode ? await resolvePublicLotShare(shareCode) : null;
-  if (shareCode && (!shareResolved || shareResolved.listingSlug !== slug)) {
-    notFound();
-  }
+  const attribution = await getShareAttribution(shareFromQuery);
+  const shareContact = shareContactFrom(attribution);
+  const trackVisit = Boolean(
+    attribution?.fromQuery && attribution.resolved.listingSlug === slug,
+  );
 
   const relatedSections = await getRelatedListingSections(listing);
 
   return (
     <>
-      {shareCode ? <LotShareVisitTracker shareCode={shareCode} /> : null}
+      {trackVisit && attribution ? (
+        <LotShareVisitTracker shareCode={attribution.code} />
+      ) : null}
       <JsonLd data={listingJsonLd(listing)} />
       <JsonLd data={listingBreadcrumbJsonLd(listing)} />
       <ProductDetailView
         listing={listing}
         relatedSections={relatedSections}
-        shareContact={shareResolved?.employee ?? null}
+        shareContact={shareContact}
       />
     </>
   );

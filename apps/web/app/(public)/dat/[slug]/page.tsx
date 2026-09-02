@@ -6,6 +6,7 @@ type Props = {
 };
 
 export const revalidate = false;
+export const dynamic = 'force-dynamic';
 
 export async function generateMetadata({ params }: Props) {
   const { slug } = await params;

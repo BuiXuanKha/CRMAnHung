@@ -13,8 +13,12 @@ export {
   listingPlaceHubPath,
 };
 
-export function listingHref(slug?: string): string {
-  return slug ? `${PUBLIC_LISTING_PATH}/${slug}` : PUBLIC_LISTING_PATH;
+export function listingHref(slug?: string, shareCode?: string | null): string {
+  const path = slug ? `${PUBLIC_LISTING_PATH}/${slug}` : PUBLIC_LISTING_PATH;
+  const code = shareCode?.trim();
+  if (!code) return path;
+  const qs = new URLSearchParams({ share: code });
+  return `${path}?${qs.toString()}`;
 }
 
 export function listingCanonicalUrl(slug: string): string {

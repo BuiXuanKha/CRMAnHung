@@ -76,7 +76,7 @@ Cùng entity `PublicPost`:
 
 Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú nội bộ lô/map, lịch sử GD, chat, file mật.
 
-Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi hotline công ty.
+Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi khách vào thẳng anhungland.com; **SĐT nhân viên share** khi khách vào bằng `?share=` (cả lô NV khác trong cùng phiên — §18).
 
 ---
 
@@ -174,7 +174,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public. ADMIN đăng luồng mới thì gỡ sibling. STAFF không gỡ luồng NV khác đang hiện — báo lỗi.
 6. Bài viết CMS = **chỉ ADMIN**; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
-7. Liên hệ khách: hotline + Zalo công ty; chưa form SĐT.
+7. Liên hệ khách: vào thẳng domain → hotline + Zalo công ty. Vào bằng link share NV → SĐT NV đó trên **mọi** lô trong phiên (§18). Chưa form SĐT.
 8. Soạn bài đăng: double-click hàng/thẻ → modal copy public. Giá CRM **làm mờ**. Không copy hoa hồng, ghi chú nội bộ / chủ nhà, tên/SĐT khách.
 
 ---
@@ -800,5 +800,20 @@ Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
 | Canonical | URL hub tuyệt đối |
 | JSON-LD | `ItemList` URL lô trong hub; `BreadcrumbList` |
 | Sitemap | Chỉ hub có lô; priority xã ~0.75, cấp 4 ~0.7 |
+
+---
+
+## 18. Share NV + liên hệ trên trang khách (chốt 2026-09-02)
+
+NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang chủ (cùng catalog). Nút **Chia sẻ** giữ luồng đã làm: mã cố định `(NV + listing)`, URL `/dat/{slug}?share=CODE`.
+
+| Khách vào | Liên hệ trên **mọi** trang chi tiết lô (Zalo / gọi / hotline header) |
+|-----------|---------------------------------------------------------------------|
+| Thẳng `anhungland.com` (không `?share=`, không cookie phiên) | Hotline công ty `ANHUNG_BRAND` |
+| Link share của NV A | SĐT + tên **A** — cả khi lô do NV B đăng |
+
+Cách giữ phiên: cookie first-party `crmanhung_share` (httpOnly, SameSite=Lax, **hết khi đóng trình duyệt**). `?share=` mới ghi đè cookie. Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). Đếm visit chỉ khi mở đúng lô gốc của mã đó. Chi tiết lô `force-dynamic` (đọc cookie); Google không gửi cookie → HTML bot = hotline công ty.
+
+SEO: canonical / OG / JSON-LD `telephone` **luôn** hotline công ty — không nhồi SĐT NV vào HTML bot.
 
 

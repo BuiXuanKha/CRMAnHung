@@ -169,7 +169,7 @@ export function ProductDetailView({
     ? 'Nhân viên tư vấn An Hưng Land'
     : ANHUNG_BRAND.legalLine;
   const contactLead = shareContact
-    ? 'Liên hệ trực tiếp nhân viên phụ trách lô này'
+    ? `Liên hệ ${shareContact.fullName}`
     : 'Xem đất thực tế · tư vấn miễn phí';
   const hasSummaryStats = Boolean(
     area || listing.frontageLabel || listing.directionLabel || product?.legalLabel,
@@ -190,8 +190,8 @@ export function ProductDetailView({
             />
           </Link>
           <div className="ph-header-right">
-            <a className="ph-hotline" href={`tel:${ANHUNG_BRAND.hotlineTel}`}>
-              Hotline {ANHUNG_BRAND.hotlineDisplay}
+            <a className="ph-hotline" href={`tel:${contactPhone.replace(/\D/g, '')}`}>
+              Hotline {contactPhoneDisplay}
             </a>
             <nav className="ph-nav" aria-label="Menu">
               <Link href={PUBLIC_LISTING_PATH}>Sản phẩm</Link>
@@ -334,7 +334,7 @@ export function ProductDetailView({
             </div>
             <p className="pd-aside-lead">{contactLead}</p>
             <ListingZaloBtn label="Chat qua Zalo" phone={contactPhone} />
-            <ListingPhoneBtn phone={shareContact?.phone ?? contactPhoneDisplay} />
+            <ListingPhoneBtn phone={contactPhone} />
           </aside>
         </div>
 
@@ -351,7 +351,7 @@ export function ProductDetailView({
 
       <div className="pd-mobile-bar">
         <ListingZaloBtn label="Liên hệ Zalo" phone={contactPhone} />
-        <ListingPhoneBtn phone={shareContact?.phone ?? contactPhoneDisplay} />
+        <ListingPhoneBtn phone={contactPhone} />
       </div>
     </div>
   );

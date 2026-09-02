@@ -2,10 +2,34 @@ import { z } from 'zod';
 import { LodatSaleStatus } from './enums.js';
 import { PUBLIC_LISTING_SHORT_PATH } from './public-content.js';
 
+/**
+ * Staff share links (`?share=CODE`) + guest contact attribution.
+ * Query/cookie identify the **referring employee**, not the listing owner.
+ */
+
 export const lotShareContactSchema = z.object({
   fullName: z.string(),
   phone: z.string(),
 });
+
+/** First-party cookie: khách vào bằng `?share=` — liên hệ NV trên mọi lô trong phiên. */
+export const PUBLIC_SHARE_COOKIE = 'crmanhung_share';
+
+/** Same alphabet as API share codes (no I/O/0/1). */
+export const SHARE_CODE_PATTERN = /^[A-HJ-NP-Z2-9]{4,12}$/i;
+
+export function normalizeShareCode(raw: string | null | undefined): string {
+  const s = raw?.trim().toUpperCase() ?? '';
+  return SHARE_CODE_PATTERN.test(s) ? s : '';
+}
+
+/** `?share=` wins over cookie (khách đổi link NV). */
+export function pickShareCode(
+  fromQuery: string | null | undefined,
+  fromCookie: string | null | undefined,
+): string {
+  return normalizeShareCode(fromQuery) || normalizeShareCode(fromCookie);
+}
 
 export type LotShareContact = z.infer<typeof lotShareContactSchema>;
 
@@ -41,7 +65,8 @@ export function buildLotShareUrl(
 ): string {
   const base = origin.replace(/\/$/, '');
   const path = `${PUBLIC_LISTING_SHORT_PATH}/${encodeURIComponent(slug)}`;
-  const qs = new URLSearchParams({ share: shareCode });
+  const code = normalizeShareCode(shareCode);
+  const qs = new URLSearchParams({ share: code || shareCode.trim() });
   return `${base}${path}?${qs.toString()}`;
 }
 
