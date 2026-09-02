@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { Phone } from 'lucide-react';
+import { LodatSaleStatus, type LotShareContact } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import {
   ProductGallery,
@@ -32,11 +33,34 @@ function zaloLink(telDigits: string): string {
   return `https://zalo.me/${telDigits}`;
 }
 
-function ListingZaloBtn({ label }: { label: string }) {
+function phoneToTelDigits(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.startsWith('84')) return digits;
+  if (digits.startsWith('0')) return `84${digits.slice(1)}`;
+  return digits;
+}
+
+function formatPhoneDisplay(phone: string): string {
+  const d = phone.replace(/\D/g, '');
+  if (d.length === 10 && d.startsWith('0')) {
+    return `${d.slice(0, 4)} ${d.slice(4, 7)} ${d.slice(7)}`;
+  }
+  return phone.trim();
+}
+
+function saleStatusLabel(status?: LodatSaleStatus): string | null {
+  if (!status || status === LodatSaleStatus.DANG_BAN) return null;
+  if (status === LodatSaleStatus.TAM_DUNG) return 'Tạm dừng bán';
+  if (status === LodatSaleStatus.DA_BAN) return 'Đã bán';
+  if (status === LodatSaleStatus.DAT_COC) return 'Đã cọc';
+  return null;
+}
+
+function ListingZaloBtn({ label, phone }: { label: string; phone: string }) {
   return (
     <a
       className="pd-zalo-btn"
-      href={zaloLink(ANHUNG_BRAND.hotlineTel)}
+      href={zaloLink(phoneToTelDigits(phone))}
       target="_blank"
       rel="noopener noreferrer"
     >
@@ -45,17 +69,19 @@ function ListingZaloBtn({ label }: { label: string }) {
   );
 }
 
-function ListingPhoneBtn() {
+function ListingPhoneBtn({ phone }: { phone: string }) {
+  const display = formatPhoneDisplay(phone);
+  const tel = phone.replace(/\D/g, '');
   return (
     <a
       className="pd-phone-btn"
-      href={`tel:${ANHUNG_BRAND.hotlineTel}`}
-      aria-label={`Gọi ${ANHUNG_BRAND.hotlineDisplay}`}
+      href={`tel:${tel}`}
+      aria-label={`Gọi ${display}`}
     >
       <Phone className="pd-phone-btn-icon" size={18} strokeWidth={2} aria-hidden />
       <span className="pd-phone-btn-copy">
         <span className="pd-phone-btn-action">Bấm là gọi:</span>
-        <span className="pd-phone-btn-num">{ANHUNG_BRAND.hotlineDisplay}</span>
+        <span className="pd-phone-btn-num">{display}</span>
       </span>
     </a>
   );
@@ -112,9 +138,11 @@ function RelatedListingBlock({
 export function ProductDetailView({
   listing,
   relatedSections,
+  shareContact = null,
 }: {
   listing: PublicListingView;
   relatedSections: RelatedListingSection[];
+  shareContact?: LotShareContact | null;
 }) {
   const product = getProductBySlug(listing.slug);
   const images = listingImages(listing);
@@ -128,9 +156,20 @@ export function ProductDetailView({
   const showPlainBody =
     !showHtmlBody && Boolean(fallbackBody) && fallbackBody !== listing.excerpt.trim();
   const highlights = product?.highlights ?? [];
-  const brandInitial = ANHUNG_BRAND.shortName.slice(0, 1).toUpperCase();
   const shareUrl = listingCanonicalUrl(listing.slug);
   const shareText = listingShareText(listing);
+  const saleLabel = saleStatusLabel(listing.saleStatus);
+  const contactPhone = shareContact?.phone ?? ANHUNG_BRAND.hotlineTel;
+  const contactPhoneDisplay = shareContact?.phone
+    ? formatPhoneDisplay(shareContact.phone)
+    : ANHUNG_BRAND.hotlineDisplay;
+  const contactName = shareContact?.fullName ?? ANHUNG_BRAND.name;
+  const contactRole = shareContact
+    ? 'Nhân viên tư vấn An Hưng Land'
+    : ANHUNG_BRAND.legalLine;
+  const contactLead = shareContact
+    ? 'Liên hệ trực tiếp nhân viên phụ trách lô này'
+    : 'Xem đất thực tế · tư vấn miễn phí';
   const hasSummaryStats = Boolean(
     area || listing.frontageLabel || listing.directionLabel || product?.legalLabel,
   );
@@ -191,6 +230,7 @@ export function ProductDetailView({
 
             {product?.postedLabel ? <p className="pd-posted">{product.postedLabel}</p> : null}
             <h1>{h1}</h1>
+            {saleLabel ? <p className="pd-sale-badge">{saleLabel}</p> : null}
             {listing.location ? (
               <p className="pd-location">
                 <span className="pd-location-pin" aria-hidden />
@@ -285,16 +325,16 @@ export function ProductDetailView({
           <aside className="pd-aside" aria-label="Liên hệ tư vấn">
             <div className="pd-agent">
               <span className="pd-agent-avatar" aria-hidden>
-                {brandInitial}
+                {contactName.slice(0, 1).toUpperCase()}
               </span>
               <div className="pd-agent-meta">
-                <p className="pd-agent-name">{ANHUNG_BRAND.name}</p>
-                <p className="pd-agent-role">{ANHUNG_BRAND.legalLine}</p>
+                <p className="pd-agent-name">{contactName}</p>
+                <p className="pd-agent-role">{contactRole}</p>
               </div>
             </div>
-            <p className="pd-aside-lead">Xem đất thực tế · tư vấn miễn phí</p>
-            <ListingZaloBtn label="Chat qua Zalo" />
-            <ListingPhoneBtn />
+            <p className="pd-aside-lead">{contactLead}</p>
+            <ListingZaloBtn label="Chat qua Zalo" phone={contactPhone} />
+            <ListingPhoneBtn phone={shareContact?.phone ?? contactPhoneDisplay} />
           </aside>
         </div>
 
@@ -310,8 +350,8 @@ export function ProductDetailView({
       </main>
 
       <div className="pd-mobile-bar">
-        <ListingZaloBtn label="Liên hệ Zalo" />
-        <ListingPhoneBtn />
+        <ListingZaloBtn label="Liên hệ Zalo" phone={contactPhone} />
+        <ListingPhoneBtn phone={shareContact?.phone ?? contactPhoneDisplay} />
       </div>
     </div>
   );

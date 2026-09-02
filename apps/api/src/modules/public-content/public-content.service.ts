@@ -124,10 +124,10 @@ export class PublicContentService {
       where: { slug },
       include: { lodat: { include: LODAT_INCLUDE } },
     });
-    if (!row?.isPublished || !this.isOpenSale(row.lodat)) {
+    if (!row?.publishedAt) {
       throw new NotFoundException('Không tìm thấy sản phẩm');
     }
-    const { hubMaps } = await this.loadPublishedCatalog();
+    const hubMaps = await this.loadHubMapsForPublished();
     return this.toCatalog(row, hubMaps);
   }
 
@@ -556,6 +556,17 @@ export class PublicContentService {
       : lodat.address;
   }
 
+  private async loadHubMapsForPublished(): Promise<HubSlugMaps> {
+    const rows = await this.prisma.publicLotListing.findMany({
+      where: { publishedAt: { not: null } },
+      include: { lodat: { include: LODAT_INCLUDE } },
+    });
+    const geos = rows
+      .map((row) => addressGeo(this.lodatAddress(row.lodat)))
+      .filter((g): g is NonNullable<typeof g> => g != null);
+    return buildHubSlugMaps(geos);
+  }
+
   private async loadPublishedCatalog(): Promise<{
     items: ReturnType<PublicContentService['toCatalog']>[];
     hubMaps: HubSlugMaps;
@@ -679,6 +690,7 @@ export class PublicContentService {
     const geo = hubMaps ? addressGeo(addr) : null;
     const commune = hubMaps ? communeMetaForGeo(hubMaps, geo) : null;
     const place = hubMaps ? placeMetaForGeo(hubMaps, geo) : null;
+    const saleStatus = lodat.maps[0]?.status ?? 'TAM_DUNG';
 
     return {
       id: row.id,
@@ -711,6 +723,7 @@ export class PublicContentService {
           }
         : {}),
       ...(addr?.kind ? { addressKind: addr.kind } : {}),
+      saleStatus,
     };
   }
 

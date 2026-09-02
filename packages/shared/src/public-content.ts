@@ -6,7 +6,7 @@
  * SERP snippet falls back to `excerpt`. Editor modal may fill it later.
  */
 import { z } from 'zod';
-import { AddressKind, LodatKind, PublicPostCategory, PublicPostStatus } from './enums.js';
+import { AddressKind, LodatKind, LodatSaleStatus, PublicPostCategory, PublicPostStatus } from './enums.js';
 
 /** Google snippet length — clip excerpt / metaDescription to this. */
 export const META_DESCRIPTION_MAX = 160;
@@ -18,6 +18,9 @@ export const PUBLIC_POST_EXCERPT_MAX = 320;
  * Guest catalog URL prefix on anhungland.com (Nam Sách local SEO).
  */
 export const PUBLIC_LISTING_PATH = '/mua-ban-nha-dat-huyen-nam-sach';
+
+/** Short guest lot URL — `/dat/{slug}?share=CODE`. */
+export const PUBLIC_LISTING_SHORT_PATH = '/dat';
 
 /** Reserved path segment under catalog — hub xã / cấp 4; not a lot slug. */
 export const PUBLIC_LISTING_HUB_SEGMENT = 'xa';
@@ -283,6 +286,8 @@ export const publicGuestListingSchema = z.object({
   metaDescription: z.string().trim().max(320).nullable().optional(),
   publishedAt: z.string().datetime().nullable().optional(),
   updatedAt: z.string().datetime().optional(),
+  /** Rao bán trên CRM — guest chi tiết vẫn mở khi Tạm dừng / Đã bán. */
+  saleStatus: z.nativeEnum(LodatSaleStatus).optional(),
 });
 
 export type PublicGuestListing = z.infer<typeof publicGuestListingSchema>;

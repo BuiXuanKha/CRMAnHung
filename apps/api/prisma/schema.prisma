@@ -39,6 +39,7 @@ model User {
   createdTitleServiceMoney TitleServiceMoney[] @relation("TitleServiceMoneyCreator")
   createdTitleServiceAttachments TitleServiceAttachment[] @relation("TitleServiceAttachmentCreator")
   viewedTitleServiceAttachments TitleServiceAttachmentView[] @relation("TitleServiceAttachmentViewer")
+  publicLotShares           PublicLotShare[]
 }
 
 model RefreshToken {
@@ -374,9 +375,26 @@ model PublicLotListing {
   updatedAt       DateTime @updatedAt
 
   lodat Lodat @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+  shares PublicLotShare[]
 
   @@index([isPublished])
   @@index([updatedAt])
+}
+
+/// Link share lô public — một mã / (nhân viên + listing đã publish).
+model PublicLotShare {
+  id              String   @id @default(cuid())
+  shareCode       String   @unique
+  employeeId      String
+  publicListingId String
+  visitCount      Int      @default(0)
+  createdAt       DateTime @default(now())
+
+  employee      User             @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  publicListing PublicLotListing @relation(fields: [publicListingId], references: [id], onDelete: Cascade)
+
+  @@unique([employeeId, publicListingId])
+  @@index([publicListingId])
 }
 
 /// 301 slug lô cũ → slug mới (sau khi đổi công thức tên+địa chỉ).

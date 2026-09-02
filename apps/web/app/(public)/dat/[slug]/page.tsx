@@ -12,6 +12,6 @@ export async function generateMetadata({ params }: Props) {
   return buildListingDetailMetadata(slug);
 }
 
-export default function MuaBanNhaDatDetailPage(props: Props) {
+export default function DatShortListingPage(props: Props) {
   return <ListingDetailRoute {...props} />;
 }

@@ -30,6 +30,7 @@ export type PublicListingView = PublicGuestListing & {
   placeSlug?: string | null;
   placeLabel?: string | null;
   addressKind?: PublicCatalogListing['addressKind'];
+  saleStatus?: PublicCatalogListing['saleStatus'];
 };
 
 function catalogToView(row: PublicCatalogListing): PublicListingView {
@@ -55,6 +56,7 @@ function catalogToView(row: PublicCatalogListing): PublicListingView {
     ...(row.placeSlug != null ? { placeSlug: row.placeSlug } : {}),
     ...(row.placeLabel != null ? { placeLabel: row.placeLabel } : {}),
     ...(row.addressKind != null ? { addressKind: row.addressKind } : {}),
+    ...(row.saleStatus != null ? { saleStatus: row.saleStatus } : {}),
   };
 }
 

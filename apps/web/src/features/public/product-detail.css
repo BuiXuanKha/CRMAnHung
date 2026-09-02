@@ -54,6 +54,17 @@
   font-weight: 600;
 }
 
+.pd-sale-badge {
+  display: inline-block;
+  margin: 8px 0 0;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #fef3c7;
+  color: #92400e;
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+
 .pd-location {
   display: flex;
   align-items: flex-start;
