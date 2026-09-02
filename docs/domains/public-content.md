@@ -76,7 +76,7 @@ Cùng entity `PublicPost`:
 
 Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú nội bộ lô/map, lịch sử GD, chat, file mật.
 
-Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi khách vào thẳng anhungland.com; **SĐT nhân viên share** khi khách vào bằng `?share=` (cả lô NV khác trong cùng phiên); **tên + SĐT + avatar NV đã login** khi NV xem trang khách (§18). JSON-LD/canonical luôn hotline công ty.
+Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi hết cookie share; **SĐT nhân viên share** khi còn cookie 30 ngày (trang chủ + chi tiết lô, kể cả lô NV khác); **tên + SĐT + avatar NV đã login** khi NV xem trang khách (§18). JSON-LD/canonical luôn hotline công ty.
 
 ---
 
