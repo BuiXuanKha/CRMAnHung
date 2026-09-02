@@ -815,7 +815,7 @@ NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang c
 | Link share **NV B** | Đổi thành B, **đếm lại 30 ngày** từ lần bấm B |
 | NV đã login CRM | Số + avatar **chính mình** — thắng cookie |
 
-Cookie `crmanhung_share` (httpOnly, SameSite=Lax, path `/`): `maxAge` = thời hạn còn lại tới `expiresAt`. Chỉ **ghi** khi `?share=` hợp lệ. Lướt web không `?share=` **không** gia hạn. Google không gửi cookie → HTML bot = hotline công ty. JSON-LD / canonical luôn công ty.
+Cookie `crmanhung_share` (httpOnly, SameSite=Lax, path `/`): payload `CODE~employeeId~expiresAt` (không JSON). Middleware gọi Nest loopback `:5050`, **ghi cookie** khi `?share=` đúng format (kể cả lúc lookup NV chậm). `maxAge` = thời hạn còn lại tới `expiresAt`. Lướt web không `?share=` **không** gia hạn. Google không gửi cookie → HTML bot = hotline công ty. JSON-LD / canonical luôn công ty.
 
 Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). Đếm visit chỉ khi mở đúng lô gốc của mã đó. Chi tiết lô `force-dynamic`.
 

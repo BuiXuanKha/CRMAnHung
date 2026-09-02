@@ -56,7 +56,12 @@ module.exports = {
         NODE_ENV: 'production',
         PORT: 5001,
         HOSTNAME: '0.0.0.0',
-        ...pickEnv(['REVALIDATE_SECRET', 'PUBLIC_SEO_INDEX', 'NEXT_PUBLIC_SEO_INDEX']),
+        ...pickEnv([
+          'REVALIDATE_SECRET',
+          'PUBLIC_SEO_INDEX',
+          'NEXT_PUBLIC_SEO_INDEX',
+          'INTERNAL_API_ORIGIN',
+        ]),
       },
     },
   ],

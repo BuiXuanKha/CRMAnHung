@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import {
   PUBLIC_SHARE_COOKIE,
+  PUBLIC_SHARE_REQUEST_HEADER,
   nextPublicShareCookie,
   normalizeShareCode,
   parsePublicShareCookie,
@@ -9,25 +10,22 @@ import {
   serializePublicShareCookie,
 } from '@crmanhung/shared';
 
-function lotShareResolveHref(request: NextRequest, code: string): string {
+/** Nest on this VPS — never hairpin through Cloudflare public origin. */
+const LOOPBACK_API_ORIGIN = 'http://127.0.0.1:5050';
+
+function lotShareResolveHref(code: string): string {
   const suffix = `/public/lot-shares/${encodeURIComponent(code)}`;
   const api = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (api && /^https?:\/\//i.test(api)) {
-    return `${api.replace(/\/$/, '')}${suffix}`;
-  }
-  const origin = process.env.INTERNAL_API_ORIGIN?.trim() || request.nextUrl.origin;
   const prefix = api?.startsWith('/') ? api.replace(/\/$/, '') : '/api/v1';
-  return new URL(`${prefix}${suffix}`, origin).href;
+  const origin = process.env.INTERNAL_API_ORIGIN?.trim() || LOOPBACK_API_ORIGIN;
+  return new URL(`${prefix}${suffix}`, `${origin.replace(/\/$/, '')}/`).href;
 }
 
-async function lookupShareEmployee(
-  request: NextRequest,
-  code: string,
-): Promise<{ employeeId: string } | null> {
+async function lookupShareEmployee(code: string): Promise<{ employeeId: string } | null> {
   try {
-    const res = await fetch(lotShareResolveHref(request, code), {
+    const res = await fetch(lotShareResolveHref(code), {
       headers: { accept: 'application/json' },
-      signal: AbortSignal.timeout(2500),
+      signal: AbortSignal.timeout(4000),
     });
     if (!res.ok) return null;
     const body = (await res.json()) as { employeeId?: string };
@@ -48,30 +46,39 @@ function cookieOptions(request: NextRequest, maxAge: number) {
   };
 }
 
+function withShareHeader(request: NextRequest, code: string): NextResponse {
+  const requestHeaders = new Headers(request.headers);
+  requestHeaders.set(PUBLIC_SHARE_REQUEST_HEADER, code);
+  return NextResponse.next({ request: { headers: requestHeaders } });
+}
+
 /**
  * Last-click staff cookie: 30 days; same employee does not reset the clock;
  * a different employee overwrites and restarts. No `?share=` → leave cookie as-is.
+ * Always persist a valid-format code so homepage can resolve even if lookup is slow.
  */
 export async function middleware(request: NextRequest) {
   const code = normalizeShareCode(request.nextUrl.searchParams.get('share'));
   if (!code) return NextResponse.next();
 
-  const lookedUp = await lookupShareEmployee(request, code);
-  if (!lookedUp) return NextResponse.next();
-
+  const lookedUp = await lookupShareEmployee(code);
   const nowMs = Date.now();
   const existing = parsePublicShareCookie(request.cookies.get(PUBLIC_SHARE_COOKIE)?.value);
   const next = nextPublicShareCookie({
     nowMs,
     shareCode: code,
-    employeeId: lookedUp.employeeId,
+    employeeId: lookedUp?.employeeId ?? '',
     existing,
   });
   const maxAge = remainingShareCookieMaxAgeSec(next.expiresAtMs, nowMs);
-  if (maxAge <= 0) return NextResponse.next();
-
-  const res = NextResponse.next();
-  res.cookies.set(PUBLIC_SHARE_COOKIE, serializePublicShareCookie(next), cookieOptions(request, maxAge));
+  const res = withShareHeader(request, code);
+  if (maxAge > 0) {
+    res.cookies.set(
+      PUBLIC_SHARE_COOKIE,
+      serializePublicShareCookie(next),
+      cookieOptions(request, maxAge),
+    );
+  }
   return res;
 }
 

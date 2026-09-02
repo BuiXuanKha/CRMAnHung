@@ -33,17 +33,33 @@ describe('pickShareCode', () => {
     assert.equal(pickShareCode(null, 'ab2k9'), 'AB2K9');
   });
 
-  it('reads shareCode from a JSON cookie payload', () => {
+  it('reads shareCode from the delimited cookie payload', () => {
     const raw = serializePublicShareCookie({
       shareCode: 'AB2K9',
       employeeId: 'emp-a',
       expiresAtMs: 1_900_000_000_000,
     });
+    assert.equal(raw, 'AB2K9~emp-a~1900000000000');
+    assert.equal(pickShareCode('', raw), 'AB2K9');
+  });
+
+  it('reads shareCode from a legacy JSON cookie payload', () => {
+    const raw = JSON.stringify({ c: 'AB2K9', e: 'emp-a', x: 1_900_000_000_000 });
     assert.equal(pickShareCode('', raw), 'AB2K9');
   });
 
   it('returns empty when neither is a share code', () => {
     assert.equal(pickShareCode('?utm=1', 'nope'), '');
+  });
+
+  it('round-trips a cookie with empty employeeId', () => {
+    const raw = serializePublicShareCookie({
+      shareCode: 'AB2K9',
+      employeeId: '',
+      expiresAtMs: 1_900_000_000_000,
+    });
+    assert.equal(raw, 'AB2K9~~1900000000000');
+    assert.equal(pickShareCode('', raw), 'AB2K9');
   });
 });
 

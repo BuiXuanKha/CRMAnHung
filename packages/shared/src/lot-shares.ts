@@ -28,18 +28,49 @@ export type PublicShareCookiePayload = {
   expiresAtMs: number;
 };
 
+/** Forwarded by middleware on the same `?share=` request so layout can read it before Set-Cookie. */
+export const PUBLIC_SHARE_REQUEST_HEADER = 'x-crmanhung-share-code';
+
+/** Cookie-safe (`CODE~employeeId~expiresAtMs`) — `~` is not percent-encoded. JSON quotes break Set-Cookie. */
+const SHARE_COOKIE_DELIM = '~';
+
 const shareCookieWireSchema = z.object({
   c: z.string(),
-  e: z.string().min(1),
+  e: z.string(),
   x: z.number().int().positive(),
 });
 
 export function serializePublicShareCookie(payload: PublicShareCookiePayload): string {
-  return JSON.stringify({
-    c: payload.shareCode,
-    e: payload.employeeId,
-    x: payload.expiresAtMs,
-  });
+  const shareCode = normalizeShareCode(payload.shareCode);
+  const employeeId = payload.employeeId.trim().replaceAll(SHARE_COOKIE_DELIM, '');
+  const expiresAtMs = Math.max(0, Math.floor(payload.expiresAtMs));
+  return `${shareCode}${SHARE_COOKIE_DELIM}${employeeId}${SHARE_COOKIE_DELIM}${expiresAtMs}`;
+}
+
+function parseDelimitedShareCookie(raw: string): PublicShareCookiePayload | null {
+  const parts = raw.split(SHARE_COOKIE_DELIM);
+  if (parts.length !== 3) return null;
+  const shareCode = normalizeShareCode(parts[0]);
+  if (!shareCode) return null;
+  const expiresAtMs = Number(parts[2]);
+  if (!Number.isFinite(expiresAtMs) || expiresAtMs < 0) return null;
+  return { shareCode, employeeId: parts[1]?.trim() ?? '', expiresAtMs };
+}
+
+function parseJsonShareCookie(raw: string): PublicShareCookiePayload | null {
+  try {
+    const parsed = shareCookieWireSchema.safeParse(JSON.parse(raw));
+    if (!parsed.success) return null;
+    const shareCode = normalizeShareCode(parsed.data.c);
+    if (!shareCode) return null;
+    return {
+      shareCode,
+      employeeId: parsed.data.e.trim(),
+      expiresAtMs: parsed.data.x,
+    };
+  } catch {
+    return null;
+  }
 }
 
 export function parsePublicShareCookie(
@@ -51,15 +82,7 @@ export function parsePublicShareCookie(
   if (legacy) {
     return { shareCode: legacy, employeeId: '', expiresAtMs: 0 };
   }
-  try {
-    const parsed = shareCookieWireSchema.safeParse(JSON.parse(s));
-    if (!parsed.success) return null;
-    const shareCode = normalizeShareCode(parsed.data.c);
-    if (!shareCode) return null;
-    return { shareCode, employeeId: parsed.data.e, expiresAtMs: parsed.data.x };
-  } catch {
-    return null;
-  }
+  return parseDelimitedShareCookie(s) ?? parseJsonShareCookie(s);
 }
 
 export function shareCodeFromCookieValue(raw: string | null | undefined): string {
