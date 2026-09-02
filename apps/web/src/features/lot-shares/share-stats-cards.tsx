@@ -1,38 +1,34 @@
-import type { ShareEmployeeStat } from '@crmanhung/shared';
-import { ShareStatsPerson } from './share-stats-person';
+import type { ShareStatsDisplayRow } from '@crmanhung/shared';
+import {
+  ShareStatsPerson,
+  shareStatsRowKey,
+  shareStatsShareCount,
+  shareStatsViewCount,
+} from './share-stats-person';
 
-export function ShareStatsCards({
-  items,
-  total,
-}: {
-  items: ShareEmployeeStat[];
-  total: number;
-}) {
+export function ShareStatsCards({ rows }: { rows: ShareStatsDisplayRow[] }) {
+  const total = rows.length;
   return (
     <section className="pw-cards" aria-label="Thống kê share">
-      {items.length === 0 ? (
-        <p className="pw-empty">Không có nhân viên.</p>
-      ) : (
-        <ul className="pw-card-list">
-          {items.map((row) => (
-            <li key={row.employeeId}>
-              <div className="pw-card pw-card-static">
-                <ShareStatsPerson row={row} />
-                <span className="pw-share-metrics">
-                  <span>
-                    Share <strong>{row.sharedListingCount}</strong>
-                  </span>
-                  <span>
-                    Xem <strong>{row.attributedViewCount}</strong>
-                  </span>
+      <ul className="pw-card-list">
+        {rows.map((row) => (
+          <li key={shareStatsRowKey(row)}>
+            <div className="pw-card pw-card-static">
+              <ShareStatsPerson row={row} />
+              <span className="pw-share-metrics">
+                <span>
+                  Share <strong>{shareStatsShareCount(row)}</strong>
                 </span>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+                <span>
+                  Xem <strong>{shareStatsViewCount(row)}</strong>
+                </span>
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
       <p className="pw-table-foot">
-        Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> nhân viên
+        Hiển thị <strong>{total}</strong> / Tổng <strong>{total}</strong> dòng
       </p>
     </section>
   );

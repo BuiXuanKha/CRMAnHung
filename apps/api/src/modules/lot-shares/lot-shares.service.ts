@@ -153,14 +153,40 @@ export class LotSharesService {
     }
   }
 
+  /**
+   * Public page view: cookie share hợp lệ → NV; không / mã không còn → Truy cập trực tiếp.
+   * JWT NV → không đếm.
+   */
+  async recordPublicPageView(shareCode: string | undefined, hasBearerToken: boolean) {
+    if (hasBearerToken) {
+      return { ok: true as const, viewCount: 0 };
+    }
+    const code = shareCode?.trim().toUpperCase() ?? '';
+    if (code) {
+      const share = await this.findActiveShare(code);
+      if (share) {
+        return this.incrementEmployeeView(share.employeeId);
+      }
+    }
+    return this.incrementDirectView();
+  }
+
   /** Cookie share còn hạn: mỗi lần khách đổi/tải trang public → +1 cho NV. */
   async recordAttributedPageView(shareCode: string, hasBearerToken: boolean) {
     if (hasBearerToken) {
       return { ok: true as const, viewCount: 0 };
     }
-    const code = shareCode.trim().toUpperCase();
+    const share = await this.findActiveShare(shareCode.trim().toUpperCase());
+    if (!share) {
+      throw new NotFoundException('Link share không hợp lệ.');
+    }
+    return this.incrementEmployeeView(share.employeeId);
+  }
+
+  private async findActiveShare(shareCode: string) {
+    if (!shareCode) return null;
     const share = await this.prisma.publicLotShare.findUnique({
-      where: { shareCode: code },
+      where: { shareCode },
       select: {
         employeeId: true,
         employee: { select: { isActive: true } },
@@ -168,11 +194,25 @@ export class LotSharesService {
       },
     });
     if (!share || !share.publicListing.isPublished || !share.employee.isActive) {
-      throw new NotFoundException('Link share không hợp lệ.');
+      return null;
     }
+    return share;
+  }
+
+  private async incrementEmployeeView(employeeId: string) {
     const row = await this.prisma.publicShareViewStat.upsert({
-      where: { employeeId: share.employeeId },
-      create: { employeeId: share.employeeId, viewCount: 1 },
+      where: { employeeId },
+      create: { employeeId, viewCount: 1 },
+      update: { viewCount: { increment: 1 } },
+      select: { viewCount: true },
+    });
+    return { ok: true as const, viewCount: row.viewCount };
+  }
+
+  private async incrementDirectView() {
+    const row = await this.prisma.publicDirectViewStat.upsert({
+      where: { id: 'direct' },
+      create: { id: 'direct', viewCount: 1 },
       update: { viewCount: { increment: 1 } },
       select: { viewCount: true },
     });
@@ -207,9 +247,9 @@ export class LotSharesService {
     throw new BadRequestException('Không tạo được mã share — thử lại sau.');
   }
 
-  /** ADMIN thống kê: mỗi NV, số listing đã tạo mã share. */
+  /** ADMIN thống kê: mỗi NV, số listing đã tạo mã share + lượt xem trực tiếp. */
   async listEmployeeShareStats() {
-    const [users, grouped, viewRows] = await Promise.all([
+    const [users, grouped, viewRows, directRow] = await Promise.all([
       this.prisma.user.findMany({
         where: { role: { in: ['STAFF', 'ADMIN'] } },
         select: {
@@ -228,6 +268,10 @@ export class LotSharesService {
       }),
       this.prisma.publicShareViewStat.findMany({
         select: { employeeId: true, viewCount: true },
+      }),
+      this.prisma.publicDirectViewStat.findUnique({
+        where: { id: 'direct' },
+        select: { viewCount: true },
       }),
     ]);
     const countByEmployee = new Map(
@@ -255,7 +299,11 @@ export class LotSharesService {
         if (byShare !== 0) return byShare;
         return a.fullName.localeCompare(b.fullName, 'vi');
       });
-    return { items, total: items.length };
+    return {
+      items,
+      total: items.length,
+      directViewCount: directRow?.viewCount ?? 0,
+    };
   }
 
   private randomShareCode(): string {

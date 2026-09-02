@@ -114,7 +114,7 @@ PublicPost                        (category, slug, status, cover, body) — khô
 | **Dashboard** | `/dashboard` | Tổng quan + menu trái. **ADMIN.** §12 |
 | **Lô đất** | `/dashboard/lo-dat` | List lô đăng web. STAFF + ADMIN. §13 |
 | **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). **ADMIN.** §14 |
-| **Thống kê** | `/dashboard/thong-ke` | List NV + số lô đã tạo link share. **ADMIN.** §20 |
+| **Thống kê** | `/dashboard/thong-ke` | List NV + số lô đã share + lượt xem (cookie NV và **Truy cập trực tiếp**). **ADMIN.** §20 |
 | Trang chủ khách | `/` | Ô tìm bài đăng (trên «Sản phẩm dành cho bạn») → catalog `?q=` · lô đã Đăng web · **Dự án nổi bật** = bài `PUBLISHED` `/du-an` (tối đa 3) |
 
 **Không** thêm công tắc Đăng web trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
@@ -142,8 +142,9 @@ Prefix `/api/v1`. Dashboard mock: `packages/shared/src/public-content.ts`.
 | GET | `/admin/public-web/posts` | JWT ADMIN | List bài (nháp + đã xuất bản) — **Postgres** |
 | POST | `/admin/public-web/posts` | JWT ADMIN | Soạn bài (tiêu đề + chuyên mục + body) — **Postgres** |
 | POST | `/admin/public-web/posts/gpt-content` | JWT ADMIN | Nest gọi OpenAI — bài **dự án** từ tên dự án → JSON SEO |
-| GET | `/admin/lot-shares/employee-stats` | JWT ADMIN | List NV + `sharedListingCount` + `attributedViewCount` |
-| POST | `/public/lot-shares/:code/page-view` | Không (bỏ nếu có JWT NV) | +1 lượt xem cho NV của mã share |
+| GET | `/admin/lot-shares/employee-stats` | JWT ADMIN | List NV + `sharedListingCount` + `attributedViewCount` + `directViewCount` |
+| POST | `/public/page-views` | Không (bỏ nếu có JWT NV) | +1 lượt xem: có `shareCode` hợp lệ → NV; không → **Truy cập trực tiếp** |
+| POST | `/public/lot-shares/:code/page-view` | Không (bỏ nếu có JWT NV) | +1 lượt xem cho NV của mã share (giữ tương thích) |
 | GET | `/public/listings` | Không | Lô đã đăng ∩ Mở bán → `publicCatalogListingSchema` |
 | GET | `/public/listings/:slug` | Không | Chi tiết `/mua-ban-nha-dat-huyen-nam-sach/[slug]` — 404 nếu nháp / đã gỡ / không Mở bán |
 | GET | `/public/posts` | Không | Bài `PUBLISHED` (`?category=` tuỳ chọn) → `publicGuestPostListResponseSchema` |
@@ -821,7 +822,7 @@ NV A / NV B mỗi người kho lô riêng; **Đăng web** đưa lô lên trang c
 
 Cookie `crmanhung_share` (httpOnly, SameSite=Lax, path `/`): payload `CODE~employeeId~expiresAt` (không JSON). Middleware gọi Nest loopback `:5050`, **ghi cookie** khi `?share=` đúng format (kể cả lúc lookup NV chậm). `maxAge` = thời hạn còn lại tới `expiresAt`. Lướt web không `?share=` **không** gia hạn. Google không gửi cookie → HTML bot = hotline công ty. JSON-LD / canonical luôn công ty.
 
-Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). **Lượt xem** (`attributedViewCount`): khách còn cookie share → mỗi lần tải hoặc chuyển trang public (trang chủ, catalog, chi tiết lô, bài viết…) cộng 1, **kể cả F5**. NV đã login CRM không đếm. Googlebot không cookie → không đếm. Chi tiết lô `force-dynamic`.
+Mã không khớp slug lô đang xem **vẫn hợp lệ** (không 404). **Lượt xem** (JS client, mỗi lần tải hoặc chuyển trang public — trang chủ, catalog, chi tiết lô, bài viết…; **F5 = +1**): khách còn cookie share → cộng cho NV (`attributedViewCount`); khách không cookie / hết hạn / máy khác → cộng **Truy cập trực tiếp** (`directViewCount`). NV đã login CRM không đếm. Googlebot không chạy JS → không đếm. Chi tiết lô `force-dynamic`.
 
 Thứ tự: NV đã login (có SĐT) → cookie/`?share=` → hotline công ty. Avatar = CDN khi có; không ảnh → chữ cái.
 
@@ -867,9 +868,9 @@ Contract: `matchPublicListingSearch` + `listingCatalogSearchPath` (`packages/sha
 
 ## 20. Thống kê share `/dashboard/thong-ke` (chốt 2026-09-02)
 
-**ADMIN.** STAFF không vào (redirect `/dashboard/lo-dat`). List NV + số lô đã bấm **Chia sẻ** + **lượt xem** trang khách khi còn cookie NV. Không đếm Gọi/Zalo.
+**ADMIN.** STAFF không vào (redirect `/dashboard/lo-dat`). List NV + số lô đã bấm **Chia sẻ** + **lượt xem** trang khách (cookie NV **và** không cookie). Không đếm Gọi/Zalo.
 
-Zod: `shareEmployeeStatsResponseSchema` — `GET /admin/lot-shares/employee-stats`.
+Zod: `shareEmployeeStatsResponseSchema` — `GET /admin/lot-shares/employee-stats` (`items` NV + `directViewCount`).
 
 Thứ tự: **20.1 máy tính** → **20.2 mobile**. Không H1 trùng chữ menu trái.
 
@@ -877,36 +878,36 @@ Thứ tự: **20.1 máy tính** → **20.2 mobile**. Không H1 trùng chữ menu
 
 ```
 ┌ Thống kê                                                    ┐
-│ Dòng phụ: số lô đã share + lượt xem khách (cookie)          │
+│ Dòng phụ: share NV + lượt xem (cookie / truy cập trực tiếp) │
 ├ Bảng §4.5 — không lọc cột, không Thao tác                    │
-└ Footer đếm NV                                               │
+└ Footer đếm dòng (NV + Truy cập trực tiếp)                    │
 ```
 
 #### 20.1.1 Thanh đầu
 
 1. **H1** `Thống kê`
-2. Dòng phụ: `Số lô đã tạo link share và lượt khách xem trang khi còn cookie NV. F5 cũng cộng 1.`
+2. Dòng phụ: `Số lô đã tạo link share và lượt khách xem trang. Cookie NV cộng cho nhân viên; không cookie = Truy cập trực tiếp. F5 cũng cộng 1.`
 
 #### 20.1.2 Bảng
 
 §4.5. Không icon lọc. Không bấm dòng.
 
-| Cột | Ô |
-|-----|---|
-| `#` | STT sau khi sắp xếp |
-| Nhân viên | Avatar 32px + **tên**; dòng phụ username. Hangtag **Đã khóa** `red` nếu `isActive = false` |
-| Đã share | Số lô đã tạo mã (`sharedListingCount`); `0` khi chưa |
-| Lượt xem | Mỗi lần khách (cookie) tải/đổi trang public (`attributedViewCount`); F5 = +1; `0` khi chưa |
+| Cột | Ô NV | Ô **Truy cập trực tiếp** |
+|-----|------|--------------------------|
+| `#` | STT sau khi sắp xếp | Cùng STT trong list đã sort |
+| Nhân viên | Avatar 32px + **tên**; dòng phụ username. Hangtag **Đã khóa** `red` nếu `isActive = false` | Icon Lucide `Globe` + **Truy cập trực tiếp**; dòng phụ `Không gắn nhân viên`. Không hangtag |
+| Đã share | Số lô đã tạo mã (`sharedListingCount`); `0` khi chưa | Luôn `0` |
+| Lượt xem | Khách còn cookie: mỗi lần tải/đổi trang public (`attributedViewCount`); F5 = +1; `0` khi chưa | Khách không cookie (`directViewCount`); cùng quy tắc F5; `0` khi chưa |
 
-Sắp xếp: `attributedViewCount` giảm dần, rồi `sharedListingCount`, rồi tên `vi`. Mọi User `STAFF` + `ADMIN` (kể cả 0 share / 0 xem).
+Sắp xếp (NV **và** dòng Truy cập trực tiếp): `attributedViewCount` / `directViewCount` giảm dần, rồi `sharedListingCount`, rồi tên `vi` (dòng trực tiếp xếp sau NV khi bằng điểm). Mọi User `STAFF` + `ADMIN` (kể cả 0 share / 0 xem). **Luôn** có đúng một dòng Truy cập trực tiếp — không tạo User giả.
 
-Trống: `Không có nhân viên.`
+Trống: không — luôn có dòng trực tiếp (kể cả 0 xem).
 
-Footer: `Hiển thị N / Tổng M nhân viên`.
+Footer: `Hiển thị N / Tổng M dòng` (NV + 1).
 
 ### 20.2 Giao diện mobile
 
-Cùng dữ liệu. Thẻ xếp dọc: avatar · tên · Share / Xem. Footer cùng 20.1.2. Menu dashboard cuộn ngang (mục **Thống kê**).
+Cùng dữ liệu. Thẻ xếp dọc: avatar / Globe · tên · Share / Xem. Footer cùng 20.1.2. Menu dashboard cuộn ngang (mục **Thống kê**).
 
 
 

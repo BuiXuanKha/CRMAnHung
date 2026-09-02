@@ -43,7 +43,7 @@ export default async function PublicLayout({ children }: { children: ReactNode }
   return (
     <div className="public-shell">
       <PublicShareContactProvider contact={shareContactFrom(attribution)}>
-        {attribution ? <ShareAttributedViewTracker shareCode={attribution.code} /> : null}
+        <ShareAttributedViewTracker shareCode={attribution?.code} />
         {children}
       </PublicShareContactProvider>
     </div>

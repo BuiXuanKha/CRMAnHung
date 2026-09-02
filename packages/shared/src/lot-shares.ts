@@ -243,9 +243,59 @@ export type ShareEmployeeStat = z.infer<typeof shareEmployeeStatSchema>;
 export const shareEmployeeStatsResponseSchema = z.object({
   items: z.array(shareEmployeeStatSchema),
   total: z.number().int().nonnegative(),
+  /** Khách không cookie share — mỗi lần tải/đổi trang public, F5 = +1. */
+  directViewCount: z.number().int().nonnegative(),
 });
 
 export type ShareEmployeeStatsResponse = z.infer<typeof shareEmployeeStatsResponseSchema>;
+
+export const SHARE_STATS_DIRECT_ID = '__direct__';
+
+export type ShareStatsDisplayRow =
+  | { kind: 'employee'; employee: ShareEmployeeStat }
+  | { kind: 'direct'; attributedViewCount: number };
+
+function shareStatsSortKey(row: ShareStatsDisplayRow): {
+  views: number;
+  shares: number;
+  name: string;
+  directLast: number;
+} {
+  if (row.kind === 'direct') {
+    return { views: row.attributedViewCount, shares: 0, name: '', directLast: 1 };
+  }
+  return {
+    views: row.employee.attributedViewCount,
+    shares: row.employee.sharedListingCount,
+    name: row.employee.fullName,
+    directLast: 0,
+  };
+}
+
+/** NV + đúng một dòng Truy cập trực tiếp. Sort: lượt xem → đã share → tên; trực tiếp sau NV khi bằng điểm. */
+export function mergeShareStatsDisplayRows(
+  items: ShareEmployeeStat[],
+  directViewCount: number,
+): ShareStatsDisplayRow[] {
+  const rows: ShareStatsDisplayRow[] = [
+    ...items.map((employee) => ({ kind: 'employee' as const, employee })),
+    { kind: 'direct', attributedViewCount: Math.max(0, Math.floor(directViewCount)) },
+  ];
+  return rows.sort((a, b) => {
+    const left = shareStatsSortKey(a);
+    const right = shareStatsSortKey(b);
+    if (right.views !== left.views) return right.views - left.views;
+    if (right.shares !== left.shares) return right.shares - left.shares;
+    if (left.directLast !== right.directLast) return left.directLast - right.directLast;
+    return left.name.localeCompare(right.name, 'vi');
+  });
+}
+
+export const publicPageViewRequestSchema = z.object({
+  shareCode: z.string().max(12).optional(),
+});
+
+export type PublicPageViewRequest = z.infer<typeof publicPageViewRequestSchema>;
 
 export const publicSharePageViewResponseSchema = z.object({
   ok: z.literal(true),

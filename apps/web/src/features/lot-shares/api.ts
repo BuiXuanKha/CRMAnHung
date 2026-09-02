@@ -50,11 +50,18 @@ export async function recordPublicLotShareVisit(
 export async function recordSharePageView(
   shareCode: string,
 ): Promise<PublicSharePageViewResponse | null> {
+  return recordPublicPageView(shareCode);
+}
+
+export async function recordPublicPageView(
+  shareCode?: string,
+): Promise<PublicSharePageViewResponse | null> {
+  const code = shareCode?.trim() ?? '';
   try {
-    return await apiFetch<PublicSharePageViewResponse>(
-      `/public/lot-shares/${encodeURIComponent(shareCode.trim())}/page-view`,
-      { method: 'POST' },
-    );
+    return await apiFetch<PublicSharePageViewResponse>('/public/page-views', {
+      method: 'POST',
+      body: JSON.stringify(code ? { shareCode: code } : {}),
+    });
   } catch {
     return null;
   }

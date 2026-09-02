@@ -678,6 +678,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-31 | `/lo-dat`: thiếu ảnh = ô xám + `ImageOff`; ô tìm không map chữ Nhà/Đất sang hangtag (lọc cột Phân loại) |
 | 2026-09-02 | STAFF header **Đăng web** → `/dashboard/lo-dat` (lô mình tạo). Preview **Gỡ web** khi đang hiện. Bài CMS + Tổng quan vẫn ADMIN |
 | 2026-09-02 | Dashboard menu **Thống kê** `/dashboard/thong-ke` (ADMIN): list NV + cột số lô đã tạo link share + lượt xem khách (cookie, gồm trang chủ, F5 = +1) |
+| 2026-09-02 | Thống kê: thêm dòng **Truy cập trực tiếp** (khách không cookie share); cùng F5 = +1; icon Lucide `Globe` |
 
 ---
 

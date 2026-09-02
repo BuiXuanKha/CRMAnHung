@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { mergeShareStatsDisplayRows } from '@crmanhung/shared';
 import { listShareEmployeeStats } from './api';
 import { ShareStatsCards } from './share-stats-cards';
 import { ShareStatsTable } from './share-stats-table';
@@ -14,6 +15,9 @@ export function ShareStatsPage() {
     queryFn: listShareEmployeeStats,
   });
   const data = query.data;
+  const rows = data
+    ? mergeShareStatsDisplayRows(data.items, data.directViewCount)
+    : [];
 
   return (
     <div className="pw-page">
@@ -21,8 +25,8 @@ export function ShareStatsPage() {
         <div>
           <h1>Thống kê</h1>
           <p>
-            Số lô đã tạo link share và lượt khách xem trang (trang chủ, lô, bài…) khi còn cookie
-            NV. F5 cũng cộng 1.
+            Số lô đã tạo link share và lượt khách xem trang. Cookie NV cộng cho nhân viên; không
+            cookie = Truy cập trực tiếp. F5 cũng cộng 1.
           </p>
         </div>
       </header>
@@ -36,10 +40,10 @@ export function ShareStatsPage() {
       ) : (
         <>
           <div className="pw-list-desktop">
-            <ShareStatsTable items={data.items} total={data.total} />
+            <ShareStatsTable rows={rows} />
           </div>
           <div className="pw-list-mobile">
-            <ShareStatsCards items={data.items} total={data.total} />
+            <ShareStatsCards rows={rows} />
           </div>
         </>
       )}

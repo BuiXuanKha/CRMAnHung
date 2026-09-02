@@ -1,5 +1,18 @@
-import type { ShareEmployeeStat } from '@crmanhung/shared';
+import { SHARE_STATS_DIRECT_ID, type ShareStatsDisplayRow } from '@crmanhung/shared';
+import { Globe } from 'lucide-react';
 import { CrmBadge } from '@/shared/ui/badge';
+
+export function shareStatsRowKey(row: ShareStatsDisplayRow): string {
+  return row.kind === 'direct' ? SHARE_STATS_DIRECT_ID : row.employee.employeeId;
+}
+
+export function shareStatsViewCount(row: ShareStatsDisplayRow): number {
+  return row.kind === 'direct' ? row.attributedViewCount : row.employee.attributedViewCount;
+}
+
+export function shareStatsShareCount(row: ShareStatsDisplayRow): number {
+  return row.kind === 'direct' ? 0 : row.employee.sharedListingCount;
+}
 
 function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -8,23 +21,36 @@ function initials(name: string): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export function ShareStatsPerson({ row }: { row: ShareEmployeeStat }) {
+export function ShareStatsPerson({ row }: { row: ShareStatsDisplayRow }) {
+  if (row.kind === 'direct') {
+    return (
+      <span className="pw-person">
+        <span className="pw-avatar" aria-hidden>
+          <Globe size={16} strokeWidth={2} />
+        </span>
+        <span className="pw-person-text">
+          <span className="pw-title">Truy cập trực tiếp</span>
+          <span className="pw-sub">Không gắn nhân viên</span>
+        </span>
+      </span>
+    );
+  }
+
+  const employee = row.employee;
   return (
     <span className="pw-person">
       <span className="pw-avatar" aria-hidden>
-        {row.avatarUrl ? (
+        {employee.avatarUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={row.avatarUrl} alt="" />
+          <img src={employee.avatarUrl} alt="" />
         ) : (
-          initials(row.fullName)
+          initials(employee.fullName)
         )}
       </span>
       <span className="pw-person-text">
-        <span className="pw-title">{row.fullName}</span>
-        <span className="pw-sub">{row.username}</span>
-        {row.isActive === false ? (
-          <CrmBadge tone="red">Đã khóa</CrmBadge>
-        ) : null}
+        <span className="pw-title">{employee.fullName}</span>
+        <span className="pw-sub">{employee.username}</span>
+        {employee.isActive === false ? <CrmBadge tone="red">Đã khóa</CrmBadge> : null}
       </span>
     </span>
   );

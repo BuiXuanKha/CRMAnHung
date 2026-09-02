@@ -5,11 +5,13 @@ import {
   buildLotShareUrl,
   contactFromAuthUser,
   guestLotShareUrl,
+  mergeShareStatsDisplayRows,
   nextPublicShareCookie,
   normalizeShareCode,
   pickShareCode,
   resolvePublicShareOrigin,
   serializePublicShareCookie,
+  type ShareEmployeeStat,
 } from './lot-shares.js';
 
 describe('normalizeShareCode', () => {
@@ -171,5 +173,44 @@ describe('nextPublicShareCookie', () => {
     });
     assert.equal(next.employeeId, 'emp-b');
     assert.equal(next.expiresAtMs, now + PUBLIC_SHARE_COOKIE_TTL_MS);
+  });
+});
+
+function stat(partial: Pick<ShareEmployeeStat, 'employeeId' | 'fullName'> & Partial<ShareEmployeeStat>): ShareEmployeeStat {
+  return {
+    username: partial.username ?? partial.employeeId,
+    phone: null,
+    role: 'STAFF',
+    isActive: true,
+    sharedListingCount: 0,
+    attributedViewCount: 0,
+    ...partial,
+  };
+}
+
+describe('mergeShareStatsDisplayRows', () => {
+  it('always appends one direct row and sorts by views then shares', () => {
+    const rows = mergeShareStatsDisplayRows(
+      [
+        stat({ employeeId: 'a', fullName: 'An', sharedListingCount: 2, attributedViewCount: 1 }),
+        stat({ employeeId: 'b', fullName: 'Bình', sharedListingCount: 9, attributedViewCount: 5 }),
+      ],
+      5,
+    );
+    assert.equal(rows[0]?.kind, 'employee');
+    if (rows[0]?.kind === 'employee') assert.equal(rows[0].employee.employeeId, 'b');
+    assert.equal(rows[1]?.kind, 'direct');
+    if (rows[1]?.kind === 'direct') assert.equal(rows[1].attributedViewCount, 5);
+    assert.equal(rows[2]?.kind, 'employee');
+  });
+
+  it('places the direct row after employees when counts tie', () => {
+    const rows = mergeShareStatsDisplayRows(
+      [stat({ employeeId: 'a', fullName: 'An' })],
+      0,
+    );
+    assert.equal(rows.length, 2);
+    assert.equal(rows[0]?.kind, 'employee');
+    assert.equal(rows[1]?.kind, 'direct');
   });
 });

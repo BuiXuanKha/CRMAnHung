@@ -409,6 +409,13 @@ model PublicShareViewStat {
   employee User @relation(fields: [employeeId], references: [id], onDelete: Cascade)
 }
 
+/// Lượt xem khách không cookie share (dòng Truy cập trực tiếp). Singleton `id = direct`.
+model PublicDirectViewStat {
+  id        String   @id
+  viewCount Int      @default(0)
+  updatedAt DateTime @updatedAt
+}
+
 /// 301 slug lô cũ → slug mới (sau khi đổi công thức tên+địa chỉ).
 model PublicLotSlugRedirect {
   id        String   @id @default(cuid())
