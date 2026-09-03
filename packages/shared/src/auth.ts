@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { UserRole } from './enums.js';
+import { digitsFromPhoneRaw } from './vn-phone.js';
 
 export const loginSchema = z.object({
   username: z.string().trim().min(1, 'Vui lòng nhập tên đăng nhập'),
@@ -43,7 +44,7 @@ const vnPhoneSchema = z
 const vnPhoneInputSchema = z
   .string()
   .trim()
-  .transform((v) => v.replace(/\D/g, ''))
+  .transform((v) => digitsFromPhoneRaw(v))
   .pipe(vnPhoneSchema);
 
 const usernameSchema = z

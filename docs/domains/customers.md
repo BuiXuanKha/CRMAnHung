@@ -178,7 +178,8 @@ Hiện khi **đã có** SĐT. Bấm → copy số (tick tạm).
 ##### 4. Icon SĐT **cam** (`#ea580c`)
 
 Hiện khi **chưa có** SĐT (và chưa xoá).  
-Bấm → modal **Thêm số điện thoại**. Trùng số → modal mục 15.
+Bấm → modal **Thêm số điện thoại**. Trùng số → modal mục 15.  
+Ô SĐT: dán `0977 656 280` / `+84…` lấy đủ 10 số (không để `maxLength` cắt khoảng trắng trước khi bỏ dấu cách).
 
 ##### 5. SĐT trên menu Thao tác
 

@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ImagePlus, UserPlus, UserRoundCog } from 'lucide-react';
 import { UserRole, type UserAdminListItem } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
+import { handlePhonePaste, phoneDigitsFromChange } from '@/shared/phone-input';
 import { Icon } from '@/shared/ui/icon';
 import { UserAvatar } from './user-avatar';
 
@@ -168,13 +169,15 @@ export function UserFormDialog({
             value={form.phone}
             disabled={busy}
             required
-            maxLength={10}
             placeholder="0xxxxxxxxx"
             onChange={(e) =>
               setForm((f) => ({
                 ...f,
-                phone: e.target.value.replace(/\D/g, '').slice(0, 10),
+                phone: phoneDigitsFromChange(e),
               }))
+            }
+            onPaste={(e) =>
+              handlePhonePaste(e, (digits) => setForm((f) => ({ ...f, phone: digits })))
             }
           />
         </label>

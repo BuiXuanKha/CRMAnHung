@@ -5,6 +5,7 @@
  */
 import { z } from 'zod';
 import { CustomerStatus } from './enums.js';
+import { digitsFromPhoneRaw } from './vn-phone.js';
 
 const vnPhoneSchema = z
   .string()
@@ -13,7 +14,7 @@ const vnPhoneSchema = z
 
 const vnPhoneInputSchema = z
   .string()
-  .transform((v) => v.replace(/\D/g, ''))
+  .transform((v) => digitsFromPhoneRaw(v))
   .pipe(vnPhoneSchema);
 
 export const customerPhoneSchema = z.object({

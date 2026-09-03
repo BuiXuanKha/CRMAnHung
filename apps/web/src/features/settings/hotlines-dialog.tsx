@@ -4,6 +4,7 @@ import { Phone } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import type { EmployeeHotline } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
+import { handlePhonePaste, phoneDigitsFromChange } from '@/shared/phone-input';
 import { createHotline, listMyHotlines, updateHotline } from '../customers/api';
 
 type Props = {
@@ -101,11 +102,11 @@ export function HotlinesSettingsDialog({ open, onClose }: Props) {
             type="tel"
             inputMode="numeric"
             value={phone}
-            maxLength={10}
             placeholder="0xxxxxxxxx"
             disabled={busy}
             required
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+            onChange={(e) => setPhone(phoneDigitsFromChange(e))}
+            onPaste={(e) => handlePhonePaste(e, setPhone)}
           />
         </label>
         <label>

@@ -4,6 +4,7 @@ import { Phone } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { addCustomerPhoneSchema, type CustomerListItem } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
+import { handlePhonePaste, phoneDigitsFromChange } from '@/shared/phone-input';
 
 type Props = {
   customer: CustomerListItem | null;
@@ -76,11 +77,14 @@ export function AddCustomerPhoneModal({
               autoComplete="tel"
               placeholder="0xxxxxxxxx"
               value={phone}
-              maxLength={10}
               disabled={busy}
               required
               onChange={(e) => {
-                setPhone(e.target.value.replace(/\D/g, '').slice(0, 10));
+                setPhone(phoneDigitsFromChange(e));
+                if (parseError) setParseError(null);
+              }}
+              onPaste={(e) => {
+                handlePhonePaste(e, setPhone);
                 if (parseError) setParseError(null);
               }}
             />

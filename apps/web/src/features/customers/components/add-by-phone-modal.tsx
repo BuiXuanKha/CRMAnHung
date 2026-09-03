@@ -8,6 +8,7 @@ import {
   type EmployeeHotline,
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
+import { handlePhonePaste, phoneDigitsFromChange } from '@/shared/phone-input';
 
 type Props = {
   open: boolean;
@@ -136,11 +137,11 @@ export function AddByPhoneModal({
             inputMode="numeric"
             autoComplete="tel"
             value={phone}
-            maxLength={10}
             placeholder="0xxxxxxxxx"
             disabled={busy || noHotlines}
             required
-            onChange={(e) => setPhone(e.target.value.replace(/\D/g, '').slice(0, 10))}
+            onChange={(e) => setPhone(phoneDigitsFromChange(e))}
+            onPaste={(e) => handlePhonePaste(e, setPhone)}
           />
         </label>
         <label>

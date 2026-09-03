@@ -1,4 +1,5 @@
 export * from './enums.js';
+export * from './vn-phone.js';
 export * from './auth.js';
 export * from './customers.js';
 export * from './customer-chat-urls.js';
