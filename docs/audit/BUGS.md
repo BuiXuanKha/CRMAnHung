@@ -12,6 +12,15 @@ File này là sổ theo dõi lỗi của **toàn bộ project**. Không xóa và
 6. Không kết luận khi chưa đủ bằng chứng. Ghi `NEEDS VERIFICATION` thay vì khẳng định đó là BUG.
 7. Không tự sửa bug sau khi phát hiện. Owner quyết định bug nào được fix.
 
+## Kiểm thử trình duyệt
+
+Khi cần xác minh chức năng thực tế trên UI:
+
+1. Chỉ dùng tài khoản kiểm thử do owner cung cấp (ngoài git). **Không** ghi mật khẩu vào file này hay bất kỳ file nào trong repo.
+2. Tài khoản được phép: `Admin` (quản trị), `kha` (user). Không dùng tài khoản khác.
+3. Chỉ đọc / điều hướng / quan sát. Mọi thao tác **tạo, sửa, hoặc xóa dữ liệu thực tế** phải báo owner trước và **không tự thực hiện**.
+4. Bug phát hiện qua trình duyệt ghi thêm các trường dưới đây (ngoài mẫu chuẩn).
+
 ## Trạng thái sổ
 
 | Trường | Giá trị |
@@ -39,6 +48,14 @@ Mỗi mục bug tối thiểu gồm:
 - **Evidence** — dẫn code / hành vi quan sát được; không suy đoán
 - **Status** — mặc định `OPEN` (hoặc `NEEDS VERIFICATION` nếu chưa đủ bằng chứng)
 
+Nếu phát hiện qua trình duyệt, **bắt buộc** thêm:
+
+- **Test account** — `Admin` hoặc `kha`
+- **Thao tác đã thực hiện**
+- **Kết quả thực tế**
+- **Kết quả mong đợi**
+- **Cách tái hiện**
+
 Mẫu:
 
 ```md
@@ -56,11 +73,34 @@ Mẫu:
 - **Status:** OPEN
 ```
 
+Mẫu (phát hiện qua trình duyệt):
+
+```md
+### BUG-NNN — <tiêu đề ngắn>
+
+- **Severity:** HIGH
+- **Module:** customers
+- **File:** `apps/web/src/features/customers/...`
+- **Function:**
+- **Vị trí code:**
+- **Problem:**
+- **Root cause:**
+- **Impact:**
+- **Evidence:**
+- **Test account:** kha
+- **Thao tác đã thực hiện:**
+- **Kết quả thực tế:**
+- **Kết quả mong đợi:**
+- **Cách tái hiện:**
+- **Status:** OPEN
+```
+
 ## Nhật ký audit
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
 | 2026-09-03 | — | — | Khởi tạo `docs/audit/BUGS.md`. Chưa audit. Chờ owner giao module đầu tiên. |
+| 2026-09-03 | — | — | Bổ sung quy tắc kiểm thử trình duyệt (tài khoản Admin / kha; cấm tự tạo-sửa-xóa dữ liệu; mẫu bug UI). Mật khẩu không lưu trong repo. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
