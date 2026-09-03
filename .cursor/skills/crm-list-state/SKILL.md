@@ -15,7 +15,7 @@ Nhớ **ô tìm + lọc + selectedId + vị trí cuộn** khi rời list (chi ti
 | Key | `crmanhung:<feature>-list-state` |
 | Payload | search, filters, `selectedId`, `scrollTop`, `anchorId` |
 | Row DOM | `data-list-row-id={id}` trên mỗi dòng/thẻ |
-| Đổi lọc/search | Reset `scrollTop` về 0 |
+| Đổi lọc/search | Reset `scrollTop` về 0 **sau** restore; không cùng layout pass với restore (cache RQ từng kéo list về đầu) |
 | Logout | `clearAllListStates()` (auth) — xóa mọi `*-list-state` |
 | Không nhớ | Panel rail / tab phải |
 
@@ -26,7 +26,7 @@ Nhớ **ô tìm + lọc + selectedId + vị trí cuộn** khi rời list (chi ti
    - `getActiveListScrollEl`, `needsMoreListScrollHeight` (nếu infinite scroll)
    - `useCrmInfiniteList` — tải 50, cuộn gần đáy 160px thì nối thêm (`CRM_LIST_PAGE_SIZE` / `CRM_LIST_LOAD_MORE_PX`)
 2. Feature file ví dụ: `features/lodats/list-state.ts`, `features/customers/list-state.ts`
-3. Trên list page: peek → restore filters trước fetch; save khi scroll / đổi lọc / `pagehide` / trước `router.push`
+3. Trên list page: peek → restore filters trước fetch; save khi scroll / đổi lọc / `pagehide` / trước `router.push`. Đánh dấu `restoredFiltersKey` lúc restore xong; `resetListScrollIfFiltersChanged` chỉ cuộn về 0 khi lọc **thay đổi**.
 4. Gắn `scrollRef` + `onScroll` vào vùng cuộn (bảng desktop / thẻ mobile); `onScroll` gọi `loadMoreIfNearEnd(el)`
 5. Che list lúc restore (`is-restoring` opacity 0, timeout ~4s) nếu cần tránh nháy đầu trang
 6. Footer: `Hiển thị n / Tổng N` khi chưa hết; `Tổng N` khi đã tải hết; `— Đang tải thêm…` khi `isFetchingNextPage`

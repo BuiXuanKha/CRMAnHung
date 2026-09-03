@@ -112,7 +112,11 @@
 }
 
 .tx-list-restore {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .tx-list-restore.is-restoring .tx-table-shell,

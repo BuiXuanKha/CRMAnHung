@@ -131,6 +131,7 @@ Các màn list (`/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`) dùng 
 
 - **sessionStorage** theo tab (key `crmanhung:<feature>-list-state`)
 - Lưu: ô tìm, bộ lọc, `selectedId`, `scrollTop` + `anchorId`
+- Restore: ưu tiên `anchorId` (dòng/thẻ đang thấy), rồi `scrollTop`. Đổi lọc mới cuộn về 0 — không xóa vị trí lúc vừa restore (Back từ chi tiết, cache React Query).
 - Đăng xuất → xóa mọi key `*-list-state`
 - Feature bọc thin store (`createListStateStore`) — xem skill `crm-list-state`
 - **Cuộn tải thêm:** `useCrmInfiniteList` — mỗi lần 50 dòng, gần đáy 160px thì nối trang (`/khach-hang`, `/lo-dat`)

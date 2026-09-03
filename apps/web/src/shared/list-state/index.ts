@@ -4,6 +4,7 @@ export {
   getActiveListScrollEl,
   maxListScrollTop,
   needsMoreListScrollHeight,
+  resetListScrollIfFiltersChanged,
   restoreListScroll,
   type ListScrollSnapshot,
 } from './scroll';

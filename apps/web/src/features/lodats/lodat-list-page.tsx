@@ -13,7 +13,7 @@ import {
   type LodatListQuery,
   type LodatListingStatus,
 } from '@crmanhung/shared';
-import { needsMoreListScrollHeight, useCrmInfiniteList } from '@/shared/list-state';
+import { needsMoreListScrollHeight, resetListScrollIfFiltersChanged, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
@@ -96,6 +96,7 @@ export function LodatListPage() {
   const [listConcealed, setListConcealed] = useState(false);
   const restoreSnap = useRef<LodatListSavedState | null>(null);
   const restoreDone = useRef(false);
+  const restoredFiltersKey = useRef<string | null>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const cardsScrollRef = useRef<HTMLDivElement>(null);
   const persistRef = useRef({
@@ -172,6 +173,16 @@ export function LodatListPage() {
 
   const items = rawItems;
   const mobileFilterCount = countMobileLodatFilters(status, priceBracket);
+  const filterKey = [
+    keyword,
+    status,
+    kind,
+    extra.photo,
+    extra.address,
+    extra.area,
+    extra.direction,
+    priceBracket,
+  ].join('\0');
 
   const toggleMut = useMutation({
     mutationFn: (plot: LodatListItem) => {
@@ -250,26 +261,32 @@ export function LodatListPage() {
     const snap = restoreSnap.current;
     if (!snap) {
       restoreDone.current = true;
+      restoredFiltersKey.current = filterKey;
       return;
     }
     if (items.length === 0) {
       restoreDone.current = true;
       restoreSnap.current = null;
+      restoredFiltersKey.current = filterKey;
       setListConcealed(false);
       return;
     }
     const root = getListScrollEl();
-    // Chưa đủ chiều cao cho vị trí đã lưu → nạp thêm trang rồi mới đặt scroll
+    const missingAnchor = snap.anchorId
+      ? !root?.querySelector(`[data-list-row-id="${CSS.escape(snap.anchorId)}"]`)
+      : false;
+    // Chưa đủ chiều cao / chưa có thẻ đã nhớ → nạp thêm trang rồi mới đặt scroll
     if (
       items.length < total &&
-      needsMoreListScrollHeight(root, snap.scrollTop) &&
-      list.hasNextPage
+      list.hasNextPage &&
+      (needsMoreListScrollHeight(root, snap.scrollTop) || missingAnchor)
     ) {
       void list.fetchNextPage();
       return;
     }
     restoreLodatListScroll(root, snap);
     restoreDone.current = true;
+    restoredFiltersKey.current = filterKey;
     restoreSnap.current = null;
     setListConcealed(false);
   }, [
@@ -279,6 +296,7 @@ export function LodatListPage() {
     list.isLoading,
     list.isFetchingNextPage,
     list.hasNextPage,
+    filterKey,
   ]);
 
   // List ngắn hơn khung (màn cao / lọc chặt) → tự nạp thêm cho đủ cuộn
@@ -293,20 +311,13 @@ export function LodatListPage() {
   }
 
   useLayoutEffect(() => {
-    if (!restoreReady || restoreSnap.current || !restoreDone.current) return;
-    const root = getListScrollEl();
-    if (root) root.scrollTop = 0;
-  }, [
-    keyword,
-    status,
-    kind,
-    extra.photo,
-    extra.address,
-    extra.area,
-    extra.direction,
-    priceBracket,
-    restoreReady,
-  ]);
+    resetListScrollIfFiltersChanged(
+      getListScrollEl(),
+      restoredFiltersKey,
+      filterKey,
+      restoreReady && restoreDone.current && !restoreSnap.current,
+    );
+  }, [filterKey, restoreReady]);
 
   useEffect(() => {
     if (!restoreReady || listConcealed || !restoreDone.current) return;

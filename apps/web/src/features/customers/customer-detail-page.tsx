@@ -34,7 +34,7 @@ export function CustomerDetailPage() {
   });
 
   function goBack() {
-    router.push('/khach-hang');
+    router.push('/khach-hang', { scroll: false });
   }
 
   if (detail.isLoading) {

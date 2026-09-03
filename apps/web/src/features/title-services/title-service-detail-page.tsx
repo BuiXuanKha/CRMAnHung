@@ -77,7 +77,7 @@ export function TitleServiceDetailPage() {
   return (
     <div className="sd-detail-page">
       <div className="sd-detail-inner">
-        <Link href="/dich-vu-so-do" className="sd-detail-back">
+        <Link href="/dich-vu-so-do" scroll={false} className="sd-detail-back">
           ← Dịch vụ sổ đỏ
         </Link>
 
