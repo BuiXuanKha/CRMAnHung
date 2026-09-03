@@ -17,7 +17,7 @@
 | Validation / contract | **Zod** trong `@crmanhung/shared` | Chỉ class-validator — không share được với Web/Extension |
 | Web | **Next.js 15 (App Router) + React 19 + TanStack Query** | Vite SPA thuần — không đủ cho web **public** (SEO/SSR); xem ADR 0006 |
 | State server | TanStack Query | Redux — quá nặng cho form CRUD |
-| Auth | JWT **access ngắn** + **refresh rotation** | JWT 7 ngày cố định như hệ cũ |
+| Auth | JWT **access ngắn** + **refresh rotation** (mặc định 30 ngày) | JWT dài cố định không rotation như hệ cũ |
 | Extension | Chrome MV3 + TS (esbuild) | Giữ vanilla khổng lồ một file — sẽ tách module khi port scanner |
 | Deploy | Cùng VPS Mắt Bão, domain `anhungland.com` | Server mới — chưa cần chi phí/ops |
 

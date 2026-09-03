@@ -128,7 +128,7 @@ DATABASE_URL="postgresql://crmanhung:<password>@127.0.0.1:5432/crmanhung?schema=
 JWT_ACCESS_SECRET=<random ≥ 32 ký tự>
 JWT_REFRESH_SECRET=<random ≥ 32 ký tự khác>
 JWT_ACCESS_EXPIRES_IN=15m
-JWT_REFRESH_EXPIRES_IN=7d
+JWT_REFRESH_EXPIRES_IN=30d
 CORS_ORIGINS=https://anhungland.com
 R2_ACCOUNT_ID=271dac0fb7f61cb74a3d5427b93661bc
 R2_ACCESS_KEY_ID=<r2_access_key>

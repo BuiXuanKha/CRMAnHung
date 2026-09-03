@@ -150,7 +150,7 @@ export class AuthService {
     );
 
     const refreshToken = randomBytes(48).toString('base64url');
-    const expiresIn = this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '7d';
+    const expiresIn = this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '30d';
     const expiresAt = this.parseExpiryDate(expiresIn);
 
     await this.prisma.refreshToken.create({

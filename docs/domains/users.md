@@ -40,7 +40,7 @@ Mật khẩu: bcrypt cost ≥ 12. Không lưu plaintext.
 
 1. **Đăng nhập** — username + mật khẩu → JWT access + refresh → ADMIN `/dashboard`, STAFF `/khach-hang`
 2. **Sai / khoá** — cùng câu: «Tên đăng nhập hoặc mật khẩu không đúng»; user `isActive=false` không vào được
-3. **Phiên** — F5: còn refresh thì `/auth/me`; hết hạn → `/login`
+3. **Phiên** — access ~15 phút (tự refresh); refresh **30 ngày**. F5: còn refresh thì `/auth/me`; hết hạn → `/login`
 4. **Đăng xuất** — avatar menu → revoke refresh → `/login`
 
 ## 5. Quan hệ

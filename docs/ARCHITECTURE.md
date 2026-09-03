@@ -35,7 +35,7 @@ Production mục tiêu (sau khi migrate): kế thừa nghiệp vụ An Hưng Lan
 | ORM / DB | Prisma + **PostgreSQL** | Schema rõ, migrate chuẩn; giống nhau từ dev → prod |
 | Object storage | **Cloudflare R2** (S3 API) | Ảnh/file không nằm disk VPS |
 | Validation | Zod (`@crmanhung/shared`) + Nest ValidationPipe | Contract dùng chung FE/BE/Extension |
-| Auth | JWT access (ngắn) + refresh (rotation) | Bảo mật hơn JWT 7 ngày cố định |
+| Auth | JWT access (ngắn) + refresh (rotation, mặc định **30 ngày**) | Bảo mật hơn JWT dài cố định không rotation |
 | Web | **Next.js 15 (App Router) + React 19 + TanStack Query** | Public web + CRM sau login; SEO/SSR cho trang mở |
 | Extension | Chrome MV3 + TypeScript (esbuild) | Cùng type với API |
 | Lint/format | ESLint + Prettier (workspace) | Chất lượng đồng đều |
