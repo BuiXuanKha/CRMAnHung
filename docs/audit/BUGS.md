@@ -25,12 +25,12 @@ Khi cần xác minh chức năng thực tế trên UI:
 
 | Trường | Giá trị |
 |--------|---------|
-| ID tiếp theo | `BUG-047` |
-| Tổng bug đã ghi | 46 |
-| OPEN | 46 |
+| ID tiếp theo | `BUG-084` |
+| Tổng bug đã ghi | 83 |
+| OPEN | 83 |
 | NEEDS VERIFICATION | 0 |
 | FIXED / CLOSED | 0 |
-| Lần audit gần nhất | 2026-09-03 — Messenger ingest (`from-extension`) / tin đã lưu / mapping UID–thread–Person |
+| Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
 
@@ -106,6 +106,11 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | Lô đất / map chủ / giá-DT-MT-hướng / trạng thái / public listing | BUG-023 … BUG-034 | Source: `lodats.service`/`dto`/`schema.prisma`, `packages/shared/src/lodats.ts`, `apps/web/src/features/lodats`, `transactions.service` (đồng bộ map), `public-content.service` (Đăng web ∩ Mở bán), `customers-view` lodatCount. Không sửa code. Không login (CF 1010; không tạo/sửa/xóa dữ liệu thật). |
 | 2026-09-03 | Share lô public / cookie / thống kê / authz API | BUG-035 … BUG-040 | Source: `lot-shares.service` + public/admin controllers, `public-listings` share-link, `lodats` share-link, middleware cookie, `packages/shared/src/lot-shares.ts`, web `features/lot-shares` + `ProductShareButton`. Không có Share nội bộ CRM (cấp quyền lô giữa NV). Không sửa code. Không login. Không ghi trùng BUG-003. |
 | 2026-09-03 | Messenger ingest / tin đã lưu / UID–thread–Person | BUG-041 … BUG-046 | Source: `from-extension.service`/`parse`, Prisma `CustomerMessenger*`, `GET /customers/:id/messages`, web `ChatThread` rail list, `apps/extension` stub. Đối chiếu scanner cũ `MESSAGE_MAX_COUNT=500`. Không sửa code. Không ghi trùng BUG-013 / 016 / 021. |
+| 2026-09-03 | Dashboard / địa chỉ / kho lô / GD / sổ đỏ / CMS bài / lọc-phân trang còn lại | BUG-047 … BUG-058 | Source: `public-content` + `staff-lots`/`api.ts` dashboard, `addresses`/`admin-units`, `transactions`, `title-services`, `customers-filters` ngân sách, `users` hotline, Prisma `ProjectLot`. Không sửa code. Không commit/push. Không login (CF 1010; không tạo/sửa/xóa dữ liệu thật). Không ghi trùng BUG-009 / 016 / 023–025 / 030 / 032 / 037. |
+| 2026-09-03 | Liên kết toàn hệ thống (cross-module flows) | BUG-059 … BUG-065 | Trace FE→API→DB→module liên quan. Source: `changeOwner` ∩ TX, xóa ảnh lô/địa chỉ ∩ snapshot/R2/`countPublicImageKeyRefs`, overlay listing ∩ `lodats.update`, `Customer.isHidden` ∩ TX/sổ đỏ/chat, `users.remove` FK, ingest FB UID ∩ `EmployeeFacebookProfile`. Không sửa code. Không commit/push. Không login. Không ghi trùng BUG-001 / 003 / 016 / 021 / 023–028 / 032 / 034 / 036 / 046 / 049. |
+| 2026-09-03 | SEO / URL public (slug → API → Next → metadata/sitemap/robots/OG/JSON-LD) | BUG-066 … BUG-080 | Source: `toPublicSlug`/`uniqueSlug`/`PublicLotSlugRedirect`, `public-content.service`, hub `buildHubSlugMaps`, `sitemap.ts`/`robots.ts`, `listing-seo`/`post-seo`/`listing-hub-seo`, revalidate, guest `api.ts` nuốt lỗi, `og-default.png` không có trong `apps/web/public`. Không sửa code. Không commit/push. Không login (CF 1010). Không ghi trùng BUG-023 / 024 / 056 / 062 (chỉ hệ quả SEO riêng). |
+| 2026-09-03 | Browser audit — public live HTML | BUG-081 … BUG-082 | `https://anhungland.com` UA Chrome: title trang chủ lặp brand; `GET /dashbroad` 200 prerender (không 307). Xác nhận live BUG-071 (chuyên mục trống vẫn 200+index+sitemap). `og-default.png` production 200 (BUG-075 là thiếu file trong git). Không ghi trùng 071/075. Chưa xong CRM login UI (agent trình duyệt đang chạy). Không sửa code. Không commit/push. |
+| 2026-09-03 | Browser audit — CRM Admin + kha | BUG-083 | UI: login/validation, list khách/lô/GD/sổ, fake ID 404, kha bị chặn bài-viết/thống-kê/user/địa-chỉ. kha mở được stub `/quan-tri/khach-hang` (không redirect). Không ghi: kha `/dashboard`→`/dashboard/lo-dat` (đúng Đăng web); 404 public đã có link Trang chủ. Lỡ bấm «Chia sẻ» lô (createOrGet). Không sửa/xóa. Không commit/push. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -116,14 +121,14 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | auth | `apps/api/src/modules/auth` | `apps/web/src/features/auth` | Đăng nhập / JWT |
 | users | `apps/api/src/modules/users` | `apps/web/src/features/users` | Quản trị user, hotline |
 | customers | `apps/api/src/modules/customers` | `apps/web/src/features/customers` | Khách hàng, care, phone, extension ingest |
-| addresses | `apps/api/src/modules/addresses` | `apps/web/src/features/addresses` | Địa chỉ, đơn vị hành chính |
-| lodats | `apps/api/src/modules/lodats` | `apps/web/src/features/lodats` | Lô đất |
-| transactions | `apps/api/src/modules/transactions` | `apps/web/src/features/transactions` | Giao dịch |
-| title-services | `apps/api/src/modules/title-services` | `apps/web/src/features/title-services` | Dịch vụ sổ đỏ |
+| addresses | `apps/api/src/modules/addresses` | `apps/web/src/features/addresses` | Địa chỉ, đơn vị hành chính — audit 2026-09-03 (còn lại) |
+| lodats | `apps/api/src/modules/lodats` | `apps/web/src/features/lodats` | Lô đất — audit trước; kho `ProjectLot` ghi BUG-048 |
+| transactions | `apps/api/src/modules/transactions` | `apps/web/src/features/transactions` | Giao dịch — audit 2026-09-03 |
+| title-services | `apps/api/src/modules/title-services` | `apps/web/src/features/title-services` | Dịch vụ sổ đỏ — audit 2026-09-03 |
 | lot-shares | `apps/api/src/modules/lot-shares` | `apps/web/src/features/lot-shares` | Share lô, thống kê xem |
-| public-content | `apps/api/src/modules/public-content` | `apps/web/src/features/public-content` | CMS bài viết / listing admin |
-| public web | controllers public trong API | `apps/web/src/features/public` | Site công khai anhungland.com |
-| settings | — | `apps/web/src/features/settings` | Cài đặt CRM |
+| public-content | `apps/api/src/modules/public-content` | `apps/web/src/features/public-content` | CMS bài / listing / dashboard — audit 2026-09-03 (còn lại) |
+| public web | controllers public trong API | `apps/web/src/features/public` | Catalog khách (list ∩ Mở bán); slug chi tiết = BUG-023; SEO/URL = BUG-066…080 |
+| settings | — | `apps/web/src/features/settings` | Hotline + sổ địa chỉ (Admin) |
 | health | `apps/api/src/modules/health` | — | Health check |
 | storage | `apps/api/src/storage` | — | Cloudflare R2 |
 | extension | — | `apps/extension` | Chrome MV3 |
@@ -180,6 +185,43 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | OPEN |
 | BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | OPEN |
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | OPEN |
+| BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | OPEN |
+| BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | OPEN |
+| BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | OPEN |
+| BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | OPEN |
+| BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | OPEN |
+| BUG-052 | MEDIUM | title-services | List sổ đỏ `take: 500`, `total: items.length` — cắt im lặng. | OPEN |
+| BUG-053 | MEDIUM | addresses | List địa chỉ `take: 500`, `total: items.length` — picker/sổ thiếu địa chỉ cũ. | OPEN |
+| BUG-054 | MEDIUM | transactions / title-services | `nextCode()` đọc max rồi +1, không khóa — race trùng `code` unique → 500. | OPEN |
+| BUG-055 | MEDIUM | customers | Lọc tài chính theo khoảng vẫn khớp khách «Chưa xác định» (min/max null). | OPEN |
+| BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN |
+| BUG-057 | MEDIUM | addresses | Đổi `PROJECT` → `REGULAR` không kiểm kho `ProjectLot` — picker kho chết, lô cũ còn. | OPEN |
+| BUG-058 | MEDIUM | transactions / lodats | Form tạo GD (không `?lodatId`) picker tối đa 200 lô — lô cũ không chọn được. | OPEN |
+| BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | OPEN |
+| BUG-060 | HIGH | lodats / transactions | Xóa ảnh lô không đếm `TransactionSnapshotImage` — xóa R2, ảnh GD gãy. | OPEN |
+| BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | OPEN |
+| BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | OPEN |
+| BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | OPEN |
+| BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | OPEN |
+| BUG-065 | MEDIUM | customers / messenger / users | Ingest tin `employeeFacebookUid` không khớp profile NV; không API gắn UID NV. | OPEN |
+| BUG-066 | HIGH | public-content / slug | Slug lô từ editor/GPT lưu raw — không `toPublicSlug` (dấu, hoa, khoảng, `/`). | OPEN |
+| BUG-067 | HIGH | public-content / slug | `uniqueSlug` không chừa `PublicLotSlugRedirect.fromSlug` — listing mới chiếm URL đang 301. | OPEN |
+| BUG-068 | HIGH | public-content / hub | Hub `/xa/…` tính lúc đọc, đổi khi tập lô đổi; không bảng 301. | OPEN |
+| BUG-069 | HIGH | public-content / hub | Hub slug chi tiết (mọi `isPublished`) ≠ catalog/sitemap (chỉ Mở bán) → link nội bộ 404. | OPEN |
+| BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN |
+| BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | OPEN |
+| BUG-072 | HIGH | public web / sitemap | Guest fetch nuốt lỗi API → sitemap/catalog rỗng; chi tiết slug thành 404 giả. | OPEN |
+| BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm `isPublished` / Mở bán — trỏ tới 404 hoặc BUG-023. | OPEN |
+| BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | OPEN |
+| BUG-075 | MEDIUM | public web / OG | `/og-default.png` không có trong `apps/web/public` — OG/Twitter/JSON-LD fallback 404. | OPEN |
+| BUG-076 | MEDIUM | public web / canonical | `[category]` không hợp lệ: metadata noindex nhưng không gỡ canonical trang chủ. | OPEN |
+| BUG-077 | MEDIUM | public-content / hub | Hai địa chỉ khác nhau `toPublicSlug` trùng → một hub URL, trộn listing. | OPEN |
+| BUG-078 | MEDIUM | public-content / metadata | `title` / `seoTitle` không unique — hai lô/bài trùng document title. | OPEN |
+| BUG-079 | LOW | public web | `getProductBySlug` mock đè gallery/mô tả listing thật nếu trùng slug demo. | OPEN |
+| BUG-080 | LOW | public-content / slug | Slug lô `toPublicSlug(..., 0)` không cắt độ dài; title+location → URL cực dài. | OPEN |
+| BUG-081 | MEDIUM | public web / metadata | `<title>` trang chủ lặp «An Hưng Land» hai lần (live). | OPEN |
+| BUG-082 | MEDIUM | public web / CRM | `/dashbroad` (alias gõ sai) trả HTTP 200 cache, không redirect `/dashboard`. | OPEN |
+| BUG-083 | MEDIUM | web authz | STAFF mở `/quan-tri/khach-hang` thấy stub «Registry ADMIN»; không redirect. | OPEN |
 
 ## Danh sách bug
 
@@ -779,5 +821,501 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** API list đầy đủ; màn chi tiết không gắn thread.
 - **Impact:** Chậm/timeout; NV không thấy chat lúc đang ở chi tiết khách.
 - **Evidence:** `listMessages` không limit. `customer-detail-page.tsx` không `listCustomerMessages`. `customer-list-page.tsx` rail `ChatThread`.
+- **Status:** OPEN
+
+### BUG-047 — Dashboard / Đăng web cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất
+
+- **Severity:** HIGH
+- **Module:** public-content / dashboard
+- **File:** `apps/web/src/features/public-content/api.ts`, `apps/web/src/features/public-content/staff-lots.ts`, `apps/web/src/features/public-content/public-web-dashboard.tsx`
+- **Function:** `loadOpenPlots`, `getPublicWebDashboard`, `listStaffOpenLots`, `buildPublicWebDashboard`
+- **Vị trí code:** `loadOpenPlots` → `listLodats({ status: DANG_BAN, limit: LODAT_LIST_MAX_PAGE_SIZE })` (`200`, không lặp `offset`). `publishedLotCount` / `pendingLotCount` = đếm `staffOpen` (giao `plots` đã cắt ∩ overlay). `recentLots: lots.slice(0, 8)` từ `GET /admin/public-web/lots`. Dialog «Đăng lô» = `(data?.recentLots ?? []).filter(!isPublished)`. `/dashboard/lo-dat` dùng cùng `loadOpenPlots`.
+- **Problem:** (1) Công ty / Admin > 200 lô đang Mở bán: thẻ «Lô đang hiện / Chờ đăng» thiếu; list `/dashboard/lo-dat` không hiện lô ngoài 200 `updatedAt` mới nhất — không soạn/đăng được. (2) Nút Tổng quan «Đăng lô» không lấy lô Mở bán chưa có hàng `PublicLotListing`; chỉ unpublished nằm trong 8 listing `updatedAt` mới nhất. Nếu 8 hàng đó đều đã đăng → dialog «Không còn lô chờ đăng» dù `pendingLotCount` > 0. (3) Lô Tạm dừng vẫn `isPublished` (BUG-023) không vào `staffOpen` (chỉ `DANG_BAN`) nên thẻ «Lô đang hiện» thấp hơn catalog slug.
+- **Root cause:** Dashboard ghép client: cap list lô CRM + slice overlay; không COUNT/full join Mở bán × listing.
+- **Impact:** Admin tưởng hết lô chờ đăng / số liệu sai; lô Mở bán cũ không lên web; lệch với `GET /public/listings` (không cắt 200).
+- **Evidence:** `LODAT_LIST_MAX_PAGE_SIZE = 200`. `buildPublicWebDashboard` đếm `staffOpen` không đếm `lots.filter(isPublished)`. `PublishLotDialog` `pendingLots` từ `recentLots`. Domain `public-content.md` §12: Chờ đăng = «Mở bán CRM, chưa Đăng web».
+- **Status:** OPEN
+
+### BUG-048 — Không có API/UI quản lý kho lô (`ProjectLot`)
+
+- **Severity:** HIGH
+- **Module:** addresses / lodats
+- **File:** `apps/api/prisma/schema.prisma` (`model ProjectLot`), `apps/api/src/modules/lodats/lodats.service.ts` (`listProjectLots`), `apps/api/scripts/migrate-project-lots-from-legacy.ts`
+- **Function:** (không có `create`/`update`/`hide` ProjectLot trên Nest)
+- **Vị trí code:** Grep runtime `projectLot.create` chỉ script migrate. `GET /lodats/project-lots` đọc kho `isHidden: false`. Sổ địa chỉ (`addresses.service` / `addresses-manage-dialog.tsx`) CRUD `Address` + ảnh dự án + Tỉnh/Huyện/Xã — không hàng kho.
+- **Problem:** Domain `lodats.md` §0.4 / `addresses.md` §3: Admin thêm / sửa / xoá / import Excel kho (số lô, DT, MT, hướng) trên địa chỉ `PROJECT`. CRM mới chỉ copy legacy. Dự án mới: NV picker «Không có lô kho»; không sửa DT kho (JOIN mọi `Lodat` trỏ sang).
+- **Root cause:** Schema có `ProjectLot`; vertical slice quản kho chưa làm (chỉ migrate + picker).
+- **Impact:** Không mở bán lô dự án mới đúng nghiệp vụ kho; sửa thông số kho không được; phụ thuộc script ngoài UI.
+- **Evidence:** `listProjectLots` read-only. Domain Admin «import/sửa kho dự án». Không controller `project-lots` CUD.
+- **Status:** OPEN
+
+### BUG-049 — Admin tạo giao dịch trên lô NV thì GD thuộc Admin; unique GD mở chặn NV
+
+- **Severity:** HIGH
+- **Module:** transactions / permission
+- **File:** `apps/api/src/modules/transactions/transactions.service.ts`
+- **Function:** `create`, `ownershipWhere`, `assertCanAccessLodat`
+- **Vị trí code:** `assertCanAccessLodat`: ADMIN luôn pass. `create` gán `createdByEmployeeId: user.id`. `list` STAFF = `{ createdByEmployeeId: user.id }`. Unique SQL `Transaction_lodatId_open_uidx` / `findOpenId` theo `lodatId` toàn cục (mọi NV). UI: Admin mở lô bất kỳ → `/giao-dich/tao?lodatId=`.
+- **Problem:** Domain: STAFF list/sửa GD mình tạo; tạo từ lô mình. Admin tạo GD trên luồng NV A → hàng `createdBy` = Admin. NV A không thấy trên `/giao-dich`; tạo GD trên cùng lô → 409 `OPEN_TRANSACTION_EXISTS` (hoặc unique). Lịch sử trên chi tiết lô (`listLodatTransactionHistory`) vẫn hiện GD (lọc `lodatId`, không lọc người tạo) — FE/BE lệch theo màn.
+- **Root cause:** Ownership GD = người bấm Tạo, không = `Lodat.createdByEmployeeId`. Unique mở theo lô, không theo NV.
+- **Impact:** NV mất quyền ghi nhận deal trên lô mình; thống kê STAFF thiếu doanh thu; Admin tưởng NV đã có GD.
+- **Evidence:** `create` `createdByEmployeeId: user.id`. `ownershipWhere` STAFF. Migration `Transaction_lodatId_open_uidx`. `lodat-transaction-history.ts` `where: { lodatId }`. Domain `transactions.md` §2.
+- **Status:** OPEN
+
+### BUG-050 — Admin tạo hồ sơ sổ đỏ trên khách NV thì hồ sơ thuộc Admin
+
+- **Severity:** HIGH
+- **Module:** title-services / permission
+- **File:** `apps/api/src/modules/title-services/title-services.service.ts`, `apps/web/src/features/title-services/title-service-create-page.tsx`
+- **Function:** `create`, `ownershipWhere`, `assertCustomerAccess`
+- **Vị trí code:** `assertCustomerAccess` cho phép Admin mọi khách. `createdByEmployeeId: user.id`. List STAFF = hồ sơ mình tạo — **không** theo `Customer.employeeId`. Form `/khach-hang/[id]/dich-vu-so-do` Admin mở được khách NV.
+- **Problem:** Domain §2/§5: STAFF tạo từ khách thuộc mình; list = `createdByEmployeeId`; «trùng lúc tạo vì khách phải của NV». Admin tạo hộ → NV giữ Person không thấy `/dich-vu-so-do`; Admin lọc NV kia cũng không thấy (người tạo là Admin). Merge khách vs Restrict TitleService đã BUG-016.
+- **Root cause:** Không gán `createdByEmployeeId = customer.employeeId`; không chặn Admin tạo hộ.
+- **Impact:** Hồ sơ sổ đỏ «mất» trên list NV; phí/tiến độ/file không theo Person.
+- **Evidence:** `create` + `ownershipWhere`. Domain `title-services.md` §2 «Không: tạo cho khách NV khác» (cột STAFF); Admin không được mô tả tạo hộ.
+- **Status:** OPEN
+
+### BUG-051 — List giao dịch không phân trang; Admin không lọc theo NV trên UI
+
+- **Severity:** MEDIUM
+- **Module:** transactions
+- **File:** `apps/api/src/modules/transactions/transactions.service.ts`, `apps/web/src/features/transactions/transaction-list-page.tsx`, `apps/web/src/features/transactions/api.ts`
+- **Function:** `list`
+- **Vị trí code:** `findMany` mọi hàng khớp filter, không `take`/`skip`. `total: items.length`. `statsFromItems(items)` trên API; FE tính lại trên `applyExtraFilters` (lọc cột client). Query DTO có `createdByEmployeeId`; list page không gửi, không có dropdown NV (khác sổ đỏ).
+- **Problem:** Toàn bộ GD (+ parties/snapshot) một request — timeout/OOM khi copy/tăng data. `total` không phải COUNT. Extra filter «Chưa có lô/người bán» chạy trên payload đã load, không trên DB. Domain §2: Admin lọc theo NV — UI không làm, thẻ doanh thu luôn cộng mọi NV (trừ extra filter).
+- **Root cause:** List «load hết»; FE extra filter sau; thiếu control `createdByEmployeeId`.
+- **Impact:** Sai/thiếu số liệu khi request fail hoặc Admin cần xem từng NV; lệch UX với `/dich-vu-so-do`.
+- **Evidence:** `list` không `count`. `transaction-list-page.tsx` `listQuery` chỉ keyword/type/status. Domain `transactions.md` §2–3 thẻ thống kê «trong cùng lọc».
+- **Status:** OPEN
+
+### BUG-052 — List sổ đỏ cắt 500 hàng và khai `total` bằng độ dài trang
+
+- **Severity:** MEDIUM
+- **Module:** title-services
+- **File:** `apps/api/src/modules/title-services/title-services.service.ts`, `apps/api/src/modules/title-services/title-services-view.ts`
+- **Function:** `list`
+- **Vị trí code:** `take: LIST_LIMIT` (`500`). `return { items, total: items.length }`. Không `count()`. FE `applyExtraFilters` trên `items`.
+- **Problem:** Hồ sơ thứ 501+ (sort ghim → `pinnedAt` → `updatedAt`) không lên list/tìm/lọc cột. UI tin `total` = hết. Domain ghi «Limit 500» (CRM cũ) nhưng CRM mới không báo còn trang.
+- **Root cause:** `total` gán length sau `take`, không COUNT.
+- **Impact:** Mất hồ sơ trên UI; ghim/lọc NV sai vì thiếu hàng.
+- **Evidence:** `LIST_LIMIT = 500`. `title-service-list-page.tsx` một `listTitleServices` không infinite scroll.
+- **Status:** OPEN
+
+### BUG-053 — List địa chỉ cắt 500; sổ/picker thiếu địa chỉ cũ
+
+- **Severity:** MEDIUM
+- **Module:** addresses
+- **File:** `apps/api/src/modules/addresses/addresses.service.ts`, `apps/web/src/features/addresses/addresses-manage-dialog.tsx`, `apps/web/src/features/addresses/components/address-picker.tsx`
+- **Function:** `list`
+- **Vị trí code:** `take: 500`, `orderBy: updatedAt desc`, `total: items.length`. Filter `kind` trên dialog là client trên payload đó. Picker STAFF cùng API (không `includeHidden` mặc định).
+- **Problem:** >500 địa chỉ: sổ Admin đếm «Tất cả/Dân/Dự án» sai; NV tạo lô không chọn được địa chỉ cũ. Keyword có thể kéo đúng hàng nếu khớp — không keyword thì mất.
+- **Root cause:** Một trang cứng + `total` = length.
+- **Impact:** Tạo lô nhầm địa chỉ / không tạo được lô đúng xã/dự án đã có.
+- **Evidence:** `addresses.service.ts` `take: 500`. Dialog `counters` từ `allItems.length`. BUG-009 là `includeHidden`; đây là cắt trang.
+- **Status:** OPEN
+
+### BUG-054 — Cấp mã `GD-` / `SD-` không atomic — tạo song song trùng unique
+
+- **Severity:** MEDIUM
+- **Module:** transactions / title-services
+- **File:** `apps/api/src/modules/transactions/transactions.service.ts`, `apps/api/src/modules/title-services/title-services.service.ts`
+- **Function:** `nextCode`
+- **Vị trí code:** `findFirst` `code startsWith` prefix năm, `orderBy code desc`, parse số, `+1` `padStart(4)`. `Transaction.code` / `TitleService.code` `@unique`. `create` GD chỉ `rethrowOpenConflict` khi P2002 unique **lô mở**, không unique `code`. Sổ đỏ `create` không bắt P2002.
+- **Problem:** Hai POST cùng lúc → cùng mã → 500. Không retry. (Sau `9999`, sort chuỗi `code` lệch độ dài — dễ cấp trùng `10000`; NEEDS VERIFICATION khi chưa có >9999 GD/năm.)
+- **Root cause:** Đọc-sửa không transaction/`SERIAL`.
+- **Impact:** NV/Admin bấm Lưu hai lần / hai tab: một bản 500, không rõ đã tạo chưa; retry có thể tạo GD/hồ sơ thứ hai (lô: unique mở chặn GD; sổ đỏ: hai hồ sơ cùng khách).
+- **Evidence:** Hai `nextCode` giống nhau. Prisma `code String @unique`.
+- **Status:** OPEN
+
+### BUG-055 — Lọc tài chính theo khoảng vẫn ra khách chưa nhập ngân sách
+
+- **Severity:** MEDIUM
+- **Module:** customers
+- **File:** `apps/api/src/modules/customers/customers-filters.ts`, `apps/web/src/features/customers/display.ts`
+- **Function:** `budgetFilterWhere`, `matchesBudgetFilter`
+- **Vị trí code:** API `overlap`: `budgetMinVnd` null **hoặc** `lte rangeMax`; `budgetMaxVnd` null **hoặc** `gte rangeMin`. Cả hai null → cả hai nhánh OR đúng → dính `lt_1b` / `1b_2b` / `gt_2b`. FE: `lo = min ?? 0`, `hi = max ?? 9e15` — cùng nghĩa. Có filter riêng `none` / `has`.
+- **Problem:** NV chọn «Dưới 1 tỷ» (hoặc 1–2 tỷ / trên 2 tỷ) vẫn thấy khách «Chưa xác định». FE/API cùng sai (không lệch nhau).
+- **Root cause:** Null = không giới hạn thay vì loại khỏi khoảng.
+- **Impact:** Sai list chăm sóc / gọi nhầm khách chưa khai ngân sách.
+- **Evidence:** `budgetFilterWhere` `lt_1b`/`1b_2b`/`gt_2b`. `customer-list-page.tsx` gửi `budgetFilter`. `normalizeCareBudget` chỉ cho cả hai null hoặc cả hai số — không half-null.
+- **Status:** OPEN
+
+### BUG-056 — Không sửa được nội dung bài CMS sau khi tạo; tạo lại dễ hai bài published
+
+- **Severity:** MEDIUM
+- **Module:** public-content
+- **File:** `apps/api/src/modules/public-content/admin-public-web.controller.ts`, `apps/api/src/modules/public-content/public-content.service.ts`, `apps/web/src/features/public-content/components/compose-post-dialog.tsx`, `apps/web/src/features/public-content/public-post-list-page.tsx`
+- **Function:** `createPost`, `setPostStatus`, `uniquePostSlug`
+- **Vị trí code:** API bài: `GET` list, `POST` tạo, `PATCH :id/status`. Không `PATCH` title/body/cover/slug. Dialog «Soạn bài viết» luôn `createPublicPost`. `uniquePostSlug` thêm `-2` khi trùng `(category, slug)`. `setPostStatus(PUBLISHED)` không đổi `publishedAt` nếu đã có. Gỡ về nháp không xóa hàng.
+- **Problem:** Sai chính tả / ảnh / HTML: không Lưu đè. Admin soạn lại cùng tiêu đề → slug-2, xuất bản cả hai → hai URL khách. GPT «Dùng cho bài soạn» cũng `POST` mới.
+- **Root cause:** Contract domain chỉ create + status; UI không edit.
+- **Impact:** Bài trùng trên anhungland.com; SEO/nội dung lệch; nháp cũ tồn tại.
+- **Evidence:** Controller không update body. `createPost` + `uniquePostSlug`. Domain bảng API §7 không có PATCH content.
+- **Status:** OPEN
+
+### BUG-057 — Đổi địa chỉ dự án sang đất dân không kiểm kho `ProjectLot`
+
+- **Severity:** MEDIUM
+- **Module:** addresses
+- **File:** `apps/api/src/modules/addresses/addresses.service.ts`, `apps/web/src/features/addresses/addresses-manage-dialog.tsx`
+- **Function:** `update`
+- **Vị trí code:** `PROJECT` → `REGULAR`: chỉ chặn khi còn `AddressImage`. Không `count` `projectLots`. `listProjectLots` đòi `kind === PROJECT`. `mapAddressRow` `lodatCount`: PROJECT = `_count.projectLots`, REGULAR = `_count.lodats`.
+- **Problem:** Admin bỏ tick dự án khi còn kho: lưu được. Picker lô kho 400 «không phải dự án». `Lodat.projectLotId` cũ vẫn sống. Badge «(N lô)» đổi sang đếm lô dân `addressId` — số kho biến mất trên sổ.
+- **Root cause:** Đổi kind không XOR với `ProjectLot` (Restrict chỉ khi xóa Address).
+- **Impact:** NV không gắn chủ kho; Admin tưởng dự án hết lô; dữ liệu mixed dân/kho.
+- **Evidence:** `update` imageCount vs không `projectLot.findFirst`. `listProjectLots` kind check. Soft-hide địa chỉ cố ý không cascade (domain) — không ghi trùng; đây là đổi kind.
+- **Status:** OPEN
+
+### BUG-058 — Form tạo giao dịch (không gắn sẵn lô) chỉ picker 200 lô
+
+- **Severity:** MEDIUM
+- **Module:** transactions / lodats
+- **File:** `apps/web/src/features/transactions/transaction-form-page.tsx`
+- **Function:** `TransactionFormPage` `lodatsQ`
+- **Vị trí code:** `enabled: mode === 'create' && !queryLodatId`. `listLodats({ limit: 200, includePaused: true })`. Không keyword/offset. Tạo từ chi tiết lô dùng `?lodatId=` — không dính.
+- **Problem:** Admin/NV vào `/giao-dich/tao` tay: dropdown thiếu lô ngoài 200 `updatedAt`. Chọn nhầm lô mới hơn hoặc không tạo được GD lô cũ. API `create` nhận `lodatId` bất kỳ (trong quyền) — lệch UI/API.
+- **Root cause:** Picker một trang max list lô.
+- **Impact:** GD gắn sai lô / không tạo được; snapshot đóng băng lô nhầm.
+- **Evidence:** `lodatsQ` `limit: 200`. `listLodats` API max 200/trang có `offset` nhưng form không trang.
+- **Status:** OPEN
+
+### BUG-059 — Đổi chủ khi giao dịch đang mở: TX trỏ map cũ, xóa GD sửa map inactive
+
+- **Severity:** HIGH
+- **Module:** lodats / transactions
+- **File:** `apps/api/src/modules/lodats/lodats.service.ts`, `apps/api/src/modules/transactions/transactions.service.ts`, `apps/web/src/features/lodats/components/change-owner-modal.tsx`
+- **Function:** `changeOwner`, `create`/`remove`/`findOpenId`
+- **Vị trí code:** `changeOwner`: `updateMany` map `isActive: false` rồi `create` map mới; không đọc `Transaction`. Unique SQL `Transaction_lodatId_open_uidx` theo `lodatId`. `Transaction.lodatCustomerMapId` Restrict, không đổi. `remove` GD mở: `lodatCustomerMap.update` **đúng `row.lodatCustomerMapId`** (map đã đóng). Modal Đổi chủ không gọi `GET …/lodat/:id/open`. Lịch sử lô `listLodatTransactionHistory` theo `lodatId` (hiện GD cũ trên lô chủ mới).
+- **Problem:** Flow: lô đang Đã cọc (GD mở) → Đổi chủ thành công → `/lo-dat` hiện Person mới + trạng thái form mới; `/giao-dich` vẫn GD mở gắn map/chủ cũ (snapshot + `freeTextName`). Tạo GD mới → 409. Xóa GD mở → map **cũ** (inactive) bị ép `DANG_BAN` (BUG-025 trên nhầm hàng); map active của chủ mới không đổi. Cùng NV hoặc Admin (BUG-028) đều dính.
+- **Root cause:** Đổi chủ = đóng/mở map; GD = FK map lúc tạo + unique theo lô. Hai module không giao nhau.
+- **Impact:** Sai chủ trên deal vs lô; không tạo GD chủ mới; xóa GD không sửa trạng thái rao bán đang hiện; thống kê/lịch sử lệch Person.
+- **Evidence:** `changeOwner` transaction chỉ `LodatCustomerMap`/`Lodat`. `findOpenId({ lodatId })`. `remove` `where: { id: row.lodatCustomerMapId }`. Domain snapshot đóng băng lúc tạo — không giải thích đổi chủ khi deal mở.
+- **Status:** OPEN
+
+### BUG-060 — Xóa ảnh lô xóa R2 dù snapshot giao dịch còn trỏ cùng `objectKey`
+
+- **Severity:** HIGH
+- **Module:** lodats / transactions
+- **File:** `apps/api/src/modules/lodats/lodats.service.ts`, `apps/api/src/storage/retarget-public-key.ts`, `apps/api/src/modules/transactions/transactions-snapshot.ts`
+- **Function:** `deleteImage`, `countPublicImageKeyRefs`, `buildSnapshotCreate`
+- **Vị trí code:** `deleteImage`: đếm `customerMessengerImage` + `lodatImage` rồi `storage.delete`. Không đếm `transactionSnapshotImage` / `transactionAttachment` / `addressImage`. `countPublicImageKeyRefs` (SEO rename, avatar) **có** snapshot. Snapshot GD copy cùng `objectKey` (+ `sourceLodatImageId` SetNull khi xóa hàng `LodatImage`).
+- **Problem:** Tạo GD (đóng băng ảnh) → gỡ ảnh trên `/lo-dat` khi không còn bản lodat/chat khác → R2 mất. Chi tiết GD `storage.publicUrl(objectKey)` 404. Gallery lô đúng (đã xóa hàng); GD sai. Copy SEO `retarget` thì an toàn hơn xóa tay.
+- **Root cause:** Hai đường xóa/đếm ref không cùng tập bảng.
+- **Impact:** Mất bằng chứng ảnh deal; lệch FE lô vs FE GD.
+- **Evidence:** `deleteImage` Promise.all chat+lodat. `countPublicImageKeyRefs` gồm `transactionSnapshotImage`. `buildSnapshotCreate` `objectKey` lodat/address.
+- **Status:** OPEN
+
+### BUG-061 — Xóa ảnh địa chỉ dự án luôn xóa object R2 — gãy lô, web khách, snapshot GD
+
+- **Severity:** HIGH
+- **Module:** addresses / lodats / public-content / transactions
+- **File:** `apps/api/src/modules/addresses/addresses.service.ts`
+- **Function:** `deleteImage`
+- **Vị trí code:** Xóa hàng `AddressImage` rồi `storage.delete` trong `try`, **không** `countPublicImageKeyRefs`. Lô dự án gallery đọc `projectLot.address.images`. Catalog `coverUrl`/`imageUrls` lấy ảnh địa chỉ kho. Snapshot GD dự án copy `addr.images` `objectKey`.
+- **Problem:** Admin gỡ 1 ảnh dự án trên sổ địa chỉ → CDN 404 trên mọi `Lodat` trỏ kho, trang `/mua-ban-…/[slug]`, GD đã snapshot. `LodatImage` dân không dính; kho không nhân ảnh lên `LodatImage`.
+- **Root cause:** Ảnh dự án dùng chung một key; xóa địa chỉ coi là exclusive owner.
+- **Impact:** Một thao tác sổ địa chỉ phá list lô + Đăng web + hồ sơ GD.
+- **Evidence:** `addresses.service.ts` `deleteImage` vs `lodats` `ADDRESS_INCLUDE.images`. `public-content.service.ts` `imageUrls` project address. `transactions-snapshot.ts` nhánh `projectLotId && addr?.images`.
+- **Status:** OPEN
+
+### BUG-062 — Sửa lô CRM không cập nhật overlay Đăng web (title/location); catalog trộn dữ liệu cũ và mới
+
+- **Severity:** MEDIUM
+- **Module:** lodats / public-content
+- **File:** `apps/api/src/modules/lodats/lodats.service.ts`, `apps/api/src/modules/public-content/public-content.service.ts`
+- **Function:** `update` (lodats), `toCatalog` / `toAdminRow`
+- **Vị trí code:** `lodats.update` ghi `Lodat`/`LodatCustomerMap` — không `publicLotListing.update`. `toCatalog`: `title`/`location`/`excerpt` từ **hàng listing**; `areaM2`/`frontageM`/`direction`/`saleStatus`/`coverImageUrl` từ **lodat live**.
+- **Problem:** NV đổi tiêu đề hoặc địa chỉ dân trên `/lo-dat` → CRM đúng; anhungland.com vẫn H1/địa chỉ overlay. Khách thấy DT/MT/ảnh/công tắc Mở bán mới + tên cũ. Sửa giá map không đổi `priceLabel` overlay (cố ý làm mờ) — title/location thì NV tưởng «sửa lô = sửa web».
+- **Root cause:** Overlay copy độc lập; `update` lô không sync; catalog đọc mixed sources.
+- **Impact:** SEO/nội dung khách sai; lệch dashboard preview (`cover` live, `title` overlay).
+- **Evidence:** `lodats.update` không prisma `publicLotListing`. `toCatalog` `row.title` vs `lodat.areaM2`. Domain: Đăng web ≠ mọi lô Mở bán — không nói sửa lô tự đẩy title.
+- **Status:** OPEN
+
+### BUG-063 — Ẩn Person không cắt GD, sổ đỏ, chat API, chủ trên lô
+
+- **Severity:** MEDIUM
+- **Module:** customers / lodats / transactions / title-services / messenger
+- **File:** `apps/api/src/modules/customers/customers.service.ts`, `apps/api/src/modules/transactions/transactions.service.ts`, `apps/api/src/modules/title-services/title-services.service.ts`, `apps/api/src/modules/lodats/lodats.service.ts`
+- **Function:** `update` (`isHidden`), `assertPartyCustomers`, `list`/`update` title-services, `listMessages`, `LIST_INCLUDE` maps
+- **Vị trí code:** Ẩn = `Customer.isHidden = true` (không xóa hàng). Chặn tạo: lô, sổ đỏ, care. **Không** chặn: `assertPartyCustomers` (không đọc `isHidden`); title `update`/`addProgress`/`addMoney`/`addAttachment`; `listMessages`; list lô `maps.customer` không lọc ẩn. List khách mặc định `isHidden: false` nên Person «biến» khỏi `/khach-hang`.
+- **Problem:** Flow xóa mềm: NV ẩn khách → list khách trống; `/lo-dat` vẫn chủ (mở rộng BUG-027); tạo GD mới vẫn chọn/gắn `customerId` đã ẩn nếu biết ID hoặc prefill chủ map; sổ đỏ đang làm vẫn sửa; `GET /customers/:id/messages` vẫn trả chat. Khôi phục (`isHidden: false`) không sửa map/GD.
+- **Root cause:** `isHidden` chỉ cửa list + một số create; không phải cascade nghiệp vụ.
+- **Impact:** Person «đã xóa» vẫn là chủ/bên GD/hồ sơ sổ/chat; audit/GD lệch list khách.
+- **Evidence:** `create` lodat/title check `isHidden`. `assertPartyCustomers` chỉ `id` + `employeeId`. `listMessages` không `isHidden`. BUG-027 chỉ map; đây là các module còn lại trên cùng cờ.
+- **Status:** OPEN
+
+### BUG-064 — Xóa User không precheck FK phụ — 500 Restrict dù không còn khách/lô/GD/sổ đỏ
+
+- **Severity:** MEDIUM
+- **Module:** users
+- **File:** `apps/api/src/modules/users/users.service.ts`, `apps/api/prisma/schema.prisma`
+- **Function:** `remove`
+- **Vị trí code:** Đếm `customer.employeeId`, `lodat`/`transaction`/`titleService` `createdByEmployeeId`. `user.delete`. Schema: `CustomerCareNote.employeeId` không `onDelete` (Restrict); `TitleServiceProgress`/`Money`/`Attachment` `createdBy` Restrict; `TitleServiceAttachmentView.viewedBy` Restrict. `Lodat`/`Transaction`/`TitleService` creator Restrict (đã đếm). `PublicLotShare` Cascade. `EmployeeHotline` Cascade vs `Customer.sourceHotlineId` Restrict — đã chặn nếu còn khách của NV đó.
+- **Problem:** Admin từng ghi chăm sóc / bước sổ đỏ / xem file trên hồ sơ **NV khác** (hoặc progress trên hồ sơ mình đã chuyển…), rồi xóa hết khách/lô/GD/sổ của chính Admin → UI cho xóa → P2003 500, không câu «vô hiệu hóa». Disable thì JWT CRM còn (BUG-001) / share public tắt (BUG-036).
+- **Root cause:** Precheck không phủ mọi Restrict.
+- **Impact:** Không xóa được user «sạch» khách; Admin tưởng xóa xong; lỗi không rõ.
+- **Evidence:** `remove` bốn `count`. Prisma care note / title progress / view log không Cascade.
+- **Status:** OPEN
+
+### BUG-065 — Import Messenger ghi `employeeFacebookUid` không chứng thực profile NV; không API gắn UID
+
+- **Severity:** MEDIUM
+- **Module:** customers / messenger / users
+- **File:** `apps/api/src/modules/customers/from-extension.service.ts`, `apps/api/src/modules/customers/customers-phone.ts`, `apps/api/scripts/migrate-facebook-profiles-from-legacy.ts`
+- **Function:** `createCustomer`, `touchExisting`, `listContactChannels`
+- **Vị trí code:** `employeeId` = JWT. `employeeFacebookUid` = `fields.employeeUid` từ payload scanner, không `EmployeeFacebookProfile.find`. `touchExisting` chỉ ghi UID nếu hàng đang trống. Profile chỉ script migrate — không CRUD Nest. Lọc `fb:{uid}` theo `customerFacebook.employeeFacebookUid` trong phạm vi khách của JWT.
+- **Problem:** Flow JWT NV A + extension gửi UID nick B (máy chung / sai field): Person thuộc A, kênh liên hệ hiện nick B (nếu migrate) hoặc raw UID. Lọc «Facebook B» ra khách của A. NV mới không có hàng profile → nhãn kênh = UID. Không gắn/sửa UID NV trên `/quan-tri/nguoi-dung`.
+- **Root cause:** Ingest tin client; User và Messenger không cùng bảng profile lúc runtime.
+- **Impact:** Sai nhóm kênh/thống kê nick; khó biết chat thuộc nick nào; trùng Person theo thread vẫn BUG-013.
+- **Evidence:** `from-extension.service.ts` gán `fields.employeeUid`. Grep `employeeFacebookProfile.create` chỉ script migrate. `contactChannelWhere` `fb:`.
+- **Status:** OPEN
+
+### BUG-066 — Slug lô từ editor/GPT không chạy `toPublicSlug`
+
+- **Severity:** HIGH
+- **Module:** public-content / slug
+- **File:** `apps/api/src/modules/public-content/public-content.service.ts`, `packages/shared/src/public-content.ts`, `apps/web/src/features/public-content/lot-gpt-apply.ts`, `apps/web/src/features/public-content/components/lot-listing-editor-dialog.tsx`
+- **Function:** `updateDraft`, `uniqueSlug`, `lotGptToEditorPrefill`, `parsedInput`
+- **Vị trí code:** `createPost` gọi `toPublicPostSlug(dto.slug \|\| title)`. `updateDraft`: `slugHint = dto.slug?.trim()` rồi `uniqueSlug(slugHint)` — `uniqueSlug` chỉ `reservePublicLotSlug` (đổi đúng chuỗi `xa`). `updatePublicListingDraftSchema.slug` = `z.string().trim().min(1).max(200)` không regex. GPT: `slug: result.slug.trim()` không `toPublicSlug`.
+- **Problem:** NV/GPT gửi slug có dấu tiếng Việt, hoa, khoảng trắng, `!`, `/` → ghi DB nguyên. URL `/mua-ban-nha-dat-huyen-nam-sach/{raw}` encode lệch, hai lô `Foo` vs `foo` cùng unique Postgres (case-sensitive). Tạo mới không gửi slug thì `toListingPublicSlug` vẫn ASCII đúng.
+- **Root cause:** Hai đường: generate từ title thì slugify; đường overlay/GPT tin client.
+- **Impact:** URL gãy / trùng gần giống; crawler/index lệch; không ổn định so với bài CMS.
+- **Evidence:** `uniqueSlug` vs `toPublicPostSlug` trong `createPost`. Schema slug lô vs `toPublicSlug` NFD + `[^a-z0-9]`.
+- **Status:** OPEN
+
+### BUG-067 — `uniqueSlug` không chừa bảng 301 — listing mới chiếm URL cũ
+
+- **Severity:** HIGH
+- **Module:** public-content / slug
+- **File:** `apps/api/src/modules/public-content/public-content.service.ts`, `apps/web/src/features/public/listing-detail-route.tsx`
+- **Function:** `uniqueSlug`, `recordLotSlugChange`, `redirectIfLegacySlug`
+- **Vị trí code:** `uniqueSlug` `while (publicLotListing.findUnique({ slug }))`. `PublicLotSlugRedirect.fromSlug` unique riêng. HTML: `getPublicListingBySlug` trước, chỉ khi null mới `getPublicLotSlugRedirect` → `permanentRedirect`.
+- **Problem:** Lô A đổi slug `cu`→`moi` (301 `cu`→`moi`). Lô B publish nhận `cu` vì listing table trống. Guest/`Google` mở URL cũ ra B (200), không 301 về A. Chuỗi redirect A chết khi còn hàng redirect (không bao giờ đọc).
+- **Root cause:** Unique guest URL = unique listing slug, không gồm `fromSlug`.
+- **Impact:** Backlink/index của URL cũ đổi nội dung; duplicate/sai listing; 301 thành dead.
+- **Evidence:** `uniqueSlug` không query `publicLotSlugRedirect`. `ListingDetailRoute` thứ tự fetch listing rồi redirect.
+- **Status:** OPEN
+
+### BUG-068 — Hub `/xa/…` không lưu slug, đổi theo tập lô, không 301
+
+- **Severity:** HIGH
+- **Module:** public-content / hub
+- **File:** `apps/api/src/modules/public-content/public-listing-hub-slugs.ts`, `apps/api/src/modules/public-content/public-content.service.ts`
+- **Function:** `buildHubSlugMaps`, `loadPublishedCatalog`, `listCommuneHubs` / `getCommuneHubDetail`
+- **Vị trí code:** `commune` slug = `toPublicSlug(wardName, 60)`; nếu cùng tên xã >1 huyện trong **tập geo hiện tại** thì thêm `-${district}`. Place = `toPublicSlug(address.detail, 60)`. Không model hub; không `PublicLotSlugRedirect` cho `/xa/`. Đổi tên xã/thôn, ẩn ward (`addressGeo` → null), hoặc còn 1 huyện → slug đổi. `getCommuneHubDetail` 404 nếu không còn listing khớp slug cũ.
+- **Problem:** URL hub là hàm của catalog sống. Google index `/xa/dong-lac-nam-sach` rồi tập lô đổi → 404, không 301 sang `/xa/dong-lac`. Sửa `Address.detail`/ward đổi place/commune slug im lặng.
+- **Root cause:** Hub derived, không identity ổn định + không redirect table.
+- **Impact:** Mất URL đã index; internal link cũ gãy; sitemap `lastmod` URL mới, URL cũ biến mất không báo crawler.
+- **Evidence:** `buildHubSlugMaps` `districts.size > 1`. Prisma không `PublicListingHub`. Redirect chỉ `PublicLotSlugRedirect` (lô).
+- **Status:** OPEN
+
+### BUG-069 — Hub slug trang chi tiết lô lệch catalog/sitemap — link nội bộ 404
+
+- **Severity:** HIGH
+- **Module:** public-content / hub
+- **File:** `apps/api/src/modules/public-content/public-content.service.ts`, `apps/web/src/features/public/listing-seo.ts`, `apps/web/src/features/public/related-listings.ts`
+- **Function:** `getPublishedBySlug` / `loadHubMapsForPublished` vs `loadPublishedCatalog`, `listingCommuneHubCrumb`, `pickSameCommuneSection`
+- **Vị trí code:** `loadHubMapsForPublished`: mọi `isPublished: true` (gồm Tạm dừng). `loadPublishedCatalog`: `rows.filter(isOpenSale)` rồi `buildHubSlugMaps`. `getPublishedBySlug` gắn `communeSlug` từ maps «mọi published». Catalog/hub/sitemap dùng maps «chỉ Mở bán». Breadcrumb + «Xem tất cả» dùng `listing.communeSlug`.
+- **Problem:** Có lô published nhưng Tạm dừng ở xã trùng tên huyện khác → chi tiết lô đang Mở bán nhận slug có hậu tố huyện; hub thật (catalog) không hậu tố (hoặc ngược). `href` `/xa/{slug-chi-tiet}` 404. Cùng lúc BUG-023: slug lô paused vẫn 200.
+- **Root cause:** Hai hàm build hub maps, hai tập lô.
+- **Impact:** JSON-LD BreadcrumbList + HTML nav trỏ URL hub không tồn tại (broken internal link, crawl trap).
+- **Evidence:** `getPublishedBySlug` gọi `loadHubMapsForPublished`. `listPublished`/`listCommuneHubs` gọi `loadPublishedCatalog`. `listingCommuneHubCrumb` / `hubHref: listingCommuneHubPath(communeSlug)`.
+- **Status:** OPEN
+
+### BUG-070 — On-demand revalidate bỏ hub; Tạm dừng / sửa địa chỉ không làm mới sitemap-catalog
+
+- **Severity:** HIGH
+- **Module:** public-content / ISR
+- **File:** `apps/api/src/modules/public-content/public-web-revalidate.service.ts`, `apps/api/src/modules/lodats/lodats.service.ts`, `apps/api/src/modules/addresses/addresses.service.ts`, `apps/web/app/sitemap.ts`, `apps/web/app/(public)/mua-ban-nha-dat-huyen-nam-sach/xa/**/page.tsx`
+- **Function:** `revalidateListing`, `updateSaleStatus`, `AddressService.update`
+- **Vị trí code:** `revalidateListing` paths: `/{listingPath}/{slug}`, catalog, `/sitemap.xml`, đôi khi `/`. Không `listingCommuneHubPath` / place. Hub/catalog/sitemap `export const revalidate = false` (chỉ ISR khi revalidate). `updateSaleStatus` chỉ map status + `lodat.updatedAt` — không `PublicWebRevalidateService`. `addresses.update` không revalidate.
+- **Problem:** (1) Đăng/gỡ lô: HTML hub `/xa/…` cache cũ (thiếu/thừa listing) dù sitemap có thể đã cập nhật. (2) Tạm dừng: catalog+sitemap HTML cũ vẫn list lô cho tới sự kiện publish khác; sau đó sitemap bỏ URL nhưng chi tiết vẫn 200 (BUG-023) = orphan. (3) Đổi ward/`detail` (BUG-068): hub URL đổi, cache+sitemap cũ.
+- **Root cause:** Revalidate gắn publish overlay, không gắn sale/address; path list thiếu hub.
+- **Impact:** Sitemap/HTML lệch nhau; crawler index URL stale hoặc bỏ URL còn 200.
+- **Evidence:** `revalidateListing` array paths. Grep `PublicWebRevalidate` chỉ `public-content.service`. Hub pages `revalidate = false`.
+- **Status:** OPEN
+
+### BUG-071 — Sitemap luôn đưa 6 URL chuyên mục bài, kể cả chuyên mục trống
+
+- **Severity:** MEDIUM
+- **Module:** public-content / sitemap
+- **File:** `apps/web/app/sitemap.ts`, `apps/web/src/features/public/post-seo.ts`, `apps/web/app/(public)/[category]/page.tsx`
+- **Function:** `sitemap`, `categoryListMetadata`
+- **Vị trí code:** `categoryPages = Object.values(PublicPostCategory).map` → `/tin-tuc` `/du-an` `/kien-thuc` `/kinh-nghiem` `/lien-he` `/chinh-sach` không đếm `listSitemapPosts`. Trang list: `robots: publicSearchRobots()` (index khi cờ SEO bật); empty state «Hiện chưa có bài…».
+- **Problem:** `lien-he` / `chinh-sach` (và chuyên mục tin chưa có bài) được khai trong sitemap + indexable, nội dung mỏng/trùng description mẫu.
+- **Root cause:** Sitemap emit enum, không filter `posts.length`.
+- **Impact:** Index thin/empty; «Chính sách bảo mật» trống nếu chưa soạn bài.
+- **Evidence:** `sitemap.ts` `categoryPages` vs `articles` từ posts. `PublicPostCategory` 6 giá trị. `categoryListMetadata` luôn canonical category URL.
+- **Status:** OPEN
+
+### BUG-072 — Guest API lỗi bị nuốt → sitemap/catalog rỗng, slug thành 404 giả
+
+- **Severity:** HIGH
+- **Module:** public web / sitemap
+- **File:** `apps/web/src/features/public-content/api.ts`, `apps/web/app/sitemap.ts`, `apps/web/src/features/public/listing-detail-route.tsx`
+- **Function:** `listPublishedCatalog`, `getPublishedCatalogBySlug`, `getPublicLotSlugRedirect`
+- **Vị trí code:** `listPublishedCatalog` `catch { return [] }` (mọi lỗi, không chỉ build). `getPublishedCatalogBySlug`: không phải `ApiError` 404 cũng `return null`. `getPublicLotSlugRedirect` tương tự. Sitemap `revalidate = false` ghi đè bằng kết quả rỗng. Chi tiết: null listing + null redirect → `notFound()`.
+- **Problem:** Nest timeout/5xx lúc generate sitemap hoặc lúc Googlebot hit detail: sitemap mất toàn bộ URL lô/hub/bài (còn home + catalog + 6 category); URL lô đang sống trả 404 → rủi ro deindex.
+- **Root cause:** Fail-soft cho `next build` dùng luôn lúc runtime ISR/request.
+- **Impact:** Crawl thấy nội dung «biến»; soft 404 hàng loạt.
+- **Evidence:** comment «next build: API chưa chạy». `sitemap.ts` `listSitemapListings` → `listPublishedCatalog`. `buildListingDetailMetadata` unpublished khi `!listing`.
+- **Status:** OPEN
+
+### BUG-073 — 301 slug lô không kiểm tra đích còn published / Mở bán
+
+- **Severity:** MEDIUM
+- **Module:** public-content / redirect
+- **File:** `apps/api/src/modules/public-content/public-content.service.ts`, `apps/web/src/features/public/listing-detail-route.tsx`
+- **Function:** `findLotSlugRedirect`, `redirectIfLegacySlug`
+- **Vị trí code:** `findLotSlugRedirect` `select: { toSlug: true }` không join listing. `permanentRedirect(listingHref(toSlug))` luôn. `GET /public/listings/:slug` không đọc bảng redirect (404).
+- **Problem:** Gỡ Đăng web / xóa overlay / Tạm dừng (BUG-023): URL cũ vẫn 301 tới slug hiện tại rồi 404 hoặc 200 lô không rao. Google gộp tín hiệu vào URL chết/sai.
+- **Root cause:** Redirect table không gắn lifecycle listing.
+- **Impact:** Chuỗi 301→404; crawl budget; tín hiệu về URL không index được.
+- **Evidence:** `findLotSlugRedirect` vs `getPublishedBySlug` `!row?.isPublished`. Không `isOpenSale` trên redirect.
+- **Status:** OPEN
+
+### BUG-074 — Xóa lô không xóa `PublicLotSlugRedirect` — 301 mồ côi
+
+- **Severity:** MEDIUM
+- **Module:** public-content / redirect
+- **File:** `apps/api/prisma/schema.prisma`, `apps/api/src/modules/public-content/public-content.service.ts`
+- **Function:** `PublicLotListing` `onDelete: Cascade` từ `Lodat`; model `PublicLotSlugRedirect`
+- **Vị trí code:** `PublicLotSlugRedirect` không FK `toSlug`/`lodatId`. Xóa `Lodat` cascade listing + shares. Redirect `fromSlug`/`toSlug` còn. `recordLotSlugChange` không chạy lúc xóa.
+- **Problem:** URL cũ 301 mãi tới slug đã mất → 404 (BUG-073). `uniqueSlug` vẫn có thể tái sử dụng `fromSlug` (BUG-067) hoặc để 301 chết.
+- **Root cause:** Redirect không thuộc vòng đời listing.
+- **Impact:** 301 vĩnh viễn tới 404; bảng redirect phình.
+- **Evidence:** schema `PublicLotSlugRedirect` không relation. `Lodat` → `PublicLotListing` Cascade. Grep xóa redirect chỉ `recordLotSlugChange` / script regenerate.
+- **Status:** OPEN
+
+### BUG-075 — Không có file `/og-default.png` trong app public
+
+- **Severity:** MEDIUM
+- **Module:** public web / Open Graph
+- **File:** `apps/web/src/features/public/site.ts`, `apps/web/app/(public)/layout.tsx`, `apps/web/src/features/public/listing-seo.ts`, `apps/web/src/features/public/post-seo.ts`, `apps/web/src/features/public/listing-hub-seo.ts`
+- **Function:** `PUBLIC_OG_DEFAULT`, `listingOgImage`, layout `openGraph.images`
+- **Vị trí code:** `PUBLIC_OG_DEFAULT = '/og-default.png'`. `apps/web/public/` chỉ `brand/*.svg` — không `og-default.png`. Listing/bài/hub không bìa → `toAbsoluteUrl('/og-default.png')`. JSON-LD `listingImageObjectsJsonLd` / `postArticleJsonLd` fallback cùng URL. Sitemap cố ý bỏ OG default (`isBrandOgFallback`).
+- **Problem:** Trang chủ, catalog, hub, bài/lô thiếu bìa: `og:image` / Twitter `summary_large_image` trỏ 404 trên origin. Preview MXH hỏng; ImageObject `contentUrl` 404.
+- **Root cause:** Hằng số fallback, asset không commit.
+- **Impact:** OG sai; rich preview fail. (Production có thể có file ngoài git — repo/deploy từ git thì thiếu.)
+- **Evidence:** Glob `og-default.png` = 0. `apps/web/public/brand/` chỉ 2 SVG.
+- **Status:** OPEN
+
+### BUG-076 — Category không hợp lệ: noindex nhưng canonical có thể kế thừa trang chủ
+
+- **Severity:** MEDIUM
+- **Module:** public web / canonical
+- **File:** `apps/web/app/(public)/[category]/page.tsx`, `apps/web/app/(public)/layout.tsx`, `apps/web/src/features/public/post-seo.ts`
+- **Function:** `generateMetadata` (category list)
+- **Vị trí code:** `isPublicPostCategory` false → `{ title: 'Không tìm thấy', robots: { index: false, follow: false } }` — không `alternates.canonical: null`. Layout public `canonical: PUBLIC_SITE_ORIGIN`. `unpublishedPostMetadata` / `unpublishedListingMetadata` / `not-found.tsx` / `unpublishedHubMetadata` thì gán `canonical: null`. Page sau đó `notFound()`.
+- **Problem:** URL `/khong-phai-chuyen-muc` (và segment lạ khác khớp `[category]`) có thể emit canonical homepage trên response 404/noindex — tín hiệu «trang này = trang chủ».
+- **Root cause:** Nhánh metadata invalid category thiếu bước gỡ canonical mà các 404 public khác đã làm.
+- **Impact:** Soft-404 gắn homepage; merge/index nhầm. (Next có thể ghi đè bằng `not-found.tsx` — nếu merge layout+page thì lỗi còn.)
+- **Evidence:** `[category]/page.tsx` generateMetadata vs `unpublishedPostMetadata` `canonical: null`. Layout `alternates.canonical`.
+- **Status:** OPEN
+
+### BUG-077 — Hai địa chỉ khác nhau có thể cùng một hub slug
+
+- **Severity:** MEDIUM
+- **Module:** public-content / hub
+- **File:** `apps/api/src/modules/public-content/public-listing-hub-slugs.ts`
+- **Function:** `buildHubSlugMaps`
+- **Vị trí code:** Place key = `wardId|detail.trim().toLowerCase()` (chưa slugify). `slug: toPublicSlug(geo.detail, 60, 'khu')` không unique trong commune. Hai `detail` khác («KĐT ABC» vs «KDT ABC», cắt 60 ký tự, chỉ khác dấu) → hai entry, **cùng** `placeSlug`. `listPlaceHubs` gộp `byKey = communeSlug/pSlug`. Commune: hai `wardId` cùng tên (sau NFD) không hậu tố huyện → cùng `commune` slug, `listCommuneHubs` gộp `bySlug`.
+- **Problem:** Một URL hub trộn listing hai khu/xã; `label` = sample đầu; title/H1/JSON-LD ItemList sai địa bàn.
+- **Root cause:** Unique hub theo label thô, URL theo slug gập.
+- **Impact:** Duplicate content / sai entity trên URL đang index; không tách được hai khu.
+- **Evidence:** `placeByWardDetail.set` không check slug đã dùng. `listPlaceHubs` key `${cSlug}/${pSlug}`.
+- **Status:** OPEN
+
+### BUG-078 — Không ràng buộc unique `title` / `seoTitle` — trùng thẻ title trên nhiều URL
+
+- **Severity:** MEDIUM
+- **Module:** public-content / metadata
+- **File:** `apps/api/prisma/schema.prisma`, `apps/web/src/features/public/listing-seo.ts`, `apps/web/src/features/public/post-seo.ts`, `apps/api/src/modules/public-content/public-content.service.ts`
+- **Function:** `listingMetadata`, `postMetadata`, `uniqueSlug` / `uniquePostSlug`
+- **Vị trí code:** Unique DB: `PublicLotListing.slug`; `PublicPost` `@@unique([category, slug])`. Không unique `title`/`seoTitle`/`metaDescription`. `listingSeoTitle` = seoTitle hoặc H1. GPT/NV trùng tiêu đề → slug `-2` nhưng `<title>` giống. `clipMetaDescription` cùng excerpt mẫu → meta description trùng.
+- **Problem:** Hai URL published khác slug, cùng document title (và có thể cùng description). Search Console duplicate title; SERP khó chọn URL.
+- **Root cause:** Định danh SEO = slug, không phải title.
+- **Impact:** Trùng title/description trên index. Bài: cộng BUG-056 (tạo lại → slug-2, cả hai published).
+- **Evidence:** schema unique. `listingMetadata` `title: seoTitle`. `postMetadata` `title: post.title`.
+- **Status:** OPEN
+
+### BUG-079 — Mock demo đè gallery/mô tả listing thật khi trùng slug
+
+- **Severity:** LOW
+- **Module:** public web
+- **File:** `apps/web/src/features/public/product-detail.tsx`, `apps/web/src/features/public/mock-data.ts`
+- **Function:** `listingImages`, `ProductDetailView`
+- **Vị trí code:** `listingImages`: nếu `getProductBySlug(listing.slug)?.gallery` thì **return gallery Unsplash**, bỏ `listing.imageUrls`. Body: `fallbackBody = product?.description`; `highlights = product?.highlights`. Metadata/OG/sitemap dùng API (`listingSeoImageUrls`), không mock.
+- **Problem:** Overlay slug trùng slug demo (`nen-tho-cu-long-thanh-mat-tien`, …) → HTML khách ảnh/mô tả giả, OG/sitemap ảnh CDN thật. Lệch on-page vs structured data.
+- **Root cause:** Fallback mock còn trong trang production.
+- **Impact:** Nội dung sai; ImageObject ≠ gallery DOM. Xác suất thấp (slug demo cụ thể).
+- **Evidence:** `getProductBySlug` trong `product-detail.tsx`. `mock-data.ts` `GALLERY.house` Unsplash.
+- **Status:** OPEN
+
+### BUG-080 — Slug lô không giới hạn độ dài khi generate từ title+địa chỉ
+
+- **Severity:** LOW
+- **Module:** public-content / slug
+- **File:** `packages/shared/src/public-content.ts`, `apps/api/src/modules/public-content/public-content.service.ts`
+- **Function:** `toListingPublicSlug`, `toPublicSlug`, `uniqueSlug`
+- **Vị trí code:** Comment: `maxLen <= 0` — không cắt (lot URLs). `toListingPublicSlug` → `toPublicSlug(combined, 0, 'lo-dat')`. Title overlay max 160 + location 240. `uniqueSlug` có thể thêm `-n`. Zod `slug` max 200 chỉ khi client gửi `dto.slug`; create publish auto không qua cap đó. Hub vẫn `maxLen` 60.
+- **Problem:** URL guest hàng trăm ký tự (title lặp địa chỉ). Cắt giữa từ không xảy ra (cố ý) nhưng crawler/CDN/log/OG URL phình; một số công cụ cắt URL.
+- **Root cause:** Lot slug cap = 0; schema 200 không áp generate server.
+- **Impact:** URL khó chia sẻ; rủi ro cắt/normalize phía proxy. Không làm hai lô trùng slug (vẫn unique).
+- **Evidence:** `toPublicSlug` `if (maxLen > 0 && slug.length > maxLen)`. `setPublished` `uniqueSlug(toListingPublicSlug(title, location))`.
+- **Status:** OPEN
+
+### BUG-081 — Title trang chủ lặp tên thương hiệu
+
+- **Severity:** MEDIUM
+- **Module:** public web / metadata
+- **File:** `apps/web/app/layout.tsx`, `apps/web/app/(public)/layout.tsx`
+- **Function:** `metadata.title` (root template + public default)
+- **Vị trí code:** Root `title.template = '%s \| An Hưng Land'`. Public layout `title.default = 'An Hưng Land — Văn phòng giao dịch bất động sản'` (đã chứa brand). Trang `/` không `generateMetadata` riêng.
+- **Problem:** SERP/tab hiện `An Hưng Land — Văn phòng giao dịch bất động sản | An Hưng Land`.
+- **Root cause:** Default title đã có brand rồi bị template layout cha gắn thêm `\| An Hưng Land`.
+- **Impact:** Title trang chủ trùng brand; cắt SERP; lệch OG `title` (OG không lặp suffix).
+- **Evidence:** Live `GET https://anhungland.com/` (UA Chrome, 2026-09-03) `<title>An Hưng Land — Văn phòng giao dịch bất động sản | An Hưng Land</title>`. Listing/bài không lặp (generateMetadata `seoTitle` không chứa brand).
+- **Test account:** guest (không đăng nhập)
+- **Thao tác đã thực hiện:** Mở trang chủ, đọc `<title>` HTML.
+- **Kết quả thực tế:** Brand xuất hiện hai lần, cách bởi ` | `.
+- **Kết quả mong đợi:** Một lần tên thương hiệu, ví dụ `An Hưng Land — Văn phòng giao dịch bất động sản`.
+- **Cách tái hiện:** Mở `https://anhungland.com/` → xem title tab hoặc View Source `<title>`.
+- **Status:** OPEN
+
+### BUG-082 — `/dashbroad` không redirect, trả 200 HTML đã prerender
+
+- **Severity:** MEDIUM
+- **Module:** public web / CRM
+- **File:** `apps/web/app/(crm)/dashbroad/page.tsx`
+- **Function:** `DashbroadAliasPage`
+- **Vị trí code:** Server `redirect('/dashboard')`. Live: `GET /dashbroad` **không** `Location`; `HTTP/2 200`; `x-nextjs-prerender: 1`; `x-nextjs-cache: HIT`; `cache-control: s-maxage=31536000`. Body HTML CRM (`boot-screen` / RSC có chuỗi `dashbroad` và `dashboard`).
+- **Problem:** Alias «gõ sai» không 307/308. Guest nhận 200 «Đang tải…» rồi JS đẩy `/login`, không đi `/dashboard`. URL sai vẫn 200 (robots Disallow path này).
+- **Root cause:** `(crm)/layout.tsx` client + trang `redirect()` bị prerender/cache thành 200 thay vì Response redirect.
+- **Impact:** Bookmark/gõ sai không vào Dashboard; URL thừa 200; cache CDN/Next cực dài.
+- **Evidence:** Live curl không follow redirect, 2026-09-03. Source comment «Alias gõ sai — chuyển sang `/dashboard`».
+- **Test account:** guest
+- **Thao tác đã thực hiện:** `GET https://anhungland.com/dashbroad` không follow.
+- **Kết quả thực tế:** 200 + HTML, không header `Location`.
+- **Kết quả mong đợi:** 307/308 `Location: /dashboard` (rồi guest mới bị đẩy login).
+- **Cách tái hiện:** Trình duyệt ẩn / cửa sổ mới → mở `/dashbroad` → URL không đổi thành `/dashboard` trên response đầu (có thể chỉ đổi sau hydrate).
+- **Status:** OPEN
+
+### BUG-083 — STAFF mở được stub Quản trị khách (không guard)
+
+- **Severity:** MEDIUM
+- **Module:** web authz / customers
+- **File:** `apps/web/app/(crm)/quan-tri/khach-hang/page.tsx`, `apps/web/src/shared/ui/placeholder-page.tsx`
+- **Function:** `QuanTriKhachHangPage`
+- **Vị trí code:** Chỉ `PlaceholderPage` — không `useAuth` / `router.replace`. Khác `/quan-tri/nguoi-dung` (`UserAdminPage` đẩy STAFF về `/khach-hang`) và `/cai-dat/dia-chi`. Nav «Quản trị khách» chỉ hiện với ADMIN (`layout.tsx`).
+- **Problem:** User `kha` gõ URL `/quan-tri/khach-hang` thấy H1 «Quản trị khách hàng» và «Registry toàn hệ thống (ADMIN) — triển khai ở P4.» — không redirect. Không có bảng khách toàn hệ thống (stub).
+- **Root cause:** Route placeholder quên chặn role; CRM authz chủ yếu client (BUG-012) nhưng các trang admin khác vẫn redirect.
+- **Impact:** Lộ mặt trang admin; khi P4 gắn registry thật mà quên guard thì STAFF xem khách toàn công ty. Hiện chưa rò dữ liệu list.
+- **Evidence:** Source không check role. Browser 2026-09-03 tài khoản kha: URL giữ `/quan-tri/khach-hang`, đúng copy stub.
+- **Test account:** kha
+- **Thao tác đã thực hiện:** Đăng nhập kha → mở trực tiếp `https://anhungland.com/quan-tri/khach-hang`.
+- **Kết quả thực tế:** Trang stub ADMIN render đủ.
+- **Kết quả mong đợi:** Redirect `/khach-hang` (cùng rule `/quan-tri/nguoi-dung`).
+- **Cách tái hiện:** Login user `kha` → dán `/quan-tri/khach-hang` trên `anhungland.com`.
 - **Status:** OPEN
 
