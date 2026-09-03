@@ -1,6 +1,6 @@
 /**
  * Content script stub — P1 sẽ port scanner từ AnhunglandExtension.
- * Ảnh chat gửi `POST /api/v1/customers/from-extension` — API convert WebP.
+ * Ảnh chat + avatar gửi `POST /api/v1/customers/from-extension` — API convert WebP.
  * Hiện chỉ đánh dấu trang Meta đã gắn CRMAnHung.
  */
 const markerId = 'crmanhung-ext-marker';

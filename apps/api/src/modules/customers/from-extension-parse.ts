@@ -10,6 +10,7 @@ export type ScanFields = {
   threadId: string;
   customerUid: string;
   customerName: string;
+  avatarUrl: string;
   scanSource: string;
   scanSourceLabel: string;
   employeeUid: string;
@@ -32,20 +33,30 @@ export function trimText(value: unknown): string {
   return String(value ?? '').trim();
 }
 
-/** Keep existing rawMeta keys (pageUrl, assetId, …) and stamp the latest inbox URL. */
+export function parseRawMetaObject(raw: string | null | undefined): Record<string, unknown> {
+  if (!raw?.trim()) return {};
+  try {
+    const parsed = JSON.parse(raw) as unknown;
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      return { ...(parsed as Record<string, unknown>) };
+    }
+  } catch {
+    return {};
+  }
+  return {};
+}
+
+/** Keep existing rawMeta keys (pageUrl, avatarSourceKey, …) and stamp the latest inbox URL. */
 export function mergeFacebookRawMeta(
   existing: string | null | undefined,
   pageUrl?: string | null,
+  extra?: Record<string, unknown> | null,
 ): string | null {
-  let obj: Record<string, unknown> = {};
-  if (existing?.trim()) {
-    try {
-      const parsed = JSON.parse(existing) as unknown;
-      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-        obj = { ...(parsed as Record<string, unknown>) };
-      }
-    } catch {
-      obj = {};
+  const obj: Record<string, unknown> = { ...parseRawMetaObject(existing) };
+  if (extra) {
+    for (const [key, value] of Object.entries(extra)) {
+      if (value === undefined) continue;
+      obj[key] = value;
     }
   }
   const url = trimText(pageUrl);
@@ -74,6 +85,7 @@ export function parseScan(draft: FromExtensionDraft): ScanFields {
     customerName: trimText(scan.customerName),
     customerUid: isE2ee ? rawUid : rawUid || threadId,
     threadId,
+    avatarUrl: trimText(scan.avatarUrl),
     employeeUid: trimText(scan.employeeUid) || trimText(scan.myPageUid),
     pageUrl: trimText(draft.pageUrl),
     rawMeta,
