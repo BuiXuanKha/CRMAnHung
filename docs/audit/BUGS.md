@@ -25,12 +25,12 @@ Khi cần xác minh chức năng thực tế trên UI:
 
 | Trường | Giá trị |
 |--------|---------|
-| ID tiếp theo | `BUG-023` |
-| Tổng bug đã ghi | 22 |
-| OPEN | 22 |
+| ID tiếp theo | `BUG-035` |
+| Tổng bug đã ghi | 34 |
+| OPEN | 34 |
 | NEEDS VERIFICATION | 0 |
 | FIXED / CLOSED | 0 |
-| Lần audit gần nhất | 2026-09-03 — Person / Customer / SĐT / Facebook UID / chủ đất |
+| Lần audit gần nhất | 2026-09-03 — Lô đất / LodatCustomerMap / giá-DT-MT / trạng thái / chủ / public listing |
 
 ## Cách ghi một bug
 
@@ -103,6 +103,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | — | — | Bổ sung quy tắc kiểm thử trình duyệt (tài khoản Admin / kha; cấm tự tạo-sửa-xóa dữ liệu; mẫu bug UI). Mật khẩu không lưu trong repo. |
 | 2026-09-03 | User / Login / Auth / Role / Permission | BUG-001 … BUG-012 | Đọc source API + web. Không sửa code. Không login production (Cloudflare 1010 chặn non-browser; login sẽ tạo refresh token). |
 | 2026-09-03 | Person / Customer / SĐT / Facebook / chủ đất | BUG-013 … BUG-022 | Source: Customer, CustomerPhone, CustomerFacebook, LodatCustomerMap, merge, extension ingest, web list. Không sửa code. Không login (tránh tạo refresh; CF 1010). |
+| 2026-09-03 | Lô đất / map chủ / giá-DT-MT-hướng / trạng thái / public listing | BUG-023 … BUG-034 | Source: `lodats.service`/`dto`/`schema.prisma`, `packages/shared/src/lodats.ts`, `apps/web/src/features/lodats`, `transactions.service` (đồng bộ map), `public-content.service` (Đăng web ∩ Mở bán), `customers-view` lodatCount. Không sửa code. Không login (CF 1010; không tạo/sửa/xóa dữ liệu thật). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -153,6 +154,18 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | OPEN |
 | BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | OPEN |
 | BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | OPEN |
+| BUG-023 | HIGH | lodats / public-content | `GET /public/listings/:slug` không kiểm tra Mở bán — lô Tạm dừng vẫn mở được bằng URL. | OPEN |
+| BUG-024 | HIGH | lodats / public-content | Gỡ Đăng web cũng đi qua `requireOpenLodat` — lô Tạm dừng không gỡ được listing. | OPEN |
+| BUG-025 | HIGH | lodats / transactions | Xóa GD mở ép map `DANG_BAN`; tạo/sửa/hoàn tất GD không đụng trạng thái rao bán. | OPEN |
+| BUG-026 | HIGH | lodats | API ép `DAT_COC`/`DA_BAN` → `TAM_DUNG`; Lưu/công tắc ghi đè status thật trên map. | OPEN |
+| BUG-027 | MEDIUM | lodats / customers | Ẩn khách không đóng map — lô vẫn hiện chủ đã xoá; không API gỡ chủ/xóa lô. | OPEN |
+| BUG-028 | MEDIUM | lodats | Admin đổi chủ không bắt khách thuộc NV giữ luồng — gán nhầm Person sang lô NV khác. | OPEN |
+| BUG-029 | MEDIUM | lodats | Unique SQL 1 luồng/NV/kho không khớp Prisma/`create` (chỉ map active); không đóng luồng. | OPEN |
+| BUG-030 | MEDIUM | lodats | API nhận DT/MT âm; Zod/FE `nonnegative` — lệch frontend/backend. | OPEN |
+| BUG-031 | MEDIUM | lodats / web | Dropdown «Tất cả trạng thái» không gửi `includePaused`; API mặc định chỉ `DANG_BAN`. | OPEN |
+| BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | OPEN |
+| BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | OPEN |
+| BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | OPEN |
 
 ## Danh sách bug
 
@@ -440,5 +453,161 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** DTO Nest không implement đủ contract shared.
 - **Impact:** Ghi chú Person cũ kẹt; client theo shared gửi `note` thì lỗi.
 - **Evidence:** `update-customer.dto.ts` vs `updateCustomerSchema`. `customers.service.ts` `data` không có `note`.
+- **Status:** OPEN
+
+### BUG-023 — Chi tiết public theo slug không ẩn lô đã Tạm dừng
+
+- **Severity:** HIGH
+- **Module:** lodats / public-content
+- **File:** `apps/api/src/modules/public-content/public-content.service.ts`
+- **Function:** `getPublishedBySlug`, `loadPublishedCatalog`, `isOpenSale`
+- **Vị trí code:** `getPublishedBySlug` chỉ `if (!row?.isPublished) 404`. `loadPublishedCatalog` lọc `rows.filter(isOpenSale)` (`maps[0].status === 'DANG_BAN'`). `updateSaleStatus` / `update` map không đụng `PublicLotListing.isPublished`.
+- **Problem:** Domain `public-content.md`: khách thấy lô khi **Đăng web ∩ Mở bán**; `GET /public/listings/:slug` phải 404 nếu không Mở bán. List catalog đúng filter; mở URL slug vẫn trả listing đã Tạm dừng / `DAT_COC` (nếu `isPublished` còn true).
+- **Root cause:** Chi tiết slug không gọi `isOpenSale`. Tạm dừng lô cố ý không auto-gỡ Đăng web, nhưng guest API chi tiết không áp cùng rule với list.
+- **Impact:** Lô tạm dừng / không còn rao vẫn xem được trên web công khai nếu biết slug (SEO, share cũ, bookmark). List `/public/listings` thì ẩn.
+- **Evidence:** `getPublishedBySlug` vs `loadPublishedCatalog`. `lodats.service.ts` `updateSaleStatus` chỉ `lodatCustomerMap.status` + `lodat.updatedAt`. `docs/domains/public-content.md` §3.1 / API GET slug.
+- **Status:** OPEN
+
+### BUG-024 — Không gỡ Đăng web được khi lô đã Tạm dừng
+
+- **Severity:** HIGH
+- **Module:** lodats / public-content
+- **File:** `apps/api/src/modules/public-content/public-content.service.ts`
+- **Function:** `setPublished`, `requireOpenLodat`
+- **Vị trí code:** `setPublished` luôn `requireOpenLodat` trước khi `isPublished` true hay false. `requireOpenLodat` ném `BadRequestException('Chỉ đăng lô đang Mở bán.')` nếu `!isOpenSale`.
+- **Problem:** Domain: Gỡ web = tắt `isPublished` tường minh; Tạm dừng không tự gỡ. NV tạm dừng rồi muốn Gỡ listing thì API từ chối vì lô không còn `DANG_BAN`. Phải bật lại Mở bán rồi mới gỡ được.
+- **Root cause:** Cùng guard «chỉ lô đang mở bán» dùng cho cả Đăng và Gỡ.
+- **Impact:** Không thu hồi trang công khai đã publish khi lô đang Tạm dừng, cộng BUG-023 (slug vẫn sống).
+- **Evidence:** `setPublished(user, id, isPublished)` dòng đầu `requireOpenLodat`. `requireOpenLodat` + `isOpenSale`. Domain «Gỡ tường minh trên dashboard».
+- **Status:** OPEN
+
+### BUG-025 — Xóa giao dịch mở ép map về Mở bán; tạo/sửa/hoàn tất GD không đổi trạng thái lô
+
+- **Severity:** HIGH
+- **Module:** lodats / transactions
+- **File:** `apps/api/src/modules/transactions/transactions.service.ts`
+- **Function:** `create`, `update`, `remove`
+- **Vị trí code:** `create` / `update` không `lodatCustomerMap.update` status. `remove`: nếu GD còn `DA_COC`/`DA_CONG_CHUNG` thì `lodatCustomerMap.update({ status: 'DANG_BAN' })` theo `row.lodatCustomerMapId` lúc tạo GD.
+- **Problem:** Tạo cọc / công chứng / hoàn tất không đổi `LodatCustomerMap.status` — lô vẫn `DANG_BAN` trên `/lo-dat` và (nếu đã Đăng web) trên catalog. Xóa GD mở thì ghi đè status map thành `DANG_BAN` kể cả NV đã Tạm dừng. Nếu đã `changeOwner`, FK map của GD là map **cũ** (`isActive: false`) — `remove` sửa lịch sử, không đụng chủ hiện tại.
+- **Root cause:** Logic «mở bán lại khi xóa GD» còn sót; không đối xứng với create/complete; không kiểm tra map còn active / status hiện tại.
+- **Impact:** Lô đang cọc/đã bán vẫn hiện Mở bán. Xóa GD có thể tự bật lại rao bán. Đổi chủ + xóa GD làm lệch lịch sử map cũ.
+- **Evidence:** `transactions.service.ts` `create` data không có map status. `update` `transaction.update` chỉ cột GD. `remove` khối `OPEN_STATUSES` → `status: 'DANG_BAN'`. Domain lodats §3: đã cọc/đã bán thuộc GD, không phải công tắc list — nhưng `remove` vẫn ghi công tắc.
+- **Status:** OPEN
+
+### BUG-026 — Ép `DAT_COC`/`DA_BAN` thành Tạm dừng rồi Lưu/công tắc ghi đè DB
+
+- **Severity:** HIGH
+- **Module:** lodats
+- **File:** `apps/api/src/modules/lodats/lodats.service.ts`, `apps/web/src/features/lodats/lodat-edit-page.tsx`, `apps/web/src/features/lodats/lodat-list-page.tsx`
+- **Function:** `mapRow`, `update`, `updateSaleStatus`
+- **Vị trí code:** `mapRow`: `rawStatus` khác `DANG_BAN`/`TAM_DUNG` → `'TAM_DUNG'`. Contract `lodatListingStatusSchema` chỉ hai giá trị. Form sửa gửi `input.status = mapForm.status` (đã bị ép). `update` ghi `mapData.status = dto.status`. Công tắc list `updateLodatSaleStatus` cũng chỉ hai enum.
+- **Problem:** Schema/migrate giữ `DAT_COC`/`DA_BAN` trên map. API list/chi tiết báo `TAM_DUNG`. Lịch sử chủ (`ownerHistory.status`) vẫn raw. Bấm Lưu trên `/sua` hoặc công tắc Mở bán ghi đè status migrate thành `TAM_DUNG`/`DANG_BAN` — mất `DAT_COC`/`DA_BAN`.
+- **Root cause:** Tầng list cố ý thu hẹp enum; form/công tắc round-trip status đã thu hẹp xuống DB.
+- **Impact:** Copy CRM cũ: một lần sửa lô / gạt công tắc xóa trạng thái đã cọc/đã bán trên map. Filter mặc định (chỉ `DANG_BAN`) vốn ẩn các map này; sau khi Lưu chúng thành Tạm dừng thật và hiện khi `@`.
+- **Evidence:** `mapRow` nhánh coerce. `lodat-edit-page.tsx` `handleSubmit` `input.status`. `UpdateLodatDto` `@IsIn(['DANG_BAN','TAM_DUNG'])`. Schema comment `DANG_BAN | TAM_DUNG | DAT_COC | DA_BAN`. `lodat-edit-owner-history.tsx` vẫn nhãn Đã cọc/Đã bán từ `ownerHistory`.
+- **Status:** OPEN
+
+### BUG-027 — Ẩn khách (xóa mềm) không tách lô; không API xóa lô / đóng luồng
+
+- **Severity:** MEDIUM
+- **Module:** lodats / customers
+- **File:** `apps/api/src/modules/customers/customers.service.ts`, `apps/api/src/modules/lodats/lodats.service.ts`, `apps/api/src/modules/lodats/lodats.controller.ts`
+- **Function:** `CustomersService.update` (`isHidden`), `LodatsService.create` / `changeOwner` / `list` / `getById`
+- **Vị trí code:** UI «Xóa khách» = `isHidden: true`. Map `onDelete: Cascade` chỉ khi **hard-delete** Customer (merge). `create`/`changeOwner` từ chối khách ẩn; `list`/`getById`/`mapRow` không lọc `customer.isHidden`. Controller không có `DELETE /lodats/:id`. Không có API `isActive: false` nếu không tạo map mới (`changeOwner` luôn create).
+- **Problem:** Khách «Đã xoá» vẫn là chủ active trên `/lo-dat` (`customerHint`, chi tiết owner). Không gỡ chủ trừ đổi sang khách khác. Domain §0.1 «gỡ chủ lô dự án = đóng luồng» không có endpoint. Hard-delete lô: Prisma `Transaction` Restrict; `LodatImage`/`LodatCustomerMap`/`PublicLotListing` Cascade — không đi được từ API.
+- **Root cause:** Soft-hide Person không đụng `LodatCustomerMap`. Thiếu thao tác đóng luồng.
+- **Impact:** Rao bán dưới tên khách đã xóa. NV không xóa được lô tạo nhầm. Lô dự án không đóng luồng để NV khác/kho sạch.
+- **Evidence:** `customer-list-page.tsx` delete → `isHidden: true`. `LodatCustomerMap` customer Cascade. `lodats.controller.ts` chỉ DELETE ảnh. `changeOwner` luôn `create` map active.
+- **Status:** OPEN
+
+### BUG-028 — Admin đổi chủ có thể gắn khách của NV khác vào luồng lô
+
+- **Severity:** MEDIUM
+- **Module:** lodats
+- **File:** `apps/api/src/modules/lodats/lodats.service.ts`, `apps/web/src/features/lodats/components/change-owner-modal.tsx`
+- **Function:** `changeOwner`
+- **Vị trí code:** `if (user.role !== 'ADMIN' && customer.employeeId !== user.id)` — Admin bỏ qua. Không so `customer.employeeId === row.createdByEmployeeId`. Modal `listCustomers` Admin thấy mọi khách.
+- **Problem:** Domain §0.3: đổi chủ trong **luồng NV đang giữ** (người tạo `Lodat`). Admin được quyền tương tự — không nói gắn Person của NV B vào lô NV A. STAFF `list`/`getById` theo `createdByEmployeeId`: NV A thấy chủ là khách NV B; NV B không thấy lô trên `/lo-dat`. `listForCustomer` STAFF cũng lọc người tạo lô (BUG-032).
+- **Root cause:** Authz Admin = mọi khách hệ thống, không giới hạn hồ sơ của creator lô.
+- **Impact:** Gán nhầm chủ đất xuyên NV; panel khách của B có badge lô (count) nhưng list lô trống nếu B không tạo `Lodat`.
+- **Evidence:** `changeOwner` sau `assertCanAccess` (lô). Check khách chỉ `user.role !== 'ADMIN'`. `ownershipWhere` STAFF = `createdByEmployeeId: user.id`.
+- **Status:** OPEN
+
+### BUG-029 — Unique 1 luồng/NV/lô kho lệch Prisma và `create()`; không đóng được luồng
+
+- **Severity:** MEDIUM
+- **Module:** lodats
+- **File:** `apps/api/prisma/migrations/20260824120000_project_lot_and_lodat_align/migration.sql`, `apps/api/prisma/schema.prisma`, `apps/api/src/modules/lodats/lodats.service.ts`
+- **Function:** `create`, `getById`
+- **Vị trí code:** SQL `UNIQUE (projectLotId, createdByEmployeeId) WHERE projectLotId IS NOT NULL` (mọi Lodat, kể cả hết map active). Prisma `model Lodat` không `@@unique`. `create` chỉ `findFirst` lodat cùng kho+NV **còn map isActive**. `getById` 404 nếu `maps.length === 0` (include chỉ active). Service không bắt `P2002`.
+- **Problem:** Hai `POST /lodats` song song cùng `projectLotId` → một cái unique violation 500. Lodat tồn tại nhưng không còn map active (merge xóa map — BUG-016; hoặc SQL) → list ẩn, getById 404 «chưa gắn chủ», `create` không thấy active rồi đụng unique. Domain đóng luồng rồi gắn lại không làm được qua API.
+- **Root cause:** Unique không partial theo map active; schema Prisma lệch migration; `create` check khác DB.
+- **Impact:** NV kẹt không tạo lại luồng kho. `prisma db push` có thể **drop** unique vì schema không khai. Race tạo lô dự án.
+- **Evidence:** Migration `Lodat_projectLotId_createdByEmployeeId_uidx`. `schema.prisma` Lodat indexes không unique. `create` `maps: { some: { isActive: true } }`. Không `catch` P2002 trong `lodats.service.ts`.
+- **Status:** OPEN
+
+### BUG-030 — API cho phép diện tích / mặt tiền âm; contract Zod thì không
+
+- **Severity:** MEDIUM
+- **Module:** lodats
+- **File:** `apps/api/src/modules/lodats/dto/lodat.dto.ts`, `packages/shared/src/lodats.ts`, `apps/api/src/modules/lodats/lodats.service.ts`
+- **Function:** `CreateLodatDto` / `UpdateLodatDto`, `parseOptionalNumber`
+- **Vị trí code:** DTO `@IsNumber()` không `@Min(0)`. `parseOptionalNumber` chỉ `Number.isFinite`. Shared `createLodatSchema` / `updateLodatSchema` `z.number().nonnegative()`. API `ValidationPipe` class-validator, không parse Zod. `priceVnd` DTO không `@IsNumber` — `parsePrice` strip non-digit (chuỗi rác → số).
+- **Problem:** Web `createLodat`/`updateLodat` chặn âm qua Zod. Gọi API trực tiếp (hoặc client khác) lưu `areaM2: -10`, `frontageM: -1`. Giá âm: `parsePrice` bỏ dấu trừ → dương hoặc null, không phải âm — lệch DT.
+- **Root cause:** Nest DTO không mirror Zod.
+- **Impact:** Lô dân thông số không hợp lệ; lọc khoảng DT (`gte: 1`) bỏ qua số âm/0.
+- **Evidence:** `lodat.dto.ts` area/frontage. `packages/shared/src/lodats.ts` nonnegative. `main.ts` ValidationPipe không Zod.
+- **Status:** OPEN
+
+### BUG-031 — Nhãn «Tất cả trạng thái» vẫn ẩn lô Tạm dừng
+
+- **Severity:** MEDIUM
+- **Module:** lodats / web
+- **File:** `apps/web/src/features/lodats/display.ts`, `apps/web/src/features/lodats/lodat-list-page.tsx`, `apps/api/src/modules/lodats/lodats.service.ts`
+- **Function:** `STATUS_FILTER_OPTIONS`, `list`
+- **Vị trí code:** Dropdown `value: ''` label «Tất cả trạng thái». `listQuery.status` undefined khi `status === ''`. API: không `pausedOnly`, không `status`, không `includePaused` → filter `maps.status = DANG_BAN`. Hiện tạm dừng phải gõ `@` / `@@` (`parseSearchKeyword`) hoặc chọn đúng «Tạm dừng».
+- **Problem:** Domain mặc định ẩn tạm dừng là đúng; nhãn dropdown nói «tất cả» nhưng hành vi = chỉ Mở bán. User tin đã xem đủ lô.
+- **Root cause:** UI status rỗng ≠ `includePaused: true`.
+- **Impact:** Lô Tạm dừng / map `DAT_COC` (không `DANG_BAN`) biến mất khỏi list dù filter «Tất cả».
+- **Evidence:** `STATUS_FILTER_OPTIONS`. `lodats.service.ts` `list` nhánh `else if (!query.includePaused)`. `parseSearchKeyword` `@`/`@@`.
+- **Status:** OPEN
+
+### BUG-032 — Số lô trên khách đếm mọi map; STAFF xem list lô khách thì chỉ lô mình tạo
+
+- **Severity:** MEDIUM
+- **Module:** lodats / customers
+- **File:** `apps/api/src/modules/customers/customers-view.ts`, `apps/api/src/modules/lodats/lodats.service.ts`
+- **Function:** `loadLodatCounts`, `listForCustomer`
+- **Vị trí code:** `groupBy` map `isActive: true` theo `customerId` — không lọc `Lodat.createdByEmployeeId`. `listForCustomer` `ownershipWhere` STAFF = lô mình tạo + map active của khách. `take: 100` không phân trang.
+- **Problem:** Badge/lọc «có lô» trên `/khach-hang` có thể > 0 trong khi panel/chi tiết khách STAFF `items: []` (lô do NV khác tạo, Admin đổi chủ — BUG-028). Admin `listForCustomer` thấy đủ.
+- **Root cause:** Hai truy vấn khác tiêu chí ownership.
+- **Impact:** NV tưởng khách có lô nhưng không mở được; hoặc ngược lại sau đổi chủ xuyên NV.
+- **Evidence:** `loadLodatCounts`. `listForCustomer` comment «STAFF chỉ lô mình tạo». `customers.service.ts` `listLodats` → `listForCustomer`.
+- **Status:** OPEN
+
+### BUG-033 — Database không ràng buộc XOR đất dân / lô kho
+
+- **Severity:** LOW
+- **Module:** lodats / db
+- **File:** `apps/api/prisma/schema.prisma`
+- **Function:** `model Lodat`
+- **Vị trí code:** `addressId` và `projectLotId` đều optional; không CHECK. `create()` XOR ở app. `update()` lô dân đổi `addressId`; lô dự án bỏ qua specs, không chuyển loại. Không unique/check «đúng một trong hai».
+- **Problem:** Script/SQL/migrate lỗi có thể ghi cả hai FK, hoặc cả hai null (`addressFilter=empty` nhắm case này). `mapRow` ưu tiên project nếu `projectLotId` truthy — địa chỉ dân trên cùng hàng bị bỏ.
+- **Root cause:** Luật §0.4 chỉ enforce ở service.
+- **Impact:** Hàng lô không hợp lệ; JOIN specs/địa chỉ sai loại. API bình thường không tạo được (XOR).
+- **Evidence:** `schema.prisma` Lodat. `create` `isProject === Boolean(dto.addressId)`. Không CHECK trong `apps/api/prisma/migrations` cho Lodat XOR.
+- **Status:** OPEN
+
+### BUG-034 — Tạo lô dân commit trước khi copy ảnh chat; lỗi copy để lại lô mồ côi / retry trùng
+
+- **Severity:** MEDIUM
+- **Module:** lodats
+- **File:** `apps/api/src/modules/lodats/lodats.service.ts`
+- **Function:** `create`
+- **Vị trí code:** `prisma.lodat.create` (kèm map) xong mới `copyPublicImageToSeoLotKey` + `lodatImage.createMany`. Không `$transaction` với copy R2. Ném lỗi → HTTP 500, hàng Lodat+map đã có. Lô dân không unique theo địa chỉ+NV. Ảnh file máy upload **sau** `createLodat` phía web (đã bắt lỗi riêng).
+- **Problem:** Copy R2/SEO fail: client báo không tạo được nhưng lô đã gắn chủ. Bấm tạo lại → thêm lô dân trùng cùng khách/địa chỉ/tiêu đề. Ảnh chat có thể thiếu một phần nếu fail giữa vòng `for`.
+- **Root cause:** Side-effect storage ngoài transaction DB.
+- **Impact:** Duplicate lô dân; chủ/giá nhân bản; list rối. Lô dự án unique SQL (BUG-029) thì retry = 500.
+- **Evidence:** `create` sau `select: { id: true }` khối `if (!isProject && dto.chatImageIds?.length)`. `lodat-create-page.tsx` upload file sau `createLodat` (nhánh khác, có toast).
 - **Status:** OPEN
 
