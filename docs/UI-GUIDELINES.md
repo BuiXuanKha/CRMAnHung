@@ -680,6 +680,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-02 | Dashboard menu **Thống kê** `/dashboard/thong-ke` (ADMIN): list NV + cột số lô đã tạo link share + lượt xem khách (cookie, gồm trang chủ, F5 = +1) |
 | 2026-09-02 | Thống kê: thêm dòng **Truy cập trực tiếp** (khách không cookie share); cùng F5 = +1; icon Lucide `Globe` |
 | 2026-09-03 | Chi tiết `/khach-hang/[id]` mobile: ẩn «← Danh sách khách»; FAB gọi (`tel:`) + **Zalo** (`zalo.me`) khi có SĐT + **Mở Messenger** (cùng menu list mobile); máy tính không đổi |
+| 2026-09-03 | Chi tiết `/lo-dat/[id]` mobile: ẩn «← Danh sách lô đất»; FAB liên hệ **chủ đất** (Gọi / Zalo / Mở Messenger); nổi trên footer Giao dịch·Sửa; máy tính không đổi |
 
 ---
 

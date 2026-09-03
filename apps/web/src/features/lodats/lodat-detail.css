@@ -355,6 +355,69 @@
   color: #334155;
 }
 
+/* FAB chủ đất — ẩn máy tính; mobile nổi trên footer */
+.ld-owner-fab {
+  display: none;
+}
+
+.ld-owner-fab-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 22%);
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ld-owner-fab-btn:active {
+  transform: scale(0.96);
+}
+
+.ld-owner-fab-call {
+  background: #047857;
+}
+
+.ld-owner-fab-zalo {
+  background: #0068ff;
+}
+
+.ld-owner-fab-zalo-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.ld-owner-fab-chat {
+  background: #2563eb;
+}
+
+@media (max-width: 899px) {
+  .ld-detail-back {
+    display: none;
+  }
+
+  .ld-detail-page.has-owner-fab.has-mobile-footer {
+    padding-bottom: 220px;
+  }
+
+  .ld-owner-fab {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 12px;
+    position: fixed;
+    right: 16px;
+    bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    z-index: 45;
+  }
+}
+
 @media (min-width: 900px) {
   .ld-detail-page.has-mobile-footer {
     padding-bottom: 16px;

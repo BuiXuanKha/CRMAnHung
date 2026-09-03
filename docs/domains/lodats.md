@@ -388,6 +388,18 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 
 Xếp dọc: content → **Lịch sử giao dịch** (nếu có) → **Lô đất cùng xã**; footer dính đáy: **Giao dịch** (cùng open-or-create) · **Sửa lô đất**.
 
+**Không** hiện «← Danh sách lô đất» (Back / vuốt hệ thống). Máy tính vẫn hiện.
+
+**FAB liên hệ chủ đất** góc phải dưới, **nổi trên** footer (chỉ khi có nút cần hiện):
+
+| Nút | Điều kiện | Hành vi |
+|-----|-----------|---------|
+| Gọi điện | Chủ có ≥1 SĐT | `tel:` số đầu trên hồ sơ chủ |
+| Zalo | Chủ có ≥1 SĐT | Tab `zalo.me/84…` (cùng trang public) |
+| Mở Messenger | Chủ có Facebook và **chưa** ẩn | Cùng menu list khách mobile (`messenger.com` / CrmAlert) |
+
+Không chủ / không SĐT và không FB → không hiện cụm FAB. Máy tính **không** FAB.
+
 #### 12.3.3 Gallery ảnh (đã làm)
 
 Full-screen giống CRM cũ: tiêu đề + `N / M` · đóng · prev/next · vuốt · chấm · **Tải về** · **Xoay trái/phải**.

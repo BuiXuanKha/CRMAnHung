@@ -23,6 +23,7 @@ import {
   retargetLodatSeoImages,
   uniqueSeoLotImageKey,
 } from './lodat-seo-image-upload';
+import { facebookPageUrlFromRawMeta } from '@crmanhung/shared';
 
 const ADDRESS_INCLUDE = {
   province: { select: { name: true, isHidden: true } },
@@ -54,9 +55,22 @@ const LIST_INCLUDE = {
         select: {
           id: true,
           fullName: true,
+          isHidden: true,
           phones: {
             orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
             select: { phone: true, label: true },
+          },
+          facebook: {
+            select: {
+              customerUid: true,
+              threadId: true,
+              facebookName: true,
+              scanSource: true,
+              scanSourceLabel: true,
+              employeeFacebookUid: true,
+              rawMeta: true,
+              avatarObjectKey: true,
+            },
           },
         },
       },
@@ -283,10 +297,23 @@ export class LodatsService {
         ? {
             customerId: customer.id,
             fullName: customer.fullName,
+            isHidden: customer.isHidden,
             phones: (customer.phones ?? []).map((ph) => ({
               phone: ph.phone,
               label: ph.label ?? null,
             })),
+            facebook: customer.facebook
+              ? {
+                  customerUid: customer.facebook.customerUid,
+                  threadId: customer.facebook.threadId,
+                  facebookName: customer.facebook.facebookName,
+                  avatarUrl: this.publicUrl(customer.facebook.avatarObjectKey),
+                  scanSource: customer.facebook.scanSource,
+                  scanSourceLabel: customer.facebook.scanSourceLabel,
+                  employeeFacebookUid: customer.facebook.employeeFacebookUid,
+                  pageUrl: facebookPageUrlFromRawMeta(customer.facebook.rawMeta),
+                }
+              : null,
           }
         : null,
       canEditSpecs: canAccess && !isProject,

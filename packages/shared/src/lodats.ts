@@ -11,6 +11,7 @@ import {
   TransactionStatus,
   TransactionType,
 } from './enums.js';
+import { customerFacebookSchema } from './customers.js';
 
 export const lodatListingStatusSchema = z.enum([
   LodatSaleStatus.DANG_BAN,
@@ -105,12 +106,16 @@ export type UpdateLodatSaleStatusInput = z.infer<typeof updateLodatSaleStatusSch
 export const lodatOwnerSchema = z.object({
   customerId: z.string(),
   fullName: z.string(),
+  /** Ẩn trên hồ sơ khách — FAB Messenger không hiện. */
+  isHidden: z.boolean().default(false),
   phones: z.array(
     z.object({
       phone: z.string(),
       label: z.string().nullable().optional(),
     }),
   ),
+  /** Meta FB để FAB «Mở Messenger» (cùng menu list khách mobile). */
+  facebook: customerFacebookSchema.nullable().optional(),
 });
 
 export type LodatOwner = z.infer<typeof lodatOwnerSchema>;

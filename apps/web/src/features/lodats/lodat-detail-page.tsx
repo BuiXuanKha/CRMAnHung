@@ -18,6 +18,7 @@ import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { getLodat, listSameWardLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { createLodatShareLink } from '@/features/lot-shares/api';
 import { LodatImageGallery } from './components/lodat-image-gallery';
+import { LodatOwnerFab } from './components/lodat-owner-fab';
 import { LodatTransactionHistory } from './components/lodat-transaction-history';
 import { SameWardList } from './components/same-ward-list';
 import { SaleToggle } from './components/sale-toggle';
@@ -163,9 +164,21 @@ export function LodatDetailPage() {
   const sameWardVisible = Boolean(
     sameWardName || sameWardItems.length || sameWardError,
   );
+  const owner = detail?.owner ?? null;
+  const hasOwnerFab = owner
+    ? owner.phones.length > 0 || (Boolean(owner.facebook) && !owner.isHidden)
+    : false;
 
   return (
-    <div className={['ld-detail-page', detail ? 'has-mobile-footer' : ''].filter(Boolean).join(' ')}>
+    <div
+      className={[
+        'ld-detail-page',
+        detail ? 'has-mobile-footer' : '',
+        hasOwnerFab ? 'has-owner-fab' : '',
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <Link href="/lo-dat" scroll={false} className="ld-detail-back">
         ← Danh sách lô đất
       </Link>
@@ -426,6 +439,8 @@ export function LodatDetailPage() {
           </button>
         </footer>
       ) : null}
+
+      {owner ? <LodatOwnerFab owner={owner} /> : null}
 
       {galleryOpen && detail && imageCount ? (
         <LodatImageGallery
