@@ -207,8 +207,58 @@
   margin-right: 4px;
 }
 
+/* FAB — ẩn máy tính; chỉ hiện mobile (§12.3.2) */
+.kh-detail-fab {
+  display: none;
+}
+
+.kh-detail-fab-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 999px;
+  border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  box-shadow: 0 4px 14px rgb(15 23 42 / 22%);
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.kh-detail-fab-btn:active {
+  transform: scale(0.96);
+}
+
+.kh-detail-fab-call {
+  background: #047857;
+}
+
+.kh-detail-fab-chat {
+  background: #2563eb;
+}
+
 @media (max-width: 767px) {
   .kh-detail {
     width: 100%;
+  }
+
+  .kh-detail-back {
+    display: none;
+  }
+
+  .kh-detail.has-fab {
+    padding-bottom: 88px;
+  }
+
+  .kh-detail-fab {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: 12px;
+    position: fixed;
+    right: 16px;
+    bottom: max(20px, env(safe-area-inset-bottom, 0px));
+    z-index: 40;
   }
 }

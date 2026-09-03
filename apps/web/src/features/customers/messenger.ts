@@ -2,8 +2,11 @@ import {
   facebookInboxChatUrl as resolveFacebookInboxChatUrl,
   messengerComUrl as resolveMessengerComUrl,
   numericMessengerId,
+  type CustomerDetail,
   type CustomerListItem,
 } from '@crmanhung/shared';
+
+type CustomerWithFacebook = Pick<CustomerListItem | CustomerDetail, 'facebook'>;
 
 /**
  * Khớp CRM cũ (`crm.anhungland.com`):
@@ -17,12 +20,12 @@ import {
 export { numericMessengerId };
 
 /** URL «Mở chat». */
-export function facebookInboxChatUrl(customer: CustomerListItem): string | null {
+export function facebookInboxChatUrl(customer: CustomerWithFacebook): string | null {
   return resolveFacebookInboxChatUrl(customer.facebook);
 }
 
 /** URL «Mở Messenger». */
-export function messengerComUrl(customer: CustomerListItem): string | null {
+export function messengerComUrl(customer: CustomerWithFacebook): string | null {
   return resolveMessengerComUrl(customer.facebook);
 }
 
@@ -49,6 +52,6 @@ export function openExternalUrl(url: string | null | undefined): boolean {
 }
 
 /** @deprecated dùng messengerComUrl + openExternalUrl */
-export function openCustomerMessenger(customer: CustomerListItem): boolean {
+export function openCustomerMessenger(customer: CustomerWithFacebook): boolean {
   return openExternalUrl(messengerComUrl(customer));
 }

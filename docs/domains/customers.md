@@ -414,21 +414,29 @@ Quay lại = `/khach-hang` (mục 24 sẽ khôi phục cuộn/lọc).
 
 #### 12.3.1 Máy tính
 
-Cùng khối 12.3.3. Cột nội dung hẹp (~720px). Nút quay lại trên cùng.
+Cùng khối 12.3.3. Cột nội dung hẹp (~720px). Nút quay lại trên cùng. **Không** FAB.
 
 #### 12.3.2 Mobile
 
-Cùng khối 12.3.3. SĐT bấm = `tel:`. Padding gọn.
+Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** hiện «← Danh sách khách» (Back / vuốt hệ thống).
+
+**FAB** góc phải dưới (chỉ khi có nút cần hiện; không có SĐT và không có FB → không hiện cụm):
+
+| Nút | Điều kiện | Hành vi |
+|-----|-----------|---------|
+| Gọi điện | Có ≥1 SĐT | `tel:` số chính (hoặc số đầu trên hồ sơ) |
+| Mở chat | Có Facebook và khách **chưa** ẩn | Cùng logic menu list «Mở chat» (tab ngoài / CrmAlert nếu không mở được) |
 
 #### 12.3.3 Thành phần
 
-1. **Quay lại** — «← Danh sách khách»
+1. **Quay lại** — «← Danh sách khách» (**chỉ máy tính**). Mobile: ẩn
 2. **Hero** — avatar (ảnh FB hoặc chữ tắt); tên; hangtag trạng thái; hangtag **Đã xoá** nếu ẩn
 3. **SĐT** — mọi số trên hồ sơ; trống `—`. Điện thoại: từng số là `tel:`
 4. **Tài chính** — khoảng ngân sách; trống `—`
 5. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú
 6. **Danh sách lô đất** — API. Cùng thẻ §12.1.6: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
 7. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Không có → «Chưa có lịch sử chăm sóc.»
+8. **FAB mobile** — §12.3.2 (gọi / mở chat)
 
 Không form chăm sóc trên trang này (form = **§12.4**).
 
