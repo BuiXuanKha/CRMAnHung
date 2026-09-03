@@ -25,12 +25,12 @@ Khi cần xác minh chức năng thực tế trên UI:
 
 | Trường | Giá trị |
 |--------|---------|
-| ID tiếp theo | `BUG-035` |
-| Tổng bug đã ghi | 34 |
-| OPEN | 34 |
+| ID tiếp theo | `BUG-041` |
+| Tổng bug đã ghi | 40 |
+| OPEN | 40 |
 | NEEDS VERIFICATION | 0 |
 | FIXED / CLOSED | 0 |
-| Lần audit gần nhất | 2026-09-03 — Lô đất / LodatCustomerMap / giá-DT-MT / trạng thái / chủ / public listing |
+| Lần audit gần nhất | 2026-09-03 — Share lô public (`PublicLotShare`) / cookie last-click / thống kê / phân quyền API |
 
 ## Cách ghi một bug
 
@@ -104,6 +104,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | User / Login / Auth / Role / Permission | BUG-001 … BUG-012 | Đọc source API + web. Không sửa code. Không login production (Cloudflare 1010 chặn non-browser; login sẽ tạo refresh token). |
 | 2026-09-03 | Person / Customer / SĐT / Facebook / chủ đất | BUG-013 … BUG-022 | Source: Customer, CustomerPhone, CustomerFacebook, LodatCustomerMap, merge, extension ingest, web list. Không sửa code. Không login (tránh tạo refresh; CF 1010). |
 | 2026-09-03 | Lô đất / map chủ / giá-DT-MT-hướng / trạng thái / public listing | BUG-023 … BUG-034 | Source: `lodats.service`/`dto`/`schema.prisma`, `packages/shared/src/lodats.ts`, `apps/web/src/features/lodats`, `transactions.service` (đồng bộ map), `public-content.service` (Đăng web ∩ Mở bán), `customers-view` lodatCount. Không sửa code. Không login (CF 1010; không tạo/sửa/xóa dữ liệu thật). |
+| 2026-09-03 | Share lô public / cookie / thống kê / authz API | BUG-035 … BUG-040 | Source: `lot-shares.service` + public/admin controllers, `public-listings` share-link, `lodats` share-link, middleware cookie, `packages/shared/src/lot-shares.ts`, web `features/lot-shares` + `ProductShareButton`. Không có Share nội bộ CRM (cấp quyền lô giữa NV). Không sửa code. Không login. Không ghi trùng BUG-003. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -166,6 +167,12 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | OPEN |
 | BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | OPEN |
 | BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | OPEN |
+| BUG-035 | HIGH | lot-shares | Middleware ghi cookie `?share=` đúng format dù resolve 404 — ghi đè last-click; `employeeId` rỗng reset hạn 30 ngày. | OPEN |
+| BUG-036 | HIGH | lot-shares | Không API xóa/sửa/xoay mã share; gỡ publish / disable NV chỉ ẩn resolve; publish lại mã cũ còn hiệu lực. | OPEN |
+| BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | OPEN |
+| BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | OPEN |
+| BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | OPEN |
+| BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | OPEN |
 
 ## Danh sách bug
 
@@ -609,5 +616,83 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Side-effect storage ngoài transaction DB.
 - **Impact:** Duplicate lô dân; chủ/giá nhân bản; list rối. Lô dự án unique SQL (BUG-029) thì retry = 500.
 - **Evidence:** `create` sau `select: { id: true }` khối `if (!isProject && dto.chatImageIds?.length)`. `lodat-create-page.tsx` upload file sau `createLodat` (nhánh khác, có toast).
+- **Status:** OPEN
+
+### BUG-035 — Cookie last-click ghi khi mã share không resolve được
+
+- **Severity:** HIGH
+- **Module:** lot-shares
+- **File:** `apps/web/middleware.ts`, `packages/shared/src/lot-shares.ts`
+- **Function:** `middleware`, `nextPublicShareCookie`, `lookupShareEmployee`
+- **Vị trí code:** Middleware: `normalizeShareCode` thành công → `lookupShareEmployee` (GET Nest resolve). Lookup fail (`employeeId: ''`) vẫn `nextPublicShareCookie` + `cookies.set` nếu `maxAge > 0`. Comment: ghi cookie khi đúng format kể cả lookup chậm. `sameStaff` chỉ true khi `existing.employeeId === employeeId` và còn hạn — `employeeId` rỗng không bao giờ `sameStaff`.
+- **Problem:** `?share=XXXXX` đúng alphabet 4–12 ký tự nhưng không có hàng / NV `isActive=false` / listing gỡ publish → resolve 404. Cookie httpOnly vẫn ghi 30 ngày, **ghi đè** mã NV trước. Lần sau lookup được NV thật: cookie đang `employeeId=''` ≠ id thật → domain «cùng NV không reset 30 ngày» bị phá. Trang layout không resolve được → liên hệ hotline; `ShareAttributedViewTracker` không có code → cộng **Truy cập trực tiếp**.
+- **Root cause:** Cố tình persist format-valid code trước khi biết mã còn sống; không tách timeout vs 404.
+- **Impact:** Link giả / NV đã khóa / lô gỡ web cướp attribution 30 ngày. Đối thủ gửi khách URL `?share=` rác để xóa cookie NV.
+- **Evidence:** `middleware.ts` `lookedUp?.employeeId ?? ''` rồi luôn set cookie. `lot-shares.ts` `nextPublicShareCookie`. `resolveShareCode` 404 khi `!isPublished` / `!isActive`. Domain `public-content.md` §18 last-click.
+- **Status:** OPEN
+
+### BUG-036 — Không thu hồi được share; disable/gỡ web chỉ ẩn resolve; mã cũ sống lại
+
+- **Severity:** HIGH
+- **Module:** lot-shares
+- **File:** `apps/api/src/modules/lot-shares/lot-shares.service.ts`, `apps/api/src/modules/lot-shares/public-lot-shares.controller.ts`, `apps/api/src/modules/lot-shares/admin-lot-shares.controller.ts`, `apps/api/prisma/schema.prisma`
+- **Function:** `createOrGetShareLinkForListing`, `resolveShareCode`, `UsersService.remove` / `update` (`isActive`)
+- **Vị trí code:** Không `PATCH`/`DELETE` `PublicLotShare`. `create` unique `(employeeId, publicListingId)` → lần sau trả **cùng** `shareCode`. `resolve`/`findActiveShare` chặn `!isPublished` / `!isActive`. Hàng DB giữ nguyên. `User` delete `onDelete: Cascade` share — nhưng `remove` user **cấm** nếu còn lodat/khách/GD (NV đang share thì thường không xóa được). Disable không xóa share.
+- **Problem:** Không xóa share của mình hay của người khác. Lộ mã: không xoay. Gỡ Đăng web: guest resolve 404 (mọi NV trên listing); **bật lại publish** → mọi mã cũ dùng được ngay. Disable NV: resolve 404, cookie/mã còn; bật lại `isActive` → share lại hiệu lực. Đổi `role` không đụng bảng share.
+- **Root cause:** Share = get-or-create; không vòng đời revoke. Trạng thái hiệu lực suy ra từ User/listing, không có cờ trên `PublicLotShare`.
+- **Impact:** Không «xóa share thì mất quyền» vì không có xóa. Quyền liên hệ/thống kê của mã chỉ tạm tắt. UI không có màn sửa/xóa share (ẩn hết) — backend cũng không có; không phải FE ẩn nhưng BE vẫn xóa được.
+- **Evidence:** Chỉ `POST` share-link + `GET/POST` public code + `GET` admin stats. Schema `PublicLotShare` không `revokedAt`. `createOrGetShareLinkForListing` `findUnique` employee+listing.
+- **Status:** OPEN
+
+### BUG-037 — Cộng lượt xem public không chứng thực cookie share
+
+- **Severity:** MEDIUM
+- **Module:** lot-shares
+- **File:** `apps/api/src/modules/lot-shares/lot-shares.service.ts`, `apps/api/src/modules/lot-shares/public-page-views.controller.ts`
+- **Function:** `recordPublicPageView`, `recordAttributedPageView`
+- **Vị trí code:** `@Public() POST /public/page-views` body `shareCode` tùy chọn. Không đọc cookie. `findActiveShare` theo mã. Có `Authorization: Bearer …` (kể cả token giả — guard `@Public` bỏ JWT) thì **không đếm**. Cookie `crmanhung_share` httpOnly — client JS gửi code từ SSR/`attribution`, không bắt buộc khớp cookie server.
+- **Problem:** `curl` + mã share (nằm trên URL công khai) tăng `attributedViewCount` của NV. Body rỗng tăng `directViewCount`. Throttler 120/phút. Tracker FE bỏ qua khi có JWT; API không bắt origin/cookie.
+- **Root cause:** Đếm view tin client; tách khỏi cookie last-click.
+- **Impact:** Thống kê `/dashboard/thong-ke` (ADMIN) không đáng tin. Không mở CRM data của NV khác — chỉ số.
+- **Evidence:** `recordPublicPageView(body?.shareCode, hasBearerToken)`. `ShareAttributedViewTracker` `POST /public/page-views`. Không chỗ nào verify cookie vs body.
+- **Status:** OPEN
+
+### BUG-038 — `POST /public/lot-shares/:code/visit` tăng đếm không cùng rule resolve
+
+- **Severity:** MEDIUM
+- **Module:** lot-shares
+- **File:** `apps/api/src/modules/lot-shares/lot-shares.service.ts`, `apps/api/src/modules/lot-shares/public-lot-shares.controller.ts`
+- **Function:** `recordVisit`
+- **Vị trí code:** `publicLotShare.update` `visitCount + 1` theo `shareCode` trước. Sau đó nếu `!isPublished` mới 404 — **đã cộng**. Không đọc `employee.isActive`. Web `recordPublicLotShareVisit` **không được gọi** (chỉ khai trong `api.ts`).
+- **Problem:** Endpoint public. NV disable / listing unpublished vẫn tăng `visitCount` (unpublished: +1 rồi lỗi). `GET :code` (còn hiệu lực) trả `visitCount` đã bị thổi.
+- **Root cause:** Update-then-check; không `findActiveShare`.
+- **Impact:** Số visit trên resolve sai. FE hiện không gọi — vẫn gọi được trực tiếp (UI ẩn ≠ bảo mật).
+- **Evidence:** `recordVisit` try `update` rồi `if (!row.publicListing.isPublished)`. Grep `recordPublicLotShareVisit` chỉ `api.ts`.
+- **Status:** OPEN
+
+### BUG-039 — Mất SĐT: khách không resolve share nhưng view vẫn cộng cho NV
+
+- **Severity:** MEDIUM
+- **Module:** lot-shares
+- **File:** `apps/api/src/modules/lot-shares/lot-shares.service.ts`
+- **Function:** `resolveShareCode`, `findActiveShare`, `createOrGetShareLinkForListing`
+- **Vị trí code:** Tạo share: `isActive` + `phone.trim()`. `resolveShareCode`: 404 nếu không phone / không active / không publish. `findActiveShare`: chỉ `isPublished` + `employee.isActive` — **không** phone.
+- **Problem:** Admin xóa SĐT user sau khi đã có `PublicLotShare`. Guest GET resolve 404 (hotline). `POST /public/page-views` với mã cũ vẫn `incrementEmployeeView`. Middleware lookup fail → BUG-035 cookie. Tracker layout không attribution → có thể đếm direct thay vì NV tùy client gửi mã hay không.
+- **Root cause:** Hai hàm «share còn sống» khác điều kiện.
+- **Impact:** Liên hệ và thống kê lệch. Tạo share mới cũng 400 «chưa có SĐT» trong khi hàng cũ còn.
+- **Evidence:** `resolveShareCode` khối `if (!phone)`. `findActiveShare` select không `phone`.
+- **Status:** OPEN
+
+### BUG-040 — Resolve public trả `employeeId` và `visitCount`
+
+- **Severity:** LOW
+- **Module:** lot-shares
+- **File:** `apps/api/src/modules/lot-shares/lot-shares.service.ts`, `packages/shared/src/lot-shares.ts`
+- **Function:** `resolveShareCode`
+- **Vị trí code:** `@Public() GET /public/lot-shares/:code` trả `employeeId`, `visitCount`, `employee.fullName/phone/avatarUrl`, `listingSlug`. Middleware chỉ cần `employeeId`. UI liên hệ cần tên/SĐT/avatar.
+- **Problem:** Guest biết mã (URL share) đọc được id nội bộ User và số visit. Không mở `/lodats` hay CRM (JWT + ownership riêng). Không sửa/xóa share (không API).
+- **Root cause:** Cùng DTO cho middleware + guest contact.
+- **Impact:** Lộ id nhân viên + thống kê visit từng mã. Brute-force mã 5 ký tự (~32^5) + 120 req/phút không thực tế.
+- **Evidence:** `publicLotShareResolveSchema`. `middleware.ts` `body.employeeId`.
 - **Status:** OPEN
 
