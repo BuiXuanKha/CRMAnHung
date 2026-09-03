@@ -1,4 +1,8 @@
-import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
   CopyObjectCommand,
@@ -12,6 +16,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import { randomUUID } from 'node:crypto';
 import path from 'node:path';
+import { fetchPublicCdnImage } from './public-image-fetch';
 import { isPublicRasterImage, toPublicWebp, withPublicWebpExt } from './to-public-webp';
 
 export type UploadInput = {
@@ -120,6 +125,20 @@ export class StorageService {
       '',
     );
     return `${base}/${objectKey.replace(/^\//, '')}`;
+  }
+
+  /**
+   * Same-origin download for CRM gallery. CDN (`cdn.anhungland.com`) has no CORS,
+   * so the browser cannot `fetch` the object; this streams it after host allowlist.
+   */
+  async fetchPublicImage(rawUrl: string): Promise<{
+    buffer: Buffer;
+    contentType: string;
+    fileName: string;
+  }> {
+    const publicBase =
+      this.config.get<string>('R2_PUBLIC_BASE_URL') ?? 'https://cdn.anhungland.com';
+    return fetchPublicCdnImage(rawUrl, publicBase);
   }
 
   private async preparePublicRaster(input: UploadInput): Promise<UploadInput> {

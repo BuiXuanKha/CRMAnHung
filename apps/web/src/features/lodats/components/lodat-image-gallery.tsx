@@ -13,6 +13,11 @@ import {
 } from 'lucide-react';
 import { Icon } from '@/shared/ui/icon';
 import type { LodatImage } from '@crmanhung/shared';
+import {
+  downloadGalleryImage,
+  fileNameFromImageUrl,
+  normalizeRotationDeg,
+} from './lodat-image-download';
 import './lodat-image-gallery.css';
 
 const SWIPE_PX = 48;
@@ -29,67 +34,6 @@ type Props = {
   onError?: (message: string) => void;
 };
 
-function normalizeDeg(deg: number): number {
-  return ((deg % 360) + 360) % 360;
-}
-
-function fileNameFromUrl(url: string, index: number): string {
-  try {
-    const path = new URL(url, window.location.origin).pathname;
-    const base = path.split('/').pop() || `anh-lo-${index + 1}.jpg`;
-    return base.includes('.') ? base : `${base}.jpg`;
-  } catch {
-    return `anh-lo-${index + 1}.jpg`;
-  }
-}
-
-async function downloadRotatedImage(url: string, rotationDeg: number, fileName: string) {
-  const res = await fetch(url, { mode: 'cors', credentials: 'omit' });
-  if (!res.ok) throw new Error('Không tải được ảnh');
-  const blob = await res.blob();
-  const objectUrl = URL.createObjectURL(blob);
-
-  try {
-    const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-      const el = new Image();
-      el.onload = () => resolve(el);
-      el.onerror = () => reject(new Error('Không đọc được ảnh'));
-      el.src = objectUrl;
-    });
-
-    const deg = normalizeDeg(rotationDeg);
-    const swap = deg === 90 || deg === 270;
-    const canvas = document.createElement('canvas');
-    canvas.width = swap ? img.naturalHeight : img.naturalWidth;
-    canvas.height = swap ? img.naturalWidth : img.naturalHeight;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) throw new Error('Không tạo được ảnh tải về');
-
-    ctx.translate(canvas.width / 2, canvas.height / 2);
-    ctx.rotate((deg * Math.PI) / 180);
-    ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
-
-    const outType = blob.type.includes('png') ? 'image/png' : 'image/jpeg';
-    const outBlob = await new Promise<Blob>((resolve, reject) => {
-      canvas.toBlob(
-        (b) => (b ? resolve(b) : reject(new Error('Không tạo được file tải về'))),
-        outType,
-        0.92,
-      );
-    });
-
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(outBlob);
-    a.download = fileName.replace(/\.[^.]+$/, '') + (outType === 'image/png' ? '.png' : '.jpg');
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-  } finally {
-    URL.revokeObjectURL(objectUrl);
-  }
-}
-
 export function LodatImageGallery({
   title,
   images,
@@ -103,6 +47,7 @@ export function LodatImageGallery({
   const [index, setIndex] = useState(startIndex);
   const [localRotations, setLocalRotations] = useState<Record<string, number>>({});
   const [busyDownload, setBusyDownload] = useState(false);
+  const [downloadDone, setDownloadDone] = useState(false);
   const [busyRotate, setBusyRotate] = useState(false);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
   const [mounted, setMounted] = useState(false);
@@ -115,7 +60,7 @@ export function LodatImageGallery({
     const next: Record<string, number> = {};
     for (const img of images) {
       const key = img.id ?? img.url;
-      next[key] = normalizeDeg(img.rotationDeg ?? 0);
+      next[key] = normalizeRotationDeg(img.rotationDeg ?? 0);
     }
     setLocalRotations(next);
   }, [images]);
@@ -145,6 +90,10 @@ export function LodatImageGallery({
   }, [startIndex]);
 
   useEffect(() => {
+    setDownloadDone(false);
+  }, [safeIndex, url]);
+
+  useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
     return () => {
@@ -164,7 +113,7 @@ export function LodatImageGallery({
 
   function rotate(delta: number) {
     if (!current || busyRotate) return;
-    const nextDeg = normalizeDeg(rotationDeg + delta);
+    const nextDeg = normalizeRotationDeg(rotationDeg + delta);
 
     if (current.source !== 'lodat' || !current.id || !onRotate) {
       setLocalRotations((cur) => ({ ...cur, [rotationKey]: nextDeg }));
@@ -176,7 +125,7 @@ export function LodatImageGallery({
     setBusyRotate(true);
     void onRotate(current, nextDeg)
       .then((saved) => {
-        setLocalRotations((cur) => ({ ...cur, [rotationKey]: normalizeDeg(saved) }));
+        setLocalRotations((cur) => ({ ...cur, [rotationKey]: normalizeRotationDeg(saved) }));
         onToast?.('Đã lưu góc xoay ảnh.');
       })
       .catch((err: Error) => {
@@ -190,19 +139,47 @@ export function LodatImageGallery({
     if (!url || busyDownload) return;
     setBusyDownload(true);
     try {
-      await downloadRotatedImage(url, rotationDeg, fileNameFromUrl(url, safeIndex));
+      const result = await downloadGalleryImage(
+        url,
+        rotationDeg,
+        fileNameFromImageUrl(url, safeIndex),
+      );
+      if (result === 'cancelled') return;
+      setDownloadDone(true);
       onToast?.('Đã tải ảnh về máy.');
-    } catch {
-      try {
-        window.open(url, '_blank', 'noopener,noreferrer');
-        onToast?.('Đã mở ảnh — giữ để lưu nếu trình duyệt chặn tải.');
-      } catch {
-        onError?.('Không tải được ảnh về máy.');
-      }
+    } catch (err) {
+      setDownloadDone(false);
+      onError?.((err as Error).message || 'Không tải được ảnh về máy.');
     } finally {
       setBusyDownload(false);
     }
   }
+
+  function stopOverlayPointer(e: { stopPropagation: () => void }) {
+    e.stopPropagation();
+  }
+
+  const downloadLabel = busyDownload ? 'Đang tải…' : downloadDone ? 'Đã tải' : 'Tải về';
+
+  const downloadButton = (className: string) => (
+    <button
+      type="button"
+      className={className}
+      disabled={busyDownload}
+      aria-label={
+        busyDownload ? 'Đang tải ảnh' : downloadDone ? 'Đã tải ảnh' : 'Tải ảnh về'
+      }
+      onClick={(e) => {
+        e.stopPropagation();
+        void handleDownload();
+      }}
+      onTouchStart={stopOverlayPointer}
+      onTouchEnd={stopOverlayPointer}
+    >
+      <Icon icon={Download} size={16} />
+      {downloadLabel}
+    </button>
+  );
 
   if (!mounted || count < 1 || !url) return null;
 
@@ -277,6 +254,7 @@ export function LodatImageGallery({
           >
             <Icon icon={Scan} size={16} />
           </a>
+          {downloadButton('ld-img-gallery-download ld-img-gallery-download--overlay')}
         </div>
 
         {count > 1 ? (
@@ -292,15 +270,7 @@ export function LodatImageGallery({
       </div>
 
       <div className="ld-img-gallery-mid">
-        <button
-          type="button"
-          className="ld-img-gallery-download"
-          disabled={busyDownload}
-          onClick={() => void handleDownload()}
-        >
-          <Icon icon={Download} size={16} />
-          {busyDownload ? 'Đang tải…' : 'Tải về'}
-        </button>
+        {downloadButton('ld-img-gallery-download ld-img-gallery-download--mid')}
 
         {count > 1 ? (
           <div className="ld-img-gallery-dots" role="tablist" aria-label="Chọn ảnh">

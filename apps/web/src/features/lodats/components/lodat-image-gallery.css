@@ -109,6 +109,10 @@
   text-decoration: none;
 }
 
+.ld-img-gallery-download--overlay {
+  display: none;
+}
+
 .ld-img-gallery-scan:hover {
   background: rgba(15, 23, 42, 0.8);
 }
@@ -234,6 +238,30 @@
 
 .ld-img-gallery-rotate:hover {
   background: #475569;
+}
+
+@media (max-width: 767px) {
+  .ld-img-gallery-download--overlay {
+    position: absolute;
+    left: 50%;
+    bottom: 14px;
+    z-index: 2;
+    transform: translateX(-50%);
+    display: inline-flex;
+    min-width: 108px;
+    padding: 10px 18px;
+    background: rgba(15, 23, 42, 0.78);
+    backdrop-filter: blur(6px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+  }
+
+  .ld-img-gallery-download--mid {
+    display: none;
+  }
+
+  .ld-img-gallery-scan {
+    display: none;
+  }
 }
 
 @media (min-width: 900px) {

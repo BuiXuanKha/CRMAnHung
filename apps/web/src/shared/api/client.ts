@@ -123,11 +123,11 @@ async function tryRefresh(): Promise<boolean> {
   return true;
 }
 
-export async function apiFetch<T>(
+async function apiRequest(
   path: string,
   init: RequestInit = {},
   retry = true,
-): Promise<T> {
+): Promise<Response> {
   const headers = new Headers(init.headers);
   const isFormData = typeof FormData !== 'undefined' && init.body instanceof FormData;
   if (!isFormData && !headers.has('Content-Type') && init.body) {
@@ -150,7 +150,7 @@ export async function apiFetch<T>(
     });
     const refreshed = await refreshPromise;
     if (refreshed) {
-      return apiFetch<T>(path, init, false);
+      return apiRequest(path, init, false);
     }
   }
 
@@ -158,9 +158,21 @@ export async function apiFetch<T>(
     throw await parseError(res);
   }
 
+  return res;
+}
+
+export async function apiFetch<T>(
+  path: string,
+  init: RequestInit = {},
+): Promise<T> {
+  const res = await apiRequest(path, init);
   if (res.status === 204) {
     return undefined as T;
   }
-
   return (await res.json()) as T;
+}
+
+export async function apiFetchBlob(path: string, init: RequestInit = {}): Promise<Blob> {
+  const res = await apiRequest(path, init);
+  return res.blob();
 }
