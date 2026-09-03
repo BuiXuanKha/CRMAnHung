@@ -2,6 +2,7 @@ import {
   createListStateStore,
   getActiveListScrollEl,
   type ListSavedState,
+  type ListScrollSnapshot,
 } from '@/shared/list-state';
 import type { ExtraFilters, PriceBracket } from './display';
 
@@ -69,7 +70,7 @@ export { getActiveListScrollEl };
 
 export function restoreLodatListScroll(
   root: HTMLElement | null,
-  snapshot: { anchorId: string | null; scrollTop: number },
+  snapshot: ListScrollSnapshot,
 ) {
   store.restoreScroll(root, snapshot);
 }

@@ -13,9 +13,11 @@ Nhớ **ô tìm + lọc + selectedId + vị trí cuộn** khi rời list (chi ti
 |----------|---------|
 | Storage | `sessionStorage` — theo tab; đóng tab mất |
 | Key | `crmanhung:<feature>-list-state` |
-| Payload | search, filters, `selectedId`, `scrollTop`, `anchorId` |
+| Payload | search, filters, `selectedId`, `scrollTop`, `anchorId`, `anchorOffset` |
 | Row DOM | `data-list-row-id={id}` trên mỗi dòng/thẻ |
 | Đổi lọc/search | Reset `scrollTop` về 0 **sau** restore; không cùng layout pass với restore (cache RQ từng kéo list về đầu) |
+| Restore | **Đúng pixel** `scrollTop`; `anchorId` + `anchorOffset` chỉ dự phòng khi list đã đổi. Căn anchor sát mép trên = lệch ~1 dòng, user thấy giật |
+| Re-apply | `requestAnimationFrame` ×2 + `document.fonts.ready`; bỏ qua nếu user đã cuộn |
 | Logout | `clearAllListStates()` (auth) — xóa mọi `*-list-state` |
 | Không nhớ | Panel rail / tab phải |
 

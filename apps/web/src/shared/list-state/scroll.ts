@@ -6,6 +6,8 @@ export const CRM_MOBILE_LIST_MQ = '(max-width: 767px)';
 
 export type ListScrollSnapshot = {
   anchorId: string | null;
+  /** Anchor row top relative to the scroller top — usually negative (row partly cut). */
+  anchorOffset: number;
   scrollTop: number;
 };
 
@@ -40,21 +42,25 @@ export function captureListScroll(
   root: HTMLElement | null,
   rowAttr: string = LIST_ROW_ATTR,
 ): ListScrollSnapshot {
-  if (!root) return { anchorId: null, scrollTop: 0 };
+  if (!root) return { anchorId: null, anchorOffset: 0, scrollTop: 0 };
   const rows = root.querySelectorAll(`[${rowAttr}]`);
   const rootRect = root.getBoundingClientRect();
   let anchorId: string | null = null;
+  let anchorOffset = 0;
   for (const row of rows) {
     const rect = row.getBoundingClientRect();
     if (rect.bottom > rootRect.top + 1) {
       anchorId = row.getAttribute(rowAttr);
+      anchorOffset = rect.top - rootRect.top;
       break;
     }
   }
   if (!anchorId && rows.length) {
-    anchorId = rows[0].getAttribute(rowAttr);
+    const first = rows[0];
+    anchorId = first.getAttribute(rowAttr);
+    anchorOffset = first.getBoundingClientRect().top - rootRect.top;
   }
-  return { anchorId, scrollTop: root.scrollTop };
+  return { anchorId, anchorOffset, scrollTop: root.scrollTop };
 }
 
 export function maxListScrollTop(root: HTMLElement | null): number {
@@ -76,7 +82,17 @@ export function restoreListScroll(
   rowAttr: string = LIST_ROW_ATTR,
 ) {
   if (!root) return;
+  let lastApplied = -1;
   const apply = () => {
+    // Exact pixels first: the list is normally unchanged, and re-aligning the
+    // anchor row to the top would drop the partially scrolled row, which reads
+    // as a small jump right after the list appears.
+    if (Number.isFinite(snapshot.scrollTop) && snapshot.scrollTop <= maxListScrollTop(root)) {
+      root.scrollTop = snapshot.scrollTop;
+      return;
+    }
+    // Content changed above the anchor (rows added/removed) — keep the anchor
+    // row at the very offset it had, not glued to the top edge.
     if (snapshot.anchorId) {
       const row = root.querySelector(
         `[${rowAttr}="${CSS.escape(snapshot.anchorId)}"]`,
@@ -84,7 +100,8 @@ export function restoreListScroll(
       if (row instanceof HTMLElement) {
         const rootRect = root.getBoundingClientRect();
         const rowRect = row.getBoundingClientRect();
-        root.scrollTop += rowRect.top - rootRect.top;
+        const offset = Number.isFinite(snapshot.anchorOffset) ? snapshot.anchorOffset : 0;
+        root.scrollTop += rowRect.top - rootRect.top - offset;
         return;
       }
     }
@@ -92,9 +109,24 @@ export function restoreListScroll(
       root.scrollTop = Math.min(snapshot.scrollTop, maxListScrollTop(root));
     }
   };
-  apply();
-  requestAnimationFrame(apply);
-  requestAnimationFrame(() => requestAnimationFrame(apply));
+
+  const run = () => {
+    apply();
+    lastApplied = root.scrollTop;
+  };
+
+  /** Re-apply only while the user has not scrolled yet, so we never fight them. */
+  const runIfUntouched = () => {
+    if (Math.abs(root.scrollTop - lastApplied) > 1) return;
+    run();
+  };
+
+  run();
+  requestAnimationFrame(runIfUntouched);
+  requestAnimationFrame(() => requestAnimationFrame(runIfUntouched));
+  // Swapping the web font re-measures card titles and can change row heights
+  // after the list is already visible.
+  document.fonts?.ready.then(runIfUntouched).catch(() => {});
 }
 
 /**

@@ -2,6 +2,7 @@ import {
   createListStateStore,
   getActiveListScrollEl,
   type ListSavedState,
+  type ListScrollSnapshot,
 } from '@/shared/list-state';
 import { DEFAULT_EXTRA_FILTERS, type ExtraFilters } from './display';
 
@@ -55,7 +56,7 @@ export { getActiveListScrollEl };
 
 export function restoreTransactionListScroll(
   root: HTMLElement | null,
-  snapshot: { anchorId: string | null; scrollTop: number },
+  snapshot: ListScrollSnapshot,
 ) {
   store.restoreScroll(root, snapshot);
 }
