@@ -165,16 +165,12 @@ export function LodatDetailPage() {
     sameWardName || sameWardItems.length || sameWardError,
   );
   const owner = detail?.owner ?? null;
-  const hasOwnerFab = owner
-    ? owner.phones.length > 0 || (Boolean(owner.facebook) && !owner.isHidden)
-    : false;
 
   return (
     <div
       className={[
         'ld-detail-page',
-        detail ? 'has-mobile-footer' : '',
-        hasOwnerFab ? 'has-owner-fab' : '',
+        detail ? 'has-owner-fab' : '',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -423,24 +419,16 @@ export function LodatDetailPage() {
       ) : null}
 
       {detail ? (
-        <footer className="ld-detail-mobile-footer">
-          <button
-            type="button"
-            onClick={() => router.push(createTransactionHref(detail.id))}
-          >
-            Giao dịch
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => router.push(`/lo-dat/${detail.id}/sua`)}
-          >
-            Sửa lô đất
-          </button>
-        </footer>
+        <footer className="ld-detail-mobile-footer" aria-hidden="true" />
       ) : null}
 
-      {owner ? <LodatOwnerFab owner={owner} /> : null}
+      {detail ? (
+        <LodatOwnerFab
+          owner={owner}
+          onTransaction={() => router.push(createTransactionHref(detail.id))}
+          onEdit={() => router.push(`/lo-dat/${detail.id}/sua`)}
+        />
+      ) : null}
 
       {galleryOpen && detail && imageCount ? (
         <LodatImageGallery

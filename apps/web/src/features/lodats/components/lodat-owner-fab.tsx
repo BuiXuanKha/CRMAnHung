@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { AlertTriangle, MessageCircle, Phone } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { AlertTriangle, MessageCircle, MoreHorizontal, Phone } from 'lucide-react';
 import type { LodatOwner } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 import { CrmAlertDialog } from '@/shared/ui/dialog';
@@ -12,25 +12,41 @@ import {
 } from '@/features/customers/messenger';
 
 type Props = {
-  owner: LodatOwner;
+  owner: LodatOwner | null;
+  onTransaction: () => void;
+  onEdit: () => void;
 };
 
 /**
- * FAB liên hệ chủ đất — mobile only (§12.3.2 lodats).
- * Gọi + Zalo khi có SĐT; Messenger = cùng menu list khách mobile.
+ * FAB cụm phải dưới — mobile only (§12.3.2 lodats).
+ * «⋯» → popover Giao dịch / Sửa lô đất (thay footer dính).
+ * Gọi + Zalo + Messenger khi chủ có liên hệ.
  */
-export function LodatOwnerFab({ owner }: Props) {
-  const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(
-    null,
-  );
-  const callPhone = owner.phones[0]?.phone?.trim() || null;
+export function LodatOwnerFab({ owner, onTransaction, onEdit }: Props) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
+
+  const callPhone = owner?.phones[0]?.phone?.trim() || null;
   const showCall = Boolean(callPhone);
   const showZalo = Boolean(callPhone);
-  const showMessenger = Boolean(owner.facebook) && !owner.isHidden;
+  const showMessenger = Boolean(owner?.facebook) && !owner?.isHidden;
 
-  if (!showCall && !showZalo && !showMessenger) return null;
+  /* Đóng khi bấm ngoài */
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handler = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (menuRef.current?.contains(t) || btnRef.current?.contains(t)) return;
+      setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [menuOpen]);
 
   function openMessenger() {
+    if (!owner) return;
     const url = messengerComUrl({ facebook: owner.facebook });
     if (!openExternalUrl(url)) {
       setAlertBox({
@@ -44,7 +60,43 @@ export function LodatOwnerFab({ owner }: Props) {
 
   return (
     <>
-      <div className="ld-owner-fab" role="group" aria-label="Liên hệ chủ đất">
+      <div className="ld-owner-fab" role="group" aria-label="Thao tác lô đất">
+        {/* «⋯» — luôn hiện (dù không có chủ, vẫn cần Giao dịch / Sửa) */}
+        <div className="ld-owner-fab-menu-wrap">
+          {menuOpen ? (
+            <div ref={menuRef} className="ld-owner-fab-popover" role="menu">
+              <button
+                type="button"
+                role="menuitem"
+                className="ld-owner-fab-menu-item"
+                onClick={() => { setMenuOpen(false); onTransaction(); }}
+              >
+                Giao dịch
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="ld-owner-fab-menu-item"
+                onClick={() => { setMenuOpen(false); onEdit(); }}
+              >
+                Sửa lô đất
+              </button>
+            </div>
+          ) : null}
+          <button
+            ref={btnRef}
+            type="button"
+            className="ld-owner-fab-btn ld-owner-fab-more"
+            aria-haspopup="menu"
+            aria-expanded={menuOpen}
+            aria-label="Thêm thao tác"
+            title="Thêm thao tác"
+            onClick={() => setMenuOpen((v) => !v)}
+          >
+            <Icon icon={MoreHorizontal} size={22} />
+          </button>
+        </div>
+
         {showCall ? (
           <a
             className="ld-owner-fab-btn ld-owner-fab-call"
