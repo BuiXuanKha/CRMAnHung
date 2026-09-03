@@ -233,7 +233,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Problem:** Mọi XSS trên origin CRM đọc được cả cặp token (refresh 7 ngày). Không dùng cookie HttpOnly.
 - **Root cause:** Bearer token do JS lưu, không cookie + CSRF token.
 - **Impact:** Một lỗ XSS = chiếm session STAFF/ADMIN đến khi refresh hết hạn hoặc Admin disable (và vẫn còn cửa sổ access — BUG-001).
-- **Evidence:** `client.ts` `ACCESS_KEY` / `REFRESH_KEY`. `auth-context.ts` `setTokens` sau login.
+- **Evidence:** `client.ts` `ACCESS_KEY` / `REFRESH_KEY`. `auth-context.tsx` `setTokens` sau login.
 - **Status:** OPEN
 
 ### BUG-008 — STAFF phân biệt 403/404 trên bản ghi của NV khác
