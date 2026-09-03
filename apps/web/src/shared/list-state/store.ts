@@ -44,6 +44,14 @@ function readRaw(key: string): Record<string, unknown> | null {
   }
 }
 
+function storedScroll(key: string): ListScrollSnapshot {
+  const raw = readRaw(key);
+  return {
+    anchorId: typeof raw?.anchorId === 'string' ? raw.anchorId : null,
+    scrollTop: Number(raw?.scrollTop) || 0,
+  };
+}
+
 function writeRaw(key: string, value: unknown) {
   try {
     sessionStorage.setItem(key, JSON.stringify(value));
@@ -104,7 +112,10 @@ export function createListStateStore<TFields extends Record<string, unknown>>(
       fields: TFields & { selectedId: string | null },
     ) {
       if (typeof window === 'undefined') return;
-      const scroll = captureListScroll(root, rowAttr);
+      // Unmount cleanup runs in the passive phase, after React nulls the refs,
+      // so `root` is null there. Capturing then would store scrollTop 0 and wipe
+      // the position saved right before `router.push`.
+      const scroll = root ? captureListScroll(root, rowAttr) : storedScroll(config.key);
       writeRaw(config.key, {
         version,
         ...scroll,
