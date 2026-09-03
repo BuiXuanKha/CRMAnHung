@@ -4,18 +4,24 @@ import type { FromExtensionResult } from '@crmanhung/shared';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
+import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
 import {
   ingestMessengerChatImage,
   isStableMessengerMessageId,
 } from './messenger-image-ingest';
 import {
+  avatarSourceKeyFromRawMeta,
+  resolveAvatarFromScan,
+} from './messenger-avatar-ingest';
+import {
   fullNameSeed,
   incomingImageUrls,
   isPlaceholder,
   MAX_MESSAGES,
+  mergeFacebookRawMeta,
   messageStorageKey,
   originalPathHint,
-  mergeFacebookRawMeta,
+  parseRawMetaObject,
   parseScan,
   toSender,
   trimText,
@@ -104,6 +110,7 @@ export class FromExtensionService {
       where: { id: existing.facebookId },
     });
     if (!fb) return;
+    const avatar = await this.resolveAvatar(existing.id, fields, fb);
     await this.prisma.customerFacebook.update({
       where: { id: fb.id },
       data: {
@@ -113,9 +120,12 @@ export class FromExtensionService {
         scanSource: fields.scanSource || fb.scanSource,
         scanSourceLabel: fields.scanSourceLabel || fb.scanSourceLabel,
         employeeFacebookUid: fb.employeeFacebookUid || fields.employeeUid || null,
-        rawMeta: mergeFacebookRawMeta(fields.rawMeta || fb.rawMeta, fields.pageUrl),
+        avatarUrl: avatar.avatarUrl,
+        avatarObjectKey: avatar.avatarObjectKey,
+        rawMeta: avatar.rawMeta,
       },
     });
+    await this.deletePublicObjectIfOrphan(avatar.previousObjectKey);
     await this.prisma.customer.update({
       where: { id: existing.id },
       data: { updatedAt: new Date() },
@@ -148,7 +158,66 @@ export class FromExtensionService {
     if (!row.facebook) {
       throw new BadRequestException('Không tạo được hồ sơ Facebook cho khách.');
     }
+    const fb = await this.prisma.customerFacebook.findUnique({
+      where: { id: row.facebook.id },
+    });
+    if (fb) {
+      const avatar = await this.resolveAvatar(row.id, fields, fb);
+      await this.prisma.customerFacebook.update({
+        where: { id: fb.id },
+        data: {
+          avatarUrl: avatar.avatarUrl,
+          avatarObjectKey: avatar.avatarObjectKey,
+          rawMeta: avatar.rawMeta,
+        },
+      });
+      await this.deletePublicObjectIfOrphan(avatar.previousObjectKey);
+    }
     return { id: row.id, facebookId: row.facebook.id };
+  }
+
+  private async resolveAvatar(
+    customerId: string,
+    fields: ScanFields,
+    fb: { avatarUrl: string | null; avatarObjectKey: string | null; rawMeta: string | null },
+  ): Promise<{
+    avatarUrl: string | null;
+    avatarObjectKey: string | null;
+    rawMeta: string | null;
+    previousObjectKey: string | null;
+  }> {
+    const outcome = await resolveAvatarFromScan(
+      this.storage,
+      fields.avatarUrl,
+      {
+        avatarUrl: fb.avatarUrl,
+        avatarObjectKey: fb.avatarObjectKey,
+        avatarSourceKey: avatarSourceKeyFromRawMeta(fb.rawMeta),
+      },
+      customerId,
+    );
+    const rawMeta = mergeFacebookRawMeta(fb.rawMeta || fields.rawMeta, fields.pageUrl, {
+      ...parseRawMetaObject(fields.rawMeta),
+      ...(outcome.avatarSourceKey ? { avatarSourceKey: outcome.avatarSourceKey } : {}),
+    });
+    return {
+      avatarUrl: outcome.avatarUrl,
+      avatarObjectKey: outcome.avatarObjectKey,
+      rawMeta,
+      previousObjectKey: outcome.previousObjectKey,
+    };
+  }
+
+  private async deletePublicObjectIfOrphan(objectKey: string | null | undefined): Promise<void> {
+    const key = objectKey?.trim();
+    if (!key) return;
+    const refs = await countPublicImageKeyRefs(this.prisma, key);
+    if (refs > 0) return;
+    try {
+      await this.storage.delete(key, 'public');
+    } catch {
+      // orphan ok
+    }
   }
 
   private async appendMessages(

@@ -49,12 +49,15 @@ export function extractChatLibraryKey(raw: string): string | null {
   return null;
 }
 
-export function parseMediaDataUrl(dataUrl: string): { buffer: Buffer; mime: string } | null {
+export function parseMediaDataUrl(
+  dataUrl: string,
+  maxBytes = CHAT_IMAGE_MAX_BYTES,
+): { buffer: Buffer; mime: string } | null {
   const match = /^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/i.exec(dataUrl.trim());
   if (!match) return null;
   const mime = match[1].toLowerCase();
   const buffer = Buffer.from(match[2], 'base64');
-  if (!buffer.length || buffer.length > CHAT_IMAGE_MAX_BYTES) return null;
+  if (!buffer.length || buffer.length > maxBytes) return null;
   if (!isPublicRasterImage(mime, null)) return null;
   return { buffer, mime };
 }
@@ -73,8 +76,9 @@ export function isAllowedMessengerImageHost(hostname: string): boolean {
   );
 }
 
-async function fetchRemoteImageBuffer(
+export async function fetchRemoteMessengerImage(
   remoteUrl: string,
+  maxBytes = CHAT_IMAGE_MAX_BYTES,
 ): Promise<{ buffer: Buffer; mime: string } | null> {
   let url = remoteUrl;
   for (let hop = 0; hop <= MAX_REDIRECTS; hop += 1) {
@@ -111,7 +115,7 @@ async function fetchRemoteImageBuffer(
         .toLowerCase();
       if (!contentType.startsWith('image/')) return null;
       const buffer = Buffer.from(await res.arrayBuffer());
-      if (!buffer.length || buffer.length > CHAT_IMAGE_MAX_BYTES) return null;
+      if (!buffer.length || buffer.length > maxBytes) return null;
       if (!isPublicRasterImage(contentType, null)) return null;
       return { buffer, mime: contentType };
     } catch {
@@ -140,7 +144,7 @@ export async function ingestMessengerChatImage(
   if (value.startsWith('data:')) {
     parsed = parseMediaDataUrl(value);
   } else if (/^https?:\/\//i.test(value)) {
-    parsed = await fetchRemoteImageBuffer(value);
+    parsed = await fetchRemoteMessengerImage(value);
   }
   if (!parsed) return null;
 

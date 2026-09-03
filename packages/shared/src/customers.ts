@@ -339,7 +339,7 @@ export const customerMessengerThreadSchema = z.object({
 
 export type CustomerMessengerThread = z.infer<typeof customerMessengerThreadSchema>;
 
-/** Extension scan → `POST /api/v1/customers/from-extension` (ảnh chat raster → WebP trên API). */
+/** Extension scan → `POST /api/v1/customers/from-extension` (ảnh chat + avatar raster → WebP trên API). */
 export const extensionChatMessageSchema = z
   .object({
     id: z.string().optional(),
