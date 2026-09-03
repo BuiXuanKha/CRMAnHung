@@ -1,11 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { AlertTriangle, MessageSquare, Phone } from 'lucide-react';
+import { AlertTriangle, MessageCircle, Phone } from 'lucide-react';
 import type { CustomerDetail } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 import { CrmAlertDialog } from '@/shared/ui/dialog';
-import { facebookInboxChatUrl, openExternalUrl } from '../messenger';
+import { messengerComUrl, openExternalUrl } from '../messenger';
 
 type Props = {
   customer: CustomerDetail;
@@ -15,25 +15,25 @@ type Props = {
 
 /**
  * FAB góc phải dưới — chỉ CSS hiện trên mobile (§12.3.2).
- * «Mở chat» = cùng handler menu list (không invent rule riêng).
+ * «Mở Messenger» = cùng handler menu list mobile (không dùng «Mở chat» desktop).
  */
 export function DetailMobileFab({ customer, callPhone }: Props) {
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(
     null,
   );
   const showCall = Boolean(callPhone);
-  const showChat = Boolean(customer.facebook) && !customer.isHidden;
+  const showMessenger = Boolean(customer.facebook) && !customer.isHidden;
 
-  if (!showCall && !showChat) return null;
+  if (!showCall && !showMessenger) return null;
 
-  function openChat() {
-    const url = facebookInboxChatUrl(customer);
+  function openMessenger() {
+    const url = messengerComUrl(customer);
     if (!openExternalUrl(url)) {
       setAlertBox({
-        title: 'Không mở được chat',
-        message: customer.facebook?.threadId
-          ? 'Thread Facebook của khách không phải mã số Inbox hợp lệ để mở hội thoại.'
-          : 'Khách này chưa có thread Facebook Inbox để mở hội thoại.',
+        title: 'Không mở được Messenger',
+        message: customer.facebook
+          ? 'Khách này chưa có thread / UID Messenger (mã số) để mở hội thoại.'
+          : 'Khách này chưa gắn Facebook — không mở được Messenger.',
       });
     }
   }
@@ -51,15 +51,15 @@ export function DetailMobileFab({ customer, callPhone }: Props) {
             <Icon icon={Phone} size={22} />
           </a>
         ) : null}
-        {showChat ? (
+        {showMessenger ? (
           <button
             type="button"
             className="kh-detail-fab-btn kh-detail-fab-chat"
-            onClick={openChat}
-            aria-label="Mở chat"
-            title="Mở chat"
+            onClick={openMessenger}
+            aria-label="Mở Messenger"
+            title="Mở Messenger"
           >
-            <Icon icon={MessageSquare} size={22} />
+            <Icon icon={MessageCircle} size={22} />
           </button>
         ) : null}
       </div>
