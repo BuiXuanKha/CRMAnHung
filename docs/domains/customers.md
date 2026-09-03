@@ -265,7 +265,7 @@ Khi **vào lại list** (Back, «Danh sách khách», menu Quản lý khách hà
 
 1. Khôi phục đúng bộ lọc đã lưu, rồi gọi API với bộ lọc đó (`offset=0`, `limit=50`).
 2. Nếu `scrollTop` đã lưu **cao hơn** chiều cao list hiện có → **tải thêm 50** (lặp) cho đến khi đủ chiều cao hoặc hết `total`.
-3. Đặt lại cuộn theo **dòng/thẻ đang thấy** (`anchorId`), rồi `scrollTop`. Effect đổi lọc **không** kéo về đầu trong cùng lúc restore (Back từ chi tiết, cache React Query).
+3. Đặt lại **đúng pixel** `scrollTop`; `anchorId` + `anchorOffset` chỉ dùng khi list đã đổi. Effect đổi lọc **không** kéo về đầu trong cùng lúc restore (Back từ chi tiết, cache React Query).
 4. Trong lúc khôi phục: **không** nháy về đầu trang (che list ngắn; timeout an toàn ~4s).
 5. Giữ snapshot trong tab cho lần vào sau. Đăng xuất thì xóa.
 

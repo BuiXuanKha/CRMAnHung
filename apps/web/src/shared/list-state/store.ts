@@ -45,9 +45,13 @@ function readRaw(key: string): Record<string, unknown> | null {
 }
 
 function storedScroll(key: string): ListScrollSnapshot {
-  const raw = readRaw(key);
+  return scrollFromRaw(readRaw(key));
+}
+
+function scrollFromRaw(raw: Record<string, unknown> | null): ListScrollSnapshot {
   return {
     anchorId: typeof raw?.anchorId === 'string' ? raw.anchorId : null,
+    anchorOffset: Number(raw?.anchorOffset) || 0,
     scrollTop: Number(raw?.scrollTop) || 0,
   };
 }
@@ -98,8 +102,7 @@ export function createListStateStore<TFields extends Record<string, unknown>>(
         const fields = config.parseFields(parsed);
         return {
           ...fields,
-          anchorId: typeof parsed.anchorId === 'string' ? parsed.anchorId : null,
-          scrollTop: Number(parsed.scrollTop) || 0,
+          ...scrollFromRaw(parsed),
           selectedId: typeof parsed.selectedId === 'string' ? parsed.selectedId : null,
         };
       } catch {
