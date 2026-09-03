@@ -9,22 +9,34 @@ import { messengerComUrl, openExternalUrl } from '../messenger';
 
 type Props = {
   customer: CustomerDetail;
-  /** Số dùng cho `tel:` (số chính / số đầu). */
+  /** Số dùng cho `tel:` / Zalo (số chính / số đầu). */
   callPhone: string | null;
 };
 
+/** Cùng quy tắc trang public: `zalo.me/84…` từ SĐT VN. */
+function zaloMeUrl(phone: string): string {
+  const digits = phone.replace(/\D/g, '');
+  const id = digits.startsWith('84')
+    ? digits
+    : digits.startsWith('0')
+      ? `84${digits.slice(1)}`
+      : digits;
+  return `https://zalo.me/${id}`;
+}
+
 /**
  * FAB góc phải dưới — chỉ CSS hiện trên mobile (§12.3.2).
- * «Mở Messenger» = cùng handler menu list mobile (không dùng «Mở chat» desktop).
+ * Gọi + Zalo khi có SĐT; Messenger = cùng menu list mobile.
  */
 export function DetailMobileFab({ customer, callPhone }: Props) {
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(
     null,
   );
   const showCall = Boolean(callPhone);
+  const showZalo = Boolean(callPhone);
   const showMessenger = Boolean(customer.facebook) && !customer.isHidden;
 
-  if (!showCall && !showMessenger) return null;
+  if (!showCall && !showZalo && !showMessenger) return null;
 
   function openMessenger() {
     const url = messengerComUrl(customer);
@@ -49,6 +61,20 @@ export function DetailMobileFab({ customer, callPhone }: Props) {
             title="Gọi điện"
           >
             <Icon icon={Phone} size={22} />
+          </a>
+        ) : null}
+        {showZalo && callPhone ? (
+          <a
+            className="kh-detail-fab-btn kh-detail-fab-zalo"
+            href={zaloMeUrl(callPhone)}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Zalo ${callPhone}`}
+            title="Zalo"
+          >
+            <span className="kh-detail-fab-zalo-label" aria-hidden>
+              Zalo
+            </span>
           </a>
         ) : null}
         {showMessenger ? (

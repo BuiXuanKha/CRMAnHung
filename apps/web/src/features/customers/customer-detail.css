@@ -235,6 +235,17 @@
   background: #047857;
 }
 
+.kh-detail-fab-zalo {
+  background: #0068ff;
+}
+
+.kh-detail-fab-zalo-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
 .kh-detail-fab-chat {
   background: #2563eb;
 }
@@ -249,7 +260,7 @@
   }
 
   .kh-detail.has-fab {
-    padding-bottom: 88px;
+    padding-bottom: 160px;
   }
 
   .kh-detail-fab {
