@@ -38,7 +38,11 @@
 }
 
 .sd-list-restore {
-  display: contents;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .sd-list-restore.is-restoring .sd-table-shell,

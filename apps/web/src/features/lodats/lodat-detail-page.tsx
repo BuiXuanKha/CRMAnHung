@@ -166,7 +166,7 @@ export function LodatDetailPage() {
 
   return (
     <div className={['ld-detail-page', detail ? 'has-mobile-footer' : ''].filter(Boolean).join(' ')}>
-      <Link href="/lo-dat" className="ld-detail-back">
+      <Link href="/lo-dat" scroll={false} className="ld-detail-back">
         ← Danh sách lô đất
       </Link>
 

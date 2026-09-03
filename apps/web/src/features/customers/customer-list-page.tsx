@@ -13,7 +13,7 @@ import {
   type PhoneDuplicateExisting,
   type UpdateCustomerCareInput,
 } from '@crmanhung/shared';
-import { useCrmInfiniteList } from '@/shared/list-state';
+import { resetListScrollIfFiltersChanged, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
 import { HotlinesSettingsDialog } from '@/features/settings/hotlines-dialog';
@@ -128,6 +128,7 @@ export function CustomerListPage() {
   const [listConcealed, setListConcealed] = useState(false);
   const restoreSnap = useRef<CustomerListSavedState | null>(null);
   const restoreDone = useRef(false);
+  const restoredFiltersKey = useRef<string | null>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const cardsScrollRef = useRef<HTMLDivElement>(null);
   const persistRef = useRef({
@@ -192,6 +193,14 @@ export function CustomerListPage() {
     ],
   );
   const mobileFilterCount = countMobileCustomerFilters(status, extra);
+  const filterKey = [
+    keyword,
+    status,
+    extra.finance,
+    extra.channel,
+    extra.demand,
+    extra.lodat,
+  ].join('\0');
   const stats = useMemo(() => countCustomerStats(items), [items]);
   const channelOptions = useMemo(
     () =>
@@ -292,26 +301,42 @@ export function CustomerListPage() {
     const snap = restoreSnap.current;
     if (!snap) {
       restoreDone.current = true;
+      restoredFiltersKey.current = filterKey;
       return;
     }
     if (items.length === 0) {
       restoreDone.current = true;
       restoreSnap.current = null;
+      restoredFiltersKey.current = filterKey;
       setListConcealed(false);
       return;
     }
     const root = getListScrollEl();
-    if (items.length < total && needsMoreListScrollHeight(root, snap.scrollTop)) {
-      if (list.hasNextPage) {
-        void list.fetchNextPage();
-        return;
-      }
+    const missingAnchor = snap.anchorId
+      ? !root?.querySelector(`[data-list-row-id="${CSS.escape(snap.anchorId)}"]`)
+      : false;
+    if (
+      items.length < total &&
+      list.hasNextPage &&
+      (needsMoreListScrollHeight(root, snap.scrollTop) || missingAnchor)
+    ) {
+      void list.fetchNextPage();
+      return;
     }
     restoreListScroll(root, snap);
     restoreDone.current = true;
+    restoredFiltersKey.current = filterKey;
     restoreSnap.current = null;
     setListConcealed(false);
-  }, [restoreReady, items.length, total, list.isLoading, list.isFetchingNextPage, list.hasNextPage]);
+  }, [
+    restoreReady,
+    items.length,
+    total,
+    list.isLoading,
+    list.isFetchingNextPage,
+    list.hasNextPage,
+    filterKey,
+  ]);
 
   useEffect(() => {
     if (!restoreReady || listConcealed || list.isLoading) return;
@@ -324,10 +349,13 @@ export function CustomerListPage() {
   }
 
   useLayoutEffect(() => {
-    if (!restoreReady || restoreSnap.current || !restoreDone.current) return;
-    const root = getListScrollEl();
-    if (root) root.scrollTop = 0;
-  }, [keyword, status, extra.finance, extra.channel, extra.demand, extra.lodat, restoreReady]);
+    resetListScrollIfFiltersChanged(
+      getListScrollEl(),
+      restoredFiltersKey,
+      filterKey,
+      restoreReady && restoreDone.current && !restoreSnap.current,
+    );
+  }, [filterKey, restoreReady]);
 
   useEffect(() => {
     if (!restoreReady || listConcealed || !restoreDone.current) return;

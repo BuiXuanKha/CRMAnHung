@@ -11,6 +11,7 @@ import {
   type TitleServiceListItem,
 } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
+import { resetListScrollIfFiltersChanged } from '@/shared/list-state';
 import { useAuth } from '@/features/auth/auth-context';
 import { listUserDirectory } from '@/features/users/api';
 import {
@@ -72,6 +73,7 @@ export function TitleServiceListPage() {
   const [listConcealed, setListConcealed] = useState(false);
   const restoreSnap = useRef<TitleServiceListSavedState | null>(null);
   const restoreDone = useRef(false);
+  const restoredFiltersKey = useRef<string | null>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const cardsScrollRef = useRef<HTMLDivElement>(null);
   const persistRef = useRef({
@@ -118,6 +120,15 @@ export function TitleServiceListPage() {
     list.data?.items.find((row) => row.id === selectedId) ??
     null;
   const mobileFilterCount = countMobileTitleServiceFilters(status, employeeId);
+  const filterKey = [
+    keyword,
+    status,
+    employeeId,
+    extra.need,
+    extra.progress,
+    extra.money,
+    extra.docs,
+  ].join('\0');
 
   useEffect(() => {
     if (filtered.length === 0) return;
@@ -176,34 +187,31 @@ export function TitleServiceListPage() {
     const snap = restoreSnap.current;
     if (!snap) {
       restoreDone.current = true;
+      restoredFiltersKey.current = filterKey;
       return;
     }
     if (filtered.length === 0) {
       restoreDone.current = true;
       restoreSnap.current = null;
+      restoredFiltersKey.current = filterKey;
       setListConcealed(false);
       return;
     }
     restoreTitleServiceListScroll(getListScrollEl(), snap);
     restoreDone.current = true;
+    restoredFiltersKey.current = filterKey;
     restoreSnap.current = null;
     setListConcealed(false);
-  }, [restoreReady, filtered.length, list.isLoading]);
+  }, [restoreReady, filtered.length, list.isLoading, filterKey]);
 
   useLayoutEffect(() => {
-    if (!restoreReady || restoreSnap.current || !restoreDone.current) return;
-    const root = getListScrollEl();
-    if (root) root.scrollTop = 0;
-  }, [
-    keyword,
-    status,
-    employeeId,
-    extra.need,
-    extra.progress,
-    extra.money,
-    extra.docs,
-    restoreReady,
-  ]);
+    resetListScrollIfFiltersChanged(
+      getListScrollEl(),
+      restoredFiltersKey,
+      filterKey,
+      restoreReady && restoreDone.current && !restoreSnap.current,
+    );
+  }, [filterKey, restoreReady]);
 
   useEffect(() => {
     if (!restoreReady || listConcealed || !restoreDone.current) return;

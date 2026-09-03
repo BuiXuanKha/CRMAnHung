@@ -43,7 +43,7 @@ export function TransactionDetailPage() {
   return (
     <div className="tx-detail-page">
       <div className="tx-detail-head">
-        <Link href="/giao-dich" className="tx-detail-back">
+        <Link href="/giao-dich" scroll={false} className="tx-detail-back">
           ← Quản lý giao dịch
         </Link>
         {d ? (

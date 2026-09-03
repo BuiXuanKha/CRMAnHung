@@ -10,6 +10,7 @@ import {
   type TransactionListItem,
 } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
+import { resetListScrollIfFiltersChanged } from '@/shared/list-state';
 import { deleteTransaction, listTransactions, statsFromItems } from './api';
 import { type TransactionAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
@@ -57,6 +58,7 @@ export function TransactionListPage() {
   const [listConcealed, setListConcealed] = useState(false);
   const restoreSnap = useRef<TransactionListSavedState | null>(null);
   const restoreDone = useRef(false);
+  const restoredFiltersKey = useRef<string | null>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const cardsScrollRef = useRef<HTMLDivElement>(null);
   const persistRef = useRef({
@@ -93,6 +95,18 @@ export function TransactionListPage() {
 
   const stats = useMemo(() => statsFromItems(filtered), [filtered]);
   const mobileFilterCount = countMobileTransactionFilters(type, status);
+  const filterKey = [
+    keyword,
+    type,
+    status,
+    extra.lodat,
+    extra.seller,
+    extra.buyer,
+    extra.price,
+    extra.commission,
+    extra.notary,
+    extra.note,
+  ].join('\0');
   const filteredEmpty = hasTransactionListFilters(keyword, type, status, extra);
 
   const deleteMut = useMutation({
@@ -148,25 +162,31 @@ export function TransactionListPage() {
     const snap = restoreSnap.current;
     if (!snap) {
       restoreDone.current = true;
+      restoredFiltersKey.current = filterKey;
       return;
     }
     if (filtered.length === 0) {
       restoreDone.current = true;
       restoreSnap.current = null;
+      restoredFiltersKey.current = filterKey;
       setListConcealed(false);
       return;
     }
     restoreTransactionListScroll(getListScrollEl(), snap);
     restoreDone.current = true;
+    restoredFiltersKey.current = filterKey;
     restoreSnap.current = null;
     setListConcealed(false);
-  }, [restoreReady, filtered.length, list.isLoading]);
+  }, [restoreReady, filtered.length, list.isLoading, filterKey]);
 
   useLayoutEffect(() => {
-    if (!restoreReady || restoreSnap.current || !restoreDone.current) return;
-    const root = getListScrollEl();
-    if (root) root.scrollTop = 0;
-  }, [keyword, type, status, extra, restoreReady]);
+    resetListScrollIfFiltersChanged(
+      getListScrollEl(),
+      restoredFiltersKey,
+      filterKey,
+      restoreReady && restoreDone.current && !restoreSnap.current,
+    );
+  }, [filterKey, restoreReady]);
 
   useEffect(() => {
     if (!restoreReady || listConcealed || !restoreDone.current) return;

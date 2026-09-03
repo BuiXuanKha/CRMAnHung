@@ -310,7 +310,7 @@ Cùng quy tắc shared list-state (`createListStateStore`, key `crmanhung:lodat-
 
 - Storage: **sessionStorage** key `crmanhung:lodat-list-state` (theo tab; đóng tab / đăng xuất → mất).
 - Lưu khi: đổi lọc, cuộn, rời list (chi tiết, sửa, Back, F5 cùng tab).
-- Vào lại: khôi phục lọc → fetch `offset=0`; nếu `scrollTop` cao hơn list hiện có → **tải thêm 50** đến khi đủ hoặc hết `total`; đặt lại scroll; che list ngắn lúc restore (~4s).
+- Vào lại: khôi phục lọc → fetch `offset=0`; nếu `scrollTop` cao hơn list hiện có → **tải thêm 50** đến khi đủ hoặc hết `total`; đặt lại scroll theo **thẻ/dòng đang thấy** (`anchorId`); che list ngắn lúc restore (~4s). Effect «đổi lọc → cuộn đầu» **không** chạy cùng lúc restore (tránh Back từ chi tiết bị kéo về đầu).
 - Đổi tìm/lọc → scroll về đầu.
 - **Không** nhớ panel (list lô không có rail phải).
 

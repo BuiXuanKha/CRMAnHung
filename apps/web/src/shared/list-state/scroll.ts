@@ -1,20 +1,38 @@
 /** Attribute on each list row/card for scroll anchor restore. */
 export const LIST_ROW_ATTR = 'data-list-row-id';
 
+/** Same breakpoint as CRM mobile card lists. */
+export const CRM_MOBILE_LIST_MQ = '(max-width: 767px)';
+
 export type ListScrollSnapshot = {
   anchorId: string | null;
   scrollTop: number;
 };
 
+function isVerticallyScrollable(el: HTMLElement | null): boolean {
+  if (!el) return false;
+  return el.scrollHeight > el.clientHeight + 2;
+}
+
+function canScrollY(el: HTMLElement): boolean {
+  const oy = getComputedStyle(el).overflowY;
+  return oy === 'auto' || oy === 'scroll' || oy === 'overlay';
+}
+
 export function getActiveListScrollEl(
   desktop: HTMLElement | null,
   mobile: HTMLElement | null,
 ): HTMLElement | null {
-  const desktopVisible = desktop && desktop.offsetParent !== null;
-  const mobileVisible = mobile && mobile.offsetParent !== null;
-  const preferred = desktopVisible ? desktop : mobileVisible ? mobile : desktop || mobile;
-  if (!preferred) return null;
-  if (preferred.scrollHeight > preferred.clientHeight + 2) return preferred;
+  const isMobile =
+    typeof window !== 'undefined' && window.matchMedia(CRM_MOBILE_LIST_MQ).matches;
+  const preferred = isMobile ? mobile || desktop : desktop || mobile;
+  if (isVerticallyScrollable(preferred)) return preferred;
+
+  let node = preferred?.parentElement ?? null;
+  while (node) {
+    if (isVerticallyScrollable(node) && canScrollY(node)) return node;
+    node = node.parentElement;
+  }
   return preferred;
 }
 
@@ -59,19 +77,39 @@ export function restoreListScroll(
 ) {
   if (!root) return;
   const apply = () => {
+    if (snapshot.anchorId) {
+      const row = root.querySelector(
+        `[${rowAttr}="${CSS.escape(snapshot.anchorId)}"]`,
+      );
+      if (row instanceof HTMLElement) {
+        const rootRect = root.getBoundingClientRect();
+        const rowRect = row.getBoundingClientRect();
+        root.scrollTop += rowRect.top - rootRect.top;
+        return;
+      }
+    }
     if (Number.isFinite(snapshot.scrollTop)) {
       root.scrollTop = Math.min(snapshot.scrollTop, maxListScrollTop(root));
-      return;
     }
-    if (!snapshot.anchorId) return;
-    const row = root.querySelector(
-      `[${rowAttr}="${CSS.escape(snapshot.anchorId)}"]`,
-    );
-    if (!(row instanceof HTMLElement)) return;
-    const rootRect = root.getBoundingClientRect();
-    const rowRect = row.getBoundingClientRect();
-    root.scrollTop += rowRect.top - rootRect.top;
   };
   apply();
   requestAnimationFrame(apply);
+  requestAnimationFrame(() => requestAnimationFrame(apply));
+}
+
+/**
+ * «Đổi lọc → cuộn về 0» must not run on the same layout pass as scroll restore.
+ * Warm React Query cache finishes loading immediately, so both effects used to
+ * run together and wipe the restored position.
+ */
+export function resetListScrollIfFiltersChanged(
+  root: HTMLElement | null,
+  restoredFiltersKey: { current: string | null },
+  filtersKey: string,
+  canReset: boolean,
+) {
+  if (!canReset) return;
+  if (restoredFiltersKey.current === filtersKey) return;
+  restoredFiltersKey.current = filtersKey;
+  if (root) root.scrollTop = 0;
 }
