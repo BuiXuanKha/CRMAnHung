@@ -24,6 +24,14 @@ if [[ ! -f "$API/.env" ]]; then
   exit 1
 fi
 
+# Phiên NV: refresh 30 ngày (docs/domains/users.md). Chỉ sửa đúng key — không đụng secret khác.
+if grep -q '^JWT_REFRESH_EXPIRES_IN=' "$API/.env"; then
+  sed -i 's/^JWT_REFRESH_EXPIRES_IN=.*/JWT_REFRESH_EXPIRES_IN=30d/' "$API/.env"
+else
+  printf '\nJWT_REFRESH_EXPIRES_IN=30d\n' >> "$API/.env"
+fi
+echo "==> JWT_REFRESH_EXPIRES_IN=30d (apps/api/.env)"
+
 if ! command -v pnpm >/dev/null 2>&1; then
   echo "==> Cài pnpm (corepack)"
   corepack enable
