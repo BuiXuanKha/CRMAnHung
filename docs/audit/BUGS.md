@@ -25,12 +25,12 @@ Khi cần xác minh chức năng thực tế trên UI:
 
 | Trường | Giá trị |
 |--------|---------|
-| ID tiếp theo | `BUG-041` |
-| Tổng bug đã ghi | 40 |
-| OPEN | 40 |
+| ID tiếp theo | `BUG-047` |
+| Tổng bug đã ghi | 46 |
+| OPEN | 46 |
 | NEEDS VERIFICATION | 0 |
 | FIXED / CLOSED | 0 |
-| Lần audit gần nhất | 2026-09-03 — Share lô public (`PublicLotShare`) / cookie last-click / thống kê / phân quyền API |
+| Lần audit gần nhất | 2026-09-03 — Messenger ingest (`from-extension`) / tin đã lưu / mapping UID–thread–Person |
 
 ## Cách ghi một bug
 
@@ -105,6 +105,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | Person / Customer / SĐT / Facebook / chủ đất | BUG-013 … BUG-022 | Source: Customer, CustomerPhone, CustomerFacebook, LodatCustomerMap, merge, extension ingest, web list. Không sửa code. Không login (tránh tạo refresh; CF 1010). |
 | 2026-09-03 | Lô đất / map chủ / giá-DT-MT-hướng / trạng thái / public listing | BUG-023 … BUG-034 | Source: `lodats.service`/`dto`/`schema.prisma`, `packages/shared/src/lodats.ts`, `apps/web/src/features/lodats`, `transactions.service` (đồng bộ map), `public-content.service` (Đăng web ∩ Mở bán), `customers-view` lodatCount. Không sửa code. Không login (CF 1010; không tạo/sửa/xóa dữ liệu thật). |
 | 2026-09-03 | Share lô public / cookie / thống kê / authz API | BUG-035 … BUG-040 | Source: `lot-shares.service` + public/admin controllers, `public-listings` share-link, `lodats` share-link, middleware cookie, `packages/shared/src/lot-shares.ts`, web `features/lot-shares` + `ProductShareButton`. Không có Share nội bộ CRM (cấp quyền lô giữa NV). Không sửa code. Không login. Không ghi trùng BUG-003. |
+| 2026-09-03 | Messenger ingest / tin đã lưu / UID–thread–Person | BUG-041 … BUG-046 | Source: `from-extension.service`/`parse`, Prisma `CustomerMessenger*`, `GET /customers/:id/messages`, web `ChatThread` rail list, `apps/extension` stub. Đối chiếu scanner cũ `MESSAGE_MAX_COUNT=500`. Không sửa code. Không ghi trùng BUG-013 / 016 / 021. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -173,6 +174,12 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | OPEN |
 | BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | OPEN |
 | BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | OPEN |
+| BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN |
+| BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | OPEN |
+| BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). | OPEN |
+| BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | OPEN |
+| BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | OPEN |
+| BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | OPEN |
 
 ## Danh sách bug
 
@@ -694,5 +701,83 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Cùng DTO cho middleware + guest contact.
 - **Impact:** Lộ id nhân viên + thống kê visit từng mã. Brute-force mã 5 ký tự (~32^5) + 120 req/phút không thực tế.
 - **Evidence:** `publicLotShareResolveSchema`. `middleware.ts` `body.employeeId`.
+- **Status:** OPEN
+
+### BUG-041 — Thứ tự tin theo chỉ số lần quét, không theo thời gian
+
+- **Severity:** HIGH
+- **Module:** customers / messenger
+- **File:** `apps/api/src/modules/customers/from-extension.service.ts`, `apps/api/src/modules/customers/customers.service.ts`, `apps/web/src/features/customers/components/chat-thread.tsx`
+- **Function:** `appendMessages`, `listMessages`
+- **Vị trí code:** Tin khớp: `sortOrder: i` với `i` = vị trí trong `chatMessages` lần này (`slice(0, 200)`). Tin **không** có trong payload giữ `sortOrder` cũ. `create` cũng `sortOrder: i`. Cột `sentAt` / `direction` không gán. `listMessages` `orderBy: [{ sortOrder: 'asc' }, { id: 'asc' }]`. UI `#index+1` theo mảng đã sort.
+- **Problem:** Quét lại cùng hội thoại nhưng cửa sổ DOM khác (200 tin mới vs 200 tin cũ, hoặc cuộn thêm): tin trùng bị gán index 0…n của cửa sổ mới; tin cũ ngoài cửa sổ vẫn 0…n → **trùng sortOrder**, timeline xen kẽ. CRM không nhận timestamp từ payload (`extensionChatMessageSchema` không có `sentAt`).
+- **Root cause:** `sortOrder` = thứ tự batch, không phải thứ tự hội thoại ổn định; không merge theo `sentAt` / mid.
+- **Impact:** Cột phụ «Nội dung chat» sai thứ tự sau import lại. Ảnh lô lấy từ chat theo thứ tự tin cũng lệch.
+- **Evidence:** `appendMessages` `found.sortOrder !== i` → update `sortOrder: i`. Schema `sentAt DateTime?` không có trong `create`/`update` ingest. `listMessages` không `sentAt`.
+- **Status:** OPEN
+
+### BUG-042 — Cắt 200 tin im lặng; lệch scanner cũ 500
+
+- **Severity:** HIGH
+- **Module:** customers / messenger
+- **File:** `apps/api/src/modules/customers/from-extension-parse.ts`, `apps/api/src/modules/customers/from-extension.service.ts`
+- **Function:** `appendMessages`
+- **Vị trí code:** `MAX_MESSAGES = 200`; `incoming = (fields.messages ?? []).slice(0, MAX_MESSAGES)`. Không field `messagesDropped`. `fromExtensionResultSchema` chỉ `messagesAppended` / `messagesUpdated`. Scanner CRM cũ `MESSAGE_MAX_COUNT = 500` (`AnhunglandExtension/content-inbox.js`). Docs `customers.md` §13.14 ghi tối đa 200/lần.
+- **Problem:** Payload 201–500 tin: phần sau **bỏ không báo**. Extension mới trong repo này **stub** (chưa quét); nếu NV còn dùng scanner cũ 500 tin → CRM mất tin. Cùng cuộc chat import nhiều lần từng cửa sổ 200 tin thì dồn vào một `CustomerFacebook` nhưng sort loạn (BUG-041).
+- **Root cause:** Truncate cứng; không phân trang ingest; không báo client.
+- **Impact:** Thiếu lịch sử. NV tưởng đã lưu đủ vì `ok: true`.
+- **Evidence:** `from-extension-parse.ts` `MAX_MESSAGES`. `appendMessages` `slice(0, MAX_MESSAGES)`. Extension `apps/extension/src/content/content.ts` chỉ marker stub.
+- **Status:** OPEN
+
+### BUG-043 — Tin nhắn không unique; khóa dedupe yếu tạo trùng hoặc gộp nhầm
+
+- **Severity:** HIGH
+- **Module:** customers / messenger
+- **File:** `apps/api/prisma/schema.prisma`, `apps/api/src/modules/customers/from-extension-parse.ts`, `apps/api/src/modules/customers/from-extension.service.ts`
+- **Function:** `messageStorageKey`, `appendMessages`
+- **Vị trí code:** `CustomerMessengerMessage.externalMessageId` / `dedupeKey` chỉ index theo facebook+sortOrder, **không unique**. `messageStorageKey`: `mid.` / `@msgr.` → `mid:id`; else `dedupeKey`; else `` `${id\|\|'no-id'}::${sender}::${text}` ``. `find` `byKey` rồi `byStable` chỉ khi hàng cũ đã có `externalMessageId` ổn định. Hai `appendMessages` song song không transaction.
+- **Problem:** (1) Lần 1 chưa có mid (fallback `no-id::customer::`) rồi lần 2 có `mid.…` → **tạo hàng mới** (byStable miss). (2) Nhiều tin chỉ ảnh, cùng sender, text rỗng, không mid/dedupe → **một khóa** — gộp thành một tin. (3) Race hai POST → hai hàng cùng mid. Mapping Person đã ghi BUG-013; đây là **trùng/gộp tin**.
+- **Root cause:** Không `@@unique([customerFacebookId, externalMessageId])`; fallback không đủ phân biệt bubble.
+- **Impact:** Lịch sử nhân bản hoặc mất bubble ảnh. `messageCount` phình.
+- **Evidence:** Schema `CustomerMessengerMessage`. `messageStorageKey`. `appendMessages` không `P2002`/unique. `isStableMessengerMessageId`.
+- **Status:** OPEN
+
+### BUG-044 — Khớp nhầm rồi ghi đè nội dung / bỏ ảnh
+
+- **Severity:** MEDIUM
+- **Module:** customers / messenger
+- **File:** `apps/api/src/modules/customers/from-extension.service.ts`
+- **Function:** `appendMessages`, `ingestExtraImages`
+- **Vị trí code:** `betterText` = body mới khác rỗng và (placeholder→thật **hoặc** `nextBody.length > prevBody.length`). `ingestExtraImages`: chỉ thêm khi `imageUrls.length > found.images.length`; không thay URL/index đã lưu. Fetch ảnh fail → `ingestMessengerChatImage` trả `null` (bỏ ảnh).
+- **Problem:** Hai tin khác nhau dính cùng khóa yếu (BUG-043): lần sau text dài hơn **xóa** text ngắn. Cùng tin: lần 1 1 ảnh fail, lần 2 1 URL khác → length không tăng → **không lưu ảnh**. Không xóa tin thừa khi import lại (cố ý) nhưng cũng không sửa ảnh sai.
+- **Root cause:** Merge tin = heuristic độ dài + đếm ảnh, không so mid/nội dung khác.
+- **Impact:** Sai lời thoại; thiếu ảnh chat / ảnh lô reuse chat.
+- **Evidence:** `betterText` trong `appendMessages`. `ingestExtraImages` `if (imageUrls.length <= found.images.length) return 0`. `ingestMessengerChatImage` `return null` khi host/fetch fail.
+- **Status:** OPEN
+
+### BUG-045 — Import lại không cập nhật tên khách (`fullName`)
+
+- **Severity:** MEDIUM
+- **Module:** customers / messenger
+- **File:** `apps/api/src/modules/customers/from-extension.service.ts`
+- **Function:** `touchExisting`, `createCustomer`
+- **Vị trí code:** Tạo mới: `fullName: fullNameSeed(fields)` (tên FB / `Khách {uid}`). Lần sau: `customerFacebook.update` `facebookName: fields.customerName \|\| fb.facebookName`; `customer.update` chỉ `updatedAt`. Không gán `fullName`. Domain: không sửa tên FB tay; tên do extension khi scan.
+- **Problem:** Lần đầu thiếu `customerName` → list hiện `Khách {threadId}`. Quét lại có tên Messenger: cột tên Person **không đổi**; `facebookName` trên FB có. UI list dùng `fullName`.
+- **Root cause:** `touchExisting` không đụng `Customer.fullName`.
+- **Impact:** Mapping đúng Person nhưng nhãn sai; NV tưởng khách khác.
+- **Evidence:** `touchExisting` vs `createCustomer` `fullNameSeed`. `toListItem` `fullName`.
+- **Status:** OPEN
+
+### BUG-046 — API tin nhắn một phát không phân trang; không thời điểm; chi tiết khách không có chat
+
+- **Severity:** MEDIUM
+- **Module:** customers / messenger
+- **File:** `apps/api/src/modules/customers/customers.service.ts`, `packages/shared/src/customers.ts`, `apps/web/src/features/customers/customer-detail-page.tsx`, `apps/web/src/features/customers/components/chat-thread.tsx`
+- **Function:** `listMessages`
+- **Vị trí code:** `findMany` mọi tin của `CustomerFacebook`, không `take`/`cursor`. Contract `customerMessengerMessageSchema` không `sentAt`. Chi tiết `/khach-hang/[id]` không gọi `GET …/messages` (chỉ list rail khi `messageCount > 0`).
+- **Problem:** Sau migrate/trùng tin, payload lớn một request. UI không hiện giờ gửi (cột DB `sentAt` trống — BUG-041). Mở hồ sơ chi tiết không xem được lịch sử (phải về list + cột phụ).
+- **Root cause:** API list đầy đủ; màn chi tiết không gắn thread.
+- **Impact:** Chậm/timeout; NV không thấy chat lúc đang ở chi tiết khách.
+- **Evidence:** `listMessages` không limit. `customer-detail-page.tsx` không `listCustomerMessages`. `customer-list-page.tsx` rail `ChatThread`.
 - **Status:** OPEN
 
