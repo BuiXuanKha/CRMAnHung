@@ -25,12 +25,12 @@ Khi cần xác minh chức năng thực tế trên UI:
 
 | Trường | Giá trị |
 |--------|---------|
-| ID tiếp theo | `BUG-013` |
-| Tổng bug đã ghi | 12 |
-| OPEN | 12 |
+| ID tiếp theo | `BUG-023` |
+| Tổng bug đã ghi | 22 |
+| OPEN | 22 |
 | NEEDS VERIFICATION | 0 |
 | FIXED / CLOSED | 0 |
-| Lần audit gần nhất | 2026-09-03 — User / Login / Authentication / Role / Permission |
+| Lần audit gần nhất | 2026-09-03 — Person / Customer / SĐT / Facebook UID / chủ đất |
 
 ## Cách ghi một bug
 
@@ -102,6 +102,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | — | — | Khởi tạo `docs/audit/BUGS.md`. Chưa audit. Chờ owner giao module đầu tiên. |
 | 2026-09-03 | — | — | Bổ sung quy tắc kiểm thử trình duyệt (tài khoản Admin / kha; cấm tự tạo-sửa-xóa dữ liệu; mẫu bug UI). Mật khẩu không lưu trong repo. |
 | 2026-09-03 | User / Login / Auth / Role / Permission | BUG-001 … BUG-012 | Đọc source API + web. Không sửa code. Không login production (Cloudflare 1010 chặn non-browser; login sẽ tạo refresh token). |
+| 2026-09-03 | Person / Customer / SĐT / Facebook / chủ đất | BUG-013 … BUG-022 | Source: Customer, CustomerPhone, CustomerFacebook, LodatCustomerMap, merge, extension ingest, web list. Không sửa code. Không login (tránh tạo refresh; CF 1010). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -142,6 +143,16 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | OPEN |
 | BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | OPEN |
 | BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | OPEN |
+| BUG-013 | HIGH | customers / extension | Cùng người Facebook có thể thành nhiều Customer (UID/thread không unique; e2ee vs threadId). | OPEN |
+| BUG-014 | HIGH | customers | Trùng SĐT lúc tạo: bấm OK ghi đè `fullName` và mở lại khách cũ. | OPEN |
+| BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | OPEN |
+| BUG-016 | HIGH | customers | Gộp Facebook: mất SĐT nguồn, party SetNull, xóa map trùng lô; TitleService Restrict → merge vỡ. | OPEN |
+| BUG-017 | HIGH | customers / permission | Admin gộp Facebook giữa hai `employeeId` khác nhau — chuyển hồ sơ sang NV khác. | OPEN |
+| BUG-018 | HIGH | customers | SĐT không unique trên DB; không chuẩn hóa — race / format lệch tạo Person trùng. | OPEN |
+| BUG-019 | MEDIUM | customers | Tìm kiếm không khớp tên/UID Facebook; keyword SĐT không bỏ khoảng trắng. | OPEN |
+| BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | OPEN |
+| BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | OPEN |
+| BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | OPEN |
 
 ## Danh sách bug
 
@@ -299,5 +310,135 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Không có middleware Next chặn CRM theo session; JWT không cookie nên server component không thấy user.
 - **Impact:** Không lộ danh sách user qua API. Lộ cấu trúc UI admin. Khớp nguyên tắc “ẩn nút không phải bảo mật” — ghi nhận lệch frontend vs backend.
 - **Evidence:** `layout.tsx` (crm) chỉ `AppShell`. `user-admin-page.tsx` check `user.role !== ADMIN` rồi `router.replace`. `GET /users` `@Roles('ADMIN')` + `RolesGuard` trên controller.
+- **Status:** OPEN
+
+### BUG-013 — Cùng người Facebook tạo được nhiều Customer
+
+- **Severity:** HIGH
+- **Module:** customers / extension
+- **File:** `apps/api/src/modules/customers/from-extension.service.ts`, `apps/api/src/modules/customers/from-extension-parse.ts`, `apps/api/prisma/schema.prisma`
+- **Function:** `FromExtensionService.findExisting` / `createCustomer`, `parseScan`
+- **Vị trí code:** `CustomerFacebook.customerUid` / `threadId` chỉ `@@index`, không unique. `findExisting` scoped `employeeId`: ưu tiên `threadId`, sau đó `customerUid`, `orderBy createdAt desc`. `parseScan`: non-e2ee `customerUid = rawUid || threadId`; e2ee chỉ `rawUid`. `touchExisting` ghi `threadId: fields.threadId || fb.threadId` (đè thread cũ).
+- **Problem:** Một người thật có thể thành nhiều Person: (1) quét e2ee và Messenger thường (UID vs threadId-as-UID); (2) threadId đổi, lần sau không khớp thread cũ và UID trống; (3) hai ingest song song không unique; (4) cùng UID hai NV = hai Customer (cố ý theo NV, nhưng cùng NV vẫn trùng). Scan thread mới cùng UID đè `threadId` rồi append tin vào một `CustomerFacebook` — trộn hai hội thoại.
+- **Root cause:** Không unique `(employeeId, customerUid)` / `(employeeId, threadId)`; heuristic UID = threadId; lookup không gộp e2ee/non-e2ee.
+- **Impact:** Trùng hồ sơ, chat/chăm sóc/lô tách đôi; gộp tay dễ mất dữ liệu (BUG-016).
+- **Evidence:** `schema.prisma` `CustomerFacebook` không `@@unique` UID. `findExisting` dòng 69–97. `parseScan` `isE2ee ? rawUid : rawUid || threadId`. `createCustomer` luôn `customer.create` khi miss.
+- **Status:** OPEN
+
+### BUG-014 — Trùng SĐT lúc tạo: OK ghi đè tên khách cũ
+
+- **Severity:** HIGH
+- **Module:** customers
+- **File:** `apps/api/src/modules/customers/customers-phone.ts`, `apps/web/src/features/customers/customer-list-page.tsx`, `apps/web/src/features/customers/components/phone-duplicate-modal.tsx`
+- **Function:** `acknowledgePhoneDuplicate`, `submitDuplicate`
+- **Vị trí code:** `POST /customers` trùng SĐT → 409. UI mode `create`: confirm gọi `PATCH .../acknowledge-phone-duplicate` với `fullName` vừa gõ. API `update` `fullName`, `isHidden: false`, `autoRestoredAt: null`. Không tạo Customer mới.
+- **Problem:** Hai người dùng chung một số (gia đình), hoặc NV gõ nhầm SĐT đã có: bấm OK **đổi tên** khách cũ thành tên mới và khôi phục nếu đang ẩn. Không có bước “giữ tên cũ / chỉ mở hồ sơ”.
+- **Root cause:** Acknowledge = rename + unhide, tái sử dụng như “không tạo trùng”.
+- **Impact:** Ghi đè danh tính Person; khách ẩn bị hiện lại với tên sai.
+- **Evidence:** `customers-phone.ts` `acknowledgePhoneDuplicate`. `customer-list-page.tsx` `dup.mode === 'create'` → `acknowledgePhoneDuplicate(dup.existing.id, { fullName: dup.fullName \|\| existing })`. Modal: “bấm OK để cập nhật tên”.
+- **Status:** OPEN
+
+### BUG-015 — Sửa SĐT xóa mọi số phụ
+
+- **Severity:** HIGH
+- **Module:** customers
+- **File:** `apps/api/src/modules/customers/customers-phone.ts`
+- **Function:** `replaceCustomerPhone`
+- **Vị trí code:** Sau khi đổi `phones[0]`, nếu `existing.phones.length > 1` thì `deleteMany` mọi `CustomerPhone` khác của khách.
+- **Problem:** CRM cũ `tblPersonPhone` copy nhiều số / khách (`migrate-phones-from-legacy.ts`). UI/API hiện coi như 1 SĐT. PATCH `/customers/:id/phones` (menu Sửa SĐT) **xóa vĩnh viễn** các số còn lại.
+- **Root cause:** Mô hình “một số” ép lên dữ liệu nhiều số; không merge/giữ số phụ.
+- **Impact:** Mất SĐT sau migrate. Không hoàn tác.
+- **Evidence:** `replaceCustomerPhone` khối `if (existing.phones.length > 1) deleteMany`. `addCustomerPhone` từ chối nếu đã có số. Schema `CustomerPhone` không unique, cho phép nhiều dòng.
+- **Status:** OPEN
+
+### BUG-016 — Gộp Facebook không chuyển hết quan hệ Person
+
+- **Severity:** HIGH
+- **Module:** customers
+- **File:** `apps/api/src/modules/customers/customers-phone.ts`, `apps/api/prisma/schema.prisma`
+- **Function:** `mergeFacebookIntoPhoneHolder`
+- **Vị trí code:** Transaction: chuyển `CustomerFacebook.customerId`, `CustomerCareNote`, một phần `LodatCustomerMap`; `delete` Customer nguồn. Không chuyển `CustomerPhone` nguồn (Cascade xóa). `TransactionParty.customerId` `onDelete: SetNull`. `TitleService.customerId` `onDelete: Restrict`. Map trùng `lodatId` với đích: `deleteMany` map nguồn (mất giá/lịch sử nguồn trên lô đó).
+- **Problem:** Gộp FB → hồ sơ có SĐT: (1) SĐT trên hồ sơ FB bị mất; (2) party giao dịch mất liên kết Person; (3) nguồn có hồ sơ sổ đỏ → Prisma Restrict, merge fail 500, không gộp được; (4) hai map cùng lô thì xóa map nguồn.
+- **Root cause:** Merge chỉ chuyển FB + care + map còn lại; không xử lý TitleService / phone / party; xóa map overlap.
+- **Impact:** Mất dữ liệu hoặc không gộp được khi Person đã có sổ đỏ/GD. Hai Person vẫn tồn tại nếu Restrict.
+- **Evidence:** `mergeFacebookIntoPhoneHolder` dòng 383–411. Schema TitleService Restrict; TransactionParty SetNull; CustomerPhone Cascade.
+- **Status:** OPEN
+
+### BUG-017 — Admin gộp Facebook xuyên nhân viên
+
+- **Severity:** HIGH
+- **Module:** customers / permission
+- **File:** `apps/api/src/modules/customers/customers-phone.ts`
+- **Function:** `mergeFacebookIntoPhoneHolder`
+- **Vị trí code:** `assertCanAccess` nguồn và đích. ADMIN luôn pass dù `source.employeeId !== target.employeeId`. Không so hai NV. STAFF chỉ gộp trong hồ sơ mình.
+- **Problem:** `POST /customers/merge-facebook-into-phone-holder` với JWT Admin: chuyển Facebook (chat, UID) sang Customer của NV khác rồi xóa Person nguồn.
+- **Root cause:** Ownership merge = quyền xem cả hai, không = cùng sales.
+- **Impact:** Hồ sơ/chat/lead gán nhầm NV; Person nguồn biến mất.
+- **Evidence:** `assertCanAccess` ADMIN return sớm. Không có `source.employeeId === target.employeeId`.
+- **Status:** OPEN
+
+### BUG-018 — SĐT không unique trên DB, không chuẩn hóa
+
+- **Severity:** HIGH
+- **Module:** customers
+- **File:** `apps/api/prisma/schema.prisma`, `apps/api/src/modules/customers/customers-phone.ts`, `apps/api/scripts/migrate-phones-from-legacy.ts`
+- **Function:** `findByPhoneForEmployee`, `createManualCustomer`, migrate phones
+- **Vị trí code:** `CustomerPhone.phone` chỉ `@@index`, không `@@unique([customerId, phone])` hay unique theo NV. Duplicate check `phones: { some: { phone } }` exact sau trim/DTO digits. Create: check rồi `create` ngoài unique constraint. Migrate: `String(row.Phone).trim()` không `replace(/\D/g)` / không ép `0xxxxxxxxx`.
+- **Problem:** (1) Hai POST tạo cùng lúc cùng NV + cùng số → hai Person. (2) Số migrate `"0912 345 678"` / `+84…` không khớp số mới `0912345678` → tạo Person thứ hai. (3) Cùng số hai NV = hai Customer (migrate ghi rõ giữ nguyên — đúng theo NV, nhưng không có registry chống trùng toàn hệ).
+- **Root cause:** Unique chỉ trong code; format SĐT không một chuẩn.
+- **Impact:** Trùng Person; tìm/gộp SĐT miss.
+- **Evidence:** Schema `CustomerPhone`. `createManualCustomer` 113–131. `migrate-phones-from-legacy.ts` comment “Duplicate numbers across employees are kept as-is” + trim only.
+- **Status:** OPEN
+
+### BUG-019 — Tìm Person bỏ Facebook UID/tên; SĐT có khoảng không khớp
+
+- **Severity:** MEDIUM
+- **Module:** customers
+- **File:** `apps/api/src/modules/customers/customers.service.ts`, `apps/web/src/features/customers/components/filter-bar.tsx`
+- **Function:** `CustomersService.list`
+- **Vị trí code:** Keyword `OR`: `fullName`, `note` (cột dư tblPerson.Note), `phones.phone contains` raw, `careNotes`. Không `facebook.facebookName` / `customerUid` / `threadId`. Keyword không `replace(/\D/g)` trước khi so SĐT.
+- **Problem:** Placeholder UI “Tìm tên, SĐT…” — gõ nick Facebook hoặc UID không ra. Gõ `0912 345 678` không `contains` `0912345678`.
+- **Root cause:** Search list không cover kênh Facebook; không normalize phone.
+- **Impact:** NV tạo thêm Person vì tưởng chưa có; miss khách FB-only.
+- **Evidence:** `customers.service.ts` `list` khối keyword. `filter-bar.tsx` placeholder.
+- **Status:** OPEN
+
+### BUG-020 — Không ràng buộc một chủ active trên một lô
+
+- **Severity:** MEDIUM
+- **Module:** lodats / mapping chủ đất
+- **File:** `apps/api/prisma/schema.prisma`, `apps/api/src/modules/lodats/lodats.service.ts`
+- **Function:** `LIST_INCLUDE.maps`, `changeOwner`
+- **Vị trí code:** `LodatCustomerMap` `@@index([lodatId, isActive])` không unique. Include list: `maps where isActive take 1 orderBy updatedAt desc`. `changeOwner` `updateMany` active=false rồi `create` active — hai request song song → hai map active.
+- **Problem:** “Chủ hiện tại” trên list/chi tiết có thể không phải map duy nhất; Person A/B cùng lúc isActive trên một lô. Merge xóa map overlap giả định tối đa một quan hệ nguồn/lô.
+- **Root cause:** Thiếu unique partial index `lodatId WHERE isActive`.
+- **Impact:** Sai chủ đất hiển thị; GD lấy `findFirst` active `orderBy updatedAt` — có thể lệch Person.
+- **Evidence:** Schema `LodatCustomerMap`. `LIST_INCLUDE` take 1. `transactions.service.ts` `findFirst` `{ lodatId, isActive: true }`.
+- **Status:** OPEN
+
+### BUG-021 — Extension cập nhật khách đã ẩn, không khôi phục
+
+- **Severity:** MEDIUM
+- **Module:** customers / extension
+- **File:** `apps/api/src/modules/customers/from-extension.service.ts`
+- **Function:** `findExisting`, `touchExisting`, `appendMessages`
+- **Vị trí code:** `findExisting` không lọc `isHidden`. `touchExisting` / `appendMessages` không set `isHidden: false`. List mặc định `isHidden: false`.
+- **Problem:** Khách xóa mềm vẫn nhận tin/ảnh scan mới; NV không thấy trên list trừ `@` / `@@`. Không `autoRestoredAt`.
+- **Root cause:** Ingest không đụng cờ ẩn.
+- **Impact:** Mất lead trên UI; dữ liệu vẫn ghi.
+- **Evidence:** `findExisting` where chỉ `employeeId` + facebook thread/uid. `customers.service.ts` list `isHidden: false` mặc định.
+- **Status:** OPEN
+
+### BUG-022 — Lệch contract/API: không sửa được `Customer.note`
+
+- **Severity:** MEDIUM
+- **Module:** customers
+- **File:** `packages/shared/src/customers.ts`, `apps/api/src/modules/customers/dto/update-customer.dto.ts`, `apps/api/src/modules/customers/customers.service.ts`
+- **Function:** `UpdateCustomerDto`, `CustomersService.update`
+- **Vị trí code:** Shared `updateCustomerSchema` có `note`, `budgetMinVnd`, `budgetMaxVnd`. Nest `UpdateCustomerDto` chỉ `fullName`, `status`, `isPinned`, `isHidden`. `update()` không gán `note`. `forbidNonWhitelisted` → PATCH `note` = 400. Tạo khách có `note`; chi tiết UI không hiện `Customer.note` (chỉ care).
+- **Problem:** Cột copy từ `tblPerson.Note` không sửa được qua API update; budget khách chỉ qua care-notes. Frontend/shared và backend lệch.
+- **Root cause:** DTO Nest không implement đủ contract shared.
+- **Impact:** Ghi chú Person cũ kẹt; client theo shared gửi `note` thì lỗi.
+- **Evidence:** `update-customer.dto.ts` vs `updateCustomerSchema`. `customers.service.ts` `data` không có `note`.
 - **Status:** OPEN
 
