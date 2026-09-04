@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 72 |
+| OPEN | 70 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 11 |
+| FIXED / CLOSED | 13 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -122,6 +122,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | docs | conflict markers | Gỡ sót marker merge trên `BUGS.md` journal (password 6–18 + BUG-003). |
 | 2026-09-04 | users | BUG-010 CLOSED | Owner: race Admin cuối không xảy ra với An Hưng Land — won't fix. |
 | 2026-09-04 | users / auth | BUG-011 FIXED | Create/reset: 6–18 + bắt buộc chữ và số; login không đổi. |
+| 2026-09-04 | web authz | BUG-012 FIXED | Middleware CRM theo cookie role; STAFF không vào route Admin (kèm BUG-083). |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -159,7 +160,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-008 | MEDIUM | customers / lodats | STAFF nhận 403 (thay vì 404) khi ID thuộc NV khác — lộ tồn tại bản ghi. | FIXED |
 | BUG-009 | MEDIUM | addresses | `includeHidden` không khóa ADMIN; STAFF đọc địa chỉ / đơn vị đã ẩn. | FIXED |
 | BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | CLOSED |
-| BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | FIXED || BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | OPEN |
+| BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | FIXED || BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | FIXED |
 | BUG-013 | HIGH | customers / extension | Cùng người Facebook có thể thành nhiều Customer (UID/thread không unique; e2ee vs threadId). | OPEN |
 | BUG-014 | HIGH | customers | Trùng SĐT lúc tạo: bấm OK ghi đè `fullName` và mở lại khách cũ. | OPEN |
 | BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | OPEN |
@@ -230,7 +231,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-080 | LOW | public-content / slug | Slug lô `toPublicSlug(..., 0)` không cắt độ dài; title+location → URL cực dài. | OPEN |
 | BUG-081 | MEDIUM | public web / metadata | `<title>` trang chủ lặp «An Hưng Land» hai lần (live). | OPEN |
 | BUG-082 | MEDIUM | public web / CRM | `/dashbroad` (alias gõ sai) trả HTTP 200 cache, không redirect `/dashboard`. | OPEN |
-| BUG-083 | MEDIUM | web authz | STAFF mở `/quan-tri/khach-hang` thấy stub «Registry ADMIN»; không redirect. | OPEN |
+| BUG-083 | MEDIUM | web authz | STAFF mở `/quan-tri/khach-hang` thấy stub «Registry ADMIN»; không redirect. | FIXED |
 
 ## Danh sách bug
 
@@ -397,7 +398,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Không có middleware Next chặn CRM theo session; JWT không cookie nên server component không thấy user.
 - **Impact:** Không lộ danh sách user qua API. Lộ cấu trúc UI admin. Khớp nguyên tắc “ẩn nút không phải bảo mật” — ghi nhận lệch frontend vs backend.
 - **Evidence:** `layout.tsx` (crm) chỉ `AppShell`. `user-admin-page.tsx` check `user.role !== ADMIN` rồi `router.replace`. `GET /users` `@Roles('ADMIN')` + `RolesGuard` trên controller.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — Cookie HttpOnly `crmanhung_web_role` (path `/`) set lúc login/refresh/`me`; Next middleware điều phối: guest → `/login`, STAFF khỏi `/quan-tri`/`/cai-dat`/dashboard admin → `/khach-hang` hoặc `/dashboard/lo-dat`. API vẫn là tường thật. Client redirect giữ lớp phụ.
 
 ### BUG-013 — Cùng người Facebook tạo được nhiều Customer
 
@@ -1335,5 +1336,5 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Kết quả thực tế:** Trang stub ADMIN render đủ.
 - **Kết quả mong đợi:** Redirect `/khach-hang` (cùng rule `/quan-tri/nguoi-dung`).
 - **Cách tái hiện:** Login user `kha` → dán `/quan-tri/khach-hang` trên `anhungland.com`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — Cùng middleware BUG-012: STAFF + `/quan-tri/*` → redirect `/khach-hang` trước khi render stub.
 

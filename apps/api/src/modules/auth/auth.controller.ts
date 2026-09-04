@@ -5,8 +5,10 @@ import type { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import {
   clearRefreshCookie,
+  clearWebRoleCookie,
   resolveRefreshToken,
   setRefreshCookie,
+  setWebRoleCookie,
 } from './auth-cookies';
 import { LoginDto, RefreshTokenDto } from './dto/auth.dto';
 import { Public } from '../../common/decorators/public.decorator';
@@ -29,6 +31,7 @@ export class AuthController {
   ) {
     const result = await this.authService.login(dto);
     setRefreshCookie(res, result.refreshToken, this.config);
+    setWebRoleCookie(res, result.user.role, this.config);
     return result;
   }
 
@@ -41,9 +44,16 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const refreshToken = resolveRefreshToken(req, dto.refreshToken);
-    const result = await this.authService.refresh(refreshToken ?? '');
-    setRefreshCookie(res, result.refreshToken, this.config);
-    return result;
+    try {
+      const result = await this.authService.refresh(refreshToken ?? '');
+      setRefreshCookie(res, result.refreshToken, this.config);
+      setWebRoleCookie(res, result.user.role, this.config);
+      return result;
+    } catch (err) {
+      clearRefreshCookie(res, this.config);
+      clearWebRoleCookie(res, this.config);
+      throw err;
+    }
   }
 
   @Public()
@@ -57,11 +67,17 @@ export class AuthController {
     const refreshToken = resolveRefreshToken(req, dto.refreshToken);
     const result = await this.authService.logout(refreshToken);
     clearRefreshCookie(res, this.config);
+    clearWebRoleCookie(res, this.config);
     return result;
   }
 
   @Get('me')
-  me(@CurrentUser() user: RequestUser) {
-    return this.authService.me(user.id);
+  async me(
+    @CurrentUser() user: RequestUser,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const me = await this.authService.me(user.id);
+    setWebRoleCookie(res, me.role, this.config);
+    return me;
   }
 }
