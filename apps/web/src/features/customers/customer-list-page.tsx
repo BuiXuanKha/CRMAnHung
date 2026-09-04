@@ -291,6 +291,7 @@ export function CustomerListPage() {
   }
 
   function onListScroll() {
+    setMenuId(null);
     loadMoreIfNearEnd();
     persistListState();
   }

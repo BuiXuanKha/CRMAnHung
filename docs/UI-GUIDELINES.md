@@ -683,6 +683,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-03 | Chi tiết `/lo-dat/[id]` mobile: ẩn «← Danh sách lô đất»; FAB liên hệ **chủ đất** (Gọi / Zalo / Mở Messenger); nổi trên footer Giao dịch·Sửa; máy tính không đổi |
 | 2026-09-04 | Chi tiết `/khach-hang/[id]`: dưới tên chỉ hiện **tên kênh**; FAB **«⋯»** popover + icon Lucide (chăm sóc / tạo lô / sổ đỏ) |
 | 2026-09-04 | AddressPicker: chọn bằng `onClick` (không `preventDefault` pointerdown) — vuốt cuộn được; chặn click xuyên iOS bằng ignore-trigger ngắn |
+| 2026-09-04 | List `/khach-hang` menu Thao tác: ưu tiên mở dưới chevron, thiếu chỗ thì trên; không khóa cuộn — cuộn list/resize đóng menu |
 
 ---
 

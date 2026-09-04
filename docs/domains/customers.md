@@ -217,7 +217,12 @@ Page/nick FB của NV **hoặc** hotline (SĐT + nhãn).
 
 ##### 12. Menu thao tác (chevron)
 
-Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
+Một menu (portal `position: fixed`). Khách đã xoá: **chỉ** «Khôi phục khách».
+
+**Vị trí / cuộn**
+
+- Ưu tiên mở **dưới** nút chevron. Không đủ chỗ dưới (bị footer / mép viewport che) → mở **trên** nút.
+- **Không** khóa cuộn list khi menu mở. Cuộn vùng bảng (hoặc resize) → **đóng** menu ngay — cuộn tới khách khác không cần đóng tay.
 
 | Mục | Việc |
 |-----|------|
@@ -379,7 +384,9 @@ Page/nick FB hoặc hotline. Chữ thuần, không link.
 
 ##### 12. Menu thao tác (chevron)
 
-Một menu. Khách đã xoá: **chỉ** «Khôi phục khách».
+Cùng menu máy tính (portal). Khách đã xoá: **chỉ** «Khôi phục khách».
+
+**Vị trí / cuộn** — giống §12.1.4 mục 12: ưu tiên dưới nút, thiếu chỗ thì trên; **không** khóa cuộn; cuộn thẻ / resize → đóng menu (tránh che thanh «Thêm khách bằng SĐT»).
 
 | Mục | Việc |
 |-----|------|

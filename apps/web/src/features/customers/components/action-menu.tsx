@@ -37,9 +37,21 @@ type Props = {
   onAction: (action: CustomerAction) => void;
 };
 
+const MENU_WIDTH = 220;
+const GAP = 4;
+const EDGE = 8;
+
+function clampLeft(right: number): number {
+  const left = Math.min(right - MENU_WIDTH, window.innerWidth - MENU_WIDTH - EDGE);
+  return Math.max(EDGE, left);
+}
+
 /**
  * Menu Thao tác portal ra document.body — tránh bị .kh-table-scroll /
  * .kh-page (overflow hidden|auto) cắt mất hit-test khi position:fixed.
+ *
+ * Vị trí: ưu tiên dưới nút; thiếu chỗ → trên. Không khóa cuộn; cuộn /
+ * resize → đóng (để kéo list tới khách khác không cần đóng tay).
  */
 export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
@@ -75,11 +87,38 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
       return;
     }
     const r = btn.getBoundingClientRect();
-    const width = 220;
-    const left = Math.min(r.right - width, window.innerWidth - width - 8);
-    setPos({ top: r.bottom + 4, left: Math.max(8, left) });
+    setPos({ top: r.bottom + GAP, left: clampLeft(r.right) });
     setTriggerVisible(true);
   }, [open]);
+
+  /* Đo chiều cao menu sau khi portal mount — lật lên trên nếu thiếu chỗ dưới. */
+  useLayoutEffect(() => {
+    if (!open || !triggerVisible) return;
+    const btn = wrapRef.current?.querySelector('button');
+    const menu = menuRef.current;
+    if (!btn || !menu) return;
+
+    const r = btn.getBoundingClientRect();
+    const menuH = menu.getBoundingClientRect().height;
+    const spaceBelow = window.innerHeight - r.bottom - GAP - EDGE;
+    const spaceAbove = r.top - GAP - EDGE;
+    const left = clampLeft(r.right);
+
+    let top: number;
+    if (menuH <= spaceBelow) {
+      top = r.bottom + GAP;
+    } else if (menuH <= spaceAbove) {
+      top = r.top - GAP - menuH;
+    } else if (spaceAbove > spaceBelow) {
+      top = Math.max(EDGE, r.top - GAP - menuH);
+    } else {
+      top = r.bottom + GAP;
+      if (top + menuH > window.innerHeight - EDGE) {
+        top = Math.max(EDGE, window.innerHeight - EDGE - menuH);
+      }
+    }
+    setPos({ top, left });
+  }, [open, triggerVisible, customer.isHidden, customer.primaryPhone, customer.isPinned, hasFacebook, isMobile]);
 
   useEffect(() => {
     /* Chỉ instance có nút đang hiện mới lắng nghe bấm-ngoài. Instance ẩn
@@ -93,6 +132,19 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
     };
     document.addEventListener('mousedown', onDoc);
     return () => document.removeEventListener('mousedown', onDoc);
+  }, [open, triggerVisible, onClose]);
+
+  useEffect(() => {
+    if (!open || !triggerVisible) return;
+    /* capture: bắt scroll trên .kh-table-scroll / .kh-cards (overflow:auto),
+       không khóa body — chỉ đóng menu để cuộn tiếp. */
+    const close = () => onClose();
+    window.addEventListener('scroll', close, true);
+    window.addEventListener('resize', close);
+    return () => {
+      window.removeEventListener('scroll', close, true);
+      window.removeEventListener('resize', close);
+    };
   }, [open, triggerVisible, onClose]);
 
   function run(action: CustomerAction) {
