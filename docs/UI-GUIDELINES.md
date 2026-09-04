@@ -296,7 +296,7 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 |----------|---------|
 | Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px; **chỉ thông tin cơ bản**: tiêu đề đậm trên cùng; thân 2 cột. **Không** hangtag Nhà/Đất, **không** chevron thao tác, **không** công tắc Mở bán trên thẻ |
 | Ảnh | Thumbnail trái ~80×56, bo 8px; overlay hangtag trạng thái **Mở bán** `green` / **Tạm dừng** `gray` (góc trên trái ảnh); `+N` ảnh thêm góc dưới phải |
-| Phải ảnh | Địa chỉ nhạt; giá `crm-money`; một dòng `90 m² · MT 8 m · Nam`. Không ghi chú giá / hoa hồng trên thẻ |
+| Phải ảnh | Địa chỉ nhạt; giá `crm-money`; **ghi chú giá** / **hoa hồng** (chữ đã lưu) nếu có — cùng cột Giá bán desktop; một dòng `90 m² · MT 8 m · Nam`. Thiếu ghi chú / hoa hồng → ẩn dòng |
 | Bấm thẻ | Mở chi tiết |
 | Tìm / lọc | Cùng **một hàng**: ô tìm + nút **Bộ lọc** + nút **Tìm** (nền xanh). Bộ lọc bung panel **inline** dưới hàng (không `CrmDialog`): select Trạng thái, select khoảng giá (bước 500tr + «Chưa có giá»), nút Xoá lọc khi đang lọc. Nút Tìm đóng bàn phím; gõ ô tìm vẫn lọc. Ô tìm viền vàng khi bắt đầu bằng `@` |
 | Footer | Cùng câu «Hiển thị N / Tổng M lô đất», dính đáy vùng list |
@@ -685,6 +685,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-04 | AddressPicker: chọn bằng `onClick` (không `preventDefault` pointerdown) — vuốt cuộn được; chặn click xuyên iOS bằng ignore-trigger ngắn |
 | 2026-09-04 | List `/khach-hang` menu Thao tác: ưu tiên mở dưới chevron, thiếu chỗ thì trên; không khóa cuộn — cuộn list/resize đóng menu |
 | 2026-09-04 | Menu Thao tác: đóng khi cuộn trên iOS — `touchmove` + listener trực tiếp `.kh-cards` / `.kh-table-scroll` + theo dõi vị trí nút (window capture scroll không đủ) |
+| 2026-09-04 | List `/lo-dat` thẻ mobile: thêm dòng **Ghi chú giá** + **Hoa hồng** (cùng cột Giá bán desktop; thiếu thì ẩn) |
 
 ---
 

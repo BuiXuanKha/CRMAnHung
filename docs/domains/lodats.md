@@ -354,7 +354,9 @@ CRM cũ: bấm ảnh → gallery. Web mới: bấm cả thẻ → chi tiết. Th
 
 ##### 3. Phải ảnh
 
-Địa chỉ · giá · một dòng DT · MT · hướng.
+Địa chỉ · giá (`crm-money`) · ghi chú giá (nếu có) · hoa hồng chữ đã lưu (nếu có, ví dụ `1%` · `Chưa trao đổi`) · một dòng DT · MT · hướng.
+
+Thiếu ghi chú giá / hoa hồng → **ẩn** dòng (không hiện `—`). Cùng nghĩa cột Giá bán máy tính §12.1.3 mục 5.
 
 #### 12.2.4 Footer
 

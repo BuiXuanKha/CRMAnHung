@@ -5,7 +5,7 @@ import { ImageOff } from 'lucide-react';
 import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
-import { formatPriceVnd, formatSpecsInline } from '../display';
+import { formatBrokerFee, formatPriceVnd, formatSpecsInline } from '../display';
 
 type Props = {
   items: LodatListItem[];
@@ -44,6 +44,7 @@ export function LodatCardList({
         ) : (
           items.map((p) => {
             const open = p.status === LodatSaleStatus.DANG_BAN;
+            const fee = formatBrokerFee(p.brokerFeeNote, p.commissionPercent);
             function openCard() {
               onSelect(p.id);
               onOpen(p.id);
@@ -106,6 +107,10 @@ export function LodatCardList({
                   <div className="ld-card-meta">
                     <span className="ld-card-address">{p.address?.trim() || '—'}</span>
                     <span className="crm-money">{formatPriceVnd(p.priceVnd)}</span>
+                    {p.priceNote?.trim() ? (
+                      <span className="ld-card-note">Ghi chú giá: {p.priceNote}</span>
+                    ) : null}
+                    {fee ? <span className="ld-card-note">Hoa hồng: {fee}</span> : null}
                     <span className="ld-card-specs">{formatSpecsInline(p)}</span>
                   </div>
                 </div>
