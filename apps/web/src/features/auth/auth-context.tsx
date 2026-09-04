@@ -13,9 +13,8 @@ import { type AuthUser, type LoginResponse } from '@crmanhung/shared';
 import {
   apiFetch,
   clearTokens,
-  getAccessToken,
-  getRefreshToken,
   setTokens,
+  tryRefresh,
 } from '@/shared/api/client';
 import { clearAllListStates } from '@/shared/list-state';
 
@@ -61,12 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const boot = async () => {
-      if (!getAccessToken() && !getRefreshToken()) {
-        writeSessionUser(null);
-        setLoading(false);
-        return;
-      }
       try {
+        // Cold boot: access is memory-only; restore via HttpOnly refresh cookie.
+        const refreshed = await tryRefresh();
+        if (!refreshed) {
+          writeSessionUser(null);
+          setUser(null);
+          return;
+        }
         const me = await apiFetch<AuthUser>('/auth/me');
         writeSessionUser(me);
         setUser(me);
@@ -86,6 +87,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       method: 'POST',
       body: JSON.stringify({ username, password }),
     });
+    // Refresh is Set-Cookie HttpOnly; keep access in memory only.
     setTokens(data.accessToken, data.refreshToken);
     writeSessionUser(data.user);
     setUser(data.user);
@@ -99,14 +101,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const logout = useCallback(async () => {
-    const refreshToken = getRefreshToken();
     try {
-      if (refreshToken) {
-        await apiFetch('/auth/logout', {
-          method: 'POST',
-          body: JSON.stringify({ refreshToken }),
-        });
-      }
+      await apiFetch('/auth/logout', {
+        method: 'POST',
+        body: JSON.stringify({}),
+      });
     } catch {
       // ignore network errors on logout
     } finally {

@@ -13,33 +13,48 @@ function resolveApiUrl(path: string): string {
   return new URL(relative, origin).href;
 }
 
-const ACCESS_KEY = 'crmanhung_access_token';
-const REFRESH_KEY = 'crmanhung_refresh_token';
+/** Legacy keys — cleared on boot so XSS cannot read old persisted tokens (BUG-007). */
+const LEGACY_ACCESS_KEY = 'crmanhung_access_token';
+const LEGACY_REFRESH_KEY = 'crmanhung_refresh_token';
+
+/** In-memory access JWT only (not localStorage). Refresh lives in HttpOnly cookie. */
+let memoryAccessToken: string | null = null;
 
 function canUseStorage() {
   return typeof window !== 'undefined';
 }
 
-export function getAccessToken() {
-  if (!canUseStorage()) return null;
-  return localStorage.getItem(ACCESS_KEY);
-}
-
-export function getRefreshToken() {
-  if (!canUseStorage()) return null;
-  return localStorage.getItem(REFRESH_KEY);
-}
-
-export function setTokens(accessToken: string, refreshToken: string) {
+function clearLegacyTokenStorage() {
   if (!canUseStorage()) return;
-  localStorage.setItem(ACCESS_KEY, accessToken);
-  localStorage.setItem(REFRESH_KEY, refreshToken);
+  try {
+    localStorage.removeItem(LEGACY_ACCESS_KEY);
+    localStorage.removeItem(LEGACY_REFRESH_KEY);
+  } catch {
+    // ignore
+  }
+}
+
+export function getAccessToken() {
+  return memoryAccessToken;
+}
+
+export function setAccessToken(accessToken: string | null) {
+  memoryAccessToken = accessToken?.trim() ? accessToken : null;
+}
+
+/** @deprecated Refresh is HttpOnly cookie; kept as no-op clear for call sites. */
+export function getRefreshToken() {
+  return null;
+}
+
+export function setTokens(accessToken: string, _refreshToken?: string) {
+  setAccessToken(accessToken);
+  clearLegacyTokenStorage();
 }
 
 export function clearTokens() {
-  if (!canUseStorage()) return;
-  localStorage.removeItem(ACCESS_KEY);
-  localStorage.removeItem(REFRESH_KEY);
+  memoryAccessToken = null;
+  clearLegacyTokenStorage();
 }
 
 type ApiErrorBody = {
@@ -100,14 +115,13 @@ async function parseError(res: Response): Promise<ApiError> {
 
 let refreshPromise: Promise<boolean> | null = null;
 
-async function tryRefresh(): Promise<boolean> {
-  const refreshToken = getRefreshToken();
-  if (!refreshToken) return false;
-
+/** Exchange HttpOnly refresh cookie for a new access token (memory). */
+export async function tryRefresh(): Promise<boolean> {
   const res = await fetch(resolveApiUrl('/auth/refresh'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ refreshToken }),
+    credentials: 'include',
+    body: JSON.stringify({}),
   });
 
   if (!res.ok) {
@@ -117,9 +131,9 @@ async function tryRefresh(): Promise<boolean> {
 
   const data = (await res.json()) as {
     accessToken: string;
-    refreshToken: string;
+    refreshToken?: string;
   };
-  setTokens(data.accessToken, data.refreshToken);
+  setAccessToken(data.accessToken);
   return true;
 }
 
@@ -142,6 +156,7 @@ async function apiRequest(
   const res = await fetch(resolveApiUrl(path), {
     ...init,
     headers,
+    credentials: 'include',
   });
 
   if (res.status === 401 && retry) {
@@ -176,3 +191,6 @@ export async function apiFetchBlob(path: string, init: RequestInit = {}): Promis
   const res = await apiRequest(path, init);
   return res.blob();
 }
+
+// Clear any pre-BUG-007 persisted tokens as soon as this module loads in the browser.
+clearLegacyTokenStorage();

@@ -11,6 +11,19 @@ const nextConfig: NextConfig = {
   // Monorepo: trace deps từ root workspace
   outputFileTracingRoot: path.join(__dirname, '../..'),
   transpilePackages: ['@crmanhung/shared'],
+  // Local same-origin `/api/v1` → Nest (HttpOnly cookies work; matches nginx prod).
+  async rewrites() {
+    const target = (process.env.INTERNAL_API_ORIGIN ?? 'http://127.0.0.1:5050').replace(
+      /\/$/,
+      '',
+    );
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${target}/api/v1/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

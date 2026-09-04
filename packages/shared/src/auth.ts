@@ -31,7 +31,8 @@ export const loginResponseSchema = z.object({
 export type LoginResponse = z.infer<typeof loginResponseSchema>;
 
 export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1),
+  /** Optional for browser CRM (HttpOnly cookie). Required for extension body refresh. */
+  refreshToken: z.string().min(1).optional(),
 });
 
 export type RefreshTokenInput = z.infer<typeof refreshTokenSchema>;

@@ -1,6 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { NestExpressApplication } from '@nestjs/platform-express';
+import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
@@ -11,6 +12,7 @@ async function bootstrap() {
   });
   const config = app.get(ConfigService);
 
+  app.use(cookieParser());
   app.useBodyParser('json', { limit: '32mb' });
   app.useBodyParser('urlencoded', { extended: true, limit: '32mb' });
 

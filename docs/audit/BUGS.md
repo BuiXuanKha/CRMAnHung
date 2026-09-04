@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 77 |
+| OPEN | 76 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 6 |
+| FIXED / CLOSED | 7 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -116,6 +116,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | auth policy | password 6–18 | Owner chốt mật khẩu 6–18 ký tự (login/create/reset + shared + UI). |
 | 2026-09-04 | lot-shares | BUG-003 CLOSED | Owner: publish rồi ai cũng share được với hotline của mình — không phải bug; revert ownership check trên slug. |
 | 2026-09-04 | auth fix | BUG-006 FIXED | Reuse refresh đã revoke → hủy toàn bộ session + sessionVersion. |
+| 2026-09-04 | auth / web | BUG-007 FIXED | Refresh HttpOnly cookie; access memory-only; không localStorage. |
 | 2026-09-04 | docs | conflict markers | Gỡ sót marker merge trên `BUGS.md` journal (password 6–18 + BUG-003). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
@@ -151,7 +152,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-004 | MEDIUM | auth | Login lộ username đang active qua thời gian (timing). | FIXED |
 | BUG-005 | MEDIUM | auth | Login không giới hạn độ dài mật khẩu; bcrypt + body 32MB có thể DoS. | FIXED |
 | BUG-006 | MEDIUM | auth | Refresh rotation không phát hiện reuse token đã revoke. | FIXED |
-| BUG-007 | MEDIUM | auth / web | Access + refresh token lưu `localStorage` (mọi XSS = lấy session). | OPEN |
+| BUG-007 | MEDIUM | auth / web | Access + refresh token lưu `localStorage` (mọi XSS = lấy session). | FIXED |
 | BUG-008 | MEDIUM | customers / lodats | STAFF nhận 403 (thay vì 404) khi ID thuộc NV khác — lộ tồn tại bản ghi. | OPEN |
 | BUG-009 | MEDIUM | addresses | `includeHidden` không khóa ADMIN; STAFF đọc địa chỉ / đơn vị đã ẩn. | OPEN |
 | BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | OPEN |
@@ -326,7 +327,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Bearer token do JS lưu, không cookie + CSRF token.
 - **Impact:** Một lỗ XSS = chiếm session STAFF/ADMIN đến khi refresh hết hạn hoặc Admin disable (và vẫn còn cửa sổ access — BUG-001).
 - **Evidence:** `client.ts` `ACCESS_KEY` / `REFRESH_KEY`. `auth-context.tsx` `setTokens` sau login.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — Refresh → cookie HttpOnly `crmanhung_refresh` (path `/api/v1/auth`); access chỉ memory; xóa legacy localStorage; web `credentials: 'include'`. Extension vẫn Bearer + `chrome.storage`.
+- **Fix:** `auth-cookies.ts`, `auth.controller.ts`, `client.ts`, `auth-context.tsx`, Next rewrite `/api/v1`.
 
 ### BUG-008 — STAFF phân biệt 403/404 trên bản ghi của NV khác
 
