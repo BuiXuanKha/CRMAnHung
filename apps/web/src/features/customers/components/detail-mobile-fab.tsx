@@ -9,29 +9,35 @@ import { CrmAlertDialog } from '@/shared/ui/dialog';
 import { zaloMeUrl } from '@/shared/zalo-link';
 import { useAuth } from '@/features/auth/auth-context';
 import { messengerComUrl, openExternalUrl } from '../messenger';
+import {
+  CallPhonePickerModal,
+  uniqueCustomerPhones,
+  directCallHref,
+  placeCall,
+} from './call-phone-picker-modal';
 
 type Props = {
   customer: CustomerDetail;
-  /** Số dùng cho `tel:` / Zalo (số chính / số đầu). */
-  callPhone: string | null;
 };
 
 /**
  * FAB góc phải dưới — chỉ CSS hiện trên mobile (§12.3.2).
- * «⋯» → popover (Cập nhật chăm sóc / Tạo lô đất / Dịch vụ sổ đỏ).
- * Gọi + Zalo khi có SĐT; Messenger = cùng menu list mobile.
+ * Gọi: 1 số → tel thẳng; ≥2 số → modal chọn số. Zalo dùng số đầu.
  */
-export function DetailMobileFab({ customer, callPhone }: Props) {
+export function DetailMobileFab({ customer }: Props) {
   const router = useRouter();
   const { user } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(
     null,
   );
+  const [callPickerOpen, setCallPickerOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  const showCall = Boolean(callPhone);
+  const phones = uniqueCustomerPhones(customer.phones, customer.primaryPhone);
+  const callPhone = phones[0]?.phone ?? null;
+  const showCall = phones.length > 0;
   const showZalo = Boolean(callPhone);
   const showMessenger = Boolean(customer.facebook) && !customer.isHidden;
   const showMore = !customer.isHidden;
@@ -136,14 +142,22 @@ export function DetailMobileFab({ customer, callPhone }: Props) {
         ) : null}
 
         {showCall ? (
-          <a
+          <button
+            type="button"
             className="kh-detail-fab-btn kh-detail-fab-call"
-            href={`tel:${callPhone}`}
-            aria-label={`Gọi ${callPhone}`}
+            aria-label="Gọi điện"
             title="Gọi điện"
+            onClick={() => {
+              const href = directCallHref(phones);
+              if (href) {
+                window.location.href = href;
+                return;
+              }
+              setCallPickerOpen(true);
+            }}
           >
             <Icon icon={Phone} size={22} />
-          </a>
+          </button>
         ) : null}
         {showZalo && callPhone ? (
           <a
@@ -171,6 +185,16 @@ export function DetailMobileFab({ customer, callPhone }: Props) {
           </button>
         ) : null}
       </div>
+
+      <CallPhonePickerModal
+        open={callPickerOpen}
+        phones={phones}
+        onClose={() => setCallPickerOpen(false)}
+        onPick={(phone) => {
+          setCallPickerOpen(false);
+          placeCall(phone);
+        }}
+      />
 
       <CrmAlertDialog
         open={Boolean(alertBox)}

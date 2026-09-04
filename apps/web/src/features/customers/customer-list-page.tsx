@@ -36,7 +36,13 @@ import {
   updateCustomerPhone,
 } from './api';
 import { AddByPhoneModal } from './components/add-by-phone-modal';
-import { AddCustomerPhoneModal } from './components/add-customer-phone-modal';
+import { ManageCustomerPhonesModal } from './components/manage-customer-phones-modal';
+import {
+  CallPhonePickerModal,
+  uniqueCustomerPhones,
+  directCallHref,
+  placeCall,
+} from './components/call-phone-picker-modal';
 import { PhoneDuplicateModal } from './components/phone-duplicate-modal';
 import { RenameCustomerModal } from './components/rename-customer-modal';
 import { CustomerCareEditModal } from './components/care-edit-modal';
@@ -108,15 +114,18 @@ export function CustomerListPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<ConfirmState>(null);
   const [careEdit, setCareEdit] = useState<CareState>(null);
-  const [addPhone, setAddPhone] = useState<CareState>(null);
-  const [phoneMode, setPhoneMode] = useState<'add' | 'edit'>('add');
-  const [confirmDeletePhone, setConfirmDeletePhone] = useState<CareState>(null);
+  const [managePhones, setManagePhones] = useState<CareState>(null);
+  const [confirmDeletePhone, setConfirmDeletePhone] = useState<{
+    customer: CustomerListItem;
+    phone: { id: string; phone: string; label?: string | null };
+  } | null>(null);
   const [alertBox, setAlertBox] = useState<AlertState>(null);
   const [deleteBusy, setDeleteBusy] = useState(false);
   const [careBusy, setCareBusy] = useState(false);
   const [careError, setCareError] = useState<string | null>(null);
   const [addPhoneBusy, setAddPhoneBusy] = useState(false);
   const [addPhoneError, setAddPhoneError] = useState<string | null>(null);
+  const [callPicker, setCallPicker] = useState<CareState>(null);
   const [rename, setRename] = useState<CareState>(null);
   const [renameBusy, setRenameBusy] = useState(false);
   const [renameError, setRenameError] = useState<string | null>(null);
@@ -405,18 +414,21 @@ export function CustomerListPage() {
     setCareEdit({ customer });
   }
 
-  function openAddPhone(customer: CustomerListItem) {
-    if (customer.isHidden || customer.primaryPhone) return;
+  function openManagePhones(customer: CustomerListItem) {
+    if (customer.isHidden) return;
     setAddPhoneError(null);
-    setPhoneMode('add');
-    setAddPhone({ customer });
+    setManagePhones({ customer });
   }
 
-  function openEditPhone(customer: CustomerListItem) {
-    if (customer.isHidden || !customer.primaryPhone) return;
-    setAddPhoneError(null);
-    setPhoneMode('edit');
-    setAddPhone({ customer });
+  function requestCall(customer: CustomerListItem) {
+    const phones = uniqueCustomerPhones(customer.phones, customer.primaryPhone);
+    if (phones.length === 0) return;
+    const href = directCallHref(phones);
+    if (href) {
+      window.location.href = href;
+      return;
+    }
+    setCallPicker({ customer });
   }
 
   function openRename(customer: CustomerListItem) {
@@ -463,8 +475,7 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'phone') {
-      if (customer.primaryPhone) openEditPhone(customer);
-      else openAddPhone(customer);
+      openManagePhones(customer);
       return;
     }
     if (action === 'lodat') {
@@ -536,27 +547,22 @@ export function CustomerListPage() {
     }
   }
 
-  async function submitAddPhone(phone: string) {
-    if (!addPhone) return;
-    if (phoneMode === 'edit' && phone === addPhone.customer.primaryPhone) {
-      setAddPhone(null);
-      return;
-    }
+  async function submitManageAdd(phone: string) {
+    if (!managePhones) return;
     setAddPhoneBusy(true);
     setAddPhoneError(null);
     try {
-      if (phoneMode === 'edit') {
-        await updateCustomerPhone(addPhone.customer.id, { phone });
-        await qc.invalidateQueries({ queryKey: ['customers'] });
-        await qc.invalidateQueries({ queryKey: ['customer', addPhone.customer.id] });
-        setAddPhone(null);
-        flash('Đã cập nhật số điện thoại.');
-        return;
-      }
-      await addCustomerPhone(addPhone.customer.id, { phone });
+      await addCustomerPhone(managePhones.customer.id, { phone });
       await qc.invalidateQueries({ queryKey: ['customers'] });
-      await qc.invalidateQueries({ queryKey: ['customer', addPhone.customer.id] });
-      setAddPhone(null);
+      await qc.invalidateQueries({ queryKey: ['customer', managePhones.customer.id] });
+      const refreshed = await getCustomer(managePhones.customer.id);
+      setManagePhones({
+        customer: {
+          ...managePhones.customer,
+          primaryPhone: refreshed.primaryPhone,
+          phones: refreshed.phones,
+        },
+      });
       flash('Đã thêm số điện thoại.');
     } catch (err) {
       if (isPhoneDuplicateError(err)) {
@@ -564,8 +570,44 @@ export function CustomerListPage() {
           mode: err.mergeAllowed ? 'merge' : 'info',
           existing: err.existing,
           phone: typeof err.phone === 'string' ? err.phone : phone,
-          sourceId: addPhone.customer.id,
-          sourceName: addPhone.customer.fullName,
+          sourceId: managePhones.customer.id,
+          sourceName: managePhones.customer.fullName,
+        });
+        return;
+      }
+      setAddPhoneError(
+        err instanceof Error ? err.message : 'Không lưu được số điện thoại.',
+      );
+    } finally {
+      setAddPhoneBusy(false);
+    }
+  }
+
+  async function submitManageUpdate(phoneId: string, phone: string) {
+    if (!managePhones) return;
+    setAddPhoneBusy(true);
+    setAddPhoneError(null);
+    try {
+      await updateCustomerPhone(managePhones.customer.id, phoneId, { phone });
+      await qc.invalidateQueries({ queryKey: ['customers'] });
+      await qc.invalidateQueries({ queryKey: ['customer', managePhones.customer.id] });
+      const refreshed = await getCustomer(managePhones.customer.id);
+      setManagePhones({
+        customer: {
+          ...managePhones.customer,
+          primaryPhone: refreshed.primaryPhone,
+          phones: refreshed.phones,
+        },
+      });
+      flash('Đã cập nhật số điện thoại.');
+    } catch (err) {
+      if (isPhoneDuplicateError(err)) {
+        setDup({
+          mode: err.mergeAllowed ? 'merge' : 'info',
+          existing: err.existing,
+          phone: typeof err.phone === 'string' ? err.phone : phone,
+          sourceId: managePhones.customer.id,
+          sourceName: managePhones.customer.fullName,
         });
         return;
       }
@@ -581,11 +623,25 @@ export function CustomerListPage() {
     if (!confirmDeletePhone) return;
     setAddPhoneBusy(true);
     try {
-      await deleteCustomerPhone(confirmDeletePhone.customer.id);
+      await deleteCustomerPhone(
+        confirmDeletePhone.customer.id,
+        confirmDeletePhone.phone.id,
+      );
       await qc.invalidateQueries({ queryKey: ['customers'] });
-      await qc.invalidateQueries({ queryKey: ['customer', confirmDeletePhone.customer.id] });
+      await qc.invalidateQueries({
+        queryKey: ['customer', confirmDeletePhone.customer.id],
+      });
+      if (managePhones?.customer.id === confirmDeletePhone.customer.id) {
+        const refreshed = await getCustomer(confirmDeletePhone.customer.id);
+        setManagePhones({
+          customer: {
+            ...managePhones.customer,
+            primaryPhone: refreshed.primaryPhone,
+            phones: refreshed.phones,
+          },
+        });
+      }
       setConfirmDeletePhone(null);
-      setAddPhone(null);
       flash('Đã xoá số điện thoại.');
     } catch (err) {
       setAddPhoneError(
@@ -631,10 +687,10 @@ export function CustomerListPage() {
           targetCustomerId: dup.existing.id,
           phone: dup.phone,
         });
-        setAddPhone(null);
+        setManagePhones(null);
         flash('Đã gộp khách Facebook vào hồ sơ có số điện thoại.');
       } else {
-        setAddPhone(null);
+        setManagePhones(null);
       }
       setSelectedId(dup.existing.id);
       setDup(null);
@@ -698,7 +754,7 @@ export function CustomerListPage() {
                   void handleAction(c, a);
                 }}
                 onCare={(c) => openCareEdit(c)}
-                onAddPhone={(c) => openAddPhone(c)}
+                onAddPhone={(c) => openManagePhones(c)}
                 onRename={(c) => openRename(c)}
                 channelOptions={channelOptions}
                 scrollRef={tableScrollRef}
@@ -722,7 +778,8 @@ export function CustomerListPage() {
                 void handleAction(c, a);
               }}
               onAdd={() => setAddOpen(true)}
-              onAddPhone={(c) => openAddPhone(c)}
+              onAddPhone={(c) => openManagePhones(c)}
+              onCallPhone={(c) => requestCall(c)}
               scrollRef={cardsScrollRef}
               onScroll={onListScroll}
             />
@@ -810,23 +867,39 @@ export function CustomerListPage() {
         onSubmit={submitCare}
       />
 
-      <AddCustomerPhoneModal
-        customer={addPhone?.customer ?? null}
-        mode={phoneMode}
+      <ManageCustomerPhonesModal
+        customer={managePhones?.customer ?? null}
+        phones={uniqueCustomerPhones(
+          managePhones?.customer.phones,
+          managePhones?.customer.primaryPhone,
+        )}
         busy={addPhoneBusy}
         error={addPhoneError}
         onClose={() => {
           if (!addPhoneBusy && !confirmDeletePhone) {
-            setAddPhone(null);
+            setManagePhones(null);
             setAddPhoneError(null);
           }
         }}
-        onSubmit={submitAddPhone}
-        onDelete={
-          phoneMode === 'edit' && addPhone
-            ? () => setConfirmDeletePhone({ customer: addPhone.customer })
-            : undefined
-        }
+        onAdd={submitManageAdd}
+        onUpdate={submitManageUpdate}
+        onDelete={(phone) => {
+          if (!managePhones) return;
+          setConfirmDeletePhone({ customer: managePhones.customer, phone });
+        }}
+      />
+
+      <CallPhonePickerModal
+        open={Boolean(callPicker)}
+        phones={uniqueCustomerPhones(
+          callPicker?.customer.phones,
+          callPicker?.customer.primaryPhone,
+        )}
+        onClose={() => setCallPicker(null)}
+        onPick={(phone) => {
+          setCallPicker(null);
+          placeCall(phone);
+        }}
       />
 
       <CrmConfirmDialog
@@ -835,7 +908,7 @@ export function CustomerListPage() {
         icon={Trash2}
         message={
           confirmDeletePhone
-            ? `Xóa số ${confirmDeletePhone.customer.primaryPhone ?? ''} của «${confirmDeletePhone.customer.fullName}»? Sau đó có thể thêm số mới bằng icon cam hoặc menu Thao tác.`
+            ? `Xóa số ${confirmDeletePhone.phone.phone} của «${confirmDeletePhone.customer.fullName}»?`
             : ''
         }
         confirmLabel="Xóa số"

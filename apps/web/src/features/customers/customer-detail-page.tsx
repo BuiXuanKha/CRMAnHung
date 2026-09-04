@@ -194,7 +194,7 @@ export function CustomerDetailPage() {
         </section>
       </div>
 
-      <DetailMobileFab customer={customer} callPhone={callPhone} />
+      <DetailMobileFab customer={customer} />
     </>
   );
 }

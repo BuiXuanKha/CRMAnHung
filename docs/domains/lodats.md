@@ -396,7 +396,7 @@ Xếp dọc: content → **Lịch sử giao dịch** (nếu có) → **Lô đấ
 
 | Nút | Điều kiện | Hành vi |
 |-----|-----------|---------|
-| Gọi điện | Chủ có ≥1 SĐT | `tel:` số đầu trên hồ sơ chủ |
+| Gọi điện | Chủ có ≥1 SĐT | **1 số** → `tel:` thẳng; **≥2 số** → modal chọn số |
 | Zalo | Chủ có ≥1 SĐT | Tab `zalo.me/84…` (cùng trang public) |
 | Mở Messenger | Chủ có Facebook và **chưa** ẩn | Cùng menu list khách mobile (`messenger.com` / CrmAlert) |
 

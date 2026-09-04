@@ -144,7 +144,7 @@ export async function addCustomerPhone(
   const existing = await prisma.customer.findUnique({
     where: { id },
     include: {
-      phones: { select: { id: true } },
+      phones: { select: { id: true, phone: true, sortOrder: true } },
       facebook: { select: { id: true } },
     },
   });
@@ -157,8 +157,11 @@ export async function addCustomerPhone(
       'Không thêm số điện thoại cho khách đã ẩn. Hãy khôi phục trước.',
     );
   }
-  if (existing.phones.length > 0) {
-    throw new BadRequestException('Khách này đã có số điện thoại.');
+  if (existing.phones.length >= 10) {
+    throw new BadRequestException('Mỗi khách tối đa 10 số điện thoại.');
+  }
+  if (existing.phones.some((p) => p.phone === phone)) {
+    throw new BadRequestException('Số điện thoại này đã có trên hồ sơ khách.');
   }
 
   const taken = await findByPhoneForEmployee(prisma, existing.employeeId, phone);
@@ -175,9 +178,12 @@ export async function addCustomerPhone(
     });
   }
 
+  const nextSort =
+    existing.phones.reduce((max, p) => Math.max(max, p.sortOrder ?? 0), -1) + 1;
+
   await prisma.$transaction(async (tx) => {
     await tx.customerPhone.create({
-      data: { customerId: id, phone, sortOrder: 0 },
+      data: { customerId: id, phone, sortOrder: nextSort },
     });
     await tx.customer.update({
       where: { id },
@@ -188,10 +194,11 @@ export async function addCustomerPhone(
   return loadDetail(id);
 }
 
-export async function deleteCustomerPhones(
+export async function deleteCustomerPhone(
   prisma: PrismaService,
   user: RequestUser,
   id: string,
+  phoneId: string,
   loadDetail: (id: string) => Promise<unknown>,
 ) {
   const existing = await prisma.customer.findUnique({
@@ -207,12 +214,13 @@ export async function deleteCustomerPhones(
       'Không xoá số điện thoại của khách đã ẩn. Hãy khôi phục trước.',
     );
   }
-  if (existing.phones.length === 0) {
-    throw new BadRequestException('Khách chưa có số điện thoại.');
+  const row = existing.phones.find((p) => p.id === phoneId);
+  if (!row) {
+    throw new NotFoundException('Không tìm thấy số điện thoại.');
   }
 
   await prisma.$transaction(async (tx) => {
-    await tx.customerPhone.deleteMany({ where: { customerId: id } });
+    await tx.customerPhone.delete({ where: { id: phoneId } });
     await tx.customer.update({
       where: { id },
       data: { updatedAt: new Date() },
@@ -222,10 +230,11 @@ export async function deleteCustomerPhones(
   return loadDetail(id);
 }
 
-export async function replaceCustomerPhone(
+export async function updateCustomerPhone(
   prisma: PrismaService,
   user: RequestUser,
   id: string,
+  phoneId: string,
   dto: AddCustomerPhoneDto,
   loadDetail: (id: string) => Promise<unknown>,
 ) {
@@ -249,13 +258,15 @@ export async function replaceCustomerPhone(
       'Không sửa số điện thoại của khách đã ẩn. Hãy khôi phục trước.',
     );
   }
-  if (existing.phones.length === 0) {
-    throw new BadRequestException('Khách chưa có số điện thoại. Hãy thêm số trước.');
+  const target = existing.phones.find((p) => p.id === phoneId);
+  if (!target) {
+    throw new NotFoundException('Không tìm thấy số điện thoại.');
   }
-
-  const primary = existing.phones[0];
-  if (primary.phone === phone) {
+  if (target.phone === phone) {
     return loadDetail(id);
+  }
+  if (existing.phones.some((p) => p.id !== phoneId && p.phone === phone)) {
+    throw new BadRequestException('Số điện thoại này đã có trên hồ sơ khách.');
   }
 
   const taken = await findByPhoneForEmployee(prisma, existing.employeeId, phone);
@@ -274,14 +285,9 @@ export async function replaceCustomerPhone(
 
   await prisma.$transaction(async (tx) => {
     await tx.customerPhone.update({
-      where: { id: primary.id },
+      where: { id: phoneId },
       data: { phone },
     });
-    if (existing.phones.length > 1) {
-      await tx.customerPhone.deleteMany({
-        where: { customerId: id, id: { not: primary.id } },
-      });
-    }
     await tx.customer.update({
       where: { id },
       data: { updatedAt: new Date() },

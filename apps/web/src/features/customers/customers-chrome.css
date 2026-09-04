@@ -246,3 +246,32 @@
     min-width: 0;
   }
 }
+
+/* BUG-015 — quản lý / chọn SĐT */
+.kh-phone-manage-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.kh-phone-manage-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.kh-phone-manage-num {
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.kh-phone-manage-actions {
+  display: flex;
+  gap: 6px;
+}
+.kh-phone-pick-btn {
+  width: 100%;
+  justify-content: center;
+}

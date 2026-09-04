@@ -10,6 +10,12 @@ import {
   messengerComUrl,
   openExternalUrl,
 } from '@/features/customers/messenger';
+import {
+  CallPhonePickerModal,
+  uniqueCustomerPhones,
+  directCallHref,
+  placeCall,
+} from '@/features/customers/components/call-phone-picker-modal';
 
 type Props = {
   owner: LodatOwner | null;
@@ -20,16 +26,18 @@ type Props = {
 /**
  * FAB cụm phải dưới — mobile only (§12.3.2 lodats).
  * «⋯» → popover Giao dịch / Sửa lô đất (thay footer dính).
- * Gọi + Zalo + Messenger khi chủ có liên hệ.
+ * Gọi: 1 số → tel thẳng; ≥2 số → modal chọn số. Zalo dùng số đầu.
  */
 export function LodatOwnerFab({ owner, onTransaction, onEdit }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
+  const [callPickerOpen, setCallPickerOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
 
-  const callPhone = owner?.phones[0]?.phone?.trim() || null;
-  const showCall = Boolean(callPhone);
+  const phones = uniqueCustomerPhones(owner?.phones ?? []);
+  const callPhone = phones[0]?.phone ?? null;
+  const showCall = phones.length > 0;
   const showZalo = Boolean(callPhone);
   const showMessenger = Boolean(owner?.facebook) && !owner?.isHidden;
 
@@ -98,14 +106,22 @@ export function LodatOwnerFab({ owner, onTransaction, onEdit }: Props) {
         </div>
 
         {showCall ? (
-          <a
+          <button
+            type="button"
             className="ld-owner-fab-btn ld-owner-fab-call"
-            href={`tel:${callPhone}`}
-            aria-label={`Gọi chủ đất ${callPhone}`}
+            aria-label="Gọi điện chủ đất"
             title="Gọi điện"
+            onClick={() => {
+              const href = directCallHref(phones);
+              if (href) {
+                window.location.href = href;
+                return;
+              }
+              setCallPickerOpen(true);
+            }}
           >
             <Icon icon={Phone} size={22} />
-          </a>
+          </button>
         ) : null}
         {showZalo && callPhone ? (
           <a
@@ -133,6 +149,16 @@ export function LodatOwnerFab({ owner, onTransaction, onEdit }: Props) {
           </button>
         ) : null}
       </div>
+
+      <CallPhonePickerModal
+        open={callPickerOpen}
+        phones={phones}
+        onClose={() => setCallPickerOpen(false)}
+        onPick={(phone) => {
+          setCallPickerOpen(false);
+          placeCall(phone);
+        }}
+      />
 
       <CrmAlertDialog
         open={Boolean(alertBox)}
