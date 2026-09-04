@@ -33,10 +33,16 @@ export function AddressPicker({
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AddressListItem | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
+  /** Chặn click xuyên iOS: sau khi chọn, bỏ qua click trigger trong ~400ms. */
+  const ignoreTriggerUntil = useRef(0);
 
   function closePanel() {
     setOpen(false);
     setKeyword('');
+  }
+
+  function armIgnoreTriggerClick() {
+    ignoreTriggerUntil.current = Date.now() + 400;
   }
 
   useEffect(() => {
@@ -110,14 +116,15 @@ export function AddressPicker({
   function pickItem(item: AddressListItem) {
     setSelected(item);
     onChange(item);
-    /* Delay đóng: tránh iOS Safari click xuyên panel → mở lại trigger */
-    window.setTimeout(() => closePanel(), 0);
+    armIgnoreTriggerClick();
+    closePanel();
   }
 
   function clearSelection() {
     setSelected(null);
     onChange(null);
-    window.setTimeout(() => closePanel(), 0);
+    armIgnoreTriggerClick();
+    closePanel();
   }
 
   return (
@@ -128,6 +135,7 @@ export function AddressPicker({
         disabled={disabled}
         aria-expanded={open}
         onClick={() => {
+          if (Date.now() < ignoreTriggerUntil.current) return;
           if (open) closePanel();
           else setOpen(true);
         }}
@@ -153,11 +161,7 @@ export function AddressPicker({
                   <button
                     type="button"
                     className="addr-picker-item"
-                    onPointerDown={(e) => {
-                      /* preventDefault: không để click “rơi” xuống trigger sau khi panel unmount */
-                      e.preventDefault();
-                      pickItem(item);
-                    }}
+                    onClick={() => pickItem(item)}
                   >
                     <span
                       className={
@@ -175,10 +179,7 @@ export function AddressPicker({
               );
             })}
           </ul>
-          <button type="button" className="crm-btn" onPointerDown={(e) => {
-            e.preventDefault();
-            clearSelection();
-          }}>
+          <button type="button" className="crm-btn" onClick={clearSelection}>
             Bỏ chọn
           </button>
         </div>
