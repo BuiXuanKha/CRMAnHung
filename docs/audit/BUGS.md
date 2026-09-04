@@ -373,8 +373,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Problem:** Admin có thể đặt MK 6 ký tự dễ đoán. bcrypt 12 không bù policy yếu.
 - **Root cause:** Contract cố ý min 6.
 - **Impact:** Brute-force / credential stuffing dễ hơn; login throttle 10/phút/IP hạn chế một phần.
-- **Evidence:** `user-admin.dto.ts` password min 6 max 128; `auth.ts` `userPasswordSchema`.
-- **Status:** OPEN
+- **Evidence:** `user-admin.dto.ts` password min 6 max **18** (owner 2026-09-04); `auth.ts` `userPasswordSchema`. Vẫn không bắt chữ hoa/số/ký tự đặc biệt.
+- **Status:** OPEN (chỉ còn phần độ phức tạp; độ dài đã chốt 6–18)
 
 ### BUG-012 — Phân quyền CRM trên UI chỉ chạy client
 
