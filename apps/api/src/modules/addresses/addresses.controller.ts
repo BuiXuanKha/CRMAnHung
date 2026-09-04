@@ -23,7 +23,8 @@ import {
   UpdateAddressDto,
 } from './dto/address.dto';
 
-function includeHiddenFlag(raw?: string): boolean {
+function includeHiddenFlag(raw: string | undefined, role: string): boolean {
+  if (role !== 'ADMIN') return false;
   return raw === '1' || raw === 'true';
 }
 
@@ -32,11 +33,11 @@ export class AddressesController {
   constructor(private readonly addresses: AddressesService) {}
 
   @Get()
-  list(@Query() query: ListAddressesQueryDto) {
+  list(@CurrentUser() user: RequestUser, @Query() query: ListAddressesQueryDto) {
     return this.addresses.list({
       keyword: query.keyword,
       kind: query.kind,
-      includeHidden: includeHiddenFlag(query.includeHidden),
+      includeHidden: includeHiddenFlag(query.includeHidden, user.role),
     });
   }
 

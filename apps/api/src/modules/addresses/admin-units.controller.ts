@@ -2,7 +2,6 @@ import {
   Body,
   Controller,
   Get,
-  Param,
   Post,
   Query,
   UseGuards,
@@ -13,7 +12,8 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { AdminUnitsService } from './admin-units.service';
 import { CreateAdminUnitDto, ListAdminUnitsQueryDto } from './dto/admin-units.dto';
 
-function includeHiddenFlag(raw?: string): boolean {
+function includeHiddenFlag(raw: string | undefined, role: string): boolean {
+  if (role !== 'ADMIN') return false;
   return raw === '1' || raw === 'true';
 }
 
@@ -22,8 +22,13 @@ export class AdminUnitsController {
   constructor(private readonly adminUnits: AdminUnitsService) {}
 
   @Get('provinces')
-  listProvinces(@Query() query: ListAdminUnitsQueryDto) {
-    return this.adminUnits.listProvinces(includeHiddenFlag(query.includeHidden));
+  listProvinces(
+    @CurrentUser() user: RequestUser,
+    @Query() query: ListAdminUnitsQueryDto,
+  ) {
+    return this.adminUnits.listProvinces(
+      includeHiddenFlag(query.includeHidden, user.role),
+    );
   }
 
   @Post('provinces')
@@ -34,10 +39,13 @@ export class AdminUnitsController {
   }
 
   @Get('districts')
-  listDistricts(@Query() query: ListAdminUnitsQueryDto) {
+  listDistricts(
+    @CurrentUser() user: RequestUser,
+    @Query() query: ListAdminUnitsQueryDto,
+  ) {
     return this.adminUnits.listDistricts(
       String(query.parentId || ''),
-      includeHiddenFlag(query.includeHidden),
+      includeHiddenFlag(query.includeHidden, user.role),
     );
   }
 
@@ -49,10 +57,13 @@ export class AdminUnitsController {
   }
 
   @Get('wards')
-  listWards(@Query() query: ListAdminUnitsQueryDto) {
+  listWards(
+    @CurrentUser() user: RequestUser,
+    @Query() query: ListAdminUnitsQueryDto,
+  ) {
     return this.adminUnits.listWards(
       String(query.parentId || ''),
-      includeHiddenFlag(query.includeHidden),
+      includeHiddenFlag(query.includeHidden, user.role),
     );
   }
 
