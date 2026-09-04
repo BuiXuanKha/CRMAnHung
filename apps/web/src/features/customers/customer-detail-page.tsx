@@ -78,7 +78,7 @@ export function CustomerDetailPage() {
   const budget = formatBudget(customer.budgetMinVnd, customer.budgetMaxVnd);
   const lots = lodats.data?.items ?? [];
   const careNotes = customer.careNotes ?? [];
-  const hasFab = Boolean(callPhone) || (Boolean(customer.facebook) && !customer.isHidden);
+  const hasFab = !customer.isHidden || Boolean(callPhone) || Boolean(customer.facebook);
 
   return (
     <>

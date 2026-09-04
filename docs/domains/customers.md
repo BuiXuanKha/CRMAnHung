@@ -420,10 +420,11 @@ Cùng khối 12.3.3. Cột nội dung hẹp (~720px). Nút quay lại trên cùn
 
 Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** hiện «← Danh sách khách» (Back / vuốt hệ thống).
 
-**FAB** góc phải dưới (chỉ khi có nút cần hiện; không có SĐT và không có FB → không hiện cụm):
+**FAB** góc phải dưới (mobile; «⋯» luôn hiện nếu khách chưa ẩn):
 
 | Nút | Điều kiện | Hành vi |
 |-----|-----------|---------|
+| «⋯» | Khách **chưa** ẩn | Popover: **Cập nhật chăm sóc** · **Tạo lô đất** · **Dịch vụ sổ đỏ** (cùng route menu list; ADMIN tạo lô → CrmAlert) |
 | Gọi điện | Có ≥1 SĐT | `tel:` số chính (hoặc số đầu trên hồ sơ) |
 | Zalo | Có ≥1 SĐT | Tab `zalo.me/84…` (cùng quy tắc trang public) |
 | Mở Messenger | Có Facebook và khách **chưa** ẩn | Cùng logic menu list mobile «Mở Messenger» (`messenger.com` / CrmAlert nếu không mở được). **Không** dùng «Mở chat» (desktop-only) |
@@ -438,7 +439,7 @@ Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** h
 6. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú
 7. **Danh sách lô đất** — API. Cùng thẻ §12.1.6: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
 8. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Không có → «Chưa có lịch sử chăm sóc.»
-9. **FAB mobile** — §12.3.2 (gọi / Zalo / mở Messenger)
+9. **FAB mobile** — §12.3.2 («⋯» / gọi / Zalo / mở Messenger)
 
 Không form chăm sóc trên trang này (form = **§12.4**).
 
