@@ -288,6 +288,8 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 │ thẻ: tiêu đề                     │
 │ [ảnh + hangtag Mở bán]  địa chỉ  │
 │                         giá      │
+│                         ghi chú giá (nếu có) │
+│                         hoa hồng (nếu có)    │
 │                         DT·MT·Hướng │
 └─ Hiển thị N / Tổng M lô đất ─────┘
 ```
