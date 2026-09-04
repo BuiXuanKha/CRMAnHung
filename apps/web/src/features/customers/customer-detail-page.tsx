@@ -6,6 +6,7 @@ import { getCustomer, listCustomerLodats } from './api';
 import { DetailLodatList } from './components/detail-lodat-list';
 import { DetailMobileFab } from './components/detail-mobile-fab';
 import {
+  channelLabel,
   formatBudget,
   formatCareTimestamp,
   formatRelativeAgo,
@@ -101,6 +102,10 @@ export function CustomerDetailPage() {
               <CrmBadge tone={statusTone(customer.status)}>{statusLabel(customer.status)}</CrmBadge>
               {customer.isHidden ? <CrmBadge tone="red">Đã xoá</CrmBadge> : null}
             </div>
+            <dl className="kh-detail-channel">
+              <dt>Kênh liên hệ</dt>
+              <dd>{channelLabel(customer)}</dd>
+            </dl>
             <dl className="kh-detail-meta">
               <div>
                 <dt>SĐT</dt>

@@ -432,12 +432,13 @@ Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** h
 
 1. **Quay lại** — «← Danh sách khách» (**chỉ máy tính**). Mobile: ẩn
 2. **Hero** — avatar (ảnh FB hoặc chữ tắt); tên; hangtag trạng thái; hangtag **Đã xoá** nếu ẩn
-3. **SĐT** — mọi số trên hồ sơ; trống `—`. Điện thoại: từng số là `tel:`
-4. **Tài chính** — khoảng ngân sách; trống `—`
-5. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú
-6. **Danh sách lô đất** — API. Cùng thẻ §12.1.6: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
-7. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Không có → «Chưa có lịch sử chăm sóc.»
-8. **FAB mobile** — §12.3.2 (gọi / Zalo / mở Messenger)
+3. **Kênh liên hệ** — ngay dưới tên; cùng chữ list (`channelLabel`: hotline / page·nick FB). Trống → `—`
+4. **SĐT** — mọi số trên hồ sơ; trống `—`. Điện thoại: từng số là `tel:`
+5. **Tài chính** — khoảng ngân sách; trống `—`
+6. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú
+7. **Danh sách lô đất** — API. Cùng thẻ §12.1.6: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
+8. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Không có → «Chưa có lịch sử chăm sóc.»
+9. **FAB mobile** — §12.3.2 (gọi / Zalo / mở Messenger)
 
 Không form chăm sóc trên trang này (form = **§12.4**).
 
