@@ -51,22 +51,13 @@ export class LotSharesService {
   async createOrGetShareLinkBySlug(user: RequestUser, slug: string) {
     const listing = await this.prisma.publicLotListing.findUnique({
       where: { slug: slug.trim() },
-      select: {
-        id: true,
-        slug: true,
-        isPublished: true,
-        lodat: { select: { createdByEmployeeId: true } },
-      },
+      select: { id: true, slug: true, isPublished: true },
     });
     if (!listing?.isPublished) {
       throw new BadRequestException('Lô chưa đăng lên web khách — cần publish trước khi share.');
     }
-    if (
-      user.role !== 'ADMIN' &&
-      listing.lodat.createdByEmployeeId !== user.id
-    ) {
-      throw new NotFoundException('Không tìm thấy lô đất.');
-    }
+    // By design: any active STAFF/ADMIN may create their own shareCode on a
+    // published listing; guest sees that staff's hotline (not the lodat owner).
     return this.createOrGetShareLinkForListing(user, listing);
   }
 

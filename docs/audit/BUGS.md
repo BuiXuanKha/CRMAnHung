@@ -113,6 +113,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | Browser audit — CRM Admin + kha | BUG-083 | UI: login/validation, list khách/lô/GD/sổ, fake ID 404, kha bị chặn bài-viết/thống-kê/user/địa-chỉ. kha mở được stub `/quan-tri/khach-hang` (không redirect). Không ghi: kha `/dashboard`→`/dashboard/lo-dat` (đúng Đăng web); 404 public đã có link Trang chủ. Lỡ bấm «Chia sẻ» lô (createOrGet). Không sửa/xóa. Không commit/push. |
 | 2026-09-04 | auth fix | BUG-001 FIXED | `JwtStrategy` load User + `sessionVersion`; revoke refresh khi đổi role / khóa / reset MK. |
 | 2026-09-04 | auth / shares | BUG-002 … BUG-005 FIXED | Username lowercase; share slug ownership; login timing + MaxLength mật khẩu. Dừng tại BUG-005 theo owner. |
+| 2026-09-04 | lot-shares | BUG-003 CLOSED | Owner: publish rồi ai cũng share được với hotline của mình — không phải bug; revert ownership check trên slug. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -143,7 +144,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 |----|----------|--------|---------|--------|
 | BUG-001 | HIGH | auth | Access JWT không gắn trạng thái user trên DB (disable / xóa / hạ role / reset MK). | FIXED |
 | BUG-002 | HIGH | users / auth | Username unique phân biệt hoa-thường; login tìm không phân biệt. | FIXED |
-| BUG-003 | HIGH | lot-shares | STAFF tạo share-link theo slug không kiểm tra quyền sở hữu lô. | FIXED |
+| BUG-003 | HIGH | lot-shares | STAFF tạo share-link theo slug không kiểm tra quyền sở hữu lô. | CLOSED |
 | BUG-004 | MEDIUM | auth | Login lộ username đang active qua thời gian (timing). | FIXED |
 | BUG-005 | MEDIUM | auth | Login không giới hạn độ dài mật khẩu; bcrypt + body 32MB có thể DoS. | FIXED |
 | BUG-006 | MEDIUM | auth | Refresh rotation không phát hiện reuse token đã revoke. | OPEN |
@@ -266,8 +267,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Hai đường tạo share không cùng rule; đường slug bỏ ownership.
 - **Impact:** Lấy lead / thống kê view của lô người khác; vượt UI (UI có thể chỉ hiện nút trên lô của mình).
 - **Evidence:** `createOrGetShareLink` (khoảng dòng 35–37) so role/owner; `createOrGetShareLinkBySlug` (51–60) không so. Controller `public-listings.controller.ts` `createShareLink`.
-- **Status:** FIXED (2026-09-04) — `createOrGetShareLinkBySlug` load `lodat.createdByEmployeeId`; STAFF không sở hữu → 404 giống đường lodatId.
-- **Fix:** `lot-shares.service.ts`.
+- **Status:** CLOSED (by design, 2026-09-04) — Owner: listing đã **publish** thì mọi NV login được tạo `shareCode` riêng; khách mở link share của B thấy bài + **hotline của B** (không phải chủ lô A). Đã revert check ownership trên đường slug (fix nhầm lúc coi là bug).
+- **Note:** Đường CRM theo `lodatId` vẫn check sở hữu (share từ hồ sơ lô của mình) — khác use-case trang công khai.
 
 ### BUG-004 — Login enumeration username đang hoạt động (timing)
 
