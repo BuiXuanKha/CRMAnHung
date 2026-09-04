@@ -136,14 +136,63 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
 
   useEffect(() => {
     if (!open || !triggerVisible) return;
-    /* capture: bắt scroll trên .kh-table-scroll / .kh-cards (overflow:auto),
-       không khóa body — chỉ đóng menu để cuộn tiếp. */
+    /* iOS Safari: scroll trên overflow:auto thường KHÔNG tới window
+       (kể cả capture) — nên gắn trực tiếp + touchmove/wheel + theo dõi
+       vị trí nút. Không khóa cuộn; chỉ đóng menu. */
     const close = () => onClose();
-    window.addEventListener('scroll', close, true);
+
+    const scrollRoots: EventTarget[] = [window, document];
+    document.querySelectorAll('.kh-cards, .kh-table-scroll').forEach((el) => {
+      scrollRoots.push(el);
+    });
+    let node: HTMLElement | null = wrapRef.current;
+    while (node) {
+      const { overflow, overflowY } = getComputedStyle(node);
+      if (/(auto|scroll|overlay)/.test(`${overflow}${overflowY}`)) {
+        scrollRoots.push(node);
+      }
+      node = node.parentElement;
+    }
+    for (const root of scrollRoots) {
+      root.addEventListener('scroll', close, { capture: true, passive: true });
+    }
+
+    const onTouchMove = (e: TouchEvent) => {
+      const t = e.target as Node | null;
+      if (t && (menuRef.current?.contains(t) || wrapRef.current?.contains(t))) return;
+      close();
+    };
+    document.addEventListener('touchmove', onTouchMove, { capture: true, passive: true });
+    document.addEventListener('wheel', close, { capture: true, passive: true });
     window.addEventListener('resize', close);
+    const vv = window.visualViewport;
+    vv?.addEventListener('resize', close);
+    vv?.addEventListener('scroll', close);
+
+    const btn = wrapRef.current?.querySelector('button');
+    const origin = btn?.getBoundingClientRect();
+    let raf = 0;
+    const watchTrigger = () => {
+      if (!btn || !origin) return;
+      const r = btn.getBoundingClientRect();
+      if (Math.abs(r.top - origin.top) > 1 || Math.abs(r.left - origin.left) > 1) {
+        close();
+        return;
+      }
+      raf = requestAnimationFrame(watchTrigger);
+    };
+    if (btn && origin) raf = requestAnimationFrame(watchTrigger);
+
     return () => {
-      window.removeEventListener('scroll', close, true);
+      for (const root of scrollRoots) {
+        root.removeEventListener('scroll', close, true);
+      }
+      document.removeEventListener('touchmove', onTouchMove, true);
+      document.removeEventListener('wheel', close, true);
       window.removeEventListener('resize', close);
+      vv?.removeEventListener('resize', close);
+      vv?.removeEventListener('scroll', close);
+      cancelAnimationFrame(raf);
     };
   }, [open, triggerVisible, onClose]);
 

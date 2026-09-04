@@ -222,7 +222,7 @@ Một menu (portal `position: fixed`). Khách đã xoá: **chỉ** «Khôi phụ
 **Vị trí / cuộn**
 
 - Ưu tiên mở **dưới** nút chevron. Không đủ chỗ dưới (bị footer / mép viewport che) → mở **trên** nút.
-- **Không** khóa cuộn list khi menu mở. Cuộn vùng bảng (hoặc resize) → **đóng** menu ngay — cuộn tới khách khác không cần đóng tay.
+- **Không** khóa cuộn list khi menu mở. Cuộn vùng bảng/thẻ (touchmove / wheel / resize, kể cả iOS) → **đóng** menu ngay — cuộn tới khách khác không cần đóng tay.
 
 | Mục | Việc |
 |-----|------|
