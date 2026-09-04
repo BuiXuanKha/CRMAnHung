@@ -1,4 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { facebookPageUrlFromRawMeta } from '@crmanhung/shared';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -55,7 +55,8 @@ function trimText(value: string | null | undefined): string | null {
 export function assertCanAccess(user: RequestUser, employeeId: string) {
   if (user.role === 'ADMIN') return;
   if (employeeId !== user.id) {
-    throw new ForbiddenException('Không có quyền xem khách này');
+    // Same status as missing row — avoid ID enumeration (BUG-008).
+    throw new NotFoundException('Không tìm thấy khách hàng.');
   }
 }
 

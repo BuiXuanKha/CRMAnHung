@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 76 |
+| OPEN | 75 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 7 |
+| FIXED / CLOSED | 8 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -117,6 +117,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | lot-shares | BUG-003 CLOSED | Owner: publish rồi ai cũng share được với hotline của mình — không phải bug; revert ownership check trên slug. |
 | 2026-09-04 | auth fix | BUG-006 FIXED | Reuse refresh đã revoke → hủy toàn bộ session + sessionVersion. |
 | 2026-09-04 | auth / web | BUG-007 FIXED | Refresh HttpOnly cookie; access memory-only; không localStorage. |
+| 2026-09-04 | authz | BUG-008 FIXED | STAFF ownership fail → 404 (không lộ ID bản ghi NV khác). |
 | 2026-09-04 | docs | conflict markers | Gỡ sót marker merge trên `BUGS.md` journal (password 6–18 + BUG-003). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
@@ -153,7 +154,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-005 | MEDIUM | auth | Login không giới hạn độ dài mật khẩu; bcrypt + body 32MB có thể DoS. | FIXED |
 | BUG-006 | MEDIUM | auth | Refresh rotation không phát hiện reuse token đã revoke. | FIXED |
 | BUG-007 | MEDIUM | auth / web | Access + refresh token lưu `localStorage` (mọi XSS = lấy session). | FIXED |
-| BUG-008 | MEDIUM | customers / lodats | STAFF nhận 403 (thay vì 404) khi ID thuộc NV khác — lộ tồn tại bản ghi. | OPEN |
+| BUG-008 | MEDIUM | customers / lodats | STAFF nhận 403 (thay vì 404) khi ID thuộc NV khác — lộ tồn tại bản ghi. | FIXED |
 | BUG-009 | MEDIUM | addresses | `includeHidden` không khóa ADMIN; STAFF đọc địa chỉ / đơn vị đã ẩn. | OPEN |
 | BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | OPEN |
 | BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | OPEN |
@@ -341,7 +342,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Check tồn tại rồi mới check quyền, map sang 403.
 - **Impact:** Dò ID khách/lô của NV khác. Không vượt quyền đọc field.
 - **Evidence:** `customers.service.ts` `getById`: `if (!row) NotFound` rồi `assertCanAccess` → `ForbiddenException('Không có quyền xem khách này')`. Lodats `getById` cùng pattern.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — ownership fail → `NotFoundException` (giống ID không tồn tại) trên customers / lodats / transactions / title-services / public-content lodat access.
+- **Fix:** `customers-view.ts` `assertCanAccess`; `lodats` / `transactions` / `title-services` / `public-content` assert helpers.
 
 ### BUG-009 — STAFF đọc địa chỉ / đơn vị hành chính đã ẩn
 

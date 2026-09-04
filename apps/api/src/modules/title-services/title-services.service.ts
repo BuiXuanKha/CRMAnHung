@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -321,7 +320,7 @@ export class TitleServicesService {
   private assertCanAccess(user: RequestUser, createdByEmployeeId: string) {
     if (user.role === 'ADMIN') return;
     if (createdByEmployeeId !== user.id) {
-      throw new ForbiddenException('Không có quyền với hồ sơ sổ đỏ này.');
+      throw new NotFoundException('Không tìm thấy hồ sơ sổ đỏ.');
     }
   }
 

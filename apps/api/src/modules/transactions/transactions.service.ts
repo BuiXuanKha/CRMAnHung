@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   ConflictException,
-  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -219,14 +218,14 @@ export class TransactionsService {
   private assertCanAccessTx(user: RequestUser, createdByEmployeeId: string) {
     if (user.role === 'ADMIN') return;
     if (createdByEmployeeId !== user.id) {
-      throw new ForbiddenException('Không có quyền với giao dịch này.');
+      throw new NotFoundException('Không tìm thấy giao dịch.');
     }
   }
 
   private assertCanAccessLodat(user: RequestUser, createdByEmployeeId: string) {
     if (user.role === 'ADMIN') return;
     if (createdByEmployeeId !== user.id) {
-      throw new ForbiddenException('Không có quyền với lô đất này.');
+      throw new NotFoundException('Không tìm thấy lô đất.');
     }
   }
 

@@ -352,7 +352,7 @@ export class LodatsService {
   private assertCanAccess(user: RequestUser, createdByEmployeeId: string) {
     if (user.role === 'ADMIN') return;
     if (createdByEmployeeId !== user.id) {
-      throw new ForbiddenException('Không có quyền với lô đất này.');
+      throw new NotFoundException('Không tìm thấy lô đất.');
     }
   }
 
@@ -662,7 +662,7 @@ export class LodatsService {
       throw new NotFoundException('Không tìm thấy khách hàng.');
     }
     if (user.role !== 'ADMIN' && customer.employeeId !== user.id) {
-      throw new ForbiddenException('Khách này không thuộc hồ sơ của bạn.');
+      throw new NotFoundException('Không tìm thấy khách hàng.');
     }
 
     const activeMap = row.maps[0] ?? null;
@@ -878,7 +878,7 @@ export class LodatsService {
       throw new NotFoundException('Không tìm thấy khách hàng.');
     }
     if (customer.employeeId !== user.id) {
-      throw new ForbiddenException('Khách này không thuộc hồ sơ của bạn.');
+      throw new NotFoundException('Không tìm thấy khách hàng.');
     }
 
     const isProject = Boolean(dto.projectLotId);
