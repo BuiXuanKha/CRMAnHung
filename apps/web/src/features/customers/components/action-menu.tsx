@@ -239,7 +239,9 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
                 <li>
                   <button type="button" role="menuitem" onClick={() => run('phone')}>
                     <Icon icon={Phone} />{' '}
-                    {customer.primaryPhone ? 'Sửa số điện thoại' : 'Thêm số điện thoại'}
+                    {customer.primaryPhone || (customer.phones?.length ?? 0) > 0
+                      ? 'Quản lý số điện thoại'
+                      : 'Thêm số điện thoại'}
                   </button>
                 </li>
                 <li>

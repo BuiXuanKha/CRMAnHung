@@ -20,10 +20,10 @@ import {
   acknowledgePhoneDuplicate,
   addCustomerPhone,
   createManualCustomer,
-  deleteCustomerPhones,
+  deleteCustomerPhone,
   listContactChannels,
   mergeFacebookIntoPhoneHolder,
-  replaceCustomerPhone,
+  updateCustomerPhone,
 } from './customers-phone';
 import {
   LIST_INCLUDE,
@@ -384,11 +384,20 @@ export class CustomersService {
     return addCustomerPhone(this.prisma, user, id, dto, (cid) => this.getById(user, cid));
   }
 
-  async replacePhone(user: RequestUser, id: string, dto: AddCustomerPhoneDto) {
-    return replaceCustomerPhone(this.prisma, user, id, dto, (cid) => this.getById(user, cid));
+  async updatePhone(
+    user: RequestUser,
+    id: string,
+    phoneId: string,
+    dto: AddCustomerPhoneDto,
+  ) {
+    return updateCustomerPhone(this.prisma, user, id, phoneId, dto, (cid) =>
+      this.getById(user, cid),
+    );
   }
 
-  async deletePhone(user: RequestUser, id: string) {
-    return deleteCustomerPhones(this.prisma, user, id, (cid) => this.getById(user, cid));
+  async deletePhone(user: RequestUser, id: string, phoneId: string) {
+    return deleteCustomerPhone(this.prisma, user, id, phoneId, (cid) =>
+      this.getById(user, cid),
+    );
   }
 }

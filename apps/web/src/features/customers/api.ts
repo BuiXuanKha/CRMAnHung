@@ -106,17 +106,23 @@ export async function addCustomerPhone(
 
 export async function updateCustomerPhone(
   id: string,
+  phoneId: string,
   input: UpdateCustomerPhoneInput,
 ): Promise<CustomerDetail> {
   const parsed = updateCustomerPhoneSchema.parse(input);
-  return apiFetch<CustomerDetail>(`/customers/${id}/phones`, {
+  return apiFetch<CustomerDetail>(`/customers/${id}/phones/${phoneId}`, {
     method: 'PATCH',
     body: JSON.stringify(parsed),
   });
 }
 
-export async function deleteCustomerPhone(id: string): Promise<CustomerDetail> {
-  return apiFetch<CustomerDetail>(`/customers/${id}/phones`, { method: 'DELETE' });
+export async function deleteCustomerPhone(
+  id: string,
+  phoneId: string,
+): Promise<CustomerDetail> {
+  return apiFetch<CustomerDetail>(`/customers/${id}/phones/${phoneId}`, {
+    method: 'DELETE',
+  });
 }
 
 export async function acknowledgePhoneDuplicate(

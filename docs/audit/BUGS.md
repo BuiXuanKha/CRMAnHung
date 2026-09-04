@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 70 |
+| OPEN | 69 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 13 |
+| FIXED / CLOSED | 14 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -123,6 +123,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | users | BUG-010 CLOSED | Owner: race Admin cuối không xảy ra với An Hưng Land — won't fix. |
 | 2026-09-04 | users / auth | BUG-011 FIXED | Create/reset: 6–18 + bắt buộc chữ và số; login không đổi. |
 | 2026-09-04 | web authz | BUG-012 FIXED | Middleware CRM theo cookie role; STAFF không vào route Admin (kèm BUG-083). |
+| 2026-09-04 | customers | BUG-015 FIXED | PATCH/DELETE theo `phoneId` (không wipe số phụ); modal quản lý SĐT; FAB/gọi: 1 số → tel, ≥2 → picker. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -163,7 +164,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | FIXED || BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | FIXED |
 | BUG-013 | HIGH | customers / extension | Cùng người Facebook có thể thành nhiều Customer (UID/thread không unique; e2ee vs threadId). | OPEN |
 | BUG-014 | HIGH | customers | Trùng SĐT lúc tạo: bấm OK ghi đè `fullName` và mở lại khách cũ. | OPEN |
-| BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | OPEN |
+| BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | FIXED |
 | BUG-016 | HIGH | customers | Gộp Facebook: mất SĐT nguồn, party SetNull, xóa map trùng lô; TitleService Restrict → merge vỡ. | OPEN |
 | BUG-017 | HIGH | customers / permission | Admin gộp Facebook giữa hai `employeeId` khác nhau — chuyển hồ sơ sang NV khác. | OPEN |
 | BUG-018 | HIGH | customers | SĐT không unique trên DB; không chuẩn hóa — race / format lệch tạo Person trùng. | OPEN |
@@ -437,8 +438,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Mô hình “một số” ép lên dữ liệu nhiều số; không merge/giữ số phụ.
 - **Impact:** Mất SĐT sau migrate. Không hoàn tác.
 - **Evidence:** `replaceCustomerPhone` khối `if (existing.phones.length > 1) deleteMany`. `addCustomerPhone` từ chối nếu đã có số. Schema `CustomerPhone` không unique, cho phép nhiều dòng.
-- **Status:** OPEN
-
+- **Status:** FIXED (2026-09-04) — `replaceCustomerPhone` → `updateCustomerPhone` / `deleteCustomerPhone` theo `phoneId` (`PATCH|DELETE /customers/:id/phones/:phoneId`); không `deleteMany` số phụ. UI: modal quản lý danh sách SĐT (thêm/sửa/xoá). FAB chi tiết khách + FAB chủ lô + icon gọi mobile: 1 số → `tel:` thẳng; ≥2 → modal chọn số.
 ### BUG-016 — Gộp Facebook không chuyển hết quan hệ Person
 
 - **Severity:** HIGH

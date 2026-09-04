@@ -89,17 +89,22 @@ export class CustomersController {
     return this.customersService.addPhone(user, id, dto);
   }
 
-  @Patch(':id/phones')
-  replacePhone(
+  @Patch(':id/phones/:phoneId')
+  updatePhone(
     @CurrentUser() user: RequestUser,
     @Param('id') id: string,
+    @Param('phoneId') phoneId: string,
     @Body() dto: AddCustomerPhoneDto,
   ) {
-    return this.customersService.replacePhone(user, id, dto);
+    return this.customersService.updatePhone(user, id, phoneId, dto);
   }
 
-  @Delete(':id/phones')
-  deletePhone(@CurrentUser() user: RequestUser, @Param('id') id: string) {
-    return this.customersService.deletePhone(user, id);
+  @Delete(':id/phones/:phoneId')
+  deletePhone(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Param('phoneId') phoneId: string,
+  ) {
+    return this.customersService.deletePhone(user, id, phoneId);
   }
 }

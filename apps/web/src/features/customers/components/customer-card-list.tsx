@@ -28,6 +28,7 @@ type Props = {
   onAction: (customer: CustomerListItem, action: CustomerAction) => void;
   onAdd: () => void;
   onAddPhone?: (customer: CustomerListItem) => void;
+  onCallPhone?: (customer: CustomerListItem) => void;
   scrollRef?: Ref<HTMLDivElement>;
   onScroll?: () => void;
 };
@@ -45,6 +46,7 @@ export function CustomerCardList({
   onAction,
   onAdd,
   onAddPhone,
+  onCallPhone,
   scrollRef,
   onScroll,
 }: Props) {
@@ -91,15 +93,18 @@ export function CustomerCardList({
                   <div className="kh-card-name">
                     <strong>{c.fullName}</strong>
                     {c.primaryPhone ? (
-                      <a
-                        href={`tel:${c.primaryPhone}`}
+                      <button
+                        type="button"
                         className="kh-card-call"
                         title={c.primaryPhone}
-                        aria-label={`Gọi ${c.primaryPhone}`}
-                        onClick={(e) => e.stopPropagation()}
+                        aria-label={`Gọi ${c.fullName}`}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onCallPhone?.(c);
+                        }}
                       >
                         <Icon icon={Phone} size={12} />
-                      </a>
+                      </button>
                     ) : !c.isHidden ? (
                       <button
                         type="button"

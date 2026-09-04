@@ -61,7 +61,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 |----|------|------------|
 | 1 | Menu khôi phục khách ẩn (§11 mục 16) | **Xong.** «Khôi phục khách» → `PATCH isHidden: false`. |
 | 2 | Tạo hồ sơ sổ đỏ từ khách (§11 mục 7) | **Xong.** Form `/khach-hang/[id]/dich-vu-so-do`. |
-| 3 | Xoá / sửa SĐT (§11 mục 11) | **Xong.** Menu Thao tác → modal; icon cam vẫn thêm nhanh. |
+| 3 | Xoá / sửa SĐT (§11 mục 11) | **Xong.** Menu → modal quản lý nhiều số (thêm/sửa/xoá); FAB gọi: 1 số thẳng, ≥2 chọn số. |
 | 4 | Sửa tên Facebook (§11 mục 13) | **Không làm.** Tên FB nhận từ extension khi scan; không modal sửa tay. |
 | 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Chưa làm.** Khi extension kéo lại khách ẩn (API ingest không tự khôi phục — §13.14). |
 | 6 | Inbox Facebook sống (§11 mục 27) | **Chưa làm; cần bàn.** Không phải cột phụ chat, không phải menu Mở chat. |
@@ -185,8 +185,8 @@ Bấm → modal **Thêm số điện thoại**. Trùng số → modal mục 15.
 
 Khách chưa ẩn. **NV phụ trách khách.** Icon cam (mục 4) vẫn thêm nhanh khi chưa có số.
 
-- Chưa có số: mục **Thêm số điện thoại** → cùng modal thêm nhanh.
-- Đã có số: mục **Sửa số điện thoại** → modal 1 ô (prefill) · **Lưu** ghi đè · **Xóa số** (CrmConfirm). Trùng số → modal mục 15.
+- Chưa có số: mục **Thêm số điện thoại** → modal thêm nhanh (hoặc mở quản lý trống + form thêm).
+- Đã có số: mục **Quản lý số điện thoại** → modal danh sách (thêm / sửa / xoá từng số, tối đa 10). Trùng số → modal mục 15.
 
 ##### 6. Icon Map + số lô
 
@@ -344,7 +344,7 @@ Tên đậm. **Không** bút sửa tên trên thẻ.
 
 ##### 2. Icon SĐT **xanh** (`#047857`)
 
-Hiện khi **đã có** SĐT. Bấm → `tel:`.
+Hiện khi **đã có** SĐT. Bấm → gọi: **1 số** `tel:` thẳng; **≥2 số** → modal chọn số.
 
 ##### 3. Icon SĐT **cam** (`#ea580c`)
 
@@ -432,7 +432,7 @@ Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** h
 | Nút | Điều kiện | Hành vi |
 |-----|-----------|---------|
 | «⋯» | Khách **chưa** ẩn | Popover + icon Lucide: **Cập nhật chăm sóc** · **Tạo lô đất** · **Dịch vụ sổ đỏ** (cùng route menu list; ADMIN tạo lô → CrmAlert) |
-| Gọi điện | Có ≥1 SĐT | `tel:` số chính (hoặc số đầu trên hồ sơ) |
+| Gọi điện | Có ≥1 SĐT | **1 số** → `tel:` thẳng; **≥2 số** → modal chọn số |
 | Zalo | Có ≥1 SĐT | Tab `zalo.me/84…` (cùng quy tắc trang public) |
 | Mở Messenger | Có Facebook và khách **chưa** ẩn | Cùng logic menu list mobile «Mở Messenger» (`messenger.com` / CrmAlert nếu không mở được). **Không** dùng «Mở chat» (desktop-only) |
 
@@ -580,7 +580,7 @@ Script: `pnpm chat:migrate-legacy`. **Xong staging (20 253/20 253 tin, 2 4
 
 Khách **chưa có** SĐT và **chưa ẩn**: icon Phone **cam** `#ea580c` trên list (máy tính + thẻ mobile). Bấm → modal **Thêm số điện thoại** (CrmDialog; 1 ô SĐT; Huỷ + Lưu số).
 
-`POST /api/v1/customers/:id/phones` `{ phone }` — 10 số, bắt đầu `0`. Ownership cùng GET/PATCH. Khách đã ẩn / đã có số: API từ chối. Số đã có trên hồ sơ khác: `409 PHONE_DUPLICATE` + modal mục 15 (gộp nếu được).
+`POST /api/v1/customers/:id/phones` `{ phone }` — thêm số (tối đa 10 / khách; 10 số bắt đầu `0`). Ownership cùng GET/PATCH. Khách đã ẩn: API từ chối. Trùng số trên cùng hồ sơ: 400. Số đã có trên hồ sơ khác: `409 PHONE_DUPLICATE` + modal mục 15 (gộp nếu được). `PATCH|DELETE /api/v1/customers/:id/phones/:phoneId` — sửa / xoá từng số (không wipe số phụ).
 
 Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam không gọi.
 
