@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 73 |
+| OPEN | 72 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 10 |
+| FIXED / CLOSED | 11 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -121,7 +121,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | addresses | BUG-009 FIXED | includeHidden chỉ ADMIN; STAFF không đọc địa chỉ/đơn vị đã ẩn. |
 | 2026-09-04 | docs | conflict markers | Gỡ sót marker merge trên `BUGS.md` journal (password 6–18 + BUG-003). |
 | 2026-09-04 | users | BUG-010 CLOSED | Owner: race Admin cuối không xảy ra với An Hưng Land — won't fix. |
-
+| 2026-09-04 | users / auth | BUG-011 FIXED | Create/reset: 6–18 + bắt buộc chữ và số; login không đổi. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -159,8 +159,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-008 | MEDIUM | customers / lodats | STAFF nhận 403 (thay vì 404) khi ID thuộc NV khác — lộ tồn tại bản ghi. | FIXED |
 | BUG-009 | MEDIUM | addresses | `includeHidden` không khóa ADMIN; STAFF đọc địa chỉ / đơn vị đã ẩn. | FIXED |
 | BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | CLOSED |
-| BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | OPEN |
-| BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | OPEN |
+| BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | FIXED || BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | OPEN |
 | BUG-013 | HIGH | customers / extension | Cùng người Facebook có thể thành nhiều Customer (UID/thread không unique; e2ee vs threadId). | OPEN |
 | BUG-014 | HIGH | customers | Trùng SĐT lúc tạo: bấm OK ghi đè `fullName` và mở lại khách cũ. | OPEN |
 | BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | OPEN |
@@ -385,7 +384,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Contract cố ý min 6.
 - **Impact:** Brute-force / credential stuffing dễ hơn; login throttle 10/phút/IP hạn chế một phần.
 - **Evidence:** `user-admin.dto.ts` password min 6 max **18** (owner 2026-09-04); `auth.ts` `userPasswordSchema`. Vẫn không bắt chữ hoa/số/ký tự đặc biệt.
-- **Status:** OPEN (chỉ còn phần độ phức tạp; độ dài đã chốt 6–18)
+- **Status:** FIXED (2026-09-04) — Create/reset: giữ 6–18; bắt buộc ≥1 chữ cái + ≥1 chữ số (`userPasswordSchema` + DTO `Matches` + UI). Login không thêm rule. Không bắt ký tự đặc biệt / chữ hoa (vừa đủ cho CRM nội bộ).
 
 ### BUG-012 — Phân quyền CRM trên UI chỉ chạy client
 

@@ -55,10 +55,20 @@ const usernameSchema = z
   .max(40, 'Tên đăng nhập tối đa 40 ký tự')
   .regex(/^[a-zA-Z0-9._-]+$/, 'Chỉ dùng chữ, số, dấu chấm, gạch ngang, gạch dưới');
 
-const userPasswordSchema = z
+/** Create / reset password — 6–18 chars, at least one letter + one digit. Login stays free-form. */
+export const USER_PASSWORD_HINT =
+  '6–18 ký tự, có chữ và số (vd. abc123)';
+
+export const userPasswordSchema = z
   .string()
   .min(6, 'Mật khẩu tối thiểu 6 ký tự')
-  .max(18, 'Mật khẩu tối đa 18 ký tự');
+  .max(18, 'Mật khẩu tối đa 18 ký tự')
+  .regex(/[A-Za-z]/, 'Mật khẩu phải có ít nhất một chữ cái')
+  .regex(/\d/, 'Mật khẩu phải có ít nhất một chữ số');
+
+export function isValidUserPassword(password: string): boolean {
+  return userPasswordSchema.safeParse(password).success;
+}
 
 /** ADMIN directory — GET /users (lọc NV trên list sổ đỏ). */
 export const userDirectoryItemSchema = z.object({

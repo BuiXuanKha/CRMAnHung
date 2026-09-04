@@ -2,7 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { KeyRound } from 'lucide-react';
-import type { UserAdminListItem } from '@crmanhung/shared';
+import {
+  USER_PASSWORD_HINT,
+  isValidUserPassword,
+  type UserAdminListItem,
+} from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
 
 type Props = {
@@ -32,6 +36,7 @@ export function ResetPasswordDialog({
   }, [open, user?.id]);
 
   const mismatch = confirm.length > 0 && password !== confirm;
+  const passwordOk = isValidUserPassword(password);
 
   return (
     <CrmDialog
@@ -67,6 +72,7 @@ export function ResetPasswordDialog({
             maxLength={18}
             onChange={(e) => setPassword(e.target.value)}
           />
+          <span className="crm-form-hint">{USER_PASSWORD_HINT}</span>
         </label>
         <label>
           Nhập lại mật khẩu
@@ -91,7 +97,7 @@ export function ResetPasswordDialog({
           <button
             type="submit"
             className="crm-btn primary"
-            disabled={busy || mismatch || password.length < 6 || password.length > 18}
+            disabled={busy || mismatch || !passwordOk}
           >
             {busy ? 'Đang lưu…' : 'Đặt mật khẩu'}
           </button>

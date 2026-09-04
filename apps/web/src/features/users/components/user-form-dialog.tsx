@@ -2,7 +2,12 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { ImagePlus, UserPlus, UserRoundCog } from 'lucide-react';
-import { UserRole, type UserAdminListItem } from '@crmanhung/shared';
+import {
+  USER_PASSWORD_HINT,
+  UserRole,
+  isValidUserPassword,
+  type UserAdminListItem,
+} from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
 import { handlePhonePaste, phoneDigitsFromChange } from '@/shared/phone-input';
 import { Icon } from '@/shared/ui/icon';
@@ -80,6 +85,8 @@ export function UserFormDialog({
   }, [previewUrl]);
 
   const shownUrl = previewUrl ?? (form.removeAvatar ? null : user?.avatarUrl ?? null);
+  const createPasswordOk =
+    mode !== 'create' || isValidUserPassword(form.password);
 
   return (
     <CrmDialog
@@ -194,6 +201,7 @@ export function UserFormDialog({
               maxLength={18}
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
             />
+            <span className="crm-form-hint">{USER_PASSWORD_HINT}</span>
           </label>
         ) : null}
         <label>
@@ -224,7 +232,11 @@ export function UserFormDialog({
           <button type="button" className="crm-btn" disabled={busy} onClick={onClose}>
             Huỷ
           </button>
-          <button type="submit" className="crm-btn primary" disabled={busy}>
+          <button
+            type="submit"
+            className="crm-btn primary"
+            disabled={busy || !createPasswordOk}
+          >
             {busy ? 'Đang lưu…' : mode === 'create' ? 'Thêm mới' : 'Lưu thay đổi'}
           </button>
         </div>
