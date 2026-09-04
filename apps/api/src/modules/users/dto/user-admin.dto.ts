@@ -35,7 +35,7 @@ export class CreateUserDto {
 
   @IsString()
   @MinLength(6, { message: 'Mật khẩu tối thiểu 6 ký tự' })
-  @MaxLength(128)
+  @MaxLength(18, { message: 'Mật khẩu tối đa 18 ký tự' })
   password!: string;
 
   @IsOptional()
@@ -83,6 +83,6 @@ export class UpdateUserDto {
 export class ResetUserPasswordDto {
   @IsString()
   @MinLength(6, { message: 'Mật khẩu tối thiểu 6 ký tự' })
-  @MaxLength(128)
+  @MaxLength(18, { message: 'Mật khẩu tối đa 18 ký tự' })
   password!: string;
 }

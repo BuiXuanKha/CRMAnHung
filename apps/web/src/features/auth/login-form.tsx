@@ -88,6 +88,7 @@ export function LoginForm() {
               onChange={(e) => setPassword(e.target.value)}
               autoComplete="current-password"
               required
+              maxLength={18}
             />
           </label>
 
