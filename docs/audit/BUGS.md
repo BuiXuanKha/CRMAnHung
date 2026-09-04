@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 82 |
+| OPEN | 78 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 1 |
+| FIXED / CLOSED | 5 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -112,6 +112,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | Browser audit — public live HTML | BUG-081 … BUG-082 | `https://anhungland.com` UA Chrome: title trang chủ lặp brand; `GET /dashbroad` 200 prerender (không 307). Xác nhận live BUG-071 (chuyên mục trống vẫn 200+index+sitemap). `og-default.png` production 200 (BUG-075 là thiếu file trong git). Không ghi trùng 071/075. Chưa xong CRM login UI (agent trình duyệt đang chạy). Không sửa code. Không commit/push. |
 | 2026-09-03 | Browser audit — CRM Admin + kha | BUG-083 | UI: login/validation, list khách/lô/GD/sổ, fake ID 404, kha bị chặn bài-viết/thống-kê/user/địa-chỉ. kha mở được stub `/quan-tri/khach-hang` (không redirect). Không ghi: kha `/dashboard`→`/dashboard/lo-dat` (đúng Đăng web); 404 public đã có link Trang chủ. Lỡ bấm «Chia sẻ» lô (createOrGet). Không sửa/xóa. Không commit/push. |
 | 2026-09-04 | auth fix | BUG-001 FIXED | `JwtStrategy` load User + `sessionVersion`; revoke refresh khi đổi role / khóa / reset MK. |
+| 2026-09-04 | auth / shares | BUG-002 … BUG-005 FIXED | Username lowercase; share slug ownership; login timing + MaxLength mật khẩu. Dừng tại BUG-005 theo owner. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -141,10 +142,10 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | ID | Severity | Module | Problem | Status |
 |----|----------|--------|---------|--------|
 | BUG-001 | HIGH | auth | Access JWT không gắn trạng thái user trên DB (disable / xóa / hạ role / reset MK). | FIXED |
-| BUG-002 | HIGH | users / auth | Username unique phân biệt hoa-thường; login tìm không phân biệt. | OPEN |
-| BUG-003 | HIGH | lot-shares | STAFF tạo share-link theo slug không kiểm tra quyền sở hữu lô. | OPEN |
-| BUG-004 | MEDIUM | auth | Login lộ username đang active qua thời gian (timing). | OPEN |
-| BUG-005 | MEDIUM | auth | Login không giới hạn độ dài mật khẩu; bcrypt + body 32MB có thể DoS. | OPEN |
+| BUG-002 | HIGH | users / auth | Username unique phân biệt hoa-thường; login tìm không phân biệt. | FIXED |
+| BUG-003 | HIGH | lot-shares | STAFF tạo share-link theo slug không kiểm tra quyền sở hữu lô. | FIXED |
+| BUG-004 | MEDIUM | auth | Login lộ username đang active qua thời gian (timing). | FIXED |
+| BUG-005 | MEDIUM | auth | Login không giới hạn độ dài mật khẩu; bcrypt + body 32MB có thể DoS. | FIXED |
 | BUG-006 | MEDIUM | auth | Refresh rotation không phát hiện reuse token đã revoke. | OPEN |
 | BUG-007 | MEDIUM | auth / web | Access + refresh token lưu `localStorage` (mọi XSS = lấy session). | OPEN |
 | BUG-008 | MEDIUM | customers / lodats | STAFF nhận 403 (thay vì 404) khi ID thuộc NV khác — lộ tồn tại bản ghi. | OPEN |
@@ -251,7 +252,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Unique constraint và lookup không cùng quy tắc so khớp.
 - **Impact:** Trùng tài khoản; đăng nhập nhầm/thất bại; Admin tạo user với username khác hoa-thường của user đã có.
 - **Evidence:** Schema `@unique` trên `String`. `AuthService.login` `mode: 'insensitive'`. `CreateUserDto` cho phép `[a-zA-Z0-9._-]`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — username luôn lowercase khi create/update/login; migration lower existing; login `findUnique` theo username đã chuẩn hóa.
+- **Fix:** `auth.service.ts`, `users.service.ts`, migration `20260904101000_user_username_lowercase`.
 
 ### BUG-003 — STAFF tạo share-link theo slug không cần sở hữu lô
 
@@ -264,7 +266,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Hai đường tạo share không cùng rule; đường slug bỏ ownership.
 - **Impact:** Lấy lead / thống kê view của lô người khác; vượt UI (UI có thể chỉ hiện nút trên lô của mình).
 - **Evidence:** `createOrGetShareLink` (khoảng dòng 35–37) so role/owner; `createOrGetShareLinkBySlug` (51–60) không so. Controller `public-listings.controller.ts` `createShareLink`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — `createOrGetShareLinkBySlug` load `lodat.createdByEmployeeId`; STAFF không sở hữu → 404 giống đường lodatId.
+- **Fix:** `lot-shares.service.ts`.
 
 ### BUG-004 — Login enumeration username đang hoạt động (timing)
 
@@ -277,7 +280,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Early return trước dummy hash compare.
 - **Impact:** Đo thời gian (kèm brute-force username) suy ra tài khoản live. `@Throttle` login 10/60s làm chậm nhưng không xóa kênh timing.
 - **Evidence:** `auth.service.ts` dòng 62–68; `BCRYPT_ROUNDS = 12` ở users.service (cùng bcryptjs).
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — luôn `bcrypt.compare` với hash thật hoặc dummy hash khi user thiếu/inactive.
+- **Fix:** `auth.service.ts` `login`.
 
 ### BUG-005 — Login không MaxLength mật khẩu; bcrypt + body 32MB
 
@@ -290,7 +294,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** DTO login không cùng bound với create/reset; body parser quá rộng cho endpoint auth.
 - **Impact:** DoS CPU API.
 - **Evidence:** `auth.dto.ts` `LoginDto`; `main.ts` `bodyParser: json limit 32mb`; `auth.service.ts` `bcrypt.compare(dto.password, user.passwordHash)`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — `LoginDto.password` `@MaxLength(128)`; username `@MaxLength(40)`.
+- **Fix:** `auth.dto.ts`.
 
 ### BUG-006 — Refresh rotation không phát hiện reuse
 

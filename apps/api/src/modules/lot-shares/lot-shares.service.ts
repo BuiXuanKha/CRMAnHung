@@ -51,10 +51,21 @@ export class LotSharesService {
   async createOrGetShareLinkBySlug(user: RequestUser, slug: string) {
     const listing = await this.prisma.publicLotListing.findUnique({
       where: { slug: slug.trim() },
-      select: { id: true, slug: true, isPublished: true },
+      select: {
+        id: true,
+        slug: true,
+        isPublished: true,
+        lodat: { select: { createdByEmployeeId: true } },
+      },
     });
     if (!listing?.isPublished) {
       throw new BadRequestException('Lô chưa đăng lên web khách — cần publish trước khi share.');
+    }
+    if (
+      user.role !== 'ADMIN' &&
+      listing.lodat.createdByEmployeeId !== user.id
+    ) {
+      throw new NotFoundException('Không tìm thấy lô đất.');
     }
     return this.createOrGetShareLinkForListing(user, listing);
   }

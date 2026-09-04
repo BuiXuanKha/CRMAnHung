@@ -55,16 +55,18 @@ export class AuthService {
   ) {}
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findFirst({
-      where: { username: { equals: dto.username.trim(), mode: 'insensitive' } },
+    const username = dto.username.trim().toLowerCase();
+    const user = await this.prisma.user.findUnique({
+      where: { username },
     });
 
-    if (!user || !user.isActive) {
-      throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không đúng');
-    }
+    // Always bcrypt.compare to avoid timing username enumeration (BUG-004).
+    const dummyHash =
+      '$2b$12$kK7DyCVvhSre804Vqnouset4L65ja9Ql7/Gt3ot4rDEU7Ww4L.RzK';
+    const passwordHash = user?.isActive ? user.passwordHash : dummyHash;
+    const ok = await bcrypt.compare(dto.password, passwordHash);
 
-    const ok = await bcrypt.compare(dto.password, user.passwordHash);
-    if (!ok) {
+    if (!user || !user.isActive || !ok) {
       throw new UnauthorizedException('Tên đăng nhập hoặc mật khẩu không đúng');
     }
 

@@ -42,7 +42,7 @@ export class UsersService {
   }
 
   async create(dto: CreateUserDto) {
-    const username = dto.username.trim();
+    const username = dto.username.trim().toLowerCase();
     const fullName = dto.fullName.trim();
     const phone = dto.phone.trim();
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
@@ -95,7 +95,7 @@ export class UsersService {
     }
 
     const data: Prisma.UserUpdateInput = {};
-    if (dto.username !== undefined) data.username = dto.username.trim();
+    if (dto.username !== undefined) data.username = dto.username.trim().toLowerCase();
     if (dto.fullName !== undefined) data.fullName = dto.fullName.trim();
     if (dto.phone !== undefined) data.phone = dto.phone.trim();
     if (dto.role !== undefined) data.role = dto.role;
