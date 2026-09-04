@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 74 |
+| OPEN | 73 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 9 |
+| FIXED / CLOSED | 10 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -120,6 +120,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | authz | BUG-008 FIXED | STAFF ownership fail → 404 (không lộ ID bản ghi NV khác). |
 | 2026-09-04 | addresses | BUG-009 FIXED | includeHidden chỉ ADMIN; STAFF không đọc địa chỉ/đơn vị đã ẩn. |
 | 2026-09-04 | docs | conflict markers | Gỡ sót marker merge trên `BUGS.md` journal (password 6–18 + BUG-003). |
+| 2026-09-04 | users | BUG-010 CLOSED | Owner: race Admin cuối không xảy ra với An Hưng Land — won't fix. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -157,7 +158,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-007 | MEDIUM | auth / web | Access + refresh token lưu `localStorage` (mọi XSS = lấy session). | FIXED |
 | BUG-008 | MEDIUM | customers / lodats | STAFF nhận 403 (thay vì 404) khi ID thuộc NV khác — lộ tồn tại bản ghi. | FIXED |
 | BUG-009 | MEDIUM | addresses | `includeHidden` không khóa ADMIN; STAFF đọc địa chỉ / đơn vị đã ẩn. | FIXED |
-| BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | OPEN |
+| BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | CLOSED |
 | BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | OPEN |
 | BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | OPEN |
 | BUG-013 | HIGH | customers / extension | Cùng người Facebook có thể thành nhiều Customer (UID/thread không unique; e2ee vs threadId). | OPEN |
@@ -371,7 +372,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** TOCTOU; không `SERIALIZABLE` / row lock.
 - **Impact:** Mất hết Admin; không còn ai vào `/users`. Cần hai Admin + hai request trùng thời điểm.
 - **Evidence:** `update()` khối `adminCount <= 1` rồi `prisma.user.update` riêng. `remove()` cùng pattern.
-- **Status:** OPEN
+- **Status:** CLOSED (won't fix, 2026-09-04) — Owner: với An Hưng Land không xảy ra được; bỏ qua, không sửa.
 
 ### BUG-011 — Chính sách mật khẩu yếu
 
