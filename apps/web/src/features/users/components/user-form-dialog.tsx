@@ -191,7 +191,7 @@ export function UserFormDialog({
               disabled={busy}
               required
               minLength={6}
-              maxLength={128}
+              maxLength={18}
               onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
             />
           </label>

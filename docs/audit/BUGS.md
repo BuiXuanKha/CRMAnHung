@@ -113,6 +113,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | Browser audit — CRM Admin + kha | BUG-083 | UI: login/validation, list khách/lô/GD/sổ, fake ID 404, kha bị chặn bài-viết/thống-kê/user/địa-chỉ. kha mở được stub `/quan-tri/khach-hang` (không redirect). Không ghi: kha `/dashboard`→`/dashboard/lo-dat` (đúng Đăng web); 404 public đã có link Trang chủ. Lỡ bấm «Chia sẻ» lô (createOrGet). Không sửa/xóa. Không commit/push. |
 | 2026-09-04 | auth fix | BUG-001 FIXED | `JwtStrategy` load User + `sessionVersion`; revoke refresh khi đổi role / khóa / reset MK. |
 | 2026-09-04 | auth / shares | BUG-002 … BUG-005 FIXED | Username lowercase; share slug ownership; login timing + MaxLength mật khẩu. Dừng tại BUG-005 theo owner. |
+| 2026-09-04 | auth policy | password 6–18 | Owner chốt mật khẩu 6–18 ký tự (login/create/reset + shared + UI). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -294,8 +295,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** DTO login không cùng bound với create/reset; body parser quá rộng cho endpoint auth.
 - **Impact:** DoS CPU API.
 - **Evidence:** `auth.dto.ts` `LoginDto`; `main.ts` `bodyParser: json limit 32mb`; `auth.service.ts` `bcrypt.compare(dto.password, user.passwordHash)`.
-- **Status:** FIXED (2026-09-04) — `LoginDto.password` `@MaxLength(128)`; username `@MaxLength(40)`.
-- **Fix:** `auth.dto.ts`.
+- **Status:** FIXED (2026-09-04) — `LoginDto.password` giới hạn độ dài; username `@MaxLength(40)`. Policy mật khẩu hệ thống: **6–18** ký tự (2026-09-04, theo owner).
+- **Fix:** `auth.dto.ts`; sau đó đồng bộ create/reset/shared/UI → max **18**.
 
 ### BUG-006 — Refresh rotation không phát hiện reuse
 

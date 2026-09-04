@@ -57,7 +57,7 @@ const usernameSchema = z
 const userPasswordSchema = z
   .string()
   .min(6, 'Mật khẩu tối thiểu 6 ký tự')
-  .max(128, 'Mật khẩu tối đa 128 ký tự');
+  .max(18, 'Mật khẩu tối đa 18 ký tự');
 
 /** ADMIN directory — GET /users (lọc NV trên list sổ đỏ). */
 export const userDirectoryItemSchema = z.object({

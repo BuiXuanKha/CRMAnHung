@@ -64,7 +64,7 @@ export function ResetPasswordDialog({
             disabled={busy}
             required
             minLength={6}
-            maxLength={128}
+            maxLength={18}
             onChange={(e) => setPassword(e.target.value)}
           />
         </label>
@@ -77,7 +77,7 @@ export function ResetPasswordDialog({
             disabled={busy}
             required
             minLength={6}
-            maxLength={128}
+            maxLength={18}
             onChange={(e) => setConfirm(e.target.value)}
           />
         </label>
@@ -91,7 +91,7 @@ export function ResetPasswordDialog({
           <button
             type="submit"
             className="crm-btn primary"
-            disabled={busy || mismatch || password.length < 6}
+            disabled={busy || mismatch || password.length < 6 || password.length > 18}
           >
             {busy ? 'Đang lưu…' : 'Đặt mật khẩu'}
           </button>
