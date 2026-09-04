@@ -102,10 +102,7 @@ export function CustomerDetailPage() {
               <CrmBadge tone={statusTone(customer.status)}>{statusLabel(customer.status)}</CrmBadge>
               {customer.isHidden ? <CrmBadge tone="red">Đã xoá</CrmBadge> : null}
             </div>
-            <dl className="kh-detail-channel">
-              <dt>Kênh liên hệ</dt>
-              <dd>{channelLabel(customer)}</dd>
-            </dl>
+            <p className="kh-detail-channel">{channelLabel(customer)}</p>
             <dl className="kh-detail-meta">
               <div>
                 <dt>SĐT</dt>

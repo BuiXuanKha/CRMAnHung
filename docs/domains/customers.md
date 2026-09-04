@@ -432,7 +432,7 @@ Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** h
 
 1. **Quay lại** — «← Danh sách khách» (**chỉ máy tính**). Mobile: ẩn
 2. **Hero** — avatar (ảnh FB hoặc chữ tắt); tên; hangtag trạng thái; hangtag **Đã xoá** nếu ẩn
-3. **Kênh liên hệ** — ngay dưới tên; cùng chữ list (`channelLabel`: hotline / page·nick FB). Trống → `—`
+3. **Kênh liên hệ** — ngay dưới tên; chỉ chữ tên kênh (cùng `channelLabel` list: hotline / page·nick FB). **Không** nhãn «Kênh liên hệ». Trống → `—`
 4. **SĐT** — mọi số trên hồ sơ; trống `—`. Điện thoại: từng số là `tel:`
 5. **Tài chính** — khoảng ngân sách; trống `—`
 6. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú

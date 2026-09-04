@@ -81,18 +81,6 @@
 
 .kh-detail-channel {
   margin: 6px 0 0;
-}
-
-.kh-detail-channel dt {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
-  color: #94a3b8;
-}
-
-.kh-detail-channel dd {
-  margin: 2px 0 0;
   font-size: 0.86rem;
   font-weight: 600;
   color: #2563eb;
