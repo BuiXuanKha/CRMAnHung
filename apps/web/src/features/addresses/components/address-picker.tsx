@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   AddressKind,
   formatAddressLabel,
@@ -32,6 +32,12 @@ export function AddressPicker({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<AddressListItem | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  function closePanel() {
+    setOpen(false);
+    setKeyword('');
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -68,6 +74,18 @@ export function AddressPicker({
     if (found) setSelected(found);
   }, [value, items]);
 
+  /* Đóng khi bấm ngoài */
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e: MouseEvent) => {
+      const t = e.target as Node;
+      if (rootRef.current?.contains(t)) return;
+      closePanel();
+    };
+    document.addEventListener('mousedown', onDoc);
+    return () => document.removeEventListener('mousedown', onDoc);
+  }, [open]);
+
   const label = useMemo(() => {
     if (selected) return formatAddressLabel(selected);
     if (labelHint?.trim()) return labelHint.trim();
@@ -89,13 +107,30 @@ export function AddressPicker({
     return { title, sub: subParts.filter(Boolean).join(' · ') };
   }
 
+  function pickItem(item: AddressListItem) {
+    setSelected(item);
+    onChange(item);
+    /* Delay đóng: tránh iOS Safari click xuyên panel → mở lại trigger */
+    window.setTimeout(() => closePanel(), 0);
+  }
+
+  function clearSelection() {
+    setSelected(null);
+    onChange(null);
+    window.setTimeout(() => closePanel(), 0);
+  }
+
   return (
-    <div className="addr-picker">
+    <div className="addr-picker" ref={rootRef}>
       <button
         type="button"
         className={selected ? 'addr-picker-trigger' : 'addr-picker-trigger is-empty'}
         disabled={disabled}
-        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        onClick={() => {
+          if (open) closePanel();
+          else setOpen(true);
+        }}
       >
         {label}
       </button>
@@ -104,6 +139,7 @@ export function AddressPicker({
           <input
             placeholder="Tìm tỉnh, huyện, xã, thôn, dự án…"
             value={keyword}
+            autoFocus
             onChange={(e) => setKeyword(e.target.value)}
           />
           {loading ? <p className="crm-form-hint">Đang tải…</p> : null}
@@ -117,10 +153,10 @@ export function AddressPicker({
                   <button
                     type="button"
                     className="addr-picker-item"
-                    onClick={() => {
-                      setSelected(item);
-                      onChange(item);
-                      setOpen(false);
+                    onPointerDown={(e) => {
+                      /* preventDefault: không để click “rơi” xuống trigger sau khi panel unmount */
+                      e.preventDefault();
+                      pickItem(item);
                     }}
                   >
                     <span
@@ -139,15 +175,10 @@ export function AddressPicker({
               );
             })}
           </ul>
-          <button
-            type="button"
-            className="crm-btn"
-            onClick={() => {
-              setSelected(null);
-              onChange(null);
-              setOpen(false);
-            }}
-          >
+          <button type="button" className="crm-btn" onPointerDown={(e) => {
+            e.preventDefault();
+            clearSelection();
+          }}>
             Bỏ chọn
           </button>
         </div>

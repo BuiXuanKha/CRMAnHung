@@ -424,7 +424,7 @@ Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** h
 
 | Nút | Điều kiện | Hành vi |
 |-----|-----------|---------|
-| «⋯» | Khách **chưa** ẩn | Popover: **Cập nhật chăm sóc** · **Tạo lô đất** · **Dịch vụ sổ đỏ** (cùng route menu list; ADMIN tạo lô → CrmAlert) |
+| «⋯» | Khách **chưa** ẩn | Popover + icon Lucide: **Cập nhật chăm sóc** · **Tạo lô đất** · **Dịch vụ sổ đỏ** (cùng route menu list; ADMIN tạo lô → CrmAlert) |
 | Gọi điện | Có ≥1 SĐT | `tel:` số chính (hoặc số đầu trên hồ sơ) |
 | Zalo | Có ≥1 SĐT | Tab `zalo.me/84…` (cùng quy tắc trang public) |
 | Mở Messenger | Có Facebook và khách **chưa** ẩn | Cùng logic menu list mobile «Mở Messenger» (`messenger.com` / CrmAlert nếu không mở được). **Không** dùng «Mở chat» (desktop-only) |

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { AlertTriangle, MessageCircle, MoreHorizontal, Phone } from 'lucide-react';
+import { AlertTriangle, FileText, Map, MessageCircle, MoreHorizontal, NotebookPen, Phone } from 'lucide-react';
 import { UserRole, type CustomerDetail } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 import { CrmAlertDialog } from '@/shared/ui/dialog';
@@ -97,6 +97,7 @@ export function DetailMobileFab({ customer, callPhone }: Props) {
                   className="kh-detail-fab-menu-item"
                   onClick={goCare}
                 >
+                  <Icon icon={NotebookPen} size={16} />
                   Cập nhật chăm sóc
                 </button>
                 <button
@@ -105,6 +106,7 @@ export function DetailMobileFab({ customer, callPhone }: Props) {
                   className="kh-detail-fab-menu-item"
                   onClick={goLodat}
                 >
+                  <Icon icon={Map} size={16} />
                   Tạo lô đất
                 </button>
                 <button
@@ -113,6 +115,7 @@ export function DetailMobileFab({ customer, callPhone }: Props) {
                   className="kh-detail-fab-menu-item"
                   onClick={goSodo}
                 >
+                  <Icon icon={FileText} size={16} />
                   Dịch vụ sổ đỏ
                 </button>
               </div>
