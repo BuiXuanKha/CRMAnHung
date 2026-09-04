@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 78 |
+| OPEN | 77 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 5 |
+| FIXED / CLOSED | 6 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -113,11 +113,10 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | Browser audit — CRM Admin + kha | BUG-083 | UI: login/validation, list khách/lô/GD/sổ, fake ID 404, kha bị chặn bài-viết/thống-kê/user/địa-chỉ. kha mở được stub `/quan-tri/khach-hang` (không redirect). Không ghi: kha `/dashboard`→`/dashboard/lo-dat` (đúng Đăng web); 404 public đã có link Trang chủ. Lỡ bấm «Chia sẻ» lô (createOrGet). Không sửa/xóa. Không commit/push. |
 | 2026-09-04 | auth fix | BUG-001 FIXED | `JwtStrategy` load User + `sessionVersion`; revoke refresh khi đổi role / khóa / reset MK. |
 | 2026-09-04 | auth / shares | BUG-002 … BUG-005 FIXED | Username lowercase; share slug ownership; login timing + MaxLength mật khẩu. Dừng tại BUG-005 theo owner. |
-<<<<<<< HEAD
 | 2026-09-04 | auth policy | password 6–18 | Owner chốt mật khẩu 6–18 ký tự (login/create/reset + shared + UI). |
-=======
 | 2026-09-04 | lot-shares | BUG-003 CLOSED | Owner: publish rồi ai cũng share được với hotline của mình — không phải bug; revert ownership check trên slug. |
->>>>>>> origin/cursor/revert-bug-003-share-by-design-7ba7
+| 2026-09-04 | auth fix | BUG-006 FIXED | Reuse refresh đã revoke → hủy toàn bộ session + sessionVersion. |
+| 2026-09-04 | docs | conflict markers | Gỡ sót marker merge trên `BUGS.md` journal (password 6–18 + BUG-003). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -151,7 +150,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-003 | HIGH | lot-shares | STAFF tạo share-link theo slug không kiểm tra quyền sở hữu lô. | CLOSED |
 | BUG-004 | MEDIUM | auth | Login lộ username đang active qua thời gian (timing). | FIXED |
 | BUG-005 | MEDIUM | auth | Login không giới hạn độ dài mật khẩu; bcrypt + body 32MB có thể DoS. | FIXED |
-| BUG-006 | MEDIUM | auth | Refresh rotation không phát hiện reuse token đã revoke. | OPEN |
+| BUG-006 | MEDIUM | auth | Refresh rotation không phát hiện reuse token đã revoke. | FIXED |
 | BUG-007 | MEDIUM | auth / web | Access + refresh token lưu `localStorage` (mọi XSS = lấy session). | OPEN |
 | BUG-008 | MEDIUM | customers / lodats | STAFF nhận 403 (thay vì 404) khi ID thuộc NV khác — lộ tồn tại bản ghi. | OPEN |
 | BUG-009 | MEDIUM | addresses | `includeHidden` không khóa ADMIN; STAFF đọc địa chỉ / đơn vị đã ẩn. | OPEN |
@@ -313,7 +312,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Chỉ check revoked rồi throw; không `revokeRefreshTokens(userId)`.
 - **Impact:** Refresh token lộ (log, XSS, backup) vẫn dùng được đến khi hết hạn 7 ngày nếu attacker refresh trước victim; reuse sau rotate không giết session mới.
 - **Evidence:** `refresh()` dòng 84–96: `if (!stored || stored.revokedAt || expired) throw`; không nhánh reuse.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — reuse refresh đã `revokedAt` → revoke mọi refresh còn lại + bump `sessionVersion` (hủy luôn access JWT).
+- **Fix:** `auth.service.ts` `refresh` / `revokeAllSessions`.
 
 ### BUG-007 — Access/refresh token trong localStorage
 
