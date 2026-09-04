@@ -106,12 +106,18 @@ export class UsersService {
     }
 
     try {
+      const shouldInvalidateSession =
+        dto.isActive === false ||
+        (dto.role !== undefined && dto.role !== existing.role);
+
       const user = await this.prisma.user.update({
         where: { id },
-        data,
+        data: shouldInvalidateSession
+          ? { ...data, sessionVersion: { increment: 1 } }
+          : data,
         select: userSelect,
       });
-      if (dto.isActive === false) {
+      if (shouldInvalidateSession) {
         await this.revokeRefreshTokens(id);
       }
       return toAdminUser(user, this.storage);
@@ -135,7 +141,10 @@ export class UsersService {
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
     await this.prisma.user.update({
       where: { id },
-      data: { passwordHash },
+      data: {
+        passwordHash,
+        sessionVersion: { increment: 1 },
+      },
     });
     await this.revokeRefreshTokens(id);
     return { ok: true };

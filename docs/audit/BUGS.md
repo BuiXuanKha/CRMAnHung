@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 83 |
+| OPEN | 82 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 0 |
+| FIXED / CLOSED | 1 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -111,6 +111,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-03 | SEO / URL public (slug → API → Next → metadata/sitemap/robots/OG/JSON-LD) | BUG-066 … BUG-080 | Source: `toPublicSlug`/`uniqueSlug`/`PublicLotSlugRedirect`, `public-content.service`, hub `buildHubSlugMaps`, `sitemap.ts`/`robots.ts`, `listing-seo`/`post-seo`/`listing-hub-seo`, revalidate, guest `api.ts` nuốt lỗi, `og-default.png` không có trong `apps/web/public`. Không sửa code. Không commit/push. Không login (CF 1010). Không ghi trùng BUG-023 / 024 / 056 / 062 (chỉ hệ quả SEO riêng). |
 | 2026-09-03 | Browser audit — public live HTML | BUG-081 … BUG-082 | `https://anhungland.com` UA Chrome: title trang chủ lặp brand; `GET /dashbroad` 200 prerender (không 307). Xác nhận live BUG-071 (chuyên mục trống vẫn 200+index+sitemap). `og-default.png` production 200 (BUG-075 là thiếu file trong git). Không ghi trùng 071/075. Chưa xong CRM login UI (agent trình duyệt đang chạy). Không sửa code. Không commit/push. |
 | 2026-09-03 | Browser audit — CRM Admin + kha | BUG-083 | UI: login/validation, list khách/lô/GD/sổ, fake ID 404, kha bị chặn bài-viết/thống-kê/user/địa-chỉ. kha mở được stub `/quan-tri/khach-hang` (không redirect). Không ghi: kha `/dashboard`→`/dashboard/lo-dat` (đúng Đăng web); 404 public đã có link Trang chủ. Lỡ bấm «Chia sẻ» lô (createOrGet). Không sửa/xóa. Không commit/push. |
+| 2026-09-04 | auth fix | BUG-001 FIXED | `JwtStrategy` load User + `sessionVersion`; revoke refresh khi đổi role / khóa / reset MK. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -139,7 +140,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 
 | ID | Severity | Module | Problem | Status |
 |----|----------|--------|---------|--------|
-| BUG-001 | HIGH | auth | Access JWT không gắn trạng thái user trên DB (disable / xóa / hạ role / reset MK). | OPEN |
+| BUG-001 | HIGH | auth | Access JWT không gắn trạng thái user trên DB (disable / xóa / hạ role / reset MK). | FIXED |
 | BUG-002 | HIGH | users / auth | Username unique phân biệt hoa-thường; login tìm không phân biệt. | OPEN |
 | BUG-003 | HIGH | lot-shares | STAFF tạo share-link theo slug không kiểm tra quyền sở hữu lô. | OPEN |
 | BUG-004 | MEDIUM | auth | Login lộ username đang active qua thời gian (timing). | OPEN |
@@ -236,7 +237,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Passport JWT không load user từ Postgres; role nằm trong token; không có denylist access token; đổi role không thu hồi refresh.
 - **Impact:** Cửa sổ tối đa ~15 phút (hoặc TTL prod) sau khi thu hồi quyền. Session cũ sau reset MK vẫn gọi API. Disable user không đá phiên đang mở cho đến khi access hết hạn hoặc reload gọi `/auth/me`.
 - **Evidence:** `jwt.strategy.ts` `validate()` return payload. `users.service.ts` `update()` revoke refresh chỉ trong nhánh `dto.isActive === false`. `auth.service.ts` `me()` mới check `isActive`. Các controller customers/lodats/transactions/title-services không check `isActive`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-04) — `JwtStrategy.validate` load User từ DB (`isActive` + role hiện tại); claim `sv` khớp `User.sessionVersion`; bump version + revoke refresh khi khóa / đổi role / reset MK.
+- **Fix:** `jwt.strategy.ts`, `auth.service.ts`, `users.service.ts`, migration `20260904100000_user_session_version`.
 
 ### BUG-002 — Username unique case-sensitive, login case-insensitive
 

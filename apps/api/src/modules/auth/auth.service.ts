@@ -22,17 +22,17 @@ export type AuthUserPayload = {
   avatarUrl?: string | null;
 };
 
-function toAuthUser(
-  user: {
-    id: string;
-    username: string;
-    fullName: string;
-    role: string;
-    phone?: string | null;
-    avatarObjectKey?: string | null;
-  },
-  storage: StorageService,
-): AuthUserPayload {
+type AuthUserSource = {
+  id: string;
+  username: string;
+  fullName: string;
+  role: string;
+  phone?: string | null;
+  avatarObjectKey?: string | null;
+  sessionVersion: number;
+};
+
+function toAuthUser(user: AuthUserSource, storage: StorageService): AuthUserPayload {
   const phone = user.phone?.trim();
   const avatarUrl = userAvatarUrl(storage, user.avatarObjectKey);
   return {
@@ -70,7 +70,7 @@ export class AuthService {
 
     const payload: AuthUserPayload = toAuthUser(user, this.storage);
 
-    const tokens = await this.issueTokens(payload);
+    const tokens = await this.issueTokens(payload, user.sessionVersion);
     return { ...tokens, user: payload };
   }
 
@@ -97,7 +97,7 @@ export class AuthService {
 
     const payload: AuthUserPayload = toAuthUser(stored.user, this.storage);
 
-    const tokens = await this.issueTokens(payload);
+    const tokens = await this.issueTokens(payload, stored.user.sessionVersion);
     return { ...tokens, user: payload };
   }
 
@@ -124,6 +124,7 @@ export class AuthService {
         phone: true,
         isActive: true,
         avatarObjectKey: true,
+        sessionVersion: true,
       },
     });
     if (!user || !user.isActive) {
@@ -132,7 +133,10 @@ export class AuthService {
     return toAuthUser(user, this.storage);
   }
 
-  private async issueTokens(payload: AuthUserPayload): Promise<AuthTokens> {
+  private async issueTokens(
+    payload: AuthUserPayload,
+    sessionVersion: number,
+  ): Promise<AuthTokens> {
     const accessExpiresIn =
       this.config.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m';
 
@@ -142,6 +146,7 @@ export class AuthService {
         username: payload.username,
         fullName: payload.fullName,
         role: payload.role,
+        sv: sessionVersion,
       },
       {
         secret: this.config.getOrThrow<string>('JWT_ACCESS_SECRET'),
