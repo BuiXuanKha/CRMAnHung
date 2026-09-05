@@ -30,7 +30,7 @@ Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên k
 | Actor | Được | Không |
 |-------|------|--------|
 | Khách (chưa login) | Đọc bài / lô **đã public**; share URL | Sửa, xem bản nháp, vào CRM |
-| STAFF | CRM của mình + soạn / Đăng / Gỡ web **lô `createdByEmployeeId` = mình** | Bài CMS (`/dashboard/bai-viet`); lô NV khác; Tổng quan dashboard |
+| STAFF | CRM của mình + soạn / **Đăng web** **lô `createdByEmployeeId` = mình** (không Gỡ web) | Bài CMS (`/dashboard/bai-viet`); lô NV khác; Tổng quan dashboard |
 | ADMIN | Mọi lô (mọi NV) + bài CMS + Gỡ luồng kho trùng | — |
 
 Chốt (2026-09-02): STAFF tự đăng lô của mình. Bài viết CMS vẫn **chỉ ADMIN**. Trang khách vẫn thương hiệu công ty — không lộ PII / hoa hồng / tên NV.
@@ -174,7 +174,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 1. STAFF vào `/dashboard/lo-dat` (header **Đăng web**). `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` của STAFF → `/dashboard/lo-dat`. Bốn trang CRM **không** thêm công tắc Đăng web.
 2. Lô lên web = công tắc tường minh (STAFF lô mình / ADMIN mọi NV) — không auto theo Mở bán hay giao dịch.
-3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. Gỡ web = tắt Đăng web tường minh. (Khách chỉ thấy lô Đăng web ∩ đang Mở bán.)
+3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. **Không** còn Gỡ Đăng web — listing đã đăng giữ `isPublished`; khách chỉ thấy khi Đăng web ∩ đang Mở bán.
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
 5. Cùng số lô kho → một listing public. ADMIN đăng luồng mới thì gỡ sibling. STAFF không gỡ luồng NV khác đang hiện — báo lỗi.
 6. Bài viết CMS = **chỉ ADMIN**; chuyên mục: dự án, kiến thức, liên hệ, chính sách bảo mật, tin tức, kinh nghiệm.
@@ -246,7 +246,7 @@ Cùng hình thức thẻ GD: nền trắng, viền `#e2e8f0`, bo 12px. 4 cột.
 | Giá | `crm-money` nếu hiện số; không thì chữ `Liên hệ` |
 | Web | Hangtag **Đang hiện** `green` · **Chờ đăng** `gray` |
 
-Bấm nền hàng → `CrmConfirm` **Đăng web** (lô chờ đăng) hoặc **Gỡ web** (đang hiện). Toast khi xong. Số đếm cập nhật.
+Bấm nền hàng chờ đăng → `CrmConfirm` **Đăng web**. Lô đang hiện: xem link khách (không Gỡ web). Toast khi đăng xong.
 
 Footer: `Hiển thị N / Tổng M lô` (N = dòng trên hub; M = đang hiện + chờ đăng).
 
@@ -414,7 +414,7 @@ Trống: `Không có lô đang mở bán.`
 1. Nhãn `Preview Post`
 2. Chưa chọn dòng: `Chọn một lô đang mở bán để xem bài đăng.`
 3. Có chọn: ảnh bìa, hangtag Web, tiêu đề, địa chỉ, giá, DT · MT · hướng, hangtag Nhà/Đất, mô tả public (không PII), hotline công ty
-4. Nút **Đăng web** khi chờ đăng → `CrmConfirm`. Nút **Gỡ web** khi đang hiện → `CrmConfirm` (STAFF không vào Tổng quan). Link `Xem trên anhungland.com` khi đang hiện.
+4. Nút **Đăng web** khi chờ đăng → `CrmConfirm`. **Không** nút Gỡ web. Link `Xem trên anhungland.com` khi đang hiện.
 
 ### 13.2 Mobile
 
@@ -533,7 +533,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 2. Title = `seoTitle` (GPT) + `\| An Hưng Land`. H1 = `title` (GPT h1) — cùng địa danh, không bắt buộc trùng chữ. Meta = `metaDescription` hoặc excerpt.
 3. Ảnh OG = ảnh bìa; thiếu → `/og-default.png`. Ảnh SEO: **tạo/sửa lô** đặt CDN key `{slug}-anh-n` (đổi title/địa chỉ rồi Lưu thì đổi key); Đăng web không làm lại. `alt` = `listingHeadline` (không lặp địa chỉ); sitemap `image:loc`; JSON-LD `ImageObject` — [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §10.
 4. JSON-LD `RealEstateListing`: `name` = H1; giá = `priceLabel` công bố (hoặc bỏ số nếu Liên hệ / `xxx`); `itemOffered` Place/House + `floorSize` khi parse được.
-5. Sitemap chỉ lô đang hiện (+ URL ảnh CDN). Gỡ web → 404, không còn trong sitemap.
+5. Sitemap chỉ lô Đăng web ∩ Mở bán (+ URL ảnh CDN). Không Gỡ web — ẩn khỏi khách/sitemap khi hết Mở bán.
 6. Cấm trên HTML + JSON-LD + meta: giá map CRM, hoa hồng, tên/SĐT khách, ghi chú nội bộ.
 
 ---
@@ -642,7 +642,7 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 
 | Hạng mục | Cách làm |
 |----------|----------|
-| Gỡ web | NV của lô hoặc ADMIN tắt Đăng web trên `/dashboard/lo-dat`. **Không** auto khi Tạm dừng hay tạo/sửa GD |
+| Gỡ web | **Đã bỏ (2026-09-05).** Không tắt `isPublished` từ UI/API user. Ẩn khách = hết Mở bán. (Sibling auto-unpublish khi Đăng lô kho khác vẫn giữ.) |
 | Khách thấy lô | `isPublished` ∩ map `DANG_BAN` (rule guest API sẵn có — không đụng công tắc Đăng web) |
 | Một listing / ProjectLot | ADMIN **Đăng web** → `unpublishSiblingProjectLotListings` gỡ listing published khác cùng `projectLotId`. STAFF không gỡ luồng NV khác đang hiện |
 | Slug ổn định | Slug = `toListingPublicSlug(title, leftover location)` lúc **tạo** listing (không trần 80; cấm `xa`). `PATCH draft` / Đăng lại **không** đổi slug trừ khi admin sửa ô slug |
