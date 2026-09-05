@@ -143,6 +143,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lodats | BUG-034 FIXED | Owner: lỗi copy ảnh chat → xóa lô vừa tạo (rollback); không để lô mồ côi / retry trùng. |
 | 2026-09-05 | lot-shares / web | BUG-035 FIXED | Owner: chỉ ghi cookie `?share=` khi resolve thành công; mã rác/404 không đè last-click. |
 | 2026-09-05 | lot-shares | BUG-036 CLOSED | Owner: không phải lỗi — link share sống lâu; không thu hồi/tắt; sau chỉ đổi trạng thái mở bán/đã bán. |
+| 2026-09-05 | lot-shares | BUG-037 FIXED | Owner: POST /public/page-views chỉ cộng NV khi cookie httpOnly khớp mã; body một mình không đủ. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -212,6 +213,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-036 | HIGH | lot-shares | Không API xóa/sửa/xoay mã share; gỡ publish / disable NV chỉ ẩn resolve; publish lại mã cũ còn hiệu lực. | OPEN |
 | BUG-036 | HIGH | lot-shares | Không API xóa/sửa/xoay mã share; gỡ publish / disable NV chỉ ẩn resolve; publish lại mã cũ còn hiệu lực. | CLOSED |
 | BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | OPEN |
+| BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | FIXED |
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | OPEN |
 | BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | OPEN |
 | BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | OPEN |
@@ -748,7 +750,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Đếm view tin client; tách khỏi cookie last-click.
 - **Impact:** Thống kê `/dashboard/thong-ke` (ADMIN) không đáng tin. Không mở CRM data của NV khác — chỉ số.
 - **Evidence:** `recordPublicPageView(body?.shareCode, hasBearerToken)`. `ShareAttributedViewTracker` `POST /public/page-views`. Không chỗ nào verify cookie vs body.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: `recordPublicPageView` / `recordAttributedPageView` chỉ cộng NV khi cookie `crmanhung_share` còn hạn và khớp body/path (nếu gửi). Không cookie / lệch mã → Truy cập trực tiếp.
 
 ### BUG-038 — `POST /public/lot-shares/:code/visit` tăng đếm không cùng rule resolve
 

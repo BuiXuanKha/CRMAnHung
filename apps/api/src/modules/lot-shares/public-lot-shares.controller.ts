@@ -1,4 +1,6 @@
-import { Controller, Get, Headers, Param, Post } from '@nestjs/common';
+import { Controller, Get, Headers, Param, Post, Req } from '@nestjs/common';
+import type { Request } from 'express';
+import { PUBLIC_SHARE_COOKIE } from '@crmanhung/shared';
 import { Public } from '../../common/decorators/public.decorator';
 import { LotSharesService } from './lot-shares.service';
 
@@ -21,10 +23,13 @@ export class PublicLotSharesController {
   @Public()
   @Post(':code/page-view')
   recordPageView(
+    @Req() req: Request,
     @Param('code') code: string,
     @Headers('authorization') authorization?: string,
   ) {
     const hasBearerToken = Boolean(authorization?.toLowerCase().startsWith('bearer '));
-    return this.lotShares.recordAttributedPageView(code, hasBearerToken);
+    const raw = req.cookies?.[PUBLIC_SHARE_COOKIE];
+    const shareCookieRaw = typeof raw === 'string' ? raw : undefined;
+    return this.lotShares.recordAttributedPageView(code, shareCookieRaw, hasBearerToken);
   }
 }
