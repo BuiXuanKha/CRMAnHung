@@ -61,7 +61,7 @@ export function FilterBar({
           onKeyDown={(e) => {
             if (e.key === 'Enter') submitSearch();
           }}
-          placeholder="Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)"
+          placeholder="Tìm tên, SĐT, Facebook, UID, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)"
           aria-label="Tìm khách hàng"
         />
       </div>

@@ -3,6 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { digitsFromPhoneRaw } from '@crmanhung/shared';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
@@ -82,23 +83,37 @@ export class CustomersService {
 
     const keyword = query.keyword?.trim();
     if (keyword) {
-      and.push({
-        OR: [
-          { fullName: { contains: keyword, mode: 'insensitive' } },
-          { note: { contains: keyword, mode: 'insensitive' } },
-          { phones: { some: { phone: { contains: keyword } } } },
-          {
-            careNotes: {
-              some: {
-                OR: [
-                  { needSummary: { contains: keyword, mode: 'insensitive' } },
-                  { note: { contains: keyword, mode: 'insensitive' } },
-                ],
-              },
+      // BUG-019: FB name/UID + normalized phone (no threadId — nobody searches by it).
+      const phoneDigits = digitsFromPhoneRaw(keyword);
+      const or: Prisma.CustomerWhereInput[] = [
+        { fullName: { contains: keyword, mode: 'insensitive' } },
+        { note: { contains: keyword, mode: 'insensitive' } },
+        { phones: { some: { phone: { contains: keyword } } } },
+        {
+          facebook: {
+            is: {
+              OR: [
+                { facebookName: { contains: keyword, mode: 'insensitive' } },
+                { customerUid: { contains: keyword, mode: 'insensitive' } },
+              ],
             },
           },
-        ],
-      });
+        },
+        {
+          careNotes: {
+            some: {
+              OR: [
+                { needSummary: { contains: keyword, mode: 'insensitive' } },
+                { note: { contains: keyword, mode: 'insensitive' } },
+              ],
+            },
+          },
+        },
+      ];
+      if (phoneDigits && phoneDigits !== keyword) {
+        or.push({ phones: { some: { phone: { contains: phoneDigits } } } });
+      }
+      and.push({ OR: or });
     }
 
     const budget = budgetFilterWhere(query.budgetFilter);
