@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -166,11 +167,17 @@ export async function addCustomerPhone(
 
   const taken = await findByPhoneForEmployee(prisma, existing.employeeId, phone);
   if (taken && taken.id !== id) {
-    const mergeAllowed = !taken.facebook;
+    // BUG-017: chỉ NV phụ trách mới được gộp; Admin không gộp.
+    const mergeAllowed =
+      user.role !== 'ADMIN' &&
+      existing.employeeId === user.id &&
+      !taken.facebook;
     throwPhoneDuplicate({
       message: mergeAllowed
         ? 'Số điện thoại này đã thuộc khách chỉ có SĐT — có thể gộp hồ sơ Facebook vào.'
-        : 'Số điện thoại này đã thuộc khách khác có liên hệ Facebook.',
+        : taken.facebook
+          ? 'Số điện thoại này đã thuộc khách khác có liên hệ Facebook.'
+          : 'Số điện thoại này đã thuộc khách khác — chỉ nhân viên phụ trách mới được gộp.',
       existing: mapExisting(taken),
       mergeAllowed,
       phone,
@@ -271,11 +278,17 @@ export async function updateCustomerPhone(
 
   const taken = await findByPhoneForEmployee(prisma, existing.employeeId, phone);
   if (taken && taken.id !== id) {
-    const mergeAllowed = !taken.facebook;
+    // BUG-017: chỉ NV phụ trách mới được gộp; Admin không gộp.
+    const mergeAllowed =
+      user.role !== 'ADMIN' &&
+      existing.employeeId === user.id &&
+      !taken.facebook;
     throwPhoneDuplicate({
       message: mergeAllowed
         ? 'Số điện thoại này đã thuộc khách chỉ có SĐT — có thể gộp hồ sơ Facebook vào.'
-        : 'Số điện thoại này đã thuộc khách khác có liên hệ Facebook.',
+        : taken.facebook
+          ? 'Số điện thoại này đã thuộc khách khác có liên hệ Facebook.'
+          : 'Số điện thoại này đã thuộc khách khác — chỉ nhân viên phụ trách mới được gộp.',
       existing: mapExisting(taken),
       mergeAllowed,
       phone,
@@ -336,6 +349,13 @@ export async function mergeFacebookIntoPhoneHolder(
     throw new BadRequestException('Không thể gộp vào chính hồ sơ đó.');
   }
 
+  // BUG-017 (owner): Admin không có khách — không được gộp. Chỉ NV gộp khách của mình.
+  if (user.role === 'ADMIN') {
+    throw new ForbiddenException(
+      'Admin không gộp khách. Chỉ nhân viên phụ trách mới được gộp khách của mình.',
+    );
+  }
+
   const source = await prisma.customer.findUnique({
     where: { id: sourceId },
     include: { facebook: { select: { id: true } } },
@@ -354,12 +374,15 @@ export async function mergeFacebookIntoPhoneHolder(
   });
   if (!target) {
     throw new NotFoundException(
-      user.role === 'ADMIN'
-        ? 'Không tìm thấy khách đích.'
-        : 'Không tìm thấy khách đích hoặc không thuộc tài khoản của bạn.',
+      'Không tìm thấy khách đích hoặc không thuộc tài khoản của bạn.',
     );
   }
   assertCanAccess(user, target.employeeId);
+  if (source.employeeId !== target.employeeId || source.employeeId !== user.id) {
+    throw new ForbiddenException(
+      'Chỉ được gộp hai hồ sơ khách thuộc cùng nhân viên đang đăng nhập.',
+    );
+  }
   if (target.facebook) {
     throw new ConflictException({
       statusCode: 409,
