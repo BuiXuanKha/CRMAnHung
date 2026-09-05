@@ -129,6 +129,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | customers / permission | BUG-017 FIXED | Owner: Admin không gộp; chỉ NV gộp khách của mình (`source/target.employeeId === user.id`). |
 | 2026-09-05 | customers | BUG-016 defer | Owner: nghiêm trọng — bàn chi tiết / chốt thiết kế sau; **chưa code**. Giữ Person đích, chuyển hết quan hệ rồi mới xóa nguồn (không tạo Person mới). |
 | 2026-09-05 | customers | BUG-018 FIXED | Unique `(employeeId, phone)` + `(customerId, phone)`; normalize `0`+9; P2002 → 409. Không unique toàn hệ. |
+| 2026-09-05 | customers | BUG-019 FIXED | List keyword: + `facebookName` / `customerUid`; SĐT qua `digitsFromPhoneRaw`. Không tìm `threadId` (owner). |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -173,7 +174,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-016 | HIGH | customers | Gộp Facebook: mất SĐT nguồn, party SetNull, xóa map trùng lô; TitleService Restrict → merge vỡ. | OPEN |
 | BUG-017 | HIGH | customers / permission | Admin gộp Facebook giữa hai `employeeId` khác nhau — chuyển hồ sơ sang NV khác. | FIXED |
 | BUG-018 | HIGH | customers | SĐT không unique trên DB; không chuẩn hóa — race / format lệch tạo Person trùng. | FIXED |
-| BUG-019 | MEDIUM | customers | Tìm kiếm không khớp tên/UID Facebook; keyword SĐT không bỏ khoảng trắng. | OPEN |
+| BUG-019 | MEDIUM | customers | Tìm kiếm không khớp tên/UID Facebook; keyword SĐT không bỏ khoảng trắng. | FIXED |
 | BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | OPEN |
 | BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | OPEN |
 | BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | OPEN |
@@ -494,7 +495,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Search list không cover kênh Facebook; không normalize phone.
 - **Impact:** NV tạo thêm Person vì tưởng chưa có; miss khách FB-only.
 - **Evidence:** `customers.service.ts` `list` khối keyword. `filter-bar.tsx` placeholder.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: tìm `facebookName` + `customerUid`; **không** `threadId`. SĐT: thêm nhánh `digitsFromPhoneRaw(keyword)`. Placeholder list cập nhật.
 
 ### BUG-020 — Không ràng buộc một chủ active trên một lô
 
