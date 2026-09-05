@@ -124,9 +124,13 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | users / auth | BUG-011 FIXED | Create/reset: 6–18 + bắt buộc chữ và số; login không đổi. |
 | 2026-09-04 | web authz | BUG-012 FIXED | Middleware CRM theo cookie role; STAFF không vào route Admin (kèm BUG-083). |
 | 2026-09-04 | customers | BUG-013 note | DB prod: trùng UID khác page = đúng; 4 case buinam cùng page + E2EE khác thread (legacy) — để xử lý sau. |
+<<<<<<< HEAD
 | 2026-09-04 | customers | BUG-015 FIXED | PATCH/DELETE theo `phoneId` (không wipe số phụ); modal quản lý SĐT; FAB/gọi: 1 số → tel, ≥2 → picker. |
 | 2026-09-05 | customers / permission | BUG-017 FIXED | Owner: Admin không gộp; chỉ NV gộp khách của mình (`source/target.employeeId === user.id`). |
 | 2026-09-05 | customers | BUG-016 defer | Owner: nghiêm trọng — bàn chi tiết / chốt thiết kế sau; **chưa code**. Giữ Person đích, chuyển hết quan hệ rồi mới xóa nguồn (không tạo Person mới). |
+=======
+| 2026-09-04 | customers | BUG-014 deferred | Owner: để sau. Acknowledge trùng SĐT lúc tạo vẫn rename+unhide. |
+>>>>>>> a469949 (docs(audit): defer BUG-014 per owner)
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -428,7 +432,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Acknowledge = rename + unhide, tái sử dụng như “không tạo trùng”.
 - **Impact:** Ghi đè danh tính Person; khách ẩn bị hiện lại với tên sai.
 - **Evidence:** `customers-phone.ts` `acknowledgePhoneDuplicate`. `customer-list-page.tsx` `dup.mode === 'create'` → `acknowledgePhoneDuplicate(dup.existing.id, { fullName: dup.fullName \|\| existing })`. Modal: “bấm OK để cập nhật tên”.
-- **Status:** OPEN
+- **Status:** OPEN (deferred — 2026-09-04; owner: để sau)
 
 ### BUG-015 — Sửa SĐT xóa mọi số phụ
 
