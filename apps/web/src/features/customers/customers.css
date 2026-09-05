@@ -143,27 +143,98 @@
 /* BUG-015 — quản lý / chọn SĐT */
 .kh-phone-manage-list {
   list-style: none;
-  margin: 0;
+  margin: 0 0 14px;
   padding: 0;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 .kh-phone-manage-row {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+.kh-phone-manage-row:last-child {
+  border-bottom: 0;
+  padding-bottom: 0;
 }
 .kh-phone-manage-num {
-  font-weight: 600;
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  font-variant-numeric: tabular-nums;
+  color: #0f172a;
+  line-height: 1.3;
+  word-break: break-all;
 }
 .kh-phone-manage-actions {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+.kh-phone-manage-actions .crm-btn {
+  display: inline-flex;
+  width: 100%;
+  min-height: 42px;
+  align-items: center;
+  justify-content: center;
   gap: 6px;
 }
-.kh-phone-pick-btn {
+.kh-phone-manage-footer {
+  flex-direction: column-reverse;
+  align-items: stretch;
+  gap: 8px;
+  margin-top: 4px;
+}
+.kh-phone-manage-footer .crm-btn {
+  display: inline-flex;
   width: 100%;
+  min-height: 44px;
+  align-items: center;
   justify-content: center;
+  gap: 6px;
+}
+.kh-phone-pick-row {
+  list-style: none;
+}
+.kh-phone-pick-btn {
+  display: inline-flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .kh-phone-manage-row {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+  }
+  .kh-phone-manage-num {
+    font-size: 1rem;
+  }
+  .kh-phone-manage-actions {
+    display: flex;
+    width: auto;
+    flex: 0 0 auto;
+  }
+  .kh-phone-manage-actions .crm-btn {
+    width: auto;
+    min-height: 0;
+  }
+  .kh-phone-manage-footer {
+    flex-direction: row;
+    justify-content: flex-end;
+    align-items: center;
+  }
+  .kh-phone-manage-footer .crm-btn {
+    width: auto;
+    min-height: 0;
+  }
 }

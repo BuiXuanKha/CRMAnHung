@@ -111,7 +111,7 @@ export function ManageCustomerPhonesModal({
           {parseError || error ? (
             <p className="crm-form-error">{parseError || error}</p>
           ) : null}
-          <div className="crm-dialog-actions">
+          <div className="crm-dialog-actions kh-phone-manage-footer">
             <button
               type="button"
               className="crm-btn"
@@ -128,13 +128,13 @@ export function ManageCustomerPhonesModal({
       ) : (
         <div className="kh-phone-manage">
           {phones.length === 0 ? (
-            <p className="crm-form-hint">Chưa có số điện thoại.</p>
+            <p className="crm-form-hint">Chưa có số. Bấm «Thêm số» bên dưới.</p>
           ) : (
             <ul className="kh-phone-manage-list">
               {phones.map((p) => (
                 <li key={p.id} className="kh-phone-manage-row">
-                  <span className="kh-phone-manage-num">{p.phone}</span>
-                  <span className="kh-phone-manage-actions">
+                  <p className="kh-phone-manage-num">{p.phone}</p>
+                  <div className="kh-phone-manage-actions">
                     <button
                       type="button"
                       className="crm-btn"
@@ -142,7 +142,7 @@ export function ManageCustomerPhonesModal({
                       aria-label={`Sửa ${p.phone}`}
                       onClick={() => setDraft({ mode: 'edit', phone: p })}
                     >
-                      <Icon icon={Pencil} size={14} />
+                      <Icon icon={Pencil} size={16} />
                       Sửa
                     </button>
                     <button
@@ -152,16 +152,16 @@ export function ManageCustomerPhonesModal({
                       aria-label={`Xóa ${p.phone}`}
                       onClick={() => onDelete(p)}
                     >
-                      <Icon icon={Trash2} size={14} />
+                      <Icon icon={Trash2} size={16} />
                       Xóa
                     </button>
-                  </span>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
           {error ? <p className="crm-form-error">{error}</p> : null}
-          <div className="crm-dialog-actions">
+          <div className="crm-dialog-actions kh-phone-manage-footer">
             <button type="button" className="crm-btn" disabled={busy} onClick={onClose}>
               Đóng
             </button>
@@ -171,7 +171,7 @@ export function ManageCustomerPhonesModal({
               disabled={busy || phones.length >= 10}
               onClick={() => setDraft({ mode: 'add' })}
             >
-              <Icon icon={Plus} size={14} />
+              <Icon icon={Plus} size={16} />
               Thêm số
             </button>
           </div>
