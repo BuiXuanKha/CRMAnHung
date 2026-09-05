@@ -7,6 +7,7 @@ import {
   Matches,
   MaxLength,
   MinLength,
+  ValidateIf,
 } from 'class-validator';
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9._-]+$/;
@@ -65,12 +66,17 @@ export class UpdateUserDto {
   @MaxLength(120)
   fullName?: string;
 
-  @IsOptional()
+  /** Present → must be a full VN mobile. Null/empty rejected (admin may change, not clear). */
+  @ValidateIf((_, value) => value !== undefined)
   @Transform(({ value }) =>
     typeof value === 'string' ? value.replace(/\D/g, '') : value,
   )
-  @IsString()
-  @Matches(PHONE_PATTERN, { message: 'SĐT phải gồm 10 số, bắt đầu bằng 0' })
+  @IsString({
+    message: 'Không được xoá số điện thoại nhân viên — chỉ được đổi số.',
+  })
+  @Matches(PHONE_PATTERN, {
+    message: 'SĐT phải gồm 10 số, bắt đầu bằng 0. Không được xoá số.',
+  })
   phone?: string;
 
   @IsOptional()

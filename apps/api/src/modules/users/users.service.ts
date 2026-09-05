@@ -97,7 +97,15 @@ export class UsersService {
     const data: Prisma.UserUpdateInput = {};
     if (dto.username !== undefined) data.username = dto.username.trim().toLowerCase();
     if (dto.fullName !== undefined) data.fullName = dto.fullName.trim();
-    if (dto.phone !== undefined) data.phone = dto.phone.trim();
+    if (dto.phone !== undefined) {
+      const phone = typeof dto.phone === 'string' ? dto.phone.trim() : '';
+      if (!/^0\d{9}$/.test(phone)) {
+        throw new BadRequestException(
+          'Không được xoá số điện thoại nhân viên — chỉ được đổi sang số hợp lệ (10 số, bắt đầu bằng 0).',
+        );
+      }
+      data.phone = phone;
+    }
     if (dto.role !== undefined) data.role = dto.role;
     if (dto.isActive !== undefined) data.isActive = dto.isActive;
 

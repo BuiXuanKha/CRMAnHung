@@ -100,6 +100,9 @@ export function UserFormDialog({
         className="nv-form"
         onSubmit={(e) => {
           e.preventDefault();
+          if (!/^0\d{9}$/.test(form.phone.trim())) {
+            return;
+          }
           onSubmit(form);
         }}
       >
@@ -176,6 +179,10 @@ export function UserFormDialog({
             value={form.phone}
             disabled={busy}
             required
+            minLength={10}
+            maxLength={10}
+            pattern="0[0-9]{9}"
+            title="10 số, bắt đầu bằng 0 — không được xoá, chỉ được đổi số"
             placeholder="0xxxxxxxxx"
             onChange={(e) =>
               setForm((f) => ({
@@ -187,6 +194,11 @@ export function UserFormDialog({
               handlePhonePaste(e, (digits) => setForm((f) => ({ ...f, phone: digits })))
             }
           />
+          <span className="crm-form-hint">
+            {mode === 'edit'
+              ? 'Chỉ được đổi số — không xoá SĐT nhân viên.'
+              : 'Bắt buộc 10 số, bắt đầu bằng 0.'}
+          </span>
         </label>
         {mode === 'create' ? (
           <label>
