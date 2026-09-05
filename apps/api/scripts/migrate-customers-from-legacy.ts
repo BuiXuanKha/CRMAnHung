@@ -127,7 +127,6 @@ async function main() {
 
     const fullName =
       String(row.FullName || '').trim() || `Khách ${row.ID}`;
-    const note = String(row.Note || '').trim() || null;
     const status = String(row.Status || '').trim() || 'KHACH_MOI';
     const createdAt = toDate(row.CreatedAtMs) ?? new Date();
     const updatedAt = toDate(row.UpdatedAtMs) ?? createdAt;
@@ -138,7 +137,6 @@ async function main() {
       status,
       budgetMinVnd: toBudget(row.MinBudgetVnd),
       budgetMaxVnd: toBudget(row.MaxBudgetVnd),
-      note,
       isPinned,
       isHidden: Number(row.IsHidden) === 1,
       pinnedAt: isPinned ? toDate(row.PinnedAtMs) : null,

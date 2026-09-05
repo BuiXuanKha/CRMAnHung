@@ -35,7 +35,6 @@ export function AddByPhoneModal({
 }: Props) {
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');
-  const [note, setNote] = useState('');
   const [sourceHotlineId, setSourceHotlineId] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
@@ -47,7 +46,6 @@ export function AddByPhoneModal({
     if (!open) return;
     setFullName('');
     setPhone('');
-    setNote('');
     setParseError(null);
     setSourceHotlineId('');
     const t = window.setTimeout(() => nameRef.current?.focus(), 50);
@@ -78,7 +76,6 @@ export function AddByPhoneModal({
             fullName,
             phone,
             sourceHotlineId,
-            note,
           });
           if (!parsed.success) {
             setParseError(parsed.error.issues[0]?.message ?? 'Dữ liệu không hợp lệ.');
@@ -142,16 +139,6 @@ export function AddByPhoneModal({
             required
             onChange={(e) => setPhone(phoneDigitsFromChange(e))}
             onPaste={(e) => handlePhonePaste(e, setPhone)}
-          />
-        </label>
-        <label>
-          Ghi chú
-          <textarea
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Nguồn khách, nhu cầu sơ bộ..."
-            maxLength={500}
-            disabled={busy || noHotlines}
           />
         </label>
         {parseError || error ? (

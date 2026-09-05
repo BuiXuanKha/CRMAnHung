@@ -675,7 +675,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | List `/khach-hang`: menu Thao tác **Thêm / Sửa số điện thoại** (Lưu / Xóa); icon cam vẫn thêm nhanh |
 | 2026-08-30 | Panel phải + chi tiết khách: thẻ lô ảnh trái / chữ phải; bấm ảnh = gallery (+N); bấm chữ = `/lo-dat/[id]` |
 | 2026-08-30 | Cột phụ `/khach-hang`: ẩn thanh Chat / Chăm sóc / Lô khi khách không có tin, lịch sử, hoặc lô |
-| 2026-08-30 | Docs khách: Inbox Facebook sống ≠ cột phụ tin đã lưu / menu Mở chat; ô tìm API không khớp tên FB; `Customer.note` không hiện list |
+| 2026-08-30 | Docs khách: Inbox Facebook sống ≠ cột phụ tin đã lưu / menu Mở chat; ô tìm API không khớp tên FB |
 | 2026-08-31 | List `/lo-dat` cột Giá bán: dòng hoa hồng = chữ đã lưu (`brokerFeeNote`), không phải `%` số `commissionPercent` |
 | 2026-08-31 | `/lo-dat`: thiếu ảnh = ô xám + `ImageOff`; ô tìm không map chữ Nhà/Đất sang hangtag (lọc cột Phân loại) |
 | 2026-09-02 | STAFF header **Đăng web** → `/dashboard/lo-dat` (lô mình tạo). Preview **Gỡ web** khi đang hiện. Bài CMS + Tổng quan vẫn ADMIN |

@@ -213,7 +213,6 @@ export function toListItem(
     status: toStatus(row.status),
     budgetMinVnd: toBudgetNumber(row.budgetMinVnd),
     budgetMaxVnd: toBudgetNumber(row.budgetMaxVnd),
-    note: row.note,
     isPinned: row.isPinned,
     isHidden: row.isHidden,
     pinnedAt: toIso(row.pinnedAt),

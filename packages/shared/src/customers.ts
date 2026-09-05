@@ -76,8 +76,6 @@ export const customerListItemSchema = z.object({
   status: z.nativeEnum(CustomerStatus),
   budgetMinVnd: z.number().int().nullable().optional(),
   budgetMaxVnd: z.number().int().nullable().optional(),
-  /** Cột dư `tblPerson.Note` — không hiện list/chi tiết. Ô tìm API vẫn khớp. */
-  note: z.string().nullable().optional(),
   isPinned: z.boolean(),
   isHidden: z.boolean(),
   pinnedAt: z.string().nullable().optional(),
@@ -147,7 +145,6 @@ export const createCustomerSchema = z.object({
   fullName: z.string().trim().min(1, 'Vui lòng nhập tên khách').max(120),
   phone: vnPhoneInputSchema,
   sourceHotlineId: z.string().trim().min(1, 'Vui lòng chọn hotline khách đã liên hệ.'),
-  note: z.string().trim().max(500).optional(),
 });
 
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;
@@ -247,9 +244,6 @@ export type ContactChannelList = z.infer<typeof contactChannelListSchema>;
 export const updateCustomerSchema = z.object({
   fullName: z.string().trim().min(1, 'Tên khách không được để trống.').max(120).optional(),
   status: z.nativeEnum(CustomerStatus).optional(),
-  note: z.string().trim().nullable().optional(),
-  budgetMinVnd: z.number().int().nonnegative().nullable().optional(),
-  budgetMaxVnd: z.number().int().nonnegative().nullable().optional(),
   isPinned: z.boolean().optional(),
   isHidden: z.boolean().optional(),
 });

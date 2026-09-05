@@ -28,7 +28,6 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 |-----|--------|-----------|
 | Nhu cầu | `NeedSummary` (care) | Cột Nhu cầu = bản mới nhất không rỗng |
 | Ghi chú chăm sóc | `Note` (care) | Form chăm sóc; cột phụ lịch sử; trang chi tiết |
-| `Customer.note` | `tblPerson.Note` (cột dư) | Copy 5 khách. **Không hiện** list/chi tiết. Ô tìm API vẫn khớp |
 | Đã xoá | `isHidden` | Soft-hide |
 | Hangtag | KN / KM / CCS / Khác | Mục 3 UI-GUIDELINES |
 | Tin đã lưu | Scan extension + copy | Cột phụ **Nội dung chat** (`messageCount`) |
@@ -36,7 +35,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. `limit` mặc định 50, `offset` từ 0, `total` = COUNT. Mỗi dòng: `lodatCount`, `messageCount` (tin đã lưu), `careNoteCount` (lần chăm sóc) — cột phụ ẩn thanh khi = 0. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (cột phụ). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). **POST `/api/v1/customers`** — thêm khách bằng SĐT (hotline + tên + số + ghi chú). **GET `/api/v1/customers/contact-channels`** — lọc kênh. **POST `/api/v1/customers/from-extension`** — ingest scan + tin; ảnh chat + avatar raster → WebP (`storage.upload`). Scanner Chrome vẫn stub. **Không** API inbox Meta sống.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. `limit` mặc định 50, `offset` từ 0, `total` = COUNT. Mỗi dòng: `lodatCount`, `messageCount` (tin đã lưu), `careNoteCount` (lần chăm sóc) — cột phụ ẩn thanh khi = 0. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (cột phụ). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). **POST `/api/v1/customers`** — thêm khách bằng SĐT (hotline + tên + số). **GET `/api/v1/customers/contact-channels`** — lọc kênh. **POST `/api/v1/customers/from-extension`** — ingest scan + tin; ảnh chat + avatar raster → WebP (`storage.upload`). Scanner Chrome vẫn stub. **Không** API inbox Meta sống.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -80,7 +79,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 11. **Xoá / sửa SĐT** — menu Thao tác (không icon thùng rác trên dòng). **Xong.** NV phụ trách khách. Icon cam vẫn thêm nhanh khi chưa có số.
 12. **Sửa tên khách** — bút trên tên (máy tính). Có trên staging.
 13. **Sửa tên Facebook** — **không làm.** Không bút / modal sửa tay. Tên FB (`facebookName`) do **extension** ghi khi scan.
-14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Có trên staging.
+14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *. Chưa có hotline → Cài đặt SĐT. Có trên staging.
 15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Có trên staging.
 16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách» → `PATCH isHidden: false` (xoá `autoRestoredAt`). **Xong.** Tìm lại bằng `@` / `@@`. Extension tự khôi phục = mục 25.
 17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care, không rỗng). Có trên staging (237 khách có lịch sử).
@@ -131,7 +130,6 @@ Hangtag **Clear** (`CrmBadge` gray) hiện **ngay sau con trỏ** khi ô không 
 
 - Tên CRM (`fullName`)
 - Mọi SĐT
-- `Customer.note` (cột dư — **không hiện** trên list/chi tiết)
 - Nhu cầu (`NeedSummary`) **và** ghi chú (`Note`) trong **mọi** lần chăm sóc
 
 **Không** khớp tên Facebook (`facebookName`) trên API. Tên FB vẫn hiện dòng phụ máy tính.
@@ -148,7 +146,7 @@ STAFF không thấy khách người khác.
 
 Cùng hàng ô tìm, bên phải.
 
-Bấm → modal **Thêm khách hàng bằng số điện**: hotline * (bắt buộc), tên *, SĐT * (`0` + 9 số), ghi chú. Trùng SĐT → modal xác nhận. Chưa có hotline → bảo vào Cài đặt SĐT.
+Bấm → modal **Thêm khách hàng bằng số điện**: hotline * (bắt buộc), tên *, SĐT * (`0` + 9 số). Trùng SĐT → modal xác nhận. Chưa có hotline → bảo vào Cài đặt SĐT.
 
 #### 12.1.3 Bộ lọc
 
@@ -481,7 +479,7 @@ Chi tiết thứ tự: [`MIGRATION.md`](../MIGRATION.md) — **một bảng / m�
 
 `tblPerson` → `Customer` + map entity `customer`.
 
-Copy: `employeeId` (qua map `user`), tên, trạng thái, tài chính (`BIGINT` — có khách 2,5 tỷ, vượt INT4), `note` (cột dư trên khách), ẩn, ghim + `pinnedAt`, `autoRestoredAt`, ngày tạo/sửa.
+Copy: `employeeId` (qua map `user`), tên, trạng thái, tài chính (`BIGINT` — có khách 2,5 tỷ, vượt INT4), ẩn, ghim + `pinnedAt`, `autoRestoredAt`, ngày tạo/sửa. **Không** copy `tblPerson.Note` (cột dư đã bỏ khỏi model).
 
 Lúc copy: `sourceHotlineId` = null (FK cho phép trống). Gắn nguồn ở **§13.3** sau khi có bảng hotline.
 
@@ -497,7 +495,7 @@ Freeze: NV ngừng sửa CRM cũ; Extension tắt. Chỉ đọc SQLite.
 | Khách ẩn | Copy cả. |
 | Ghim | `IsPinned` + `PinnedAtMs` → `isPinned` + `pinnedAt`. |
 | Tự khôi phục | `AutoRestoredAtMs` → `autoRestoredAt`. |
-| `tblPerson.Note` | Cột dư. Copy vào `Customer.note` (5 khách lúc freeze). Cột Nhu cầu = lịch sử — **sau**. |
+| `tblPerson.Note` | Cột dư Person — **không** migrate (đã drop `Customer.note`). Ghi chú dùng = care `Note`. |
 | Trạng thái + tài chính | Snapshot trên khách. |
 | Hotline nguồn | Copy **hết** hotline (kể cả tắt) rồi gắn `sourceHotlineId`. 22 khách lúc freeze có nguồn. |
 | Trùng SĐT 2 NV | Giữ nguyên khi copy SĐT (cùng số trên 2 hồ sơ = 2 dòng). Lúc freeze: 0. |
@@ -546,7 +544,7 @@ Script: `pnpm phones:migrate-legacy`. **Xong staging (152/152).**
 
 Lúc freeze: **266** dòng / **237** khách có lịch sử (215 một lần, 18 hai lần, 4 nhiều hơn). Mọi dòng đều có `NeedSummary` (max 94 ký tự). 86 dòng có `Note`. 0 NV trống. Bảng cũ **không** có cột ngân sách / Source trên history — ngân sách list vẫn lấy snapshot trên `Customer`.
 
-Cột Nhu cầu list = `NeedSummary` mới nhất **không rỗng** (`CreatedAtMs DESC, ID DESC`) — cùng CRM cũ. Ghi chú mới nhất (`Note`) → `latestCareNote` (cột phụ). Ô tìm khớp mọi `NeedSummary` + `Note` chăm sóc **và** `Customer.note` (cột dư). **Không** khớp `facebookName`.
+Cột Nhu cầu list = `NeedSummary` mới nhất **không rỗng** (`CreatedAtMs DESC, ID DESC`) — cùng CRM cũ. Ghi chú mới nhất (`Note`) → `latestCareNote` (cột phụ). Ô tìm khớp mọi `NeedSummary` + `Note` chăm sóc. **Không** khớp `facebookName`.
 
 Cột phụ **Lịch sử chăm sóc** đọc `GET /customers/:id` (nhu cầu + ghi chú). Slice copy **không** bật form cập nhật (mục 2) — form = **§13.8**.
 
@@ -586,7 +584,7 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 
 ### 13.11 Slice này — thêm khách SĐT, trùng/gộp, sửa tên, lọc
 
-- **POST `/api/v1/customers`** `{ fullName, phone, sourceHotlineId, note? }`. Hotline phải của NV đang bật. Trùng SĐT cùng NV → `409 PHONE_DUPLICATE`; OK = cập nhật tên + khôi phục nếu đang ẩn (`PATCH .../acknowledge-phone-duplicate`).
+- **POST `/api/v1/customers`** `{ fullName, phone, sourceHotlineId }`. Hotline phải của NV đang bật. Trùng SĐT cùng NV → `409 PHONE_DUPLICATE`; OK = cập nhật tên + khôi phục nếu đang ẩn (`PATCH .../acknowledge-phone-duplicate`).
 - **GET `/api/v1/users/me/hotlines`**. Chưa có hotline → Cài đặt → Quản lý SĐT (thêm / bật-tắt).
 - **SĐT chuẩn (BUG-018):** mọi ghi qua `digitsFromPhoneRaw` → `0` + 9 số. DB: `CustomerPhone.employeeId` + unique `(employeeId, phone)` và `(customerId, phone)` — cùng số hai NV vẫn được; race → `409`. Không unique SĐT toàn hệ.
 - Thêm SĐT cam trùng: `409` kèm `mergeAllowed` (chỉ **STAFF** phụ trách khách; Admin không gộp). Gộp Facebook → khách chỉ có SĐT: **POST `/customers/merge-facebook-into-phone-holder`** — chỉ NV, hai hồ sơ cùng `employeeId` = user; Admin → 403.

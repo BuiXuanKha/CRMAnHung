@@ -152,7 +152,6 @@ export async function createManualCustomer(
 ) {
   const fullName = dto.fullName.trim();
   const phone = normalizeCustomerPhone(dto.phone);
-  const note = dto.note?.trim() || null;
 
   const hotline = await prisma.employeeHotline.findFirst({
     where: { id: dto.sourceHotlineId, employeeId: user.id, isActive: true },
@@ -178,7 +177,6 @@ export async function createManualCustomer(
       data: {
         employeeId: user.id,
         fullName,
-        note,
         status: 'KHACH_MOI',
         sourceHotlineId: hotline.id,
         phones: {
