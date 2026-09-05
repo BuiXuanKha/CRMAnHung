@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 65 |
+| OPEN | 64 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 18 |
+| FIXED / CLOSED | 19 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -136,6 +136,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | customers | BUG-022 FIXED | Owner: bỏ `Customer.note` (drop cột); modal thêm SĐT không còn ô ghi chú; budget chỉ qua care. |
 | 2026-09-05 | lodats | BUG-030 FIXED | API `@Min(0)` + service reject DT/MT âm — khớp Zod web. |
 | 2026-09-05 | lodats / web | BUG-031 FIXED | Owner: mặc định lọc Mở bán; thêm «Tất cả trạng thái» thật (`includePaused`). |
+| 2026-09-05 | lodats / customers | BUG-032 FIXED | Owner: badge số lô STAFF chỉ đếm lô mình tạo (vd. Anh Nam 3 lô → Kha 2, Dũng 1). |
 | 2026-09-05 | lodats / db | BUG-033 CLOSED | Owner: không sao — không sửa CHECK XOR; API đã chặn lúc tạo. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -194,7 +195,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-029 | MEDIUM | lodats | Unique SQL 1 luồng/NV/kho không khớp Prisma/`create` (chỉ map active); không đóng luồng. | OPEN |
 | BUG-030 | MEDIUM | lodats | API nhận DT/MT âm; Zod/FE `nonnegative` — lệch frontend/backend. | FIXED |
 | BUG-031 | MEDIUM | lodats / web | Dropdown «Tất cả trạng thái» không gửi `includePaused`; API mặc định chỉ `DANG_BAN`. | FIXED |
-| BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | OPEN |
+| BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | FIXED |
 | BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | CLOSED |
 | BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | OPEN |
 | BUG-035 | HIGH | lot-shares | Middleware ghi cookie `?share=` đúng format dù resolve 404 — ghi đè last-click; `employeeId` rỗng reset hạn 30 ngày. | OPEN |
@@ -671,7 +672,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Hai truy vấn khác tiêu chí ownership.
 - **Impact:** NV tưởng khách có lô nhưng không mở được; hoặc ngược lại sau đổi chủ xuyên NV.
 - **Evidence:** `loadLodatCounts`. `listForCustomer` comment «STAFF chỉ lô mình tạo». `customers.service.ts` `listLodats` → `listForCustomer`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — `loadLodatCounts(user)`: STAFF lọc `lodat.createdByEmployeeId = user.id` (khớp `listForCustomer`); ADMIN đếm mọi map active. Badge Kha/Dũng = số lô mình tạo trên khách đó.
 
 ### BUG-033 — Database không ràng buộc XOR đất dân / lô kho
 
