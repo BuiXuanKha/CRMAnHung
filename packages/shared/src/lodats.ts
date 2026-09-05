@@ -178,6 +178,8 @@ export const lodatDetailSchema = lodatListItemSchema.extend({
   owner: lodatOwnerSchema.nullable().optional(),
   canEditSpecs: z.boolean().default(false),
   canEditMap: z.boolean().default(false),
+  /** Chỉ NV giữ luồng — Admin không đổi chủ (owner 2026-09-05). */
+  canChangeOwner: z.boolean().default(false),
   canEditImages: z.boolean().default(false),
   ownerHistory: z.array(lodatOwnerHistoryItemSchema).default([]),
   transactionHistory: z.array(lodatTransactionHistoryItemSchema).default([]),
