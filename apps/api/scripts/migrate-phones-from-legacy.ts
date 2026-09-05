@@ -5,7 +5,8 @@
  * Needs map `customer` (customers already copied).
  * Primary phone on list = SortOrder ASC, then ID ASC (same as CRM cũ).
  *
- * Duplicate numbers across employees are kept as-is.
+ * Normalize via digitsFromPhoneRaw → `0` + 9 digits (BUG-018).
+ * Same number across employees is kept (unique is per employeeId + phone).
  *
  * Usage (on VPS, from apps/api):
  *   LEGACY_SQLITE=/var/www/anhungland-crm/database/facebook_customer_crm.db \
@@ -13,6 +14,7 @@
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { digitsFromPhoneRaw } from '@crmanhung/shared';
 import { PrismaClient } from '@prisma/client';
 
 const PHONE_ENTITY = 'customer_phone';
@@ -95,6 +97,15 @@ async function main() {
     );
   }
 
+  const customerIds = [...new Set(customerMap.values())];
+  const customers = await prisma.customer.findMany({
+    where: { id: { in: customerIds } },
+    select: { id: true, employeeId: true },
+  });
+  const employeeByCustomer = new Map(
+    customers.map((c) => [c.id, c.employeeId] as const),
+  );
+
   const rows = sqliteJson<LegacyPhone>(
     sqlitePath,
     `SELECT ID, PersonId, Phone, Label, SortOrder, CreatedAtMs
@@ -115,15 +126,23 @@ async function main() {
       continue;
     }
 
-    const phone = String(row.Phone || '').trim();
-    if (!phone) {
-      console.warn(`  Bỏ phone ID=${row.ID}: số trống`);
+    const employeeId = employeeByCustomer.get(customerId);
+    if (!employeeId) {
+      console.warn(`  Bỏ phone ID=${row.ID}: thiếu employeeId cho ${customerId}`);
+      skipped += 1;
+      continue;
+    }
+
+    const phone = digitsFromPhoneRaw(String(row.Phone || ''));
+    if (!/^0\d{9}$/.test(phone)) {
+      console.warn(`  Bỏ phone ID=${row.ID}: số không chuẩn «${row.Phone}»`);
       skipped += 1;
       continue;
     }
 
     const data = {
       customerId,
+      employeeId,
       phone,
       label: trimOrNull(row.Label),
       sortOrder: Number.isFinite(Number(row.SortOrder)) ? Number(row.SortOrder) : 0,
@@ -135,15 +154,21 @@ async function main() {
       ? await prisma.customerPhone.findUnique({ where: { id: mappedId } })
       : null;
 
-    const saved = existing
-      ? await prisma.customerPhone.update({ where: { id: existing.id }, data })
-      : await prisma.customerPhone.create({ data });
+    try {
+      const saved = existing
+        ? await prisma.customerPhone.update({ where: { id: existing.id }, data })
+        : await prisma.customerPhone.create({ data });
 
-    await upsertMap(prisma, PHONE_ENTITY, row.ID, saved.id);
-    phoneMap.set(String(row.ID), saved.id);
-    copied += 1;
+      await upsertMap(prisma, PHONE_ENTITY, row.ID, saved.id);
+      phoneMap.set(String(row.ID), saved.id);
+      copied += 1;
+    } catch (err) {
+      console.warn(`  Bỏ phone ID=${row.ID}: unique conflict (${phone} / NV)`);
+      skipped += 1;
+      console.warn(err);
+    }
 
-    if (copied % 50 === 0) {
+    if (copied % 50 === 0 && copied > 0) {
       console.log(`  … ${copied}/${rows.length}`);
     }
   }

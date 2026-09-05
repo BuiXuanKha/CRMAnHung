@@ -27,6 +27,7 @@ model User {
 
   refreshTokens     RefreshToken[]
   customers         Customer[]             @relation("CustomerOwner")
+  customerPhones    CustomerPhone[]
   facebookProfiles  EmployeeFacebookProfile[]
   hotlines          EmployeeHotline[]
   careNotes         CustomerCareNote[]
@@ -117,15 +118,21 @@ model CustomerFacebook {
 model CustomerPhone {
   id         String   @id @default(cuid())
   customerId String
+  /// Denormalized from Customer — enforces one Person per SĐT per NV (BUG-018).
+  employeeId String
   phone      String
   label      String?
   sortOrder  Int      @default(0)
   createdAt  DateTime @default(now())
 
   customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  employee User     @relation(fields: [employeeId], references: [id], onDelete: Restrict)
 
+  @@unique([customerId, phone])
+  @@unique([employeeId, phone])
   @@index([customerId])
   @@index([phone])
+  @@index([employeeId])
 }
 
 model CustomerMessengerMessage {
