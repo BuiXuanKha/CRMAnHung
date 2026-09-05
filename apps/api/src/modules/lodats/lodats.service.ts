@@ -829,6 +829,9 @@ export class LodatsService {
     if (!Number.isFinite(n)) {
       throw new BadRequestException('Số không hợp lệ.');
     }
+    if (n < 0) {
+      throw new BadRequestException('Diện tích / mặt tiền không được âm.');
+    }
     return n;
   }
 
