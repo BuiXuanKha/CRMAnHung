@@ -109,7 +109,8 @@ function guardCrmRoutes(request: NextRequest): NextResponse | null {
 /**
  * Last-click staff cookie: 30 days; same employee does not reset the clock;
  * a different employee overwrites and restarts. No `?share=` → leave cookie as-is.
- * Always persist a valid-format code so homepage can resolve even if lookup is slow.
+ * BUG-035: only persist when resolve succeeds (live code + active staff).
+ * Bad/unknown/disabled codes must not overwrite a prior good cookie.
  */
 export async function middleware(request: NextRequest) {
   const crmGuard = guardCrmRoutes(request);
@@ -119,12 +120,15 @@ export async function middleware(request: NextRequest) {
   if (!code) return NextResponse.next();
 
   const lookedUp = await lookupShareEmployee(code);
+  // Resolve failed (404 / inactive / timeout) — keep existing last-click cookie.
+  if (!lookedUp) return NextResponse.next();
+
   const nowMs = Date.now();
   const existing = parsePublicShareCookie(request.cookies.get(PUBLIC_SHARE_COOKIE)?.value);
   const next = nextPublicShareCookie({
     nowMs,
     shareCode: code,
-    employeeId: lookedUp?.employeeId ?? '',
+    employeeId: lookedUp.employeeId,
     existing,
   });
   const maxAge = remainingShareCookieMaxAgeSec(next.expiresAtMs, nowMs);

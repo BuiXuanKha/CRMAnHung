@@ -141,6 +141,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lodats / customers | BUG-032 FIXED | Owner: badge số lô STAFF chỉ đếm lô mình tạo (vd. Anh Nam 3 lô → Kha 2, Dũng 1). |
 | 2026-09-05 | lodats / db | BUG-033 CLOSED | Owner: không sao — không sửa CHECK XOR; API đã chặn lúc tạo. |
 | 2026-09-05 | lodats | BUG-034 FIXED | Owner: lỗi copy ảnh chat → xóa lô vừa tạo (rollback); không để lô mồ côi / retry trùng. |
+| 2026-09-05 | lot-shares / web | BUG-035 FIXED | Owner: chỉ ghi cookie `?share=` khi resolve thành công; mã rác/404 không đè last-click. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -205,6 +206,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | OPEN |
 | BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | FIXED |
 | BUG-035 | HIGH | lot-shares | Middleware ghi cookie `?share=` đúng format dù resolve 404 — ghi đè last-click; `employeeId` rỗng reset hạn 30 ngày. | OPEN |
+| BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | OPEN |
+| BUG-035 | HIGH | lot-shares | Middleware ghi cookie `?share=` đúng format dù resolve 404 — ghi đè last-click; `employeeId` rỗng reset hạn 30 ngày. | FIXED |
 | BUG-036 | HIGH | lot-shares | Không API xóa/sửa/xoay mã share; gỡ publish / disable NV chỉ ẩn resolve; publish lại mã cũ còn hiệu lực. | OPEN |
 | BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | OPEN |
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | OPEN |
@@ -717,7 +720,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Cố tình persist format-valid code trước khi biết mã còn sống; không tách timeout vs 404.
 - **Impact:** Link giả / NV đã khóa / lô gỡ web cướp attribution 30 ngày. Đối thủ gửi khách URL `?share=` rác để xóa cookie NV.
 - **Evidence:** `middleware.ts` `lookedUp?.employeeId ?? ''` rồi luôn set cookie. `lot-shares.ts` `nextPublicShareCookie`. `resolveShareCode` 404 khi `!isPublished` / `!isActive`. Domain `public-content.md` §18 last-click.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: middleware chỉ set cookie + share header khi `lookupShareEmployee` thành công. Resolve fail → `NextResponse.next()` giữ cookie last-click cũ.
 
 ### BUG-036 — Không thu hồi được share; disable/gỡ web chỉ ẩn resolve; mã cũ sống lại
 
