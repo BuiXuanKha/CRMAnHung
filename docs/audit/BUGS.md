@@ -133,6 +133,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lodats | BUG-020 FIXED | Unique 1 chủ active/lô (ensure index); Admin **không** đổi chủ — chỉ NV giữ luồng. |
 | 2026-09-05 | lodats | BUG-028 FIXED | Owner: Admin không đổi chủ (cùng PR BUG-020) — hết gắn Person xuyên NV qua change-owner. |
 | 2026-09-05 | customers / extension | BUG-021 FIXED | Ingest tự khôi phục khách ẩn + `autoRestoredAt`; hangtag «Tự khôi phục» (CRM cũ). |
+| 2026-09-05 | customers | BUG-022 FIXED | Owner: bỏ `Customer.note` (drop cột); modal thêm SĐT không còn ô ghi chú; budget chỉ qua care. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -180,7 +181,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-019 | MEDIUM | customers | Tìm kiếm không khớp tên/UID Facebook; keyword SĐT không bỏ khoảng trắng. | FIXED |
 | BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | FIXED |
 | BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | FIXED |
-| BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | OPEN |
+| BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | FIXED |
 | BUG-023 | HIGH | lodats / public-content | `GET /public/listings/:slug` không kiểm tra Mở bán — lô Tạm dừng vẫn mở được bằng URL. | OPEN |
 | BUG-024 | HIGH | lodats / public-content | Gỡ Đăng web cũng đi qua `requireOpenLodat` — lô Tạm dừng không gỡ được listing. | OPEN |
 | BUG-025 | HIGH | lodats / transactions | Xóa GD mở ép map `DANG_BAN`; tạo/sửa/hoàn tất GD không đụng trạng thái rao bán. | OPEN |
@@ -537,7 +538,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** DTO Nest không implement đủ contract shared.
 - **Impact:** Ghi chú Person cũ kẹt; client theo shared gửi `note` thì lỗi.
 - **Evidence:** `update-customer.dto.ts` vs `updateCustomerSchema`. `customers.service.ts` `data` không có `note`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: bỏ hẳn `Customer.note` (drop cột Prisma + migration). Modal thêm SĐT bỏ ô ghi chú. Contract create/update không còn `note`/budget trên khách; ghi chú + tài chính chỉ qua care-notes. Ô tìm không khớp cột dư. Migrate legacy không copy `tblPerson.Note`.
 
 ### BUG-023 — Chi tiết public theo slug không ẩn lô đã Tạm dừng
 

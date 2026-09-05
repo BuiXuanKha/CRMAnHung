@@ -87,7 +87,6 @@ export class CustomersService {
       const phoneDigits = digitsFromPhoneRaw(keyword);
       const or: Prisma.CustomerWhereInput[] = [
         { fullName: { contains: keyword, mode: 'insensitive' } },
-        { note: { contains: keyword, mode: 'insensitive' } },
         { phones: { some: { phone: { contains: keyword } } } },
         {
           facebook: {

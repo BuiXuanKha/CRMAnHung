@@ -69,7 +69,6 @@ model Customer {
   status          String   @default("KHACH_MOI")
   budgetMinVnd    BigInt?
   budgetMaxVnd    BigInt?
-  note            String?
   isPinned        Boolean  @default(false)
   isHidden        Boolean  @default(false)
   pinnedAt        DateTime?
