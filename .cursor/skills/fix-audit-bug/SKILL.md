@@ -1,6 +1,6 @@
 ---
 name: fix-audit-bug
-description: Fix one OPEN bug from docs/audit/BUGS.md. Verify still open, explain as Admin/staff with real DB examples when needed, propose fix before coding, ask before merge/deploy. Use when owner says sửa bug, BUG-NNN, sang bug N, or audit bug fix.
+description: Fix one OPEN bug from docs/audit/BUGS.md. Verify still open, explain as Admin/staff with real DB examples when needed, open a PR per bug, batch ask merge/deploy every 5 PRs. Use when owner says sửa bug, BUG-NNN, sang bug N, or audit bug fix.
 ---
 
 # Sửa bug audit — CRMAnHung
@@ -19,11 +19,11 @@ description: Fix one OPEN bug from docs/audit/BUGS.md. Verify still open, explai
 ③ Báo owner: còn → giải thích kiểu thao tác NV/Admin + ví dụ DB thật (khi cần) + cách sửa
          không còn → đóng/ghi FIXED hoặc CLOSED (by design) — không sửa thừa
     ↓ owner đồng ý sửa (hoặc «sửa đi»)
-④ Sửa tối thiểu + typecheck + cập nhật BUGS.md
+④ Sửa tối thiểu + typecheck + cập nhật BUGS.md + PR
     ↓
-⑤ Hỏi owner: có merge vào main để deploy không?
-    ↓ chỉ khi owner đồng ý
-⑥ Skill deploy-staging (①b nhánh cũ → merge main → Actions)
+⑤ Batch merge/deploy — xem mục «Batch 5 PR» (không hỏi deploy sau mỗi bug)
+    ↓ khi đủ điều kiện / owner bảo deploy
+⑥ Skill deploy-staging (①b gộp hết PR pending → merge main → Actions một lần)
 ```
 
 ### ① Đọc bug
@@ -84,22 +84,43 @@ Mẫu giọng (đúng ý owner):
 - Áp dụng skill liên quan nếu đụng UI / auth / R2 / SEO (`ui-guidelines`, `security-baseline`, …).
 - Typecheck module đã đụng; smoke logic liên quan.
 - Cập nhật `docs/audit/BUGS.md`: Status `FIXED`, ghi chú Fix, nhật ký audit; chỉnh đếm OPEN / FIXED.
-- Commit + push + mở/cập nhật PR draft.
+- Commit + push + mở/cập nhật PR (draft OK). **Chưa merge.**
+- Kết thúc lượt: báo ngắn «BUG-NNN xong — PR #… (chờ batch)» + đếm PR bug chưa merge (xem dưới). Sang bug tiếp nếu owner đang duyệt tuần tự.
 
-### ⑤ Hỏi merge / deploy
+### ⑤ Batch 5 PR rồi mới hỏi merge / deploy
 
-Sau khi PR sẵn sàng (typecheck OK; CI xanh nếu đã chạy), **hỏi owner**:
+Owner chốt: **không** hỏi merge/deploy sau mỗi bug — chờ deploy từng cái rất chậm.
 
-> BUG-NNN đã sửa xong (PR #…). Bạn có muốn **merge vào `main` để deploy** lên anhungland.com không?
+**Đếm PR bugfix đang mở vào `main`:**
 
-- **Không** tự merge/deploy.
-- Owner đồng ý → skill **`deploy-staging`** (bắt buộc bước ①b: liệt kê PR/nhánh `cursor/*` chưa merge và hỏi nếu còn PR khác).
-- Owner chưa đồng ý → dừng; giữ PR.
+```bash
+gh pr list --base main --state open --limit 30 \
+  --json number,title,headRefName,isDraft,statusCheckRollup
+```
+
+Chỉ tính PR `cursor/fix-bug-*` (hoặc title/body rõ `BUG-NNN` audit fix). Không tính PR skill/docs linh tinh trừ khi owner bảo gộp chung.
+
+| Tình huống | Việc làm |
+|------------|----------|
+| Chưa đủ **5** PR bug mở | **Không** hỏi deploy. Tiếp bug / chờ owner. Nhắc: `Đã có N/5 PR — chưa hỏi deploy.` |
+| Đủ **≥ 5** PR bug mở | **Một lần** hỏi: liệt kê PR # theo thứ tự BUG (nhỏ → lớn), xin phép **merge tuần tự rồi deploy một lần**. |
+| Owner nói **deploy** / **merge deploy** bất kỳ lúc nào | Làm ngay (kể cả &lt; 5) — skill `deploy-staging` (①b gộp hết pending). |
+| Owner nói **merge PR này** / **deploy ngay bug N** | Merge đúng phạm vi owner nói; không ép đủ 5. |
+
+Khi được phép batch:
+
+1. CI xanh từng PR (hoặc sửa cho xanh).
+2. `gh pr ready` nếu draft.
+3. Merge **tuần tự** theo số BUG tăng dần (tránh conflict chồng).
+4. Một lần push `main` → Actions deploy (skill **`deploy-staging`**).
+5. Sau deploy: health check; nhắc owner đợt đã lên gồm BUG-… nào.
+
+**Không** tự merge/deploy khi chưa đủ 5 và owner chưa bảo deploy.
 
 ### ⑥ Sau deploy (nếu có)
 
 - Theo dõi Actions deploy.
-- Nhắc cách check nhanh trên https://anhungland.com (đúng mục «Sửa xong sẽ thành như nào»).
+- Nhắc cách check nhanh trên https://anhungland.com (các bug trong đợt).
 
 ## Giọng giải thích
 
@@ -114,7 +135,8 @@ Sau khi PR sẵn sàng (typecheck OK; CI xanh nếu đã chạy), **hỏi owner*
 - Giải thích chỉ bằng jargon (unique index, DTO…) mà **không** nói được user bấm gì ở màn nào.
 - Bịa ví dụ «như thật» khi chưa query — phải ghi là giả định.
 - Ghi/sửa DB chỉ để tạo case demo.
-- Sửa xong rồi **tự** merge/deploy mà chưa hỏi (bước ⑤).
+- Hỏi merge/deploy **sau mỗi** bug fix (trái batch 5) — trừ khi owner chủ động bảo deploy/merge ngay.
+- Tự merge/deploy khi chưa đủ 5 PR và owner chưa bảo deploy.
 - Gộp nhiều BUG-NNN vào một PR trừ khi owner bảo gộp.
 - Coi UI ẩn nút là đủ bảo mật (xem `security-baseline`).
 - Đụng `crm.anhungland.com` / cây CRM cũ khi deploy.
@@ -125,4 +147,5 @@ Sau khi PR sẵn sàng (typecheck OK; CI xanh nếu đã chạy), **hỏi owner*
 - [ ] Owner đã được giải thích kiểu thao tác NV/Admin (+ ví dụ DB nếu cần) / đồng ý hướng sửa
 - [ ] Fix tối thiểu + typecheck
 - [ ] `docs/audit/BUGS.md` cập nhật FIXED
-- [ ] Đã hỏi merge/deploy — chỉ merge khi owner đồng ý
+- [ ] PR đã mở, **chưa** merge (trừ khi đang chạy batch / owner bảo deploy)
+- [ ] Đếm PR bug mở: &lt; 5 → không hỏi deploy; ≥ 5 → hỏi merge tuần tự + deploy một lần
