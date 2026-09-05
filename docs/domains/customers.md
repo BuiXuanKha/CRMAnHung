@@ -119,7 +119,7 @@ Thứ tự mỗi trang: **12.1 máy tính** → **12.2 mobile** → trong từng
 
 #### 12.1.1 Ô tìm kiếm
 
-Placeholder: `Tìm tên, SĐT, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)`
+Placeholder: `Tìm tên, SĐT, Facebook, UID, nhu cầu, ghi chú... (@ cả đã xoá, @@ chỉ đã xoá)`
 
 Gõ → debounce ~250ms rồi lọc.
 
