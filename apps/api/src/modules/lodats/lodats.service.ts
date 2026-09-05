@@ -988,50 +988,68 @@ export class LodatsService {
       select: { id: true },
     });
 
-    // Ảnh chat reuse — copy sang key SEO của lô; giữ file customers/chat/ gốc
+    // Ảnh chat reuse — copy sang key SEO của lô; giữ file customers/chat/ gốc.
+    // BUG-034: lỗi copy/ghi ảnh → xóa lô vừa tạo (không để mồ côi / retry trùng).
     if (!isProject && dto.chatImageIds?.length) {
-      const chatImages = await this.prisma.customerMessengerImage.findMany({
-        where: {
-          id: { in: dto.chatImageIds.slice(0, 5) },
-          message: { customerFacebook: { customerId: customer.id } },
-        },
-        orderBy: [{ createdAt: 'asc' }],
-        select: { id: true, objectKey: true, rotationDeg: true },
-      });
-      const ordered = dto.chatImageIds
-        .map((id) => chatImages.find((img) => img.id === id))
-        .filter((img): img is (typeof chatImages)[number] => Boolean(img))
-        .slice(0, 5);
-      if (ordered.length) {
-        const createdFull = await this.prisma.lodat.findUniqueOrThrow({
-          where: { id: created.id },
-          include: LIST_INCLUDE,
+      const copiedKeys: string[] = [];
+      try {
+        const chatImages = await this.prisma.customerMessengerImage.findMany({
+          where: {
+            id: { in: dto.chatImageIds.slice(0, 5) },
+            message: { customerFacebook: { customerId: customer.id } },
+          },
+          orderBy: [{ createdAt: 'asc' }],
+          select: { id: true, objectKey: true, rotationDeg: true },
         });
-        const title =
-          createdFull.title?.trim() ||
-          createdFull.projectLot?.title?.trim() ||
-          'Lô đất';
-        const location = this.formatAddress(this.resolveAddress(createdFull));
-        const keys: string[] = [];
-        for (let i = 0; i < ordered.length; i += 1) {
-          const img = ordered[i]!;
-          keys.push(
-            await copyPublicImageToSeoLotKey(this.storage, img.objectKey, {
+        const ordered = dto.chatImageIds
+          .map((id) => chatImages.find((img) => img.id === id))
+          .filter((img): img is (typeof chatImages)[number] => Boolean(img))
+          .slice(0, 5);
+        if (ordered.length) {
+          const createdFull = await this.prisma.lodat.findUniqueOrThrow({
+            where: { id: created.id },
+            include: LIST_INCLUDE,
+          });
+          const title =
+            createdFull.title?.trim() ||
+            createdFull.projectLot?.title?.trim() ||
+            'Lô đất';
+          const location = this.formatAddress(this.resolveAddress(createdFull));
+          for (let i = 0; i < ordered.length; i += 1) {
+            const img = ordered[i]!;
+            copiedKeys.push(
+              await copyPublicImageToSeoLotKey(this.storage, img.objectKey, {
+                lodatId: created.id,
+                title,
+                location,
+                index: i + 1,
+              }),
+            );
+          }
+          await this.prisma.lodatImage.createMany({
+            data: ordered.map((img, i) => ({
               lodatId: created.id,
-              title,
-              location,
-              index: i + 1,
-            }),
-          );
+              objectKey: copiedKeys[i] ?? img.objectKey,
+              sortOrder: i,
+              rotationDeg: ((img.rotationDeg % 360) + 360) % 360,
+            })),
+          });
         }
-        await this.prisma.lodatImage.createMany({
-          data: ordered.map((img, i) => ({
-            lodatId: created.id,
-            objectKey: keys[i] ?? img.objectKey,
-            sortOrder: i,
-            rotationDeg: ((img.rotationDeg % 360) + 360) % 360,
-          })),
+      } catch (err) {
+        this.logger.warn(
+          `Chat image copy failed for lodat ${created.id}; rolling back create`,
+          err instanceof Error ? err.stack : err,
+        );
+        await this.prisma.lodat.delete({ where: { id: created.id } }).catch((delErr) => {
+          this.logger.error(
+            `Failed to roll back lodat ${created.id} after chat image error`,
+            delErr instanceof Error ? delErr.stack : delErr,
+          );
         });
+        for (const key of copiedKeys) {
+          await this.storage.delete(key, 'public');
+        }
+        throw err;
       }
     }
 
