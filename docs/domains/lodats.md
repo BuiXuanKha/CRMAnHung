@@ -64,7 +64,7 @@ Lô **đất dân** không dùng chung kho: thửa do NV tạo, NV khác không 
 
 Trong **một luồng NV**, chủ có thể chuyển nhượng (đóng map cũ, mở map mới).
 
-Quyền đổi chủ thuộc **nhân viên đang giữ luồng đó** (là người tạo `Lodat` trỏ `ProjectLot` và gắn chủ cho lô thuộc dự án). ADMIN có quyền tương tự.
+Quyền đổi chủ thuộc **nhân viên đang giữ luồng đó** (người tạo `Lodat`). **Admin không đổi chủ** (chốt owner 2026-09-05).
 
 ### 0.4 Hai bảng lô — trỏ kho, không copy (chốt)
 
@@ -473,12 +473,12 @@ Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thôn
 
 #### 12.4.4 Đổi chủ
 
-Nút **Đổi chủ** (cùng hàng tiêu đề «Chủ đất & giá bán»). Chỉ hiện khi `canEditMap` (NV giữ luồng / ADMIN).
+Nút **Đổi chủ** (cùng hàng tiêu đề «Chủ đất & giá bán»). Chỉ hiện khi `canChangeOwner` (NV giữ luồng — **không** Admin).
 
 Bấm → **CrmDialog** form «Đổi chủ đất»:
 
 1. Dòng chủ hiện tại (tên).
-2. Ô tìm khách (tên / SĐT) — debounce ~250ms; STAFF chỉ khách của mình; ADMIN mọi khách đang hiện (`isHidden=false`). **Không** liệt kê chủ đang active.
+2. Ô tìm khách (tên / SĐT) — debounce ~250ms; chỉ khách của NV đang login. **Không** liệt kê chủ đang active.
 3. Danh sách: tên đậm + SĐT; bấm một dòng = chọn (viền xanh).
 4. Khối **map mới** (điền sẵn từ form/map đang mở, sửa được): trạng thái · giá · ghi chú giá (+ chip) · hoa hồng (+ chip) · ghi chú liên kết chủ.
 5. Huỷ · **Đổi chủ** (primary). Chưa chọn khách / trùng chủ hiện tại → không gửi.
@@ -526,7 +526,7 @@ Xếp dọc như §12.4.2 (một cột; Huỷ/Tạo cuối form; nút «Thêm �
 |----------|------|
 | `GET /lodats/project-lots?addressId=` | Kho lô của địa chỉ PROJECT + cờ `takenByMe` |
 | `POST /lodats` | Tạo lô dân (addressId REGULAR + specs) hoặc lô dự án (projectLotId) + map chủ; chặn ADMIN; khách phải thuộc NV |
-| `POST /lodats/:id/change-owner` | Đổi chủ: đóng map active, mở map mới. Body `{ customerId, status?, priceVnd?, priceNote?, brokerFeeNote?, mapNote? }`. STAFF: lô mình + khách mình. ADMIN: mọi lô / khách đang hiện. |
+| `POST /lodats/:id/change-owner` | Đổi chủ: đóng map active, mở map mới. Body `{ customerId, status?, priceVnd?, priceNote?, brokerFeeNote?, mapNote? }`. **Chỉ STAFF** giữ luồng + khách của mình. ADMIN → 403. |
 
 ---
 

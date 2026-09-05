@@ -130,6 +130,8 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | customers | BUG-016 defer | Owner: nghiêm trọng — bàn chi tiết / chốt thiết kế sau; **chưa code**. Giữ Person đích, chuyển hết quan hệ rồi mới xóa nguồn (không tạo Person mới). |
 | 2026-09-05 | customers | BUG-018 FIXED | Unique `(employeeId, phone)` + `(customerId, phone)`; normalize `0`+9; P2002 → 409. Không unique toàn hệ. |
 | 2026-09-05 | customers | BUG-019 FIXED | List keyword: + `facebookName` / `customerUid`; SĐT qua `digitsFromPhoneRaw`. Không tìm `threadId` (owner). |
+| 2026-09-05 | lodats | BUG-020 FIXED | Unique 1 chủ active/lô (ensure index); Admin **không** đổi chủ — chỉ NV giữ luồng. |
+| 2026-09-05 | lodats | BUG-028 FIXED | Owner: Admin không đổi chủ (cùng PR BUG-020) — hết gắn Person xuyên NV qua change-owner. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -175,7 +177,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-017 | HIGH | customers / permission | Admin gộp Facebook giữa hai `employeeId` khác nhau — chuyển hồ sơ sang NV khác. | FIXED |
 | BUG-018 | HIGH | customers | SĐT không unique trên DB; không chuẩn hóa — race / format lệch tạo Person trùng. | FIXED |
 | BUG-019 | MEDIUM | customers | Tìm kiếm không khớp tên/UID Facebook; keyword SĐT không bỏ khoảng trắng. | FIXED |
-| BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | OPEN |
+| BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | FIXED |
 | BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | OPEN |
 | BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | OPEN |
 | BUG-023 | HIGH | lodats / public-content | `GET /public/listings/:slug` không kiểm tra Mở bán — lô Tạm dừng vẫn mở được bằng URL. | OPEN |
@@ -183,7 +185,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-025 | HIGH | lodats / transactions | Xóa GD mở ép map `DANG_BAN`; tạo/sửa/hoàn tất GD không đụng trạng thái rao bán. | OPEN |
 | BUG-026 | HIGH | lodats | API ép `DAT_COC`/`DA_BAN` → `TAM_DUNG`; Lưu/công tắc ghi đè status thật trên map. | OPEN |
 | BUG-027 | MEDIUM | lodats / customers | Ẩn khách không đóng map — lô vẫn hiện chủ đã xoá; không API gỡ chủ/xóa lô. | OPEN |
-| BUG-028 | MEDIUM | lodats | Admin đổi chủ không bắt khách thuộc NV giữ luồng — gán nhầm Person sang lô NV khác. | OPEN |
+| BUG-028 | MEDIUM | lodats | Admin đổi chủ không bắt khách thuộc NV giữ luồng — gán nhầm Person sang lô NV khác. | FIXED |
 | BUG-029 | MEDIUM | lodats | Unique SQL 1 luồng/NV/kho không khớp Prisma/`create` (chỉ map active); không đóng luồng. | OPEN |
 | BUG-030 | MEDIUM | lodats | API nhận DT/MT âm; Zod/FE `nonnegative` — lệch frontend/backend. | OPEN |
 | BUG-031 | MEDIUM | lodats / web | Dropdown «Tất cả trạng thái» không gửi `includePaused`; API mặc định chỉ `DANG_BAN`. | OPEN |
@@ -508,7 +510,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Thiếu unique partial index `lodatId WHERE isActive`.
 - **Impact:** Sai chủ đất hiển thị; GD lấy `findFirst` active `orderBy updatedAt` — có thể lệch Person.
 - **Evidence:** Schema `LodatCustomerMap`. `LIST_INCLUDE` take 1. `transactions.service.ts` `findFirst` `{ lodatId, isActive: true }`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Unique partial `LodatCustomerMap_lodatId_active_uidx` (đã có từ 20260824; migration ensure + dedupe). `changeOwner` bắt `P2002`. **Owner:** Admin **không** đổi chủ — chỉ NV giữ luồng (`canChangeOwner`); API `403` nếu ADMIN.
 
 ### BUG-021 — Extension cập nhật khách đã ẩn, không khôi phục
 
@@ -612,7 +614,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Authz Admin = mọi khách hệ thống, không giới hạn hồ sơ của creator lô.
 - **Impact:** Gán nhầm chủ đất xuyên NV; panel khách của B có badge lô (count) nhưng list lô trống nếu B không tạo `Lodat`.
 - **Evidence:** `changeOwner` sau `assertCanAccess` (lô). Check khách chỉ `user.role !== 'ADMIN'`. `ownershipWhere` STAFF = `createdByEmployeeId: user.id`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: Admin **không** đổi chủ lô. `changeOwner` Forbidden nếu ADMIN; `canChangeOwner` chỉ NV `createdByEmployeeId === user.id`. Khách phải thuộc NV đó. (Đóng luôn rủi ro gắn Person xuyên NV.)
 
 ### BUG-029 — Unique 1 luồng/NV/lô kho lệch Prisma và `create()`; không đóng được luồng
 

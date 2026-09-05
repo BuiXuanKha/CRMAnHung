@@ -483,6 +483,7 @@ model LodatTempImage {
 }
 
 /// Map NV–khách–lô: giá, mở bán, lịch sử chủ (isActive / endedAt).
+/// 1 chủ active / lodat: unique index SQL `LodatCustomerMap_lodatId_active_uidx` (BUG-020).
 model LodatCustomerMap {
   id                  String    @id @default(cuid())
   lodatId             String

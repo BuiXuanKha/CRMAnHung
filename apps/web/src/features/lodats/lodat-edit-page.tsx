@@ -123,6 +123,7 @@ export function LodatEditPage() {
   const isProject = Boolean(detail?.projectLotId);
   const canEditSpecs = detail?.canEditSpecs ?? false;
   const canEditMap = detail?.canEditMap ?? false;
+  const canChangeOwner = detail?.canChangeOwner ?? false;
   const canEditImages = detail?.canEditImages ?? false;
   const images = detail?.images ?? [];
   const lodatImageCount = images.filter((i) => i.source === 'lodat').length;
@@ -397,7 +398,7 @@ export function LodatEditPage() {
               <section className="ld-edit-card">
                 <div className="ld-edit-section-head">
                   <h2 className="ld-edit-section-title">Chủ đất & giá bán</h2>
-                  {canEditMap ? (
+                  {canChangeOwner ? (
                     <button
                       type="button"
                       className="ld-edit-change-owner"

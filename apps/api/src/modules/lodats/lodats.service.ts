@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   ForbiddenException,
   Injectable,
   Logger,
@@ -318,6 +319,9 @@ export class LodatsService {
         : null,
       canEditSpecs: canAccess && !isProject,
       canEditMap: canAccess,
+      // Owner: Admin không đổi chủ — chỉ NV tạo luồng.
+      canChangeOwner:
+        user.role !== 'ADMIN' && row.createdByEmployeeId === user.id,
       canEditImages: canAccess && !isProject,
       ownerHistory,
       transactionHistory,
@@ -645,6 +649,13 @@ export class LodatsService {
       throw new BadRequestException('Chọn khách làm chủ mới.');
     }
 
+    // Owner 2026-09-05: Admin không đổi chủ lô — chỉ NV giữ luồng.
+    if (user.role === 'ADMIN') {
+      throw new ForbiddenException(
+        'Admin không đổi chủ lô. Chỉ nhân viên giữ luồng mới được đổi chủ.',
+      );
+    }
+
     const row = await this.prisma.lodat.findUnique({
       where: { id },
       include: LIST_INCLUDE,
@@ -661,7 +672,7 @@ export class LodatsService {
     if (!customer || customer.isHidden) {
       throw new NotFoundException('Không tìm thấy khách hàng.');
     }
-    if (user.role !== 'ADMIN' && customer.employeeId !== user.id) {
+    if (customer.employeeId !== user.id) {
       throw new NotFoundException('Không tìm thấy khách hàng.');
     }
 
@@ -671,41 +682,53 @@ export class LodatsService {
     }
 
     const now = new Date();
-    await this.prisma.$transaction(async (tx) => {
-      await tx.lodatCustomerMap.updateMany({
-        where: { lodatId: id, isActive: true },
-        data: { isActive: false, endedAt: now },
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        await tx.lodatCustomerMap.updateMany({
+          where: { lodatId: id, isActive: true },
+          data: { isActive: false, endedAt: now },
+        });
+        await tx.lodatCustomerMap.create({
+          data: {
+            lodatId: id,
+            customerId: customer.id,
+            priceVnd:
+              dto.priceVnd !== undefined
+                ? this.parsePrice(dto.priceVnd) ?? null
+                : (activeMap?.priceVnd ?? null),
+            priceNote:
+              dto.priceNote !== undefined
+                ? dto.priceNote?.trim() || null
+                : (activeMap?.priceNote ?? null),
+            brokerFeeNote:
+              dto.brokerFeeNote !== undefined
+                ? dto.brokerFeeNote?.trim() || null
+                : (activeMap?.brokerFeeNote ?? null),
+            note:
+              dto.mapNote !== undefined
+                ? dto.mapNote?.trim() || null
+                : (activeMap?.note ?? null),
+            status: dto.status ?? activeMap?.status ?? 'DANG_BAN',
+            isActive: true,
+            createdByEmployeeId: user.id,
+          },
+        });
+        await tx.lodat.update({
+          where: { id },
+          data: { updatedAt: now },
+        });
       });
-      await tx.lodatCustomerMap.create({
-        data: {
-          lodatId: id,
-          customerId: customer.id,
-          priceVnd:
-            dto.priceVnd !== undefined
-              ? this.parsePrice(dto.priceVnd) ?? null
-              : (activeMap?.priceVnd ?? null),
-          priceNote:
-            dto.priceNote !== undefined
-              ? dto.priceNote?.trim() || null
-              : (activeMap?.priceNote ?? null),
-          brokerFeeNote:
-            dto.brokerFeeNote !== undefined
-              ? dto.brokerFeeNote?.trim() || null
-              : (activeMap?.brokerFeeNote ?? null),
-          note:
-            dto.mapNote !== undefined
-              ? dto.mapNote?.trim() || null
-              : (activeMap?.note ?? null),
-          status: dto.status ?? activeMap?.status ?? 'DANG_BAN',
-          isActive: true,
-          createdByEmployeeId: user.id,
-        },
-      });
-      await tx.lodat.update({
-        where: { id },
-        data: { updatedAt: now },
-      });
-    });
+    } catch (err) {
+      if (
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002'
+      ) {
+        throw new ConflictException(
+          'Lô đang có chủ active khác (thao tác trùng). Thử lại.',
+        );
+      }
+      throw err;
+    }
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({
       where: { id },
