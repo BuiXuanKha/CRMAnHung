@@ -125,10 +125,16 @@ export const KIND_FILTER_OPTIONS = [
   { value: LodatKind.DAT, label: 'Đất' },
 ];
 
+/** Sentinel lọc «Tất cả» = Mở bán + Tạm dừng (`includePaused`). */
+export const STATUS_FILTER_ALL = 'all';
+
+/** Mặc định list: chỉ Mở bán (ý owner — tập trung lô đang bán). */
+export const STATUS_FILTER_DEFAULT = LodatSaleStatus.DANG_BAN;
+
 export const STATUS_FILTER_OPTIONS = [
-  { value: '', label: 'Tất cả trạng thái' },
   { value: LodatSaleStatus.DANG_BAN, label: 'Mở bán' },
   { value: LodatSaleStatus.TAM_DUNG, label: 'Tạm dừng' },
+  { value: STATUS_FILTER_ALL, label: 'Tất cả trạng thái' },
 ];
 
 export function formatSpecsInline(p: LodatListItem): string {
@@ -171,7 +177,8 @@ export function countActiveLodatFilters(
   priceBracket: PriceBracket = '',
 ): number {
   let n = 0;
-  if (status) n += 1;
+  // Mặc định Mở bán không tính là «đang lọc»; Tất cả / Tạm dừng thì có.
+  if (status && status !== STATUS_FILTER_DEFAULT) n += 1;
   if (kind) n += 1;
   if (extra.photo !== 'all') n += 1;
   if (extra.address !== 'all') n += 1;
@@ -182,7 +189,7 @@ export function countActiveLodatFilters(
 }
 
 export function countMobileLodatFilters(status: string, priceBracket: PriceBracket): number {
-  return (status ? 1 : 0) + (priceBracket ? 1 : 0);
+  return (status && status !== STATUS_FILTER_DEFAULT ? 1 : 0) + (priceBracket ? 1 : 0);
 }
 
 export function applyExtraFilters(
