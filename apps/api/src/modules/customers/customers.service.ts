@@ -266,7 +266,11 @@ export class CustomersService {
     const data: Prisma.CustomerUpdateInput = {};
     if (dto.fullName !== undefined) data.fullName = dto.fullName.trim();
     if (dto.status !== undefined) data.status = dto.status;
-    if (dto.isHidden !== undefined) data.isHidden = dto.isHidden;
+    if (dto.isHidden !== undefined) {
+      data.isHidden = dto.isHidden;
+      // Ẩn tay hoặc khôi phục tay → bỏ hangtag «Tự khôi phục» (chỉ dành cho extension).
+      data.autoRestoredAt = null;
+    }
     if (dto.isPinned !== undefined) {
       data.isPinned = dto.isPinned;
       data.pinnedAt = dto.isPinned ? new Date() : null;

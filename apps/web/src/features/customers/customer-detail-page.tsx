@@ -101,6 +101,9 @@ export function CustomerDetailPage() {
               <h1>{customer.fullName}</h1>
               <CrmBadge tone={statusTone(customer.status)}>{statusLabel(customer.status)}</CrmBadge>
               {customer.isHidden ? <CrmBadge tone="red">Đã xoá</CrmBadge> : null}
+              {!customer.isHidden && customer.autoRestoredAt ? (
+                <CrmBadge tone="amber">Tự khôi phục</CrmBadge>
+              ) : null}
             </div>
             <p className="kh-detail-channel">{channelLabel(customer)}</p>
             <dl className="kh-detail-meta">

@@ -63,7 +63,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 | 2 | Tạo hồ sơ sổ đỏ từ khách (§11 mục 7) | **Xong.** Form `/khach-hang/[id]/dich-vu-so-do`. |
 | 3 | Xoá / sửa SĐT (§11 mục 11) | **Xong.** Menu → modal quản lý nhiều số (thêm/sửa/xoá); FAB gọi: 1 số thẳng, ≥2 chọn số. |
 | 4 | Sửa tên Facebook (§11 mục 13) | **Không làm.** Tên FB nhận từ extension khi scan; không modal sửa tay. |
-| 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Chưa làm.** Khi extension kéo lại khách ẩn (API ingest không tự khôi phục — §13.14). |
+| 5 | Hangtag «Tự khôi phục» (§11 mục 25) | **Xong.** Extension scan khách ẩn → `isHidden: false` + `autoRestoredAt`; hangtag list/chi tiết. |
 | 6 | Inbox Facebook sống (§11 mục 27) | **Chưa làm; cần bàn.** Không phải cột phụ chat, không phải menu Mở chat. |
 | 7 | Quản trị khách / hard-delete (§11 mục 26) | **Chưa làm** (phần admin). |
 
@@ -82,7 +82,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 13. **Sửa tên Facebook** — **không làm.** Không bút / modal sửa tay. Tên FB (`facebookName`) do **extension** ghi khi scan.
 14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *, ghi chú. Chưa có hotline → Cài đặt SĐT. Có trên staging.
 15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Có trên staging.
-16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách» → `PATCH isHidden: false`. **Xong.** Tìm lại bằng `@` / `@@`. Extension **không** tự khôi phục (hangtag = mục 25).
+16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách» → `PATCH isHidden: false` (xoá `autoRestoredAt`). **Xong.** Tìm lại bằng `@` / `@@`. Extension tự khôi phục = mục 25.
 17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care, không rỗng). Có trên staging (237 khách có lịch sử).
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
 19. **Lọc tài chính** — chưa có / đã có / dưới 1 tỷ / 1–2 tỷ / trên 2 tỷ. Có trên staging.
@@ -91,7 +91,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 22. **Cột phụ danh sách lô** — thẻ: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. **API** (`GET /customers/:id/lodats`). Ẩn thanh khi `lodatCount = 0`.
 23. **Icon Map + số lô cạnh tên** — không cột «Số lô đất»; lọc lô = icon trên cột Tên; **không** icon mess trên item. **API `lodatCount`.**
 24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Có trên staging.
-25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn. **Chưa làm.** Không phụ thuộc menu khôi phục tay (mục 16). API ingest không tự `isHidden: false` (§13.14).
+25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn. **Xong.** `from-extension` set `isHidden: false` + `autoRestoredAt`. Ẩn/khôi phục tay xoá hangtag.
 26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder. **Chưa làm** (chốt 2026-08-24).
 27. **Inbox Facebook sống** — hội thoại Meta realtime **trong** CRM (CRM cũ: extension quét `business.facebook.com/latest/inbox`). **Chưa làm.** Không nhầm với mục 21. Cần bàn: iframe / cửa sổ phụ / chỉ dựa extension + tin đã lưu. Scanner `apps/extension` vẫn stub.
 
@@ -615,7 +615,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 
 **POST `/api/v1/customers/from-extension`** (JWT). Payload giống CRM cũ: `scan.threadId` hoặc `scan.customerUid` + `scan.avatarUrl` + `chatMessages[].imageUrls` (data URL / Facebook CDN).
 
-- Khớp khách của **NV đang login** theo thread rồi UID. Chưa có → tạo `KHACH_MOI`. **Không** tự khôi phục khách ẩn (hangtag §11 mục 25; menu khôi phục tay = mục 16 đã có). **Không** đổi SĐT.
+- Khớp khách của **NV đang login** theo thread rồi UID. Chưa có → tạo `KHACH_MOI`. Khách đang ẩn → **tự khôi phục** (`isHidden: false`, `autoRestoredAt`) + hangtag «Tự khôi phục» (§11 mục 25). **Không** đổi SĐT.
 - Avatar: URL rỗng → giữ ảnh cũ. Cùng pathname FB CDN (`rawMeta.avatarSourceKey`) và đã có R2 → không tải lại. URL mới → `sharp` WebP → R2 `customers/avatars/<customerId>/<hash>.webp` (`avatarObjectKey`). Tải/upload fail: giữ R2 cũ; chưa có ảnh thì lưu URL FB tạm (list vẫn hiện được).
 - Ảnh chat raster mới → `sharp` WebP (cạnh dài ≤ 2560) → R2 `customers/chat/<customerId>/{mid}-{n}.webp`. Video / path `/img/imgsmessenger/` cũ: bỏ qua.
 - Tin đã có đủ ảnh (kể cả JPEG migrate đã convert WebP) → không encode lại. Gắn ảnh chat vào lô: **copy** SEO WebP, giữ file chat (cùng key WebP sau `[seo-webp-replace]`).
