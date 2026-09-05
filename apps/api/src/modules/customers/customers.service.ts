@@ -149,7 +149,7 @@ export class CustomersService {
       await Promise.all([
         loadProfiles(this.prisma),
         loadCareSummaries(this.prisma, ids),
-        loadLodatCounts(this.prisma, ids),
+        loadLodatCounts(this.prisma, ids, user),
         loadMessageCounts(this.prisma, ids),
         loadCareNoteCounts(this.prisma, ids),
       ]);
@@ -181,7 +181,7 @@ export class CustomersService {
       await Promise.all([
         loadCareSummaries(this.prisma, [row.id]),
         loadCareNotes(this.prisma, row.id),
-        loadLodatCounts(this.prisma, [row.id]),
+        loadLodatCounts(this.prisma, [row.id], user),
         loadMessageCounts(this.prisma, [row.id]),
         loadCareNoteCounts(this.prisma, [row.id]),
       ]);
@@ -285,7 +285,7 @@ export class CustomersService {
       await Promise.all([
         loadCareSummaries(this.prisma, [row.id]),
         loadCareNotes(this.prisma, row.id),
-        loadLodatCounts(this.prisma, [row.id]),
+        loadLodatCounts(this.prisma, [row.id], user),
         loadMessageCounts(this.prisma, [row.id]),
         loadCareNoteCounts(this.prisma, [row.id]),
       ]);
