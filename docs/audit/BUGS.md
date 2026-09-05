@@ -142,6 +142,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lodats / db | BUG-033 CLOSED | Owner: không sao — không sửa CHECK XOR; API đã chặn lúc tạo. |
 | 2026-09-05 | lodats | BUG-034 FIXED | Owner: lỗi copy ảnh chat → xóa lô vừa tạo (rollback); không để lô mồ côi / retry trùng. |
 | 2026-09-05 | lot-shares / web | BUG-035 FIXED | Owner: chỉ ghi cookie `?share=` khi resolve thành công; mã rác/404 không đè last-click. |
+| 2026-09-05 | lot-shares | BUG-036 CLOSED | Owner: không phải lỗi — link share sống lâu; không thu hồi/tắt; sau chỉ đổi trạng thái mở bán/đã bán. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -209,6 +210,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | OPEN |
 | BUG-035 | HIGH | lot-shares | Middleware ghi cookie `?share=` đúng format dù resolve 404 — ghi đè last-click; `employeeId` rỗng reset hạn 30 ngày. | FIXED |
 | BUG-036 | HIGH | lot-shares | Không API xóa/sửa/xoay mã share; gỡ publish / disable NV chỉ ẩn resolve; publish lại mã cũ còn hiệu lực. | OPEN |
+| BUG-036 | HIGH | lot-shares | Không API xóa/sửa/xoay mã share; gỡ publish / disable NV chỉ ẩn resolve; publish lại mã cũ còn hiệu lực. | CLOSED |
 | BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | OPEN |
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | OPEN |
 | BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | OPEN |
@@ -733,7 +735,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Share = get-or-create; không vòng đời revoke. Trạng thái hiệu lực suy ra từ User/listing, không có cờ trên `PublicLotShare`.
 - **Impact:** Không «xóa share thì mất quyền» vì không có xóa. Quyền liên hệ/thống kê của mã chỉ tạm tắt. UI không có màn sửa/xóa share (ẩn hết) — backend cũng không có; không phải FE ẩn nhưng BE vẫn xóa được.
 - **Evidence:** Chỉ `POST` share-link + `GET/POST` public code + `GET` admin stats. Schema `PublicLotShare` không `revokedAt`. `createOrGetShareLinkForListing` `findUnique` employee+listing.
-- **Status:** OPEN
+- **Status:** CLOSED (2026-09-05) — Owner: không phải lỗi. Không thu hồi/tắt link; share sống lâu dài. Sau này phát triển thêm; hiệu lực theo trạng thái mở bán/đã bán (không revoke mã).
 
 ### BUG-037 — Cộng lượt xem public không chứng thực cookie share
 
