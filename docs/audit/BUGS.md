@@ -124,6 +124,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | users / auth | BUG-011 FIXED | Create/reset: 6–18 + bắt buộc chữ và số; login không đổi. |
 | 2026-09-04 | web authz | BUG-012 FIXED | Middleware CRM theo cookie role; STAFF không vào route Admin (kèm BUG-083). |
 | 2026-09-04 | customers | BUG-015 FIXED | PATCH/DELETE theo `phoneId` (không wipe số phụ); modal quản lý SĐT; FAB/gọi: 1 số → tel, ≥2 → picker. |
+| 2026-09-05 | customers | BUG-016 defer | Owner: nghiêm trọng — bàn chi tiết / chốt thiết kế sau; **chưa code**. Giữ Person đích, chuyển hết quan hệ rồi mới xóa nguồn (không tạo Person mới). |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -450,7 +451,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Merge chỉ chuyển FB + care + map còn lại; không xử lý TitleService / phone / party; xóa map overlap.
 - **Impact:** Mất dữ liệu hoặc không gộp được khi Person đã có sổ đỏ/GD. Hai Person vẫn tồn tại nếu Restrict.
 - **Evidence:** `mergeFacebookIntoPhoneHolder` dòng 383–411. Schema TitleService Restrict; TransactionParty SetNull; CustomerPhone Cascade.
-- **Status:** OPEN
+- **Status:** OPEN — **DEFERRED (owner 2026-09-05):** bàn kỹ / chốt thiết kế sau; **không sửa code** cho đến khi owner chốt. Ghi chú bàn: merge đúng nghĩa = gắn FB + quan hệ vào Person đích (có SĐT), rồi mới xóa Person nguồn rỗng — không tạo Person mới. Cần chốt trước khi code: (1) SĐT nguồn trùng đích; (2) map trùng lô + GD; (3) có kèm BUG-017 (Admin xuyên NV) hay không.
 
 ### BUG-017 — Admin gộp Facebook xuyên nhân viên
 
