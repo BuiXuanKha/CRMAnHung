@@ -4,7 +4,11 @@ import {
   type ListSavedState,
   type ListScrollSnapshot,
 } from '@/shared/list-state';
-import type { ExtraFilters, PriceBracket } from './display';
+import {
+  STATUS_FILTER_DEFAULT,
+  type ExtraFilters,
+  type PriceBracket,
+} from './display';
 
 export const LODAT_LIST_STATE_KEY = 'crmanhung:lodat-list-state';
 
@@ -44,7 +48,10 @@ const store = createListStateStore<LodatListFields>({
   key: LODAT_LIST_STATE_KEY,
   parseFields: (raw) => ({
     searchKeyword: typeof raw.searchKeyword === 'string' ? raw.searchKeyword : '',
-    status: typeof raw.status === 'string' ? raw.status : '',
+    status:
+      typeof raw.status === 'string' && raw.status
+        ? raw.status
+        : STATUS_FILTER_DEFAULT,
     kind: typeof raw.kind === 'string' ? raw.kind : '',
     extra: parseExtra(raw.extra),
     priceBracket: parsePriceBracket(raw.priceBracket),

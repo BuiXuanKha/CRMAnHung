@@ -209,7 +209,8 @@ Substring, không phân biệt hoa thường, **giữ dấu**.
 
 | Ô tìm | Tập lô |
 |-------|--------|
-| Không `@` | Chỉ **Mở bán** |
+| Không `@` + lọc **Mở bán** (mặc định) | Chỉ **Mở bán** |
+| Lọc **Tất cả trạng thái** | Mở bán **+** Tạm dừng (`includePaused`) |
 | `@` | Mở bán **+** Tạm dừng |
 | `@@` | **Chỉ** Tạm dừng |
 

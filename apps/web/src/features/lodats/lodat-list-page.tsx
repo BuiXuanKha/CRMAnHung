@@ -23,6 +23,8 @@ import { LodatCardList } from './components/lodat-card-list';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTable } from './components/lodat-table';
 import {
+  STATUS_FILTER_ALL,
+  STATUS_FILTER_DEFAULT,
   countMobileLodatFilters,
   parseSearchKeyword,
   type ExtraFilters,
@@ -81,7 +83,7 @@ export function LodatListPage() {
   const router = useRouter();
   const qc = useQueryClient();
   const [keyword, setKeyword] = useState('');
-  const [status, setStatus] = useState('');
+  const [status, setStatus] = useState<string>(STATUS_FILTER_DEFAULT);
   const [kind, setKind] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [priceBracket, setPriceBracket] = useState<PriceBracket>('');
@@ -117,10 +119,16 @@ export function LodatListPage() {
   };
 
   const search = parseSearchKeyword(keyword);
+  const statusAll = status === STATUS_FILTER_ALL;
+  const searchOverridesStatus = Boolean(search.includePaused || search.pausedOnly);
   // Lọc cột đẩy xuống API để phân trang đúng (§12.1.2)
   const listQuery: LodatListQuery = {
     ...search,
-    status: (status || undefined) as LodatListingStatus | undefined,
+    status:
+      statusAll || searchOverridesStatus || !status
+        ? undefined
+        : (status as LodatListingStatus),
+    includePaused: statusAll || Boolean(search.includePaused),
     kind: (kind || undefined) as LodatKind | undefined,
     priceBracket: priceBracket || undefined,
     areaBracket: extra.area !== 'all' ? extra.area : undefined,
@@ -383,7 +391,7 @@ export function LodatListPage() {
             onPriceBracket={setPriceBracket}
             hasActiveFilters={mobileFilterCount > 0}
             onResetFilters={() => {
-              setStatus('');
+              setStatus(STATUS_FILTER_DEFAULT);
               setPriceBracket('');
             }}
           />

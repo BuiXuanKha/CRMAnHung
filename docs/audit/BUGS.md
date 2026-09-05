@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 67 |
+| OPEN | 66 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 16 |
+| FIXED / CLOSED | 17 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -135,6 +135,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | customers / extension | BUG-021 FIXED | Ingest tự khôi phục khách ẩn + `autoRestoredAt`; hangtag «Tự khôi phục» (CRM cũ). |
 | 2026-09-05 | customers | BUG-022 FIXED | Owner: bỏ `Customer.note` (drop cột); modal thêm SĐT không còn ô ghi chú; budget chỉ qua care. |
 | 2026-09-05 | lodats | BUG-030 FIXED | API `@Min(0)` + service reject DT/MT âm — khớp Zod web. |
+| 2026-09-05 | lodats / web | BUG-031 FIXED | Owner: mặc định lọc Mở bán; thêm «Tất cả trạng thái» thật (`includePaused`). |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -191,7 +192,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-028 | MEDIUM | lodats | Admin đổi chủ không bắt khách thuộc NV giữ luồng — gán nhầm Person sang lô NV khác. | FIXED |
 | BUG-029 | MEDIUM | lodats | Unique SQL 1 luồng/NV/kho không khớp Prisma/`create` (chỉ map active); không đóng luồng. | OPEN |
 | BUG-030 | MEDIUM | lodats | API nhận DT/MT âm; Zod/FE `nonnegative` — lệch frontend/backend. | FIXED |
-| BUG-031 | MEDIUM | lodats / web | Dropdown «Tất cả trạng thái» không gửi `includePaused`; API mặc định chỉ `DANG_BAN`. | OPEN |
+| BUG-031 | MEDIUM | lodats / web | Dropdown «Tất cả trạng thái» không gửi `includePaused`; API mặc định chỉ `DANG_BAN`. | FIXED |
 | BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | OPEN |
 | BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | OPEN |
 | BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | OPEN |
@@ -656,7 +657,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** UI status rỗng ≠ `includePaused: true`.
 - **Impact:** Lô Tạm dừng / map `DAT_COC` (không `DANG_BAN`) biến mất khỏi list dù filter «Tất cả».
 - **Evidence:** `STATUS_FILTER_OPTIONS`. `lodats.service.ts` `list` nhánh `else if (!query.includePaused)`. `parseSearchKeyword` `@`/`@@`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: hành vi mặc định chỉ Mở bán là đúng ý. UI mặc định chọn **Mở bán**; thêm lựa chọn **Tất cả trạng thái** gửi `includePaused=true`. Reset lọc về Mở bán.
 
 ### BUG-032 — Số lô trên khách đếm mọi map; STAFF xem list lô khách thì chỉ lô mình tạo
 
