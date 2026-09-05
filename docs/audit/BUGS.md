@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 66 |
+| OPEN | 65 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 17 |
+| FIXED / CLOSED | 18 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -136,6 +136,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | customers | BUG-022 FIXED | Owner: bỏ `Customer.note` (drop cột); modal thêm SĐT không còn ô ghi chú; budget chỉ qua care. |
 | 2026-09-05 | lodats | BUG-030 FIXED | API `@Min(0)` + service reject DT/MT âm — khớp Zod web. |
 | 2026-09-05 | lodats / web | BUG-031 FIXED | Owner: mặc định lọc Mở bán; thêm «Tất cả trạng thái» thật (`includePaused`). |
+| 2026-09-05 | lodats / db | BUG-033 CLOSED | Owner: không sao — không sửa CHECK XOR; API đã chặn lúc tạo. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -194,7 +195,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-030 | MEDIUM | lodats | API nhận DT/MT âm; Zod/FE `nonnegative` — lệch frontend/backend. | FIXED |
 | BUG-031 | MEDIUM | lodats / web | Dropdown «Tất cả trạng thái» không gửi `includePaused`; API mặc định chỉ `DANG_BAN`. | FIXED |
 | BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | OPEN |
-| BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | OPEN |
+| BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | CLOSED |
 | BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | OPEN |
 | BUG-035 | HIGH | lot-shares | Middleware ghi cookie `?share=` đúng format dù resolve 404 — ghi đè last-click; `employeeId` rỗng reset hạn 30 ngày. | OPEN |
 | BUG-036 | HIGH | lot-shares | Không API xóa/sửa/xoay mã share; gỡ publish / disable NV chỉ ẩn resolve; publish lại mã cũ còn hiệu lực. | OPEN |
@@ -683,7 +684,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Luật §0.4 chỉ enforce ở service.
 - **Impact:** Hàng lô không hợp lệ; JOIN specs/địa chỉ sai loại. API bình thường không tạo được (XOR).
 - **Evidence:** `schema.prisma` Lodat. `create` `isProject === Boolean(dto.addressId)`. Không CHECK trong `apps/api/prisma/migrations` cho Lodat XOR.
-- **Status:** OPEN
+- **Status:** CLOSED (2026-09-05) — Owner: không sao, không sửa. API tạo lô đã chặn cả hai / cả trống; DB staging hiện không có hàng lệch.
 
 ### BUG-034 — Tạo lô dân commit trước khi copy ảnh chat; lỗi copy để lại lô mồ côi / retry trùng
 
