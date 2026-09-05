@@ -30,6 +30,8 @@ Khi cần xác minh chức năng thực tế trên UI:
 | OPEN | 64 |
 | NEEDS VERIFICATION | 0 |
 | FIXED / CLOSED | 19 |
+| OPEN | 65 |
+| FIXED / CLOSED | 18 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -138,6 +140,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lodats / web | BUG-031 FIXED | Owner: mặc định lọc Mở bán; thêm «Tất cả trạng thái» thật (`includePaused`). |
 | 2026-09-05 | lodats / customers | BUG-032 FIXED | Owner: badge số lô STAFF chỉ đếm lô mình tạo (vd. Anh Nam 3 lô → Kha 2, Dũng 1). |
 | 2026-09-05 | lodats / db | BUG-033 CLOSED | Owner: không sao — không sửa CHECK XOR; API đã chặn lúc tạo. |
+| 2026-09-05 | lodats | BUG-034 FIXED | Owner: lỗi copy ảnh chat → xóa lô vừa tạo (rollback); không để lô mồ côi / retry trùng. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -198,6 +201,9 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | FIXED |
 | BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | CLOSED |
 | BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | OPEN |
+| BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | OPEN |
+| BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | OPEN |
+| BUG-034 | MEDIUM | lodats | `create()` commit lô trước copy ảnh chat; lỗi copy → 500 nhưng lô đã tồn tại (retry trùng dân). | FIXED |
 | BUG-035 | HIGH | lot-shares | Middleware ghi cookie `?share=` đúng format dù resolve 404 — ghi đè last-click; `employeeId` rỗng reset hạn 30 ngày. | OPEN |
 | BUG-036 | HIGH | lot-shares | Không API xóa/sửa/xoay mã share; gỡ publish / disable NV chỉ ẩn resolve; publish lại mã cũ còn hiệu lực. | OPEN |
 | BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | OPEN |
@@ -698,7 +704,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Side-effect storage ngoài transaction DB.
 - **Impact:** Duplicate lô dân; chủ/giá nhân bản; list rối. Lô dự án unique SQL (BUG-029) thì retry = 500.
 - **Evidence:** `create` sau `select: { id: true }` khối `if (!isProject && dto.chatImageIds?.length)`. `lodat-create-page.tsx` upload file sau `createLodat` (nhánh khác, có toast).
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: copy ảnh chat trong `try`; lỗi → `lodat.delete` + best-effort xóa object R2 đã copy, rồi rethrow. NV thấy lỗi = không còn lô; bấm tạo lại không trùng.
 
 ### BUG-035 — Cookie last-click ghi khi mã share không resolve được
 
