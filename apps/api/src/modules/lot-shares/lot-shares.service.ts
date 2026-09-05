@@ -129,13 +129,11 @@ export class LotSharesService {
     return {
       shareCode: row.shareCode,
       listingSlug: row.publicListing.slug,
-      employeeId: row.employeeId,
       employee: {
         fullName: row.employee.fullName,
         phone,
         ...(avatarUrl ? { avatarUrl } : {}),
       },
-      visitCount: row.visitCount,
     };
   }
 
@@ -150,7 +148,7 @@ export class LotSharesService {
       if (!row.publicListing.isPublished) {
         throw new NotFoundException('Link share không hợp lệ.');
       }
-      return { ok: true as const, visitCount: row.visitCount };
+      return { ok: true as const };
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2025') {
         throw new NotFoundException('Link share không hợp lệ.');

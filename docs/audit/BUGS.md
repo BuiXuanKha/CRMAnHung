@@ -27,13 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 64 |
+| OPEN | 55 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 19 |
-| OPEN | 65 |
-| FIXED / CLOSED | 18 |
-| OPEN | 63 |
-| FIXED / CLOSED | 20 |
+| FIXED / CLOSED | 33 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -149,6 +145,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lot-shares | BUG-038 CLOSED | Owner: link sống mãi — cộng visit thế nào cũng được; không sửa visit. |
 | 2026-09-05 | lot-shares | BUG-036 CLOSED | Owner: link share sống mãi; không thu hồi. |
 | 2026-09-05 | public-content | BUG-024 CLOSED | Owner: bỏ chức năng Gỡ Đăng web; API từ chối `isPublished: false`; ẩn khách theo Mở bán/Đã bán. |
+| 2026-09-05 | lot-shares | BUG-040 FIXED | Owner: resolve public chỉ hotline; cookie theo mã share; không lộ employeeId/visitCount. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -222,7 +219,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | OPEN |
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | CLOSED |
 | BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | OPEN |
-| BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | OPEN |
+| BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | FIXED |
 | BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN |
 | BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | OPEN |
 | BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). | OPEN |
@@ -796,7 +793,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Cùng DTO cho middleware + guest contact.
 - **Impact:** Lộ id nhân viên + thống kê visit từng mã. Brute-force mã 5 ký tự (~32^5) + 120 req/phút không thực tế.
 - **Evidence:** `publicLotShareResolveSchema`. `middleware.ts` `body.employeeId`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: trình duyệt chỉ cần mã share; resolve public chỉ trả hotline (tên/SĐT/avatar + slug); bỏ `employeeId`/`visitCount`. Cookie last-click theo mã share; middleware chỉ kiểm tra resolve 200.
 
 ### BUG-041 — Thứ tự tin theo chỉ số lần quét, không theo thời gian
 

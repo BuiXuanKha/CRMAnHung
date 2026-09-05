@@ -27,18 +27,16 @@ function lotShareResolveHref(code: string): string {
   return new URL(`${prefix}${suffix}`, `${origin.replace(/\/$/, '')}/`).href;
 }
 
-async function lookupShareEmployee(code: string): Promise<{ employeeId: string } | null> {
+/** Validate share code only — resolve body must not expose employeeId to the edge. */
+async function isLiveShareCode(code: string): Promise<boolean> {
   try {
     const res = await fetch(lotShareResolveHref(code), {
       headers: { accept: 'application/json' },
       signal: AbortSignal.timeout(4000),
     });
-    if (!res.ok) return null;
-    const body = (await res.json()) as { employeeId?: string };
-    const employeeId = body.employeeId?.trim() ?? '';
-    return employeeId ? { employeeId } : null;
+    return res.ok;
   } catch {
-    return null;
+    return false;
   }
 }
 
@@ -107,11 +105,11 @@ function guardCrmRoutes(request: NextRequest): NextResponse | null {
 }
 
 /**
- * Last-click staff cookie: 30 days; same employee does not reset the clock;
- * a different employee overwrites and restarts. No `?share=` → leave cookie as-is.
- * BUG-035: only persist when resolve succeeds (live code + active staff).
+ * Last-click share cookie: 30 days keyed by share code only.
+ * No `?share=` → leave cookie as-is. BUG-035: only persist when resolve succeeds.
  * Bad/unknown/disabled codes must not overwrite a prior good cookie.
  */
+
 export async function middleware(request: NextRequest) {
   const crmGuard = guardCrmRoutes(request);
   if (crmGuard) return crmGuard;
@@ -119,16 +117,15 @@ export async function middleware(request: NextRequest) {
   const code = normalizeShareCode(request.nextUrl.searchParams.get('share'));
   if (!code) return NextResponse.next();
 
-  const lookedUp = await lookupShareEmployee(code);
+  const live = await isLiveShareCode(code);
   // Resolve failed (404 / inactive / timeout) — keep existing last-click cookie.
-  if (!lookedUp) return NextResponse.next();
+  if (!live) return NextResponse.next();
 
   const nowMs = Date.now();
   const existing = parsePublicShareCookie(request.cookies.get(PUBLIC_SHARE_COOKIE)?.value);
   const next = nextPublicShareCookie({
     nowMs,
     shareCode: code,
-    employeeId: lookedUp.employeeId,
     existing,
   });
   const maxAge = remainingShareCookieMaxAgeSec(next.expiresAtMs, nowMs);
