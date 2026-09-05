@@ -129,15 +129,24 @@ export async function loadProfiles(
   return map;
 }
 
+/** Badge số lô trên khách — khớp `listForCustomer`: STAFF chỉ lô mình tạo; ADMIN tất cả. */
 export async function loadLodatCounts(
   prisma: PrismaService,
   customerIds: string[],
+  user: RequestUser,
 ): Promise<Map<string, number>> {
   const map = new Map<string, number>();
   if (customerIds.length === 0) return map;
+  const where: Prisma.LodatCustomerMapWhereInput = {
+    customerId: { in: customerIds },
+    isActive: true,
+  };
+  if (user.role !== 'ADMIN') {
+    where.lodat = { createdByEmployeeId: user.id };
+  }
   const rows = await prisma.lodatCustomerMap.groupBy({
     by: ['customerId'],
-    where: { customerId: { in: customerIds }, isActive: true },
+    where,
     _count: { _all: true },
   });
   for (const row of rows) {
