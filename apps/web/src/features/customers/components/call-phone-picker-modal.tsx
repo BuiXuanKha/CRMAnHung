@@ -26,7 +26,7 @@ export function CallPhonePickerModal({
     <CrmDialog open={open} title={title} icon={Phone} onClose={onClose}>
       <ul className="kh-phone-manage-list">
         {phones.map((p) => (
-          <li key={p.id} className="kh-phone-manage-row">
+          <li key={p.id} className="kh-phone-pick-row">
             <button
               type="button"
               className="crm-btn primary kh-phone-pick-btn"
@@ -38,7 +38,7 @@ export function CallPhonePickerModal({
           </li>
         ))}
       </ul>
-      <div className="crm-dialog-actions">
+      <div className="crm-dialog-actions kh-phone-manage-footer">
         <button type="button" className="crm-btn" onClick={onClose}>
           Huỷ
         </button>
