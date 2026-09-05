@@ -458,14 +458,18 @@ export class PublicContentService {
   }
 
   async setPublished(user: RequestUser, id: string, isPublished: boolean) {
+    // Product: no user-facing «Gỡ Đăng web» — listings stay published; guest visibility
+    // follows CRM Mở bán / Đã bán. Sibling auto-unpublish on publish still allowed.
+    if (!isPublished) {
+      throw new BadRequestException(
+        'Không hỗ trợ gỡ Đăng web. Lô đã đăng giữ trên web; khách thấy theo trạng thái Mở bán / Đã bán.',
+      );
+    }
     const lodat = await this.requireOpenLodat(id, user);
     const existing = await this.prisma.publicLotListing.findUnique({
       where: { lodatId: lodat.id },
     });
     if (!existing) {
-      if (!isPublished) {
-        throw new NotFoundException('Chưa có bài đăng cho lô này');
-      }
       await this.assertStaffCanPublishProjectLot(user, lodat);
       const title = this.lodatTitle(lodat);
       const location = this.lodatLocation(lodat);

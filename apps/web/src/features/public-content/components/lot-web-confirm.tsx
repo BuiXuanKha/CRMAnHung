@@ -11,23 +11,19 @@ type Props = {
   onConfirm: () => void;
 };
 
+/** Confirm Đăng web only — product no longer supports Gỡ Đăng web. */
 export function LotWebConfirm({ lot, busy, onCancel, onConfirm }: Props) {
-  const publishing = Boolean(lot && !lot.isPublished);
-
   return (
     <CrmConfirmDialog
       open={Boolean(lot)}
-      title={publishing ? 'Đăng lô lên web' : 'Gỡ lô khỏi web'}
+      title="Đăng lô lên web"
       icon={Globe}
       message={
         lot
-          ? publishing
-            ? `Đăng «${lot.title}» lên anhungland.com? Khách sẽ thấy lô này.`
-            : `Gỡ «${lot.title}» khỏi trang khách? URL cũ sẽ không còn hiện.`
+          ? `Đăng «${lot.title}» lên anhungland.com? Khách sẽ thấy lô này khi đang Mở bán.`
           : ''
       }
-      confirmLabel={publishing ? 'Đăng web' : 'Gỡ web'}
-      danger={!publishing}
+      confirmLabel="Đăng web"
       busy={busy}
       onCancel={onCancel}
       onConfirm={onConfirm}

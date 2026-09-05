@@ -17,10 +17,9 @@ type Props = {
   lot: PublicWebStaffLotRow | null;
   busy: boolean;
   onPublish: () => void;
-  onUnpublish: () => void;
 };
 
-export function LotListingPreview({ lot, busy, onPublish, onUnpublish }: Props) {
+export function LotListingPreview({ lot, busy, onPublish }: Props) {
   const price = lot ? lotPriceDisplay(lot) : null;
 
   return (
@@ -65,24 +64,14 @@ export function LotListingPreview({ lot, busy, onPublish, onUnpublish }: Props) 
           )}
           <div className="pw-preview-actions">
             {lot.isPublished ? (
-              <>
-                <a
-                  className="crm-btn"
-                  href={listingHref(lot.slug)}
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Icon icon={ExternalLink} size="sm" /> Xem trên anhungland.com
-                </a>
-                <button
-                  type="button"
-                  className="crm-btn danger"
-                  disabled={busy}
-                  onClick={onUnpublish}
-                >
-                  <Icon icon={Globe} size="sm" /> Gỡ web
-                </button>
-              </>
+              <a
+                className="crm-btn"
+                href={listingHref(lot.slug)}
+                target="_blank"
+                rel="noreferrer"
+              >
+                <Icon icon={ExternalLink} size="sm" /> Xem trên anhungland.com
+              </a>
             ) : (
               <button
                 type="button"

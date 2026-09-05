@@ -131,20 +131,16 @@ export function PublicLotListPage() {
 
   const lotMut = useMutation({
     mutationFn: (lot: PublicWebStaffLotRow) =>
-      setPublicLotPublished(lot.lodatId, { isPublished: !lot.isPublished }),
+      setPublicLotPublished(lot.lodatId, { isPublished: true }),
     onSuccess: async (updated) => {
       await invalidatePublicWebQueries(qc);
       setLotConfirm(null);
       setSelectedId(updated.lodatId);
       persist(updated.lodatId);
-      flash(
-        updated.isPublished
-          ? `Đã đăng «${updated.title}» lên web khách.`
-          : `Đã gỡ «${updated.title}» khỏi web khách.`,
-      );
+      flash(`Đã đăng «${updated.title}» lên web khách.`);
     },
     onError: (err: Error) => {
-      setAlertBox({ title: 'Không đổi được lô', message: err.message });
+      setAlertBox({ title: 'Không đăng được lô', message: err.message });
     },
   });
 
@@ -297,9 +293,6 @@ export function PublicLotListPage() {
             busy={lotMut.isPending}
             onPublish={() => {
               if (selected && !selected.isPublished) setLotConfirm(selected);
-            }}
-            onUnpublish={() => {
-              if (selected && selected.isPublished) setLotConfirm(selected);
             }}
           />
         </div>

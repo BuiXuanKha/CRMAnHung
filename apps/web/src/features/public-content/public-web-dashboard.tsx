@@ -47,18 +47,14 @@ export function PublicWebDashboard() {
 
   const lotMut = useMutation({
     mutationFn: (lot: PublicWebLotRow) =>
-      setPublicLotPublished(lot.id, { isPublished: !lot.isPublished }),
+      setPublicLotPublished(lot.id, { isPublished: true }),
     onSuccess: async (updated) => {
       await invalidatePublicWebQueries(qc);
       setLotConfirm(null);
-      flash(
-        updated.isPublished
-          ? `Đã đăng «${updated.title}» lên web khách.`
-          : `Đã gỡ «${updated.title}» khỏi web khách.`,
-      );
+      flash(`Đã đăng «${updated.title}» lên web khách.`);
     },
     onError: (err: Error) => {
-      setAlertBox({ title: 'Không đổi được lô', message: err.message });
+      setAlertBox({ title: 'Không đăng được lô', message: err.message });
     },
   });
 
@@ -169,7 +165,7 @@ export function PublicWebDashboard() {
               onSelect={(id) => {
                 const row = data.recentLots.find((item) => item.id === id);
                 setSelectedLotId(id);
-                if (row) setLotConfirm(row);
+                if (row && !row.isPublished) setLotConfirm(row);
               }}
             />
             <DashboardPostTable
@@ -191,7 +187,7 @@ export function PublicWebDashboard() {
               onSelect={(id) => {
                 const row = data.recentLots.find((item) => item.id === id);
                 setSelectedLotId(id);
-                if (row) setLotConfirm(row);
+                if (row && !row.isPublished) setLotConfirm(row);
               }}
             />
             <DashboardPostCards

@@ -32,6 +32,8 @@ Khi cần xác minh chức năng thực tế trên UI:
 | FIXED / CLOSED | 19 |
 | OPEN | 65 |
 | FIXED / CLOSED | 18 |
+| OPEN | 63 |
+| FIXED / CLOSED | 20 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -144,6 +146,9 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lot-shares / web | BUG-035 FIXED | Owner: chỉ ghi cookie `?share=` khi resolve thành công; mã rác/404 không đè last-click. |
 | 2026-09-05 | lot-shares | BUG-036 CLOSED | Owner: không phải lỗi — link share sống lâu; không thu hồi/tắt; sau chỉ đổi trạng thái mở bán/đã bán. |
 | 2026-09-05 | lot-shares | BUG-037 FIXED | Owner: POST /public/page-views chỉ cộng NV khi cookie httpOnly khớp mã; body một mình không đủ. |
+| 2026-09-05 | lot-shares | BUG-038 CLOSED | Owner: link sống mãi — cộng visit thế nào cũng được; không sửa visit. |
+| 2026-09-05 | lot-shares | BUG-036 CLOSED | Owner: link share sống mãi; không thu hồi. |
+| 2026-09-05 | public-content | BUG-024 CLOSED | Owner: bỏ chức năng Gỡ Đăng web; API từ chối `isPublished: false`; ẩn khách theo Mở bán/Đã bán. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -193,7 +198,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | FIXED |
 | BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | FIXED |
 | BUG-023 | HIGH | lodats / public-content | `GET /public/listings/:slug` không kiểm tra Mở bán — lô Tạm dừng vẫn mở được bằng URL. | OPEN |
-| BUG-024 | HIGH | lodats / public-content | Gỡ Đăng web cũng đi qua `requireOpenLodat` — lô Tạm dừng không gỡ được listing. | OPEN |
+| BUG-024 | HIGH | lodats / public-content | Gỡ Đăng web cũng đi qua `requireOpenLodat` — lô Tạm dừng không gỡ được listing. | CLOSED |
 | BUG-025 | HIGH | lodats / transactions | Xóa GD mở ép map `DANG_BAN`; tạo/sửa/hoàn tất GD không đụng trạng thái rao bán. | OPEN |
 | BUG-026 | HIGH | lodats | API ép `DAT_COC`/`DA_BAN` → `TAM_DUNG`; Lưu/công tắc ghi đè status thật trên map. | OPEN |
 | BUG-027 | MEDIUM | lodats / customers | Ẩn khách không đóng map — lô vẫn hiện chủ đã xoá; không API gỡ chủ/xóa lô. | OPEN |
@@ -215,6 +220,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | OPEN |
 | BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | FIXED |
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | OPEN |
+| BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | CLOSED |
 | BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | OPEN |
 | BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | OPEN |
 | BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN |
@@ -581,7 +587,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Cùng guard «chỉ lô đang mở bán» dùng cho cả Đăng và Gỡ.
 - **Impact:** Không thu hồi trang công khai đã publish khi lô đang Tạm dừng, cộng BUG-023 (slug vẫn sống).
 - **Evidence:** `setPublished(user, id, isPublished)` dòng đầu `requireOpenLodat`. `requireOpenLodat` + `isOpenSale`. Domain «Gỡ tường minh trên dashboard».
-- **Status:** OPEN
+- **Status:** CLOSED (2026-09-05) — Owner: bỏ chức năng Gỡ Đăng web. API `setPublished(false)` → BadRequest; UI không còn nút Gỡ web. Khách thấy lô theo Đăng web ∩ Mở bán.
 
 ### BUG-025 — Xóa giao dịch mở ép map về Mở bán; tạo/sửa/hoàn tất GD không đổi trạng thái lô
 
@@ -738,6 +744,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Impact:** Không «xóa share thì mất quyền» vì không có xóa. Quyền liên hệ/thống kê của mã chỉ tạm tắt. UI không có màn sửa/xóa share (ẩn hết) — backend cũng không có; không phải FE ẩn nhưng BE vẫn xóa được.
 - **Evidence:** Chỉ `POST` share-link + `GET/POST` public code + `GET` admin stats. Schema `PublicLotShare` không `revokedAt`. `createOrGetShareLinkForListing` `findUnique` employee+listing.
 - **Status:** CLOSED (2026-09-05) — Owner: không phải lỗi. Không thu hồi/tắt link; share sống lâu dài. Sau này phát triển thêm; hiệu lực theo trạng thái mở bán/đã bán (không revoke mã).
+- **Status:** CLOSED (2026-09-05) — Owner: không phải lỗi. Link share sống lâu; không thu hồi. Hiệu lực theo trạng thái mở bán/đã bán.
 
 ### BUG-037 — Cộng lượt xem public không chứng thực cookie share
 
@@ -763,7 +770,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Update-then-check; không `findActiveShare`.
 - **Impact:** Số visit trên resolve sai. FE hiện không gọi — vẫn gọi được trực tiếp (UI ẩn ≠ bảo mật).
 - **Evidence:** `recordVisit` try `update` rồi `if (!row.publicListing.isPublished)`. Grep `recordPublicLotShareVisit` chỉ `api.ts`.
-- **Status:** OPEN
+- **Status:** CLOSED (2026-09-05) — Owner: link share sống mãi; cộng visit thế nào cũng được — không sửa. (Gỡ Đăng web đã bỏ sản phẩm.)
 
 ### BUG-039 — Mất SĐT: khách không resolve share nhưng view vẫn cộng cho NV
 
