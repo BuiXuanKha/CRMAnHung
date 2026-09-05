@@ -186,6 +186,7 @@ export class CreateLodatDto {
   })
   @ValidateIf((_, v) => v !== null && v !== undefined)
   @IsNumber()
+  @Min(0, { message: 'Diện tích không được âm.' })
   areaM2?: number | null;
 
   @IsOptional()
@@ -196,6 +197,7 @@ export class CreateLodatDto {
   })
   @ValidateIf((_, v) => v !== null && v !== undefined)
   @IsNumber()
+  @Min(0, { message: 'Mặt tiền không được âm.' })
   frontageM?: number | null;
 
   @IsOptional()
@@ -271,6 +273,7 @@ export class UpdateLodatDto {
   })
   @ValidateIf((_, v) => v !== null && v !== undefined)
   @IsNumber()
+  @Min(0, { message: 'Diện tích không được âm.' })
   areaM2?: number | null;
 
   @IsOptional()
@@ -281,6 +284,7 @@ export class UpdateLodatDto {
   })
   @ValidateIf((_, v) => v !== null && v !== undefined)
   @IsNumber()
+  @Min(0, { message: 'Mặt tiền không được âm.' })
   frontageM?: number | null;
 
   @IsOptional()

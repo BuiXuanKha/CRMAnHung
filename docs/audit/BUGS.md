@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 68 |
+| OPEN | 67 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 15 |
+| FIXED / CLOSED | 16 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -134,6 +134,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lodats | BUG-028 FIXED | Owner: Admin không đổi chủ (cùng PR BUG-020) — hết gắn Person xuyên NV qua change-owner. |
 | 2026-09-05 | customers / extension | BUG-021 FIXED | Ingest tự khôi phục khách ẩn + `autoRestoredAt`; hangtag «Tự khôi phục» (CRM cũ). |
 | 2026-09-05 | customers | BUG-022 FIXED | Owner: bỏ `Customer.note` (drop cột); modal thêm SĐT không còn ô ghi chú; budget chỉ qua care. |
+| 2026-09-05 | lodats | BUG-030 FIXED | API `@Min(0)` + service reject DT/MT âm — khớp Zod web. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -189,7 +190,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-027 | MEDIUM | lodats / customers | Ẩn khách không đóng map — lô vẫn hiện chủ đã xoá; không API gỡ chủ/xóa lô. | OPEN |
 | BUG-028 | MEDIUM | lodats | Admin đổi chủ không bắt khách thuộc NV giữ luồng — gán nhầm Person sang lô NV khác. | FIXED |
 | BUG-029 | MEDIUM | lodats | Unique SQL 1 luồng/NV/kho không khớp Prisma/`create` (chỉ map active); không đóng luồng. | OPEN |
-| BUG-030 | MEDIUM | lodats | API nhận DT/MT âm; Zod/FE `nonnegative` — lệch frontend/backend. | OPEN |
+| BUG-030 | MEDIUM | lodats | API nhận DT/MT âm; Zod/FE `nonnegative` — lệch frontend/backend. | FIXED |
 | BUG-031 | MEDIUM | lodats / web | Dropdown «Tất cả trạng thái» không gửi `includePaused`; API mặc định chỉ `DANG_BAN`. | OPEN |
 | BUG-032 | MEDIUM | lodats / customers | `lodatCount` đếm mọi map active; STAFF `listForCustomer` chỉ lô mình tạo. | OPEN |
 | BUG-033 | LOW | lodats / db | Không CHECK XOR `addressId`/`projectLotId` — hàng lô không hợp lệ vẫn lưu được. | OPEN |
@@ -642,7 +643,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Nest DTO không mirror Zod.
 - **Impact:** Lô dân thông số không hợp lệ; lọc khoảng DT (`gte: 1`) bỏ qua số âm/0.
 - **Evidence:** `lodat.dto.ts` area/frontage. `packages/shared/src/lodats.ts` nonnegative. `main.ts` ValidationPipe không Zod.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — `CreateLodatDto` / `UpdateLodatDto`: `@Min(0)` trên `areaM2` / `frontageM`. `parseOptionalNumber` reject `n < 0`. Khớp Zod web `nonnegative`.
 
 ### BUG-031 — Nhãn «Tất cả trạng thái» vẫn ẩn lô Tạm dừng
 
