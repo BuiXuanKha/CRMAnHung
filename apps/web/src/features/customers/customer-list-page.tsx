@@ -566,8 +566,10 @@ export function CustomerListPage() {
       flash('Đã thêm số điện thoại.');
     } catch (err) {
       if (isPhoneDuplicateError(err)) {
+        const canMerge =
+          Boolean(err.mergeAllowed) && user?.role !== UserRole.ADMIN;
         setDup({
-          mode: err.mergeAllowed ? 'merge' : 'info',
+          mode: canMerge ? 'merge' : 'info',
           existing: err.existing,
           phone: typeof err.phone === 'string' ? err.phone : phone,
           sourceId: managePhones.customer.id,
@@ -602,8 +604,10 @@ export function CustomerListPage() {
       flash('Đã cập nhật số điện thoại.');
     } catch (err) {
       if (isPhoneDuplicateError(err)) {
+        const canMerge =
+          Boolean(err.mergeAllowed) && user?.role !== UserRole.ADMIN;
         setDup({
-          mode: err.mergeAllowed ? 'merge' : 'info',
+          mode: canMerge ? 'merge' : 'info',
           existing: err.existing,
           phone: typeof err.phone === 'string' ? err.phone : phone,
           sourceId: managePhones.customer.id,
@@ -682,6 +686,11 @@ export function CustomerListPage() {
         setAddOpen(false);
         flash('Đã cập nhật khách.');
       } else if (dup.mode === 'merge' && dup.sourceId && dup.phone) {
+        if (user?.role === UserRole.ADMIN) {
+          throw new Error(
+            'Admin không gộp khách. Chỉ nhân viên phụ trách mới được gộp khách của mình.',
+          );
+        }
         await mergeFacebookIntoPhoneHolder({
           sourceCustomerId: dup.sourceId,
           targetCustomerId: dup.existing.id,

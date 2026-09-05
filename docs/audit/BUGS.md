@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 69 |
+| OPEN | 68 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 14 |
+| FIXED / CLOSED | 15 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -124,6 +124,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | users / auth | BUG-011 FIXED | Create/reset: 6–18 + bắt buộc chữ và số; login không đổi. |
 | 2026-09-04 | web authz | BUG-012 FIXED | Middleware CRM theo cookie role; STAFF không vào route Admin (kèm BUG-083). |
 | 2026-09-04 | customers | BUG-015 FIXED | PATCH/DELETE theo `phoneId` (không wipe số phụ); modal quản lý SĐT; FAB/gọi: 1 số → tel, ≥2 → picker. |
+| 2026-09-05 | customers / permission | BUG-017 FIXED | Owner: Admin không gộp; chỉ NV gộp khách của mình (`source/target.employeeId === user.id`). |
 | 2026-09-05 | customers | BUG-016 defer | Owner: nghiêm trọng — bàn chi tiết / chốt thiết kế sau; **chưa code**. Giữ Person đích, chuyển hết quan hệ rồi mới xóa nguồn (không tạo Person mới). |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -167,7 +168,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-014 | HIGH | customers | Trùng SĐT lúc tạo: bấm OK ghi đè `fullName` và mở lại khách cũ. | OPEN |
 | BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | FIXED |
 | BUG-016 | HIGH | customers | Gộp Facebook: mất SĐT nguồn, party SetNull, xóa map trùng lô; TitleService Restrict → merge vỡ. | OPEN |
-| BUG-017 | HIGH | customers / permission | Admin gộp Facebook giữa hai `employeeId` khác nhau — chuyển hồ sơ sang NV khác. | OPEN |
+| BUG-017 | HIGH | customers / permission | Admin gộp Facebook giữa hai `employeeId` khác nhau — chuyển hồ sơ sang NV khác. | FIXED |
 | BUG-018 | HIGH | customers | SĐT không unique trên DB; không chuẩn hóa — race / format lệch tạo Person trùng. | OPEN |
 | BUG-019 | MEDIUM | customers | Tìm kiếm không khớp tên/UID Facebook; keyword SĐT không bỏ khoảng trắng. | OPEN |
 | BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | OPEN |
@@ -451,7 +452,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Merge chỉ chuyển FB + care + map còn lại; không xử lý TitleService / phone / party; xóa map overlap.
 - **Impact:** Mất dữ liệu hoặc không gộp được khi Person đã có sổ đỏ/GD. Hai Person vẫn tồn tại nếu Restrict.
 - **Evidence:** `mergeFacebookIntoPhoneHolder` dòng 383–411. Schema TitleService Restrict; TransactionParty SetNull; CustomerPhone Cascade.
-- **Status:** OPEN — **DEFERRED (owner 2026-09-05):** bàn kỹ / chốt thiết kế sau; **không sửa code** cho đến khi owner chốt. Ghi chú bàn: merge đúng nghĩa = gắn FB + quan hệ vào Person đích (có SĐT), rồi mới xóa Person nguồn rỗng — không tạo Person mới. Cần chốt trước khi code: (1) SĐT nguồn trùng đích; (2) map trùng lô + GD; (3) có kèm BUG-017 (Admin xuyên NV) hay không.
+- **Status:** OPEN — **DEFERRED (owner 2026-09-05):** bàn kỹ / chốt thiết kế sau; **không sửa code** cho đến khi owner chốt. Ghi chú bàn: merge đúng nghĩa = gắn FB + quan hệ vào Person đích (có SĐT), rồi mới xóa Person nguồn rỗng — không tạo Person mới. Cần chốt trước khi code: (1) SĐT nguồn trùng đích; (2) map trùng lô + GD; (3) BUG-017 đã chốt FIXED riêng: Admin không gộp; chỉ NV gộp khách mình.
 
 ### BUG-017 — Admin gộp Facebook xuyên nhân viên
 
@@ -464,7 +465,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Ownership merge = quyền xem cả hai, không = cùng sales.
 - **Impact:** Hồ sơ/chat/lead gán nhầm NV; Person nguồn biến mất.
 - **Evidence:** `assertCanAccess` ADMIN return sớm. Không có `source.employeeId === target.employeeId`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner chốt: Admin không gộp (không có khách). Chỉ NV gộp khách của mình. `mergeFacebookIntoPhoneHolder`: Forbidden nếu ADMIN; bắt `source.employeeId === target.employeeId === user.id`. `mergeAllowed` trên trùng SĐT = false với Admin. UI không mở chế độ gộp cho Admin.
 
 ### BUG-018 — SĐT không unique trên DB, không chuẩn hóa
 
