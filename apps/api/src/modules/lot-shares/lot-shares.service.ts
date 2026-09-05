@@ -5,7 +5,11 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma } from '@prisma/client';
-import { guestLotShareUrl } from '@crmanhung/shared';
+import {
+  guestLotShareUrl,
+  normalizeShareCode,
+  parsePublicShareCookie,
+} from '@crmanhung/shared';
 import { randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
@@ -156,14 +160,19 @@ export class LotSharesService {
   }
 
   /**
-   * Public page view: cookie share hợp lệ → NV; không / mã không còn → Truy cập trực tiếp.
-   * JWT NV → không đếm.
+   * BUG-037: chỉ cộng NV khi cookie httpOnly có mã còn hạn (và khớp body nếu client gửi).
+   * Body `shareCode` một mình không đủ — tránh thổi thống kê bằng curl.
+   * JWT NV → không đếm. Không cookie / mã hết hạn / không còn active → Truy cập trực tiếp.
    */
-  async recordPublicPageView(shareCode: string | undefined, hasBearerToken: boolean) {
+  async recordPublicPageView(
+    bodyShareCode: string | undefined,
+    shareCookieRaw: string | undefined,
+    hasBearerToken: boolean,
+  ) {
     if (hasBearerToken) {
       return { ok: true as const, viewCount: 0 };
     }
-    const code = shareCode?.trim().toUpperCase() ?? '';
+    const code = this.attributionShareCode(shareCookieRaw, bodyShareCode);
     if (code) {
       const share = await this.findActiveShare(code);
       if (share) {
@@ -173,16 +182,42 @@ export class LotSharesService {
     return this.incrementDirectView();
   }
 
-  /** Cookie share còn hạn: mỗi lần khách đổi/tải trang public → +1 cho NV. */
-  async recordAttributedPageView(shareCode: string, hasBearerToken: boolean) {
+  /**
+   * Cộng NV chỉ khi cookie khớp mã trên path (cùng rule BUG-037).
+   * Sai cookie → Truy cập trực tiếp (không 404 để tránh lộ mã còn/không).
+   */
+  async recordAttributedPageView(
+    pathShareCode: string,
+    shareCookieRaw: string | undefined,
+    hasBearerToken: boolean,
+  ) {
     if (hasBearerToken) {
       return { ok: true as const, viewCount: 0 };
     }
-    const share = await this.findActiveShare(shareCode.trim().toUpperCase());
+    const code = this.attributionShareCode(shareCookieRaw, pathShareCode);
+    if (!code) {
+      return this.incrementDirectView();
+    }
+    const share = await this.findActiveShare(code);
     if (!share) {
-      throw new NotFoundException('Link share không hợp lệ.');
+      return this.incrementDirectView();
     }
     return this.incrementEmployeeView(share.employeeId);
+  }
+
+  /** Mã attribution từ cookie; body/path nếu có phải khớp cookie. */
+  private attributionShareCode(
+    shareCookieRaw: string | undefined,
+    claimedShareCode?: string,
+  ): string {
+    const parsed = parsePublicShareCookie(shareCookieRaw);
+    if (!parsed) return '';
+    const cookieCode = normalizeShareCode(parsed.shareCode);
+    if (!cookieCode) return '';
+    if (parsed.expiresAtMs > 0 && parsed.expiresAtMs <= Date.now()) return '';
+    const claimed = normalizeShareCode(claimedShareCode);
+    if (claimed && claimed !== cookieCode) return '';
+    return cookieCode;
   }
 
   private async findActiveShare(shareCode: string) {
