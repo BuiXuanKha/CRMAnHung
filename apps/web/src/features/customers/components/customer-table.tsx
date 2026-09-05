@@ -288,6 +288,9 @@ export function CustomerTable({
                       {c.isHidden ? (
                         <CrmBadge tone="red">Đã xoá</CrmBadge>
                       ) : null}
+                      {!c.isHidden && c.autoRestoredAt ? (
+                        <CrmBadge tone="amber">Tự khôi phục</CrmBadge>
+                      ) : null}
                     </div>
                     {c.facebook?.facebookName ? (
                       <span className="kh-sub">{c.facebook.facebookName}</span>

@@ -132,6 +132,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | customers | BUG-019 FIXED | List keyword: + `facebookName` / `customerUid`; SĐT qua `digitsFromPhoneRaw`. Không tìm `threadId` (owner). |
 | 2026-09-05 | lodats | BUG-020 FIXED | Unique 1 chủ active/lô (ensure index); Admin **không** đổi chủ — chỉ NV giữ luồng. |
 | 2026-09-05 | lodats | BUG-028 FIXED | Owner: Admin không đổi chủ (cùng PR BUG-020) — hết gắn Person xuyên NV qua change-owner. |
+| 2026-09-05 | customers / extension | BUG-021 FIXED | Ingest tự khôi phục khách ẩn + `autoRestoredAt`; hangtag «Tự khôi phục» (CRM cũ). |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -178,7 +179,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-018 | HIGH | customers | SĐT không unique trên DB; không chuẩn hóa — race / format lệch tạo Person trùng. | FIXED |
 | BUG-019 | MEDIUM | customers | Tìm kiếm không khớp tên/UID Facebook; keyword SĐT không bỏ khoảng trắng. | FIXED |
 | BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | FIXED |
-| BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | OPEN |
+| BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | FIXED |
 | BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | OPEN |
 | BUG-023 | HIGH | lodats / public-content | `GET /public/listings/:slug` không kiểm tra Mở bán — lô Tạm dừng vẫn mở được bằng URL. | OPEN |
 | BUG-024 | HIGH | lodats / public-content | Gỡ Đăng web cũng đi qua `requireOpenLodat` — lô Tạm dừng không gỡ được listing. | OPEN |
@@ -523,7 +524,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Ingest không đụng cờ ẩn.
 - **Impact:** Mất lead trên UI; dữ liệu vẫn ghi.
 - **Evidence:** `findExisting` where chỉ `employeeId` + facebook thread/uid. `customers.service.ts` list `isHidden: false` mặc định.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Giống CRM cũ: `touchExisting` nếu `isHidden` → `isHidden: false` + `autoRestoredAt`. List/chi tiết hangtag «Tự khôi phục» (`amber`) khi `autoRestoredAt`. Ẩn/khôi phục tay xoá `autoRestoredAt`.
 
 ### BUG-022 — Lệch contract/API: không sửa được `Customer.note`
 

@@ -126,9 +126,18 @@ export class FromExtensionService {
       },
     });
     await this.deletePublicObjectIfOrphan(avatar.previousObjectKey);
+
+    // BUG-021 / CRM cũ: scan lại khách đã ẩn → tự khôi phục + hangtag «Tự khôi phục».
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: existing.id },
+      select: { isHidden: true },
+    });
+    const now = new Date();
     await this.prisma.customer.update({
       where: { id: existing.id },
-      data: { updatedAt: new Date() },
+      data: customer?.isHidden
+        ? { isHidden: false, autoRestoredAt: now, updatedAt: now }
+        : { updatedAt: now },
     });
   }
 

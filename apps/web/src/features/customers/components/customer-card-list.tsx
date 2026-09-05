@@ -133,6 +133,9 @@ export function CustomerCardList({
                       {c.isHidden ? (
                         <CrmBadge tone="red">Đã xoá</CrmBadge>
                       ) : null}
+                      {!c.isHidden && c.autoRestoredAt ? (
+                        <CrmBadge tone="amber">Tự khôi phục</CrmBadge>
+                      ) : null}
                     </span>
                   </div>
                   {budget !== '—' ? <span className="kh-card-budget">{budget}</span> : null}

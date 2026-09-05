@@ -654,7 +654,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-25 | Ô tìm list CRM: hangtag **Clear** (`CrmBadge` gray) ngay sau con trỏ — `CrmSearchField` |
 | 2026-08-25 | Helper chung nhớ list (`shared/list-state` + skill `crm-list-state`): `/khach-hang` refactor; `/lo-dat` nhớ tìm/lọc/cuộn; logout xóa mọi `*-list-state` |
 | 2026-08-25 | Khách: `lodatCount` API + Map cạnh tên; bỏ cột Số lô; rail/chi tiết lô từ `GET /customers/:id/lodats` |
-| 2026-08-24 | Khách: xoá SĐT = **NV phụ trách khách** (không chỉ admin). Hangtag «Tự khôi phục» / inbox FB sống / quản trị — chưa làm; xem `customers.md` §11 hàng đợi |
+| 2026-08-24 | Khách: xoá SĐT = **NV phụ trách khách** (không chỉ admin). Hangtag «Tự khôi phục» = BUG-021 FIXED (2026-09-05). |
 | 2026-08-26 | Menu khách **Dịch vụ sổ đỏ** → form `/khach-hang/[id]/dich-vu-so-do` (STAFF + ADMIN; không nút Thêm trên list) |
 | 2026-08-26 | List `/dich-vu-so-do`: nhớ tìm / lọc / cuộn (`sessionStorage`, skill `crm-list-state`) |
 | 2026-08-26 | Panel sổ đỏ **File tài liệu:** hangtag loại giấy (Sổ đỏ / CCCD / Giấy tờ khác) trên đầu mỗi file |
