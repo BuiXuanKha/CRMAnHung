@@ -123,6 +123,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | users | BUG-010 CLOSED | Owner: race Admin cuối không xảy ra với An Hưng Land — won't fix. |
 | 2026-09-04 | users / auth | BUG-011 FIXED | Create/reset: 6–18 + bắt buộc chữ và số; login không đổi. |
 | 2026-09-04 | web authz | BUG-012 FIXED | Middleware CRM theo cookie role; STAFF không vào route Admin (kèm BUG-083). |
+| 2026-09-04 | customers | BUG-013 note | DB prod: trùng UID khác page = đúng; 4 case buinam cùng page + E2EE khác thread (legacy) — để xử lý sau. |
 | 2026-09-04 | customers | BUG-015 FIXED | PATCH/DELETE theo `phoneId` (không wipe số phụ); modal quản lý SĐT; FAB/gọi: 1 số → tel, ≥2 → picker. |
 | 2026-09-05 | customers / permission | BUG-017 FIXED | Owner: Admin không gộp; chỉ NV gộp khách của mình (`source/target.employeeId === user.id`). |
 | 2026-09-05 | customers | BUG-016 defer | Owner: nghiêm trọng — bàn chi tiết / chốt thiết kế sau; **chưa code**. Giữ Person đích, chuyển hết quan hệ rồi mới xóa nguồn (không tạo Person mới). |
@@ -164,7 +165,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-009 | MEDIUM | addresses | `includeHidden` không khóa ADMIN; STAFF đọc địa chỉ / đơn vị đã ẩn. | FIXED |
 | BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | CLOSED |
 | BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | FIXED || BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | FIXED |
-| BUG-013 | HIGH | customers / extension | Cùng người Facebook có thể thành nhiều Customer (UID/thread không unique; e2ee vs threadId). | OPEN |
+| BUG-013 | HIGH | customers / extension | Cùng NV+page+UID vẫn có thể 2 Person (E2EE khác thread; prod: 4 case buinam). | OPEN |
 | BUG-014 | HIGH | customers | Trùng SĐT lúc tạo: bấm OK ghi đè `fullName` và mở lại khách cũ. | OPEN |
 | BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | FIXED |
 | BUG-016 | HIGH | customers | Gộp Facebook: mất SĐT nguồn, party SetNull, xóa map trùng lô; TitleService Restrict → merge vỡ. | OPEN |
@@ -410,11 +411,11 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **File:** `apps/api/src/modules/customers/from-extension.service.ts`, `apps/api/src/modules/customers/from-extension-parse.ts`, `apps/api/prisma/schema.prisma`
 - **Function:** `FromExtensionService.findExisting` / `createCustomer`, `parseScan`
 - **Vị trí code:** `CustomerFacebook.customerUid` / `threadId` chỉ `@@index`, không unique. `findExisting` scoped `employeeId`: ưu tiên `threadId`, sau đó `customerUid`, `orderBy createdAt desc`. `parseScan`: non-e2ee `customerUid = rawUid || threadId`; e2ee chỉ `rawUid`. `touchExisting` ghi `threadId: fields.threadId || fb.threadId` (đè thread cũ).
-- **Problem:** Một người thật có thể thành nhiều Person: (1) quét e2ee và Messenger thường (UID vs threadId-as-UID); (2) threadId đổi, lần sau không khớp thread cũ và UID trống; (3) hai ingest song song không unique; (4) cùng UID hai NV = hai Customer (cố ý theo NV, nhưng cùng NV vẫn trùng). Scan thread mới cùng UID đè `threadId` rồi append tin vào một `CustomerFacebook` — trộn hai hội thoại.
-- **Root cause:** Không unique `(employeeId, customerUid)` / `(employeeId, threadId)`; heuristic UID = threadId; lookup không gộp e2ee/non-e2ee.
+- **Problem:** Một người thật có thể thành nhiều Person: (1) quét e2ee và Messenger thường (UID vs threadId-as-UID); (2) threadId đổi, lần sau không khớp thread cũ và UID trống; (3) hai ingest song song không unique; (4) cùng UID hai NV = hai Customer (cố ý theo NV). Scan thread mới cùng UID đè `threadId` rồi append tin — trộn hội thoại.
+- **Root cause:** Không unique theo NV+page+UID/thread; heuristic UID = threadId; lookup không gộp e2ee/non-e2ee.
 - **Impact:** Trùng hồ sơ, chat/chăm sóc/lô tách đôi; gộp tay dễ mất dữ liệu (BUG-016).
-- **Evidence:** `schema.prisma` `CustomerFacebook` không `@@unique` UID. `findExisting` dòng 69–97. `parseScan` `isE2ee ? rawUid : rawUid || threadId`. `createCustomer` luôn `customer.create` khi miss.
-- **Status:** OPEN
+- **Evidence:** Code như trên. **Đối chiếu Postgres production 2026-09-04 (chỉ đọc):** ~1384 FB; đếm thô trùng UID cùng NV = 51 nhóm — trong đó **47 khác `employeeFacebookUid` (khác page) = đúng nghiệp vụ** (vd. Lê Tuấn Doanh: Page Bùi Xuân Khả vs Em Hà). **Còn 4 nhóm thật sự cùng NV + cùng UID + cùng page:** toàn **`buinam`**, nguồn `messenger_e2ee`, **khác `threadId`**, tạo 2026-05-29, đã có trong `migrate.legacy_id_map` (copy CRM cũ). `kha` = 0 case cùng-page. Trùng cùng `threadId` = 0. Owner: chưa rõ vì sao chỉ buinam; **note lại, xử lý sau** (chưa sửa code).
+- **Status:** OPEN (deferred — 2026-09-04; scope còn lại ≈ 4 Person-pair `buinam` E2EE)
 
 ### BUG-014 — Trùng SĐT lúc tạo: OK ghi đè tên khách cũ
 
