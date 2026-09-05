@@ -17,9 +17,9 @@ Chi tiết: `docs/DEPLOYMENT.md`. Workflow: `.github/workflows/deploy-staging.ym
 ```
 ① Nhánh abc (cursor/…) — sửa, commit, push
     ↓ chủ bảo deploy / đã ổn
-①b Kiểm tra nhánh/PR cũ chưa merge → **hỏi chủ** có gộp trước không
-    ↓ chủ trả lời (hoặc đã chỉ đích danh nhánh merge)
-② Gộp abc vào main
+①b Kiểm tra nhánh/PR mở chưa merge → **gộp hết** (cùng đợt) rồi mới merge abc
+    ↓ một lần push main
+② Gộp tất cả PR/nhánh pending + abc vào main
     ↓ GitHub tự chạy
 ③ Actions Deploy CRMAnHung (staging) trên commit main mới
 ```
@@ -30,9 +30,9 @@ Chi tiết: `docs/DEPLOYMENT.md`. Workflow: `.github/workflows/deploy-staging.ym
 - Không sửa trực tiếp trên VPS.
 - Push nhánh `abc` **không** lên server.
 
-### ①b Kiểm tra nhánh trước chưa merge (**bắt buộc trước khi merge**)
+### ①b Gộp hết PR/nhánh chưa merge trước khi deploy (**bắt buộc**)
 
-**Trước** khi merge nhánh đang làm (`abc`) hoặc bất kỳ PR nào vào `main`, agent **phải** rà soát xem còn nhánh/PR cũ chưa gộp không.
+**Trước** khi merge nhánh đang làm (`abc`) để deploy, agent **phải** rà soát mọi PR/nhánh `cursor/*` còn mở chưa nằm trong `main`, rồi **gộp luôn** cùng đợt — deploy **một lần** là xong. **Không hỏi** chủ «gộp trước hay chỉ abc» (trừ khi conflict/không merge được hoặc PR rõ ràng WIP / chủ đã nói bỏ).
 
 **Cách kiểm tra (chạy thật, không đoán):**
 
@@ -40,31 +40,23 @@ Chi tiết: `docs/DEPLOYMENT.md`. Workflow: `.github/workflows/deploy-staging.ym
 git fetch origin main
 # Nhánh cursor/* có commit chưa nằm trong main
 git branch -r --no-merged origin/main | rg 'origin/cursor/' || true
-# PR mở trỏ main (ưu tiên draft + open)
+# PR mở trỏ main (draft + open)
 gh pr list --base main --state open --limit 20
 ```
 
-Liệt kê ngắn gọn cho chủ: **PR #**, **nhánh**, **tiêu đề**, **draft/open** — bỏ qua PR đã superseded hoặc nhánh trùng commit với nhánh đang deploy.
+**Quy tắc gộp:**
 
-**Bắt buộc hỏi lại chủ** nếu tìm thấy ≥1 nhánh/PR còn commit chưa merge (trừ nhánh đang được yêu cầu merge):
-
-> Trước khi merge/deploy **`abc`**, còn các nhánh/PR chưa gộp vào `main`:
-> - PR #… — `cursor/…` — …
->
-> Bạn có muốn **merge nhanh** (các) nhánh trên **trước**, hay chỉ merge **`abc`** rồi deploy?
-
-**Quy tắc:**
-
-- **Không** tự merge/deploy nhánh đang làm khi còn nhánh cũ chưa merge mà **chưa hỏi** và **chưa có câu trả lời** của chủ.
-- Chủ trả lời *«chỉ merge abc»* / *«merge #107 trước»* / *«gộp hết rồi deploy»* → làm đúng thứ tự đã chốt.
-- Chủ đã **chỉ đích danh** PR/nhánh cần merge trong tin nhắn hiện tại (vd. *«merge #107»*) → vẫn **nhắc** nhánh còn lại nếu có, nhưng không chặn lệnh đích danh đó.
-- Không có nhánh cũ nào → báo *«không còn PR/nhánh cursor chưa merge»* rồi tiếp tục merge.
+- Lấy mọi PR open vào `main` (kể cả draft) + nhánh `origin/cursor/*` chưa merge, trừ: superseded / trùng commit với cái đang merge / chủ đã bảo bỏ / WIP rõ ràng («đừng merge», «WIP only»).
+- **Thứ tự:** docs/note nhỏ trước → fix/feature → nhánh đang được yêu cầu deploy cuối (hoặc gộp theo dependency nếu có).
+- Draft → `gh pr ready` rồi merge. Conflict → rebase/resolve trên nhánh đó, push, rồi merge — **không** bỏ qua im lặng.
+- Báo ngắn cho chủ danh sách sẽ gộp (PR # + tiêu đề), rồi **làm luôn** — không chờ thêm câu trả lời «có gộp không».
+- Không còn PR/nhánh nào khác → ghi *«không còn PR/nhánh cursor chưa merge»* rồi merge `abc`.
 
 ### ② Gộp vào `main` (đây là “bấm deploy”)
 
-- PR **vào `main`** rồi merge (hoặc fast-forward `main` tới tip nhánh đã review).
+- Merge **toàn bộ** PR/nhánh bước ①b rồi PR đang deploy (hoặc fast-forward `main` tới tip đã review).
 - Không gộp nhầm PR đang trỏ nhánh `cursor` cha.
-- Sau merge: `main` = bản lên VPS. Có thể xoá nhánh `abc`. **Không xoá `main`.**
+- Sau merge: `main` = bản lên VPS. Có thể xoá nhánh feature đã merge. **Không xoá `main`.**
 - Agent **không** `gh workflow run` (token chỉ đọc). Không cần — `push` lên `main` đã trigger workflow.
 
 ### ③ Theo dõi Actions (không nhờ chủ bấm)
@@ -100,7 +92,8 @@ Không dán private key / mật khẩu root vào chat. Không commit `.env`.
 
 ## Cấm
 
-- Merge/deploy **mà không** chạy bước ①b và **không hỏi** khi còn nhánh/PR cũ chưa merge
+- Merge/deploy **mà không** chạy bước ①b (bỏ sót PR/nhánh `cursor/*` còn mở rồi chỉ merge một nhánh)
+- Hỏi chủ «gộp PR cũ không?» rồi chờ — mặc định **gộp hết**; chỉ hỏi khi conflict/WIP/chủ đã bảo bỏ
 - Rsync/`remote_deploy.sh` từ agent làm đường mặc định
 - Deploy nhánh khác `main`
 - Đụng CRM cũ / port 5000 / cây `anhungland-crm`

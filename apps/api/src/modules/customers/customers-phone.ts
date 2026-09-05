@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
+import { digitsFromPhoneRaw } from '@crmanhung/shared';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
@@ -76,18 +77,70 @@ const DUPLICATE_INCLUDE = {
   },
 } satisfies Prisma.CustomerInclude;
 
+/** Canonical VN mobile: `0` + 9 digits (BUG-018). */
+function normalizeCustomerPhone(raw: string): string {
+  const phone = digitsFromPhoneRaw(raw);
+  if (!/^0\d{9}$/.test(phone)) {
+    throw new BadRequestException('SĐT phải gồm 10 số, bắt đầu bằng 0');
+  }
+  return phone;
+}
+
+function isPhoneUniqueViolation(err: unknown): boolean {
+  if (!(err instanceof Prisma.PrismaClientKnownRequestError) || err.code !== 'P2002') {
+    return false;
+  }
+  const target = err.meta?.target;
+  if (Array.isArray(target)) {
+    return target.some((t) => String(t).toLowerCase().includes('phone'));
+  }
+  return String(target ?? '').toLowerCase().includes('phone');
+}
+
 async function findByPhoneForEmployee(
   prisma: PrismaService,
   employeeId: string,
   phone: string,
 ) {
-  return prisma.customer.findFirst({
-    where: {
-      employeeId,
-      phones: { some: { phone } },
+  const row = await prisma.customerPhone.findUnique({
+    where: { employeeId_phone: { employeeId, phone } },
+    select: {
+      customer: {
+        include: DUPLICATE_INCLUDE,
+      },
     },
-    include: DUPLICATE_INCLUDE,
-    orderBy: [{ isHidden: 'asc' }, { updatedAt: 'desc' }, { id: 'desc' }],
+  });
+  return row?.customer ?? null;
+}
+
+async function rethrowPhoneRace(
+  prisma: PrismaService,
+  employeeId: string,
+  phone: string,
+  err: unknown,
+  fallbackMessage: string,
+): Promise<never> {
+  if (!isPhoneUniqueViolation(err)) throw err;
+  const existing = await findByPhoneForEmployee(prisma, employeeId, phone);
+  if (existing) {
+    throwPhoneDuplicate({
+      message: fallbackMessage,
+      existing: mapExisting(existing),
+      phone,
+    });
+  }
+  throwPhoneDuplicate({
+    message: fallbackMessage,
+    existing: {
+      id: '',
+      fullName: '',
+      facebookName: null,
+      primaryPhone: phone,
+      hasFacebook: false,
+      isHidden: false,
+      status: 'KHAC',
+    },
+    phone,
   });
 }
 
@@ -98,7 +151,7 @@ export async function createManualCustomer(
   loadDetail: (id: string) => Promise<unknown>,
 ) {
   const fullName = dto.fullName.trim();
-  const phone = dto.phone.trim();
+  const phone = normalizeCustomerPhone(dto.phone);
   const note = dto.note?.trim() || null;
 
   const hotline = await prisma.employeeHotline.findFirst({
@@ -116,22 +169,34 @@ export async function createManualCustomer(
     throwPhoneDuplicate({
       message: 'Số điện thoại này đã thuộc khách hàng của bạn.',
       existing: mapExisting(existing),
+      phone,
     });
   }
 
-  const created = await prisma.customer.create({
-    data: {
-      employeeId: user.id,
-      fullName,
-      note,
-      status: 'KHACH_MOI',
-      sourceHotlineId: hotline.id,
-      phones: { create: { phone, sortOrder: 0 } },
-    },
-    select: { id: true },
-  });
-
-  return loadDetail(created.id);
+  try {
+    const created = await prisma.customer.create({
+      data: {
+        employeeId: user.id,
+        fullName,
+        note,
+        status: 'KHACH_MOI',
+        sourceHotlineId: hotline.id,
+        phones: {
+          create: { phone, sortOrder: 0, employeeId: user.id },
+        },
+      },
+      select: { id: true },
+    });
+    return loadDetail(created.id);
+  } catch (err) {
+    await rethrowPhoneRace(
+      prisma,
+      user.id,
+      phone,
+      err,
+      'Số điện thoại này đã thuộc khách hàng của bạn.',
+    );
+  }
 }
 
 export async function addCustomerPhone(
@@ -141,7 +206,7 @@ export async function addCustomerPhone(
   dto: AddCustomerPhoneDto,
   loadDetail: (id: string) => Promise<unknown>,
 ) {
-  const phone = dto.phone.trim();
+  const phone = normalizeCustomerPhone(dto.phone);
   const existing = await prisma.customer.findUnique({
     where: { id },
     include: {
@@ -188,15 +253,30 @@ export async function addCustomerPhone(
   const nextSort =
     existing.phones.reduce((max, p) => Math.max(max, p.sortOrder ?? 0), -1) + 1;
 
-  await prisma.$transaction(async (tx) => {
-    await tx.customerPhone.create({
-      data: { customerId: id, phone, sortOrder: nextSort },
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.customerPhone.create({
+        data: {
+          customerId: id,
+          employeeId: existing.employeeId,
+          phone,
+          sortOrder: nextSort,
+        },
+      });
+      await tx.customer.update({
+        where: { id },
+        data: { updatedAt: new Date() },
+      });
     });
-    await tx.customer.update({
-      where: { id },
-      data: { updatedAt: new Date() },
-    });
-  });
+  } catch (err) {
+    await rethrowPhoneRace(
+      prisma,
+      existing.employeeId,
+      phone,
+      err,
+      'Số điện thoại này đã thuộc khách hàng khác của cùng nhân viên.',
+    );
+  }
 
   return loadDetail(id);
 }
@@ -245,7 +325,7 @@ export async function updateCustomerPhone(
   dto: AddCustomerPhoneDto,
   loadDetail: (id: string) => Promise<unknown>,
 ) {
-  const phone = dto.phone.trim();
+  const phone = normalizeCustomerPhone(dto.phone);
   const existing = await prisma.customer.findUnique({
     where: { id },
     include: {
@@ -296,16 +376,26 @@ export async function updateCustomerPhone(
     });
   }
 
-  await prisma.$transaction(async (tx) => {
-    await tx.customerPhone.update({
-      where: { id: phoneId },
-      data: { phone },
+  try {
+    await prisma.$transaction(async (tx) => {
+      await tx.customerPhone.update({
+        where: { id: phoneId },
+        data: { phone, employeeId: existing.employeeId },
+      });
+      await tx.customer.update({
+        where: { id },
+        data: { updatedAt: new Date() },
+      });
     });
-    await tx.customer.update({
-      where: { id },
-      data: { updatedAt: new Date() },
-    });
-  });
+  } catch (err) {
+    await rethrowPhoneRace(
+      prisma,
+      existing.employeeId,
+      phone,
+      err,
+      'Số điện thoại này đã thuộc khách hàng khác của cùng nhân viên.',
+    );
+  }
 
   return loadDetail(id);
 }
@@ -344,7 +434,7 @@ export async function mergeFacebookIntoPhoneHolder(
 ) {
   const sourceId = dto.sourceCustomerId;
   const targetId = dto.targetCustomerId;
-  const phone = dto.phone.trim();
+  const phone = normalizeCustomerPhone(dto.phone);
   if (sourceId === targetId) {
     throw new BadRequestException('Không thể gộp vào chính hồ sơ đó.');
   }

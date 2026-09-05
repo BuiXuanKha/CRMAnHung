@@ -588,6 +588,7 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 
 - **POST `/api/v1/customers`** `{ fullName, phone, sourceHotlineId, note? }`. Hotline phải của NV đang bật. Trùng SĐT cùng NV → `409 PHONE_DUPLICATE`; OK = cập nhật tên + khôi phục nếu đang ẩn (`PATCH .../acknowledge-phone-duplicate`).
 - **GET `/api/v1/users/me/hotlines`**. Chưa có hotline → Cài đặt → Quản lý SĐT (thêm / bật-tắt).
+- **SĐT chuẩn (BUG-018):** mọi ghi qua `digitsFromPhoneRaw` → `0` + 9 số. DB: `CustomerPhone.employeeId` + unique `(employeeId, phone)` và `(customerId, phone)` — cùng số hai NV vẫn được; race → `409`. Không unique SĐT toàn hệ.
 - Thêm SĐT cam trùng: `409` kèm `mergeAllowed` (chỉ **STAFF** phụ trách khách; Admin không gộp). Gộp Facebook → khách chỉ có SĐT: **POST `/customers/merge-facebook-into-phone-holder`** — chỉ NV, hai hồ sơ cùng `employeeId` = user; Admin → 403.
 - Sửa tên: bút Lucide trên máy tính → `PATCH /customers/:id` `{ fullName }`. Không bút trên thẻ mobile.
 - Lọc tài chính: `budgetFilter=none|has|lt_1b|1b_2b|gt_2b` (khoảng chồng). Lọc kênh: `contactChannel=fb:<uid>|hotline:<id>` từ **GET `/customers/contact-channels`**. Lọc lô: `lodatFilter=has|empty`. Lọc nhu cầu: `needFilter=has|empty`.

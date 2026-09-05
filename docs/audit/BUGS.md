@@ -124,13 +124,11 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | users / auth | BUG-011 FIXED | Create/reset: 6–18 + bắt buộc chữ và số; login không đổi. |
 | 2026-09-04 | web authz | BUG-012 FIXED | Middleware CRM theo cookie role; STAFF không vào route Admin (kèm BUG-083). |
 | 2026-09-04 | customers | BUG-013 note | DB prod: trùng UID khác page = đúng; 4 case buinam cùng page + E2EE khác thread (legacy) — để xử lý sau. |
-<<<<<<< HEAD
+| 2026-09-04 | customers | BUG-014 deferred | Owner: để sau. Acknowledge trùng SĐT lúc tạo vẫn rename+unhide. |
 | 2026-09-04 | customers | BUG-015 FIXED | PATCH/DELETE theo `phoneId` (không wipe số phụ); modal quản lý SĐT; FAB/gọi: 1 số → tel, ≥2 → picker. |
 | 2026-09-05 | customers / permission | BUG-017 FIXED | Owner: Admin không gộp; chỉ NV gộp khách của mình (`source/target.employeeId === user.id`). |
 | 2026-09-05 | customers | BUG-016 defer | Owner: nghiêm trọng — bàn chi tiết / chốt thiết kế sau; **chưa code**. Giữ Person đích, chuyển hết quan hệ rồi mới xóa nguồn (không tạo Person mới). |
-=======
-| 2026-09-04 | customers | BUG-014 deferred | Owner: để sau. Acknowledge trùng SĐT lúc tạo vẫn rename+unhide. |
->>>>>>> a469949 (docs(audit): defer BUG-014 per owner)
+| 2026-09-05 | customers | BUG-018 FIXED | Unique `(employeeId, phone)` + `(customerId, phone)`; normalize `0`+9; P2002 → 409. Không unique toàn hệ. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -174,7 +172,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | FIXED |
 | BUG-016 | HIGH | customers | Gộp Facebook: mất SĐT nguồn, party SetNull, xóa map trùng lô; TitleService Restrict → merge vỡ. | OPEN |
 | BUG-017 | HIGH | customers / permission | Admin gộp Facebook giữa hai `employeeId` khác nhau — chuyển hồ sơ sang NV khác. | FIXED |
-| BUG-018 | HIGH | customers | SĐT không unique trên DB; không chuẩn hóa — race / format lệch tạo Person trùng. | OPEN |
+| BUG-018 | HIGH | customers | SĐT không unique trên DB; không chuẩn hóa — race / format lệch tạo Person trùng. | FIXED |
 | BUG-019 | MEDIUM | customers | Tìm kiếm không khớp tên/UID Facebook; keyword SĐT không bỏ khoảng trắng. | OPEN |
 | BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | OPEN |
 | BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | OPEN |
@@ -483,7 +481,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Unique chỉ trong code; format SĐT không một chuẩn.
 - **Impact:** Trùng Person; tìm/gộp SĐT miss.
 - **Evidence:** Schema `CustomerPhone`. `createManualCustomer` 113–131. `migrate-phones-from-legacy.ts` comment “Duplicate numbers across employees are kept as-is” + trim only.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: unique theo NV, không unique toàn hệ. `CustomerPhone.employeeId` + `@@unique([employeeId, phone])` + `@@unique([customerId, phone])`. Mọi ghi SĐT qua `digitsFromPhoneRaw` → `0`+9; DTO + service + migrate legacy. Race `P2002` → `409 PHONE_DUPLICATE`. Migration backfill/normalize idempotent.
 
 ### BUG-019 — Tìm Person bỏ Facebook UID/tên; SĐT có khoảng không khớp
 
