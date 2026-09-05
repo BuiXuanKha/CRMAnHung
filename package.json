@@ -18,7 +18,6 @@
     "dev": "pnpm -r --parallel --filter @crmanhung/api --filter @crmanhung/web run dev",
     "dev:api": "pnpm --filter @crmanhung/api dev",
     "dev:web": "pnpm --filter @crmanhung/web dev",
-    "dev:extension": "pnpm --filter @crmanhung/extension dev",
     "build": "pnpm -r run build",
     "lint": "pnpm -r run lint",
     "typecheck": "pnpm -r run typecheck",

@@ -40,5 +40,4 @@ Không gửi lên `crm.anhungland.com`.
 
 ## Ghi chú
 
-- `apps/extension/src` vẫn là stub TypeScript (build `dist`). **Load `anhunglandextension`**, không load `dist`.
 - Dump DOM / nút Quét DOM LIVE chỉ tải file máy — không commit dump.

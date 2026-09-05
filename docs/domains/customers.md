@@ -619,7 +619,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 - Tin đã có đủ ảnh (kể cả JPEG migrate đã convert WebP) → không encode lại. Gắn ảnh chat vào lô: **copy** SEO WebP, giữ file chat (cùng key WebP sau `[seo-webp-replace]`).
 - Body JSON tối đa 32MB (data URL). Tối đa 200 tin / lần.
 
-Scanner Chrome: Load unpacked `apps/extension/anhunglandextension` (cùng panel Business Suite / Messenger / E2EE). Gửi `POST /api/v1/customers/from-extension`. Stub TypeScript `apps/extension/src` chưa thay scanner này.
+Scanner Chrome: Load unpacked `apps/extension/anhunglandextension` (cùng panel Business Suite / Messenger / E2EE). Gửi `POST /api/v1/customers/from-extension`.
 
 ---
 

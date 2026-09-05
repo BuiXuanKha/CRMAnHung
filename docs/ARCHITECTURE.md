@@ -102,11 +102,12 @@ apps/web/
 ### Extension
 
 ```
-apps/extension/src/
-├── background/     # service worker — proxy API
-├── content/        # inbox / messenger adapters + scanners
-├── options/        # login & API URL
-└── shared/
+apps/extension/anhunglandextension/   # Load unpacked — scanner Meta
+├── manifest.json
+├── content-inbox.js
+├── background.js
+├── options.html / options.js
+└── scanners/
 ```
 
 ---

@@ -1,4 +1,5 @@
-# @crmanhung/extension
+# Extension Chrome
 
-- **Load unpacked (đang dùng):** [`anhunglandextension/`](./anhunglandextension) — scanner Meta → API `anhungland.com`.
-- `src/` + `pnpm --filter @crmanhung/extension build` → `dist/` stub. Không dùng để quét.
+Scanner Meta: **[`anhunglandextension/`](./anhunglandextension)** — Load unpacked thư mục đó.
+
+API mặc định `https://anhungland.com/api/v1`.

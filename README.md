@@ -24,7 +24,7 @@ Không nhảy cóc. Chi tiết + Definition of Done: **PLAYBOOK**. Skills Cursor
 |-----|-----------|
 | `apps/api` | NestJS + Prisma + **PostgreSQL** + JWT + **Cloudflare R2** |
 | `apps/web` | **Next.js 15** (App Router) + React 19 + TanStack Query |
-| `apps/extension` | Chrome MV3 + TypeScript |
+| `apps/extension` | Chrome MV3 (Load unpacked `anhunglandextension`) |
 | `packages/shared` | Enums + Zod schemas dùng chung |
 
 Lý do chọn stack: [`docs/adr/0001-tech-stack.md`](docs/adr/0001-tech-stack.md) · Postgres [0004](docs/adr/0004-postgresql.md) · R2 [0005](docs/adr/0005-cloudflare-r2.md) · Next [0006](docs/adr/0006-nextjs-web.md).
@@ -67,9 +67,7 @@ pnpm dev
 
 ### Extension
 
-Load unpacked thư mục **`apps/extension/anhunglandextension`** (scanner đang dùng). API mặc định `https://anhungland.com/api/v1`.
-
-`pnpm --filter @crmanhung/extension build` chỉ build stub TypeScript (`dist/`) — **không** dùng để quét.
+Load unpacked thư mục **`apps/extension/anhunglandextension`**. API mặc định `https://anhungland.com/api/v1`.
 
 ## Hiện trạng
 
