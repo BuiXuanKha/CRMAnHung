@@ -102,7 +102,7 @@ apps/web/
 ### Extension
 
 ```
-apps/extension/anhunglandextension/   # Load unpacked — scanner Meta
+apps/extension/   # Load unpacked — scanner Meta
 ├── manifest.json
 ├── content-inbox.js
 ├── background.js
@@ -159,7 +159,7 @@ Không nhớ panel cột phụ (chỉ list). Chi tiết domain: `customers.md` �
 
 ```
 Meta Inbox / Messenger (tab ngoài / extension)
-  → Extension (scan + JWT) — Load unpacked `apps/extension/anhunglandextension`
+  → Extension (scan + JWT) — Load unpacked `apps/extension`
   → POST /api/v1/customers/from-extension
   → DB (Customer + Facebook + Messenger)
   → Web: cột phụ «Nội dung chat» = tin đã lưu

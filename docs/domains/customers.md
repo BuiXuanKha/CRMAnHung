@@ -35,7 +35,7 @@ Nhân viên tìm / chăm sóc khách (Messenger hoặc nhập SĐT), gắn lô, 
 
 ## 4–10. (API / mock / migrate)
 
-Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. `limit` mặc định 50, `offset` từ 0, `total` = COUNT. Mỗi dòng: `lodatCount`, `messageCount` (tin đã lưu), `careNoteCount` (lần chăm sóc) — cột phụ ẩn thanh khi = 0. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (cột phụ). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). **POST `/api/v1/customers`** — thêm khách bằng SĐT (hotline + tên + số). **GET `/api/v1/customers/contact-channels`** — lọc kênh. **POST `/api/v1/customers/from-extension`** — ingest scan + tin; ảnh chat + avatar raster → WebP (`storage.upload`). Scanner Chrome: Load unpacked `apps/extension/anhunglandextension`. **Không** API inbox Meta sống.
+Giữ contract list. **GET `/api/v1/customers`** — STAFF khách mình, ADMIN tất cả. `limit` mặc định 50, `offset` từ 0, `total` = COUNT. Mỗi dòng: `lodatCount`, `messageCount` (tin đã lưu), `careNoteCount` (lần chăm sóc) — cột phụ ẩn thanh khi = 0. Staging đã có: tên, trạng thái, tài chính, ghim/ẩn, kênh, avatar CDN, SĐT, nhu cầu, form chăm sóc. **GET `/api/v1/customers/:id/messages`** — tin đã lưu + URL ảnh R2 (cột phụ). **POST `/api/v1/customers/:id/care-notes`** — cập nhật trạng thái + ngân sách; append care nếu khác lần gần nhất. **POST `/api/v1/customers/:id/phones`** — thêm SĐT khi khách chưa có số (SĐT cam). **POST `/api/v1/customers`** — thêm khách bằng SĐT (hotline + tên + số). **GET `/api/v1/customers/contact-channels`** — lọc kênh. **POST `/api/v1/customers/from-extension`** — ingest scan + tin; ảnh chat + avatar raster → WebP (`storage.upload`). Scanner Chrome: Load unpacked `apps/extension`. **Không** API inbox Meta sống.
 
 ## 11. Còn thiếu / chưa đúng so với CRM cũ
 
@@ -92,7 +92,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 24. **Tải thêm 50 dòng khi cuộn** + nhớ vị trí/lọc khi rời list — đặc tả **§12.1.5**. Có trên staging.
 25. **Hangtag «Tự khôi phục»** khi extension kéo lại khách đã ẩn. **Xong.** `from-extension` set `isHidden: false` + `autoRestoredAt`. Ẩn/khôi phục tay xoá hangtag.
 26. **Quản trị khách (admin)** — xóa cứng / registry. Trang `/quan-tri/khach-hang` còn placeholder. **Chưa làm** (chốt 2026-08-24).
-27. **Inbox Facebook sống** — hội thoại Meta realtime **trong** CRM (CRM cũ: extension quét `business.facebook.com/latest/inbox`). **Chưa làm.** Không nhầm với mục 21. Cần bàn: iframe / cửa sổ phụ / chỉ dựa extension + tin đã lưu. Scanner load `apps/extension/anhunglandextension`.
+27. **Inbox Facebook sống** — hội thoại Meta realtime **trong** CRM (CRM cũ: extension quét `business.facebook.com/latest/inbox`). **Chưa làm.** Không nhầm với mục 21. Cần bàn: iframe / cửa sổ phụ / chỉ dựa extension + tin đã lưu. Scanner load `apps/extension`.
 
 ---
 
@@ -619,7 +619,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 - Tin đã có đủ ảnh (kể cả JPEG migrate đã convert WebP) → không encode lại. Gắn ảnh chat vào lô: **copy** SEO WebP, giữ file chat (cùng key WebP sau `[seo-webp-replace]`).
 - Body JSON tối đa 32MB (data URL). Tối đa 200 tin / lần.
 
-Scanner Chrome: Load unpacked `apps/extension/anhunglandextension` (cùng panel Business Suite / Messenger / E2EE). Gửi `POST /api/v1/customers/from-extension`.
+Scanner Chrome: Load unpacked `apps/extension` (cùng panel Business Suite / Messenger / E2EE). Gửi `POST /api/v1/customers/from-extension`.
 
 ---
 

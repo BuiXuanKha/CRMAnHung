@@ -188,7 +188,7 @@ Payload draft gồm object `scan` (UID, tên, page, source, thread…) + `chatMe
 
 ## 8. Cài đặt & phát triển
 
-1. Chrome → `chrome://extensions` → Developer mode → **Load unpacked** → chọn thư mục `apps/extension/anhunglandextension`.
+1. Chrome → `chrome://extensions` → Developer mode → **Load unpacked** → chọn thư mục `apps/extension`.
 2. Mở Business Suite Inbox hoặc Messenger thread khớp URL trong manifest.
 3. Icon extension / Options → đặt API URL (`http://localhost:5050/api/v1` hoặc `https://anhungland.com/api/v1`).
 4. Trên panel: đăng nhập tài khoản CRM (cùng user Web), bật quét, mở hội thoại khách.
