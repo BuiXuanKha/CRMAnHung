@@ -11,7 +11,7 @@ Chrome MV3 — quét khách + tin từ Meta Inbox / Messenger, gửi vào **CRM 
 1. Gỡ bản cũ **Anhungland Extension** trên `chrome://extensions` (nếu còn).
 2. Bật Developer mode → **Load unpacked** → chọn:
 
-   `crmanhung/apps/extension/unpacked`
+   `crmanhung/apps/extension/anhunglandextension`
 
 3. Icon extension / Options: API URL mặc định `https://anhungland.com/api/v1`. Dev: `http://localhost:5050/api/v1`.
 4. Mở Business Suite Inbox hoặc Messenger → panel: đăng nhập `kha` / Admin → **Bật quét** → đổi hội thoại để gửi (hoặc **Dừng** để gửi khách đang mở).
@@ -40,5 +40,5 @@ Không gửi lên `crm.anhungland.com`.
 
 ## Ghi chú
 
-- `apps/extension/src` vẫn là stub TypeScript (build `dist`). **Load `unpacked`**, không load `dist`.
+- `apps/extension/src` vẫn là stub TypeScript (build `dist`). **Load `anhunglandextension`**, không load `dist`.
 - Dump DOM / nút Quét DOM LIVE chỉ tải file máy — không commit dump.

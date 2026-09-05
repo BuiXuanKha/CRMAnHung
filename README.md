@@ -67,7 +67,7 @@ pnpm dev
 
 ### Extension
 
-Load unpacked thư mục **`apps/extension/unpacked`** (scanner đang dùng). API mặc định `https://anhungland.com/api/v1`.
+Load unpacked thư mục **`apps/extension/anhunglandextension`** (scanner đang dùng). API mặc định `https://anhungland.com/api/v1`.
 
 `pnpm --filter @crmanhung/extension build` chỉ build stub TypeScript (`dist/`) — **không** dùng để quét.
 

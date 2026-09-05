@@ -1,6 +1,6 @@
 /**
  * TypeScript stub — không Load unpacked `dist/`.
- * Scanner đang dùng: `apps/extension/unpacked`.
+ * Scanner đang dùng: `apps/extension/anhunglandextension`.
  */
 const markerId = 'crmanhung-ext-marker';
 if (!document.getElementById(markerId)) {
