@@ -65,13 +65,11 @@ pnpm dev
 
 `pnpm db:seed` không tạo user nháp. Tài khoản CRM lấy từ copy DB cũ (`kha`, `buinam`, `admin`) — xem `docs/MIGRATION.md`.
 
-### Extension (dev)
+### Extension
 
-```bash
-pnpm --filter @crmanhung/extension build
-```
+Load unpacked thư mục **`apps/extension/unpacked`** (scanner đang dùng). API mặc định `https://anhungland.com/api/v1`.
 
-Load unpacked thư mục `apps/extension/dist` trong `chrome://extensions`.
+`pnpm --filter @crmanhung/extension build` chỉ build stub TypeScript (`dist/`) — **không** dùng để quét.
 
 ## Hiện trạng
 

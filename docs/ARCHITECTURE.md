@@ -158,7 +158,7 @@ Không nhớ panel cột phụ (chỉ list). Chi tiết domain: `customers.md` �
 
 ```
 Meta Inbox / Messenger (tab ngoài / extension)
-  → Extension (scan + JWT) — apps/extension vẫn stub
+  → Extension (scan + JWT) — Load unpacked `apps/extension/unpacked`
   → POST /api/v1/customers/from-extension
   → DB (Customer + Facebook + Messenger)
   → Web: cột phụ «Nội dung chat» = tin đã lưu

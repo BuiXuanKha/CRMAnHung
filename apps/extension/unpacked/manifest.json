@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "An Hưng Land CRM Extension",
+  "version": "2.12.0",
+  "description": "Quét khách từ Meta Inbox / Messenger, gửi vào CRM An Hưng Land (anhungland.com)",
+  "permissions": ["activeTab", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "host_permissions": [
+    "https://business.facebook.com/*",
+    "https://www.facebook.com/*",
+    "https://web.facebook.com/*",
+    "https://anhungland.com/*",
+    "http://localhost:5050/*",
+    "http://127.0.0.1:5050/*"
+  ],
+  "optional_host_permissions": ["http://*/*", "https://*/*"],
+  "action": {
+    "default_title": "An Hưng Land Extension — Cài đặt",
+    "default_popup": "options.html"
+  },
+  "options_ui": {
+    "page": "options.html",
+    "open_in_tab": true
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://business.facebook.com/latest/inbox",
+        "https://business.facebook.com/latest/inbox/*"
+      ],
+      "js": [
+        "config.js",
+        "ext-source.js",
+        "ext-person-name.js",
+        "ext-context-business-suite.js",
+        "content-inbox.js"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "https://www.facebook.com/messages/t/*",
+        "https://www.facebook.com/messages/e2ee/t/*",
+        "https://web.facebook.com/messages/t/*",
+        "https://web.facebook.com/messages/e2ee/t/*"
+      ],
+      "js": [
+        "config.js",
+        "ext-source.js",
+        "ext-person-name.js",
+        "ext-context-facebook-com.js",
+        "scanners/scanner-messenger-web.js",
+        "content-inbox.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}
