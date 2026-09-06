@@ -1012,7 +1012,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Contract domain chỉ create + status; UI không edit.
 - **Impact:** Bài trùng trên anhungland.com; SEO/nội dung lệch; nháp cũ tồn tại.
 - **Evidence:** Controller không update body. `createPost` + `uniquePostSlug`. Domain bảng API §7 không có PATCH content.
-- **Status:** OPEN
+- **Status:** OPEN (HOÃN — owner 2026-09-06: làm sau)
 
 ### BUG-057 — Đổi địa chỉ dự án sang đất dân không kiểm kho `ProjectLot`
 

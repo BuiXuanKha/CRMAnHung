@@ -18,7 +18,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **053** | MED | FIXED | Picker địa chỉ dump 500 | SỬA: bỏ trần 500, trả hết + COUNT (2026-09-06) |  |
 | **054** | MED | FIXED | Race 2 tab Lưu — chưa thấy case | SỬA: retry P2002 code + nextCode max số (2026-09-06) |  |
 | **055** | MED | STILL_OPEN | Lọc «Dưới 1 tỷ» ra cả khách chưa nhập ngân sách | **SỬA** |  |
-| **056** | MED | STILL_OPEN | Admin không sửa được bài đã tạo | **SỬA** PATCH nội dung |  |
+| **056** | MED | STILL_OPEN | Admin không sửa được bài đã tạo | **SỬA** PATCH nội dung | HOÃN (owner 2026-09-06 — làm sau) |
 | **057** | MED | STILL_OPEN | Bỏ tick dự án khi còn kho | **SỬA** chặn khi còn `ProjectLot` |  |
 | **058** | MED | STILL_OPEN | `/giao-dich/tao` không `lodatId` chỉ 200 lô; **Admin đã không tạo GD** | Bỏ picker trần — bắt tạo từ lô |  |
 | **059** | HIGH | STILL_OPEN | Đổi chủ khi GD **Đã cọc** — lệch deal vs lô. Admin đã không đổi chủ | **SỬA** chặn đổi chủ khi còn GD mở |  |
@@ -50,9 +50,9 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 **Gợi ý thứ tự nếu bảo «sửa các ô SỬA»:**  
 1) 060 · 061 · 059 (ảnh/GD/chủ — mất data)  
 2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
-3) 055 · 057 · 056 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
+3) 055 · 057 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
-5) Chờ chốt: **062, 063**. Hoãn: 052, 058 (nếu chọn bỏ picker), 065, 068, 077, 078, 080.
+5) Chờ chốt: **062, 063**. Hoãn: **056** (owner), 052, 058 (nếu chọn bỏ picker), 065, 068, 077, 078, 080.
 
 ---
 
@@ -148,13 +148,13 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-056 — Không sửa nội dung bài; soạn lại = bài mới (`-2`)
 
-**Còn.** Chỉ `POST` tạo + `PATCH` status. Dialog luôn tạo mới. Trùng slug chuyên mục → `-2`.
+**Chốt: HOÃN** (owner 2026-09-06 — làm sau). Vẫn OPEN trên code: chỉ `POST` tạo + `PATCH` status; soạn lại → slug `-2`.
 
 **Tôi vào vai Admin.** `/dashboard/bai-viet` → Soạn → xuất bản. Sai chính tả → soạn lại cùng tiêu đề → URL thứ hai, **cả hai** có thể published.
 
 **Live (2026-09-06):** `/du-an` có bài; `/tin-tuc` `/kien-thuc` `/kinh-nghiem` `/lien-he` `/chinh-sach` empty «Hiện chưa có bài». Bug đau khi Admin soạn/sửa, không phụ thuộc list trống.
 
-**Đề xuất: SỬA** — `PATCH` title/body/cover/slug; dialog sửa bài đang chọn, không `POST` mới.
+**Đề xuất khi làm:** `PATCH` title/body/cover/slug; dialog sửa bài đang chọn, không `POST` mới.
 
 ---
 
