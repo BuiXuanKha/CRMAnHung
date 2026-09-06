@@ -29,6 +29,7 @@ import {
   updateLodatImageRotation,
   uploadLodatImage,
 } from './api';
+import { getOpenTransaction } from '@/features/transactions/api';
 import { ChangeOwnerModal } from './components/change-owner-modal';
 import { LodatEditImages } from './components/lodat-edit-images';
 import { LodatEditOwnerHistory } from './components/lodat-edit-owner-history';
@@ -124,6 +125,25 @@ export function LodatEditPage() {
   const canEditSpecs = detail?.canEditSpecs ?? false;
   const canEditMap = detail?.canEditMap ?? false;
   const canChangeOwner = detail?.canChangeOwner ?? false;
+
+  async function tryOpenChangeOwner() {
+    if (!id || busy) return;
+    setOwnerError(null);
+    try {
+      const open = await getOpenTransaction(id);
+      if (open.id) {
+        setAlertMsg(
+          'Lô này đang trong trạng thái giao dịch nên không đổi được chủ.',
+        );
+        return;
+      }
+    } catch (err) {
+      setAlertMsg(err instanceof Error ? err.message : 'Không kiểm tra được giao dịch mở.');
+      return;
+    }
+    setOwnerOpen(true);
+  }
+
   const canEditImages = detail?.canEditImages ?? false;
   const images = detail?.images ?? [];
   const lodatImageCount = images.filter((i) => i.source === 'lodat').length;
@@ -403,8 +423,7 @@ export function LodatEditPage() {
                       type="button"
                       className="ld-edit-change-owner"
                       onClick={() => {
-                        setOwnerError(null);
-                        setOwnerOpen(true);
+                        void tryOpenChangeOwner();
                       }}
                       disabled={busy}
                     >

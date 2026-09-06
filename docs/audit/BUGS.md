@@ -250,7 +250,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN |
 | BUG-057 | MEDIUM | addresses | Đổi `PROJECT` → `REGULAR` không kiểm kho `ProjectLot` — picker kho chết, lô cũ còn. | OPEN |
 | BUG-058 | MEDIUM | transactions / lodats | Form tạo GD (không `?lodatId`) picker tối đa 200 lô — lô cũ không chọn được. | FIXED |
-| BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | OPEN |
+| BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | FIXED |
 | BUG-060 | HIGH | lodats / transactions | Xóa ảnh lô không đếm `TransactionSnapshotImage` — xóa R2, ảnh GD gãy. | OPEN |
 | BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | CLOSED (by design) |
 | BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | OPEN |
@@ -1051,7 +1051,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Đổi chủ = đóng/mở map; GD = FK map lúc tạo + unique theo lô. Hai module không giao nhau.
 - **Impact:** Sai chủ trên deal vs lô; không tạo GD chủ mới; xóa GD không sửa trạng thái rao bán đang hiện; thống kê/lịch sử lệch Person.
 - **Evidence:** `changeOwner` transaction chỉ `LodatCustomerMap`/`Lodat`. `findOpenId({ lodatId })`. `remove` `where: { id: row.lodatCustomerMapId }`. Domain snapshot đóng băng lúc tạo — không giải thích đổi chủ khi deal mở.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: chặn đổi chủ khi còn GD mở; thông báo «Lô này đang trong trạng thái giao dịch nên không đổi được chủ.» API `ConflictException` + UI check `getOpenTransaction` trước khi mở modal.
 
 ### BUG-060 — Xóa ảnh lô xóa R2 dù snapshot giao dịch còn trỏ cùng `objectKey`
 

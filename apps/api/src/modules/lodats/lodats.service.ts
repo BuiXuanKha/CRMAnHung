@@ -665,6 +665,20 @@ export class LodatsService {
     }
     this.assertCanAccess(user, row.createdByEmployeeId);
 
+    // BUG-059: không đổi chủ khi còn GD mở (Đã cọc / Đã công chứng).
+    const openTx = await this.prisma.transaction.findFirst({
+      where: {
+        lodatId: id,
+        status: { in: ['DA_COC', 'DA_CONG_CHUNG'] },
+      },
+      select: { id: true },
+    });
+    if (openTx) {
+      throw new ConflictException(
+        'Lô này đang trong trạng thái giao dịch nên không đổi được chủ.',
+      );
+    }
+
     const customer = await this.prisma.customer.findUnique({
       where: { id: customerId },
       select: { id: true, employeeId: true, isHidden: true, fullName: true },
