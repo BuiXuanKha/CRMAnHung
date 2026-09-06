@@ -29,7 +29,6 @@ import {
   TX_PARTY,
   TX_STATUS,
   TX_TYPE,
-  statsFromItems,
   toDetail,
   toListItem,
 } from './transactions-view';
@@ -50,13 +49,38 @@ export class TransactionsService {
         ...keywordWhere(query.keyword),
       ],
     };
-    const rows = await this.prisma.transaction.findMany({
-      where,
-      orderBy: { createdAt: 'desc' },
-      include: LIST_INCLUDE,
-    });
+    const take = Math.min(Math.max(query.limit ?? 50, 1), 200);
+    const skip = Math.max(query.offset ?? 0, 0);
+
+    const [rows, total, agg] = await Promise.all([
+      this.prisma.transaction.findMany({
+        where,
+        orderBy: { createdAt: 'desc' },
+        include: LIST_INCLUDE,
+        skip,
+        take,
+      }),
+      this.prisma.transaction.count({ where }),
+      // Doanh thu / hoa hồng theo cùng filter list (không chỉ trang hiện tại).
+      this.prisma.transaction.aggregate({
+        where: {
+          AND: [where, { type: TX_TYPE.OWN }, { status: TX_STATUS.HOAN_TAT }],
+        },
+        _sum: { salePriceVnd: true, commissionVnd: true },
+      }),
+    ]);
+
     const items = rows.map(toListItem);
-    return { items, total: items.length, stats: statsFromItems(items) };
+    const saleSum = agg._sum.salePriceVnd;
+    const commissionSum = agg._sum.commissionVnd;
+    return {
+      items,
+      total,
+      stats: {
+        totalRevenueVnd: saleSum == null ? 0 : Number(saleSum),
+        totalCommissionVnd: commissionSum == null ? 0 : Number(commissionSum),
+      },
+    };
   }
 
   async getById(user: RequestUser, id: string) {

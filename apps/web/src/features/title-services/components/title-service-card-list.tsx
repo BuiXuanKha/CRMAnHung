@@ -17,6 +17,7 @@ import { ActionMenu, type TitleServiceAction } from './action-menu';
 type Props = {
   items: TitleServiceListItem[];
   total: number;
+  loadingMore?: boolean;
   selectedId: string | null;
   menuId: string | null;
   onSelect: (id: string) => void;
@@ -30,6 +31,7 @@ type Props = {
 export function TitleServiceCardList({
   items,
   total,
+  loadingMore = false,
   selectedId,
   menuId,
   onSelect,
@@ -132,6 +134,7 @@ export function TitleServiceCardList({
       </div>
       <div className="sd-cards-count">
         Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> hồ sơ sổ đỏ
+        {loadingMore ? ' — Đang tải thêm…' : ''}
       </div>
     </div>
   );

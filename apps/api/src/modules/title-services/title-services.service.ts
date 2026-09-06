@@ -22,7 +22,6 @@ import {
   DETAIL_INCLUDE,
   DONE_STATUSES,
   LIST_INCLUDE,
-  LIST_LIMIT,
   TITLE_DOC_KINDS,
   TITLE_FILE_MAX_BYTES,
   TITLE_FILE_MIMES,
@@ -50,14 +49,20 @@ export class TitleServicesService {
         ...keywordWhere(query.keyword),
       ],
     };
-    const rows = await this.prisma.titleService.findMany({
-      where,
-      orderBy: [{ isPinned: 'desc' }, { pinnedAt: 'desc' }, { updatedAt: 'desc' }],
-      take: LIST_LIMIT,
-      include: LIST_INCLUDE,
-    });
+    const take = Math.min(Math.max(query.limit ?? 50, 1), 200);
+    const skip = Math.max(query.offset ?? 0, 0);
+    const [rows, total] = await Promise.all([
+      this.prisma.titleService.findMany({
+        where,
+        orderBy: [{ isPinned: 'desc' }, { pinnedAt: 'desc' }, { updatedAt: 'desc' }],
+        skip,
+        take,
+        include: LIST_INCLUDE,
+      }),
+      this.prisma.titleService.count({ where }),
+    ]);
     const items = rows.map(toListItem);
-    return { items, total: items.length };
+    return { items, total };
   }
 
   async getById(user: RequestUser, id: string) {
