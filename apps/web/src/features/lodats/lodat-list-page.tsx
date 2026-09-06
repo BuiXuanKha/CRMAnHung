@@ -7,6 +7,7 @@ import { AlertTriangle, type LucideIcon } from 'lucide-react';
 import {
   LodatKind,
   LodatSaleStatus,
+  UserRole,
   type LodatDetail,
   type LodatImage,
   type LodatListItem,
@@ -15,6 +16,7 @@ import {
 } from '@crmanhung/shared';
 import { needsMoreListScrollHeight, resetListScrollIfFiltersChanged, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
+import { useAuth } from '@/features/auth/auth-context';
 import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { createTransactionHref } from './transaction-href';
@@ -82,6 +84,7 @@ function galleryImagesFromDetail(detail: LodatDetail): LodatImage[] {
 export function LodatListPage() {
   const router = useRouter();
   const qc = useQueryClient();
+  const { user } = useAuth();
   const [keyword, setKeyword] = useState('');
   const [status, setStatus] = useState<string>(STATUS_FILTER_DEFAULT);
   const [kind, setKind] = useState('');
@@ -352,6 +355,13 @@ export function LodatListPage() {
       return;
     }
     if (action === 'deal') {
+      if (user?.role === UserRole.ADMIN) {
+        setAlertBox({
+          title: 'Không tạo giao dịch',
+          message: 'Admin không tạo giao dịch. Nhân viên tạo giao dịch từ lô của mình.',
+        });
+        return;
+      }
       router.push(createTransactionHref(id));
       return;
     }

@@ -20,7 +20,7 @@ Theo dõi deal mua bán lô: loại, các bên, giá, hoa hồng, cọc → côn
 | Actor | List | Không |
 |-------|------|--------|
 | STAFF | GD mình tạo (`createdByEmployeeId`); tạo từ lô / khách | Sửa / xoá GD NV khác |
-| ADMIN | Tất cả; lọc theo NV | — |
+| ADMIN | Tất cả; lọc theo NV | Tạo GD (NV tạo từ lô mình) |
 
 Không nút «Thêm GD» trên list — tạo từ lô / khách.
 
@@ -97,7 +97,7 @@ Ownership: theo `createdByEmployeeId` (người **tạo GD**), không theo `Loda
 | Tạo | `/giao-dich/tao` | `?lodatId=` khoá lô; trùng GD mở → sửa GD đó |
 | Sửa | `/giao-dich/[id]/sua` | Cùng form; thêm trạng thái + lý do hủy |
 
-Không nút thêm trên list. Nút **Giao dịch** trên `/lo-dat` (menu PC) và chi tiết (desktop + footer mobile) = open-or-create (`?lodatId=`).
+Không nút thêm trên list. Nút **Giao dịch** trên `/lo-dat` (menu PC) và chi tiết (desktop + footer mobile) = open-or-create (`?lodatId=`). **Admin không tạo** — xem/sửa GD có sẵn trên `/giao-dich`.
 
 ## 7. Contract / API dự kiến
 
@@ -107,7 +107,7 @@ Prefix `/api/v1`. Zod: `packages/shared/src/transactions.ts`. Nest: `apps/api/sr
 |--------|------|----|---------|
 | GET | `/transactions` | STAFF (mình) / ADMIN (tất cả) | `keyword` `type` `status` `createdByEmployeeId` |
 | GET | `/transactions/:id` | owner / ADMIN | `TransactionDetail` |
-| POST | `/transactions` | owner lô / ADMIN | `lodatId` hoặc `lodatCustomerMapId`; trùng mở → `OPEN_TRANSACTION_EXISTS` |
+| POST | `/transactions` | owner lô (**STAFF**). ADMIN → 403 | `lodatId` hoặc `lodatCustomerMapId`; trùng mở → `OPEN_TRANSACTION_EXISTS` |
 | PATCH | `/transactions/:id` | owner / ADMIN | `UpdateTransactionInput`; `HUY` cần `cancelReason` |
 | DELETE | `/transactions/:id` | owner / ADMIN | xóa cứng; GD mở → map `DANG_BAN` |
 | GET | `/transactions/lodat/:lodatId/open` | owner lô / ADMIN | `{ id }` hoặc `id: null` |

@@ -126,6 +126,15 @@ export function LodatDetailPage() {
     window.setTimeout(() => setToast(null), 2400);
   }
 
+  function goTransaction() {
+    if (!detail) return;
+    if (isAdmin) {
+      setAlertMsg('Admin không tạo giao dịch. Nhân viên tạo giao dịch từ lô của mình.');
+      return;
+    }
+    router.push(createTransactionHref(detail.id));
+  }
+
   async function handleCopy() {
     if (!detail) return;
     try {
@@ -392,7 +401,7 @@ export function LodatDetailPage() {
               <button
                 type="button"
                 className="ld-detail-action-btn"
-                onClick={() => router.push(createTransactionHref(detail.id))}
+                onClick={goTransaction}
               >
                 Giao dịch
               </button>
@@ -425,7 +434,7 @@ export function LodatDetailPage() {
       {detail ? (
         <LodatOwnerFab
           owner={owner}
-          onTransaction={() => router.push(createTransactionHref(detail.id))}
+          onTransaction={goTransaction}
           onEdit={() => router.push(`/lo-dat/${detail.id}/sua`)}
         />
       ) : null}

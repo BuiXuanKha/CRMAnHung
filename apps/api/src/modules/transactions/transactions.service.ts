@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -76,6 +77,11 @@ export class TransactionsService {
   }
 
   async create(user: RequestUser, dto: CreateTransactionDto) {
+    if (user.role === 'ADMIN') {
+      throw new ForbiddenException(
+        'Admin không tạo giao dịch. Nhân viên tạo giao dịch từ lô của mình.',
+      );
+    }
     const { lodat, map } = await this.resolveLodatMap(user, dto);
     this.assertCreateRules(dto);
 

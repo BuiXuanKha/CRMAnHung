@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 46 |
+| OPEN | 45 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 37 |
+| FIXED / CLOSED | 38 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -155,6 +155,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | customers / messenger | BUG-046 CLOSED | Owner: không sửa — chat chỉ tham khảo, không hiện ở chi tiết khách. |
 | 2026-09-06 | public-content | BUG-047 FIXED | Owner: lô không của Admin — gỡ `/dashboard/lo-dat` + nút Đăng lô; API soạn/đăng lô chỉ STAFF. |
 | 2026-09-06 | addresses / ProjectLot | BUG-048 FIXED | Owner: copy modal CRM cũ «Import lô đất Excel». Admin import vào dự án trống → `ProjectLot`. |
+| 2026-09-06 | transactions | BUG-049 FIXED | Owner: Admin không tạo GD. `POST /transactions` 403; NV tạo từ lô mình. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -237,7 +238,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | CLOSED |
 | BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | FIXED |
 | BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | FIXED |
-| BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | OPEN |
+| BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | FIXED |
 | BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | OPEN |
 | BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | OPEN |
 | BUG-052 | MEDIUM | title-services | List sổ đỏ `take: 500`, `total: items.length` — cắt im lặng. | OPEN |
@@ -919,7 +920,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Ownership GD = người bấm Tạo, không = `Lodat.createdByEmployeeId`. Unique mở theo lô, không theo NV.
 - **Impact:** NV mất quyền ghi nhận deal trên lô mình; thống kê STAFF thiếu doanh thu; Admin tưởng NV đã có GD.
 - **Evidence:** `create` `createdByEmployeeId: user.id`. `ownershipWhere` STAFF. Migration `Transaction_lodatId_open_uidx`. `lodat-transaction-history.ts` `where: { lodatId }`. Domain `transactions.md` §2.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: Admin không tạo GD. `POST /transactions` 403; UI `/giao-dich/tao` + nút **Giao dịch** trên lô chặn Admin. Admin vẫn xem/sửa/xóa GD có sẵn. Unique 1 GD mở / lô giữ nguyên.
 
 ### BUG-050 — Admin tạo hồ sơ sổ đỏ trên khách NV thì hồ sơ thuộc Admin
 
