@@ -533,7 +533,7 @@ Xếp dọc như §12.4.2 (một cột; Huỷ/Tạo cuối form; nút «Thêm �
 
 ## 13. Lịch làm — thứ tự DB (STAFF trước)
 
-**Có: phải có sổ địa chỉ trước lô.** Prisma + copy kho/map/ảnh + API list `/lo-dat` STAFF **đã lên anhungland.com**. Còn: Admin import kho, list ADMIN.
+**Có: phải có sổ địa chỉ trước lô.** Prisma + copy kho/map/ảnh + API list `/lo-dat` STAFF **đã lên anhungland.com**. Admin **import Excel kho** (BUG-048) **đã có**. Còn: list ADMIN; sửa/xoá từng dòng kho.
 
 Khách (`Customer`) **đã có** — map chủ mới gắn được.
 
@@ -562,7 +562,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **2** | Sửa schema **Address** + **AddressImage** chỉ PROJECT | NV chọn địa chỉ khi tạo lô | Schema + API + UI + copy **xong staging** |
 | **3** | UI + API **sổ địa chỉ (Admin)** + picker (STAFF đọc) | Không có sổ thì không tạo/gắn lô | **Done** |
 | **4** | Schema **`ProjectLot`** (kho: số lô, DT, MT, hướng, `addressId` PROJECT) | Lodat dự án **trỏ** kho, không copy | Migration `20260824120000` |
-| **5** | Admin **import/sửa kho** trên địa chỉ dự án | Kho phải có sẵn trước khi NV gắn chủ | Todo |
+| **5** | Admin **import/sửa kho** trên địa chỉ dự án | Kho phải có sẵn trước khi NV gắn chủ | **Import Excel xong** (BUG-048). Sửa/xoá từng dòng kho — sau |
 | **6** | Copy **lô PROJECT** cũ `tblLodats` → `ProjectLot` | Data kho thật | Script `pnpm project-lots:migrate-legacy` — map `project_lot` |
 | **7** | Sửa schema **`Lodat` + `LodatCustomerMap`** | List `/lo-dat` đọc Lodat + map | Cùng migration `20260824120000` |
 | **8** | Copy **lô dân** `tblLodats` REGULAR → `Lodat` + map | List dân | 1 lodat cũ + maps |

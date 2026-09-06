@@ -7,6 +7,8 @@ import {
   type AdminUnitListResponse,
   type CreateAddressInput,
   type CreateAdminUnitInput,
+  type ImportProjectLotsInput,
+  type ImportProjectLotsResponse,
   type UpdateAddressInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
@@ -68,8 +70,19 @@ export async function listAddresses(
   if (query.keyword?.trim()) params.set('keyword', query.keyword.trim());
   if (query.kind) params.set('kind', query.kind);
   if (query.includeHidden) params.set('includeHidden', '1');
+  if (query.withoutLodats) params.set('withoutLodats', '1');
   const qs = params.toString();
   return apiFetch<AddressListResponse>(`/addresses${qs ? `?${qs}` : ''}`);
+}
+
+export async function importProjectLots(
+  addressId: string,
+  input: ImportProjectLotsInput,
+): Promise<ImportProjectLotsResponse> {
+  return apiFetch<ImportProjectLotsResponse>(`/addresses/${addressId}/lodats/import`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
 }
 
 export async function createAddress(

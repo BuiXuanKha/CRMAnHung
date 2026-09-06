@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 47 |
+| OPEN | 46 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 36 |
+| FIXED / CLOSED | 37 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -154,6 +154,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | customers | BUG-045 CLOSED | Owner: không sửa — tự đổi `fullName` bằng bút trên list. |
 | 2026-09-06 | customers / messenger | BUG-046 CLOSED | Owner: không sửa — chat chỉ tham khảo, không hiện ở chi tiết khách. |
 | 2026-09-06 | public-content | BUG-047 FIXED | Owner: lô không của Admin — gỡ `/dashboard/lo-dat` + nút Đăng lô; API soạn/đăng lô chỉ STAFF. |
+| 2026-09-06 | addresses / ProjectLot | BUG-048 FIXED | Owner: copy modal CRM cũ «Import lô đất Excel». Admin import vào dự án trống → `ProjectLot`. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -170,7 +171,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | lot-shares | `apps/api/src/modules/lot-shares` | `apps/web/src/features/lot-shares` | Share lô, thống kê xem |
 | public-content | `apps/api/src/modules/public-content` | `apps/web/src/features/public-content` | CMS bài / listing / dashboard — audit 2026-09-03 (còn lại) |
 | public web | controllers public trong API | `apps/web/src/features/public` | Catalog khách (list ∩ Mở bán); slug chi tiết = BUG-023; SEO/URL = BUG-066…080 |
-| settings | — | `apps/web/src/features/settings` | Hotline + sổ địa chỉ (Admin) |
+| settings | — | `apps/web/src/features/settings` | Hotline + sổ địa chỉ + Import lô đất Excel (Admin) |
 | health | `apps/api/src/modules/health` | — | Health check |
 | storage | `apps/api/src/storage` | — | Cloudflare R2 |
 | extension | — | `apps/extension` | Chrome MV3 |
@@ -235,7 +236,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | CLOSED |
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | CLOSED |
 | BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | FIXED |
-| BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | OPEN |
+| BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | FIXED |
 | BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | OPEN |
 | BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | OPEN |
 | BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | OPEN |
@@ -905,7 +906,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Schema có `ProjectLot`; vertical slice quản kho chưa làm (chỉ migrate + picker).
 - **Impact:** Không mở bán lô dự án mới đúng nghiệp vụ kho; sửa thông số kho không được; phụ thuộc script ngoài UI.
 - **Evidence:** `listProjectLots` read-only. Domain Admin «import/sửa kho dự án». Không controller `project-lots` CUD.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Admin **Cài đặt → Import lô đất Excel** (copy modal CRM cũ): chọn dự án chưa có lô, Excel 5 cột, xem trước, `POST /addresses/:id/lodats/import` ghi `ProjectLot` (không `Lodat`, không gắn khách). Dropdown `GET /addresses?kind=PROJECT&withoutLodats=1`. Sửa/xoá từng dòng kho không nằm trong modal cũ — không làm trong PR này.
 
 ### BUG-049 — Admin tạo giao dịch trên lô NV thì GD thuộc Admin; unique GD mở chặn NV
 
