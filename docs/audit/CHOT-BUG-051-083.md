@@ -15,7 +15,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 |----|------|----------------|--------------|---------|--------------|
 | **051** | MED | STILL_OPEN | List GD mới **2** hàng; Admin **không lọc NV** (lệch sổ đỏ) | SỬA lọc NV Admin; phân trang có thể làm cùng hoặc sau |  |
 | **052** | MED | FIXED | Cắt 500 — data sổ đỏ rất ít | SỬA phân trang 50 + COUNT (owner 2026-09-06) |  |
-| **053** | MED | STILL_OPEN | Picker địa chỉ dump 500 | SỬA tìm server-side (không đoán COUNT) |  |
+| **053** | MED | FIXED | Picker địa chỉ dump 500 | SỬA: bỏ trần 500, trả hết + COUNT (2026-09-06) |  |
 | **054** | MED | STILL_OPEN | Race 2 tab Lưu — chưa thấy case | SỬA nhỏ: retry khi trùng mã |  |
 | **055** | MED | STILL_OPEN | Lọc «Dưới 1 tỷ» ra cả khách chưa nhập ngân sách | **SỬA** |  |
 | **056** | MED | STILL_OPEN | Admin không sửa được bài đã tạo | **SỬA** PATCH nội dung |  |
@@ -108,7 +108,7 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-053 — Sổ/picker địa chỉ cắt 500
 
-**Còn.** `AddressesService.list` `take: 500`, `total` = length. Picker tạo lô dùng cùng API.
+**FIXED (2026-09-06).** Bỏ `take: 500`; list trả hết theo filter + `total` = COUNT. `AddressesService.list` `take: 500`, `total` = length. Picker tạo lô dùng cùng API.
 
 **Tôi vào vai Admin.** Cài đặt → Quản lý địa chỉ. Đếm tab Tất cả/Dân/Dự án trên payload 500 dòng mới nhất (`updatedAt`).
 
