@@ -244,7 +244,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | FIXED |
 | BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | OPEN |
 | BUG-052 | MEDIUM | title-services | List sổ đỏ `take: 500`, `total: items.length` — cắt im lặng. | OPEN |
-| BUG-053 | MEDIUM | addresses | List địa chỉ `take: 500`, `total: items.length` — picker/sổ thiếu địa chỉ cũ. | OPEN |
+| BUG-053 | MEDIUM | addresses | List địa chỉ `take: 500`, `total: items.length` — picker/sổ thiếu địa chỉ cũ. | FIXED |
 | BUG-054 | MEDIUM | transactions / title-services | `nextCode()` đọc max rồi +1, không khóa — race trùng `code` unique → 500. | OPEN |
 | BUG-055 | MEDIUM | customers | Lọc tài chính theo khoảng vẫn khớp khách «Chưa xác định» (min/max null). | OPEN |
 | BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN |
@@ -974,7 +974,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Một trang cứng + `total` = length.
 - **Impact:** Tạo lô nhầm địa chỉ / không tạo được lô đúng xã/dự án đã có.
 - **Evidence:** `addresses.service.ts` `take: 500`. Dialog `counters` từ `allItems.length`. BUG-009 là `includeHidden`; đây là cắt trang.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: bỏ `take: 500`; `GET /addresses` trả hết theo filter + `total` = COUNT.
 
 ### BUG-054 — Cấp mã `GD-` / `SD-` không atomic — tạo song song trùng unique
 
