@@ -251,7 +251,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-057 | MEDIUM | addresses | Đổi `PROJECT` → `REGULAR` không kiểm kho `ProjectLot` — picker kho chết, lô cũ còn. | OPEN |
 | BUG-058 | MEDIUM | transactions / lodats | Form tạo GD (không `?lodatId`) picker tối đa 200 lô — lô cũ không chọn được. | FIXED |
 | BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | FIXED |
-| BUG-060 | HIGH | lodats / transactions | Xóa ảnh lô không đếm `TransactionSnapshotImage` — xóa R2, ảnh GD gãy. | OPEN |
+| BUG-060 | HIGH | lodats / transactions | Xóa ảnh lô không đếm `TransactionSnapshotImage` — xóa R2, ảnh GD gãy. | FIXED |
 | BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | CLOSED (by design) |
 | BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | OPEN |
 | BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | OPEN |
@@ -1064,7 +1064,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Hai đường xóa/đếm ref không cùng tập bảng.
 - **Impact:** Mất bằng chứng ảnh deal; lệch FE lô vs FE GD.
 - **Evidence:** `deleteImage` Promise.all chat+lodat. `countPublicImageKeyRefs` gồm `transactionSnapshotImage`. `buildSnapshotCreate` `objectKey` lodat/address.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: tạo GD **copy** ảnh sang `transactions/snapshots/…` (file riêng). `deleteImage` lô dùng `countPublicImageKeyRefs` (bảo vệ GD cũ còn share key).
 
 ### BUG-061 — Xóa ảnh địa chỉ dự án luôn xóa object R2 — gãy lô, web khách, snapshot GD
 

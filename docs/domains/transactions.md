@@ -63,7 +63,7 @@ Lodat 1 ── n Transaction
 LodatCustomerMap 1 ── n Transaction     (map lúc tạo deal; đổi chủ sau không đổi FK này)
 Transaction 1 ── n TransactionParty     (SELLER | BUYER)
 Transaction 1 ── 1 TransactionSnapshot  (đóng băng tiêu đề / ĐC / DT·MT / giá map)
-  └── n TransactionSnapshotImage        (objectKey; optional sourceLodatImageId)
+  └── n TransactionSnapshotImage        (objectKey **copy riêng** lúc tạo GD — BUG-060; không share gallery lô)
 Transaction 1 ── n TransactionAttachment (R2 objectKey, kind HOP_DONG|SO_DO|KHAC)
 ```
 

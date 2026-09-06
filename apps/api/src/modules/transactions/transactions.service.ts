@@ -18,6 +18,7 @@ import type {
 } from './dto/transaction.dto';
 import {
   buildSnapshotCreate,
+  copySnapshotImagesToOwnKeys,
   LODAT_SNAPSHOT_INCLUDE,
 } from './transactions-snapshot';
 import {
@@ -119,6 +120,11 @@ export class TransactionsService {
     const commission =
       dto.type === TX_TYPE.RECORD ? 0n : (this.parsePrice(dto.commissionVnd) ?? 0n);
     const snapshot = buildSnapshotCreate(lodat, map);
+    // BUG-060: copy ảnh sang key riêng của GD (không dùng chung gallery lô).
+    snapshot.images.create = await copySnapshotImagesToOwnKeys(
+      this.storage,
+      snapshot.images.create,
+    );
 
     // BUG-054: race 2 tab cùng nextCode → P2002 code; thử lại mã mới vài lần.
     const maxAttempts = 3;

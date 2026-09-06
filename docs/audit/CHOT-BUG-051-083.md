@@ -22,7 +22,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **057** | MED | STILL_OPEN | Bỏ tick dự án khi còn kho | **SỬA** chặn khi còn `ProjectLot` | HOÃN (owner 2026-09-06 — làm sau) |
 | **058** | MED | FIXED | `/giao-dich/tao` không `lodatId` chỉ 200 lô; **Admin đã không tạo GD** | SỬA: picker tìm keyword (2026-09-06) |  |
 | **059** | HIGH | FIXED | Đổi chủ khi GD **Đã cọc** — lệch deal vs lô. Admin đã không đổi chủ | SỬA: chặn + thông báo khi còn GD mở (2026-09-06) |  |
-| **060** | HIGH | STILL_OPEN | Gỡ ảnh lô → xóa R2 dù GD đã đóng băng ảnh | **SỬA** đếm snapshot trước khi xóa file |  |
+| **060** | HIGH | FIXED | Gỡ ảnh lô → xóa R2 dù GD đã đóng băng ảnh | SỬA: copy ảnh khi tạo GD + đếm ref khi xóa (2026-09-06) |  |
 | **061** | HIGH | CLOSED (by design) | Admin gỡ ảnh dự án → gãy lô + web + GD | Owner: dùng chung; Admin xóa/đổi = live theo kho (2026-09-07) |  |
 | **062** | MED | STILL_OPEN | Sửa tiêu đề lô CRM ≠ H1 web | **Cần chốt hướng** A/B dưới |  |
 | **063** | MED | STILL_OPEN | Ẩn khách, lô/GD/sổ/chat vẫn dùng Person | **Cần chốt hướng** A/B (+ BUG-027) |  |
@@ -48,11 +48,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **083** | MED | **ALREADY_FIXED** | `kha` + `/quan-tri/*` đã redirect | Không sửa lại |  |
 
 **Gợi ý thứ tự nếu bảo «sửa các ô SỬA»:**  
-<<<<<<< HEAD
 1) (059/060 FIXED; 061 by design)  
-=======
-1) 060 · 061 (ảnh — mất data; 059 FIXED)  
->>>>>>> 2e994bc (fix(lodats): block change-owner while transaction open (BUG-059))
 2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
 3) 055 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
@@ -183,15 +179,10 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-060 — Xóa ảnh lô xóa R2 dù snapshot GD còn trỏ
 
-**Còn.** `deleteImage` lô chỉ đếm ảnh chat + ảnh lô. Hàm SEO `countPublicImageKeyRefs` **đã** đếm snapshot — xóa tay không dùng hàm đó.
+**FIXED (2026-09-06).** Owner: tạo GD **copy** file ảnh sang key riêng (`transactions/snapshots/…`). Xóa gallery lô không gãy ảnh GD mới. `deleteImage` lô đếm đủ ref (gồm snapshot) để GD migrate/cũ còn share key vẫn an toàn.
 
-**Tôi vào vai kha.** Tạo GD (đóng băng ảnh) → Sửa lô → gỡ hết ảnh. Chi tiết GD: ảnh 404. Gallery lô đúng (đã xóa).
+**Check:** tạo GD → gỡ ảnh trên lô → chi tiết GD vẫn hiện ảnh.
 
-**Ví dụ:** 2 GD buinam, **9** ảnh snapshot (migrate). Xóa ảnh lô nguồn của các GD đó là case thật nếu NV gỡ gallery.
-
-**Đề xuất: SỬA** — xóa R2 chỉ khi `countPublicImageKeyRefs === 0` (gồm snapshot / đính kèm).
-
----
 
 ### BUG-061 — Xóa ảnh địa chỉ dự án luôn xóa R2
 

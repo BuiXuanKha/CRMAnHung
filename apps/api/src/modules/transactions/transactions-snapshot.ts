@@ -1,4 +1,7 @@
+import { randomUUID } from 'node:crypto';
+import path from 'node:path';
 import { Prisma } from '@prisma/client';
+import type { StorageService } from '../../storage/storage.service';
 
 const ADDRESS_INCLUDE = {
   province: { select: { name: true, isHidden: true } },
@@ -109,4 +112,39 @@ export function buildSnapshotCreate(row: LodatSnapshotRow, map: MapSnap) {
     mapNote: map.note,
     images: { create: images },
   };
+}
+
+export type SnapshotImageCreate = {
+  objectKey: string;
+  sortOrder: number;
+  rotationDeg: number;
+  sourceLodatImageId: string | null;
+};
+
+/**
+ * BUG-060: mỗi ảnh snapshot GD = file R2 riêng (copy), không dùng chung key gallery lô/địa chỉ.
+ * `sourceLodatImageId` bỏ sau copy để SEO retarget lô không kéo theo ảnh GD.
+ */
+export async function copySnapshotImagesToOwnKeys(
+  storage: StorageService,
+  images: SnapshotImageCreate[],
+): Promise<SnapshotImageCreate[]> {
+  if (!images.length) return images;
+  if (!storage.isConfigured()) {
+    // Dev không R2: giữ key cũ (không copy được).
+    return images.map((img) => ({ ...img, sourceLodatImageId: null }));
+  }
+  const out: SnapshotImageCreate[] = [];
+  for (const img of images) {
+    const ext = path.extname(img.objectKey).toLowerCase().slice(0, 12) || '.webp';
+    const toKey = `transactions/snapshots/${randomUUID()}${ext}`;
+    await storage.copyPublicObject(img.objectKey, toKey);
+    out.push({
+      objectKey: toKey,
+      sortOrder: img.sortOrder,
+      rotationDeg: img.rotationDeg,
+      sourceLodatImageId: null,
+    });
+  }
+  return out;
 }
