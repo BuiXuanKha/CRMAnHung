@@ -147,6 +147,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | public-content | BUG-024 CLOSED | Owner: bỏ chức năng Gỡ Đăng web; API từ chối `isPublished: false`; ẩn khách theo Mở bán/Đã bán. |
 | 2026-09-05 | users / lot-shares | BUG-039 FIXED | Owner: Admin chỉ được đổi SĐT NV, không xoá; `findActiveShare` cùng đòi phone như resolve. |
 | 2026-09-05 | lot-shares | BUG-040 FIXED | Owner: resolve public chỉ hotline; cookie theo mã share; không lộ employeeId/visitCount. |
+| 2026-09-05 | customers / messenger | BUG-041 deferred | Owner: tạm bỏ — extension không lấy được giờ tin; nội dung chat trên CRM ít giá trị; không sửa giờ này. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -221,7 +222,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | CLOSED |
 | BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | FIXED |
 | BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | FIXED |
-| BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN |
+| BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN (deferred) |
 | BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | OPEN |
 | BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). | OPEN |
 | BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | OPEN |
@@ -807,7 +808,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** `sortOrder` = thứ tự batch, không phải thứ tự hội thoại ổn định; không merge theo `sentAt` / mid.
 - **Impact:** Cột phụ «Nội dung chat» sai thứ tự sau import lại. Ảnh lô lấy từ chat theo thứ tự tin cũng lệch.
 - **Evidence:** `appendMessages` `found.sortOrder !== i` → update `sortOrder: i`. Schema `sentAt DateTime?` không có trong `create`/`update` ingest. `listMessages` không `sentAt`.
-- **Status:** OPEN
+- **Status:** OPEN (deferred — 2026-09-05; owner: tạm bỏ — extension không lấy giờ tin; nội dung chat trên CRM ít giá trị; **không sửa code** cho đến khi owner mở lại)
 
 ### BUG-042 — Cắt 200 tin im lặng; lệch scanner cũ 500
 
