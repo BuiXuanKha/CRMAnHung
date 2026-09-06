@@ -148,13 +148,13 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-056 — Không sửa nội dung bài; soạn lại = bài mới (`-2`)
 
-**Còn.** Chỉ `POST` tạo + `PATCH` status. Dialog luôn tạo mới. Trùng slug chuyên mục → `-2`.
+**Chốt: HOÃN** (owner 2026-09-06 — làm sau). Vẫn OPEN trên code: chỉ `POST` tạo + `PATCH` status; soạn lại → slug `-2`.
 
 **Tôi vào vai Admin.** `/dashboard/bai-viet` → Soạn → xuất bản. Sai chính tả → soạn lại cùng tiêu đề → URL thứ hai, **cả hai** có thể published.
 
 **Live (2026-09-06):** `/du-an` có bài; `/tin-tuc` `/kien-thuc` `/kinh-nghiem` `/lien-he` `/chinh-sach` empty «Hiện chưa có bài». Bug đau khi Admin soạn/sửa, không phụ thuộc list trống.
 
-**Đề xuất: SỬA** — `PATCH` title/body/cover/slug; dialog sửa bài đang chọn, không `POST` mới.
+**Đề xuất khi làm:** `PATCH` title/body/cover/slug; dialog sửa bài đang chọn, không `POST` mới.
 
 ---
 
