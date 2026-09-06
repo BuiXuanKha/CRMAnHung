@@ -1,0 +1,116 @@
+.ld-search-picker {
+  position: relative;
+}
+
+.ld-search-picker-trigger {
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid var(--crm-border, #e2e8f0);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+  color: #0f172a;
+}
+
+.ld-search-picker-trigger.is-empty {
+  color: #94a3b8;
+}
+
+.ld-search-picker-trigger:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  background: #f8fafc;
+}
+
+.ld-search-picker-panel {
+  position: absolute;
+  z-index: 20;
+  left: 0;
+  right: 0;
+  top: calc(100% + 4px);
+  border: 1px solid var(--crm-border, #e2e8f0);
+  border-radius: 10px;
+  background: #fff;
+  padding: 0.65rem;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+  max-height: 320px;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+}
+
+.ld-search-picker-panel input {
+  width: 100%;
+  margin-bottom: 0.5rem;
+  font: inherit;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--crm-border, #e2e8f0);
+  border-radius: 8px;
+}
+
+.ld-search-picker-hint {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.ld-search-picker-error {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+  color: #b91c1c;
+}
+
+.ld-search-picker-panel ul {
+  list-style: none;
+  margin: 0 0 0.5rem;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.ld-search-picker-item {
+  width: 100%;
+  text-align: left;
+  border: 0;
+  background: transparent;
+  border-radius: 8px;
+  padding: 0.55rem 0.65rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ld-search-picker-item:hover {
+  background: #f1f5f9;
+}
+
+.ld-search-picker-item-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.ld-search-picker-item-text strong {
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+}
+
+.ld-search-picker-item-sub {
+  font-size: 0.8rem;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+.ld-search-picker-clear {
+  width: 100%;
+  font: inherit;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--crm-border, #e2e8f0);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}

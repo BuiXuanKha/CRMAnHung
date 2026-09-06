@@ -20,7 +20,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **055** | MED | FIXED | Lọc «Dưới 1 tỷ» ra cả khách chưa nhập ngân sách | SỬA: khoảng chỉ khách có số (2026-09-06) |  |
 | **056** | MED | STILL_OPEN | Admin không sửa được bài đã tạo | **SỬA** PATCH nội dung | HOÃN (owner 2026-09-06 — làm sau) |
 | **057** | MED | STILL_OPEN | Bỏ tick dự án khi còn kho | **SỬA** chặn khi còn `ProjectLot` | HOÃN (owner 2026-09-06 — làm sau) |
-| **058** | MED | STILL_OPEN | `/giao-dich/tao` không `lodatId` chỉ 200 lô; **Admin đã không tạo GD** | Bỏ picker trần — bắt tạo từ lô |  |
+| **058** | MED | FIXED | `/giao-dich/tao` không `lodatId` chỉ 200 lô; **Admin đã không tạo GD** | SỬA: picker tìm keyword (2026-09-06) |  |
 | **059** | HIGH | STILL_OPEN | Đổi chủ khi GD **Đã cọc** — lệch deal vs lô. Admin đã không đổi chủ | **SỬA** chặn đổi chủ khi còn GD mở |  |
 | **060** | HIGH | STILL_OPEN | Gỡ ảnh lô → xóa R2 dù GD đã đóng băng ảnh | **SỬA** đếm snapshot trước khi xóa file |  |
 | **061** | HIGH | STILL_OPEN | Admin gỡ ảnh dự án → gãy lô + web + GD | **SỬA** cùng đếm ref |  |
@@ -52,7 +52,8 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
 3) 055 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
-5) Chờ chốt: **062, 063**. Hoãn: **056**, **057** (owner làm sau), 052, 058 (nếu chọn bỏ picker), 065, 068, 077, 078, 080.
+5) Chờ chốt: **062, 063**. Hoãn: **056**, **057** (owner làm sau), 052, 065, 068, 077, 078, 080.
+
 
 ---
 
@@ -164,17 +165,10 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-058 — Form `/giao-dich/tao` (không gắn lô) chỉ 200 lô
 
-**Còn.** `listLodats({ limit: 200 })` một phát. Tạo từ chi tiết lô (`?lodatId=`) **không** dính. Sau BUG-049 **Admin không vào form tạo**.
+**FIXED (2026-09-06).** Form tạo GD tay: `LodatSearchPicker` — gõ tiêu đề/địa chỉ → API `keyword` (debounce), tối đa 30 gợi ý. Không dump 200. Tạo từ chi tiết lô (`?lodatId=`) vẫn khóa.
 
-**Tôi vào vai kha.** Gõ `/giao-dich/tao` tay (không từ lô) → dropdown thiếu lô cũ.
+**Check:** NV `kha` vào `/giao-dich/tao` → gõ tên lô cũ → chọn → Lưu. Admin vẫn không tạo GD.
 
-**Ví dụ:** Live Đăng web **25** lô Mở bán; CRM còn lô Tạm dừng / chưa đăng — tổng `Lodat` có thể > 200 (không đếm được đêm nay). Copy map lúc migrate GD: **190** `lodat_customer_map`.
-
-**Đề xuất mặc định:** **Bỏ picker trần** — không tạo GD nếu không có `?lodatId=` (bắt nút **Giao dịch** trên lô). Gọn hơn infinite picker.
-
-**Hướng khác:** Picker có ô tìm (nếu owner muốn vào `/giao-dich/tao` tay).
-
----
 
 ### BUG-059 — Đổi chủ khi GD đang mở
 

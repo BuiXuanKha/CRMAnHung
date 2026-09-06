@@ -8,6 +8,7 @@ import {
   type TransactionPartyInput,
 } from '@crmanhung/shared';
 import { formatPriceInput } from '../api';
+import { LodatSearchPicker } from '@/features/lodats/components/lodat-search-picker';
 import { PartyFields, emptyParty } from './party-fields';
 
 export type TransactionFormValues = {
@@ -24,12 +25,10 @@ export type TransactionFormValues = {
   buyers: Array<TransactionPartyInput & { key: string }>;
 };
 
-type LodatOption = { id: string; title: string };
 
 type Props = {
   mode: 'create' | 'edit';
   values: TransactionFormValues;
-  lodatOptions: LodatOption[];
   lodatLocked: boolean;
   lodatTitle?: string | null;
   busy?: boolean;
@@ -55,7 +54,6 @@ export function defaultFormValues(): TransactionFormValues {
 export function TransactionFormFields({
   mode,
   values,
-  lodatOptions,
   lodatLocked,
   lodatTitle,
   busy,
@@ -95,18 +93,12 @@ export function TransactionFormFields({
           {mode === 'edit' || lodatLocked ? (
             <input value={lodatTitle?.trim() || '—'} disabled readOnly />
           ) : (
-            <select
-              value={values.lodatId}
+            <LodatSearchPicker
+              value={values.lodatId || null}
+              labelHint={lodatTitle}
               disabled={busy}
-              onChange={(e) => set('lodatId', e.target.value)}
-            >
-              <option value="">Chọn lô đất</option>
-              {lodatOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.title}
-                </option>
-              ))}
-            </select>
+              onChange={(item) => set('lodatId', item?.id ?? '')}
+            />
           )}
         </label>
 
