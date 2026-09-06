@@ -87,6 +87,14 @@ export function DetailMobileFab({ customer }: Props) {
 
   function goSodo() {
     setMenuOpen(false);
+    if (user?.role === UserRole.ADMIN) {
+      setAlertBox({
+        title: 'Không tạo dịch vụ sổ đỏ',
+        message:
+          'Admin không tạo dịch vụ sổ đỏ. Nhân viên tạo hồ sơ từ khách của mình.',
+      });
+      return;
+    }
     router.push(`/khach-hang/${customer.id}/dich-vu-so-do`);
   }
 
