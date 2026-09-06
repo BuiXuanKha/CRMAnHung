@@ -243,7 +243,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | FIXED |
 | BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | FIXED |
 | BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | OPEN |
-| BUG-052 | MEDIUM | title-services | List sổ đỏ `take: 500`, `total: items.length` — cắt im lặng. | OPEN |
+| BUG-052 | MEDIUM | title-services | List sổ đỏ `take: 500`, `total: items.length` — cắt im lặng. | FIXED |
 | BUG-053 | MEDIUM | addresses | List địa chỉ `take: 500`, `total: items.length` — picker/sổ thiếu địa chỉ cũ. | OPEN |
 | BUG-054 | MEDIUM | transactions / title-services | `nextCode()` đọc max rồi +1, không khóa — race trùng `code` unique → 500. | OPEN |
 | BUG-055 | MEDIUM | customers | Lọc tài chính theo khoảng vẫn khớp khách «Chưa xác định» (min/max null). | OPEN |
@@ -960,7 +960,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** `total` gán length sau `take`, không COUNT.
 - **Impact:** Mất hồ sơ trên UI; ghim/lọc NV sai vì thiếu hàng.
 - **Evidence:** `LIST_LIMIT = 500`. `title-service-list-page.tsx` một `listTitleServices` không infinite scroll.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: phân trang. `limit`/`offset` (50/200) + `total` = COUNT; FE `useCrmInfiniteList` như khách/lô.
 
 ### BUG-053 — List địa chỉ cắt 500; sổ/picker thiếu địa chỉ cũ
 
