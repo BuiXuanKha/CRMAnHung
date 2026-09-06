@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 48 |
+| OPEN | 47 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 35 |
+| FIXED / CLOSED | 36 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -153,6 +153,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | customers / messenger | BUG-044 FIXED | Owner: giữ tin `mid.$` / `@msgr.`; xóa tin không ID. API `from-extension` bỏ qua bubble không mid; migrate xóa hàng cũ. |
 | 2026-09-06 | customers | BUG-045 CLOSED | Owner: không sửa — tự đổi `fullName` bằng bút trên list. |
 | 2026-09-06 | customers / messenger | BUG-046 CLOSED | Owner: không sửa — chat chỉ tham khảo, không hiện ở chi tiết khách. |
+| 2026-09-06 | public-content | BUG-047 FIXED | Owner: lô không của Admin — gỡ `/dashboard/lo-dat` + nút Đăng lô; API soạn/đăng lô chỉ STAFF. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -233,7 +234,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | FIXED |
 | BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | CLOSED |
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | CLOSED |
-| BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | OPEN |
+| BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | FIXED |
 | BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | OPEN |
 | BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | OPEN |
 | BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | OPEN |
@@ -891,7 +892,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Dashboard ghép client: cap list lô CRM + slice overlay; không COUNT/full join Mở bán × listing.
 - **Impact:** Admin tưởng hết lô chờ đăng / số liệu sai; lô Mở bán cũ không lên web; lệch với `GET /public/listings` (không cắt 200).
 - **Evidence:** `LODAT_LIST_MAX_PAGE_SIZE = 200`. `buildPublicWebDashboard` đếm `staffOpen` không đếm `lots.filter(isPublished)`. `PublishLotDialog` `pendingLots` từ `recentLots`. Domain `public-content.md` §12: Chờ đăng = «Mở bán CRM, chưa Đăng web».
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: lô không của Admin; không đăng/sửa/tạo. Gỡ `/dashboard/lo-dat` khỏi Admin (redirect `/dashboard`); Tổng quan bỏ nút **Đăng lô** (bảng lô chỉ xem). API `PATCH …/draft|published` + GPT lô chỉ **STAFF**. List NV `/dashboard/lo-dat` giữ nguyên (cap 200 chưa đụng — hiện 71 lô Mở bán).
 
 ### BUG-048 — Không có API/UI quản lý kho lô (`ProjectLot`)
 

@@ -7,6 +7,7 @@ import {
   crmHomePathForRole,
   isAdminOnlyCrmPath,
   isCrmAppPath,
+  isStaffLotWebPath,
   nextPublicShareCookie,
   normalizeShareCode,
   normalizeWebCrmRole,
@@ -92,6 +93,10 @@ function guardCrmRoutes(request: NextRequest): NextResponse | null {
       request,
       role === 'ADMIN' ? '/dashboard' : staffDashboardFallbackPath(),
     );
+  }
+
+  if (role === 'ADMIN' && isStaffLotWebPath(pathname)) {
+    return redirectCrm(request, crmHomePathForRole('ADMIN'));
   }
 
   if (role === 'STAFF' && isAdminOnlyCrmPath(pathname)) {
