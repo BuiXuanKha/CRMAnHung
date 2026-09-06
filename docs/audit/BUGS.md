@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 52 |
+| OPEN | 51 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 31 |
+| FIXED / CLOSED | 32 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -148,6 +148,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | users / lot-shares | BUG-039 FIXED | Owner: Admin chỉ được đổi SĐT NV, không xoá; `findActiveShare` cùng đòi phone như resolve. |
 | 2026-09-05 | lot-shares | BUG-040 FIXED | Owner: resolve public chỉ hotline; cookie theo mã share; không lộ employeeId/visitCount. |
 | 2026-09-05 | customers / messenger | BUG-041 deferred | Owner: tạm bỏ — extension không lấy được giờ tin; nội dung chat trên CRM ít giá trị; không sửa giờ này. |
+| 2026-09-06 | customers / messenger | BUG-042 FIXED | Owner: `MAX_MESSAGES` 200 → 500 khớp extension; docs ingest cập nhật. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -223,7 +224,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | FIXED |
 | BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | FIXED |
 | BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN (deferred) |
-| BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | OPEN |
+| BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | FIXED |
 | BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). | OPEN |
 | BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | OPEN |
 | BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | OPEN |
@@ -821,7 +822,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Truncate cứng; không phân trang ingest; không báo client.
 - **Impact:** Thiếu lịch sử. NV tưởng đã lưu đủ vì `ok: true`.
 - **Evidence:** `from-extension-parse.ts` `MAX_MESSAGES`. `appendMessages` `slice(0, MAX_MESSAGES)`. Extension `apps/extension/src/content/content.ts` chỉ marker stub.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: nâng `MAX_MESSAGES` 200 → **500** khớp extension `MESSAGE_MAX_COUNT`; cập nhật `docs/domains/customers.md`.
 
 ### BUG-043 — Tin nhắn không unique; khóa dedupe yếu tạo trùng hoặc gộp nhầm
 

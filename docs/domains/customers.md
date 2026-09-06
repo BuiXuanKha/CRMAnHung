@@ -617,7 +617,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 - Avatar: URL rỗng → giữ ảnh cũ. Cùng pathname FB CDN (`rawMeta.avatarSourceKey`) và đã có R2 → không tải lại. URL mới → `sharp` WebP → R2 `customers/avatars/<customerId>/<hash>.webp` (`avatarObjectKey`). Tải/upload fail: giữ R2 cũ; chưa có ảnh thì lưu URL FB tạm (list vẫn hiện được).
 - Ảnh chat raster mới → `sharp` WebP (cạnh dài ≤ 2560) → R2 `customers/chat/<customerId>/{mid}-{n}.webp`. Video / path `/img/imgsmessenger/` cũ: bỏ qua.
 - Tin đã có đủ ảnh (kể cả JPEG migrate đã convert WebP) → không encode lại. Gắn ảnh chat vào lô: **copy** SEO WebP, giữ file chat (cùng key WebP sau `[seo-webp-replace]`).
-- Body JSON tối đa 32MB (data URL). Tối đa 200 tin / lần.
+- Body JSON tối đa 32MB (data URL). Tối đa 500 tin / lần (khớp extension `MESSAGE_MAX_COUNT`).
 
 Scanner Chrome: Load unpacked `apps/extension` (cùng panel Business Suite / Messenger / E2EE). Gửi `POST /api/v1/customers/from-extension`.
 

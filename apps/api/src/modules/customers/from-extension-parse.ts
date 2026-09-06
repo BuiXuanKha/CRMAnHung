@@ -1,7 +1,8 @@
 import type { FromExtensionDraft } from '@crmanhung/shared';
 import { isStableMessengerMessageId } from './messenger-image-ingest';
 
-export const MAX_MESSAGES = 200;
+/** Match extension `MESSAGE_MAX_COUNT` (content-inbox) — one scan window. */
+export const MAX_MESSAGES = 500;
 export const MAX_IMAGES_PER_MESSAGE = 12;
 
 const MESSAGE_SENDERS = new Set(['customer', 'me', 'page', 'unknown']);
