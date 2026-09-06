@@ -104,6 +104,13 @@ export function isPlaceholder(text: string): boolean {
   return text === '[Đính kèm]' || text === '[Ảnh]' || text === '[Video]';
 }
 
+/** Keep only bubbles with a stable Messenger `data-message-id` (`mid.$…` / `…@msgr.…`). */
+export function messagesWithStableBubbleId(
+  messages: FromExtensionDraft['chatMessages'] | undefined,
+): NonNullable<FromExtensionDraft['chatMessages']> {
+  return (messages ?? []).filter((msg) => isStableMessengerMessageId(trimText(msg?.id)));
+}
+
 export function messageStorageKey(input: {
   id?: string;
   dedupeKey?: string;

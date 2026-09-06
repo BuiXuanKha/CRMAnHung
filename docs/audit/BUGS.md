@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 51 |
+| OPEN | 50 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 32 |
+| FIXED / CLOSED | 33 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -150,6 +150,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | customers / messenger | BUG-041 deferred | Owner: tạm bỏ — extension không lấy được giờ tin; nội dung chat trên CRM ít giá trị; không sửa giờ này. |
 | 2026-09-06 | customers / messenger | BUG-042 FIXED | Owner: `MAX_MESSAGES` 200 → 500 khớp extension; docs ingest cập nhật. |
 | 2026-09-06 | customers / extension | BUG-043 note | Owner: **chưa sửa extension**. Tin không mid phần lớn do `collectOrphanBubbleMessages` (`orphan::`). Khi làm đợt extension sẽ bàn (cấm gửi + có thể siết API). DB `kha`: 899/18617. Ghi `apps/extension/README.md`. |
+| 2026-09-06 | customers / messenger | BUG-044 FIXED | Owner: giữ tin `mid.$` / `@msgr.`; xóa tin không ID. API `from-extension` bỏ qua bubble không mid; migrate xóa hàng cũ. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -227,7 +228,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN (deferred) |
 | BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | FIXED |
 | BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). Extension gửi bubble không mid (`orphan::`) — **để khi làm extension**. | OPEN |
-| BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | OPEN |
+| BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | FIXED |
 | BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | OPEN |
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | OPEN |
 | BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | OPEN |
@@ -836,7 +837,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Không `@@unique([customerFacebookId, externalMessageId])`; fallback không đủ phân biệt bubble.
 - **Impact:** Lịch sử nhân bản hoặc mất bubble ảnh. `messageCount` phình.
 - **Evidence:** Schema `CustomerMessengerMessage`. `messageStorageKey`. `appendMessages` không `P2002`/unique. `isStableMessengerMessageId`. DB `kha` (2026-09-06): 18.617 tin; 899 không `mid.$`/`@msgr.` — **toàn** `dedupeKey` `orphan::` (hàm `collectOrphanBubbleMessages` trong `apps/extension/content-inbox.js`). `extensionChatMessageSchema.id` optional.
-- **Status:** OPEN — **DEFERRED phần extension (owner 2026-09-06):** chưa sửa scanner (còn nhiều việc). Khi làm đợt `apps/extension`: bàn tiếp — không gửi bong bóng thiếu ID `mid.$` / `@msgr.`; API đang nhận `id` optional. Unique `(facebook, mid)` trên API/DB vẫn OPEN. Ghi chú: `apps/extension/README.md`, `apps/extension/docs/tech/extension-overview.md` §11.1.
+- **Status:** OPEN — **DEFERRED phần extension (owner 2026-09-06):** chưa sửa scanner. **API (BUG-044):** không ghi tin thiếu `mid.$` / `@msgr.`; migrate xóa hàng cũ. Unique `(facebook, mid)` trên DB vẫn chưa. Ghi chú: `apps/extension/README.md`, `apps/extension/docs/tech/extension-overview.md` §11.1.
 
 ### BUG-044 — Khớp nhầm rồi ghi đè nội dung / bỏ ảnh
 
@@ -849,7 +850,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Merge tin = heuristic độ dài + đếm ảnh, không so mid/nội dung khác.
 - **Impact:** Sai lời thoại; thiếu ảnh chat / ảnh lô reuse chat.
 - **Evidence:** `betterText` trong `appendMessages`. `ingestExtraImages` `if (imageUrls.length <= found.images.length) return 0`. `ingestMessengerChatImage` `return null` khi host/fetch fail.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: giữ tin có `mid.$` / `@msgr.`; **xóa** tin không ID bong bóng. `from-extension` chỉ ingest bubble ổn định; migration `20260906120000_drop_messenger_without_bubble_id` xóa hàng cũ (ảnh cascade). Extension vẫn gửi `orphan::` (BUG-043) nhưng API không ghi. Heuristic đè chữ/ảnh trên **cùng mid** giữ nguyên (nâng `[Ảnh]` → chữ thật).
 
 ### BUG-045 — Import lại không cập nhật tên khách (`fullName`)
 

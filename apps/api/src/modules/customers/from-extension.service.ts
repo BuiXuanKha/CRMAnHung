@@ -20,6 +20,7 @@ import {
   MAX_MESSAGES,
   mergeFacebookRawMeta,
   messageStorageKey,
+  messagesWithStableBubbleId,
   originalPathHint,
   parseRawMetaObject,
   parseScan,
@@ -238,7 +239,7 @@ export class FromExtensionService {
     messagesUpdated: number;
     imagesStored: number;
   }> {
-    const incoming = (fields.messages ?? []).slice(0, MAX_MESSAGES);
+    const incoming = messagesWithStableBubbleId(fields.messages).slice(0, MAX_MESSAGES);
     if (!incoming.length) {
       return { messagesAppended: 0, messagesUpdated: 0, imagesStored: 0 };
     }
