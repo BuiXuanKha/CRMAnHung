@@ -27,13 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 64 |
+| OPEN | 53 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 19 |
-| OPEN | 65 |
-| FIXED / CLOSED | 18 |
-| OPEN | 63 |
-| FIXED / CLOSED | 20 |
+| FIXED / CLOSED | 30 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -149,6 +145,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lot-shares | BUG-038 CLOSED | Owner: link sống mãi — cộng visit thế nào cũng được; không sửa visit. |
 | 2026-09-05 | lot-shares | BUG-036 CLOSED | Owner: link share sống mãi; không thu hồi. |
 | 2026-09-05 | public-content | BUG-024 CLOSED | Owner: bỏ chức năng Gỡ Đăng web; API từ chối `isPublished: false`; ẩn khách theo Mở bán/Đã bán. |
+| 2026-09-05 | users / lot-shares | BUG-039 FIXED | Owner: Admin chỉ được đổi SĐT NV, không xoá; `findActiveShare` cùng đòi phone như resolve. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -221,7 +218,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-037 | MEDIUM | lot-shares | `POST /public/page-views` tin `shareCode` client — thao túng thống kê không cần cookie. | FIXED |
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | OPEN |
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | CLOSED |
-| BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | OPEN |
+| BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | FIXED |
 | BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | OPEN |
 | BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN |
 | BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | OPEN |
@@ -783,7 +780,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Hai hàm «share còn sống» khác điều kiện.
 - **Impact:** Liên hệ và thống kê lệch. Tạo share mới cũng 400 «chưa có SĐT» trong khi hàng cũ còn.
 - **Evidence:** `resolveShareCode` khối `if (!phone)`. `findActiveShare` select không `phone`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-05) — Owner: Admin **chỉ được đổi** SĐT nhân viên, **không được xoá**. `UpdateUserDto` / `users.service.update` từ chối null/rỗng; form Admin hint + bắt buộc 10 số. `findActiveShare` cùng đòi `employee.phone` như `resolveShareCode` (phòng NV legacy đã trống SĐT).
 
 ### BUG-040 — Resolve public trả `employeeId` và `visitCount`
 

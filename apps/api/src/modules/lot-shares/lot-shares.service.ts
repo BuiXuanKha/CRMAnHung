@@ -226,11 +226,15 @@ export class LotSharesService {
       where: { shareCode },
       select: {
         employeeId: true,
-        employee: { select: { isActive: true } },
+        employee: { select: { isActive: true, phone: true } },
         publicListing: { select: { isPublished: true } },
       },
     });
     if (!share || !share.publicListing.isPublished || !share.employee.isActive) {
+      return null;
+    }
+    // Same gate as resolveShareCode — no phone → no attribution (and admin cannot clear phone).
+    if (!share.employee.phone?.trim()) {
       return null;
     }
     return share;

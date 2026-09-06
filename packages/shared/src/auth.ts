@@ -104,6 +104,7 @@ export type CreateUserInput = z.infer<typeof createUserSchema>;
 export const updateUserSchema = z.object({
   username: usernameSchema.optional(),
   fullName: z.string().trim().min(1, 'Vui lòng nhập họ tên').max(120).optional(),
+  /** When sent, must be a full VN mobile — admin may change phone, not clear it. */
   phone: vnPhoneInputSchema.optional(),
   role: z.nativeEnum(UserRole).optional(),
   isActive: z.boolean().optional(),
