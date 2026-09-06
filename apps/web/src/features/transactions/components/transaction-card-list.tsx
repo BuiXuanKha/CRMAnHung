@@ -26,6 +26,7 @@ type Props = {
   onCloseMenu: () => void;
   onAction: (item: TransactionListItem, action: TransactionAction) => void;
   filteredEmpty: boolean;
+  loadingMore?: boolean;
   scrollRef?: Ref<HTMLDivElement>;
   onScroll?: () => void;
 };
@@ -67,6 +68,7 @@ export function TransactionCardList({
   onCloseMenu,
   onAction,
   filteredEmpty,
+  loadingMore = false,
   scrollRef,
   onScroll,
 }: Props) {
@@ -182,6 +184,7 @@ export function TransactionCardList({
       </div>
       <div className="tx-cards-count">
         Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> giao dịch
+        {loadingMore ? ' — Đang tải thêm…' : ''}
       </div>
     </div>
   );

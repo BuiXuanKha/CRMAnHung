@@ -3,6 +3,7 @@
  *
  * `type` = Của tôi / Ghi nhận. `status` = cọc → công chứng → hoàn thành / hủy.
  * RECORD không có hoa hồng; doanh thu / hoa hồng chỉ đếm OWN + HOAN_TAT.
+ * List: `limit` mặc định 50, tối đa 200; `offset` từ 0; `total` = COUNT.
  * Tạo: gửi `lodatId` hoặc `lodatCustomerMapId`.
  * Tiền: DB BigInt; JSON number hoặc string (giống lodats).
  */
@@ -16,6 +17,10 @@ import {
 
 /** BigInt tiền VND trên JSON. */
 export const transactionVndSchema = z.union([z.number(), z.string()]);
+
+/** List GD: trang mặc định 50, tối đa 200 (cùng customers/lodats). */
+export const TRANSACTION_LIST_PAGE_SIZE = 50;
+export const TRANSACTION_LIST_MAX_PAGE_SIZE = 200;
 
 export const transactionListItemSchema = z.object({
   id: z.string(),
@@ -40,6 +45,8 @@ export const transactionListQuerySchema = z.object({
   type: z.nativeEnum(TransactionType).optional(),
   status: z.nativeEnum(TransactionStatus).optional(),
   createdByEmployeeId: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(TRANSACTION_LIST_MAX_PAGE_SIZE).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
 });
 
 export type TransactionListQuery = z.infer<typeof transactionListQuerySchema>;
