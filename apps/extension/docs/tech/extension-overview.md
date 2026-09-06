@@ -230,3 +230,11 @@ Nút **Quét DOM LIVE** trên panel vẫn có thể tạo file tải về máy l
 - Phân quyền chi tiết lưu khách nằm ở Backend (`API/`), không chỉ ở extension.
 - Không có test tự động trong thư mục extension.
 - `options.html` placeholder version có thể lệch cho đến khi `options.js` chạy (giá trị thật từ manifest).
+
+### 11.1 Tin không mid — BUG-043 (owner để khi làm extension)
+
+`data-message-id` (`mid.$…` hoặc `\d+@msgr.…`) = ID **một bong bóng**. Scanner còn `collectOrphanBubbleMessages` (`content-inbox.js`): gửi tin `id` rỗng + `orphan::…`. Contract `extensionChatMessageSchema.id` optional; API ghi hết.
+
+Owner **2026-09-06**: **không sửa extension lúc này** (còn nhiều việc scanner). Khi làm đợt extension → mở lại BUG-043, bàn: không gửi bubble thiếu mid; API có từ chối không. Dữ liệu `kha` staging: 899 tin `orphan::`, 17.587 `mid.$`, 131 `@msgr.`.
+
+Xem `docs/audit/BUGS.md` BUG-043 và `apps/extension/README.md` mục «Khi làm lại / sửa extension».

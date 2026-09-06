@@ -621,6 +621,8 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 
 Scanner Chrome: Load unpacked `apps/extension` (cùng panel Business Suite / Messenger / E2EE). Gửi `POST /api/v1/customers/from-extension`.
 
+**Để khi làm extension (owner 2026-09-06, BUG-043):** scanner còn gửi tin không ID bong bóng (`orphan::`). Chưa sửa. Ghi chú: `apps/extension/README.md`.
+
 ---
 
 *Web mới: Lucide + CrmDialog, cùng hành vi trên. Không copy CSS/god-file CRM cũ.*

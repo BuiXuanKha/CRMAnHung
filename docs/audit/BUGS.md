@@ -149,6 +149,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-05 | lot-shares | BUG-038 CLOSED | Owner: link sống mãi — cộng visit thế nào cũng được; không sửa visit. |
 | 2026-09-05 | lot-shares | BUG-036 CLOSED | Owner: link share sống mãi; không thu hồi. |
 | 2026-09-05 | public-content | BUG-024 CLOSED | Owner: bỏ chức năng Gỡ Đăng web; API từ chối `isPublished: false`; ẩn khách theo Mở bán/Đã bán. |
+| 2026-09-06 | customers / extension | BUG-043 note | Owner: **chưa sửa extension**. Tin không mid phần lớn do `collectOrphanBubbleMessages` (`orphan::`). Khi làm đợt extension sẽ bàn (cấm gửi + có thể siết API). DB `kha`: 899/18617. Ghi `apps/extension/README.md`. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -225,7 +226,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | OPEN |
 | BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN |
 | BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | OPEN |
-| BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). | OPEN |
+| BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). Extension gửi bubble không mid (`orphan::`) — **để khi làm extension**. | OPEN |
 | BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | OPEN |
 | BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | OPEN |
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | OPEN |
@@ -834,8 +835,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Problem:** (1) Lần 1 chưa có mid (fallback `no-id::customer::`) rồi lần 2 có `mid.…` → **tạo hàng mới** (byStable miss). (2) Nhiều tin chỉ ảnh, cùng sender, text rỗng, không mid/dedupe → **một khóa** — gộp thành một tin. (3) Race hai POST → hai hàng cùng mid. Mapping Person đã ghi BUG-013; đây là **trùng/gộp tin**.
 - **Root cause:** Không `@@unique([customerFacebookId, externalMessageId])`; fallback không đủ phân biệt bubble.
 - **Impact:** Lịch sử nhân bản hoặc mất bubble ảnh. `messageCount` phình.
-- **Evidence:** Schema `CustomerMessengerMessage`. `messageStorageKey`. `appendMessages` không `P2002`/unique. `isStableMessengerMessageId`.
-- **Status:** OPEN
+- **Evidence:** Schema `CustomerMessengerMessage`. `messageStorageKey`. `appendMessages` không `P2002`/unique. `isStableMessengerMessageId`. DB `kha` (2026-09-06): 18.617 tin; 899 không `mid.$`/`@msgr.` — **toàn** `dedupeKey` `orphan::` (hàm `collectOrphanBubbleMessages` trong `apps/extension/content-inbox.js`). `extensionChatMessageSchema.id` optional.
+- **Status:** OPEN — **DEFERRED phần extension (owner 2026-09-06):** chưa sửa scanner (còn nhiều việc). Khi làm đợt `apps/extension`: bàn tiếp — không gửi bong bóng thiếu ID `mid.$` / `@msgr.`; API đang nhận `id` optional. Unique `(facebook, mid)` trên API/DB vẫn OPEN. Ghi chú: `apps/extension/README.md`, `apps/extension/docs/tech/extension-overview.md` §11.1.
 
 ### BUG-044 — Khớp nhầm rồi ghi đè nội dung / bỏ ảnh
 
