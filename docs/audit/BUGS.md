@@ -948,8 +948,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** List «load hết»; FE extra filter sau; thiếu control `createdByEmployeeId`.
 - **Impact:** Sai/thiếu số liệu khi request fail hoặc Admin cần xem từng NV; lệch UX với `/dich-vu-so-do`.
 - **Evidence:** `list` không `count`. `transaction-list-page.tsx` `listQuery` chỉ keyword/type/status. Domain `transactions.md` §2–3 thẻ thống kê «trong cùng lọc».
-- **Status:** OPEN
-
+- **Status:** FIXED (2026-09-06) — Owner: chỉ phân trang (Admin lọc NV **không** làm). `limit`/`offset` (50/200) + `total` = COUNT; stats doanh thu/hoa hồng = aggregate OWN+HOAN_TAT cùng filter API; FE `useCrmInfiniteList` như khách/lô.
 ### BUG-052 — List sổ đỏ cắt 500 hàng và khai `total` bằng độ dài trang
 
 - **Severity:** MEDIUM

@@ -4,34 +4,11 @@ import {
   type CreateTransactionInput,
   type OpenTransactionResponse,
   type TransactionDetail,
-  type TransactionListItem,
   type TransactionListQuery,
   type TransactionListResponse,
-  type TransactionListStats,
   type UpdateTransactionInput,
-  TransactionStatus,
-  TransactionType,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
-
-export function statsFromItems(items: TransactionListItem[]): TransactionListStats {
-  let totalRevenueVnd = 0;
-  let totalCommissionVnd = 0;
-  for (const item of items) {
-    if (item.type !== TransactionType.OWN || item.status !== TransactionStatus.HOAN_TAT) {
-      continue;
-    }
-    const sale =
-      typeof item.salePriceVnd === 'string' ? Number(item.salePriceVnd) : item.salePriceVnd;
-    const commission =
-      typeof item.commissionVnd === 'string' ? Number(item.commissionVnd) : item.commissionVnd;
-    if (typeof sale === 'number' && Number.isFinite(sale)) totalRevenueVnd += sale;
-    if (typeof commission === 'number' && Number.isFinite(commission)) {
-      totalCommissionVnd += commission;
-    }
-  }
-  return { totalRevenueVnd, totalCommissionVnd };
-}
 
 export async function listTransactions(
   query: TransactionListQuery = {},
@@ -41,6 +18,8 @@ export async function listTransactions(
   if (query.type) params.set('type', query.type);
   if (query.status) params.set('status', query.status);
   if (query.createdByEmployeeId) params.set('createdByEmployeeId', query.createdByEmployeeId);
+  if (query.limit != null) params.set('limit', String(query.limit));
+  if (query.offset != null) params.set('offset', String(query.offset));
   const qs = params.toString();
   return apiFetch<TransactionListResponse>(`/transactions${qs ? `?${qs}` : ''}`);
 }
