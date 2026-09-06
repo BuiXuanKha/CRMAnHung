@@ -10,12 +10,14 @@ import {
   TransactionPartyRole,
   TransactionStatus,
   TransactionType,
+  UserRole,
   type CreateTransactionInput,
   type TransactionDetail,
   type UpdateTransactionInput,
 } from '@crmanhung/shared';
 import { ApiError } from '@/shared/api/client';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
+import { useAuth } from '@/features/auth/auth-context';
 import { getLodat, listLodats } from '@/features/lodats/api';
 import {
   createTransaction,
@@ -106,8 +108,10 @@ export function TransactionFormPage({ mode }: Props) {
   const search = useSearchParams();
   const router = useRouter();
   const qc = useQueryClient();
+  const { user } = useAuth();
   const id = mode === 'edit' ? params.id : undefined;
   const queryLodatId = search.get('lodatId')?.trim() || '';
+  const adminBlockedCreate = mode === 'create' && user?.role === UserRole.ADMIN;
 
   const [values, setValues] = useState<TransactionFormValues>(defaultFormValues);
   const [toast, setToast] = useState<string | null>(null);
@@ -125,13 +129,13 @@ export function TransactionFormPage({ mode }: Props) {
   const lodatQ = useQuery({
     queryKey: ['lodat', pickedLodatId],
     queryFn: () => getLodat(pickedLodatId),
-    enabled: mode === 'create' && Boolean(pickedLodatId),
+    enabled: mode === 'create' && !adminBlockedCreate && Boolean(pickedLodatId),
   });
 
   const lodatsQ = useQuery({
     queryKey: ['lodats', 'tx-picker'],
     queryFn: () => listLodats({ limit: 200, includePaused: true }),
-    enabled: mode === 'create' && !queryLodatId,
+    enabled: mode === 'create' && !adminBlockedCreate && !queryLodatId,
   });
 
   const openQ = useQuery({
@@ -199,6 +203,9 @@ export function TransactionFormPage({ mode }: Props) {
       const buyers = cleanParties(values.buyers);
       const notary = dateInputToIso(values.notaryDate);
       if (mode === 'create') {
+        if (user?.role === UserRole.ADMIN) {
+          throw new Error('Admin không tạo giao dịch. Nhân viên tạo giao dịch từ lô của mình.');
+        }
         const lodatId = queryLodatId || values.lodatId;
         if (!lodatId) throw new Error('Chọn lô đất.');
         const body: CreateTransactionInput = {
@@ -274,13 +281,20 @@ export function TransactionFormPage({ mode }: Props) {
       ) : null}
       {detailQ.error ? <p className="tx-form-state error">{(detailQ.error as Error).message}</p> : null}
       {lodatQ.error ? <p className="tx-form-state error">{(lodatQ.error as Error).message}</p> : null}
+      {adminBlockedCreate && !openQ.data?.id && (openQ.isFetched || !queryLodatId) ? (
+        <p className="tx-form-state error">
+          Admin không tạo giao dịch. Nhân viên tạo giao dịch từ lô của mình.
+        </p>
+      ) : null}
       {missingOwner ? (
         <p className="tx-form-state error">
           Lô này chưa có chủ. Gắn chủ trên chi tiết lô trước khi tạo giao dịch.
         </p>
       ) : null}
 
-      {(mode === 'create' && (!queryLodatId || (openQ.isFetched && !openQ.data?.id))) ||
+      {(mode === 'create' &&
+        !adminBlockedCreate &&
+        (!queryLodatId || (openQ.isFetched && !openQ.data?.id))) ||
       (mode === 'edit' && detailQ.data) ? (
         <form
           className="tx-form"
