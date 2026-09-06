@@ -1012,7 +1012,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Contract domain chỉ create + status; UI không edit.
 - **Impact:** Bài trùng trên anhungland.com; SEO/nội dung lệch; nháp cũ tồn tại.
 - **Evidence:** Controller không update body. `createPost` + `uniquePostSlug`. Domain bảng API §7 không có PATCH content.
-- **Status:** OPEN (HOÃN — owner 2026-09-06: làm sau)
+- **Status:** OPEN
 
 ### BUG-057 — Đổi địa chỉ dự án sang đất dân không kiểm kho `ProjectLot`
 
@@ -1025,7 +1025,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Đổi kind không XOR với `ProjectLot` (Restrict chỉ khi xóa Address).
 - **Impact:** NV không gắn chủ kho; Admin tưởng dự án hết lô; dữ liệu mixed dân/kho.
 - **Evidence:** `update` imageCount vs không `projectLot.findFirst`. `listProjectLots` kind check. Soft-hide địa chỉ cố ý không cascade (domain) — không ghi trùng; đây là đổi kind.
-- **Status:** OPEN
+- **Status:** OPEN (HOÃN — owner 2026-09-06: làm sau)
 
 ### BUG-058 — Form tạo giao dịch (không gắn sẵn lô) chỉ picker 200 lô
 
