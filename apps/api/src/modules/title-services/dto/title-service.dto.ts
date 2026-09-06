@@ -3,12 +3,21 @@ import {
   Allow,
   IsBoolean,
   IsIn,
+  IsInt,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
+  Min,
   MinLength,
   ValidateIf,
 } from 'class-validator';
+
+function toOptionalInt(value: unknown): number | undefined {
+  if (value == null || value === '') return undefined;
+  const n = Number(value);
+  return Number.isFinite(n) ? Math.trunc(n) : undefined;
+}
 
 const TITLE_STATUSES = ['DANG_LAM', 'TAM_DUNG', 'HOAN_THANH', 'HUY'] as const;
 
@@ -26,6 +35,19 @@ export class ListTitleServicesQueryDto {
   @IsString()
   @MaxLength(60)
   createdByEmployeeId?: string;
+
+  @IsOptional()
+  @Transform(({ value }) => toOptionalInt(value))
+  @IsInt()
+  @Min(1)
+  @Max(200)
+  limit?: number;
+
+  @IsOptional()
+  @Transform(({ value }) => toOptionalInt(value))
+  @IsInt()
+  @Min(0)
+  offset?: number;
 }
 
 export class CreateTitleServiceDto {

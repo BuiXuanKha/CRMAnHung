@@ -51,7 +51,6 @@ export const TITLE_FILE_MIMES = [
   'application/pdf',
 ] as const;
 
-export const LIST_LIMIT = 500;
 
 export const LIST_INCLUDE = {
   customer: {

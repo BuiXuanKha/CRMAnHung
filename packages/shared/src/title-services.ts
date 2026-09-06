@@ -5,6 +5,7 @@
  * `createdByEmployeeId` trên list/detail; `expectedDoneAt`; attachment **không**
  * có URL public / objectKey client (signed GET sau authz). Ghim: `pinTitleServiceSchema`.
  * Số ngày dừng khi Hoàn thành **hoặc** Hủy (`completedAt` luôn ghi).
+ * List: `limit` mặc định 50, tối đa 200; `offset` từ 0; `total` = COUNT.
  */
 import { z } from 'zod';
 import {
@@ -98,11 +99,17 @@ export const titleServiceDetailSchema = titleServiceListItemSchema.extend({
 
 export type TitleServiceDetail = z.infer<typeof titleServiceDetailSchema>;
 
+/** List sổ đỏ: trang mặc định 50, tối đa 200 (cùng customers/lodats). */
+export const TITLE_SERVICE_LIST_PAGE_SIZE = 50;
+export const TITLE_SERVICE_LIST_MAX_PAGE_SIZE = 200;
+
 export const titleServiceListQuerySchema = z.object({
   keyword: z.string().trim().optional(),
   status: z.nativeEnum(TitleServiceStatus).optional(),
   /** ADMIN lọc theo NV tạo. */
   createdByEmployeeId: z.string().optional(),
+  limit: z.coerce.number().int().min(1).max(TITLE_SERVICE_LIST_MAX_PAGE_SIZE).optional(),
+  offset: z.coerce.number().int().min(0).optional(),
 });
 
 export type TitleServiceListQuery = z.infer<typeof titleServiceListQuerySchema>;

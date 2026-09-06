@@ -14,7 +14,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | ID | Nặng | Còn trên code? | Đau hôm nay? | Đề xuất | Chốt (owner) |
 |----|------|----------------|--------------|---------|--------------|
 | **051** | MED | STILL_OPEN | List GD mới **2** hàng; Admin **không lọc NV** (lệch sổ đỏ) | SỬA lọc NV Admin; phân trang có thể làm cùng hoặc sau |  |
-| **052** | MED | STILL_OPEN | Cắt 500 — data sổ đỏ rất ít | HOÃN, hoặc chỉ báo «tối đa 500» |  |
+| **052** | MED | FIXED | Cắt 500 — data sổ đỏ rất ít | SỬA phân trang 50 + COUNT (owner 2026-09-06) |  |
 | **053** | MED | STILL_OPEN | Picker địa chỉ dump 500 | SỬA tìm server-side (không đoán COUNT) |  |
 | **054** | MED | STILL_OPEN | Race 2 tab Lưu — chưa thấy case | SỬA nhỏ: retry khi trùng mã |  |
 | **055** | MED | STILL_OPEN | Lọc «Dưới 1 tỷ» ra cả khách chưa nhập ngân sách | **SỬA** |  |
