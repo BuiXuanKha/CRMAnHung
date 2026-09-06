@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 50 |
+| OPEN | 49 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 33 |
+| FIXED / CLOSED | 34 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -151,6 +151,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | customers / messenger | BUG-042 FIXED | Owner: `MAX_MESSAGES` 200 → 500 khớp extension; docs ingest cập nhật. |
 | 2026-09-06 | customers / extension | BUG-043 note | Owner: **chưa sửa extension**. Tin không mid phần lớn do `collectOrphanBubbleMessages` (`orphan::`). Khi làm đợt extension sẽ bàn (cấm gửi + có thể siết API). DB `kha`: 899/18617. Ghi `apps/extension/README.md`. |
 | 2026-09-06 | customers / messenger | BUG-044 FIXED | Owner: giữ tin `mid.$` / `@msgr.`; xóa tin không ID. API `from-extension` bỏ qua bubble không mid; migrate xóa hàng cũ. |
+| 2026-09-06 | customers | BUG-045 CLOSED | Owner: không sửa — tự đổi `fullName` bằng bút trên list. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -229,7 +230,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | FIXED |
 | BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). Extension gửi bubble không mid (`orphan::`) — **để khi làm extension**. | OPEN |
 | BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | FIXED |
-| BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | OPEN |
+| BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | CLOSED |
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | OPEN |
 | BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | OPEN |
 | BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | OPEN |
@@ -863,7 +864,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** `touchExisting` không đụng `Customer.fullName`.
 - **Impact:** Mapping đúng Person nhưng nhãn sai; NV tưởng khách khác.
 - **Evidence:** `touchExisting` vs `createCustomer` `fullNameSeed`. `toListItem` `fullName`.
-- **Status:** OPEN
+- **Status:** CLOSED (won't fix, 2026-09-06) — Owner: không sửa scan; tự đổi tên CRM bằng bút trên `/khach-hang`.
 
 ### BUG-046 — API tin nhắn một phát không phân trang; không thời điểm; chi tiết khách không có chat
 
