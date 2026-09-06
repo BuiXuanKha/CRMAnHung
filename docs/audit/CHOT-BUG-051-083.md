@@ -19,7 +19,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **054** | MED | FIXED | Race 2 tab Lưu — chưa thấy case | SỬA: retry P2002 code + nextCode max số (2026-09-06) |  |
 | **055** | MED | STILL_OPEN | Lọc «Dưới 1 tỷ» ra cả khách chưa nhập ngân sách | **SỬA** |  |
 | **056** | MED | STILL_OPEN | Admin không sửa được bài đã tạo | **SỬA** PATCH nội dung | HOÃN (owner 2026-09-06 — làm sau) |
-| **057** | MED | STILL_OPEN | Bỏ tick dự án khi còn kho | **SỬA** chặn khi còn `ProjectLot` |  |
+| **057** | MED | STILL_OPEN | Bỏ tick dự án khi còn kho | **SỬA** chặn khi còn `ProjectLot` | HOÃN (owner 2026-09-06 — làm sau) |
 | **058** | MED | STILL_OPEN | `/giao-dich/tao` không `lodatId` chỉ 200 lô; **Admin đã không tạo GD** | Bỏ picker trần — bắt tạo từ lô |  |
 | **059** | HIGH | STILL_OPEN | Đổi chủ khi GD **Đã cọc** — lệch deal vs lô. Admin đã không đổi chủ | **SỬA** chặn đổi chủ khi còn GD mở |  |
 | **060** | HIGH | STILL_OPEN | Gỡ ảnh lô → xóa R2 dù GD đã đóng băng ảnh | **SỬA** đếm snapshot trước khi xóa file |  |
@@ -50,9 +50,9 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 **Gợi ý thứ tự nếu bảo «sửa các ô SỬA»:**  
 1) 060 · 061 · 059 (ảnh/GD/chủ — mất data)  
 2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
-3) 055 · 057 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
+3) 055 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
-5) Chờ chốt: **062, 063**. Hoãn: **056** (owner), 052, 058 (nếu chọn bỏ picker), 065, 068, 077, 078, 080.
+5) Chờ chốt: **062, 063**. Hoãn: **056**, **057** (owner làm sau), 052, 058 (nếu chọn bỏ picker), 065, 068, 077, 078, 080.
 
 ---
 
@@ -160,13 +160,13 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-057 — Đổi dự án → đất dân không kiểm kho `ProjectLot`
 
-**Còn.** `PROJECT` → `REGULAR` chỉ chặn khi còn **ảnh**. Không `count` kho.
+**Chốt: HOÃN** (owner 2026-09-06 — làm sau). Vẫn OPEN trên code: `PROJECT` → `REGULAR` chỉ chặn khi còn **ảnh**, không `count` kho.
 
 **Tôi vào vai Admin.** Cài đặt → địa chỉ dự án còn lô kho (sau import BUG-048) → bỏ tick dự án → Lưu **được**.
 
 **Tôi vào vai kha.** Tạo lô dự án đó → picker kho 400 «không phải dự án». Lô `projectLotId` cũ vẫn sống.
 
-**Đề xuất: SỬA** — còn `ProjectLot` thì không đổi kind (cùng kiểu chặn còn ảnh).
+**Đề xuất khi làm:** còn `ProjectLot` thì không đổi kind (cùng kiểu chặn còn ảnh).
 
 ---
 
