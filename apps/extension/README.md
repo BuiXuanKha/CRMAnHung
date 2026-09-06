@@ -44,6 +44,4 @@ Không gửi lên `crm.anhungland.com`.
 
 ## Khi làm lại / sửa extension (để bàn)
 
-**Owner 2026-09-06 — chưa sửa scanner.** Extension đang gửi tin **không có ID bong bóng** (`mid.$…` / `…@msgr.…`) lên API. Hàm `collectOrphanBubbleMessages` trong `content-inbox.js` hốt span trên khung chat, `id` rỗng, `dedupeKey: orphan::vị-trí::chữ`. API `from-extension` nhận `id` optional rồi ghi DB.
-
-DB NV `kha`: 899 / 18.617 tin không mid — **toàn** khóa `orphan::`. Chi tiết: `docs/audit/BUGS.md` **BUG-043**. Lúc làm đợt extension: bàn tiếp (cấm gửi bubble không mid; có thể siết API).
+**Owner 2026-09-06 — chưa sửa scanner.** Extension vẫn gửi tin không ID bong bóng (`collectOrphanBubbleMessages`, `orphan::`). **API (BUG-044) không ghi** những tin đó; migrate xóa hàng cũ trên DB. Lúc làm đợt extension: đừng gửi bubble thiếu `mid.$` / `@msgr.`. Chi tiết: `docs/audit/BUGS.md` **BUG-043** / **BUG-044**.

@@ -233,8 +233,10 @@ Nút **Quét DOM LIVE** trên panel vẫn có thể tạo file tải về máy l
 
 ### 11.1 Tin không mid — BUG-043 (owner để khi làm extension)
 
-`data-message-id` (`mid.$…` hoặc `\d+@msgr.…`) = ID **một bong bóng**. Scanner còn `collectOrphanBubbleMessages` (`content-inbox.js`): gửi tin `id` rỗng + `orphan::…`. Contract `extensionChatMessageSchema.id` optional; API ghi hết.
+`data-message-id` (`mid.$…` hoặc `\d+@msgr.…`) = ID **một bong bóng**. Scanner còn `collectOrphanBubbleMessages` (`content-inbox.js`): gửi tin `id` rỗng + `orphan::…`. Contract `extensionChatMessageSchema.id` optional.
 
-Owner **2026-09-06**: **không sửa extension lúc này** (còn nhiều việc scanner). Khi làm đợt extension → mở lại BUG-043, bàn: không gửi bubble thiếu mid; API có từ chối không. Dữ liệu `kha` staging: 899 tin `orphan::`, 17.587 `mid.$`, 131 `@msgr.`.
+**API (BUG-044, 2026-09-06):** không ghi tin thiếu mid; migrate xóa hàng cũ. Extension vẫn gửi — lúc làm scanner thì đừng gửi.
+
+Owner **2026-09-06**: **không sửa extension lúc này**. Unique `(facebook, mid)` trên DB vẫn chưa (BUG-043).
 
 Xem `docs/audit/BUGS.md` BUG-043 và `apps/extension/README.md` mục «Khi làm lại / sửa extension».

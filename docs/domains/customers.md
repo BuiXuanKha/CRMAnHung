@@ -618,10 +618,11 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 - Ảnh chat raster mới → `sharp` WebP (cạnh dài ≤ 2560) → R2 `customers/chat/<customerId>/{mid}-{n}.webp`. Video / path `/img/imgsmessenger/` cũ: bỏ qua.
 - Tin đã có đủ ảnh (kể cả JPEG migrate đã convert WebP) → không encode lại. Gắn ảnh chat vào lô: **copy** SEO WebP, giữ file chat (cùng key WebP sau `[seo-webp-replace]`).
 - Body JSON tối đa 32MB (data URL). Tối đa 500 tin / lần (khớp extension `MESSAGE_MAX_COUNT`).
+- Chỉ lưu tin có ID bong bóng `mid.$…` hoặc `…@msgr.…` (BUG-044). Tin `orphan::` / không mid: API bỏ qua; migrate xóa hàng cũ.
 
 Scanner Chrome: Load unpacked `apps/extension` (cùng panel Business Suite / Messenger / E2EE). Gửi `POST /api/v1/customers/from-extension`.
 
-**Để khi làm extension (owner 2026-09-06, BUG-043):** scanner còn gửi tin không ID bong bóng (`orphan::`). Chưa sửa. Ghi chú: `apps/extension/README.md`.
+**Để khi làm extension (owner 2026-09-06, BUG-043):** scanner còn gửi tin không ID bong bóng (`orphan::`). **API không ghi** (BUG-044). Ghi chú: `apps/extension/README.md`.
 
 ---
 
