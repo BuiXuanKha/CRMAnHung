@@ -157,6 +157,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | addresses / ProjectLot | BUG-048 FIXED | Owner: copy modal CRM cũ «Import lô đất Excel». Admin import vào dự án trống → `ProjectLot`. |
 | 2026-09-06 | transactions | BUG-049 FIXED | Owner: Admin không tạo GD. `POST /transactions` 403; NV tạo từ lô mình. |
 | 2026-09-06 | title-services | BUG-050 FIXED | Owner: Admin không tạo sổ đỏ. `POST /title-services` 403; NV tạo từ khách mình. |
+| 2026-09-06 | audit | CHOT 051–083 | File `docs/audit/CHOT-BUG-051-083.md` — xác minh code main + giải thích NV/Admin để owner chốt. Chưa sửa OPEN. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
