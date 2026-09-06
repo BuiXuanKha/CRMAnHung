@@ -135,25 +135,28 @@ export class AddressesService {
       ];
     }
 
-    const rows = await this.prisma.address.findMany({
-      where,
-      include: {
-        province: true,
-        district: true,
-        ward: true,
-        _count: { select: { lodats: true, images: true, projectLots: true } },
-        images: {
-          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-          take: 1,
-          select: { objectKey: true },
+    // Không cắt trang — trả hết địa chỉ khớp filter (BUG-053: trần 500 làm mất địa chỉ cũ).
+    const [rows, total] = await Promise.all([
+      this.prisma.address.findMany({
+        where,
+        include: {
+          province: true,
+          district: true,
+          ward: true,
+          _count: { select: { lodats: true, images: true, projectLots: true } },
+          images: {
+            orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+            take: 1,
+            select: { objectKey: true },
+          },
         },
-      },
-      orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
-      take: 500,
-    });
+        orderBy: [{ updatedAt: 'desc' }, { id: 'desc' }],
+      }),
+      this.prisma.address.count({ where }),
+    ]);
 
     const items = rows.map((r) => this.mapAddressRow(r));
-    return { items, total: items.length };
+    return { items, total };
   }
 
   async getById(id: string) {

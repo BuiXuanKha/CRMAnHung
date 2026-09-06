@@ -26,6 +26,7 @@ type HeaderFilter = 'name' | 'need' | 'progress' | 'money' | 'docs' | null;
 type Props = {
   items: TitleServiceListItem[];
   total: number;
+  loadingMore?: boolean;
   selectedId: string | null;
   menuId: string | null;
   status: string;
@@ -43,6 +44,7 @@ type Props = {
 export function TitleServiceTable({
   items,
   total,
+  loadingMore = false,
   selectedId,
   menuId,
   status,
@@ -254,6 +256,7 @@ export function TitleServiceTable({
 
       <div className="sd-table-foot">
         Hiển thị <strong>{items.length}</strong> / Tổng <strong>{total}</strong> hồ sơ sổ đỏ
+        {loadingMore ? ' — Đang tải thêm…' : ''}
       </div>
     </div>
   );

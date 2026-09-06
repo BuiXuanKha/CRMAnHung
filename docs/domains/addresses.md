@@ -79,7 +79,7 @@ Prefix `/api/v1`. Schema Zod khi làm mock/API sổ địa chỉ.
 
 | Method | Path | Ai |
 |--------|------|-----|
-| GET | `/addresses` | STAFF + ADMIN (chọn). Query `withoutLodats=1` + `kind=PROJECT` = chỉ dự án chưa có `ProjectLot` |
+| GET | `/addresses` | STAFF + ADMIN (chọn). Trả **hết** theo filter (`keyword`/`kind`/`includeHidden`/`withoutLodats`); `total` = COUNT — không cắt 500. `withoutLodats=1` + `kind=PROJECT` = chỉ dự án chưa có `ProjectLot` |
 | POST/PATCH/DELETE | `/addresses`, `/addresses/:id` | ADMIN |
 | POST | `/addresses/:id/lodats/import` | ADMIN. Body `{ rows: [{ title, areaM2?, frontageM?, direction?, note? }] }` — tối đa 2500. Chỉ địa chỉ `PROJECT` **chưa có lô**. Ghi `ProjectLot`, không gắn khách. |
 | POST/DELETE | `/addresses/:id/images` | ADMIN |

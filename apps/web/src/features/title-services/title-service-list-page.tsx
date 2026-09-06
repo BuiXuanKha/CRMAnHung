@@ -5,13 +5,18 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
+  TITLE_SERVICE_LIST_PAGE_SIZE,
   TitleServiceMoneyKind,
   TitleServiceStatus,
   UserRole,
   type TitleServiceListItem,
 } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
-import { resetListScrollIfFiltersChanged } from '@/shared/list-state';
+import {
+  needsMoreListScrollHeight,
+  resetListScrollIfFiltersChanged,
+  useCrmInfiniteList,
+} from '@/shared/list-state';
 import { useAuth } from '@/features/auth/auth-context';
 import { listUserDirectory } from '@/features/users/api';
 import {
@@ -98,10 +103,16 @@ export function TitleServiceListPage() {
     createdByEmployeeId: isAdmin && employeeId ? employeeId : undefined,
   };
 
-  const list = useQuery({
+  const {
+    query: list,
+    rawItems,
+    total,
+    loadMoreIfNearEnd,
+  } = useCrmInfiniteList<TitleServiceListItem>({
     queryKey: ['title-services', listQuery],
-    queryFn: () => listTitleServices(listQuery),
     enabled: restoreReady,
+    pageSize: TITLE_SERVICE_LIST_PAGE_SIZE,
+    fetchPage: ({ limit, offset }) => listTitleServices({ ...listQuery, limit, offset }),
   });
 
   const staffDir = useQuery({
@@ -110,14 +121,11 @@ export function TitleServiceListPage() {
     enabled: isAdmin,
   });
 
-  const filtered = useMemo(
-    () => applyExtraFilters(list.data?.items ?? [], extra),
-    [list.data?.items, extra],
-  );
+  const filtered = useMemo(() => applyExtraFilters(rawItems, extra), [rawItems, extra]);
 
   const selected =
     filtered.find((row) => row.id === selectedId) ??
-    list.data?.items.find((row) => row.id === selectedId) ??
+    rawItems.find((row) => row.id === selectedId) ??
     null;
   const mobileFilterCount = countMobileTitleServiceFilters(status, employeeId);
   const filterKey = [
@@ -178,11 +186,12 @@ export function TitleServiceListPage() {
   }
 
   function onListScroll() {
+    loadMoreIfNearEnd(getListScrollEl());
     persistListState();
   }
 
   useLayoutEffect(() => {
-    if (!restoreReady || list.isLoading) return;
+    if (!restoreReady || list.isLoading || list.isFetchingNextPage) return;
     if (restoreDone.current) return;
     const snap = restoreSnap.current;
     if (!snap) {
@@ -197,12 +206,37 @@ export function TitleServiceListPage() {
       setListConcealed(false);
       return;
     }
-    restoreTitleServiceListScroll(getListScrollEl(), snap);
+    const root = getListScrollEl();
+    const missingAnchor = snap.anchorId
+      ? !root?.querySelector(`[data-list-row-id="${CSS.escape(snap.anchorId)}"]`)
+      : false;
+    if (
+      filtered.length < total &&
+      list.hasNextPage &&
+      (needsMoreListScrollHeight(root, snap.scrollTop) || missingAnchor)
+    ) {
+      void list.fetchNextPage();
+      return;
+    }
+    restoreTitleServiceListScroll(root, snap);
     restoreDone.current = true;
     restoredFiltersKey.current = filterKey;
     restoreSnap.current = null;
     setListConcealed(false);
-  }, [restoreReady, filtered.length, list.isLoading, filterKey]);
+  }, [
+    restoreReady,
+    filtered.length,
+    total,
+    list.isLoading,
+    list.isFetchingNextPage,
+    list.hasNextPage,
+    filterKey,
+  ]);
+
+  useEffect(() => {
+    if (!restoreReady || listConcealed || list.isLoading) return;
+    loadMoreIfNearEnd(getListScrollEl());
+  }, [restoreReady, listConcealed, list.isLoading, filtered.length, list.hasNextPage]);
 
   useLayoutEffect(() => {
     resetListScrollIfFiltersChanged(
@@ -373,11 +407,12 @@ export function TitleServiceListPage() {
               <section className="sd-table-shell" aria-label="Danh sách hồ sơ sổ đỏ">
                 <TitleServiceTable
                   items={filtered}
-                  total={list.data?.total ?? filtered.length}
+                  total={total}
                   selectedId={selectedId}
                   menuId={menuId}
                   status={status}
                   extra={extra}
+                  loadingMore={list.isFetchingNextPage}
                   onStatus={setStatus}
                   onExtra={setExtra}
                   onSelect={selectRow}
@@ -393,13 +428,14 @@ export function TitleServiceListPage() {
             {restoreReady && !list.isLoading && !list.error ? (
               <TitleServiceCardList
                 items={filtered}
-                total={list.data?.total ?? filtered.length}
+                total={total}
                 selectedId={selectedId}
                 menuId={menuId}
+                loadingMore={list.isFetchingNextPage}
                 onSelect={(cardId) => {
                   const item =
                     filtered.find((row) => row.id === cardId) ??
-                    list.data?.items.find((row) => row.id === cardId);
+                    rawItems.find((row) => row.id === cardId);
                   if (item) openDetail(item);
                 }}
                 onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}

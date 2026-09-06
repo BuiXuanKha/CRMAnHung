@@ -25,6 +25,8 @@ export async function listTitleServices(
   if (query.keyword) params.set('keyword', query.keyword);
   if (query.status) params.set('status', query.status);
   if (query.createdByEmployeeId) params.set('createdByEmployeeId', query.createdByEmployeeId);
+  if (query.limit != null) params.set('limit', String(query.limit));
+  if (query.offset != null) params.set('offset', String(query.offset));
   const qs = params.toString();
   return apiFetch<TitleServiceListResponse>(`/title-services${qs ? `?${qs}` : ''}`);
 }

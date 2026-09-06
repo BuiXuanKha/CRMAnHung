@@ -2,16 +2,22 @@
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
+  TRANSACTION_LIST_PAGE_SIZE,
   TransactionStatus,
   TransactionType,
   type TransactionListItem,
+  type TransactionListStats,
 } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
-import { resetListScrollIfFiltersChanged } from '@/shared/list-state';
-import { deleteTransaction, listTransactions, statsFromItems } from './api';
+import {
+  needsMoreListScrollHeight,
+  resetListScrollIfFiltersChanged,
+  useCrmInfiniteList,
+} from '@/shared/list-state';
+import { deleteTransaction, listTransactions } from './api';
 import { type TransactionAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
 import { TransactionStats } from './components/stats';
@@ -82,18 +88,22 @@ export function TransactionListPage() {
     status: (status || undefined) as TransactionStatus | undefined,
   };
 
-  const list = useQuery({
+  const {
+    query: list,
+    rawItems,
+    total,
+    loadMoreIfNearEnd,
+  } = useCrmInfiniteList<TransactionListItem>({
     queryKey: ['transactions', listQuery],
-    queryFn: () => listTransactions(listQuery),
     enabled: restoreReady,
+    pageSize: TRANSACTION_LIST_PAGE_SIZE,
+    fetchPage: ({ limit, offset }) => listTransactions({ ...listQuery, limit, offset }),
   });
 
-  const filtered = useMemo(
-    () => applyExtraFilters(list.data?.items ?? [], extra),
-    [list.data?.items, extra],
-  );
+  const filtered = useMemo(() => applyExtraFilters(rawItems, extra), [rawItems, extra]);
 
-  const stats = useMemo(() => statsFromItems(filtered), [filtered]);
+  const apiStats = (list.data?.pages[0] as { stats?: TransactionListStats } | undefined)?.stats;
+  const stats = apiStats ?? { totalRevenueVnd: 0, totalCommissionVnd: 0 };
   const mobileFilterCount = countMobileTransactionFilters(type, status);
   const filterKey = [
     keyword,
@@ -153,11 +163,12 @@ export function TransactionListPage() {
   }
 
   function onListScroll() {
+    loadMoreIfNearEnd(getListScrollEl());
     persistListState();
   }
 
   useLayoutEffect(() => {
-    if (!restoreReady || list.isLoading) return;
+    if (!restoreReady || list.isLoading || list.isFetchingNextPage) return;
     if (restoreDone.current) return;
     const snap = restoreSnap.current;
     if (!snap) {
@@ -172,12 +183,37 @@ export function TransactionListPage() {
       setListConcealed(false);
       return;
     }
-    restoreTransactionListScroll(getListScrollEl(), snap);
+    const root = getListScrollEl();
+    const missingAnchor = snap.anchorId
+      ? !root?.querySelector(`[data-list-row-id="${CSS.escape(snap.anchorId)}"]`)
+      : false;
+    if (
+      filtered.length < total &&
+      list.hasNextPage &&
+      (needsMoreListScrollHeight(root, snap.scrollTop) || missingAnchor)
+    ) {
+      void list.fetchNextPage();
+      return;
+    }
+    restoreTransactionListScroll(root, snap);
     restoreDone.current = true;
     restoredFiltersKey.current = filterKey;
     restoreSnap.current = null;
     setListConcealed(false);
-  }, [restoreReady, filtered.length, list.isLoading, filterKey]);
+  }, [
+    restoreReady,
+    filtered.length,
+    total,
+    list.isLoading,
+    list.isFetchingNextPage,
+    list.hasNextPage,
+    filterKey,
+  ]);
+
+  useEffect(() => {
+    if (!restoreReady || listConcealed || list.isLoading) return;
+    loadMoreIfNearEnd(getListScrollEl());
+  }, [restoreReady, listConcealed, list.isLoading, filtered.length, list.hasNextPage]);
 
   useLayoutEffect(() => {
     resetListScrollIfFiltersChanged(
@@ -256,7 +292,7 @@ export function TransactionListPage() {
     <div className="tx-page">
       <div className="tx-main">
         <TransactionStats
-          count={filtered.length}
+          count={total}
           totalRevenueVnd={stats.totalRevenueVnd}
           totalCommissionVnd={stats.totalCommissionVnd}
         />
@@ -289,13 +325,14 @@ export function TransactionListPage() {
             <section className="tx-table-shell" aria-label="Danh sách giao dịch">
               <TransactionTable
                 items={filtered}
-                total={list.data?.total ?? filtered.length}
+                total={total}
                 selectedId={selectedId}
                 menuId={menuId}
                 type={type}
                 status={status}
                 extra={extra}
                 filteredEmpty={filteredEmpty}
+                loadingMore={list.isFetchingNextPage}
                 onType={setType}
                 onStatus={setStatus}
                 onExtra={setExtra}
@@ -312,10 +349,11 @@ export function TransactionListPage() {
           {restoreReady && !list.isLoading && !list.error ? (
             <TransactionCardList
               items={filtered}
-              total={list.data?.total ?? filtered.length}
+              total={total}
               selectedId={selectedId}
               menuId={menuId}
               filteredEmpty={filteredEmpty}
+              loadingMore={list.isFetchingNextPage}
               onSelect={setSelectedId}
               onOpen={openDetail}
               onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}

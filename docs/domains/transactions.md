@@ -1,7 +1,7 @@
 # Domain: Transactions (Giao dịch)
 
 - **Slug:** `transactions`
-- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI **nối API** (staging login thật, không mock). Copy CRM cũ xong (2 GD **buinam**). STAFF **kha**: list trống đến khi tạo GD từ lô.
+- **Status:** Ready for API — Prisma + contract + Nest CRUD + UI **nối API** (staging login thật, không mock). List: `limit`/`offset` + COUNT (cuộn tải 50). Copy CRM cũ xong (2 GD **buinam**). STAFF **kha**: list trống đến khi tạo GD từ lô.
 - **Nguồn:** màn [`/giao-dich`](https://anhungland.com/giao-dich) (web mới) + CRM cũ `/giao-dich` (SQLite `tblTransaction*`, 2026-08-25)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.6 + §4.5
 - **Contract:** `packages/shared/src/transactions.ts`
@@ -261,11 +261,18 @@ Một dòng, cắt `…`. Thiếu = `—`.
 | Sửa | `/giao-dich/[id]/sua` |
 | Xóa | Đỏ → confirm → xóa cứng. GD đang mở → map về Mở bán |
 
-#### 12.1.5 Footer
+#### 12.1.5 Footer + cuộn tải thêm + nhớ vị trí
 
-`Hiển thị N / Tổng M giao dịch`.
+`Hiển thị n / Tổng M giao dịch` (`n` = số dòng đang có, `M` = `total` API). Đang nối: thêm `— Đang tải thêm…`.
 
-**Nhớ vị trí + lọc khi rời list** — cùng helper `list-state` (key `crmanhung:transaction-list-state`): ô tìm, loại, trạng thái, lọc cột, `selectedId`, `scrollTop` + `anchorId`. Dòng/thẻ có `data-list-row-id`. Đổi lọc/tìm → cuộn về 0. Vào lại (Back / menu / F5 cùng tab) khôi phục; che list lúc restore. Đăng xuất xóa.
+**Tải thêm 50 dòng** — helper `useCrmInfiniteList` (cùng `/khach-hang` / `/lo-dat`):
+
+1. `GET /transactions` nhận `limit` (mặc định 50, tối đa 200) + `offset`. `total` = COUNT cùng filter tìm/loại/trạng thái.
+2. Cuộn thân bảng/thẻ gần đáy (~160px) → nối trang; list ngắn hơn khung → tự nạp thêm.
+3. Đổi ô tìm / loại / trạng thái / lọc cột → reset `offset=0`, cuộn đầu.
+4. Thẻ doanh thu / hoa hồng = aggregate OWN + HOAN_TAT trên **cùng filter API** (không chỉ trang đang xem).
+
+**Nhớ vị trí + lọc khi rời list** — cùng helper `list-state` (key `crmanhung:transaction-list-state`): ô tìm, loại, trạng thái, lọc cột, `selectedId`, `scrollTop` + `anchorId`. Dòng/thẻ có `data-list-row-id`. Đổi lọc/tìm → cuộn về 0. Vào lại (Back / menu / F5 cùng tab) khôi phục; nếu scroll cao hơn list hiện có → tải thêm đến khi đủ hoặc hết `total`; che list lúc restore. Đăng xuất xóa.
 
 #### 12.1.6 Trống
 

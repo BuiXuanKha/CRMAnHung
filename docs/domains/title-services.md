@@ -39,7 +39,7 @@ Tiến độ gợi ý: Bàn giá, Thu thập giấy tờ, Đo đạc, Nộp hồ
 ## 4. Use cases (CRM cũ)
 
 1. **Tạo từ khách** — `POST` STAFF; khách phải thuộc NV và không ẩn. ADMIN → 403. Mã `SD-YYYY-NNNN`. Status `DANG_LAM`.
-2. **List** — STAFF chỉ hồ sơ mình; ADMIN tất cả + `?employeeId=`. Tìm: mã + tên + SĐT (không tìm nhu cầu/ghi chú). Sort: ghim → `pinnedAt` → `updatedAt`. Limit 500.
+2. **List** — STAFF chỉ hồ sơ mình; ADMIN tất cả + `?employeeId=`. Tìm: mã + tên + SĐT (không tìm nhu cầu/ghi chú). Sort: ghim → `pinnedAt` → `updatedAt`. `limit` mặc định 50, tối đa 200; `offset` từ 0; `total` = COUNT.
 3. **Sửa** — trạng thái, phí thỏa thuận, nhu cầu, ghi chú, ngày dự kiến xong. Chuyển **Hoàn thành** ghi `completedAt`; rời Hoàn thành thì xóa `completedAt`.
 4. **Ghim** — `PATCH /:id/pin` `{ pinned }`.
 5. **Tiến độ / thu-chi / file** — thêm/xóa trên hồ sơ mình. File tối đa 12 MB, disk `/img/title-services/`.
@@ -187,9 +187,15 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 | Sửa thông tin | Dialog mock (trạng thái, giá, nhu cầu) |
 | Xóa hồ sơ | Đỏ → confirm → gỡ list (mock) |
 
-#### 12.1.4 Footer
+#### 12.1.4 Footer + cuộn tải thêm
 
-`Hiển thị N / Tổng M hồ sơ sổ đỏ`.
+`Hiển thị n / Tổng M hồ sơ sổ đỏ` (`n` = số dòng đang có, `M` = `total` API). Đang nối: thêm `— Đang tải thêm…`.
+
+**Tải thêm 50 dòng** — `useCrmInfiniteList` (cùng khách/lô):
+
+1. `GET /title-services` nhận `limit` (mặc định 50, tối đa 200) + `offset`. `total` = COUNT cùng filter tìm/trạng thái/NV.
+2. Cuộn thân bảng/thẻ gần đáy (~160px) → nối trang; list ngắn hơn khung → tự nạp thêm.
+3. Đổi ô tìm / trạng thái / NV / lọc cột → reset `offset=0`, cuộn đầu.
 
 #### 12.1.5 Panel phải — Chi tiết hồ sơ
 
@@ -257,11 +263,9 @@ Nhu cầu (2 dòng) · Giá / Thu / Chi · bước tiến độ · `N file` / Ch
 
 Ghim: nền vàng + viền trái `#ca8a04`.
 
-#### 12.2.4 Footer
+#### 12.2.4 Footer + cuộn
 
-Cùng câu `Hiển thị N / Tổng M hồ sơ sổ đỏ`.
-
-Nhớ tìm / lọc / cuộn: **cùng 12.1.6**. Vùng cuộn = danh sách thẻ.
+Cùng 12.1.4 (`Hiển thị n / Tổng M` + tải thêm 50). Vùng cuộn = danh sách thẻ. Nhớ tìm / lọc / cuộn: **cùng 12.1.6**.
 
 ---
 
