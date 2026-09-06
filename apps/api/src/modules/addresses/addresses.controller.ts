@@ -19,6 +19,7 @@ import { RolesGuard } from '../../common/guards/roles.guard';
 import { AddressesService } from './addresses.service';
 import {
   CreateAddressDto,
+  ImportProjectLotsDto,
   ListAddressesQueryDto,
   UpdateAddressDto,
 } from './dto/address.dto';
@@ -38,7 +39,19 @@ export class AddressesController {
       keyword: query.keyword,
       kind: query.kind,
       includeHidden: includeHiddenFlag(query.includeHidden, user.role),
+      withoutLodats: query.withoutLodats,
     });
+  }
+
+  @Post(':id/lodats/import')
+  @UseGuards(RolesGuard)
+  @Roles('ADMIN')
+  importProjectLots(
+    @Param('id') id: string,
+    @CurrentUser() user: RequestUser,
+    @Body() dto: ImportProjectLotsDto,
+  ) {
+    return this.addresses.importProjectLots(id, user.id, dto.rows);
   }
 
   @Get(':id')

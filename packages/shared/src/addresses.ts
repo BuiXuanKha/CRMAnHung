@@ -66,6 +66,8 @@ export const addressListQuerySchema = z.object({
   keyword: z.string().trim().optional(),
   kind: z.nativeEnum(AddressKind).optional(),
   includeHidden: z.boolean().optional(),
+  /** Chỉ dự án chưa có lô kho — dropdown import Excel (CRM cũ `withoutLodats`). */
+  withoutLodats: z.boolean().optional(),
 });
 
 export type AddressListQuery = z.infer<typeof addressListQuerySchema>;
@@ -143,3 +145,65 @@ export function formatAddressLabel(item: {
   if (left && right) return `${left} · ${right}`;
   return left || right || '—';
 }
+
+/** Label dropdown import Excel — không gắn «(N lô)» (CRM cũ: detail · ward · district · province). */
+export function formatProjectImportLabel(item: {
+  detail?: string | null;
+  ward?: string | null;
+  district?: string | null;
+  province?: string | null;
+}): string {
+  const tail = [item.ward, item.district, item.province].filter(Boolean).join(' · ');
+  const detail = String(item.detail || '').trim();
+  return detail ? `${detail} · ${tail}` : tail;
+}
+
+/** Giới hạn POST /addresses/:id/lodats/import — khớp CRM cũ. */
+export const PROJECT_LOT_IMPORT_MAX_ROWS = 2500;
+
+/** 5 cột chuẩn file Excel import lô kho dự án (đúng thứ tự file mẫu). */
+export const PROJECT_LOT_EXCEL_COLUMNS = [
+  { field: 'title', label: 'Tên lô đất', required: true },
+  { field: 'areaM2', label: 'Diện tích', required: false },
+  { field: 'frontageM', label: 'Mặt tiền', required: false },
+  { field: 'direction', label: 'Hướng', required: false },
+  { field: 'note', label: 'Ghi chú', required: false },
+] as const;
+
+export const importProjectLotRowSchema = z.object({
+  title: z.string().trim().min(1, 'Thiếu tên lô đất.').max(200),
+  areaM2: z.number().nonnegative().nullable().optional(),
+  frontageM: z.number().nonnegative().nullable().optional(),
+  direction: z.string().trim().max(40).nullable().optional(),
+  note: z.string().trim().max(2000).nullable().optional(),
+});
+
+export type ImportProjectLotRow = z.infer<typeof importProjectLotRowSchema>;
+
+export const importProjectLotsInputSchema = z.object({
+  rows: z
+    .array(importProjectLotRowSchema)
+    .min(1, 'Danh sách lô import trống.')
+    .max(PROJECT_LOT_IMPORT_MAX_ROWS, `Tối đa ${PROJECT_LOT_IMPORT_MAX_ROWS} dòng mỗi lần import.`),
+});
+
+export type ImportProjectLotsInput = z.infer<typeof importProjectLotsInputSchema>;
+
+export const importProjectLotResultItemSchema = z.object({
+  rowIndex: z.number().int().positive(),
+  ok: z.boolean(),
+  id: z.string().optional(),
+  title: z.string().optional(),
+  message: z.string().optional(),
+});
+
+export const importProjectLotsResponseSchema = z.object({
+  ok: z.literal(true),
+  addressId: z.string(),
+  total: z.number().int().nonnegative(),
+  created: z.number().int().nonnegative(),
+  failed: z.number().int().nonnegative(),
+  results: z.array(importProjectLotResultItemSchema),
+});
+
+export type ImportProjectLotsResponse = z.infer<typeof importProjectLotsResponseSchema>;

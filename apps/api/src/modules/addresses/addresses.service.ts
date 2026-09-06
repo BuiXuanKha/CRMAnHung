@@ -6,8 +6,13 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
-import type { CreateAddressDto, UpdateAddressDto } from './dto/address.dto';
+import type {
+  CreateAddressDto,
+  ImportProjectLotRowDto,
+  UpdateAddressDto,
+} from './dto/address.dto';
 import { uniqueSeoAddressImageKey } from '../lodats/lodat-seo-image-upload';
+import { importProjectLotsForAddress } from './import-project-lots';
 
 type WardChain = {
   wardId: string;
@@ -105,10 +110,19 @@ export class AddressesService {
     keyword?: string;
     kind?: 'REGULAR' | 'PROJECT';
     includeHidden?: boolean;
+    withoutLodats?: boolean;
   }) {
     const where: Prisma.AddressWhereInput = {};
     if (!query.includeHidden) where.isHidden = false;
     if (query.kind) where.kind = query.kind;
+
+    if (query.withoutLodats) {
+      if (query.kind && query.kind !== 'PROJECT') {
+        throw new BadRequestException('withoutLodats chỉ áp dụng khi kind=PROJECT.');
+      }
+      where.kind = 'PROJECT';
+      where.projectLots = { none: {} };
+    }
 
     const keyword = String(query.keyword || '').trim();
     if (keyword) {
@@ -275,6 +289,14 @@ export class AddressesService {
       },
     });
     return { item: this.mapAddressRow(row) };
+  }
+
+  async importProjectLots(
+    addressId: string,
+    employeeId: string,
+    rows: ImportProjectLotRowDto[],
+  ) {
+    return importProjectLotsForAddress(this.prisma, addressId, employeeId, rows);
   }
 
   async listImages(addressId: string) {

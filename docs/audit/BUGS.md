@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 50 |
+| OPEN | 49 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 33 |
+| FIXED / CLOSED | 34 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -151,6 +151,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | customers / messenger | BUG-042 FIXED | Owner: `MAX_MESSAGES` 200 → 500 khớp extension; docs ingest cập nhật. |
 | 2026-09-06 | customers / extension | BUG-043 note | Owner: **chưa sửa extension**. Tin không mid phần lớn do `collectOrphanBubbleMessages` (`orphan::`). Khi làm đợt extension sẽ bàn (cấm gửi + có thể siết API). DB `kha`: 899/18617. Ghi `apps/extension/README.md`. |
 | 2026-09-06 | customers / messenger | BUG-044 FIXED | Owner: giữ tin `mid.$` / `@msgr.`; xóa tin không ID. API `from-extension` bỏ qua bubble không mid; migrate xóa hàng cũ. |
+| 2026-09-06 | addresses / ProjectLot | BUG-048 FIXED | Owner: copy modal CRM cũ «Import lô đất Excel». Admin import vào dự án trống → `ProjectLot`. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -167,7 +168,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | lot-shares | `apps/api/src/modules/lot-shares` | `apps/web/src/features/lot-shares` | Share lô, thống kê xem |
 | public-content | `apps/api/src/modules/public-content` | `apps/web/src/features/public-content` | CMS bài / listing / dashboard — audit 2026-09-03 (còn lại) |
 | public web | controllers public trong API | `apps/web/src/features/public` | Catalog khách (list ∩ Mở bán); slug chi tiết = BUG-023; SEO/URL = BUG-066…080 |
-| settings | — | `apps/web/src/features/settings` | Hotline + sổ địa chỉ (Admin) |
+| settings | — | `apps/web/src/features/settings` | Hotline + sổ địa chỉ + Import lô đất Excel (Admin) |
 | health | `apps/api/src/modules/health` | — | Health check |
 | storage | `apps/api/src/storage` | — | Cloudflare R2 |
 | extension | — | `apps/extension` | Chrome MV3 |
@@ -232,7 +233,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | OPEN |
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | OPEN |
 | BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | OPEN |
-| BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | OPEN |
+| BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | FIXED |
 | BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | OPEN |
 | BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | OPEN |
 | BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | OPEN |
@@ -902,7 +903,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Schema có `ProjectLot`; vertical slice quản kho chưa làm (chỉ migrate + picker).
 - **Impact:** Không mở bán lô dự án mới đúng nghiệp vụ kho; sửa thông số kho không được; phụ thuộc script ngoài UI.
 - **Evidence:** `listProjectLots` read-only. Domain Admin «import/sửa kho dự án». Không controller `project-lots` CUD.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Admin **Cài đặt → Import lô đất Excel** (copy modal CRM cũ): chọn dự án chưa có lô, Excel 5 cột, xem trước, `POST /addresses/:id/lodats/import` ghi `ProjectLot` (không `Lodat`, không gắn khách). Dropdown `GET /addresses?kind=PROJECT&withoutLodats=1`. Sửa/xoá từng dòng kho không nằm trong modal cũ — không làm trong PR này.
 
 ### BUG-049 — Admin tạo giao dịch trên lô NV thì GD thuộc Admin; unique GD mở chặn NV
 

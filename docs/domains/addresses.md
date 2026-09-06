@@ -69,7 +69,7 @@ Ownership: sổ **dùng chung** toàn công ty (không theo NV).
 |-----|-------------|---------|
 | Sổ địa chỉ | Cài đặt → modal (Admin); `/cai-dat/dia-chi` | Tìm kiếm + tab Tất cả/Thường/Dự án + list + form cascade; giống CRM cũ |
 | Picker | Form tạo/sửa lô | STAFF chọn; không nút thêm địa chỉ |
-| Import kho | Từ địa chỉ dự án | Excel; chỉ Admin |
+| Import kho | Cài đặt → **Import lô đất Excel** (Admin) | Modal giống CRM cũ: chọn dự án **chưa có lô**, Excel 5 cột, xem trước, ghi `ProjectLot`. NV không thấy mục này. |
 
 Đặc tả control: làm khi mock sổ địa chỉ (cascade 4 cấp đã chốt).
 
@@ -79,9 +79,9 @@ Prefix `/api/v1`. Schema Zod khi làm mock/API sổ địa chỉ.
 
 | Method | Path | Ai |
 |--------|------|-----|
-| GET | `/addresses` | STAFF + ADMIN (chọn) |
+| GET | `/addresses` | STAFF + ADMIN (chọn). Query `withoutLodats=1` + `kind=PROJECT` = chỉ dự án chưa có `ProjectLot` |
 | POST/PATCH/DELETE | `/addresses`, `/addresses/:id` | ADMIN |
-| POST | `/addresses/:id/lodats/import` | ADMIN |
+| POST | `/addresses/:id/lodats/import` | ADMIN. Body `{ rows: [{ title, areaM2?, frontageM?, direction?, note? }] }` — tối đa 2500. Chỉ địa chỉ `PROJECT` **chưa có lô**. Ghi `ProjectLot`, không gắn khách. |
 | POST/DELETE | `/addresses/:id/images` | ADMIN |
 | GET | `/admin-units/provinces\|districts\|wards` | STAFF + ADMIN (đọc); POST tạo đơn vị = ADMIN |
 
