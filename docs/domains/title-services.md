@@ -19,7 +19,7 @@ Theo dõi hồ sơ làm sổ đỏ: nhu cầu, tiến độ, thu/chi, tài liệ
 | Actor | List | Không |
 |-------|------|--------|
 | STAFF | Hồ sơ **mình tạo** (`createdByEmployeeId`). Tạo từ khách thuộc NV | Sửa / xóa hồ sơ NV khác; tạo cho khách NV khác |
-| ADMIN | Tất cả; lọc `employeeId` | — |
+| ADMIN | Tất cả; lọc `employeeId` | Tạo hồ sơ (NV tạo từ khách của mình) |
 
 Tạo hồ sơ từ menu khách «Dịch vụ sổ đỏ». **Không** nút Thêm trên list. Tạo luôn `DANG_LAM`.
 
@@ -38,7 +38,7 @@ Tiến độ gợi ý: Bàn giá, Thu thập giấy tờ, Đo đạc, Nộp hồ
 
 ## 4. Use cases (CRM cũ)
 
-1. **Tạo từ khách** — `POST` `personId`; khách phải thuộc NV (STAFF) và không ẩn. Mã `SD-YYYY-NNNN`. Status `DANG_LAM`.
+1. **Tạo từ khách** — `POST` STAFF; khách phải thuộc NV và không ẩn. ADMIN → 403. Mã `SD-YYYY-NNNN`. Status `DANG_LAM`.
 2. **List** — STAFF chỉ hồ sơ mình; ADMIN tất cả + `?employeeId=`. Tìm: mã + tên + SĐT (không tìm nhu cầu/ghi chú). Sort: ghim → `pinnedAt` → `updatedAt`. Limit 500.
 3. **Sửa** — trạng thái, phí thỏa thuận, nhu cầu, ghi chú, ngày dự kiến xong. Chuyển **Hoàn thành** ghi `completedAt`; rời Hoàn thành thì xóa `completedAt`.
 4. **Ghim** — `PATCH /:id/pin` `{ pinned }`.
@@ -281,7 +281,7 @@ Cùng 12.3.1. Ô/nút 16px. Nút nhanh 2×2.
 
 ### 12.4 Tạo từ khách `/khach-hang/[id]/dich-vu-so-do`
 
-Không nút Thêm trên list. Menu khách «Dịch vụ sổ đỏ» → trang này. ADMIN **được** tạo (khác lô đất). Lưu xong → ghi list-state (ô tìm/lọc trống, chọn hồ sơ mới) → `/dich-vu-so-do?id=`. Quay lại / Hủy → `/khach-hang`.
+Không nút Thêm trên list. Menu khách «Dịch vụ sổ đỏ» → trang này. **Admin không tạo** — NV tạo từ khách của mình. Lưu xong → ghi list-state (ô tìm/lọc trống, chọn hồ sơ mới) → `/dich-vu-so-do?id=`. Quay lại / Hủy → `/khach-hang`.
 
 #### 12.4.1 Máy tính
 

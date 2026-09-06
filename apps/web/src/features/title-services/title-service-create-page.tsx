@@ -4,8 +4,9 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
-import { TitleServiceStatus, type CreateTitleServiceInput } from '@crmanhung/shared';
+import { TitleServiceStatus, UserRole, type CreateTitleServiceInput } from '@crmanhung/shared';
 import { getCustomer } from '@/features/customers/api';
+import { useAuth } from '@/features/auth/auth-context';
 import { CrmBadge } from '@/shared/ui/badge';
 import { createTitleService } from './api';
 import { formatMoneyInput, parseMoneyInput, statusLabel, statusTone, todayInputValue } from './display';
@@ -17,6 +18,8 @@ export function TitleServiceCreatePage() {
   const params = useParams<{ id: string }>();
   const customerId = params.id;
   const router = useRouter();
+  const { user } = useAuth();
+  const adminBlocked = user?.role === UserRole.ADMIN;
 
   const [feeText, setFeeText] = useState('');
   const [needSummary, setNeedSummary] = useState('');
@@ -29,14 +32,14 @@ export function TitleServiceCreatePage() {
   const customerQ = useQuery({
     queryKey: ['customer', customerId],
     queryFn: () => getCustomer(customerId),
-    enabled: Boolean(customerId),
+    enabled: !adminBlocked && Boolean(customerId),
   });
   const customer = customerQ.data;
   const hidden = Boolean(customer?.isHidden);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (saving || hidden) return;
+    if (saving || hidden || adminBlocked) return;
     setFormError(null);
     if (!customerId) {
       setFormError('Thiếu khách hàng.');
@@ -65,6 +68,22 @@ export function TitleServiceCreatePage() {
       setFormError(err instanceof Error ? err.message : 'Không tạo được hồ sơ sổ đỏ.');
       setSaving(false);
     }
+  }
+
+  if (adminBlocked) {
+    return (
+      <div className="ld-edit-page">
+        <div className="ld-edit-head">
+          <Link href="/khach-hang" className="ld-edit-back">
+            ← Khách hàng
+          </Link>
+          <h1>Tạo hồ sơ sổ đỏ</h1>
+        </div>
+        <p className="ld-edit-error">
+          Admin không tạo dịch vụ sổ đỏ. Nhân viên tạo hồ sơ từ khách của mình.
+        </p>
+      </div>
+    );
   }
 
   return (

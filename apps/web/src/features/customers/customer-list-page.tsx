@@ -491,6 +491,14 @@ export function CustomerListPage() {
       return;
     }
     if (action === 'sodo') {
+      if (user?.role === UserRole.ADMIN) {
+        setAlertBox({
+          title: 'Không tạo dịch vụ sổ đỏ',
+          message:
+            'Admin không tạo dịch vụ sổ đỏ. Nhân viên tạo hồ sơ từ khách của mình.',
+        });
+        return;
+      }
       saveListBeforeLeave(customer.id);
       router.push(`/khach-hang/${customer.id}/dich-vu-so-do`);
       return;

@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 46 |
+| OPEN | 45 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 37 |
+| FIXED / CLOSED | 38 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -155,6 +155,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | customers / messenger | BUG-046 CLOSED | Owner: không sửa — chat chỉ tham khảo, không hiện ở chi tiết khách. |
 | 2026-09-06 | public-content | BUG-047 FIXED | Owner: lô không của Admin — gỡ `/dashboard/lo-dat` + nút Đăng lô; API soạn/đăng lô chỉ STAFF. |
 | 2026-09-06 | addresses / ProjectLot | BUG-048 FIXED | Owner: copy modal CRM cũ «Import lô đất Excel». Admin import vào dự án trống → `ProjectLot`. |
+| 2026-09-06 | title-services | BUG-050 FIXED | Owner: Admin không tạo sổ đỏ. `POST /title-services` 403; NV tạo từ khách mình. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -238,7 +239,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-047 | HIGH | public-content / dashboard | Tổng quan + `/dashboard/lo-dat` cắt 200 lô Mở bán; nút «Đăng lô» chỉ 8 listing gần nhất. | FIXED |
 | BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | FIXED |
 | BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | OPEN |
-| BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | OPEN |
+| BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | FIXED |
 | BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | OPEN |
 | BUG-052 | MEDIUM | title-services | List sổ đỏ `take: 500`, `total: items.length` — cắt im lặng. | OPEN |
 | BUG-053 | MEDIUM | addresses | List địa chỉ `take: 500`, `total: items.length` — picker/sổ thiếu địa chỉ cũ. | OPEN |
@@ -932,7 +933,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Không gán `createdByEmployeeId = customer.employeeId`; không chặn Admin tạo hộ.
 - **Impact:** Hồ sơ sổ đỏ «mất» trên list NV; phí/tiến độ/file không theo Person.
 - **Evidence:** `create` + `ownershipWhere`. Domain `title-services.md` §2 «Không: tạo cho khách NV khác» (cột STAFF); Admin không được mô tả tạo hộ.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: Admin không tạo sổ đỏ. `POST /title-services` 403; UI menu khách **Dịch vụ sổ đỏ** + `/khach-hang/[id]/dich-vu-so-do` chặn Admin. Admin vẫn xem/sửa/xóa hồ sơ có sẵn.
 
 ### BUG-051 — List giao dịch không phân trang; Admin không lọc theo NV trên UI
 

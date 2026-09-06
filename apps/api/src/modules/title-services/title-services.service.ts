@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -66,6 +67,11 @@ export class TitleServicesService {
   }
 
   async create(user: RequestUser, dto: CreateTitleServiceDto) {
+    if (user.role === 'ADMIN') {
+      throw new ForbiddenException(
+        'Admin không tạo dịch vụ sổ đỏ. Nhân viên tạo hồ sơ từ khách của mình.',
+      );
+    }
     const customer = await this.prisma.customer.findUnique({
       where: { id: dto.customerId.trim() },
       select: { id: true, employeeId: true, isHidden: true },
