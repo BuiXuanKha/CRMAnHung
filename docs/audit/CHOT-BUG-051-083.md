@@ -17,7 +17,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **052** | MED | FIXED | Cắt 500 — data sổ đỏ rất ít | SỬA phân trang 50 + COUNT (owner 2026-09-06) |  |
 | **053** | MED | FIXED | Picker địa chỉ dump 500 | SỬA: bỏ trần 500, trả hết + COUNT (2026-09-06) |  |
 | **054** | MED | FIXED | Race 2 tab Lưu — chưa thấy case | SỬA: retry P2002 code + nextCode max số (2026-09-06) |  |
-| **055** | MED | STILL_OPEN | Lọc «Dưới 1 tỷ» ra cả khách chưa nhập ngân sách | **SỬA** |  |
+| **055** | MED | FIXED | Lọc «Dưới 1 tỷ» ra cả khách chưa nhập ngân sách | SỬA: khoảng chỉ khách có số (2026-09-06) |  |
 | **056** | MED | STILL_OPEN | Admin không sửa được bài đã tạo | **SỬA** PATCH nội dung | HOÃN (owner 2026-09-06 — làm sau) |
 | **057** | MED | STILL_OPEN | Bỏ tick dự án khi còn kho | **SỬA** chặn khi còn `ProjectLot` | HOÃN (owner 2026-09-06 — làm sau) |
 | **058** | MED | STILL_OPEN | `/giao-dich/tao` không `lodatId` chỉ 200 lô; **Admin đã không tạo GD** | Bỏ picker trần — bắt tạo từ lô |  |
@@ -132,17 +132,9 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-055 — Lọc tài chính «Dưới 1 tỷ» vẫn ra khách chưa nhập ngân sách
 
-**Còn.** API coi `null` = không giới hạn → khách «Chưa xác định» dính mọi khoảng. FE list gửi `budgetFilter` (đúng API, cùng sai).
+**FIXED (2026-09-06).** Khoảng `lt_1b`/`1b_2b`/`gt_2b` bắt buộc min+max; null không = vô hạn. `none`/`has` giữ nguyên. API + FE client filter cùng rule.
 
-**Tôi vào vai kha.** `/khach-hang` → lọc Tài chính → **Dưới 1 tỷ**. Vẫn thấy khách chưa khai min/max.
-
-**Ví dụ:** Domain: lọc này **có trên staging**; 237 khách có lịch sử chăm sóc. Không SSH → không đếm được bao nhiêu «Chưa xác định». Hành vi sai **không** phụ thuộc số lượng.
-
-**Vì sao xấu:** Gọi nhầm khách chưa biết ngân sách.
-
-**Đề xuất: SỬA** — khoảng `lt_1b` / `1b_2b` / `gt_2b` chỉ khách **đã có** số; giữ filter riêng «Chưa có» / «Đã có».
-
-**Khi xong:** «Dưới 1 tỷ» không còn dòng Chưa xác định. Check: kha lọc khoảng vs lọc «Chưa có».
+**Check:** kha `/khach-hang` → Tài chính → **Dưới 1 tỷ** — không còn dòng «Chưa xác định»; lọc «Chưa có» vẫn ra khách null.
 
 ---
 
