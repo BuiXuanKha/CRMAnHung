@@ -81,6 +81,8 @@ export function PostRichEditor({
 
   useLayoutEffect(() => {
     if (!editor) return;
+    // Đang gõ (đặc biệt mobile): đừng setContent từ props — dễ mất selection/bàn phím.
+    if (editor.isFocused) return;
     const current = editor.getHTML();
     const next = value || '';
     // TipTap empty doc is "<p></p>" — treat as empty when syncing external HTML in.

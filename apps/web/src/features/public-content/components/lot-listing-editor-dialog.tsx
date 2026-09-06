@@ -299,7 +299,9 @@ export function LotListingEditorDialog({
               <PostRichEditor
                 key={
                   gptPrefill
-                    ? `gpt-${lot.lodatId}-${gptApplyId}-${bodyHtml.length}`
+                    ? // Remount only when GPT apply id / lô đổi — không gắn bodyHtml.length
+                      // (mỗi lần gõ đổi length → remount TipTap → mobile mất bàn phím).
+                      `gpt-${lot.lodatId}-${gptApplyId}`
                     : `lot-${lot.lodatId}`
                 }
                 value={bodyHtml}
