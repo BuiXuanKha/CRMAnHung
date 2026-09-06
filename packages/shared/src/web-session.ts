@@ -23,13 +23,16 @@ export function isCrmAppPath(pathname: string): boolean {
   );
 }
 
-/** ADMIN-only CRM areas (STAFF blocked). `/dashboard/lo-dat` stays STAFF-ok. */
+/** STAFF-only: soạn / đăng lô trên web. Admin không vào (lô thuộc NV). */
+export function isStaffLotWebPath(pathname: string): boolean {
+  return pathname === '/dashboard/lo-dat' || pathname.startsWith('/dashboard/lo-dat/');
+}
+
+/** ADMIN-only CRM areas (STAFF blocked). `/dashboard/lo-dat` is STAFF-only. */
 export function isAdminOnlyCrmPath(pathname: string): boolean {
   if (pathname.startsWith('/quan-tri') || pathname.startsWith('/cai-dat')) return true;
   if (!pathname.startsWith('/dashboard')) return false;
-  if (pathname === '/dashboard/lo-dat' || pathname.startsWith('/dashboard/lo-dat/')) {
-    return false;
-  }
+  if (isStaffLotWebPath(pathname)) return false;
   return true;
 }
 

@@ -80,7 +80,7 @@ export class AdminPublicWebController {
   }
 
   @Patch('lots/:id/draft')
-  @Roles('ADMIN', 'STAFF')
+  @Roles('STAFF')
   updateDraft(
     @CurrentUser() user: RequestUser,
     @Param('id') id: string,
@@ -90,7 +90,7 @@ export class AdminPublicWebController {
   }
 
   @Patch('lots/:id/published')
-  @Roles('ADMIN', 'STAFF')
+  @Roles('STAFF')
   setPublished(
     @CurrentUser() user: RequestUser,
     @Param('id') id: string,
@@ -100,7 +100,7 @@ export class AdminPublicWebController {
   }
 
   @Post('lots/gpt-content')
-  @Roles('ADMIN', 'STAFF')
+  @Roles('STAFF')
   generateLotGptContent(@Body() dto: LotGptRequestDto) {
     return this.lotGpt.generateContent(dto);
   }

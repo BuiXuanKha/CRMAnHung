@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ForbiddenException,
   Injectable,
   Logger,
   NotFoundException,
@@ -380,6 +381,7 @@ export class PublicContentService {
   }
 
   async updateDraft(user: RequestUser, id: string, dto: UpdatePublicListingDraftDto) {
+    this.assertStaffCanWriteListing(user);
     if (dto.priceMode === 'AMOUNT' && !dto.priceLabel?.trim()) {
       throw new BadRequestException('Nhập giá công khai hoặc chọn Liên hệ');
     }
@@ -458,6 +460,7 @@ export class PublicContentService {
   }
 
   async setPublished(user: RequestUser, id: string, isPublished: boolean) {
+    this.assertStaffCanWriteListing(user);
     // Product: no user-facing «Gỡ Đăng web» — listings stay published; guest visibility
     // follows CRM Mở bán / Đã bán. Sibling auto-unpublish on publish still allowed.
     if (!isPublished) {
@@ -470,7 +473,7 @@ export class PublicContentService {
       where: { lodatId: lodat.id },
     });
     if (!existing) {
-      await this.assertStaffCanPublishProjectLot(user, lodat);
+      await this.assertStaffCanPublishProjectLot(lodat);
       const title = this.lodatTitle(lodat);
       const location = this.lodatLocation(lodat);
       await this.unpublishSiblingProjectLotListings(lodat.id, lodat.projectLotId);
@@ -495,7 +498,7 @@ export class PublicContentService {
     }
     const wasPublished = existing.isPublished;
     if (isPublished && !wasPublished) {
-      await this.assertStaffCanPublishProjectLot(user, lodat);
+      await this.assertStaffCanPublishProjectLot(lodat);
       await this.unpublishSiblingProjectLotListings(lodat.id, lodat.projectLotId);
     }
     const saved = await this.prisma.publicLotListing.update({
@@ -541,6 +544,12 @@ export class PublicContentService {
     }
   }
 
+  private assertStaffCanWriteListing(user: RequestUser) {
+    if (user.role !== 'STAFF') {
+      throw new ForbiddenException('Bạn không có quyền thực hiện thao tác này');
+    }
+  }
+
   private async requireOpenLodat(id: string, user: RequestUser): Promise<LodatLoaded> {
     const byListing = await this.prisma.publicLotListing.findFirst({
       where: { OR: [{ id }, { lodatId: id }] },
@@ -560,15 +569,14 @@ export class PublicContentService {
   }
 
   private assertCanAccessLodat(user: RequestUser, createdByEmployeeId: string) {
-    if (user.role === 'ADMIN') return;
-    if (createdByEmployeeId !== user.id) {
+    if (user.role !== 'STAFF' || createdByEmployeeId !== user.id) {
       throw new NotFoundException('Không tìm thấy lô đất.');
     }
   }
 
-  /** STAFF cannot take down another NV's published kho lot. ADMIN still unpublishes siblings. */
-  private async assertStaffCanPublishProjectLot(user: RequestUser, lodat: LodatLoaded) {
-    if (user.role === 'ADMIN' || !lodat.projectLotId) return;
+  /** STAFF cannot take down another NV's published kho lot. */
+  private async assertStaffCanPublishProjectLot(lodat: LodatLoaded) {
+    if (!lodat.projectLotId) return;
     const sibling = await this.prisma.publicLotListing.findFirst({
       where: {
         isPublished: true,

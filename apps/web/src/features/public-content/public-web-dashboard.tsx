@@ -3,21 +3,19 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ExternalLink, FilePlus, Globe } from 'lucide-react';
-import { PublicPostStatus, type PublicWebLotRow, type PublicWebPostRow } from '@crmanhung/shared';
+import { ExternalLink, FilePlus } from 'lucide-react';
+import { PublicPostStatus, type PublicWebPostRow } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import '@/shared/ui/dialog.css';
 import { Icon } from '@/shared/ui/icon';
-import { createPublicPost, getPublicWebDashboard, setPublicLotPublished, setPublicPostStatus } from './api';
+import { createPublicPost, getPublicWebDashboard, setPublicPostStatus } from './api';
 import { ComposePostDialog } from './components/compose-post-dialog';
 import { DashboardLotCards } from './components/dashboard-lot-cards';
 import { DashboardLotTable } from './components/dashboard-lot-table';
 import { DashboardPostCards } from './components/dashboard-post-cards';
 import { DashboardPostTable } from './components/dashboard-post-table';
 import { DashboardStats } from './components/dashboard-stats';
-import { LotWebConfirm } from './components/lot-web-confirm';
 import { PostStatusConfirm } from './components/post-status-confirm';
-import { PublishLotDialog } from './components/publish-lot-dialog';
 import { invalidatePublicWebQueries, publicWebKeys } from './query';
 import { useFlash } from './use-flash';
 import './public-web-dashboard.css';
@@ -28,9 +26,7 @@ export function PublicWebDashboard() {
   const { toast, flash } = useFlash();
   const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
-  const [lotConfirm, setLotConfirm] = useState<PublicWebLotRow | null>(null);
   const [postConfirm, setPostConfirm] = useState<PublicWebPostRow | null>(null);
-  const [publishOpen, setPublishOpen] = useState(false);
   const [composeOpen, setComposeOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
@@ -43,20 +39,6 @@ export function PublicWebDashboard() {
   const data = query.data;
   const lotTotal = data ? data.publishedLotCount + data.pendingLotCount : 0;
   const postTotal = data ? data.publishedPostCount + data.draftPostCount : 0;
-  const pendingLots = (data?.recentLots ?? []).filter((row) => !row.isPublished);
-
-  const lotMut = useMutation({
-    mutationFn: (lot: PublicWebLotRow) =>
-      setPublicLotPublished(lot.id, { isPublished: true }),
-    onSuccess: async (updated) => {
-      await invalidatePublicWebQueries(qc);
-      setLotConfirm(null);
-      flash(`Đã đăng «${updated.title}» lên web khách.`);
-    },
-    onError: (err: Error) => {
-      setAlertBox({ title: 'Không đăng được lô', message: err.message });
-    },
-  });
 
   const postMut = useMutation({
     mutationFn: (post: PublicWebPostRow) =>
@@ -77,20 +59,6 @@ export function PublicWebDashboard() {
     },
     onError: (err: Error) => {
       setAlertBox({ title: 'Không đổi được bài', message: err.message });
-    },
-  });
-
-  const publishMut = useMutation({
-    mutationFn: (id: string) => setPublicLotPublished(id, { isPublished: true }),
-    onSuccess: async (updated) => {
-      await invalidatePublicWebQueries(qc);
-      setPublishOpen(false);
-      setFormError(null);
-      setSelectedLotId(updated.id);
-      flash(`Đã đăng «${updated.title}» lên web khách.`);
-    },
-    onError: (err: Error) => {
-      setFormError(err.message);
     },
   });
 
@@ -128,16 +96,6 @@ export function PublicWebDashboard() {
             className="crm-btn primary"
             onClick={() => {
               setFormError(null);
-              setPublishOpen(true);
-            }}
-          >
-            <Icon icon={Globe} size="sm" /> Đăng lô
-          </button>
-          <button
-            type="button"
-            className="crm-btn"
-            onClick={() => {
-              setFormError(null);
               setComposeOpen(true);
             }}
           >
@@ -162,11 +120,7 @@ export function PublicWebDashboard() {
               items={data.recentLots}
               total={lotTotal}
               selectedId={selectedLotId}
-              onSelect={(id) => {
-                const row = data.recentLots.find((item) => item.id === id);
-                setSelectedLotId(id);
-                if (row && !row.isPublished) setLotConfirm(row);
-              }}
+              onSelect={setSelectedLotId}
             />
             <DashboardPostTable
               items={data.recentPosts}
@@ -184,11 +138,7 @@ export function PublicWebDashboard() {
             <DashboardLotCards
               items={data.recentLots}
               total={lotTotal}
-              onSelect={(id) => {
-                const row = data.recentLots.find((item) => item.id === id);
-                setSelectedLotId(id);
-                if (row && !row.isPublished) setLotConfirm(row);
-              }}
+              onSelect={setSelectedLotId}
             />
             <DashboardPostCards
               items={data.recentPosts}
@@ -203,32 +153,12 @@ export function PublicWebDashboard() {
         </>
       )}
 
-      <LotWebConfirm
-        lot={lotConfirm}
-        busy={lotMut.isPending}
-        onCancel={() => setLotConfirm(null)}
-        onConfirm={() => {
-          if (lotConfirm && !lotMut.isPending) void lotMut.mutateAsync(lotConfirm);
-        }}
-      />
       <PostStatusConfirm
         post={postConfirm}
         busy={postMut.isPending}
         onCancel={() => setPostConfirm(null)}
         onConfirm={() => {
           if (postConfirm && !postMut.isPending) void postMut.mutateAsync(postConfirm);
-        }}
-      />
-      <PublishLotDialog
-        open={publishOpen}
-        pendingLots={pendingLots}
-        busy={publishMut.isPending}
-        error={formError}
-        onClose={() => {
-          if (!publishMut.isPending) setPublishOpen(false);
-        }}
-        onPublish={async (id) => {
-          await publishMut.mutateAsync(id);
         }}
       />
       <ComposePostDialog

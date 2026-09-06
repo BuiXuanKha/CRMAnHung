@@ -4,21 +4,20 @@ import { useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FileText, LayoutDashboard, Map, BarChart3 } from 'lucide-react';
-import { UserRole } from '@crmanhung/shared';
+import { UserRole, isStaffLotWebPath } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from '@/shared/ui/icon';
 import './dashboard-shell.css';
 
-const MENU = [
+const ADMIN_MENU = [
   { href: '/dashboard', label: 'Tổng quan', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/lo-dat', label: 'Lô đất', icon: Map, exact: false },
   { href: '/dashboard/bai-viet', label: 'Bài viết', icon: FileText, exact: false },
   { href: '/dashboard/thong-ke', label: 'Thống kê', icon: BarChart3, exact: false },
 ] as const;
 
-function isDashboardLotPath(pathname: string) {
-  return pathname === '/dashboard/lo-dat' || pathname.startsWith('/dashboard/lo-dat/');
-}
+const STAFF_MENU = [
+  { href: '/dashboard/lo-dat', label: 'Lô đất', icon: Map, exact: false },
+] as const;
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -26,7 +25,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
   const isAdmin = user?.role === UserRole.ADMIN;
   const isStaff = user?.role === UserRole.STAFF;
-  const staffOnLots = Boolean(isStaff && isDashboardLotPath(pathname));
+  const onStaffLots = isStaffLotWebPath(pathname);
+  const staffOnLots = Boolean(isStaff && onStaffLots);
+  const adminOnLots = Boolean(isAdmin && onStaffLots);
 
   useEffect(() => {
     if (loading) return;
@@ -34,9 +35,14 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       router.replace('/login');
       return;
     }
-    if (user.role === UserRole.ADMIN) return;
+    if (user.role === UserRole.ADMIN) {
+      if (isStaffLotWebPath(pathname)) {
+        router.replace('/dashboard');
+      }
+      return;
+    }
     if (user.role === UserRole.STAFF) {
-      if (!isDashboardLotPath(pathname)) {
+      if (!isStaffLotWebPath(pathname)) {
         router.replace('/dashboard/lo-dat');
       }
       return;
@@ -47,11 +53,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   if (loading || !user) {
     return <div className="boot-screen">Đang tải…</div>;
   }
-  if (!isAdmin && !staffOnLots) {
+  if (adminOnLots || (!isAdmin && !staffOnLots)) {
     return <div className="boot-screen">Đang tải…</div>;
   }
 
-  const menu = isAdmin ? MENU : MENU.filter((item) => item.href === '/dashboard/lo-dat');
+  const menu = isAdmin ? ADMIN_MENU : STAFF_MENU;
 
   return (
     <div className="pw-shell">
