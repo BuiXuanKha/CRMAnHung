@@ -132,17 +132,9 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-055 — Lọc tài chính «Dưới 1 tỷ» vẫn ra khách chưa nhập ngân sách
 
-**FIXED (2026-09-06).** Khoảng `lt_1b`/`1b_2b`/`gt_2b` bắt buộc min+max; null không = vô hạn. `none`/`has` giữ nguyên. API coi `null` = không giới hạn → khách «Chưa xác định» dính mọi khoảng. FE list gửi `budgetFilter` (đúng API, cùng sai).
+**FIXED (2026-09-06).** Khoảng `lt_1b`/`1b_2b`/`gt_2b` bắt buộc min+max; null không = vô hạn. `none`/`has` giữ nguyên. API + FE client filter cùng rule.
 
-**Tôi vào vai kha.** `/khach-hang` → lọc Tài chính → **Dưới 1 tỷ**. Vẫn thấy khách chưa khai min/max.
-
-**Ví dụ:** Domain: lọc này **có trên staging**; 237 khách có lịch sử chăm sóc. Không SSH → không đếm được bao nhiêu «Chưa xác định». Hành vi sai **không** phụ thuộc số lượng.
-
-**Vì sao xấu:** Gọi nhầm khách chưa biết ngân sách.
-
-**Đề xuất: SỬA** — khoảng `lt_1b` / `1b_2b` / `gt_2b` chỉ khách **đã có** số; giữ filter riêng «Chưa có» / «Đã có».
-
-**Khi xong:** «Dưới 1 tỷ» không còn dòng Chưa xác định. Check: kha lọc khoảng vs lọc «Chưa có».
+**Check:** kha `/khach-hang` → Tài chính → **Dưới 1 tỷ** — không còn dòng «Chưa xác định»; lọc «Chưa có» vẫn ra khách null.
 
 ---
 
