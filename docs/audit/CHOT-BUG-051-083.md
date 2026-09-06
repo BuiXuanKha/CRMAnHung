@@ -16,7 +16,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **051** | MED | STILL_OPEN | List GD mới **2** hàng; Admin **không lọc NV** (lệch sổ đỏ) | SỬA lọc NV Admin; phân trang có thể làm cùng hoặc sau |  |
 | **052** | MED | STILL_OPEN | Cắt 500 — data sổ đỏ rất ít | HOÃN, hoặc chỉ báo «tối đa 500» |  |
 | **053** | MED | STILL_OPEN | Picker địa chỉ dump 500 | SỬA tìm server-side (không đoán COUNT) |  |
-| **054** | MED | STILL_OPEN | Race 2 tab Lưu — chưa thấy case | SỬA nhỏ: retry khi trùng mã |  |
+| **054** | MED | FIXED | Race 2 tab Lưu — chưa thấy case | SỬA: retry P2002 code + nextCode max số (2026-09-06) |  |
 | **055** | MED | STILL_OPEN | Lọc «Dưới 1 tỷ» ra cả khách chưa nhập ngân sách | **SỬA** |  |
 | **056** | MED | STILL_OPEN | Admin không sửa được bài đã tạo | **SỬA** PATCH nội dung |  |
 | **057** | MED | STILL_OPEN | Bỏ tick dự án khi còn kho | **SỬA** chặn khi còn `ProjectLot` |  |
@@ -122,7 +122,7 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-054 — Mã `GD-` / `SD-` đọc max rồi +1, không khóa
 
-**Còn.** Hai `nextCode` giống nhau. Trùng `code` unique → 500, không retry. (Admin không còn POST tạo GD/sổ — race chủ yếu **hai tab NV** hoặc hai NV cùng giây.)
+**FIXED (2026-09-06).** Retry tới 3 lần khi trùng unique `code`; `nextCode` lấy max số thật. Hai `nextCode` giống nhau. Trùng `code` unique → 500, không retry. (Admin không còn POST tạo GD/sổ — race chủ yếu **hai tab NV** hoặc hai NV cùng giây.)
 
 **Ví dụ giả định (không bịa là đã query):** `kha` mở hai tab Lưu sổ đỏ cùng lúc → một bản 500. DB hiện rất ít mã; **chưa** có >9999/năm.
 

@@ -96,30 +96,42 @@ export class TransactionsService {
       dto.type === TX_TYPE.RECORD ? 0n : (this.parsePrice(dto.commissionVnd) ?? 0n);
     const snapshot = buildSnapshotCreate(lodat, map);
 
-    try {
-      const created = await this.prisma.transaction.create({
-        data: {
-          code: await this.nextCode(),
-          lodatId: lodat.id,
-          lodatCustomerMapId: map.id,
-          type: dto.type,
-          status: TX_STATUS.DA_COC,
-          notaryAppointmentAt: this.parseDate(dto.notaryAppointmentAt) ?? null,
-          salePriceVnd: sale,
-          taxPriceVnd: tax ?? null,
-          commissionVnd: commission,
-          note: dto.note?.trim() || null,
-          createdByEmployeeId: user.id,
-          parties: { create: this.partyRows(dto.sellers, dto.buyers) },
-          snapshot: { create: snapshot },
-        },
-        include: DETAIL_INCLUDE,
-      });
-      return toDetail(created, this.storage);
-    } catch (err) {
-      await this.rethrowOpenConflict(err, lodat.id);
-      throw err;
+    // BUG-054: race 2 tab cùng nextCode → P2002 code; thử lại mã mới vài lần.
+    const maxAttempts = 3;
+    let lastErr: unknown;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      try {
+        const created = await this.prisma.transaction.create({
+          data: {
+            code: await this.nextCode(),
+            lodatId: lodat.id,
+            lodatCustomerMapId: map.id,
+            type: dto.type,
+            status: TX_STATUS.DA_COC,
+            notaryAppointmentAt: this.parseDate(dto.notaryAppointmentAt) ?? null,
+            salePriceVnd: sale,
+            taxPriceVnd: tax ?? null,
+            commissionVnd: commission,
+            note: dto.note?.trim() || null,
+            createdByEmployeeId: user.id,
+            parties: { create: this.partyRows(dto.sellers, dto.buyers) },
+            snapshot: { create: snapshot },
+          },
+          include: DETAIL_INCLUDE,
+        });
+        return toDetail(created, this.storage);
+      } catch (err) {
+        if (this.isCodeUniqueConflict(err) && attempt < maxAttempts - 1) {
+          lastErr = err;
+          continue;
+        }
+        await this.rethrowOpenConflict(err, lodat.id);
+        throw err;
+      }
     }
+    throw lastErr instanceof Error
+      ? lastErr
+      : new ConflictException('Không cấp được mã giao dịch. Thử lại.');
   }
 
   async update(user: RequestUser, id: string, dto: UpdateTransactionDto) {
@@ -377,14 +389,27 @@ export class TransactionsService {
       year: 'numeric',
     }).format(new Date());
     const prefix = `GD-${year}-`;
-    const last = await this.prisma.transaction.findFirst({
+    // Max số thật — không orderBy code (chuỗi sai sau 9999).
+    const rows = await this.prisma.transaction.findMany({
       where: { code: { startsWith: prefix } },
-      orderBy: { code: 'desc' },
       select: { code: true },
     });
     let max = 0;
-    const m = last?.code.match(/^GD-\d{4}-(\d+)$/);
-    if (m) max = Number(m[1]);
+    for (const row of rows) {
+      const m = row.code.match(/^GD-\d{4}-(\d+)$/);
+      if (m) max = Math.max(max, Number(m[1]));
+    }
     return `${prefix}${String(max + 1).padStart(4, '0')}`;
+  }
+
+  private isCodeUniqueConflict(err: unknown): boolean {
+    if (!(err instanceof Prisma.PrismaClientKnownRequestError) || err.code !== 'P2002') {
+      return false;
+    }
+    const target = err.meta?.target;
+    if (Array.isArray(target)) {
+      return target.some((x) => String(x).toLowerCase().includes('code'));
+    }
+    return String(target ?? '').toLowerCase().includes('code');
   }
 }
