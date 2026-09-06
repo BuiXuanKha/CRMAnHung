@@ -986,7 +986,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Đọc-sửa không transaction/`SERIAL`.
 - **Impact:** NV/Admin bấm Lưu hai lần / hai tab: một bản 500, không rõ đã tạo chưa; retry có thể tạo GD/hồ sơ thứ hai (lô: unique mở chặn GD; sổ đỏ: hai hồ sơ cùng khách).
 - **Evidence:** Hai `nextCode` giống nhau. Prisma `code String @unique`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: tạo GD/SD retry tới 3 lần khi P2002 `code`; `nextCode` lấy max số (không sort chuỗi).
 
 ### BUG-055 — Lọc tài chính theo khoảng vẫn ra khách chưa nhập ngân sách
 
