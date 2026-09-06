@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -18,7 +18,7 @@ import {
 import { ApiError } from '@/shared/api/client';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
-import { getLodat, listLodats } from '@/features/lodats/api';
+import { getLodat } from '@/features/lodats/api';
 import {
   createTransaction,
   formatPriceInput,
@@ -132,11 +132,6 @@ export function TransactionFormPage({ mode }: Props) {
     enabled: mode === 'create' && !adminBlockedCreate && Boolean(pickedLodatId),
   });
 
-  const lodatsQ = useQuery({
-    queryKey: ['lodats', 'tx-picker'],
-    queryFn: () => listLodats({ limit: 200, includePaused: true }),
-    enabled: mode === 'create' && !adminBlockedCreate && !queryLodatId,
-  });
 
   const openQ = useQuery({
     queryKey: ['transaction-open', queryLodatId],
@@ -181,10 +176,6 @@ export function TransactionFormPage({ mode }: Props) {
     }));
   }, [mode, pickedLodatId, lodatQ.data]);
 
-  const lodatOptions = useMemo(
-    () => (lodatsQ.data?.items ?? []).map((l) => ({ id: l.id, title: l.title })),
-    [lodatsQ.data],
-  );
 
   const lockedTitle = queryLodatId
     ? lodatQ.data?.title || queryLodatId
@@ -306,7 +297,6 @@ export function TransactionFormPage({ mode }: Props) {
           <TransactionFormFields
             mode={mode}
             values={values}
-            lodatOptions={lodatOptions}
             lodatLocked={Boolean(queryLodatId)}
             lodatTitle={lockedTitle}
             busy={saveMut.isPending}

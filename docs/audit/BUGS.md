@@ -249,7 +249,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-055 | MEDIUM | customers | Lọc tài chính theo khoảng vẫn khớp khách «Chưa xác định» (min/max null). | FIXED |
 | BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN |
 | BUG-057 | MEDIUM | addresses | Đổi `PROJECT` → `REGULAR` không kiểm kho `ProjectLot` — picker kho chết, lô cũ còn. | OPEN |
-| BUG-058 | MEDIUM | transactions / lodats | Form tạo GD (không `?lodatId`) picker tối đa 200 lô — lô cũ không chọn được. | OPEN |
+| BUG-058 | MEDIUM | transactions / lodats | Form tạo GD (không `?lodatId`) picker tối đa 200 lô — lô cũ không chọn được. | FIXED |
 | BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | OPEN |
 | BUG-060 | HIGH | lodats / transactions | Xóa ảnh lô không đếm `TransactionSnapshotImage` — xóa R2, ảnh GD gãy. | OPEN |
 | BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | OPEN |
@@ -1038,7 +1038,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Picker một trang max list lô.
 - **Impact:** GD gắn sai lô / không tạo được; snapshot đóng băng lô nhầm.
 - **Evidence:** `lodatsQ` `limit: 200`. `listLodats` API max 200/trang có `offset` nhưng form không trang.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: picker tìm keyword (debounce), không dump 200. `LodatSearchPicker` trên form tạo GD tay.
 
 ### BUG-059 — Đổi chủ khi giao dịch đang mở: TX trỏ map cũ, xóa GD sửa map inactive
 
