@@ -114,12 +114,12 @@ export function matchesBudgetFilter(
   const max = c.budgetMaxVnd ?? null;
   if (key === 'none') return min == null && max == null;
   if (key === 'has') return min != null || max != null;
+  // Khoảng: chỉ khách đã có min+max (BUG-055) — không coi null = vô hạn.
+  if (min == null || max == null) return false;
   const rangeMin = key === 'lt_1b' ? 0 : key === '1b_2b' ? 1_000_000_000 : 2_000_000_000;
   const rangeMax =
     key === 'lt_1b' ? 1_000_000_000 : key === '1b_2b' ? 2_000_000_000 : 9_000_000_000_000_000;
-  const lo = min ?? 0;
-  const hi = max ?? 9_000_000_000_000_000;
-  return lo <= rangeMax && hi >= rangeMin;
+  return min <= rangeMax && max >= rangeMin;
 }
 
 export function matchesChannel(c: CustomerListItem, channel: string): boolean {

@@ -589,7 +589,7 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 - **SĐT chuẩn (BUG-018):** mọi ghi qua `digitsFromPhoneRaw` → `0` + 9 số. DB: `CustomerPhone.employeeId` + unique `(employeeId, phone)` và `(customerId, phone)` — cùng số hai NV vẫn được; race → `409`. Không unique SĐT toàn hệ.
 - Thêm SĐT cam trùng: `409` kèm `mergeAllowed` (chỉ **STAFF** phụ trách khách; Admin không gộp). Gộp Facebook → khách chỉ có SĐT: **POST `/customers/merge-facebook-into-phone-holder`** — chỉ NV, hai hồ sơ cùng `employeeId` = user; Admin → 403.
 - Sửa tên: bút Lucide trên máy tính → `PATCH /customers/:id` `{ fullName }`. Không bút trên thẻ mobile.
-- Lọc tài chính: `budgetFilter=none|has|lt_1b|1b_2b|gt_2b` (khoảng chồng). Lọc kênh: `contactChannel=fb:<uid>|hotline:<id>` từ **GET `/customers/contact-channels`**. Lọc lô: `lodatFilter=has|empty`. Lọc nhu cầu: `needFilter=has|empty`.
+- Lọc tài chính: `budgetFilter=none|has|lt_1b|1b_2b|gt_2b`. `lt_1b`/`1b_2b`/`gt_2b` = khoảng chồng **chỉ** khách đã có min+max (không gồm «Chưa xác định»). `none` / `has` riêng. Lọc kênh: `contactChannel=fb:<uid>|hotline:<id>` từ **GET `/customers/contact-channels`**. Lọc lô: `lodatFilter=has|empty`. Lọc nhu cầu: `needFilter=has|empty`.
 
 **Xong staging (2026-08-20)** — `/khach-hang` trên `anhungland.com`.
 

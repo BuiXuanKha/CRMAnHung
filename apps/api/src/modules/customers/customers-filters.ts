@@ -2,15 +2,17 @@ import { Prisma } from '@prisma/client';
 
 const RANGE_MAX = 9_000_000_000_000_000;
 
+/**
+ * Khoảng chồng — chỉ khách đã có min+max (BUG-055).
+ * Null không còn = «không giới hạn» (tránh «Chưa xác định» dính mọi khoảng).
+ */
 function overlap(rangeMin: number, rangeMax: number): Prisma.CustomerWhereInput {
   return {
     AND: [
-      {
-        OR: [{ budgetMinVnd: null }, { budgetMinVnd: { lte: BigInt(rangeMax) } }],
-      },
-      {
-        OR: [{ budgetMaxVnd: null }, { budgetMaxVnd: { gte: BigInt(rangeMin) } }],
-      },
+      { budgetMinVnd: { not: null } },
+      { budgetMaxVnd: { not: null } },
+      { budgetMinVnd: { lte: BigInt(rangeMax) } },
+      { budgetMaxVnd: { gte: BigInt(rangeMin) } },
     ],
   };
 }

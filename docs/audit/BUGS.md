@@ -999,7 +999,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Null = không giới hạn thay vì loại khỏi khoảng.
 - **Impact:** Sai list chăm sóc / gọi nhầm khách chưa khai ngân sách.
 - **Evidence:** `budgetFilterWhere` `lt_1b`/`1b_2b`/`gt_2b`. `customer-list-page.tsx` gửi `budgetFilter`. `normalizeCareBudget` chỉ cho cả hai null hoặc cả hai số — không half-null.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-06) — Owner: `lt_1b`/`1b_2b`/`gt_2b` chỉ khách có min+max; null không còn = vô hạn. Giữ `none`/`has`.
 
 ### BUG-056 — Không sửa được nội dung bài CMS sau khi tạo; tạo lại dễ hai bài published
 
