@@ -135,58 +135,44 @@ describe('nextPublicShareCookie', () => {
     const next = nextPublicShareCookie({
       nowMs: now,
       shareCode: 'ab2k9',
-      employeeId: 'emp-a',
       existing: null,
     });
     assert.equal(next.shareCode, 'AB2K9');
-    assert.equal(next.employeeId, 'emp-a');
+    assert.equal(next.employeeId, '');
     assert.equal(next.expiresAtMs, now + PUBLIC_SHARE_COOKIE_TTL_MS);
   });
 
-  it('keeps expiry when the same employee shares another listing', () => {
+  it('keeps expiry when the same share code is clicked again', () => {
     const existing = {
       shareCode: 'AB2K9',
-      employeeId: 'emp-a',
+      employeeId: '',
       expiresAtMs: now + 10 * 24 * 60 * 60 * 1000,
     };
     const next = nextPublicShareCookie({
       nowMs: now,
-      shareCode: 'xy34z',
-      employeeId: 'emp-a',
+      shareCode: 'ab2k9',
       existing,
     });
-    assert.equal(next.shareCode, 'XY34Z');
+    assert.equal(next.shareCode, 'AB2K9');
     assert.equal(next.expiresAtMs, existing.expiresAtMs);
   });
 
-  it('restarts 30 days when the employee changes', () => {
+  it('restarts 30 days when the share code changes', () => {
     const existing = {
       shareCode: 'AB2K9',
-      employeeId: 'emp-a',
+      employeeId: 'legacy-emp',
       expiresAtMs: now + 10 * 24 * 60 * 60 * 1000,
     };
     const next = nextPublicShareCookie({
       nowMs: now,
       shareCode: 'xy34z',
-      employeeId: 'emp-b',
       existing,
     });
-    assert.equal(next.employeeId, 'emp-b');
+    assert.equal(next.shareCode, 'XY34Z');
+    assert.equal(next.employeeId, '');
     assert.equal(next.expiresAtMs, now + PUBLIC_SHARE_COOKIE_TTL_MS);
   });
 });
-
-function stat(partial: Pick<ShareEmployeeStat, 'employeeId' | 'fullName'> & Partial<ShareEmployeeStat>): ShareEmployeeStat {
-  return {
-    username: partial.username ?? partial.employeeId,
-    phone: null,
-    role: 'STAFF',
-    isActive: true,
-    sharedListingCount: 0,
-    attributedViewCount: 0,
-    ...partial,
-  };
-}
 
 describe('mergeShareStatsDisplayRows', () => {
   it('always appends one direct row and sorts by views then shares', () => {

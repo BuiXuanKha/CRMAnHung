@@ -31,7 +31,7 @@ export type PublicShareCookiePayload = {
 /** Forwarded by middleware on the same `?share=` request so layout can read it before Set-Cookie. */
 export const PUBLIC_SHARE_REQUEST_HEADER = 'x-crmanhung-share-code';
 
-/** Cookie-safe (`CODE~employeeId~expiresAtMs`) — `~` is not percent-encoded. JSON quotes break Set-Cookie. */
+/** Cookie-safe (`CODE~employeeId~expiresAtMs`); employeeId left empty — server resolves code → staff. */
 const SHARE_COOKIE_DELIM = '~';
 
 const shareCookieWireSchema = z.object({
@@ -96,24 +96,26 @@ export function remainingShareCookieMaxAgeSec(
   return Math.max(0, Math.floor((expiresAtMs - nowMs) / 1000));
 }
 
-/** Last-click: new employee → 30 days; same employee with valid window → keep expiry. */
+/**
+ * Last-click by share code only (browser never needs employeeId).
+ * Same live code with valid window → keep expiry; different code → new 30 days.
+ * `employeeId` in the cookie payload stays empty for wire compatibility.
+ */
 export function nextPublicShareCookie(input: {
   nowMs: number;
   shareCode: string;
-  employeeId: string;
   existing: PublicShareCookiePayload | null;
 }): PublicShareCookiePayload {
   const shareCode = normalizeShareCode(input.shareCode);
-  const employeeId = input.employeeId.trim();
   const existing = input.existing;
-  const sameStaff =
-    Boolean(existing?.employeeId) &&
-    existing!.employeeId === employeeId &&
+  const sameCode =
+    Boolean(existing?.shareCode) &&
+    existing!.shareCode === shareCode &&
     existing!.expiresAtMs > input.nowMs;
   return {
     shareCode,
-    employeeId,
-    expiresAtMs: sameStaff
+    employeeId: '',
+    expiresAtMs: sameCode
       ? existing!.expiresAtMs
       : input.nowMs + PUBLIC_SHARE_COOKIE_TTL_MS,
   };
@@ -145,19 +147,17 @@ export const lotShareLinkResponseSchema = z.object({
 
 export type LotShareLinkResponse = z.infer<typeof lotShareLinkResponseSchema>;
 
+/** Public resolve: hotline for UI only — no internal employeeId / visitCount. */
 export const publicLotShareResolveSchema = z.object({
   shareCode: z.string().min(4).max(12),
   listingSlug: z.string().min(1),
-  employeeId: z.string().min(1),
   employee: lotShareContactSchema,
-  visitCount: z.number().int().nonnegative(),
 });
 
 export type PublicLotShareResolve = z.infer<typeof publicLotShareResolveSchema>;
 
 export const publicLotShareVisitResponseSchema = z.object({
   ok: z.literal(true),
-  visitCount: z.number().int().nonnegative(),
 });
 
 export type PublicLotShareVisitResponse = z.infer<typeof publicLotShareVisitResponseSchema>;
