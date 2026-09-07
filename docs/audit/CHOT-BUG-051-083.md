@@ -44,7 +44,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **079** | LOW | STILL_OPEN | Mock Unsplash đè gallery nếu trùng slug demo | **SỬA** gỡ mock (rẻ) |  |
 | **080** | LOW | STILL_OPEN | Slug không cắt độ dài | HOÃN — live dài nhất **88** ký tự |  |
 | **081** | MED | STILL_OPEN | Title trang chủ lặp «An Hưng Land» **hai lần** (live) | **SỬA** |  |
-| **082** | MED | STILL_OPEN (một phần) | Guest `/dashbroad` → 307 login, `next` vẫn gõ sai | SỬA nốt: 308 về `/dashboard` trước login |  |
+| **082** | MED | FIXED | Guest `/dashbroad` → 307 login, `next` vẫn gõ sai | SỬA nốt: 308 về `/dashboard` trước login | FIXED (2026-09-07) |
 | **083** | MED | **ALREADY_FIXED** | `kha` + `/quan-tri/*` đã redirect | Không sửa lại |  |
 
 **Gợi ý thứ tự nếu bảo «sửa các ô SỬA»:**  
@@ -341,11 +341,7 @@ Vẫn OPEN trên code: revalidate khi Đăng web = chi tiết + catalog + sitema
 
 ### BUG-082 — `/dashbroad` không về `/dashboard` trên response đầu
 
-**Còn một phần.** Code trang `redirect('/dashboard')`. Middleware: **đã login** thì Admin → `/dashboard`, kha → `/dashboard/lo-dat`. **Guest live:** `GET /dashbroad` → **307** `Location: /login?next=%2Fdashbroad` (không còn 200 prerender như audit 2026-09-03). `next` vẫn **gõ sai** → sau login có thể vòng alias.
-
-**Đề xuất: SỬA nốt** — 308 `/dashbroad` → `/dashboard` **trước** khi gắn `next=` login.
-
-**Khi xong:** guest `/dashbroad` → login `next=/dashboard` (hoặc 308 thẳng `/dashboard` rồi mới login).
+**FIXED (2026-09-07).** Middleware 308 `/dashbroad` → `/dashboard` trước login; guest theo chuỗi `/dashboard` → login `next=/dashboard`.
 
 ---
 

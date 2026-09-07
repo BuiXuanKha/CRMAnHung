@@ -19,7 +19,9 @@ import './login.css';
 
 function safeCrmNext(next: string | null, role: string): string | null {
   if (!next || !next.startsWith('/') || next.startsWith('//')) return null;
-  const path = next.split('?')[0] ?? next;
+  let path = next.split('?')[0] ?? next;
+  // BUG-082: typo alias must not survive as post-login destination.
+  if (path === '/dashbroad') path = '/dashboard';
   if (!isCrmAppPath(path)) return null;
   const webRole = normalizeWebCrmRole(role);
   if (!webRole) return null;
