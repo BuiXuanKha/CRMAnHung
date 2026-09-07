@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 41 |
+| OPEN | 40 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 42 |
+| FIXED / CLOSED | 43 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -258,7 +258,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | CLOSED (by design) |
 | BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | FIXED |
 | BUG-065 | MEDIUM | customers / messenger / users | Ingest tin `employeeFacebookUid` không khớp profile NV; không API gắn UID NV. | CLOSED (by design) |
-| BUG-066 | HIGH | public-content / slug | Slug lô từ editor/GPT lưu raw — không `toPublicSlug` (dấu, hoa, khoảng, `/`). | OPEN |
+| BUG-066 | HIGH | public-content / slug | Slug lô từ editor/GPT lưu raw — không `toPublicSlug` (dấu, hoa, khoảng, `/`). | FIXED |
 | BUG-067 | HIGH | public-content / slug | `uniqueSlug` không chừa `PublicLotSlugRedirect.fromSlug` — listing mới chiếm URL đang 301. | OPEN |
 | BUG-068 | HIGH | public-content / hub | Hub `/xa/…` tính lúc đọc, đổi khi tập lô đổi; không bảng 301. | OPEN |
 | BUG-069 | HIGH | public-content / hub | Hub slug chi tiết (mọi `isPublished`) ≠ catalog/sitemap (chỉ Mở bán) → link nội bộ 404. | OPEN |
@@ -1143,7 +1143,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Hai đường: generate từ title thì slugify; đường overlay/GPT tin client.
 - **Impact:** URL gãy / trùng gần giống; crawler/index lệch; không ổn định so với bài CMS.
 - **Evidence:** `uniqueSlug` vs `toPublicPostSlug` trong `createPost`. Schema slug lô vs `toPublicSlug` NFD + `[^a-z0-9]`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Owner: tin GPT, **không** cho NV sửa slug. Modal Soạn bài đăng chỉ xem URL. Tạo listing = `toListingPublicSlug(title, location)`; `PATCH` không đổi slug (bỏ `dto.slug`). `uniqueSlug` luôn `toPublicSlug` trước unique. GPT `slug` không áp vào editor.
 
 ### BUG-067 — `uniqueSlug` không chừa bảng 301 — listing mới chiếm URL cũ
 

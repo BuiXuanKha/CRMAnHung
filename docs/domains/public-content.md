@@ -403,7 +403,7 @@ Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (
 }
 ```
 
-Map sang editor: nút **Dùng cho bài đăng** (sau khi có phản hồi) → mở modal §13.3 với `h1` → tiêu đề, **`bodyHtml` → Mô tả công khai** (luôn ghi đè overlay cũ), `slug`, `metaDescription`. `facebookPost` giữ trong JSON — UI chia sẻ Facebook để sau.
+Map sang editor: nút **Dùng cho bài đăng** (sau khi có phản hồi) → mở modal §13.3 với `h1` → tiêu đề, **`bodyHtml` → Mô tả công khai** (luôn ghi đè overlay cũ), `metaDescription`. **Không** áp `slug` GPT vào ô URL (BUG-066: NV không sửa slug; lúc tạo listing API lấy từ tiêu đề). `facebookPost` giữ trong JSON — UI chia sẻ Facebook để sau.
 
 Trống: `Không có lô đang mở bán.`
 
@@ -431,7 +431,7 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 1. Prefill copy **công khai** từ lô đang Mở bán: tiêu đề, địa chỉ, giá đã làm mờ, mô tả (DT · MT · hướng · loại + CTA hotline công ty).
 2. **Không** copy: hoa hồng, ghi chú giá / broker, ghi chú thương lượng chủ nhà, tên/SĐT khách, tên NV.
 3. Ô chỉ đọc: giá gốc CRM không hiện đúng cho khách; người soạn duyệt giá công khai.
-4. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, **mô tả rich text (TipTap)**. Ảnh bìa = ảnh lô (không upload slice này).
+4. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, **mô tả rich text (TipTap)**. **Không** ô sửa slug — URL chỉ đọc (tạo = `toListingPublicSlug` từ tiêu đề+địa chỉ; đã có listing = slug đã lưu). Ảnh bìa = ảnh lô (không upload slice này).
 5. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload mock/R2 public CDN).
 6. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`; được thiếu mô tả) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng — **bắt buộc** có nội dung mô tả).
 7. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web. Preview render HTML mô tả.
@@ -643,7 +643,7 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 | Gỡ web | **Đã bỏ (2026-09-05).** Không tắt `isPublished` từ UI/API user. Ẩn khách = hết Mở bán. (Sibling auto-unpublish khi Đăng lô kho khác vẫn giữ.) |
 | Khách thấy lô | `isPublished` ∩ map `DANG_BAN` (rule guest API sẵn có — không đụng công tắc Đăng web) |
 | Một listing / ProjectLot | STAFF không gỡ luồng NV khác đang hiện. Admin không đăng lô. |
-| Slug ổn định | Slug = `toListingPublicSlug(title, leftover location)` lúc **tạo** listing (không trần 80; cấm `xa`). `PATCH draft` / Đăng lại **không** đổi slug trừ khi NV sửa ô slug |
+| Slug ổn định | Slug = `toListingPublicSlug(title, leftover location)` lúc **tạo** listing (không trần 80; cấm `xa`; `uniqueSlug` luôn `toPublicSlug`). `PATCH draft` / Đăng lại **không** đổi slug. NV **không** sửa URL tay (BUG-066). |
 | Đổi URL lô cũ | `pnpm lots:regenerate-public-slugs` dry-run; `APPLY=1` mới ghi `PublicLotSlugRedirect` + revalidate. Deploy **không** tự APPLY. VPS: commit `[apply-lot-slugs]` (hoặc `APPLY_LOT_SLUGS=1` trong `remote_deploy.sh`). Guest slug cũ → **301**. **Không** đổi tên file ảnh CDN |
 | Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** |
 

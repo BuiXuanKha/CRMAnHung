@@ -28,7 +28,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **063** | MED | CLOSED (by design) | Ẩn khách, lô/GD/sổ/chat vẫn dùng Person | Owner hướng B: chỉ khỏi list; không cascade (2026-09-07) |  |
 | **064** | MED | FIXED | Xóa User → 500 vì care/tiến độ/xem file | Owner: **không xóa cứng**; chỉ vô hiệu hóa | Không xóa cứng (2026-09-07) |
 | **065** | MED | CLOSED (by design) | Extension gửi UID nick; không khớp hồ sơ NV | Owner: **không** đăng ký kênh trước; kênh mới từ extension cứ vào | Không chặn ingest (2026-09-07) |
-| **066** | HIGH | STILL_OPEN | GPT/sửa slug lô không bỏ dấu | **SỬA** luôn `toPublicSlug` |  |
+| **066** | HIGH | FIXED | GPT/sửa slug lô không bỏ dấu | Owner: **không** sửa slug tay; URL từ tiêu đề lúc tạo | Không ô slug (2026-09-07) |
 | **067** | HIGH | STILL_OPEN | Lô mới chiếm URL 301 của lô cũ | **SỬA** `uniqueSlug` chừa bảng 301 |  |
 | **068** | HIGH | STILL_OPEN | Hub `/xa/…` đổi theo tập lô, không 301 | Lớn — làm sau 069/070; hoặc persist hub |  |
 | **069** | HIGH | STILL_OPEN | Breadcrumb lô trỏ `/xa/…` 404 | **SỬA** cùng tập lô Mở bán |  |
@@ -223,11 +223,9 @@ Admin không tạo chăm sóc — kịch bản «Admin ghi care rồi xóa NV» 
 
 ### BUG-066 — Slug lô GPT/editor không `toPublicSlug`
 
-**Còn.** Tạo bài CMS thì slugify. Overlay/GPT: tin chuỗi client (dấu, hoa, khoảng, `/`).
+**FIXED (2026-09-07).** Owner: tin GPT; **không** cho tự sửa slug.
 
-**Tôi vào vai kha.** `/dashboard/lo-dat` → GPT/sửa slug «Lô Đất Nam Sách!» → lưu raw. Guest URL encode lệch.
-
-**Đề xuất: SỬA** — mọi đường ghi slug lô chạy `toPublicSlug` trước unique.
+**Tôi vào vai kha.** `/dashboard/lo-dat` → Soạn bài đăng: hết ô slug, chỉ xem URL. Lô mới: đường dẫn từ tiêu đề (bỏ dấu). Lô đã có: URL giữ nguyên khi sửa tiêu đề. GPT điền title/mô tả, không ghi slug thô.
 
 ---
 

@@ -32,6 +32,7 @@ import {
   reservePublicLotSlug,
   toListingPublicSlug,
   toPublicPostSlug,
+  toPublicSlug,
 } from './public-slug';
 import {
   applySeoImageMove,
@@ -422,15 +423,8 @@ export class PublicContentService {
     if (seoTitle !== undefined) {
       data.seoTitle = seoTitle;
     }
-    const slugHint = dto.slug?.trim();
     if (existing) {
-      const previousSlug = existing.slug;
-      if (slugHint && slugHint !== existing.slug) {
-        data.slug = await this.uniqueSlug(slugHint);
-      }
-      if (data.slug && data.slug !== previousSlug) {
-        await this.recordLotSlugChange(previousSlug, data.slug);
-      }
+      // BUG-066: NV cannot edit URL. Ignore client `slug` — keep the stored path.
       const saved = await this.prisma.publicLotListing.update({
         where: { id: existing.id },
         data,
@@ -438,15 +432,12 @@ export class PublicContentService {
       });
       if (saved.isPublished) {
         await this.revalidate.revalidateListing(saved.slug);
-        if (data.slug && data.slug !== previousSlug) {
-          await this.revalidate.revalidateListing(previousSlug);
-        }
       }
       return this.toAdminRow(saved);
     }
-    const createSlug = slugHint
-      ? await this.uniqueSlug(slugHint)
-      : await this.uniqueSlug(toListingPublicSlug(dto.title, dto.location));
+    const createSlug = await this.uniqueSlug(
+      toListingPublicSlug(dto.title, dto.location),
+    );
     const saved = await this.prisma.publicLotListing.create({
       data: {
         lodatId: lodat.id,
@@ -592,7 +583,7 @@ export class PublicContentService {
   }
 
   private async uniqueSlug(base: string): Promise<string> {
-    const root = reservePublicLotSlug(base);
+    const root = reservePublicLotSlug(toPublicSlug(base, 0, 'lo-dat'));
     let slug = root;
     let n = 2;
     while (await this.prisma.publicLotListing.findUnique({ where: { slug } })) {
