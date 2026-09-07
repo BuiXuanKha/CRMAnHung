@@ -1,5 +1,5 @@
 import { useRef } from 'react';
-import { ImageOff, Sparkles } from 'lucide-react';
+import { CircleAlert, ImageOff, Sparkles } from 'lucide-react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import { formatArea, formatFrontageDir, kindLabel, kindTone } from '@/features/lodats/display';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -15,6 +15,7 @@ type Props = {
   onSelect: (lodatId: string) => void;
   onEdit: (lodatId: string) => void;
   onGptContent: (lodatId: string) => void;
+  onCrmDrift: (row: PublicWebStaffLotRow) => void;
 };
 
 export function StaffOpenLotCards({
@@ -24,6 +25,7 @@ export function StaffOpenLotCards({
   onSelect,
   onEdit,
   onGptContent,
+  onCrmDrift,
 }: Props) {
   const lastTap = useRef<{ id: string; at: number } | null>(null);
 
@@ -47,6 +49,7 @@ export function StaffOpenLotCards({
         <ul className="pw-card-list">
           {items.map((row) => {
             const price = lotPriceDisplay(row);
+            const hasDrift = Boolean(row.crmDrift?.length);
             return (
               <li key={row.lodatId} data-list-row-id={row.lodatId} className="pw-card-item">
                 <button
@@ -67,7 +70,31 @@ export function StaffOpenLotCards({
                   </span>
                   <span className="pw-card-body">
                     <span className="pw-card-top">
-                      <strong className="pw-title">{row.title}</strong>
+                      <span className="pw-title-row">
+                        <strong className="pw-title">{row.title}</strong>
+                        {hasDrift ? (
+                          <span
+                            role="button"
+                            tabIndex={0}
+                            className="pw-crm-drift-btn"
+                            title="CRM đã đổi — xem chi tiết"
+                            aria-label="CRM đã đổi so với bản Đăng web"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              event.stopPropagation();
+                              onCrmDrift(row);
+                            }}
+                            onKeyDown={(event) => {
+                              if (event.key !== 'Enter' && event.key !== ' ') return;
+                              event.preventDefault();
+                              event.stopPropagation();
+                              onCrmDrift(row);
+                            }}
+                          >
+                            <Icon icon={CircleAlert} size="sm" />
+                          </span>
+                        ) : null}
+                      </span>
                       <CrmBadge tone={lotWebTone(row.isPublished)}>
                         {lotWebLabel(row.isPublished)}
                       </CrmBadge>

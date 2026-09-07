@@ -201,6 +201,19 @@ export const publicWebLotRowSchema = z.object({
 
 export type PublicWebLotRow = z.infer<typeof publicWebLotRowSchema>;
 
+/**
+ * BUG-062: lệch giữa overlay Đăng web và lô CRM (title/location).
+ * Staff cân nhắc cập nhật bài trên editor — không tự đẩy.
+ */
+export const publicWebListingCrmDriftItemSchema = z.object({
+  field: z.enum(['title', 'location']),
+  label: z.string(),
+  listingValue: z.string(),
+  crmValue: z.string(),
+});
+
+export type PublicWebListingCrmDriftItem = z.infer<typeof publicWebListingCrmDriftItemSchema>;
+
 /** Lô CRM đang Mở bán — list giữa `/dashboard/lo-dat` + preview phải. */
 export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   staffName: z.string(),
@@ -213,6 +226,8 @@ export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   priceVnd: z.union([z.number(), z.string()]).nullable(),
   /** Optional SERP/OG snippet. Empty → use excerpt. Overlay editor can set later. */
   metaDescription: z.string().trim().max(320).nullable().optional(),
+  /** Lệch overlay vs CRM — có phần tử thì hiện chấm than đỏ trên Đăng web. */
+  crmDrift: z.array(publicWebListingCrmDriftItemSchema).default([]),
 });
 
 export type PublicWebStaffLotRow = z.infer<typeof publicWebStaffLotRowSchema>;

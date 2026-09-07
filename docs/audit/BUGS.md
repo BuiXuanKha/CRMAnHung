@@ -253,7 +253,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | FIXED |
 | BUG-060 | HIGH | lodats / transactions | Xóa ảnh lô không đếm `TransactionSnapshotImage` — xóa R2, ảnh GD gãy. | FIXED |
 | BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | CLOSED (by design) |
-| BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | OPEN |
+| BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | FIXED |
 | BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | OPEN |
 | BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | OPEN |
 | BUG-065 | MEDIUM | customers / messenger / users | Ingest tin `employeeFacebookUid` không khớp profile NV; không API gắn UID NV. | OPEN |
@@ -1090,7 +1090,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Overlay copy độc lập; `update` lô không sync; catalog đọc mixed sources.
 - **Impact:** SEO/nội dung khách sai; lệch dashboard preview (`cover` live, `title` overlay).
 - **Evidence:** `lodats.update` không prisma `publicLotListing`. `toCatalog` `row.title` vs `lodat.areaM2`. Domain: Đăng web ≠ mọi lô Mở bán — không nói sửa lô tự đẩy title.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Owner chốt hướng B: giữ overlay độc lập. `/dashboard/lo-dat` so title/location CRM vs listing; lô lệch xếp đầu + icon đỏ; bấm xem Đăng web vs CRM; NV cập nhật web tay trên editor. Không auto-sync.
 
 ### BUG-063 — Ẩn Person không cắt GD, sổ đỏ, chat API, chủ trên lô
 

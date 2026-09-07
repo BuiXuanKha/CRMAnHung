@@ -1,6 +1,6 @@
 'use client';
 
-import { ImageOff, Sparkles } from 'lucide-react';
+import { CircleAlert, ImageOff, Sparkles } from 'lucide-react';
 import { useState, type Ref } from 'react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import {
@@ -31,6 +31,7 @@ type Props = {
   onSelect: (lodatId: string) => void;
   onEdit: (lodatId: string) => void;
   onGptContent: (lodatId: string) => void;
+  onCrmDrift: (row: PublicWebStaffLotRow) => void;
   scrollRef?: Ref<HTMLDivElement>;
   kind: string;
   extra: ExtraFilters;
@@ -52,6 +53,7 @@ export function StaffOpenLotTable({
   onSelect,
   onEdit,
   onGptContent,
+  onCrmDrift,
   scrollRef,
   kind,
   extra,
@@ -201,7 +203,23 @@ export function StaffOpenLotTable({
                     </span>
                   </div>
                   <div>
-                    <p className="pw-title">{row.title}</p>
+                    <div className="pw-title-row">
+                      <p className="pw-title">{row.title}</p>
+                      {row.crmDrift?.length ? (
+                        <button
+                          type="button"
+                          className="pw-crm-drift-btn"
+                          title="CRM đã đổi — xem chi tiết"
+                          aria-label="CRM đã đổi so với bản Đăng web"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            onCrmDrift(row);
+                          }}
+                        >
+                          <Icon icon={CircleAlert} size="sm" />
+                        </button>
+                      ) : null}
+                    </div>
                     <p className="pw-sub">{row.location || '—'}</p>
                   </div>
                   <div>

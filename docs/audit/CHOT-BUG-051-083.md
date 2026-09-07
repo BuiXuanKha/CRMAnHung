@@ -24,7 +24,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **059** | HIGH | FIXED | Đổi chủ khi GD **Đã cọc** — lệch deal vs lô. Admin đã không đổi chủ | SỬA: chặn + thông báo khi còn GD mở (2026-09-06) |  |
 | **060** | HIGH | FIXED | Gỡ ảnh lô → xóa R2 dù GD đã đóng băng ảnh | SỬA: copy ảnh khi tạo GD + đếm ref khi xóa (2026-09-06) |  |
 | **061** | HIGH | CLOSED (by design) | Admin gỡ ảnh dự án → gãy lô + web + GD | Owner: dùng chung; Admin xóa/đổi = live theo kho (2026-09-07) |  |
-| **062** | MED | STILL_OPEN | Sửa tiêu đề lô CRM ≠ H1 web | **Cần chốt hướng** A/B dưới |  |
+| **062** | MED | FIXED | Sửa tiêu đề lô CRM ≠ H1 web | Hướng B: hangtag lệch + sort đầu; không auto-sync (2026-09-07) |  |
 | **063** | MED | STILL_OPEN | Ẩn khách, lô/GD/sổ/chat vẫn dùng Person | **Cần chốt hướng** A/B (+ BUG-027) |  |
 | **064** | MED | STILL_OPEN | Xóa User → 500 vì care/tiến độ/xem file | **SỬA** đếm đủ FK + câu tiếng Việt |  |
 | **065** | MED | STILL_OPEN | Extension gửi UID nick; không khớp hồ sơ NV | HOÃN cùng đợt extension (BUG-043) **hoặc** gắn profile |  |
@@ -52,7 +52,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
 3) 055 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
-5) Chờ chốt: **062, 063**. Hoãn: **056**, **057** (owner làm sau), 052, 065, 068, 077, 078, 080.
+5) Chờ chốt: **063**. Hoãn: **056**, **057** (owner làm sau), 052, 065, 068, 077, 078, 080.
 
 
 ---
@@ -191,18 +191,11 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-062 — Sửa lô CRM không đẩy title/địa chỉ Đăng web
 
-**Còn.** `lodats.update` không ghi `publicLotListing`. Catalog: **H1/địa chỉ** = overlay; **DT/MT/ảnh/Mở bán** = lô đang sống.
+**FIXED (2026-09-07).** Owner chốt **hướng B**: overlay Đăng web độc lập; không ghi đè khi sửa lô CRM.
 
-**Tôi vào vai kha.** `/lo-dat` sửa tiêu đề lô đã Đăng web → CRM đúng; khách anhungland.com vẫn H1 cũ + DT mới.
+`/dashboard/lo-dat`: so **tiêu đề + địa chỉ** listing vs lô CRM (khi đã có hàng listing). Lô lệch xếp đầu; icon đỏ → dialog Đăng web vs CRM. NV sửa web tay trên Soạn đăng web.
 
-**Ví dụ live:** «Nhà 332m² … Trực Trì, Quốc Tuấn» slug `nha-332m2-truc-tri-quoc-tuan`. Đổi title trên CRM **không** đổi H1 web cho đến khi sửa overlay `/dashboard/lo-dat`.
-
-**Vì sao xấu:** NV tưởng «sửa lô = sửa web».
-
-**Hướng A:** Sửa title/location lô → ghi đè overlay (web luôn = CRM).  
-**Hướng B:** Giữ độc lập; CRM hiện hangtag «Đăng web đang dùng tên khác» + chỉ sửa web trên editor.
-
-**Không đoán.** Owner tick A hoặc B.
+**Check:** sửa title lô đã Đăng web trên `/lo-dat` → vào Đăng web thấy icon + dòng lệch; H1 khách vẫn bản overlay đến khi Soạn lại.
 
 ---
 
