@@ -57,11 +57,11 @@ function withShareHeader(request: NextRequest, code: string): NextResponse {
   return NextResponse.next({ request: { headers: requestHeaders } });
 }
 
-function redirectCrm(request: NextRequest, pathname: string): NextResponse {
+function redirectCrm(request: NextRequest, pathname: string, status = 307): NextResponse {
   const url = request.nextUrl.clone();
   url.pathname = pathname;
   url.search = '';
-  return NextResponse.redirect(url);
+  return NextResponse.redirect(url, status);
 }
 
 /**
@@ -77,6 +77,14 @@ function guardCrmRoutes(request: NextRequest): NextResponse | null {
     return redirectCrm(request, crmHomePathForRole(role));
   }
 
+  // BUG-082: normalize typo before login `next=` — guest then gets next=/dashboard.
+  if (pathname === '/dashbroad') {
+    if (role === 'STAFF') {
+      return redirectCrm(request, staffDashboardFallbackPath(), 308);
+    }
+    return redirectCrm(request, '/dashboard', 308);
+  }
+
   if (!isCrmAppPath(pathname)) return null;
 
   if (!role) {
@@ -86,13 +94,6 @@ function guardCrmRoutes(request: NextRequest): NextResponse | null {
     const next = pathname + (request.nextUrl.search || '');
     if (next && next !== '/') login.searchParams.set('next', next);
     return NextResponse.redirect(login);
-  }
-
-  if (pathname === '/dashbroad') {
-    return redirectCrm(
-      request,
-      role === 'ADMIN' ? '/dashboard' : staffDashboardFallbackPath(),
-    );
   }
 
   if (role === 'ADMIN' && isStaffLotWebPath(pathname)) {

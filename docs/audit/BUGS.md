@@ -276,7 +276,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-079 | LOW | public web | `getProductBySlug` mock đè gallery/mô tả listing thật nếu trùng slug demo. | FIXED |
 | BUG-080 | LOW | public-content / slug | Slug lô `toPublicSlug(..., 0)` không cắt độ dài; title+location → URL cực dài. | OPEN |
 | BUG-081 | MEDIUM | public web / metadata | `<title>` trang chủ lặp «An Hưng Land» hai lần (live). | OPEN |
-| BUG-082 | MEDIUM | public web / CRM | `/dashbroad` (alias gõ sai) trả HTTP 200 cache, không redirect `/dashboard`. | OPEN |
+| BUG-082 | MEDIUM | public web / CRM | `/dashbroad` (alias gõ sai) trả HTTP 200 cache, không redirect `/dashboard`. | FIXED |
 | BUG-083 | MEDIUM | web authz | STAFF mở `/quan-tri/khach-hang` thấy stub «Registry ADMIN»; không redirect. | FIXED |
 
 ## Danh sách bug
@@ -1360,7 +1360,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Kết quả thực tế:** 200 + HTML, không header `Location`.
 - **Kết quả mong đợi:** 307/308 `Location: /dashboard` (rồi guest mới bị đẩy login).
 - **Cách tái hiện:** Trình duyệt ẩn / cửa sổ mới → mở `/dashbroad` → URL không đổi thành `/dashboard` trên response đầu (có thể chỉ đổi sau hydrate).
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Middleware 308 `/dashbroad` → `/dashboard` (STAFF → `/dashboard/lo-dat`) **trước** login; guest rồi mới `next=/dashboard`. Login form cũng normalize `next=/dashbroad`.
 
 ### BUG-083 — STAFF mở được stub Quản trị khách (không guard)
 
