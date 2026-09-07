@@ -25,7 +25,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **060** | HIGH | FIXED | Gỡ ảnh lô → xóa R2 dù GD đã đóng băng ảnh | SỬA: copy ảnh khi tạo GD + đếm ref khi xóa (2026-09-06) |  |
 | **061** | HIGH | CLOSED (by design) | Admin gỡ ảnh dự án → gãy lô + web + GD | Owner: dùng chung; Admin xóa/đổi = live theo kho (2026-09-07) |  |
 | **062** | MED | FIXED | Sửa tiêu đề lô CRM ≠ H1 web | Hướng B: hangtag lệch + sort đầu; không auto-sync (2026-09-07) |  |
-| **063** | MED | STILL_OPEN | Ẩn khách, lô/GD/sổ/chat vẫn dùng Person | **Cần chốt hướng** A/B (+ BUG-027) |  |
+| **063** | MED | CLOSED (by design) | Ẩn khách, lô/GD/sổ/chat vẫn dùng Person | Owner hướng B: chỉ khỏi list; không cascade (2026-09-07) |  |
 | **064** | MED | STILL_OPEN | Xóa User → 500 vì care/tiến độ/xem file | **SỬA** đếm đủ FK + câu tiếng Việt |  |
 | **065** | MED | STILL_OPEN | Extension gửi UID nick; không khớp hồ sơ NV | HOÃN cùng đợt extension (BUG-043) **hoặc** gắn profile |  |
 | **066** | HIGH | STILL_OPEN | GPT/sửa slug lô không bỏ dấu | **SỬA** luôn `toPublicSlug` |  |
@@ -52,7 +52,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
 3) 055 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
-5) Chờ chốt: **063**. Hoãn: **056**, **057** (owner làm sau), 052, 065, 068, 077, 078, 080.
+5) Hoãn: **056**, **057** (owner làm sau), 065, 068, 077, 078, 080.
 
 
 ---
@@ -201,17 +201,7 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-063 — Ẩn khách không cắt lô / GD / sổ / chat
 
-**Còn.** `isHidden` ẩn list `/khach-hang` + chặn **tạo** lô/sổ. Không chặn: bên GD, sửa sổ đang làm, `GET messages`, chủ trên list lô (cùng họ BUG-027).
-
-**Tôi vào vai kha.** Ẩn khách → hết trên list. `/lo-dat` vẫn hiện chủ. Sổ đỏ đang làm vẫn sửa. Chat API vẫn trả tin.
-
-**Ví dụ:** Hồ sơ `SD-2026-0001` gắn PersonId cũ 1561. Ẩn đúng Person đó → list khách trống, sổ/lô (nếu map còn) vẫn sống. Không SSH → không gọi tên khách.
-
-**Hướng A:** Ẩn = «đã xóa»: không hiện chủ, không sửa sổ/GD, chat 404.  
-**Hướng B:** Ẩn chỉ khỏi list khách; lô/GD/sổ giữ (đúng «xóa mềm nhẹ»).  
-Liên quan **BUG-027** (map chủ sau ẩn).
-
-**Không đoán.** Owner tick A hoặc B.
+**CLOSED (by design, 2026-09-07).** Owner chốt **hướng B**: ẩn khách chỉ khỏi `/khach-hang` (tìm `@`/`@@` rồi Khôi phục). Lô vẫn hiện chủ; GD / sổ đỏ / chat giữ Person. Vẫn không **tạo mới** lô/sổ/chăm sóc trên khách ẩn. Không cascade «đã xóa». BUG-027 giữ OPEN.
 
 ---
 
@@ -391,8 +381,8 @@ Nếu sửa sớm: chỉ nhận UID có trong `EmployeeFacebookProfile` của đ
 
 | Bug | A | B |
 |-----|---|---|
-| **062** Đăng web vs sửa lô | Sửa lô → đẩy title/location lên web | Web độc lập; CRM báo đang khác overlay |
-| **063** Ẩn khách | Ẩn = cắt lô/GD/sổ/chat | Chỉ biến khỏi `/khach-hang` |
+| **062** Đăng web vs sửa lô | Sửa lô → đẩy title/location lên web | **Đã chốt B** — hangtag lệch, không auto-sync |
+| **063** Ẩn khách | Ẩn = cắt lô/GD/sổ/chat | **Đã chốt B** — chỉ biến khỏi `/khach-hang` |
 
 059 nếu không thích chặn: viết «làm B — chuyển GD» (không mặc định).
 
@@ -401,7 +391,7 @@ Nếu sửa sớm: chỉ nhận UID có trong `EmployeeFacebookProfile` của đ
 ## 5. Mai làm gì
 
 1. Tick bảng §1 (hoặc nhắn «sửa đúng cột Đề xuất»).  
-2. Điền 062 / 063.  
+2. 062 / 063 đã chốt B.  
 3. Agent sửa **từng bug một PR**, batch 5 rồi hỏi deploy — trừ khi bạn bảo deploy ngay.
 
 Không đụng `crm.anhungland.com`.

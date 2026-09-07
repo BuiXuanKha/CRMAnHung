@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 44 |
+| OPEN | 43 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 39 |
+| FIXED / CLOSED | 40 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -158,6 +158,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | transactions | BUG-049 FIXED | Owner: Admin không tạo GD. `POST /transactions` 403; NV tạo từ lô mình. |
 | 2026-09-06 | title-services | BUG-050 FIXED | Owner: Admin không tạo sổ đỏ. `POST /title-services` 403; NV tạo từ khách mình. |
 | 2026-09-06 | audit | CHOT 051–083 | File `docs/audit/CHOT-BUG-051-083.md` — xác minh code main + giải thích NV/Admin để owner chốt. Chưa sửa OPEN. |
+| 2026-09-07 | customers | BUG-063 CLOSED | Owner hướng B: ẩn khách chỉ khỏi `/khach-hang`; lô/GD/sổ/chat giữ. Không cascade. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -254,7 +255,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-060 | HIGH | lodats / transactions | Xóa ảnh lô không đếm `TransactionSnapshotImage` — xóa R2, ảnh GD gãy. | FIXED |
 | BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | CLOSED (by design) |
 | BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | FIXED |
-| BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | OPEN |
+| BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | CLOSED (by design) |
 | BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | OPEN |
 | BUG-065 | MEDIUM | customers / messenger / users | Ingest tin `employeeFacebookUid` không khớp profile NV; không API gắn UID NV. | OPEN |
 | BUG-066 | HIGH | public-content / slug | Slug lô từ editor/GPT lưu raw — không `toPublicSlug` (dấu, hoa, khoảng, `/`). | OPEN |
@@ -1103,7 +1104,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** `isHidden` chỉ cửa list + một số create; không phải cascade nghiệp vụ.
 - **Impact:** Person «đã xóa» vẫn là chủ/bên GD/hồ sơ sổ/chat; audit/GD lệch list khách.
 - **Evidence:** `create` lodat/title check `isHidden`. `assertPartyCustomers` chỉ `id` + `employeeId`. `listMessages` không `isHidden`. BUG-027 chỉ map; đây là các module còn lại trên cùng cờ.
-- **Status:** OPEN
+- **Status:** CLOSED (by design, 2026-09-07) — Owner hướng B: ẩn = khỏi `/khach-hang` (tìm lại `@`/`@@`, khôi phục). Lô vẫn chủ, GD/sổ/chat giữ Person. Vẫn chặn **tạo mới** lô/sổ/chăm sóc trên khách ẩn. Không cascade. BUG-027 (chủ trên list lô) giữ OPEN riêng.
 
 ### BUG-064 — Xóa User không precheck FK phụ — 500 Restrict dù không còn khách/lô/GD/sổ đỏ
 
