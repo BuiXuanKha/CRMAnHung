@@ -21,7 +21,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **056** | MED | STILL_OPEN | Admin không sửa được bài đã tạo | **SỬA** PATCH nội dung | HOÃN (owner 2026-09-06 — làm sau) |
 | **057** | MED | STILL_OPEN | Bỏ tick dự án khi còn kho | **SỬA** chặn khi còn `ProjectLot` | HOÃN (owner 2026-09-06 — làm sau) |
 | **058** | MED | FIXED | `/giao-dich/tao` không `lodatId` chỉ 200 lô; **Admin đã không tạo GD** | SỬA: picker tìm keyword (2026-09-06) |  |
-| **059** | HIGH | STILL_OPEN | Đổi chủ khi GD **Đã cọc** — lệch deal vs lô. Admin đã không đổi chủ | **SỬA** chặn đổi chủ khi còn GD mở |  |
+| **059** | HIGH | FIXED | Đổi chủ khi GD **Đã cọc** — lệch deal vs lô. Admin đã không đổi chủ | SỬA: chặn + thông báo khi còn GD mở (2026-09-06) |  |
 | **060** | HIGH | STILL_OPEN | Gỡ ảnh lô → xóa R2 dù GD đã đóng băng ảnh | **SỬA** đếm snapshot trước khi xóa file |  |
 | **061** | HIGH | CLOSED (by design) | Admin gỡ ảnh dự án → gãy lô + web + GD | Owner: dùng chung; Admin xóa/đổi = live theo kho (2026-09-07) |  |
 | **062** | MED | STILL_OPEN | Sửa tiêu đề lô CRM ≠ H1 web | **Cần chốt hướng** A/B dưới |  |
@@ -48,7 +48,11 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **083** | MED | **ALREADY_FIXED** | `kha` + `/quan-tri/*` đã redirect | Không sửa lại |  |
 
 **Gợi ý thứ tự nếu bảo «sửa các ô SỬA»:**  
+<<<<<<< HEAD
 1) (059/060 FIXED; 061 by design)  
+=======
+1) 060 · 061 (ảnh — mất data; 059 FIXED)  
+>>>>>>> 2e994bc (fix(lodats): block change-owner while transaction open (BUG-059))
 2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
 3) 055 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
@@ -172,20 +176,10 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-059 — Đổi chủ khi GD đang mở
 
-**Còn.** `changeOwner` không đọc `Transaction`. Unique GD mở theo **lô**. Xóa GD mở sửa **map cũ** (đã đóng). Admin **đã không đổi chủ** (BUG-028).
+**FIXED (2026-09-06).** Chặn đổi chủ khi lô còn GD mở (`DA_COC` / `DA_CONG_CHUNG`). Thông báo: «Lô này đang trong trạng thái giao dịch nên không đổi được chủ.» API `changeOwner` + UI trước khi mở modal.
 
-**Tôi vào vai kha.** Lô đang **Đã cọc** → Sửa → **Đổi chủ** → thành công. `/lo-dat` hiện Person mới. `/giao-dich` vẫn GD mở (bên bán = chủ cũ / snapshot). Tạo GD mới → 409. Xóa GD → trạng thái rao bán sửa nhầm map cũ.
+**Check:** NV `kha` lô Đã cọc → Đổi chủ → hiện thông báo, không đổi được.
 
-**Ví dụ:** 2 GD copy đều `HOAN_TAT` — unique mở **chưa** cắn trên data đó. Bug xảy ra **khi** có GD `DA_COC` / `DA_CONG_CHUNG` rồi đổi chủ. Không bịa là hiện có GD mở.
-
-**Vì sao xấu:** Deal và lô hai chủ; kẹt tạo GD chủ mới.
-
-**Đề xuất A (tối thiểu, nên làm):** Chặn đổi chủ khi lô còn GD mở — dialog «Hoàn tất / hủy GD trước».  
-**Hướng B:** Đổi chủ thì chuyển/hủy GD trong cùng transaction (phức, dễ lệch snapshot).
-
-**Khi xong (A):** kha Đổi chủ lúc Đã cọc → không lưu, có câu tiếng Việt.
-
----
 
 ### BUG-060 — Xóa ảnh lô xóa R2 dù snapshot GD còn trỏ
 
