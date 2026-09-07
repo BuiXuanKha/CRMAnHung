@@ -51,11 +51,23 @@ Không tin sổ mù: sau audit, code có thể đã đổi.
 
 Chỉ khi **STILL_OPEN**. Owner phải **hiểu bug bằng thao tác thật**, không chỉ jargon kỹ thuật.
 
-Trả lời gồm đủ các phần:
+#### Câu đủ nghĩa (bắt buộc — owner 2026-09-07)
 
-1. **Ai / ở đâu / làm gì** — vào vai **`Admin`** hoặc **`kha` (NV)**; màn hình/URL CRM; từng bước bấm (vd. `/lo-dat` → Sửa → Lưu). Nói rõ **khi nào thấy lỗi** hoặc hành vi sai.
+Giải thích với owner bằng **câu tiếng Việt đủ nghĩa**: có **tên** (người, màn hình, lô, URL), có **chủ ngữ** và **vị ngữ** rõ. **Không** viết tắt gọn, **không** câu cụt, **không** ký hiệu thay cho lời (`-2`, `→`, `∩`) nếu chưa nói bằng chữ đó là gì.
+
+| Làm | Không làm |
+|-----|-----------|
+| «Nếu hai lô cùng đường dẫn, lô mới được thêm chữ `-2` vào **cuối** URL, ví dụ `lo-dat-nam-sach-2`.» | «Trùng thì -2.» |
+| «Chỗ hở còn lại là lúc tạo lô mới trùng URL đang chuyển hướng.» | «Lỗ vẫn còn lúc tạo lô mới.» (mơ hồ: lỗ hổng hay lỗi?) |
+| «Tôi vào vai nhân viên `kha`. Tôi mở `/dashboard/lo-dat` rồi soạn bài đăng.» | «kha /dashboard/lo-dat soạn → lưu raw.» |
+
+Thuật ngữ kỹ thuật (slug, 301, unique) chỉ dùng **sau** khi đã nói bằng lời thường. Số, hậu tố, tên file: viết rõ «thêm», «đổi thành», «không phải trừ đi hai ký tự».
+
+Trả lời gồm đủ các phần (mỗi phần là câu đủ chủ-vị, không gạch đầu dòng cụt):
+
+1. **Ai / ở đâu / làm gì** — vào vai **`Admin`** hoặc **`kha` (NV)**; màn hình/URL CRM; từng bước bấm (vd. Tôi mở `/lo-dat`, tôi bấm Sửa, tôi bấm Lưu). Nói rõ **khi nào thấy lỗi** hoặc hành vi sai.
 2. **Ví dụ** — ưu tiên **dữ liệu thật trên DB staging** (xem mục dưới). Nếu không lấy được DB: nói rõ và dùng ví dụ giả *gần* nghiệp vụ, không bịa số liệu như thể đã query.
-3. **Vì sao xấu** — một câu hậu quả nghiệp vụ (mất data, kẹt thao tác, khách thấy sai…).
+3. **Vì sao xấu** — một hoặc vài câu hậu quả nghiệp vụ (mất data, kẹt thao tác, khách thấy sai…).
 4. **Cách sửa** — hướng tối thiểu (file/hàm chính); không over-engineer. *(Bỏ qua nếu owner chỉ bảo «xem / giải thích / sang bug».)*
 5. **Sửa xong sẽ thành như nào** — hành vi mong đợi + cách owner tự check nhanh. *(Chỉ khi đang đề xuất sửa.)*
 
@@ -75,7 +87,7 @@ Khi bug phụ thuộc dữ liệu (trùng SĐT, lô kho, map chủ, gộp khách
 
 Mẫu giọng (đúng ý owner):
 
-> Tôi vào vai **NV `kha`**. Vào **`/lo-dat`**, thấy lô **LK2 - 5** (Đồng Khê, chủ Minh Quý). Nếu … thì khi bấm **…** sẽ …
+> Tôi vào vai nhân viên **`kha`**. Tôi mở trang **`/lo-dat`**. Tôi thấy lô **LK2 - 5** (Đồng Khê, chủ Minh Quý). Nếu tôi bấm **Sửa** rồi **Lưu** trong tình huống … thì màn hình sẽ hiện … / khách trên web sẽ thấy …
 
 ### ④ Sửa code
 
@@ -125,6 +137,7 @@ Khi được phép batch:
 ## Giọng giải thích
 
 - Tiếng Việt với owner; code/identifier tiếng Anh.
+- **Câu đủ nghĩa:** chủ ngữ + vị ngữ; gọi tên người, màn, lô, URL. Không câu cụt, không viết tắt gọn.
 - **Thao tác theo vai NV/Admin** trước, lý thuyết/API sau.
 - **Ví dụ DB thật** khi cần minh họa; không thay bằng abstraction nếu đã query được.
 - Không dump toàn bộ BUGS.md.
@@ -133,6 +146,7 @@ Khi được phép batch:
 
 - Sửa bug khi chưa xác minh code hiện tại (bước ②).
 - Giải thích chỉ bằng jargon (unique index, DTO…) mà **không** nói được user bấm gì ở màn nào.
+- Giải thích bằng câu cụt / ký hiệu (`-2`, `→`) mà **không** nói thành lời đó là gì; dùng từ mơ hồ («lỗ») khi cần nói **lỗ hổng** hay **lỗi**.
 - Bịa ví dụ «như thật» khi chưa query — phải ghi là giả định.
 - Ghi/sửa DB chỉ để tạo case demo.
 - Hỏi merge/deploy **sau mỗi** bug fix (trái batch 5) — trừ khi owner chủ động bảo deploy/merge ngay.
