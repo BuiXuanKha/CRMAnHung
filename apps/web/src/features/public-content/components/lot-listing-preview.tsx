@@ -1,6 +1,6 @@
 'use client';
 
-import { ExternalLink, Globe, ImageOff } from 'lucide-react';
+import { ExternalLink, ImageOff } from 'lucide-react';
 import type { PublicWebStaffLotRow } from '@crmanhung/shared';
 import { listingHref } from '@/features/public/site';
 import { CrmBadge } from '@/shared/ui/badge';
@@ -15,11 +15,9 @@ import {
 
 type Props = {
   lot: PublicWebStaffLotRow | null;
-  busy: boolean;
-  onPublish: () => void;
 };
 
-export function LotListingPreview({ lot, busy, onPublish }: Props) {
+export function LotListingPreview({ lot }: Props) {
   const price = lot ? lotPriceDisplay(lot) : null;
 
   return (
@@ -29,7 +27,7 @@ export function LotListingPreview({ lot, busy, onPublish }: Props) {
       </header>
 
       {!lot ? (
-        <p className="pw-preview-empty">Chọn một lô đang mở bán để xem bài đăng.</p>
+        <p className="pw-preview-empty">Chọn một lô để xem bài đăng.</p>
       ) : (
         <div className="pw-preview-body">
           <span className="pw-preview-cover">
@@ -63,7 +61,7 @@ export function LotListingPreview({ lot, busy, onPublish }: Props) {
             <p className="pw-preview-excerpt">{lot.excerpt}</p>
           )}
           <div className="pw-preview-actions">
-            {lot.isPublished ? (
+            {lot.slug ? (
               <a
                 className="crm-btn"
                 href={listingHref(lot.slug)}
@@ -72,16 +70,7 @@ export function LotListingPreview({ lot, busy, onPublish }: Props) {
               >
                 <Icon icon={ExternalLink} size="sm" /> Xem trên anhungland.com
               </a>
-            ) : (
-              <button
-                type="button"
-                className="crm-btn primary"
-                disabled={busy}
-                onClick={onPublish}
-              >
-                <Icon icon={Globe} size="sm" /> Đăng web
-              </button>
-            )}
+            ) : null}
           </div>
         </div>
       )}

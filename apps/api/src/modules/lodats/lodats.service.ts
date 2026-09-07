@@ -26,6 +26,7 @@ import {
   uniqueSeoLotImageKey,
 } from './lodat-seo-image-upload';
 import { facebookPageUrlFromRawMeta } from '@crmanhung/shared';
+import { PublicContentService } from '../public-content/public-content.service';
 
 const ADDRESS_INCLUDE = {
   province: { select: { name: true, isHidden: true } },
@@ -97,7 +98,32 @@ export class LodatsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly publicContent: PublicContentService,
   ) {}
+
+  private async syncPublicListing(lodatId: string): Promise<void> {
+    try {
+      await this.publicContent.syncListingFromLodat(lodatId);
+    } catch (err) {
+      this.logger.warn(
+        `Public listing sync skipped for lodat ${lodatId}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
+  }
+
+  private async ensurePublicListing(lodatId: string): Promise<void> {
+    try {
+      await this.publicContent.ensureListingForLodat(lodatId);
+    } catch (err) {
+      this.logger.warn(
+        `Public listing ensure skipped for lodat ${lodatId}: ${
+          err instanceof Error ? err.message : String(err)
+        }`,
+      );
+    }
+  }
 
   private publicUrl(objectKey: string | null | undefined): string | null {
     if (!objectKey) return null;
@@ -637,6 +663,7 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
+    await this.syncPublicListing(id);
     return this.mapDetail(refreshed, user);
   }
 
@@ -749,6 +776,7 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
+    await this.ensurePublicListing(id);
     return this.mapDetail(refreshed, user);
   }
 
@@ -1072,6 +1100,7 @@ export class LodatsService {
       where: { id: created.id },
       include: LIST_INCLUDE,
     });
+    await this.ensurePublicListing(created.id);
     return this.mapDetail(refreshed, user);
   }
 
@@ -1174,7 +1203,9 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
-    return this.mapDetail(await this.retargetImagesAfterWrite(refreshed), user);
+    const mapped = this.mapDetail(await this.retargetImagesAfterWrite(refreshed), user);
+    await this.syncPublicListing(id);
+    return mapped;
   }
 
   async addImage(

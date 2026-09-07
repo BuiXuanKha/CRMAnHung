@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { LodatSaleStatus, type LotShareContact } from '@crmanhung/shared';
+import type { LotShareContact } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { PublicAuthNavLink } from './public-auth-nav';
 import { PublicHotlineLink } from './public-hotline-link';
@@ -13,6 +13,7 @@ import type { PublicListingView, RelatedListingSection } from './published-listi
 import { getProductBySlug } from './mock-data';
 import { listingCommuneHubCrumb, listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
+import { saleStatusLabel } from './sale-status-label';
 import { listingShareText } from './share';
 import {
   PUBLIC_LISTING_PATH,
@@ -29,14 +30,6 @@ function listingImages(listing: PublicListingView): string[] {
   if (listing.imageUrls?.length) return listing.imageUrls;
   if (listing.coverImageUrl) return [listing.coverImageUrl];
   return [];
-}
-
-function saleStatusLabel(status?: LodatSaleStatus): string | null {
-  if (!status || status === LodatSaleStatus.DANG_BAN) return null;
-  if (status === LodatSaleStatus.TAM_DUNG) return 'Tạm dừng bán';
-  if (status === LodatSaleStatus.DA_BAN) return 'Đã bán';
-  if (status === LodatSaleStatus.DAT_COC) return 'Đã cọc';
-  return null;
 }
 
 function RelatedListingBlock({

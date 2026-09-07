@@ -35,8 +35,8 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **070** | HIGH | STILL_OPEN | Tạm dừng / sửa địa chỉ không làm mới hub | **SỬA** revalidate thêm `/xa/…` | HOÃN (owner 2026-09-07 — giữ logic hiện tại) |
 | **071** | MED | CLOSED | Sitemap + index 5 chuyên mục **trống** (live) | Giữ sitemap đủ chuyên mục; đã seed bài | Đóng sổ (owner 2026-09-07) |
 | **072** | HIGH | FIXED | API lỗi → sitemap/catalog rỗng, slug 404 giả | **SỬA** không nuốt 5xx lúc chạy | FIXED (2026-09-07) |
-| **073** | MED | STILL_OPEN | 301 tới lô đã gỡ / Tạm dừng | SỬA cùng 074 |  |
-| **074** | MED | STILL_OPEN | Xóa lô còn hàng 301 | SỬA cùng 067/073 |  |
+| **073** | MED | FIXED | 301 tới lô đã gỡ / thiếu listing | Chỉ 301 khi đích còn listing | FIXED (2026-09-07) |
+| **074** | MED | FIXED | Xóa lô còn hàng 301 | Xóa redirect mồ côi khi thiếu đích | FIXED (2026-09-07) |
 | **075** | MED | **ALREADY_FIXED** | `/og-default.png` live **200** | Đóng sổ FIXED — không sửa |  |
 | **076** | MED | STILL_OPEN | Category lạ: code thiếu `canonical: null` (live đang được `not-found` cứu) | SỬA 1 dòng cho chắc |  |
 | **077** | MED | STILL_OPEN | Hai thôn slug gập một hub | HOÃN — chưa thấy case live |  |

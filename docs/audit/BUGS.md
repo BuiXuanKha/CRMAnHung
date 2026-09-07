@@ -267,8 +267,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN (HOÃN) |
 | BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | CLOSED |
 | BUG-072 | HIGH | public web / sitemap | Guest fetch nuốt lỗi API → sitemap/catalog rỗng; chi tiết slug thành 404 giả. | FIXED |
-| BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm `isPublished` / Mở bán — trỏ tới 404 hoặc BUG-023. | OPEN |
-| BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | OPEN |
+| BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm đích listing còn — trỏ 404. | FIXED |
+| BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | FIXED |
 | BUG-075 | MEDIUM | public web / OG | `/og-default.png` không có trong `apps/web/public` — OG/Twitter/JSON-LD fallback 404. | OPEN |
 | BUG-076 | MEDIUM | public web / canonical | `[category]` không hợp lệ: metadata noindex nhưng không gỡ canonical trang chủ. | OPEN |
 | BUG-077 | MEDIUM | public-content / hub | Hai địa chỉ khác nhau `toPublicSlug` trùng → một hub URL, trộn listing. | OPEN |
@@ -1237,20 +1237,16 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Redirect table không gắn lifecycle listing.
 - **Impact:** Chuỗi 301→404; crawl budget; tín hiệu về URL không index được.
 - **Evidence:** `findLotSlugRedirect` vs `getPublishedBySlug` `!row?.isPublished`. Không `isOpenSale` trên redirect.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — `findLotSlugRedirect` chỉ trả `toSlug` khi còn `PublicLotListing`; không thì xóa redirect mồ côi (cùng BUG-074). Catalog/khách giữ mọi trạng thái CRM (hangtag), không ẩn vì hết Mở bán.
 
 ### BUG-074 — Xóa lô không xóa `PublicLotSlugRedirect` — 301 mồ côi
 
 - **Severity:** MEDIUM
 - **Module:** public-content / redirect
 - **File:** `apps/api/prisma/schema.prisma`, `apps/api/src/modules/public-content/public-content.service.ts`
-- **Function:** `PublicLotListing` `onDelete: Cascade` từ `Lodat`; model `PublicLotSlugRedirect`
-- **Vị trí code:** `PublicLotSlugRedirect` không FK `toSlug`/`lodatId`. Xóa `Lodat` cascade listing + shares. Redirect `fromSlug`/`toSlug` còn. `recordLotSlugChange` không chạy lúc xóa.
-- **Problem:** URL cũ 301 mãi tới slug đã mất → 404 (BUG-073). `uniqueSlug` vẫn có thể tái sử dụng `fromSlug` (BUG-067) hoặc để 301 chết.
-- **Root cause:** Redirect không thuộc vòng đời listing.
-- **Impact:** 301 vĩnh viễn tới 404; bảng redirect phình.
-- **Evidence:** schema `PublicLotSlugRedirect` không relation. `Lodat` → `PublicLotListing` Cascade. Grep xóa redirect chỉ `recordLotSlugChange` / script regenerate.
-- **Status:** OPEN
+- **Function:** `findLotSlugRedirect`
+- **Problem:** URL cũ 301 mãi tới slug đã mất → 404.
+- **Status:** FIXED (2026-09-07) — Khi thiếu listing đích, xóa redirect `fromSlug`/`toSlug` mồ côi trong `findLotSlugRedirect`.
 
 ### BUG-075 — Không có file `/og-default.png` trong app public
 

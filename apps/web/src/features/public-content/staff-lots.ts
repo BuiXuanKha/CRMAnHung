@@ -1,6 +1,5 @@
 import {
   LodatKind,
-  LodatSaleStatus,
   PublicPostStatus,
   listingBodyToExcerpt,
   type LodatListItem,
@@ -13,63 +12,68 @@ import { toListingPublicSlug } from './display';
 import { plainTextToListingBodyHtml, suggestPublicExcerpt, suggestPublicPrice } from './listing-copy';
 import { computeListingCrmDrift, sortStaffLotsByCrmDrift } from './listing-crm-drift';
 
+function listingNeedsCompose(listing: PublicWebLotRow | undefined): boolean {
+  return !listing?.bodyHtml?.trim();
+}
+
+/** Staff Đăng web list — mọi lô đã gắn chủ; listing luôn có sau ensure API. */
 export function buildStaffOpenLots(
   plots: LodatListItem[],
   listings: PublicWebLotRow[],
 ): PublicWebStaffLotRow[] {
-  const rows = plots
-    .filter((plot) => plot.status === LodatSaleStatus.DANG_BAN)
-    .map((plot) => {
-      const listing = listings.find((row) => row.lodatId === plot.id);
-      const suggested = suggestPublicPrice(plot.priceVnd);
-      const priceMode = listing?.priceMode ?? suggested.priceMode;
-      const priceLabel =
-        priceMode === 'AMOUNT' ? (listing?.priceLabel ?? suggested.priceLabel) : null;
-      const staffName = plot.createdByEmployeeName?.trim() || '—';
-      const title = listing?.title ?? plot.title;
-      const location = listing?.location ?? plot.address ?? '';
-      const kind = plot.kind ?? LodatKind.DAT;
-      const areaM2 = plot.areaM2 ?? null;
-      const frontageM = plot.frontageM ?? null;
-      const direction = plot.direction ?? null;
-      const suggestedExcerpt = suggestPublicExcerpt({
-        title,
-        location,
-        kind,
-        areaM2,
-        frontageM,
-        direction,
-      });
-      const bodyHtml =
-        listing?.bodyHtml?.trim() ||
-        plainTextToListingBodyHtml(listing?.excerpt?.trim() || suggestedExcerpt);
-      const excerpt =
-        listing?.excerpt?.trim() ||
-        listingBodyToExcerpt(bodyHtml) ||
-        suggestedExcerpt;
-      const crmDrift = computeListingCrmDrift(plot, listing);
-      return {
-        id: listing?.id ?? `pending-${plot.id}`,
-        lodatId: plot.id,
-        slug: listing?.slug ?? toListingPublicSlug(title, location),
-        title,
-        location,
-        coverImageUrl: listing?.coverImageUrl ?? plot.coverImageUrl ?? null,
-        isPublished: listing?.isPublished ?? false,
-        priceMode,
-        priceLabel,
-        excerpt,
-        bodyHtml,
-        staffName,
-        kind,
-        areaM2,
-        frontageM,
-        direction,
-        priceVnd: plot.priceVnd ?? null,
-        crmDrift,
-        ...(listing?.seoTitle != null ? { seoTitle: listing.seoTitle } : {}),
-      };
+  const rows = plots.map((plot) => {
+    const listing = listings.find((row) => row.lodatId === plot.id);
+    const suggested = suggestPublicPrice(plot.priceVnd);
+    const priceMode = listing?.priceMode ?? suggested.priceMode;
+    const priceLabel =
+      priceMode === 'AMOUNT' ? (listing?.priceLabel ?? suggested.priceLabel) : null;
+    const staffName = plot.createdByEmployeeName?.trim() || '—';
+    const title = listing?.title ?? plot.title;
+    const location = listing?.location ?? plot.address ?? '';
+    const kind = plot.kind ?? LodatKind.DAT;
+    const areaM2 = plot.areaM2 ?? null;
+    const frontageM = plot.frontageM ?? null;
+    const direction = plot.direction ?? null;
+    const suggestedExcerpt = suggestPublicExcerpt({
+      title,
+      location,
+      kind,
+      areaM2,
+      frontageM,
+      direction,
     });
+    const bodyHtml =
+      listing?.bodyHtml?.trim() ||
+      plainTextToListingBodyHtml(listing?.excerpt?.trim() || suggestedExcerpt);
+    const excerpt =
+      listing?.excerpt?.trim() ||
+      listingBodyToExcerpt(bodyHtml) ||
+      suggestedExcerpt;
+    const crmDrift = computeListingCrmDrift(plot, listing);
+    const needsCompose = listingNeedsCompose(listing);
+    return {
+      id: listing?.id ?? `pending-${plot.id}`,
+      lodatId: plot.id,
+      slug: listing?.slug ?? toListingPublicSlug(title, location),
+      title,
+      location,
+      coverImageUrl: listing?.coverImageUrl ?? plot.coverImageUrl ?? null,
+      // Staff badge: «Đã soạn» vs «Chưa soạn» (reuse isPublished flag).
+      isPublished: !needsCompose,
+      priceMode,
+      priceLabel,
+      excerpt,
+      bodyHtml: listing?.bodyHtml?.trim() ? bodyHtml : needsCompose ? '' : bodyHtml,
+      staffName,
+      kind,
+      areaM2,
+      frontageM,
+      direction,
+      priceVnd: plot.priceVnd ?? null,
+      crmDrift,
+      ...(listing?.seoTitle != null ? { seoTitle: listing.seoTitle } : {}),
+    };
+  });
   return sortStaffLotsByCrmDrift(rows);
 }
 

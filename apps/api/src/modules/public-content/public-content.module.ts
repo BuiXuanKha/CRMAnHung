@@ -27,5 +27,6 @@ import { PostGptService } from './post-gpt.service';
     LotGptService,
     PostGptService,
   ],
+  exports: [PublicContentService],
 })
 export class PublicContentModule {}

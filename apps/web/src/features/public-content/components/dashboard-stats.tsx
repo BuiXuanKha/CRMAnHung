@@ -16,14 +16,14 @@ export function DashboardStats({
   return (
     <section className="pw-stats" aria-label="Tổng quan web công khai">
       <article className="pw-stat">
-        <p className="pw-stat-label">Lô đang hiện</p>
+        <p className="pw-stat-label">Đã soạn</p>
         <p className="pw-stat-value">{publishedLotCount}</p>
-        <p className="pw-stat-hint">Khách thấy trên {PUBLIC_LISTING_PATH}</p>
+        <p className="pw-stat-hint">Có mô tả trên {PUBLIC_LISTING_PATH}</p>
       </article>
       <article className="pw-stat">
-        <p className="pw-stat-label">Chờ đăng</p>
+        <p className="pw-stat-label">Chưa soạn</p>
         <p className="pw-stat-value">{pendingLotCount}</p>
-        <p className="pw-stat-hint">Mở bán CRM, chưa Đăng web</p>
+        <p className="pw-stat-hint">Đã có slug — cần bổ sung copy</p>
       </article>
       <article className="pw-stat">
         <p className="pw-stat-label">Bài đã đăng</p>

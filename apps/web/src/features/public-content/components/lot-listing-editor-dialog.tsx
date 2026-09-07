@@ -28,8 +28,7 @@ type Props = {
   busy: boolean;
   error: string | null;
   onClose: () => void;
-  onSaveDraft: (input: UpdatePublicListingDraftInput) => Promise<void>;
-  onPublish: (input: UpdatePublicListingDraftInput) => Promise<void>;
+  onSave: (input: UpdatePublicListingDraftInput) => Promise<void>;
 };
 
 const TITLE_MAX = 160;
@@ -47,8 +46,7 @@ export function LotListingEditorDialog({
   busy,
   error,
   onClose,
-  onSaveDraft,
-  onPublish,
+  onSave,
 }: Props) {
   const [title, setTitle] = useState('');
   const [location, setLocation] = useState('');
@@ -153,7 +151,7 @@ export function LotListingEditorDialog({
           onSubmit={(e) => {
             e.preventDefault();
             const input = parsedInput(false);
-            if (input) void onSaveDraft(input);
+            if (input) void onSave(input);
           }}
         >
           {gptPrefill ? (
@@ -163,7 +161,7 @@ export function LotListingEditorDialog({
           ) : null}
           <p className="crm-form-hint">
             Copy công khai cho trang khách — không copy hoa hồng, ghi chú chủ nhà hay thông tin khách.
-            Lưu nháp được thiếu mô tả; <strong>Đăng web</strong> cần nội dung.
+            Lưu cập nhật bài gắn sẵn với lô (slug không đổi).
           </p>
           <p className="crm-form-hint-box">{publicListingInternalsHint(lot.priceVnd)}</p>
 
@@ -306,28 +304,9 @@ export function LotListingEditorDialog({
             <button type="button" className="crm-btn" disabled={busy} onClick={onClose}>
               Huỷ
             </button>
-            <button type="submit" className="crm-btn" disabled={busy}>
-              {busy
-                ? lot.isPublished
-                  ? 'Đang cập nhật…'
-                  : 'Đang lưu…'
-                : lot.isPublished
-                  ? 'Cập nhật web'
-                  : 'Lưu nháp'}
+            <button type="submit" className="crm-btn primary" disabled={busy}>
+              {busy ? 'Đang lưu…' : 'Lưu bài đăng'}
             </button>
-            {lot.isPublished ? null : (
-              <button
-                type="button"
-                className="crm-btn primary"
-                disabled={busy}
-                onClick={() => {
-                  const input = parsedInput(true);
-                  if (input) void onPublish(input);
-                }}
-              >
-                Đăng web
-              </button>
-            )}
           </div>
         </form>
       ) : null}

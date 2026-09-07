@@ -1,6 +1,5 @@
 import {
   LODAT_LIST_MAX_PAGE_SIZE,
-  LodatSaleStatus,
   createPublicPostInputSchema,
   setPublicLotPublishedSchema,
   setPublicPostStatusSchema,
@@ -31,9 +30,10 @@ import { isNextProductionBuild } from '@/features/public/next-production-build';
 import { catalogToGuestLot, type PublicGuestLot } from './guest-listing';
 import { buildPublicWebDashboard, buildStaffOpenLots } from './staff-lots';
 
-async function loadOpenPlots() {
+async function loadStaffPlots() {
+  // Always-on listing: mọi trạng thái bán (chủ gắn) — hangtag trên khách.
   const res = await listLodats({
-    status: LodatSaleStatus.DANG_BAN,
+    includePaused: true,
     limit: LODAT_LIST_MAX_PAGE_SIZE,
   });
   return res.items;
@@ -46,12 +46,12 @@ export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
 export async function getPublicWebDashboard(): Promise<PublicWebDashboard> {
   const overlay = await listPublicWebLots();
   const posts = await listPublicWebPosts();
-  const staff = buildStaffOpenLots(await loadOpenPlots(), overlay);
+  const staff = buildStaffOpenLots(await loadStaffPlots(), overlay);
   return buildPublicWebDashboard(overlay, posts, staff);
 }
 
 export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
-  return buildStaffOpenLots(await loadOpenPlots(), await listPublicWebLots());
+  return buildStaffOpenLots(await loadStaffPlots(), await listPublicWebLots());
 }
 
 /** Guest catalog — GET /public/listings (no JWT). */

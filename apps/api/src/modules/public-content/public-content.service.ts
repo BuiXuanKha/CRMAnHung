@@ -295,13 +295,136 @@ export class PublicContentService {
     };
   }
 
-  /** Old guest lot slug → current slug (Next issues 301). */
+  /**
+   * Old guest lot slug → current slug (Next issues 301).
+   * BUG-073: only when target listing still exists (slug forever while Lodat lives).
+   */
   async findLotSlugRedirect(fromSlug: string): Promise<{ toSlug: string } | null> {
     const row = await this.prisma.publicLotSlugRedirect.findUnique({
       where: { fromSlug },
       select: { toSlug: true },
     });
-    return row ?? null;
+    if (!row) return null;
+    const target = await this.prisma.publicLotListing.findUnique({
+      where: { slug: row.toSlug },
+      select: { id: true },
+    });
+    if (!target) {
+      // BUG-074: orphan redirect after listing/lodat gone
+      await this.prisma.publicLotSlugRedirect.deleteMany({
+        where: { OR: [{ fromSlug }, { toSlug: row.toSlug }] },
+      });
+      return null;
+    }
+    return { toSlug: row.toSlug };
+  }
+
+  /**
+   * Owner 2026-09-07: tạo lô / gắn chủ → đúng một listing + slug (isPublished từ đầu).
+   * Idempotent. Không đổi slug nếu đã có.
+   */
+  async ensureListingForLodat(lodatId: string): Promise<void> {
+    const existing = await this.prisma.publicLotListing.findUnique({
+      where: { lodatId },
+      select: { id: true, isPublished: true, slug: true },
+    });
+    if (existing) {
+      if (!existing.isPublished) {
+        const full = await this.prisma.publicLotListing.findUnique({
+          where: { id: existing.id },
+          select: { publishedAt: true, slug: true },
+        });
+        await this.prisma.publicLotListing.update({
+          where: { id: existing.id },
+          data: {
+            isPublished: true,
+            ...(!full?.publishedAt ? { publishedAt: new Date() } : {}),
+          },
+        });
+        await this.revalidate.revalidateListing(existing.slug, { includeHome: true });
+      }
+      return;
+    }
+    const lodat = await this.prisma.lodat.findUnique({
+      where: { id: lodatId },
+      include: LODAT_INCLUDE,
+    });
+    if (!lodat) return;
+    if (!lodat.maps.length) return;
+    const title = this.lodatTitle(lodat);
+    const location = this.lodatLocation(lodat);
+    const created = await this.prisma.publicLotListing.create({
+      data: {
+        lodatId: lodat.id,
+        slug: await this.uniqueSlug(toListingPublicSlug(title, location)),
+        title,
+        location,
+        isPublished: true,
+        priceMode: 'CONTACT',
+        priceLabel: null,
+        excerpt: [title, location].filter(Boolean).join('. '),
+        bodyHtml: '',
+        publishedAt: new Date(),
+      },
+      include: { lodat: { include: LODAT_INCLUDE } },
+    });
+    await this.ensureSeoImageKeysForLodat(lodat);
+    const hub = await this.persistCommuneHubForLodat(created.lodat);
+    await this.revalidate.revalidateListing(created.slug, {
+      includeHome: true,
+      extraPaths: this.communeHubRevalidatePaths(hub?.slug, hub?.previousSlug),
+    });
+  }
+
+  /**
+   * Đồng bộ title/location overlay từ CRM (slug giữ nguyên). Revalidate hangtag/catalog.
+   */
+  async syncListingFromLodat(lodatId: string): Promise<void> {
+    await this.ensureListingForLodat(lodatId);
+    const lodat = await this.prisma.lodat.findUnique({
+      where: { id: lodatId },
+      include: LODAT_INCLUDE,
+    });
+    if (!lodat?.maps.length) return;
+    const listing = await this.prisma.publicLotListing.findUnique({
+      where: { lodatId },
+    });
+    if (!listing) return;
+    const title = this.lodatTitle(lodat);
+    const location = this.lodatLocation(lodat);
+    const excerpt =
+      listing.bodyHtml?.trim()
+        ? listing.excerpt
+        : [title, location].filter(Boolean).join('. ');
+    const saved = await this.prisma.publicLotListing.update({
+      where: { id: listing.id },
+      data: {
+        title,
+        location,
+        excerpt,
+        isPublished: true,
+        ...(!listing.publishedAt ? { publishedAt: new Date() } : {}),
+      },
+    });
+    const hub = await this.persistCommuneHubForLodat(lodat);
+    await this.revalidate.revalidateListing(saved.slug, {
+      includeHome: true,
+      extraPaths: this.communeHubRevalidatePaths(hub?.slug, hub?.previousSlug),
+    });
+  }
+
+  /** Backfill: mọi lô STAFF đang có chủ → có listing. */
+  async ensureListingsForStaff(userId: string): Promise<void> {
+    const lodats = await this.prisma.lodat.findMany({
+      where: {
+        createdByEmployeeId: userId,
+        maps: { some: { isActive: true } },
+      },
+      select: { id: true },
+    });
+    for (const row of lodats) {
+      await this.ensureListingForLodat(row.id);
+    }
   }
 
   /** Keep old guest URLs working when staff/GPT đổi slug overlay. */
@@ -320,6 +443,9 @@ export class PublicContentService {
   }
 
   async listAdminLots(user: RequestUser) {
+    if (user.role === 'STAFF') {
+      await this.ensureListingsForStaff(user.id);
+    }
     const rows = await this.prisma.publicLotListing.findMany({
       where:
         user.role === 'ADMIN'
@@ -380,10 +506,14 @@ export class PublicContentService {
     if (dto.priceMode === 'AMOUNT' && !dto.priceLabel?.trim()) {
       throw new BadRequestException('Nhập giá công khai hoặc chọn Liên hệ');
     }
-    const lodat = await this.requireOpenLodat(id, user);
+    const lodat = await this.requireLodatForCompose(id, user);
+    await this.ensureListingForLodat(lodat.id);
     const existing = await this.prisma.publicLotListing.findUnique({
       where: { lodatId: lodat.id },
     });
+    if (!existing) {
+      throw new NotFoundException('Không tìm thấy bài đăng web của lô.');
+    }
     const priceLabel = dto.priceMode === 'CONTACT' ? null : dto.priceLabel?.trim() || null;
     const bodyHtml = dto.bodyHtml ?? '';
     const excerpt =
@@ -400,9 +530,10 @@ export class PublicContentService {
       priceLabel: string | null;
       excerpt: string;
       bodyHtml: string;
+      isPublished: boolean;
+      publishedAt?: Date;
       metaDescription?: string | null;
       seoTitle?: string | null;
-      slug?: string;
     } = {
       title: dto.title.trim(),
       location: dto.location.trim(),
@@ -410,6 +541,8 @@ export class PublicContentService {
       priceLabel,
       excerpt,
       bodyHtml,
+      isPublished: true,
+      ...(!existing.publishedAt ? { publishedAt: new Date() } : {}),
     };
     if (metaDescription !== undefined) {
       data.metaDescription = metaDescription;
@@ -417,122 +550,55 @@ export class PublicContentService {
     if (seoTitle !== undefined) {
       data.seoTitle = seoTitle;
     }
-    if (existing) {
-      // BUG-066: NV cannot edit URL. Ignore client `slug` — keep the stored path.
-      const saved = await this.prisma.publicLotListing.update({
-        where: { id: existing.id },
-        data,
-        include: { lodat: { include: LODAT_INCLUDE } },
-      });
-      if (saved.isPublished) {
-        await this.revalidate.revalidateListing(saved.slug);
-      }
-      return this.toAdminRow(saved);
-    }
-    const createSlug = await this.uniqueSlug(
-      toListingPublicSlug(dto.title, dto.location),
-    );
-    const saved = await this.prisma.publicLotListing.create({
-      data: {
-        lodatId: lodat.id,
-        slug: createSlug,
-        isPublished: false,
-        ...data,
-      },
+    // BUG-066: NV cannot edit URL. Ignore client `slug` — keep the stored path.
+    const saved = await this.prisma.publicLotListing.update({
+      where: { id: existing.id },
+      data,
       include: { lodat: { include: LODAT_INCLUDE } },
+    });
+    const hub = await this.persistCommuneHubForLodat(saved.lodat);
+    await this.revalidate.revalidateListing(saved.slug, {
+      includeHome: true,
+      extraPaths: this.communeHubRevalidatePaths(hub?.slug, hub?.previousSlug),
     });
     return this.toAdminRow(saved);
   }
 
   async setPublished(user: RequestUser, id: string, isPublished: boolean) {
     this.assertStaffCanWriteListing(user);
-    // Product: no user-facing «Gỡ Đăng web» — listings stay published; guest visibility
-    // follows CRM Mở bán / Đã bán. Sibling auto-unpublish on publish still allowed.
+    // Owner 2026-09-07: no unpublish / Gỡ — listing + slug forever.
     if (!isPublished) {
       throw new BadRequestException(
-        'Không hỗ trợ gỡ Đăng web. Lô đã đăng giữ trên web; khách thấy theo trạng thái Mở bán / Đã bán.',
+        'Không hỗ trợ gỡ bài đăng web. Slug và bài giữ mãi; trạng thái khách theo CRM.',
       );
     }
-    const lodat = await this.requireOpenLodat(id, user);
+    const lodat = await this.requireLodatForCompose(id, user);
+    await this.ensureListingForLodat(lodat.id);
     const existing = await this.prisma.publicLotListing.findUnique({
       where: { lodatId: lodat.id },
+      include: { lodat: { include: LODAT_INCLUDE } },
     });
     if (!existing) {
-      await this.assertStaffCanPublishProjectLot(lodat);
-      const title = this.lodatTitle(lodat);
-      const location = this.lodatLocation(lodat);
-      await this.unpublishSiblingProjectLotListings(lodat.id, lodat.projectLotId);
-      const created = await this.prisma.publicLotListing.create({
-        data: {
-          lodatId: lodat.id,
-          slug: await this.uniqueSlug(toListingPublicSlug(title, location)),
-          title,
-          location,
-          isPublished: true,
-          priceMode: 'CONTACT',
-          priceLabel: null,
-          excerpt: [title, location].filter(Boolean).join('. '),
-          bodyHtml: '',
-          publishedAt: new Date(),
-        },
-        include: { lodat: { include: LODAT_INCLUDE } },
-      });
-      await this.ensureSeoImageKeysForLodat(lodat);
-      const hub = await this.persistCommuneHubForLodat(created.lodat);
-      await this.revalidate.revalidateListing(created.slug, {
-        includeHome: true,
-        extraPaths: this.communeHubRevalidatePaths(hub?.slug, hub?.previousSlug),
-      });
-      return this.toAdminRow(created);
+      throw new NotFoundException('Không tìm thấy bài đăng web của lô.');
     }
-    const wasPublished = existing.isPublished;
-    if (isPublished && !wasPublished) {
-      await this.assertStaffCanPublishProjectLot(lodat);
-      await this.unpublishSiblingProjectLotListings(lodat.id, lodat.projectLotId);
+    if (existing.isPublished) {
+      return this.toAdminRow(existing);
     }
     const saved = await this.prisma.publicLotListing.update({
       where: { id: existing.id },
       data: {
-        isPublished,
-        ...(isPublished && !existing.publishedAt ? { publishedAt: new Date() } : {}),
+        isPublished: true,
+        ...(!existing.publishedAt ? { publishedAt: new Date() } : {}),
       },
       include: { lodat: { include: LODAT_INCLUDE } },
     });
-    if (isPublished) {
-      await this.ensureSeoImageKeysForLodat(lodat);
-    }
-    const hub = isPublished ? await this.persistCommuneHubForLodat(saved.lodat) : null;
+    await this.ensureSeoImageKeysForLodat(lodat);
+    const hub = await this.persistCommuneHubForLodat(saved.lodat);
     await this.revalidate.revalidateListing(saved.slug, {
-      includeHome: isPublished !== wasPublished,
+      includeHome: true,
       extraPaths: this.communeHubRevalidatePaths(hub?.slug, hub?.previousSlug),
     });
     return this.toAdminRow(saved);
-  }
-
-  private async unpublishListingById(id: string, slug: string): Promise<void> {
-    await this.prisma.publicLotListing.update({
-      where: { id },
-      data: { isPublished: false },
-    });
-    await this.revalidate.revalidateListing(slug, { includeHome: true });
-  }
-
-  /** Một số lô kho (ProjectLot) — chỉ một listing public cùng lúc. */
-  private async unpublishSiblingProjectLotListings(
-    lodatId: string,
-    projectLotId: string | null | undefined,
-  ): Promise<void> {
-    if (!projectLotId) return;
-    const siblings = await this.prisma.publicLotListing.findMany({
-      where: {
-        isPublished: true,
-        lodat: { projectLotId, id: { not: lodatId } },
-      },
-      select: { id: true, slug: true },
-    });
-    for (const row of siblings) {
-      await this.unpublishListingById(row.id, row.slug);
-    }
   }
 
   private assertStaffCanWriteListing(user: RequestUser) {
@@ -541,7 +607,8 @@ export class PublicContentService {
     }
   }
 
-  private async requireOpenLodat(id: string, user: RequestUser): Promise<LodatLoaded> {
+  /** Compose/update overlay for any CRM sale status (listing always-on). */
+  private async requireLodatForCompose(id: string, user: RequestUser): Promise<LodatLoaded> {
     const byListing = await this.prisma.publicLotListing.findFirst({
       where: { OR: [{ id }, { lodatId: id }] },
       select: { lodatId: true },
@@ -551,10 +618,10 @@ export class PublicContentService {
       where: { id: lodatId },
       include: LODAT_INCLUDE,
     });
-    if (!lodat) throw new NotFoundException('Không tìm thấy lô đang mở bán.');
+    if (!lodat) throw new NotFoundException('Không tìm thấy lô đất.');
     this.assertCanAccessLodat(user, lodat.createdByEmployeeId);
-    if (!this.isOpenSale(lodat)) {
-      throw new BadRequestException('Chỉ đăng lô đang Mở bán.');
+    if (!lodat.maps.length) {
+      throw new BadRequestException('Lô chưa gắn chủ — chưa có bài đăng web.');
     }
     return lodat;
   }
@@ -565,31 +632,10 @@ export class PublicContentService {
     }
   }
 
-  /** STAFF cannot take down another NV's published kho lot. */
-  private async assertStaffCanPublishProjectLot(lodat: LodatLoaded) {
-    if (!lodat.projectLotId) return;
-    const sibling = await this.prisma.publicLotListing.findFirst({
-      where: {
-        isPublished: true,
-        lodat: { projectLotId: lodat.projectLotId, id: { not: lodat.id } },
-      },
-      select: { id: true },
-    });
-    if (sibling) {
-      throw new BadRequestException(
-        'Số lô này đang hiện trên web ở luồng nhân viên khác. Liên hệ admin để gỡ rồi đăng.',
-      );
-    }
-  }
-
   private async uniqueSlug(base: string): Promise<string> {
     return nextUniqueLotGuestSlug(toPublicSlug(base, 0, 'lo-dat'), (slug) =>
       lotGuestSlugOccupied(this.prisma, slug),
     );
-  }
-
-  private isOpenSale(lodat: LodatLoaded): boolean {
-    return lodat.maps[0]?.status === 'DANG_BAN';
   }
 
   private lodatTitle(lodat: LodatLoaded): string {
@@ -630,8 +676,8 @@ export class PublicContentService {
   }
 
   /**
-   * One hub-map source for catalog, sitemap, commune pages, and listing detail (BUG-069).
-   * Persist backfill still sees every isPublished listing; derived maps use Mở bán only.
+   * Catalog / sitemap / hubs / listing detail (BUG-069).
+   * Owner 2026-09-07: mọi trạng thái bán — hangtag trên khách; không lọc Mở bán.
    */
   private async loadPublishedCatalog(): Promise<{
     items: ReturnType<PublicContentService['toCatalog']>[];
@@ -660,9 +706,8 @@ export class PublicContentService {
         },
       ]),
     );
-    const open = rows.filter((row) => this.isOpenSale(row.lodat));
-    const hubMaps = guestCatalogHubMaps(this.geosFromListings(open), persistedMap);
-    const items = open.map((row) => this.toCatalog(row, hubMaps));
+    const hubMaps = guestCatalogHubMaps(allGeos, persistedMap);
+    const items = rows.map((row) => this.toCatalog(row, hubMaps));
     return { items, hubMaps, persisted };
   }
 
