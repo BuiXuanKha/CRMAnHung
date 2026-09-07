@@ -27,7 +27,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **062** | MED | FIXED | Sửa tiêu đề lô CRM ≠ H1 web | Hướng B: hangtag lệch + sort đầu; không auto-sync (2026-09-07) |  |
 | **063** | MED | CLOSED (by design) | Ẩn khách, lô/GD/sổ/chat vẫn dùng Person | Owner hướng B: chỉ khỏi list; không cascade (2026-09-07) |  |
 | **064** | MED | FIXED | Xóa User → 500 vì care/tiến độ/xem file | Owner: **không xóa cứng**; chỉ vô hiệu hóa | Không xóa cứng (2026-09-07) |
-| **065** | MED | STILL_OPEN | Extension gửi UID nick; không khớp hồ sơ NV | HOÃN cùng đợt extension (BUG-043) **hoặc** gắn profile |  |
+| **065** | MED | CLOSED (by design) | Extension gửi UID nick; không khớp hồ sơ NV | Owner: **không** đăng ký kênh trước; kênh mới từ extension cứ vào | Không chặn ingest (2026-09-07) |
 | **066** | HIGH | STILL_OPEN | GPT/sửa slug lô không bỏ dấu | **SỬA** luôn `toPublicSlug` |  |
 | **067** | HIGH | STILL_OPEN | Lô mới chiếm URL 301 của lô cũ | **SỬA** `uniqueSlug` chừa bảng 301 |  |
 | **068** | HIGH | STILL_OPEN | Hub `/xa/…` đổi theo tập lô, không 301 | Lớn — làm sau 069/070; hoặc persist hub |  |
@@ -217,12 +217,7 @@ Admin không tạo chăm sóc — kịch bản «Admin ghi care rồi xóa NV» 
 
 ### BUG-065 — Extension ghi UID Facebook NV từ máy, không từ hồ sơ
 
-**Còn.** JWT = NV A; payload `employeeUid` nick B → Person của A gắn UID B. Không API gắn nick trên `/quan-tri/nguoi-dung`. Profile chỉ script migrate.
-
-**Vai:** không bấm CRM — **kha** chạy extension. Máy chung / sai field.
-
-**Đề xuất mặc định: HOÃN** cùng đợt extension (BUG-043).  
-Nếu sửa sớm: chỉ nhận UID có trong `EmployeeFacebookProfile` của đúng NV; Admin có chỗ gắn nick.
+**CLOSED (by design, 2026-09-07).** Owner: **không** đăng ký kênh liên hệ trước. Extension gửi nick/page mới → lưu khách + tin + UID **bình thường**. Không bắt nick có sẵn trong `EmployeeFacebookProfile`. Không chặn ingest. Khách vẫn thuộc NV đang login CRM.
 
 ---
 
