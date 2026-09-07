@@ -55,7 +55,6 @@ export function LotListingEditorDialog({
   const [priceMode, setPriceMode] = useState<PublicListingPriceMode>('CONTACT');
   const [priceLabel, setPriceLabel] = useState('');
   const [bodyHtml, setBodyHtml] = useState('');
-  const [slugDraft, setSlugDraft] = useState('');
   const [metaDescription, setMetaDescription] = useState('');
   const [seoTitle, setSeoTitle] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
@@ -72,7 +71,6 @@ export function LotListingEditorDialog({
       setPriceMode('CONTACT');
       setPriceLabel('');
       setBodyHtml('');
-      setSlugDraft('');
       setMetaDescription('');
       setSeoTitle('');
       setParseError(null);
@@ -85,10 +83,6 @@ export function LotListingEditorDialog({
       setPriceMode(lot.priceMode);
       setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
       setBodyHtml(gptPrefill.bodyHtml);
-      setSlugDraft(
-        gptPrefill.slug.trim() ||
-          (!lot.id.startsWith('pending-') && lot.slug ? lot.slug : ''),
-      );
       setMetaDescription(gptPrefill.metaDescription.trim() || lot.metaDescription?.trim() || '');
       setSeoTitle(gptPrefill.seoTitle.trim() || gptPrefill.title.trim());
       setParseError(null);
@@ -102,7 +96,6 @@ export function LotListingEditorDialog({
         setPriceMode(lot.priceMode);
         setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
         setBodyHtml(lotBodyHtml(lot));
-        setSlugDraft(!lot.id.startsWith('pending-') && lot.slug ? lot.slug : '');
         setMetaDescription(lot.metaDescription?.trim() || '');
         setSeoTitle(lot.seoTitle?.trim() || lot.title.trim());
         setParseError(null);
@@ -118,7 +111,6 @@ export function LotListingEditorDialog({
   }, [lot, gptApplyId]);
 
   function parsedInput(requireBody: boolean): UpdatePublicListingDraftInput | null {
-    const slug = slugDraft.trim();
     const meta = metaDescription.trim();
     const parsed = updatePublicListingDraftSchema.safeParse({
       title,
@@ -126,7 +118,6 @@ export function LotListingEditorDialog({
       priceMode,
       priceLabel: priceMode === 'AMOUNT' ? priceLabel.trim() || null : null,
       bodyHtml,
-      ...(slug ? { slug } : {}),
       metaDescription: meta || null,
       seoTitle: seoTitle.trim() || null,
     });
@@ -144,10 +135,9 @@ export function LotListingEditorDialog({
 
   const excerptPreview = listingBodyToExcerpt(bodyHtml);
   const slugPreview =
-    slugDraft.trim() ||
-    (lot && !lot.id.startsWith('pending-') && lot.slug
+    lot && !lot.id.startsWith('pending-') && lot.slug
       ? lot.slug
-      : toListingPublicSlug(title.trim() || 'lo-dat', location));
+      : toListingPublicSlug(title.trim() || 'lo-dat', location);
 
   return (
     <CrmDialog
@@ -168,7 +158,7 @@ export function LotListingEditorDialog({
         >
           {gptPrefill ? (
             <p className="crm-form-hint pw-editor-gpt-hint">
-              Đã điền từ GPT — kiểm tra tiêu đề, slug và mô tả trước khi lưu.
+              Đã điền từ GPT — kiểm tra tiêu đề và mô tả trước khi lưu.
             </p>
           ) : null}
           <p className="crm-form-hint">
@@ -222,20 +212,8 @@ export function LotListingEditorDialog({
             />
           </label>
 
-          <label>
-            <span className="crm-field-head">
-              <span>Đường dẫn (slug)</span>
-            </span>
-            <input
-              value={slugDraft}
-              onChange={(e) => setSlugDraft(e.target.value)}
-              placeholder="ban-lo-33-dau-gia-man-de"
-              maxLength={200}
-              disabled={busy}
-            />
-          </label>
           <p className="crm-slug-preview">
-            <span className="crm-slug-preview__label">Xem trước URL</span>
+            <span className="crm-slug-preview__label">Đường dẫn (không sửa tay)</span>
             <code className="crm-slug-preview__path">
               {PUBLIC_LISTING_PATH}/{slugPreview}
             </code>

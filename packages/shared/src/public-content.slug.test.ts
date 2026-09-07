@@ -40,4 +40,8 @@ describe('toListingPublicSlug', () => {
       'lo-dat-105m2-tai-nham-cap-dong-lac-nam-sach-hai-duong',
     );
   });
+
+  it('slugifies a dirty overlay slug the same way as titles', () => {
+    assert.equal(toPublicSlug('Lô Đất Nam Sách!', 0, 'lo-dat'), 'lo-dat-nam-sach');
+  });
 });
