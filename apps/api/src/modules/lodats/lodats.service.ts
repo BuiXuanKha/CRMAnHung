@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
+import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
 import type {
   ChangeLodatOwnerDto,
   CreateLodatDto,
@@ -1240,14 +1241,9 @@ export class LodatsService {
     });
     if (!image) throw new NotFoundException('Không tìm thấy ảnh lô.');
     await this.prisma.lodatImage.delete({ where: { id: imageId } });
-    // objectKey có thể reuse từ ảnh chat / lô khác — chỉ xoá R2 khi hết tham chiếu
-    const [chatRefs, lodatRefs] = await Promise.all([
-      this.prisma.customerMessengerImage.count({
-        where: { objectKey: image.objectKey },
-      }),
-      this.prisma.lodatImage.count({ where: { objectKey: image.objectKey } }),
-    ]);
-    if (chatRefs + lodatRefs === 0) {
+    // BUG-060: đếm đủ ref (snapshot GD, địa chỉ, …) — GD cũ còn share key cũng an toàn.
+    const refs = await countPublicImageKeyRefs(this.prisma, image.objectKey);
+    if (refs === 0) {
       try {
         await this.storage.delete(image.objectKey, 'public');
       } catch {
