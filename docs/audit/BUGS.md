@@ -270,7 +270,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm đích listing còn — trỏ 404. | FIXED |
 | BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | FIXED |
 | BUG-075 | MEDIUM | public web / OG | `/og-default.png` không có trong `apps/web/public` — OG/Twitter/JSON-LD fallback 404. | OPEN |
-| BUG-076 | MEDIUM | public web / canonical | `[category]` không hợp lệ: metadata noindex nhưng không gỡ canonical trang chủ. | OPEN |
+| BUG-076 | MEDIUM | public web / canonical | `[category]` không hợp lệ: metadata noindex nhưng không gỡ canonical trang chủ. | FIXED |
 | BUG-077 | MEDIUM | public-content / hub | Hai địa chỉ khác nhau `toPublicSlug` trùng → một hub URL, trộn listing. | OPEN |
 | BUG-078 | MEDIUM | public-content / metadata | `title` / `seoTitle` không unique — hai lô/bài trùng document title. | OPEN |
 | BUG-079 | LOW | public web | `getProductBySlug` mock đè gallery/mô tả listing thật nếu trùng slug demo. | OPEN |
@@ -1272,7 +1272,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Nhánh metadata invalid category thiếu bước gỡ canonical mà các 404 public khác đã làm.
 - **Impact:** Soft-404 gắn homepage; merge/index nhầm. (Next có thể ghi đè bằng `not-found.tsx` — nếu merge layout+page thì lỗi còn.)
 - **Evidence:** `[category]/page.tsx` generateMetadata vs `unpublishedPostMetadata` `canonical: null`. Layout `alternates.canonical`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — `generateMetadata` invalid category gán `alternates.canonical: null` (cùng pattern 404 public khác).
 
 ### BUG-077 — Hai địa chỉ khác nhau có thể cùng một hub slug
 

@@ -37,7 +37,12 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { category } = await params;
   if (!isPublicPostCategory(category)) {
-    return { title: 'Không tìm thấy', robots: { index: false, follow: false } };
+    // BUG-076: clear layout homepage canonical on invalid category soft-404.
+    return {
+      title: 'Không tìm thấy',
+      robots: { index: false, follow: false },
+      alternates: { canonical: null },
+    };
   }
   if (SINGLE_PAGE_CATEGORIES.has(category)) {
     const posts = await listPublicGuestPosts(category);

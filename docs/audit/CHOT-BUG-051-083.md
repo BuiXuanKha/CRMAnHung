@@ -38,7 +38,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **073** | MED | FIXED | 301 tới lô đã gỡ / thiếu listing | Chỉ 301 khi đích còn listing | FIXED (2026-09-07) |
 | **074** | MED | FIXED | Xóa lô còn hàng 301 | Xóa redirect mồ côi khi thiếu đích | FIXED (2026-09-07) |
 | **075** | MED | **ALREADY_FIXED** | `/og-default.png` live **200** | Đóng sổ FIXED — không sửa |  |
-| **076** | MED | STILL_OPEN | Category lạ: code thiếu `canonical: null` (live đang được `not-found` cứu) | SỬA 1 dòng cho chắc |  |
+| **076** | MED | FIXED | Category lạ: code thiếu `canonical: null` (live đang được `not-found` cứu) | SỬA 1 dòng cho chắc | FIXED (2026-09-07) |
 | **077** | MED | STILL_OPEN | Hai thôn slug gập một hub | HOÃN — chưa thấy case live |  |
 | **078** | MED | STILL_OPEN | Hai URL cùng `<title>` | HOÃN — 25 lô Đăng web **không** trùng title |  |
 | **079** | LOW | STILL_OPEN | Mock Unsplash đè gallery nếu trùng slug demo | **SỬA** gỡ mock (rẻ) |  |
@@ -283,9 +283,7 @@ Vẫn OPEN trên code: revalidate khi Đăng web = chi tiết + catalog + sitema
 
 ### BUG-076 — Category không hợp lệ thiếu gỡ canonical
 
-**Còn trên code** (nhánh metadata không `canonical: null`). Live `/khong-phai-chuyen-muc` hiện đi `not-found` (đang cứu). Vẫn nên 1 dòng cho đồng bộ các 404 public.
-
-**Đề xuất: SỬA** nhỏ.
+**FIXED (2026-09-07).** `generateMetadata` invalid category: `alternates.canonical: null`.
 
 ---
 
