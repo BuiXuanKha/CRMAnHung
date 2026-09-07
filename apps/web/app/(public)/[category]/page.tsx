@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { PublicPostCategory } from '@crmanhung/shared';
+import { JsonLd } from '@/features/public/json-ld';
+import { PostArticleView } from '@/features/public/post-article-view';
 import {
   isPublicPostCategory,
   listPublicGuestPosts,
@@ -9,11 +11,22 @@ import {
   publicPostCategoryLabel,
   teaserExcerpt,
 } from '@/features/public/published-posts';
-import { JsonLd } from '@/features/public/json-ld';
-import { categoryListMetadata, postItemListJsonLd } from '@/features/public/post-seo';
+import {
+  categoryListMetadata,
+  postArticleJsonLd,
+  postBreadcrumbJsonLd,
+  postItemListJsonLd,
+  postMetadata,
+} from '@/features/public/post-seo';
 import '@/features/public/public-home.css';
 
 type Props = { params: Promise<{ category: string }> };
+
+/** Chuyên mục thường chỉ một trang nội dung — hiện luôn bài thay vì list trống/1 thẻ. */
+const SINGLE_PAGE_CATEGORIES = new Set<string>([
+  PublicPostCategory.LIEN_HE,
+  PublicPostCategory.CHINH_SACH,
+]);
 
 export const revalidate = false;
 
@@ -26,6 +39,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!isPublicPostCategory(category)) {
     return { title: 'Không tìm thấy', robots: { index: false, follow: false } };
   }
+  if (SINGLE_PAGE_CATEGORIES.has(category)) {
+    const posts = await listPublicGuestPosts(category);
+    if (posts[0]) return postMetadata(posts[0]);
+  }
   return categoryListMetadata(category);
 }
 
@@ -35,6 +52,17 @@ export default async function PublicCategoryListPage({ params }: Props) {
 
   const posts = await listPublicGuestPosts(category);
   const label = publicPostCategoryLabel(category);
+
+  if (SINGLE_PAGE_CATEGORIES.has(category) && posts[0]) {
+    const post = posts[0];
+    return (
+      <>
+        <JsonLd data={postArticleJsonLd(post)} />
+        <JsonLd data={postBreadcrumbJsonLd(post)} />
+        <PostArticleView post={post} related={[]} />
+      </>
+    );
+  }
 
   return (
     <div className="ph">
