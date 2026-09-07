@@ -33,7 +33,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **068** | HIGH | FIXED | Hub `/xa/…` đổi theo tập lô, không 301 | Persist xã; 0 lô vẫn 200 + 301 đổi tên (2026-09-07) | Trang xã cố định; thôn để sau |
 | **069** | HIGH | STILL_OPEN | Breadcrumb lô trỏ `/xa/…` 404 | **SỬA** cùng tập lô Mở bán |  |
 | **070** | HIGH | STILL_OPEN | Tạm dừng / sửa địa chỉ không làm mới hub | **SỬA** revalidate thêm `/xa/…` | HOÃN (owner 2026-09-07 — giữ logic hiện tại) |
-| **071** | MED | STILL_OPEN | Sitemap + index 5 chuyên mục **trống** (live) | **SỬA** noindex / bỏ khỏi sitemap khi 0 bài | HOÃN (owner 2026-09-07 — seed nội dung; giữ sitemap) |
+| **071** | MED | CLOSED | Sitemap + index 5 chuyên mục **trống** (live) | Giữ sitemap đủ chuyên mục; đã seed bài | Đóng sổ (owner 2026-09-07) |
 | **072** | HIGH | STILL_OPEN | API lỗi → sitemap/catalog rỗng, slug 404 giả | **SỬA** không nuốt 5xx lúc chạy |  |
 | **073** | MED | STILL_OPEN | 301 tới lô đã gỡ / Tạm dừng | SỬA cùng 074 |  |
 | **074** | MED | STILL_OPEN | Xóa lô còn hàng 301 | SỬA cùng 067/073 |  |
@@ -52,7 +52,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 2) 066 · 067 · 069 · 072 (SEO khách)  
 3) 055 · 081 · 079 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
-5) Hoãn: **056**, **057**, **070**, **071** (owner), 065, 068, 077, 078, 080.
+5) Hoãn: **056**, **057**, **070** (owner), 065, 068, 077, 078, 080. **071** CLOSED.
 
 
 ---
@@ -265,7 +265,7 @@ Vẫn OPEN trên code: revalidate khi Đăng web = chi tiết + catalog + sitema
 
 ### BUG-071 — Sitemap luôn 6 chuyên mục bài, kể cả trống
 
-**Chốt: HOÃN** (owner 2026-09-07). Không lọc sitemap theo 0 bài. Seed bài Liên hệ / Chính sách / Tin tức / Kiến thức để chuyên mục có nội dung. Đóng PR #309.
+**CLOSED (2026-09-07).** Owner đóng sổ: giữ sitemap đủ chuyên mục bài; đã seed nội dung (kể cả Kinh nghiệm). Không sửa code lọc 0 bài. Đã đóng PR #309.
 
 ---
 

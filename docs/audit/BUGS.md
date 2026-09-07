@@ -264,7 +264,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-068 | HIGH | public-content / hub | Hub `/xa/…` tính lúc đọc, đổi khi tập lô đổi; không bảng 301. | FIXED |
 | BUG-069 | HIGH | public-content / hub | Hub slug chi tiết (mọi `isPublished`) ≠ catalog/sitemap (chỉ Mở bán) → link nội bộ 404. | OPEN |
 | BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN (HOÃN) |
-| BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | OPEN (HOÃN) |
+| BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | CLOSED |
 | BUG-072 | HIGH | public web / sitemap | Guest fetch nuốt lỗi API → sitemap/catalog rỗng; chi tiết slug thành 404 giả. | OPEN |
 | BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm `isPublished` / Mở bán — trỏ tới 404 hoặc BUG-023. | OPEN |
 | BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | OPEN |
@@ -1209,7 +1209,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Sitemap emit enum, không filter `posts.length`.
 - **Impact:** Index thin/empty; «Chính sách bảo mật» trống nếu chưa soạn bài.
 - **Evidence:** `sitemap.ts` `categoryPages` vs `articles` từ posts. `PublicPostCategory` 6 giá trị. `categoryListMetadata` luôn canonical category URL.
-- **Status:** OPEN (HOÃN — owner 2026-09-07: để chuyên mục trên sitemap; seed bài Liên hệ / Chính sách / Tin tức / Kiến thức. Đóng PR #309.)
+- **Status:** CLOSED (2026-09-07) — Owner đóng sổ: giữ sitemap đủ 6 chuyên mục; đã seed bài nên không còn trang trống. Không sửa filter sitemap. (Trước đó HOÃN / đóng PR #309.)
 
 ### BUG-072 — Guest API lỗi bị nuốt → sitemap/catalog rỗng, slug thành 404 giả
 
