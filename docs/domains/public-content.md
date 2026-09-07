@@ -696,7 +696,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 ### 17.2 Quy tắc nghiệp vụ
 
 1. **Hub xã (cấp 3) là trang cố định** — lưu `PublicCommuneHub` theo `wardId` (slug + tên xã + huyện + tỉnh). Site chỉ bán **huyện Nam Sách, Hải Dương** (không dùng hậu tố huyện vì trùng tên xã hai huyện). Lần đầu có listing `isPublished` (kể cả sau này hết Mở bán) → tạo hàng hub; **không xóa** khi 0 lô đang bán. Guest `/xa/{slug}` **200** + câu «Hiện không có lô đang bán…»; **không** 404. Sitemap **giữ** URL xã đã lưu. Đổi tên xã → slug mới, slug cũ **301** (`PublicCommuneHubRedirect`). Slug giả / chưa từng có hub → 404 + noindex.
-2. Gom lô: cấp 3 = `wardId`; cấp 4 = `address.detail` **trong** ward đó. Không parse chuỗi `location` làm nguồn sự thật. Hub thôn/KĐT (cấp 4) vẫn derive lúc đọc: 0 lô → 404 (chưa persist).
+2. Gom lô: cấp 3 = `wardId`; cấp 4 = `address.detail` **trong** ward đó. Không parse chuỗi `location` làm nguồn sự thật. Hub thôn/KĐT (cấp 4) vẫn derive lúc đọc: 0 lô → 404 (chưa persist). **BUG-077:** `placeSlug` unique trong mỗi xã — trùng sau bỏ dấu → `-2`/`-3`.
 3. Slug xã ổn định sau khi lưu. Slug cấp 4 unique trong phạm vi xã.
 4. Related trên chi tiết lô (hai block, dưới gallery):
    1. «Lô đất cùng xã {xã}» → hub `/xa/…` (tối đa 9 thẻ; trừ lô đang xem).

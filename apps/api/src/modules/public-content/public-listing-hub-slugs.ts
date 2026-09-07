@@ -60,6 +60,8 @@ function placeDetailKey(wardId: string, detail: string): string {
 export function buildHubSlugMaps(geos: AddressGeo[]): HubSlugMaps {
   const communeByWardId = new Map<string, CommuneSlugMeta>();
   const placeByWardDetail = new Map<string, PlaceSlugMeta>();
+  /** placeSlug taken per communeSlug — URL …/xa/{commune}/{place} must be unique. */
+  const placeSlugsTakenByCommune = new Map<string, Set<string>>();
 
   const wardNameDistricts = new Map<string, Set<string>>();
   for (const geo of geos) {
@@ -91,8 +93,17 @@ export function buildHubSlugMaps(geos: AddressGeo[]): HubSlugMaps {
       const commune = communeByWardId.get(geo.wardId)!;
       const key = placeDetailKey(geo.wardId, geo.detail);
       if (!placeByWardDetail.has(key)) {
+        // BUG-077: unique placeSlug within each commune URL (…/xa/{commune}/{place}).
+        let taken = placeSlugsTakenByCommune.get(commune.slug);
+        if (!taken) {
+          taken = new Set();
+          placeSlugsTakenByCommune.set(commune.slug, taken);
+        }
+        const base = toPublicSlug(geo.detail, 60, 'khu');
+        const slug = nextUniqueHubSlug(base, taken);
+        taken.add(slug);
         placeByWardDetail.set(key, {
-          slug: toPublicSlug(geo.detail, 60, 'khu'),
+          slug,
           label: geo.detail,
           communeSlug: commune.slug,
           communeLabel: commune.label,

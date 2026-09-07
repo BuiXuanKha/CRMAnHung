@@ -271,7 +271,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | FIXED |
 | BUG-075 | MEDIUM | public web / OG | `/og-default.png` không có trong `apps/web/public` — OG/Twitter/JSON-LD fallback 404. | OPEN |
 | BUG-076 | MEDIUM | public web / canonical | `[category]` không hợp lệ: metadata noindex nhưng không gỡ canonical trang chủ. | FIXED |
-| BUG-077 | MEDIUM | public-content / hub | Hai địa chỉ khác nhau `toPublicSlug` trùng → một hub URL, trộn listing. | OPEN |
+| BUG-077 | MEDIUM | public-content / hub | Hai địa chỉ khác nhau `toPublicSlug` trùng → một hub URL, trộn listing. | FIXED |
 | BUG-078 | MEDIUM | public-content / metadata | `title` / `seoTitle` không unique — hai lô/bài trùng document title. | OPEN |
 | BUG-079 | LOW | public web | `getProductBySlug` mock đè gallery/mô tả listing thật nếu trùng slug demo. | FIXED |
 | BUG-080 | LOW | public-content / slug | Slug lô `toPublicSlug(..., 0)` không cắt độ dài; title+location → URL cực dài. | OPEN |
@@ -1285,7 +1285,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Unique hub theo label thô, URL theo slug gập.
 - **Impact:** Duplicate content / sai entity trên URL đang index; không tách được hai khu.
 - **Evidence:** `placeByWardDetail.set` không check slug đã dùng. `listPlaceHubs` key `${cSlug}/${pSlug}`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Owner: trong mỗi xã, `placeSlug` unique; trùng sau `toPublicSlug` thì `-2`/`-3` (cùng `nextUniqueHubSlug`). Label giữ `detail` gốc.
 
 ### BUG-078 — Không ràng buộc unique `title` / `seoTitle` — trùng thẻ title trên nhiều URL
 

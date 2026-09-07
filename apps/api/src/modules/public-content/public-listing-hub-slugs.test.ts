@@ -70,6 +70,62 @@ describe('applyPersistedCommuneSlugs', () => {
   });
 });
 
+describe('buildHubSlugMaps place uniqueness (BUG-077)', () => {
+  it('suffixes -2 when two different details collapse to the same placeSlug in one commune', () => {
+    const geos: AddressGeo[] = [
+      {
+        wardId: 'w-an-lam',
+        wardName: 'An Lâm',
+        districtName: 'Nam Sách',
+        provinceName: 'Hải Dương',
+        detail: 'KĐT ABC',
+      },
+      {
+        wardId: 'w-an-lam',
+        wardName: 'An Lâm',
+        districtName: 'Nam Sách',
+        provinceName: 'Hải Dương',
+        detail: 'KDT ABC',
+      },
+    ];
+    const maps = buildHubSlugMaps(geos);
+    const a = maps.placeByWardDetail.get('w-an-lam|kđt abc');
+    const b = maps.placeByWardDetail.get('w-an-lam|kdt abc');
+    assert.ok(a);
+    assert.ok(b);
+    assert.equal(a!.communeSlug, 'an-lam');
+    assert.equal(b!.communeSlug, 'an-lam');
+    assert.equal(a!.label, 'KĐT ABC');
+    assert.equal(b!.label, 'KDT ABC');
+    assert.notEqual(a!.slug, b!.slug);
+    const slugs = new Set([a!.slug, b!.slug]);
+    assert.ok(slugs.has('kdt-abc'));
+    assert.ok(slugs.has('kdt-abc-2'));
+  });
+
+  it('allows the same placeSlug in two different communes', () => {
+    const geos: AddressGeo[] = [
+      {
+        wardId: 'w1',
+        wardName: 'An Lâm',
+        districtName: 'Nam Sách',
+        provinceName: 'Hải Dương',
+        detail: 'Nham Cáp',
+      },
+      {
+        wardId: 'w2',
+        wardName: 'Đồng Lạc',
+        districtName: 'Nam Sách',
+        provinceName: 'Hải Dương',
+        detail: 'Nham Cáp',
+      },
+    ];
+    const maps = buildHubSlugMaps(geos);
+    assert.equal(maps.placeByWardDetail.get('w1|nham cáp')?.slug, 'nham-cap');
+    assert.equal(maps.placeByWardDetail.get('w2|nham cáp')?.slug, 'nham-cap');
+  });
+});
+
 describe('guestCatalogHubMaps', () => {
   const hongPhongNamSach: AddressGeo = {
     wardId: 'w-hp-ns',

@@ -39,7 +39,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **074** | MED | FIXED | Xóa lô còn hàng 301 | Xóa redirect mồ côi khi thiếu đích | FIXED (2026-09-07) |
 | **075** | MED | **ALREADY_FIXED** | `/og-default.png` live **200** | Đóng sổ FIXED — không sửa |  |
 | **076** | MED | FIXED | Category lạ: code thiếu `canonical: null` (live đang được `not-found` cứu) | SỬA 1 dòng cho chắc | FIXED (2026-09-07) |
-| **077** | MED | STILL_OPEN | Hai thôn slug gập một hub | HOÃN — chưa thấy case live |  |
+| **077** | MED | FIXED | Hai thôn slug gập một hub | Unique `-2` trong xã | FIXED (2026-09-07) |
 | **078** | MED | STILL_OPEN | Hai URL cùng `<title>` | HOÃN — 25 lô Đăng web **không** trùng title |  |
 | **079** | LOW | FIXED | Mock Unsplash đè gallery nếu trùng slug demo | **SỬA** gỡ mock (rẻ) | FIXED (2026-09-07) |
 | **080** | LOW | STILL_OPEN | Slug không cắt độ dài | HOÃN — live dài nhất **88** ký tự |  |
@@ -52,7 +52,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 2) 066 · 067 · 069 (SEO khách; 072 FIXED)  
 3) 055 · 081 · 079 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
-5) Hoãn: **056**, **057**, **070** (owner), 065, 068, 077, 078, 080. **071** CLOSED.
+5) Hoãn: **056**, **057**, **070** (owner), 065, 068, 078, 080. **071** CLOSED.
 
 
 ---
@@ -289,9 +289,7 @@ Vẫn OPEN trên code: revalidate khi Đăng web = chi tiết + catalog + sitema
 
 ### BUG-077 — Hai địa chỉ gập một hub slug
 
-**Còn.** «KĐT ABC» vs «KDT ABC» → cùng `placeSlug`.
-
-**Live:** chưa chứng minh hai thôn đang đụng. **HOÃN** đến khi có case, hoặc unique `-2` khi làm 068.
+**FIXED (2026-09-07).** Trong mỗi xã, `placeSlug` unique; trùng → `-2`/`-3`. Ví dụ `…/xa/an-lam/kdt-abc` và `…/xa/an-lam/kdt-abc-2`.
 
 ---
 
