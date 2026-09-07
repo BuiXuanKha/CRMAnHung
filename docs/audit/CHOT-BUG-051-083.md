@@ -23,7 +23,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **058** | MED | FIXED | `/giao-dich/tao` không `lodatId` chỉ 200 lô; **Admin đã không tạo GD** | SỬA: picker tìm keyword (2026-09-06) |  |
 | **059** | HIGH | STILL_OPEN | Đổi chủ khi GD **Đã cọc** — lệch deal vs lô. Admin đã không đổi chủ | **SỬA** chặn đổi chủ khi còn GD mở |  |
 | **060** | HIGH | STILL_OPEN | Gỡ ảnh lô → xóa R2 dù GD đã đóng băng ảnh | **SỬA** đếm snapshot trước khi xóa file |  |
-| **061** | HIGH | STILL_OPEN | Admin gỡ ảnh dự án → gãy lô + web + GD | **SỬA** cùng đếm ref |  |
+| **061** | HIGH | CLOSED (by design) | Admin gỡ ảnh dự án → gãy lô + web + GD | Owner: dùng chung; Admin xóa/đổi = live theo kho (2026-09-07) |  |
 | **062** | MED | STILL_OPEN | Sửa tiêu đề lô CRM ≠ H1 web | **Cần chốt hướng** A/B dưới |  |
 | **063** | MED | STILL_OPEN | Ẩn khách, lô/GD/sổ/chat vẫn dùng Person | **Cần chốt hướng** A/B (+ BUG-027) |  |
 | **064** | MED | STILL_OPEN | Xóa User → 500 vì care/tiến độ/xem file | **SỬA** đếm đủ FK + câu tiếng Việt |  |
@@ -48,7 +48,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **083** | MED | **ALREADY_FIXED** | `kha` + `/quan-tri/*` đã redirect | Không sửa lại |  |
 
 **Gợi ý thứ tự nếu bảo «sửa các ô SỬA»:**  
-1) 060 · 061 · 059 (ảnh/GD/chủ — mất data)  
+1) (059/060 FIXED; 061 by design)  
 2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
 3) 055 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
@@ -201,17 +201,8 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 ### BUG-061 — Xóa ảnh địa chỉ dự án luôn xóa R2
 
-**Còn.** Admin `deleteImage` địa chỉ: xóa hàng rồi `storage.delete`, không đếm ref. Lô kho / catalog / snapshot **dùng chung** key.
+**CLOSED (by design, 2026-09-07).** Owner: giữ **dùng chung** ảnh kho. Admin gỡ/đổi ảnh dự án = chủ đích; lô CRM + bài Đăng web đọc live nên theo ảnh mới. Không copy nhân bản theo NV. Snapshot GD đã tạo không đổi theo kho (chấp nhận).
 
-**Tôi vào vai Admin.** Sổ địa chỉ → gỡ 1 ảnh dự án.
-
-**Hậu quả:** Mọi lô trỏ kho + trang `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/…` + GD snapshot cùng ảnh → CDN 404.
-
-**Live neo:** có lô Đăng web «Lô góc 97 m² … Khu đô thị Đồng Khê» (`ban-lo-goc-97m2-khu-do-thi-dong-khe`) — ảnh dự án là loại dùng chung.
-
-**Đề xuất: SỬA** — cùng rule đếm ref như 060. Không xóa object nếu lô/web/GD còn trỏ.
-
----
 
 ### BUG-062 — Sửa lô CRM không đẩy title/địa chỉ Đăng web
 
