@@ -16,7 +16,7 @@ Hướng dẫn cho Cursor Agent (và người) làm việc trong repo này.
 | Skill | Khi nào dùng |
 |-------|----------------|
 | `crmanhung-playbook` | Mọi task feature — nhắc thứ tự làm việc |
-| `fix-audit-bug` | **Sửa 1 bug trong `docs/audit/BUGS.md`** — xác minh → giải thích NV/Admin + DB thật khi cần → PR; **đủ 5 PR mới hỏi merge tuần tự để deploy** (trừ khi owner bảo deploy ngay) |
+| `fix-audit-bug` | **Sửa 1 bug trong `docs/audit/BUGS.md`** — xác minh → giải thích NV/Admin bằng **câu đủ nghĩa** (có tên, chủ ngữ, vị ngữ; không viết tắt gọn) + DB thật khi cần → PR; **đủ 5 PR mới hỏi merge tuần tự để deploy** (trừ khi owner bảo deploy ngay) |
 | `write-domain-doc` | Viết / cập nhật `docs/domains/*` — **máy tính → mobile → chi tiết thành phần**; đánh số, ngắn (mẫu `customers.md` §12) |
 | `add-shared-contract` | Thêm Zod/types vào `packages/shared` |
 | `ui-guidelines` | **Trước mọi UI** — đọc `docs/UI-GUIDELINES.md` |
