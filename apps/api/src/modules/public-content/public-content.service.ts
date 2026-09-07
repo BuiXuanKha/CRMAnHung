@@ -23,8 +23,7 @@ import { PublicWebRevalidateService } from './public-web-revalidate.service';
 import { PublicCommuneHubsService } from './public-commune-hubs';
 import {
   addressGeo,
-  applyPersistedCommuneSlugs,
-  buildHubSlugMaps,
+  guestCatalogHubMaps,
   communeMetaForGeo,
   placeMetaForGeo,
   preferredCommuneSlugByWardId,
@@ -139,7 +138,8 @@ export class PublicContentService {
     if (!row?.isPublished) {
       throw new NotFoundException('Không tìm thấy sản phẩm');
     }
-    const hubMaps = await this.loadHubMapsForPublished();
+    // BUG-069: same Mở bán hub maps as catalog/sitemap — not every isPublished row.
+    const { hubMaps } = await this.loadPublishedCatalog();
     return this.toCatalog(row, hubMaps);
   }
 
@@ -629,19 +629,10 @@ export class PublicContentService {
     return this.communeHubs.persistFromGeo(geo);
   }
 
-  private async loadHubMapsForPublished(): Promise<HubSlugMaps> {
-    const rows = await this.prisma.publicLotListing.findMany({
-      where: { isPublished: true },
-      include: { lodat: { include: LODAT_INCLUDE } },
-    });
-    const geos = this.geosFromListings(rows);
-    const persisted = await this.communeHubs.ensurePersisted(
-      geos,
-      preferredCommuneSlugByWardId(geos),
-    );
-    return applyPersistedCommuneSlugs(buildHubSlugMaps(geos), persisted);
-  }
-
+  /**
+   * One hub-map source for catalog, sitemap, commune pages, and listing detail (BUG-069).
+   * Persist backfill still sees every isPublished listing; derived maps use Mở bán only.
+   */
   private async loadPublishedCatalog(): Promise<{
     items: ReturnType<PublicContentService['toCatalog']>[];
     hubMaps: HubSlugMaps;
@@ -670,8 +661,7 @@ export class PublicContentService {
       ]),
     );
     const open = rows.filter((row) => this.isOpenSale(row.lodat));
-    const geos = this.geosFromListings(open);
-    const hubMaps = applyPersistedCommuneSlugs(buildHubSlugMaps(geos), persistedMap);
+    const hubMaps = guestCatalogHubMaps(this.geosFromListings(open), persistedMap);
     const items = open.map((row) => this.toCatalog(row, hubMaps));
     return { items, hubMaps, persisted };
   }
