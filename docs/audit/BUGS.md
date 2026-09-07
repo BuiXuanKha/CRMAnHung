@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 38 |
+| OPEN | 37 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 45 |
+| FIXED / CLOSED | 46 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -160,6 +160,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-06 | audit | CHOT 051–083 | File `docs/audit/CHOT-BUG-051-083.md` — xác minh code main + giải thích NV/Admin để owner chốt. Chưa sửa OPEN. |
 | 2026-09-07 | customers | BUG-063 CLOSED | Owner hướng B: ẩn khách chỉ khỏi `/khach-hang`; lô/GD/sổ/chat giữ. Không cascade. |
 | 2026-09-07 | public-content / hub | BUG-068 FIXED | Owner: persist trang xã; 0 lô đang bán vẫn 200 + empty; đổi tên xã → 301 slug cũ. Không persist thôn. |
+| 2026-09-07 | public web / sitemap | BUG-071 FIXED | Sitemap chỉ chuyên mục có bài; 0 bài → noindex follow. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -264,7 +265,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-068 | HIGH | public-content / hub | Hub `/xa/…` tính lúc đọc, đổi khi tập lô đổi; không bảng 301. | FIXED |
 | BUG-069 | HIGH | public-content / hub | Hub slug chi tiết (mọi `isPublished`) ≠ catalog/sitemap (chỉ Mở bán) → link nội bộ 404. | OPEN |
 | BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN |
-| BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | OPEN |
+| BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | FIXED |
 | BUG-072 | HIGH | public web / sitemap | Guest fetch nuốt lỗi API → sitemap/catalog rỗng; chi tiết slug thành 404 giả. | OPEN |
 | BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm `isPublished` / Mở bán — trỏ tới 404 hoặc BUG-023. | OPEN |
 | BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | OPEN |
@@ -1209,7 +1210,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Sitemap emit enum, không filter `posts.length`.
 - **Impact:** Index thin/empty; «Chính sách bảo mật» trống nếu chưa soạn bài.
 - **Evidence:** `sitemap.ts` `categoryPages` vs `articles` từ posts. `PublicPostCategory` 6 giá trị. `categoryListMetadata` luôn canonical category URL.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Sitemap chỉ `/{category}` khi có ít nhất một bài `PUBLISHED`. Trang chuyên mục 0 bài vẫn 200 («Hiện chưa có bài…») nhưng `noindex, follow`. Live lúc sửa: chỉ `/du-an` có bài.
+- **Fix:** `sitemap.ts` `sitemapPostCategories`, `categoryListMetadata({ postCount })`.
 
 ### BUG-072 — Guest API lỗi bị nuốt → sitemap/catalog rỗng, slug thành 404 giả
 

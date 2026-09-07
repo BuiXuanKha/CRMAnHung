@@ -1,9 +1,9 @@
 import type { MetadataRoute } from 'next';
-import { PublicPostCategory, listingCommuneHubPath, listingPlaceHubPath } from '@crmanhung/shared';
+import { listingCommuneHubPath, listingPlaceHubPath } from '@crmanhung/shared';
 import { listingSeoImageUrls, postSeoImageUrls } from '@/features/public/listing-image-seo';
 import { listCommuneHubs, listPlaceHubs } from '@/features/public/listing-hubs';
 import { listSitemapListings } from '@/features/public/published-listings';
-import { listSitemapPosts, postHref } from '@/features/public/published-posts';
+import { listSitemapPosts, postHref, sitemapPostCategories } from '@/features/public/published-posts';
 import { isPublicSearchIndexEnabled } from '@/features/public/search-index';
 import {
   PUBLIC_LISTING_PATH,
@@ -58,7 +58,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       ...(images.length ? { images } : {}),
     };
   });
-  const categoryPages = Object.values(PublicPostCategory).map((category) => ({
+  const categoryPages = sitemapPostCategories(posts).map((category) => ({
     url: `${PUBLIC_SITE_ORIGIN}/${category}`,
     changeFrequency: 'weekly' as const,
     priority: 0.6,

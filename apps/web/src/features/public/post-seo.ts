@@ -71,17 +71,21 @@ export function postMetadata(post: PublicGuestPost): Metadata {
   };
 }
 
-export function categoryListMetadata(category: string): Metadata {
+export function categoryListMetadata(
+  category: string,
+  opts?: { postCount?: number },
+): Metadata {
   const label = publicPostCategoryLabel(category);
   const url = categoryListCanonicalUrl(category);
   const description = clipMetaDescription(
     `Bài viết chuyên mục ${label} từ An Hưng Land — tin tức, kiến thức và cập nhật dự án.`,
   );
+  const empty = (opts?.postCount ?? 0) === 0;
   return {
     title: label,
     description,
     alternates: { canonical: url },
-    robots: publicSearchRobots(),
+    robots: empty ? { index: false, follow: true } : publicSearchRobots(),
     openGraph: {
       title: `${label} | ${ANHUNG_BRAND.name}`,
       description,

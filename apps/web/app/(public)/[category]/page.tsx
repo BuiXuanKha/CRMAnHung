@@ -26,7 +26,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!isPublicPostCategory(category)) {
     return { title: 'Không tìm thấy', robots: { index: false, follow: false } };
   }
-  return categoryListMetadata(category);
+  const posts = await listPublicGuestPosts(category);
+  return categoryListMetadata(category, { postCount: posts.length });
 }
 
 export default async function PublicCategoryListPage({ params }: Props) {

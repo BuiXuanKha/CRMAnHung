@@ -33,7 +33,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **068** | HIGH | FIXED | Hub `/xa/…` đổi theo tập lô, không 301 | Persist xã; 0 lô vẫn 200 + 301 đổi tên (2026-09-07) | Trang xã cố định; thôn để sau |
 | **069** | HIGH | STILL_OPEN | Breadcrumb lô trỏ `/xa/…` 404 | **SỬA** cùng tập lô Mở bán |  |
 | **070** | HIGH | STILL_OPEN | Tạm dừng / sửa địa chỉ không làm mới hub | **SỬA** revalidate thêm `/xa/…` |  |
-| **071** | MED | STILL_OPEN | Sitemap + index 5 chuyên mục **trống** (live) | **SỬA** noindex / bỏ khỏi sitemap khi 0 bài |  |
+| **071** | MED | FIXED | Sitemap + index 5 chuyên mục **trống** (live) | **SỬA** noindex / bỏ khỏi sitemap khi 0 bài | Sitemap chỉ chuyên mục có bài (2026-09-07) |
 | **072** | HIGH | STILL_OPEN | API lỗi → sitemap/catalog rỗng, slug 404 giả | **SỬA** không nuốt 5xx lúc chạy |  |
 | **073** | MED | STILL_OPEN | 301 tới lô đã gỡ / Tạm dừng | SỬA cùng 074 |  |
 | **074** | MED | STILL_OPEN | Xóa lô còn hàng 301 | SỬA cùng 067/073 |  |
@@ -267,14 +267,9 @@ Admin không tạo chăm sóc — kịch bản «Admin ghi care rồi xóa NV» 
 
 ### BUG-071 — Sitemap luôn 6 chuyên mục bài, kể cả trống
 
-**Còn.** Live 2026-09-06:
+**FIXED (2026-09-07).** Sitemap chỉ đưa chuyên mục đang có bài. Trang trống (`/tin-tuc`, `/lien-he`, …) vẫn mở được nhưng `noindex`.
 
-| URL | Trang |
-|-----|--------|
-| `/du-an` | có bài |
-| `/tin-tuc` `/kien-thuc` `/kinh-nghiem` `/lien-he` `/chinh-sach` | empty «Hiện chưa có bài» + title indexable |
-
-**Đề xuất: SỬA** — 0 bài → không đưa sitemap + `noindex` (trừ khi owner muốn giữ «Chính sách» luôn index).
+**Guest:** `https://anhungland.com/sitemap.xml` còn `/du-an`, không còn `/lien-he` khi chưa soạn bài.
 
 ---
 

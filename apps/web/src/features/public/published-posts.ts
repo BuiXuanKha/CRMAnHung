@@ -49,6 +49,17 @@ export async function listSitemapPosts(): Promise<PublicGuestPost[]> {
   return (await listPublishedPosts()) as PublicGuestPost[];
 }
 
+/** Sitemap: only categories that already have at least one published post (BUG-071). */
+export function sitemapPostCategories(
+  posts: Array<{ category: string }>,
+): PublicPostCategory[] {
+  const seen = new Set<string>();
+  for (const row of posts) {
+    if (isPublicPostCategory(row.category)) seen.add(row.category);
+  }
+  return Object.values(PublicPostCategory).filter((category) => seen.has(category));
+}
+
 /** Homepage «Dự án nổi bật» — bài chuyên mục Dự án, mới nhất trước. */
 export async function listHomeProjectPosts(limit = 3): Promise<PublicGuestPost[]> {
   const items = await listPublicGuestPosts(PublicPostCategory.DU_AN);
