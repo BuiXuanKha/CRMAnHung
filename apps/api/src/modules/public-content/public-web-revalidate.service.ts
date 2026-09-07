@@ -12,9 +12,13 @@ export class PublicWebRevalidateService {
 
   constructor(private readonly config: ConfigService) {}
 
-  async revalidateListing(slug: string, opts?: { includeHome?: boolean }): Promise<void> {
+  async revalidateListing(
+    slug: string,
+    opts?: { includeHome?: boolean; extraPaths?: string[] },
+  ): Promise<void> {
     const paths = [`${PUBLIC_LISTING_PATH}/${slug}`, PUBLIC_LISTING_PATH, '/sitemap.xml'];
     if (opts?.includeHome) paths.push('/');
+    if (opts?.extraPaths?.length) paths.push(...opts.extraPaths);
     await this.revalidatePaths(paths);
   }
 

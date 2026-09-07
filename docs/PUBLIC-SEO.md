@@ -46,7 +46,7 @@ Mỗi route public phải có:
 | Hạng mục | Quy ước |
 |----------|---------|
 | `app/robots.ts` | Cho phép crawl public; chặn `/login`, khu `(crm)` (`/khach-hang`, `/lo-dat`, …). Dòng `Sitemap:` chỉ khi cờ index bật |
-| `app/sitemap.ts` | Khi cờ tắt: rỗng. Khi bật: URL public ổn định + **lô đã đăng** `/mua-ban-nha-dat-huyen-nam-sach/[slug]` (+ hub `/xa/…` khi có) |
+| `app/sitemap.ts` | Khi cờ tắt: rỗng. Khi bật: URL public ổn định + **lô đã đăng** `/mua-ban-nha-dat-huyen-nam-sach/[slug]` + hub xã đã persist `/xa/…` (kể 0 lô đang bán) + hub cấp 4 khi có lô |
 | HTTPS | Chỉ `https://anhungland.com` (www → apex hoặc ngược lại — một hướng, khớp canonical) |
 | `lang` | `<html lang="vi">` (đã có ở root layout) |
 
@@ -148,7 +148,7 @@ Contract: `publicGuestListingSchema` + `listingSearchDescription` trong `package
 | **OG / Twitter** | title + description như trên; `og:image` = ảnh bìa; thiếu bìa → `/og-default.png`; `summary_large_image` | Ảnh PII / ảnh nội bộ CRM |
 | **Ảnh / Google Images** | `alt` = `listingHeadline` (title + phần địa chỉ **chưa** có trong tên); gallery SSR đủ URL; sitemap `image:loc`; JSON-LD `ImageObject`. Xem §10 | `alt` rỗng / nhồi keyword; chặn Googlebot tải CDN; sitemap `/og-default.png` |
 | **Link nội bộ** | Breadcrumb Trang chủ → Nhà đất đang bán → **xã** (`/xa/…`) → lô; block sản phẩm khác | Orphan URL; crumb nhồi cả chuỗi thôn + huyện + tỉnh |
-| **Sitemap** | Chỉ lô `isPublished` (+ hub xã/cấp4 có lô). Mỗi URL lô kèm `image:image` (bìa + gallery CDN). Gỡ web → bỏ khỏi sitemap, URL cũ 404 `noindex` | Nháp, Tạm dừng, Đã cọc / Đã bán; ảnh brand fallback |
+| **Sitemap** | Lô `isPublished` ∩ Mở bán; **hub xã đã persist** (kể 0 lô đang bán); hub cấp 4 khi có lô. Mỗi URL lô kèm `image:image` (bìa + gallery CDN). Gỡ web → bỏ lô khỏi sitemap (URL lô cũ 404 `noindex`); trang xã **không** gỡ | Nháp, Tạm dừng, Đã cọc / Đã bán trên catalog lô; ảnh brand fallback |
 | **robots** | Cho phép path catalog mới; chặn `/login` + CRM | `Disallow` path catalog |
 
 **Giá trên SERP:** cùng `priceLabel` khách thấy. Chính sách làm mờ (3,2 tỷ → `3 tỷ xxx`) thì meta/OG/JSON-LD cũng mờ — không lộ số CRM.

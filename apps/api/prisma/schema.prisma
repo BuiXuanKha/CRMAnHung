@@ -258,9 +258,10 @@ model Ward {
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
 
-  addresses Address[]
-  district  District  @relation(fields: [districtId], references: [id], onDelete: Cascade)
-  createdBy User?     @relation("WardCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
+  addresses  Address[]
+  communeHub PublicCommuneHub?
+  district   District @relation(fields: [districtId], references: [id], onDelete: Cascade)
+  createdBy  User?    @relation("WardCreator", fields: [createdByEmployeeId], references: [id], onDelete: SetNull)
 
   @@index([districtId])
   @@index([isHidden])
@@ -426,6 +427,32 @@ model PublicDirectViewStat {
 
 /// 301 slug lô cũ → slug mới (sau khi đổi công thức tên+địa chỉ).
 model PublicLotSlugRedirect {
+  id        String   @id @default(cuid())
+  fromSlug  String   @unique
+  toSlug    String
+  createdAt DateTime @default(now())
+
+  @@index([toSlug])
+}
+
+/// Trang hub xã cố định (`/xa/{slug}`). Không xóa khi hết lô đang bán.
+model PublicCommuneHub {
+  id            String   @id @default(cuid())
+  wardId        String   @unique
+  slug          String   @unique
+  label         String
+  districtLabel String   @default("")
+  provinceLabel String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  ward Ward @relation(fields: [wardId], references: [id], onDelete: Restrict)
+
+  @@index([updatedAt])
+}
+
+/// 301 slug xã cũ → slug hiện tại (đổi tên xã).
+model PublicCommuneHubRedirect {
   id        String   @id @default(cuid())
   fromSlug  String   @unique
   toSlug    String

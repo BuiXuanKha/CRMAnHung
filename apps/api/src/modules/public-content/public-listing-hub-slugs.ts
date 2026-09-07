@@ -104,6 +104,56 @@ export function buildHubSlugMaps(geos: AddressGeo[]): HubSlugMaps {
   return { communeByWardId, placeByWardDetail };
 }
 
+/** First-insert slug for a ward — match the live derived URL when seeding existing hubs. */
+export function preferredCommuneSlugByWardId(geos: AddressGeo[]): Map<string, string> {
+  const preferred = new Map<string, string>();
+  for (const [wardId, meta] of buildHubSlugMaps(geos).communeByWardId) {
+    preferred.set(wardId, meta.slug);
+  }
+  return preferred;
+}
+
+/**
+ * Persist wins: catalog/listing communeSlug follows stored hub, not the live derived map.
+ * Also copies persisted slug onto place hub parent fields.
+ */
+export function applyPersistedCommuneSlugs(
+  maps: HubSlugMaps,
+  persisted: Map<string, CommuneSlugMeta>,
+): HubSlugMaps {
+  const communeByWardId = new Map(maps.communeByWardId);
+  for (const [wardId, meta] of persisted) {
+    communeByWardId.set(wardId, meta);
+  }
+
+  const placeByWardDetail = new Map<string, PlaceSlugMeta>();
+  for (const [key, place] of maps.placeByWardDetail) {
+    const wardId = key.slice(0, key.indexOf('|'));
+    const commune = communeByWardId.get(wardId);
+    placeByWardDetail.set(
+      key,
+      commune
+        ? { ...place, communeSlug: commune.slug, communeLabel: commune.label }
+        : place,
+    );
+  }
+
+  return { communeByWardId, placeByWardDetail };
+}
+
+export function nextUniqueHubSlug(base: string, taken: ReadonlySet<string>): string {
+  const root = base.trim();
+  if (!root) return 'xa';
+  if (!taken.has(root)) return root;
+  let n = 2;
+  let slug = `${root}-${n}`;
+  while (taken.has(slug)) {
+    n += 1;
+    slug = `${root}-${n}`;
+  }
+  return slug;
+}
+
 export function communeMetaForGeo(
   maps: HubSlugMaps,
   geo: AddressGeo | null,
