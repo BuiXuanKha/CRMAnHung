@@ -34,12 +34,6 @@ export async function updateUser(
   });
 }
 
-export async function deleteUser(id: string): Promise<{ ok: boolean }> {
-  return apiFetch<{ ok: boolean }>(`/users/${encodeURIComponent(id)}`, {
-    method: 'DELETE',
-  });
-}
-
 export async function resetUserPassword(
   id: string,
   input: ResetUserPasswordInput,

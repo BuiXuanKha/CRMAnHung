@@ -55,7 +55,7 @@ Copy data: **User trước** (`employeeId` bắt buộc). Hotline nguồn có th
 |-----|-------|------|
 | Login | `/login` | Form đăng nhập |
 | CRM | sau login | ADMIN → `/dashboard` (trang đầu); STAFF → `/khach-hang` (header **Đăng web** → `/dashboard/lo-dat`) |
-| Quản lý NV | `/quan-tri/nguoi-dung` | ADMIN — bảng NV; thêm / sửa / xoá / reset MK |
+| Quản lý NV | `/quan-tri/nguoi-dung` | ADMIN — bảng NV; thêm / sửa / vô hiệu hóa / reset MK |
 
 ### 6.1 Giao diện máy tính — `/login`
 
@@ -80,15 +80,15 @@ Cùng control 6.1. Ô nhập ≥ 16px (không zoom). Nút đủ vùng chạm.
 
 ```
 ┌ Quản lý người dùng ─────────────── [ + Thêm mới ] ─┐
-├ # │ Avatar │ User │ Họ tên │ SĐT │ Vai trò │ Trạng thái │ Sửa │ Reset MK │ Xoá ┤
-└──────────────────────────────────────────────────────────────────────────────┘
+├ # │ Avatar │ User │ Họ tên │ SĐT │ Vai trò │ Trạng thái │ Sửa │ Reset MK ┤
+└────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. Chỉ ADMIN; STAFF redirect `/khach-hang`
 2. Nút **Thêm mới** → modal: user, mật khẩu, họ tên, SĐT, vai trò, avatar
-3. **Sửa** → modal (không đổi mật khẩu ở đây); đổi / gỡ avatar
+3. **Sửa** → modal (không đổi mật khẩu ở đây); đổi / gỡ avatar; tick **Tài khoản đang hoạt động** (bỏ tick = xóa mềm: NV không login; khách/lô/GD/sổ/chăm sóc giữ nguyên)
 4. **Reset MK** → modal nhập mật khẩu mới
-5. **Xoá** → confirm; không xoá NV đã có khách/lô/giao dịch/sổ đỏ hoặc chính mình
+5. **Không xóa cứng** User — `DELETE /users/:id` luôn từ chối. Giữ hàng để FK khách, lô, giao dịch, sổ đỏ, chăm sóc, tiến độ không gãy
 6. Cột **Avatar** — ảnh tròn 32px (CDN); trống = chữ tắt. Chỉ thể hiện; bấm **Sửa** để đổi
 7. Modal avatar — chọn jpg/png/webp; preview; **Gỡ ảnh** khi đã có. Lưu: PATCH field; file mới → `POST /users/:id/avatar`; gỡ → `DELETE /users/:id/avatar`
 
@@ -111,7 +111,7 @@ Prefix `/api/v1`
 | PATCH | `/users/:id` | ADMIN — sửa NV |
 | POST | `/users/:id/avatar` | ADMIN — multipart `file` (ảnh → WebP R2) |
 | DELETE | `/users/:id/avatar` | ADMIN — gỡ avatar |
-| DELETE | `/users/:id` | ADMIN — xoá NV (nếu không còn dữ liệu) |
+| DELETE | `/users/:id` | ADMIN — **luôn 400**; không xóa cứng User. Vô hiệu hóa = `PATCH` `isActive: false` |
 | POST | `/users/:id/reset-password` | ADMIN — đặt lại mật khẩu |
 
 `GET /users`, `POST /users`, `PATCH /users/:id`, `/auth/me` trả `avatarUrl` (CDN) khi có ảnh. Header CRM + khối liên hệ trang khách (chi tiết lô, thẻ khi NV login) dùng ảnh đó. `GET /public/lot-shares/:code` cũng trả `employee.avatarUrl`. Không nhét URL vào JWT.

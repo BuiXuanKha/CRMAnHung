@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 44 |
+| OPEN | 43 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 39 |
+| FIXED / CLOSED | 40 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -1116,7 +1116,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Precheck không phủ mọi Restrict.
 - **Impact:** Không xóa được user «sạch» khách; Admin tưởng xóa xong; lỗi không rõ.
 - **Evidence:** `remove` bốn `count`. Prisma care note / title progress / view log không Cascade.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Owner chốt: **không xóa cứng** nhân viên. Chỉ xóa mềm `isActive: false` (Sửa → bỏ tick Tài khoản đang hoạt động) để giữ khách/lô/GD/sổ/chăm sóc. `DELETE /users/:id` luôn 400 tiếng Việt; UI bỏ cột Xoá. Admin không tạo chăm sóc — không mở rộng chặn care trong PR này.
 
 ### BUG-065 — Import Messenger ghi `employeeFacebookUid` không chứng thực profile NV; không API gắn UID
 

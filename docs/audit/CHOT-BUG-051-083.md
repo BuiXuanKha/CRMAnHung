@@ -26,7 +26,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **061** | HIGH | CLOSED (by design) | Admin gỡ ảnh dự án → gãy lô + web + GD | Owner: dùng chung; Admin xóa/đổi = live theo kho (2026-09-07) |  |
 | **062** | MED | FIXED | Sửa tiêu đề lô CRM ≠ H1 web | Hướng B: hangtag lệch + sort đầu; không auto-sync (2026-09-07) |  |
 | **063** | MED | STILL_OPEN | Ẩn khách, lô/GD/sổ/chat vẫn dùng Person | **Cần chốt hướng** A/B (+ BUG-027) |  |
-| **064** | MED | STILL_OPEN | Xóa User → 500 vì care/tiến độ/xem file | **SỬA** đếm đủ FK + câu tiếng Việt |  |
+| **064** | MED | FIXED | Xóa User → 500 vì care/tiến độ/xem file | Owner: **không xóa cứng**; chỉ vô hiệu hóa | Không xóa cứng (2026-09-07) |
 | **065** | MED | STILL_OPEN | Extension gửi UID nick; không khớp hồ sơ NV | HOÃN cùng đợt extension (BUG-043) **hoặc** gắn profile |  |
 | **066** | HIGH | STILL_OPEN | GPT/sửa slug lô không bỏ dấu | **SỬA** luôn `toPublicSlug` |  |
 | **067** | HIGH | STILL_OPEN | Lô mới chiếm URL 301 của lô cũ | **SỬA** `uniqueSlug` chừa bảng 301 |  |
@@ -217,11 +217,11 @@ Liên quan **BUG-027** (map chủ sau ẩn).
 
 ### BUG-064 — Xóa User thiếu đếm FK → 500
 
-**Còn.** `remove` đếm khách/lô/GD/sổ của user đó. Không đếm care note, tiến độ/tiền/file sổ, lần xem file (Restrict).
+**FIXED (2026-09-07).** Owner chốt: Admin **không xóa cứng** nhân viên. Chỉ **xóa mềm** (`isActive: false`) để giữ khách, lô, giao dịch, sổ đỏ, chăm sóc.
 
-**Tôi vào vai Admin.** `/quan-tri/nguoi-dung` → Xóa user đã «sạch» khách/lô. Nếu từng ghi chăm sóc / bước sổ trên hồ sơ NV khác → Lưu → lỗi 500, không câu «vô hiệu hóa».
+**Tôi vào vai Admin.** `/quan-tri/nguoi-dung` không còn cột **Xoá**. Khóa NV: **Sửa** → bỏ tick **Tài khoản đang hoạt động**. `DELETE /users/:id` (client cũ) luôn 400: «Không xóa cứng nhân viên…».
 
-**Đề xuất: SỬA** — đếm đủ bảng Restrict; nếu còn thì báo tiếng Việt «Không xóa được, hãy vô hiệu hóa» (không bịa xóa cascade).
+Admin không tạo chăm sóc — kịch bản «Admin ghi care rồi xóa NV» không thuộc phạm vi sửa care create.
 
 ---
 

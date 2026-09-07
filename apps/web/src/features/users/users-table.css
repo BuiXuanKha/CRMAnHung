@@ -20,8 +20,7 @@
     110px
     130px
     72px
-    88px
-    64px;
+    88px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -45,7 +44,7 @@
 .nv-grid-row {
   display: grid;
   grid-template-columns: var(--nv-cols);
-  min-width: 1020px;
+  min-width: 956px;
   border-bottom: 1px solid var(--kh-line, #e2e8f0);
 }
 

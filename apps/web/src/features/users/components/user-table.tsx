@@ -6,10 +6,8 @@ import { UserAvatar } from './user-avatar';
 
 type Props = {
   items: UserAdminListItem[];
-  currentUserId: string;
   onEdit: (user: UserAdminListItem) => void;
   onResetPassword: (user: UserAdminListItem) => void;
-  onDelete: (user: UserAdminListItem) => void;
 };
 
 function roleLabel(role: string) {
@@ -22,10 +20,8 @@ function roleTone(role: string): 'blue' | 'gray' {
 
 export function UserTable({
   items,
-  currentUserId,
   onEdit,
   onResetPassword,
-  onDelete,
 }: Props) {
   return (
     <div className="nv-s3212">
@@ -41,7 +37,6 @@ export function UserTable({
             <div>Trạng thái</div>
             <div>Sửa</div>
             <div>Reset MK</div>
-            <div>Xoá</div>
           </div>
         </div>
         <div className="nv-table-scroll">
@@ -49,7 +44,6 @@ export function UserTable({
             <p className="nv-empty">Chưa có người dùng.</p>
           ) : (
             items.map((user, index) => {
-              const isSelf = user.id === currentUserId;
               return (
                 <div key={user.id} className="nv-grid-row">
                   <div>{index + 1}</div>
@@ -83,17 +77,6 @@ export function UserTable({
                       onClick={() => onResetPassword(user)}
                     >
                       Reset MK
-                    </button>
-                  </div>
-                  <div>
-                    <button
-                      type="button"
-                      className="nv-action-btn danger"
-                      disabled={isSelf}
-                      title={isSelf ? 'Không thể xóa tài khoản đang đăng nhập' : undefined}
-                      onClick={() => onDelete(user)}
-                    >
-                      Xoá
                     </button>
                   </div>
                 </div>
