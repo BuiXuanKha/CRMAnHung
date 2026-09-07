@@ -153,7 +153,7 @@ export function applyStaffLotFilters(
   items: PublicWebStaffLotRow[],
   filters: StaffLotFilters,
 ): PublicWebStaffLotRow[] {
-  return items.filter((row) => {
+  const filtered = items.filter((row) => {
     if (filters.kind && row.kind !== filters.kind) return false;
     if (filters.staffName && row.staffName !== filters.staffName) return false;
     if (filters.web === 'published' && !row.isPublished) return false;
@@ -177,6 +177,12 @@ export function applyStaffLotFilters(
       if (!matchesPriceBracket(price, filters.priceBracket)) return false;
     }
     return true;
+  });
+  // Giữ lô lệch CRM (BUG-062) ở đầu sau khi lọc.
+  return [...filtered].sort((a, b) => {
+    const ad = a.crmDrift?.length ? 1 : 0;
+    const bd = b.crmDrift?.length ? 1 : 0;
+    return bd - ad;
   });
 }
 

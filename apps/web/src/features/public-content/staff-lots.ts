@@ -11,12 +11,13 @@ import {
 } from '@crmanhung/shared';
 import { toListingPublicSlug } from './display';
 import { plainTextToListingBodyHtml, suggestPublicExcerpt, suggestPublicPrice } from './listing-copy';
+import { computeListingCrmDrift, sortStaffLotsByCrmDrift } from './listing-crm-drift';
 
 export function buildStaffOpenLots(
   plots: LodatListItem[],
   listings: PublicWebLotRow[],
 ): PublicWebStaffLotRow[] {
-  return plots
+  const rows = plots
     .filter((plot) => plot.status === LodatSaleStatus.DANG_BAN)
     .map((plot) => {
       const listing = listings.find((row) => row.lodatId === plot.id);
@@ -46,6 +47,7 @@ export function buildStaffOpenLots(
         listing?.excerpt?.trim() ||
         listingBodyToExcerpt(bodyHtml) ||
         suggestedExcerpt;
+      const crmDrift = computeListingCrmDrift(plot, listing);
       return {
         id: listing?.id ?? `pending-${plot.id}`,
         lodatId: plot.id,
@@ -64,9 +66,11 @@ export function buildStaffOpenLots(
         frontageM,
         direction,
         priceVnd: plot.priceVnd ?? null,
+        crmDrift,
         ...(listing?.seoTitle != null ? { seoTitle: listing.seoTitle } : {}),
       };
     });
+  return sortStaffLotsByCrmDrift(rows);
 }
 
 export function buildPublicWebDashboard(

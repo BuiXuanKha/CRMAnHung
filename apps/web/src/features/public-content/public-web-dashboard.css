@@ -319,6 +319,39 @@
   line-height: 1.35;
 }
 
+.pw-title-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  width: 100%;
+}
+
+.pw-title-row .pw-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.pw-crm-drift-btn {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: #dc2626;
+  cursor: pointer;
+  line-height: 1;
+}
+
+.pw-crm-drift-btn:hover,
+.pw-crm-drift-btn:focus-visible {
+  color: #b91c1c;
+  outline: none;
+}
+
 .pw-sub {
   margin: 0;
   font-size: 0.78rem;

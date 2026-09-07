@@ -22,6 +22,7 @@ import {
   staffNameFilterOptions,
   type StaffLotWebFilter,
 } from './display';
+import { formatListingCrmDriftMessage } from './listing-crm-drift';
 import { publicLotListState } from './list-state';
 import { invalidatePublicWebQueries, publicWebKeys } from './query';
 import { useFlash } from './use-flash';
@@ -127,6 +128,13 @@ export function PublicLotListPage() {
     setSelectedId(lodatId);
     persist(lodatId);
     setGptLot(row);
+  };
+
+  const onCrmDrift = (row: PublicWebStaffLotRow) => {
+    setAlertBox({
+      title: 'CRM khác bản Đăng web',
+      message: `${formatListingCrmDriftMessage(row.crmDrift ?? [])}\n\nCập nhật lại bài trên Soạn đăng web nếu cần khớp CRM.`,
+    });
   };
 
   const lotMut = useMutation({
@@ -248,6 +256,7 @@ export function PublicLotListPage() {
                 onSelect={onSelect}
                 onEdit={onEdit}
                 onGptContent={onGptContent}
+                onCrmDrift={onCrmDrift}
                 scrollRef={scrollRef}
                 kind={kind}
                 extra={extra}
@@ -285,6 +294,7 @@ export function PublicLotListPage() {
                 onSelect={onSelect}
                 onEdit={onEdit}
                 onGptContent={onGptContent}
+                onCrmDrift={onCrmDrift}
               />
             </div>
           </div>
