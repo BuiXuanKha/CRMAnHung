@@ -100,9 +100,9 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 
 | Nguồn | Ai | Ghi chú |
 |-------|----|---------|
-| Ảnh **dự án** (trên địa chỉ PROJECT) | Chỉ **Admin** thêm/sửa/xoá | Mọi lô thuộc dự án A đều hiện **ảnh chung** dự án |
+| Ảnh **dự án** (trên địa chỉ PROJECT) | Chỉ **Admin** thêm/sửa/xoá | Mọi lô thuộc dự án A đều hiện **ảnh chung** dự án. Trang sửa lô **chỉ xem** (tem Dự án). |
 | Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng hoặc gắn path ảnh chat (reuse) |
-| Ảnh riêng thửa **dự án** (theo luồng NV) | NV gắn khi tạo/sửa | Ghép với ảnh dự án trên chi tiết (giống CRM cũ) |
+| Ảnh **thêm** trên thửa dự án (`LodatImage` theo luồng NV) | NV giữ luồng: tạo/sửa | **Không** ghi sổ địa chỉ / kho `ProjectLot`. Tối đa 5. Ghép sau ảnh dự án trên chi tiết + web khách (giống CRM cũ `tblLodatImages`). NV khác cùng số lô kho không thấy ảnh này. |
 
 Upload **mới** từ máy (tạo lô hoặc sửa lô): object key CDN = `{slug tên+địa chỉ}-anh-{n}.webp` (API convert WebP). Đổi tiêu đề / địa chỉ rồi Lưu → đổi lại key cho khớp. Ảnh gắn từ chat: **copy** sang key lô SEO WebP, **giữ** file `customers/chat/` (WebP sau `images:webp-replace`; cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}.webp` từ `Address.detail`. **Đăng web không làm SEO ảnh lần nữa.**
 
@@ -120,7 +120,7 @@ Nhân viên xem / tìm lô đang rao: ảnh, địa chỉ, DT·MT·hướng, gi�
 
 | Actor | Được | Không |
 |-------|------|--------|
-| STAFF | List lô đã gắn chủ của mình; tạo lô dân từ khách; gắn chủ lô kho; đổi chủ (khi đã chốt quyền); sửa DT·MT lô dân mình tạo; công tắc Mở bán/Tạm dừng trên map mình; soạn/Đăng/Gỡ web lô mình trên `/dashboard/lo-dat` | Tạo địa chỉ; import kho; sửa/xoá ảnh dự án; thêm lô vào dự án; hard-delete thửa; bài CMS |
+| STAFF | List lô đã gắn chủ của mình; tạo lô dân từ khách; gắn chủ lô kho; đổi chủ (khi đã chốt quyền); sửa DT·MT lô dân mình tạo; thêm/gỡ **ảnh riêng thửa** (kể lô dự án); công tắc Mở bán/Tạm dừng trên map mình; soạn/Đăng web lô mình trên `/dashboard/lo-dat` | Tạo địa chỉ; import kho; sửa/xoá ảnh dự án trên sổ địa chỉ; thêm lô vào dự án; hard-delete thửa; bài CMS |
 | ADMIN | Sổ địa chỉ; import/sửa kho dự án; ảnh dự án; xem mọi lô đã gắn chủ; dọn lô kho tạo nhầm | Tạo lô từ menu khách |
 
 Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo-dat`.
@@ -470,7 +470,7 @@ Xếp dọc: thông số → chủ/giá → lịch sử → hình ảnh → xem 
 - Ghi chú giá: Thương lượng · Cứng giá · Chưa chi tiết  
 - Hoa hồng: 1% · 2% · Chưa trao đổi  
 
-Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thông số thửa; map giá vẫn sửa được.
+Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thông số thửa; map giá vẫn sửa được. **Ảnh thêm** (`LodatImage`): dán/kéo thả/chọn file, tối đa 5, gỡ bằng ×. **Ảnh dự án** (`AddressImage`): chỉ xem.
 
 #### 12.4.4 Đổi chủ
 
@@ -509,10 +509,10 @@ Layout 2 cột như §12.4.1: trái form; phải Hình ảnh + Xem nhanh sticky;
 │ Dự án:  địa chỉ PROJECT → chọn lô kho (ẩn/khoá lô NV đã giữ)  │
 │ Giá bán: trạng thái (mặc định Mở bán) · giá · chip ghi chú giá │
 │          · chip hoa hồng · ghi chú liên kết chủ                │
-└ Hình ảnh (chỉ đất dân, tối đa 5) — upload sau khi tạo xong ────┘
+└ Hình ảnh (đất dân + lô dự án, tối đa 5 ảnh thêm) — upload sau khi tạo xong ─┘
 ```
 
-- Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs; không thêm ảnh lô (ảnh dự án chung).
+- Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs. **Được thêm ảnh riêng thửa** (chat / dán / file) — không phải ảnh dự án trên sổ địa chỉ.
 - Lô **dân**: bắt buộc tiêu đề + địa chỉ REGULAR; specs như trang sửa; chip hướng/ghi chú giá/hoa hồng §12.4.3.
 - Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ (nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`.
 - 1 luồng active / NV / lô kho — API chặn, picker cũng khoá («Bạn đang giữ»).
@@ -526,7 +526,7 @@ Xếp dọc như §12.4.2 (một cột; Huỷ/Tạo cuối form; nút «Thêm �
 | Endpoint | Việc |
 |----------|------|
 | `GET /lodats/project-lots?addressId=` | Kho lô của địa chỉ PROJECT + cờ `takenByMe` |
-| `POST /lodats` | Tạo lô dân (addressId REGULAR + specs) hoặc lô dự án (projectLotId) + map chủ; chặn ADMIN; khách phải thuộc NV |
+| `POST /lodats` | Tạo lô dân (addressId REGULAR + specs) hoặc lô dự án (projectLotId) + map chủ; chặn ADMIN; khách phải thuộc NV. `chatImageIds` + upload file sau tạo: ảnh thêm (`LodatImage`), cả dân lẫn dự án |
 | `POST /lodats/:id/change-owner` | Đổi chủ: đóng map active, mở map mới. Body `{ customerId, status?, priceVnd?, priceNote?, brokerFeeNote?, mapNote? }`. **Chỉ STAFF** giữ luồng + khách của mình. ADMIN → 403. |
 
 ---
