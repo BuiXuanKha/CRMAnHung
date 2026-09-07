@@ -90,7 +90,9 @@ export function LodatEditImages({
       <h2 className="ld-edit-section-title">Hình ảnh</h2>
       {canEditImages ? (
         <p className="ld-edit-hint">
-          Ảnh dự án chỉ xem. Ảnh chat và ảnh tự thêm có thể gỡ bằng nút ×.
+          {isProject
+            ? 'Ảnh dự án chỉ xem. Ảnh bạn thêm có thể gỡ bằng nút ×.'
+            : 'Ảnh chat và ảnh tự thêm có thể gỡ bằng nút ×.'}
         </p>
       ) : (
         <p className="ld-edit-hint muted">

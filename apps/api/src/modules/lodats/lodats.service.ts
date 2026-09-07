@@ -323,7 +323,7 @@ export class LodatsService {
       // Owner: Admin không đổi chủ — chỉ NV tạo luồng.
       canChangeOwner:
         user.role !== 'ADMIN' && row.createdByEmployeeId === user.id,
-      canEditImages: canAccess && !isProject,
+      canEditImages: canAccess,
       ownerHistory,
       transactionHistory,
     };
@@ -1005,7 +1005,7 @@ export class LodatsService {
 
     // Ảnh chat reuse — copy sang key SEO của lô; giữ file customers/chat/ gốc.
     // BUG-034: lỗi copy/ghi ảnh → xóa lô vừa tạo (không để mồ côi / retry trùng).
-    if (!isProject && dto.chatImageIds?.length) {
+    if (dto.chatImageIds?.length) {
       const copiedKeys: string[] = [];
       try {
         const chatImages = await this.prisma.customerMessengerImage.findMany({
@@ -1188,15 +1188,14 @@ export class LodatsService {
     });
     if (!row) throw new NotFoundException('Không tìm thấy lô đất.');
     this.assertCanAccess(user, row.createdByEmployeeId);
-    if (row.projectLotId) {
-      throw new BadRequestException(
-        'Ảnh dự án chung chỉ Admin sửa trên sổ địa chỉ. Không thêm ảnh lô dự án tại đây.',
-      );
-    }
     if (row.images.length >= 5) {
       throw new BadRequestException('Tối đa 5 ảnh lô đất.');
     }
-    const title = row.title?.trim() || 'Lô đất';
+    const title =
+      (row.projectLotId ? row.projectLot?.title : row.title)?.trim() ||
+      row.title?.trim() ||
+      row.projectLot?.title?.trim() ||
+      'Lô đất';
     const location = this.formatAddress(this.resolveAddress(row));
     const { objectKey, fileName } = await uniqueSeoLotImageKey(this.storage, {
       lodatId,
@@ -1233,9 +1232,6 @@ export class LodatsService {
     const row = await this.prisma.lodat.findUnique({ where: { id: lodatId } });
     if (!row) throw new NotFoundException('Không tìm thấy lô đất.');
     this.assertCanAccess(user, row.createdByEmployeeId);
-    if (row.projectLotId) {
-      throw new BadRequestException('Không gỡ ảnh dự án chung từ đây.');
-    }
     const image = await this.prisma.lodatImage.findFirst({
       where: { id: imageId, lodatId },
     });

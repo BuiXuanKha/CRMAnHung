@@ -144,7 +144,7 @@ export function LodatCreatePage() {
   );
   const chatCount = queue.filter((q) => q.kind === 'chat').length;
   const atLimit = queue.length >= LODAT_MAX_UPLOAD_IMAGES;
-  const pasteDisabled = saving || isProject || atLimit;
+  const pasteDisabled = saving || atLimit;
 
   function flash(msg: string) {
     setToast(msg);
@@ -221,28 +221,26 @@ export function LodatCreatePage() {
       input.frontageM = frontageM ? Number(frontageM) : null;
       input.direction = direction.trim() || null;
       input.note = note.trim() || null;
-      const chatIds = queue
-        .filter((img): img is Extract<QueueImage, { kind: 'chat' }> => img.kind === 'chat')
-        .map((img) => img.id);
-      if (chatIds.length) input.chatImageIds = chatIds;
     }
+    const chatIds = queue
+      .filter((img): img is Extract<QueueImage, { kind: 'chat' }> => img.kind === 'chat')
+      .map((img) => img.id);
+    if (chatIds.length) input.chatImageIds = chatIds;
 
     setSaving(true);
     try {
       const created = await createLodat(input);
-      if (!isProject) {
-        const files = queue.filter(
-          (img): img is Extract<QueueImage, { kind: 'file' }> => img.kind === 'file',
-        );
-        for (const img of files) {
-          try {
-            await uploadLodatImage(created.id, img.file);
-          } catch {
-            setAlertMsg(
-              'Tạo lô thành công nhưng một số ảnh chưa tải lên được. Thêm lại ảnh trong trang Sửa.',
-            );
-            break;
-          }
+      const files = queue.filter(
+        (img): img is Extract<QueueImage, { kind: 'file' }> => img.kind === 'file',
+      );
+      for (const img of files) {
+        try {
+          await uploadLodatImage(created.id, img.file);
+        } catch {
+          setAlertMsg(
+            'Tạo lô thành công nhưng một số ảnh chưa tải lên được. Thêm lại ảnh trong trang Sửa.',
+          );
+          break;
         }
       }
       flash('Đã tạo lô đất.');
@@ -510,22 +508,22 @@ export function LodatCreatePage() {
               <section className="ld-edit-card">
                 <h2 className="ld-edit-section-title">Hình ảnh</h2>
                 {isProject ? (
-                  <p className="ld-edit-hint muted">
-                    Lô dự án dùng ảnh chung của dự án (Admin quản lý trên sổ địa chỉ).
+                  <p className="ld-edit-hint">
+                    Ảnh dự án (chung KĐT) do Admin quản lý trên sổ địa chỉ — hiện trên
+                    chi tiết sau khi tạo. Ảnh bạn thêm ở đây là ảnh riêng của thửa.
                   </p>
-                ) : (
-                  <>
-                    {chatCount > 0 ? (
-                      <p className="ld-edit-hint">
-                        Đã lấy {chatCount} ảnh từ cuộc hội thoại Messenger. Bỏ chọn bằng
-                        nút × trên ảnh hoặc «Không dùng ảnh chat» nếu không dùng cho lô
-                        này.
-                      </p>
-                    ) : null}
-                    <p className="ld-edit-limit-hint">
-                      Ảnh bạn thêm: tối đa {LODAT_MAX_UPLOAD_IMAGES} (dán, kéo thả hoặc
-                      chọn file).
-                    </p>
+                ) : null}
+                {chatCount > 0 ? (
+                  <p className="ld-edit-hint">
+                    Đã lấy {chatCount} ảnh từ cuộc hội thoại Messenger. Bỏ chọn bằng
+                    nút × trên ảnh hoặc «Không dùng ảnh chat» nếu không dùng cho lô
+                    này.
+                  </p>
+                ) : null}
+                <p className="ld-edit-limit-hint">
+                  Ảnh bạn thêm: tối đa {LODAT_MAX_UPLOAD_IMAGES} (dán, kéo thả hoặc
+                  chọn file).
+                </p>
 
                     <div className="ld-edit-paste">
                       <div className="ld-edit-paste-head">
@@ -618,8 +616,6 @@ export function LodatCreatePage() {
                         </button>
                       ) : null}
                     </div>
-                  </>
-                )}
               </section>
             </div>
 
@@ -631,7 +627,7 @@ export function LodatCreatePage() {
                 onOpenGallery={() => undefined}
                 onRotate={() => undefined}
               />
-              {!isProject && previewImages.length ? (
+              {previewImages.length ? (
                 <div className="ld-edit-thumbs" role="list" aria-label="Ảnh sẽ gắn vào lô">
                   {previewImages.map((img, idx) => (
                     <div
