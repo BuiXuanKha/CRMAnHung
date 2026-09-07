@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 37 |
+| OPEN | 16 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 46 |
-| Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
+| FIXED / CLOSED | 67 |
+| Lần audit gần nhất | 2026-09-07 — Rà soát HOÃN / bỏ qua / không làm (main `fe24906`, sau deploy) |
 
 ## Cách ghi một bug
 
@@ -161,6 +161,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-07 | customers | BUG-063 CLOSED | Owner hướng B: ẩn khách chỉ khỏi `/khach-hang`; lô/GD/sổ/chat giữ. Không cascade. |
 | 2026-09-07 | public-content / hub | BUG-068 FIXED | Owner: persist trang xã; 0 lô đang bán vẫn 200 + empty; đổi tên xã → 301 slug cũ. Không persist thôn. |
 | 2026-09-07 | public-content / hub | BUG-069 FIXED | Chi tiết lô dùng cùng hub maps Mở bán như catalog/sitemap (`guestCatalogHubMaps`). |
+| 2026-09-07 | audit | Rà soát HOÃN/bỏ qua | Sau deploy `fe24906`: đối chiếu code + live. Còn lỗi → giữ OPEN/HOÃN; **075 → FIXED** (file + live 200); **081** ghi HOÃN (owner Ko cần). Xem § «Rà soát HOÃN…». Không sửa nghiệp vụ. |
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -245,10 +246,10 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-048 | HIGH | addresses / lodats | Không API/UI thêm–sửa–xoá `ProjectLot` (kho); domain bắt Admin quản kho. | FIXED |
 | BUG-049 | HIGH | transactions / permission | Admin tạo GD trên lô NV: `createdByEmployeeId` = Admin; unique GD mở chặn NV. | FIXED |
 | BUG-050 | HIGH | title-services / permission | Admin tạo sổ đỏ trên khách NV: `createdByEmployeeId` = Admin; NV không thấy hồ sơ. | FIXED |
-| BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | OPEN |
+| BUG-051 | MEDIUM | transactions | List GD không phân trang; `total` = số hàng load; Admin UI không lọc NV. | FIXED (lọc NV Admin không làm) |
 | BUG-052 | MEDIUM | title-services | List sổ đỏ `take: 500`, `total: items.length` — cắt im lặng. | FIXED |
 | BUG-053 | MEDIUM | addresses | List địa chỉ `take: 500`, `total: items.length` — picker/sổ thiếu địa chỉ cũ. | FIXED |
-| BUG-054 | MEDIUM | transactions / title-services | `nextCode()` đọc max rồi +1, không khóa — race trùng `code` unique → 500. | OPEN |
+| BUG-054 | MEDIUM | transactions / title-services | `nextCode()` đọc max rồi +1, không khóa — race trùng `code` unique → 500. | FIXED |
 | BUG-055 | MEDIUM | customers | Lọc tài chính theo khoảng vẫn khớp khách «Chưa xác định» (min/max null). | FIXED |
 | BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN |
 | BUG-057 | MEDIUM | addresses | Đổi `PROJECT` → `REGULAR` không kiểm kho `ProjectLot` — picker kho chết, lô cũ còn. | OPEN |
@@ -264,18 +265,18 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-067 | HIGH | public-content / slug | `uniqueSlug` không chừa `PublicLotSlugRedirect.fromSlug` — listing mới chiếm URL đang 301. | FIXED |
 | BUG-068 | HIGH | public-content / hub | Hub `/xa/…` tính lúc đọc, đổi khi tập lô đổi; không bảng 301. | FIXED |
 | BUG-069 | HIGH | public-content / hub | Hub slug chi tiết (mọi `isPublished`) ≠ catalog/sitemap (chỉ Mở bán) → link nội bộ 404. | FIXED |
-| BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN (HOÃN) |
+| BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN (HOÃN) — còn |
 | BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | CLOSED |
 | BUG-072 | HIGH | public web / sitemap | Guest fetch nuốt lỗi API → sitemap/catalog rỗng; chi tiết slug thành 404 giả. | FIXED |
 | BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm đích listing còn — trỏ 404. | FIXED |
 | BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | FIXED |
-| BUG-075 | MEDIUM | public web / OG | `/og-default.png` không có trong `apps/web/public` — OG/Twitter/JSON-LD fallback 404. | OPEN |
+| BUG-075 | MEDIUM | public web / OG | `/og-default.png` không có trong `apps/web/public` — OG/Twitter/JSON-LD fallback 404. | FIXED |
 | BUG-076 | MEDIUM | public web / canonical | `[category]` không hợp lệ: metadata noindex nhưng không gỡ canonical trang chủ. | FIXED |
 | BUG-077 | MEDIUM | public-content / hub | Hai địa chỉ khác nhau `toPublicSlug` trùng → một hub URL, trộn listing. | FIXED |
-| BUG-078 | MEDIUM | public-content / metadata | `title` / `seoTitle` không unique — hai lô/bài trùng document title. | OPEN |
+| BUG-078 | MEDIUM | public-content / metadata | `title` / `seoTitle` không unique — hai lô/bài trùng document title. | OPEN (HOÃN) — còn |
 | BUG-079 | LOW | public web | `getProductBySlug` mock đè gallery/mô tả listing thật nếu trùng slug demo. | FIXED |
-| BUG-080 | LOW | public-content / slug | Slug lô `toPublicSlug(..., 0)` không cắt độ dài; title+location → URL cực dài. | OPEN |
-| BUG-081 | MEDIUM | public web / metadata | `<title>` trang chủ lặp «An Hưng Land» hai lần (live). | OPEN |
+| BUG-080 | LOW | public-content / slug | Slug lô `toPublicSlug(..., 0)` không cắt độ dài; title+location → URL cực dài. | OPEN (HOÃN) — còn |
+| BUG-081 | MEDIUM | public web / metadata | `<title>` trang chủ lặp «An Hưng Land» hai lần (live). | OPEN (HOÃN) — còn |
 | BUG-082 | MEDIUM | public web / CRM | `/dashbroad` (alias gõ sai) trả HTTP 200 cache, không redirect `/dashboard`. | FIXED |
 | BUG-083 | MEDIUM | web authz | STAFF mở `/quan-tri/khach-hang` thấy stub «Registry ADMIN»; không redirect. | FIXED |
 
@@ -1259,7 +1260,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Hằng số fallback, asset không commit.
 - **Impact:** OG sai; rich preview fail. (Production có thể có file ngoài git — repo/deploy từ git thì thiếu.)
 - **Evidence:** Glob `og-default.png` = 0. `apps/web/public/brand/` chỉ 2 SVG.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07 rà soát) — File `apps/web/public/og-default.png` đã có trong git; live `GET https://anhungland.com/og-default.png` **200** (`PUBLIC_OG_DEFAULT = '/og-default.png'`). Chốt sổ theo CHOT (ALREADY_FIXED); không sửa thêm.
 
 ### BUG-076 — Category không hợp lệ: noindex nhưng canonical có thể kế thừa trang chủ
 
@@ -1298,7 +1299,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Định danh SEO = slug, không phải title.
 - **Impact:** Trùng title/description trên index. Bài: cộng BUG-056 (tạo lại → slug-2, cả hai published).
 - **Evidence:** schema unique. `listingMetadata` `title: seoTitle`. `postMetadata` `title: post.title`.
-- **Status:** OPEN
+- **Status:** OPEN (HOÃN — owner/CHOT 2026-09-07: chưa unique title; data lúc đó không trùng). **Rà soát 2026-09-07 (`fe24906`):** vẫn **còn** — Prisma không unique `title`/`seoTitle`; metadata vẫn lấy title thô.
 
 ### BUG-079 — Mock demo đè gallery/mô tả listing thật khi trùng slug
 
@@ -1324,7 +1325,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Lot slug cap = 0; schema 200 không áp generate server.
 - **Impact:** URL khó chia sẻ; rủi ro cắt/normalize phía proxy. Không làm hai lô trùng slug (vẫn unique).
 - **Evidence:** `toPublicSlug` `if (maxLen > 0 && slug.length > maxLen)`. `setPublished` `uniqueSlug(toListingPublicSlug(title, location))`.
-- **Status:** OPEN
+- **Status:** OPEN (HOÃN — CHOT: live max ~88 ký tự). **Rà soát 2026-09-07 (`fe24906`):** vẫn **còn** — `toListingPublicSlug` → `toPublicSlug(..., 0)`; hub vẫn cắt 60.
 
 ### BUG-081 — Title trang chủ lặp tên thương hiệu
 
@@ -1342,7 +1343,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Kết quả thực tế:** Brand xuất hiện hai lần, cách bởi ` | `.
 - **Kết quả mong đợi:** Một lần tên thương hiệu, ví dụ `An Hưng Land — Văn phòng giao dịch bất động sản`.
 - **Cách tái hiện:** Mở `https://anhungland.com/` → xem title tab hoặc View Source `<title>`.
-- **Status:** OPEN
+- **Status:** OPEN (HOÃN — owner 2026-09-07: **Ko cần** sửa). **Rà soát live cùng ngày:** `<title>An Hưng Land — Văn phòng giao dịch bất động sản | An Hưng Land</title>` vẫn lặp brand.
 
 ### BUG-082 — `/dashbroad` không redirect, trả 200 HTML đã prerender
 
@@ -1379,4 +1380,54 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Kết quả mong đợi:** Redirect `/khach-hang` (cùng rule `/quan-tri/nguoi-dung`).
 - **Cách tái hiện:** Login user `kha` → dán `/quan-tri/khach-hang` trên `anhungland.com`.
 - **Status:** FIXED (2026-09-04) — Cùng middleware BUG-012: STAFF + `/quan-tri/*` → redirect `/khach-hang` trước khi render stub.
+
+---
+
+## Rà soát HOÃN / bỏ qua / không làm — 2026-09-07
+
+**Bối cảnh:** Deploy staging xong. Tip `main` = `fe24906` (gồm merge #316–#319: BUG-076/077/079/082 + batch trước). Đối chiếu **code `origin/main` + live `anhungland.com`**. Không sửa nghiệp vụ trong lần này — chỉ cập nhật sổ.
+
+### A. Vẫn còn trên code / live (giữ OPEN / HOÃN)
+
+| ID | Quyết định owner | Kết quả rà soát | Bằng chứng ngắn |
+|----|------------------|-----------------|-----------------|
+| **013** | deferred | **CÒN** | `CustomerFacebook` unique `(employeeId, facebookUid)` — không unique theo thread; E2EE multi-thread vẫn tách Person. |
+| **014** | deferred | **CÒN** | `acknowledgePhoneDuplicate` vẫn ghi `fullName` + `isHidden: false` trên khách cũ. |
+| **016** | deferred (chưa chốt thiết kế) | **CÒN** | `mergeFacebookIntoPhoneHolder`: chuyển FB + care + map; **xóa** map trùng lô; `customer.delete` nguồn — không chuyển hết SĐT nguồn / TitleService / party. |
+| **041** | deferred | **CÒN** | Ingest vẫn `sortOrder: i` theo batch; `sentAt` schema có nhưng không dùng để sắp xếp ổn định. |
+| **043** | deferred phần extension | **CÒN** (API đã siết mid qua BUG-044) | Không unique DB `(facebook, mid)`; extension vẫn có thể gửi `orphan::` — API bỏ qua ghi. |
+| **051** (phần Admin lọc NV) | Owner: phân trang **có**; lọc NV **không làm** | **CÒN** phần lọc NV | API đã `limit`/`offset` + COUNT → bug gốc FIXED; UI Admin vẫn không filter theo NV. |
+| **056** | HOÃN | **CÒN** | Chỉ `POST` tạo bài + `setPostStatus`; không PATCH `title`/`bodyHtml`/`cover`. |
+| **057** | HOÃN | **CÒN** | `PROJECT`→`REGULAR` chỉ chặn khi còn **ảnh**; không `count` `ProjectLot`. |
+| **070** | HOÃN (không sửa) | **CÒN** | `revalidateListing` = chi tiết + catalog/sitemap; **không** `/xa/…`. Module `addresses` không gọi revalidate. |
+| **078** | HOÃN | **CÒN** | Không unique `title`/`seoTitle` trên `PublicLotListing` / `PublicPost`. |
+| **080** | HOÃN | **CÒN** | `toListingPublicSlug` → `toPublicSlug(..., 0)`. |
+| **081** | Owner: Ko cần | **CÒN** (live) | `<title>… \| An Hưng Land</title>` lặp brand trên trang chủ. |
+
+### B. Đã hết / đóng sổ (trước đây HOÃN / ALREADY_FIXED / bỏ qua nhầm OPEN)
+
+| ID | Kết quả | Ghi chú |
+|----|---------|---------|
+| **075** | **HẾT → FIXED** | File trong git + live `/og-default.png` **200**. |
+| **071** | CLOSED sẵn | Không còn HOÃN. |
+| **079** | FIXED sẵn | `mock-data.ts` đã xóa. |
+| **082** | FIXED sẵn | Live `/dashbroad` → **308** `/dashboard`. |
+| **083** | FIXED sẵn | Middleware STAFF `/quan-tri/*`. |
+
+### C. CLOSED by design / won't fix (chấp nhận — không phải lỗi còn mở)
+
+| ID | Ghi chú |
+|----|--------|
+| **003** | Share theo hotline NV đăng nhập — by design. |
+| **010** | Race Admin cuối — won't fix. |
+| **033** | Không CHECK XOR DB — owner chấp nhận. |
+| **036 / 038** | Link share sống mãi / visit — owner đóng. |
+| **045 / 046** | won't fix (đổi tên tay; chat chỉ tham khảo). |
+| **061 / 063 / 065** | by design (ảnh dự án chung; ẩn khách không cascade; không đăng ký kênh trước). |
+
+### D. OPEN thuần (chưa gắn HOÃN) — vẫn thấy trên code, không thuộc đợt «không làm» nhưng ghi để khỏi sót
+
+`BUG-023`, `025`, `026`, `027`, `029` — vẫn OPEN trên detail. Riêng **023** (URL Tạm dừng vẫn mở): sau chốt listing always-on, hành vi guest thấy lô + hangtag trạng thái có thể **đúng sản phẩm**; chưa đổi Status cho đến khi owner chốt CLOSED by design.
+
+**Đếm sau rà soát (theo Status detail):** OPEN **16** · FIXED **55** · CLOSED **12** · tổng **83**.
 

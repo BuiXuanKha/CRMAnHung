@@ -37,13 +37,13 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **072** | HIGH | FIXED | API lỗi → sitemap/catalog rỗng, slug 404 giả | **SỬA** không nuốt 5xx lúc chạy | FIXED (2026-09-07) |
 | **073** | MED | FIXED | 301 tới lô đã gỡ / thiếu listing | Chỉ 301 khi đích còn listing | FIXED (2026-09-07) |
 | **074** | MED | FIXED | Xóa lô còn hàng 301 | Xóa redirect mồ côi khi thiếu đích | FIXED (2026-09-07) |
-| **075** | MED | **ALREADY_FIXED** | `/og-default.png` live **200** | Đóng sổ FIXED — không sửa |  |
+| **075** | MED | **FIXED** | `/og-default.png` git + live **200** (rà soát 2026-09-07 `fe24906`) | Đóng sổ FIXED — không sửa | FIXED |
 | **076** | MED | FIXED | Category lạ: code thiếu `canonical: null` (live đang được `not-found` cứu) | SỬA 1 dòng cho chắc | FIXED (2026-09-07) |
 | **077** | MED | FIXED | Hai thôn slug gập một hub | Unique `-2` trong xã | FIXED (2026-09-07) |
-| **078** | MED | STILL_OPEN | Hai URL cùng `<title>` | HOÃN — 25 lô Đăng web **không** trùng title |  |
+| **078** | MED | STILL_OPEN | Hai URL cùng `<title>` | HOÃN — 25 lô Đăng web **không** trùng title | HOÃN — rà soát 2026-09-07: **còn** |
 | **079** | LOW | FIXED | Mock Unsplash đè gallery nếu trùng slug demo | **SỬA** gỡ mock (rẻ) | FIXED (2026-09-07) |
-| **080** | LOW | STILL_OPEN | Slug không cắt độ dài | HOÃN — live dài nhất **88** ký tự |  |
-| **081** | MED | STILL_OPEN | Title trang chủ lặp «An Hưng Land» **hai lần** (live) | **SỬA** |  |
+| **080** | LOW | STILL_OPEN | Slug không cắt độ dài | HOÃN — live dài nhất **88** ký tự | HOÃN — rà soát 2026-09-07: **còn** |
+| **081** | MED | STILL_OPEN | Title trang chủ lặp «An Hưng Land» **hai lần** (live) | Owner: **Ko cần** | HOÃN — live vẫn lặp (2026-09-07) |
 | **082** | MED | FIXED | Guest `/dashbroad` → 307 login, `next` vẫn gõ sai | SỬA nốt: 308 về `/dashboard` trước login | FIXED (2026-09-07) |
 | **083** | MED | **ALREADY_FIXED** | `kha` + `/quan-tri/*` đã redirect | Không sửa lại |  |
 
