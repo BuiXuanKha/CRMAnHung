@@ -2,7 +2,10 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
   applyPersistedCommuneSlugs,
+  buildHubSlugMaps,
+  guestCatalogHubMaps,
   nextUniqueHubSlug,
+  type AddressGeo,
   type CommuneSlugMeta,
   type HubSlugMaps,
 } from './public-listing-hub-slugs';
@@ -64,5 +67,49 @@ describe('applyPersistedCommuneSlugs', () => {
     const next = applyPersistedCommuneSlugs(maps, persisted);
     assert.equal(next.communeByWardId.get('w1')?.slug, 'dong-lac');
     assert.equal(next.placeByWardDetail.get('w1|nham cap')?.communeSlug, 'dong-lac');
+  });
+});
+
+describe('guestCatalogHubMaps', () => {
+  const hongPhongNamSach: AddressGeo = {
+    wardId: 'w-hp-ns',
+    wardName: 'Hồng Phong',
+    districtName: 'Nam Sách',
+    provinceName: 'Hải Dương',
+    detail: 'Trúc Khê',
+  };
+  const hongPhongOtherDistrict: AddressGeo = {
+    wardId: 'w-hp-km',
+    wardName: 'Hồng Phong',
+    districtName: 'Kinh Môn',
+    provinceName: 'Hải Dương',
+    detail: null,
+  };
+
+  it('all-published maps suffix the district when a paused listing lives in another district of the same ward name', () => {
+    const allPublished = buildHubSlugMaps([hongPhongNamSach, hongPhongOtherDistrict]);
+    const openSale = buildHubSlugMaps([hongPhongNamSach]);
+    assert.equal(allPublished.communeByWardId.get('w-hp-ns')?.slug, 'hong-phong-nam-sach');
+    assert.equal(openSale.communeByWardId.get('w-hp-ns')?.slug, 'hong-phong');
+  });
+
+  it('guest maps follow Mở bán geos so listing breadcrumb matches the catalog hub', () => {
+    const persisted = new Map<string, CommuneSlugMeta>([
+      [
+        'w-hp-ns',
+        {
+          slug: 'hong-phong',
+          label: 'Hồng Phong',
+          districtLabel: 'Nam Sách',
+          provinceLabel: 'Hải Dương',
+        },
+      ],
+    ]);
+    const maps = guestCatalogHubMaps([hongPhongNamSach], persisted);
+    assert.equal(maps.communeByWardId.get('w-hp-ns')?.slug, 'hong-phong');
+    assert.equal(
+      maps.placeByWardDetail.get('w-hp-ns|trúc khê')?.communeSlug,
+      'hong-phong',
+    );
   });
 });

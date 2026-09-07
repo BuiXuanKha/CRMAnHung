@@ -114,6 +114,17 @@ export function preferredCommuneSlugByWardId(geos: AddressGeo[]): Map<string, st
 }
 
 /**
+ * Guest listing + hub URLs: derive maps from Mở bán geos only (BUG-069), then overlay
+ * persisted commune slugs so breadcrumb `/xa/{slug}` matches catalog/sitemap.
+ */
+export function guestCatalogHubMaps(
+  openSaleGeos: AddressGeo[],
+  persisted: Map<string, CommuneSlugMeta>,
+): HubSlugMaps {
+  return applyPersistedCommuneSlugs(buildHubSlugMaps(openSaleGeos), persisted);
+}
+
+/**
  * Persist wins: catalog/listing communeSlug follows stored hub, not the live derived map.
  * Also copies persisted slug onto place hub parent fields.
  */
