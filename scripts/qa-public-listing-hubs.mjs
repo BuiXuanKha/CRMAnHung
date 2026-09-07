@@ -558,5 +558,52 @@ for (const r of routes) {
   else bad(`thiếu ${r}`);
 }
 
+console.log('\nBUG-068 persist commune hub');
+const prismaSrc = read('apps/api/prisma/schema.prisma');
+if (
+  prismaSrc.includes('model PublicCommuneHub') &&
+  prismaSrc.includes('model PublicCommuneHubRedirect')
+) {
+  ok('Prisma PublicCommuneHub + PublicCommuneHubRedirect');
+} else {
+  bad('thiếu model PublicCommuneHub / redirect');
+}
+
+const communePageSrc = read(
+  'apps/web/app/(public)/mua-ban-nha-dat-huyen-nam-sach/xa/[commune]/page.tsx',
+);
+if (
+  communePageSrc.includes('Hiện không có lô đang bán') &&
+  communePageSrc.includes('getCommuneHubRedirect') &&
+  communePageSrc.includes('permanentRedirect')
+) {
+  ok('trang xã 200 empty + 301 slug cũ');
+} else {
+  bad('trang xã chưa empty 200 / 301');
+}
+
+const hubSvcSrc = read('apps/api/src/modules/public-content/public-content.service.ts');
+const communeDetailFn = hubSvcSrc.slice(
+  hubSvcSrc.indexOf('async getCommuneHubDetail'),
+  hubSvcSrc.indexOf('async findCommuneHubRedirect'),
+);
+if (
+  communeDetailFn.includes('persisted.find') &&
+  !communeDetailFn.includes('hubItems.length === 0')
+) {
+  ok('getCommuneHubDetail không 404 khi 0 lô đang bán');
+} else {
+  bad('getCommuneHubDetail vẫn 404 khi 0 lô');
+}
+
+const hubCtrlSrc = read(
+  'apps/api/src/modules/public-content/public-listing-hubs.controller.ts',
+);
+if (hubCtrlSrc.includes('commune-redirects/:fromSlug')) {
+  ok('API commune-redirects');
+} else {
+  bad('thiếu GET commune-redirects');
+}
+
 console.log(`\n${failed === 0 ? 'PASS' : `FAIL (${failed} checks)`}`);
 process.exit(failed === 0 ? 0 : 1);

@@ -695,9 +695,9 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 ### 17.2 Quy tắc nghiệp vụ
 
-1. Hub chỉ **index** khi có ≥ 1 lô Đang hiện (`isPublished` ∩ Mở bán). Hub 0 lô → **404 + noindex**, bỏ khỏi sitemap.
-2. Gom lô: cấp 3 = `wardId`; cấp 4 = `address.detail` **trong** ward đó. Không parse chuỗi `location` làm nguồn sự thật.
-3. Slug ổn định; trùng tên xã khác huyện → suffix huyện (vd. `nam-trung-nam-sach`). Slug cấp 4 unique trong phạm vi xã.
+1. **Hub xã (cấp 3) là trang cố định** — lưu `PublicCommuneHub` theo `wardId` (slug + tên xã + huyện + tỉnh). Site chỉ bán **huyện Nam Sách, Hải Dương** (không dùng hậu tố huyện vì trùng tên xã hai huyện). Lần đầu có listing `isPublished` (kể cả sau này hết Mở bán) → tạo hàng hub; **không xóa** khi 0 lô đang bán. Guest `/xa/{slug}` **200** + câu «Hiện không có lô đang bán…»; **không** 404. Sitemap **giữ** URL xã đã lưu. Đổi tên xã → slug mới, slug cũ **301** (`PublicCommuneHubRedirect`). Slug giả / chưa từng có hub → 404 + noindex.
+2. Gom lô: cấp 3 = `wardId`; cấp 4 = `address.detail` **trong** ward đó. Không parse chuỗi `location` làm nguồn sự thật. Hub thôn/KĐT (cấp 4) vẫn derive lúc đọc: 0 lô → 404 (chưa persist).
+3. Slug xã ổn định sau khi lưu. Slug cấp 4 unique trong phạm vi xã.
 4. Related trên chi tiết lô (hai block, dưới gallery):
    1. «Lô đất cùng xã {xã}» → hub `/xa/…` (tối đa 9 thẻ; trừ lô đang xem).
    2. «Đất dự án khu vực Nam Sách» — lô `Address.kind = PROJECT` thuộc **3 khu cấp 4** có nhiều lô Đang hiện nhất (hòa: ngày đăng mới hơn). Tối đa 9 thẻ; trừ lô đang xem và lô đã hiện ở block cùng xã. «Xem tất cả» → catalog huyện. Không đoán thôn thường là dự án.
@@ -724,7 +724,7 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 #### Slice C — Hub xã (UI mock → API → nối)
 
 - [x] Route `.../xa/[commune]/page.tsx` + metadata + JSON-LD `ItemList`
-- [x] Hub derive từ catalog (location → communeSlug) — mock/SSR; 0 lô / slug sai → 404 noindex
+- [x] Hub xã persist `PublicCommuneHub` (slug theo `wardId`); mock/SSR fallback catalog khi API tắt; slug sai → 404 noindex; **0 lô đang bán → 200 + empty**
 - [x] Guest API: list hubs xã + detail hub theo `wardId` + `address.detail`
 - [x] Catalog guest trả `communeSlug` / `placeSlug` từ sổ địa chỉ (không parse location)
 - [x] Web hub pages gọi `/public/listing-hubs/*`; fallback parse location khi API chưa sẵn (build/mock)
@@ -744,8 +744,8 @@ Bài CMS giữ nguyên: `/du-an/...`, `/kien-thuc/...` (khác hub lô).
 
 - [x] Script `pnpm qa:public-hubs` — path, robots, CRM noindex, redirects, sitemap, routes
 - [x] Hub canonical dưới `/mua-ban-nha-dat-huyen-nam-sach/xa/…` — không trùng `/du-an`
-- [x] Hub 0 lô / slug sai → `notFound()` + `unpublishedHubMetadata` noindex
-- [x] Sitemap chỉ hub có lô (`listCommuneHubs` / `listPlaceHubs` filter count > 0)
+- [x] Hub xã 0 lô → 200 empty; slug xã sai → `notFound()` + `unpublishedHubMetadata` noindex. Hub cấp 4 0 lô / slug sai → 404
+- [x] Sitemap: mọi hub xã đã persist (kể 0 lô); hub cấp 4 chỉ khi có lô (`listPlaceHubs` count > 0)
 - [x] `robots.ts` allow `/`; disallow CRM — không chặn catalog mới
 - [x] Smoke live `anhungland.com` sau merge PR #153 (301, hub HTML Nam Trung, sitemap hub URLs, hub 404)
 
@@ -762,7 +762,9 @@ pnpm --filter @crmanhung/web build
 |----------|---------|
 | `/mua-ban-nha-dat`, `/san-pham` | 404 (path cũ đã bỏ) |
 | Hub xã có lô | 200, canonical đúng; `robots index` + trong sitemap khi `PUBLIC_SEO_INDEX=1` (production đã bật — `PUBLIC-SEO.md` §11) |
-| Hub slug sai | 404, noindex |
+| Hub xã đã persist, 0 lô đang bán | 200, câu empty; **vẫn** sitemap; không 404 |
+| Hub xã slug cũ sau đổi tên | 301 → slug mới |
+| Hub slug sai (chưa từng lưu) | 404, noindex |
 | `/du-an` | Bài CMS — canonical `/{category}/{slug}`, khác hub lô |
 | `/dashboard`, `/lo-dat` | noindex; không trong sitemap |
 
@@ -774,10 +776,10 @@ Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
 
 1. Breadcrumb: Trang chủ → Nhà đất đang bán → {tên xã}
 2. H1: `Nhà đất {tên xã}, {huyện}` (thiếu huyện → chỉ tên xã)
-3. Một câu mô tả: số lô đang bán trong xã (vd. «N lô đang giới thiệu trên An Hưng Land.»)
+3. Một câu mô tả: số lô đang bán trong xã (vd. «N lô đang giới thiệu trên An Hưng Land.»). **0 lô:** «Hiện không có lô đang bán tại {xã} trên An Hưng Land.»
 4. (Tuỳ chọn) Danh sách link hub cấp 4 trong xã có ≥1 lô — chữ, không card
 5. Grid thẻ lô — **cùng** markup/list `/mua-ban-nha-dat-huyen-nam-sach` (`ph-product-grid`)
-6. Empty không xảy ra trên URL public (0 lô → 404)
+6. Empty **có** trên URL xã đã persist (0 lô đang bán → 200, không 404)
 
 #### 17.4.2 Giao diện máy tính — hub cấp 4
 
@@ -798,11 +800,11 @@ Path: `{PUBLIC_LISTING_PATH}/xa/[slug-xa]` và `…/xa/[slug-xa]/[slug-place]`.
 
 | Hạng mục | Quy tắc |
 |----------|---------|
-| robots | Khi `PUBLIC_SEO_INDEX=1`: `index, follow` nếu có ≥1 lô (production đã bật). Local mặc định `noindex, follow` (`PUBLIC-SEO.md` §11) |
-| 404 | Slug sai / 0 lô → `notFound` + noindex |
-| Canonical | URL hub tuyệt đối |
-| JSON-LD | `ItemList` URL lô trong hub; `BreadcrumbList` |
-| Sitemap | Chỉ hub có lô; priority xã ~0.75, cấp 4 ~0.7 |
+| robots | Khi `PUBLIC_SEO_INDEX=1`: `index, follow` trang xã đã persist (kể 0 lô) và hub cấp 4 có lô. Local mặc định `noindex, follow` (`PUBLIC-SEO.md` §11) |
+| 404 | Slug xã chưa từng lưu / slug cấp 4 0 lô hoặc sai → `notFound` + noindex |
+| Canonical | URL hub tuyệt đối (slug đã lưu; slug cũ 301) |
+| JSON-LD | `ItemList` URL lô trong hub (có thể rỗng); `BreadcrumbList` |
+| Sitemap | Mọi hub xã đã persist; cấp 4 chỉ khi có lô; priority xã ~0.75, cấp 4 ~0.7 |
 
 ---
 

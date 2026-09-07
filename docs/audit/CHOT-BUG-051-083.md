@@ -30,7 +30,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **065** | MED | CLOSED (by design) | Extension gửi UID nick; không khớp hồ sơ NV | Owner: **không** đăng ký kênh trước; kênh mới từ extension cứ vào | Không chặn ingest (2026-09-07) |
 | **066** | HIGH | FIXED | GPT/sửa slug lô không bỏ dấu | Owner: **không** sửa slug tay; URL từ tiêu đề lúc tạo | Không ô slug (2026-09-07) |
 | **067** | HIGH | FIXED | Lô mới chiếm URL 301 của lô cũ | **SỬA** `uniqueSlug` chừa bảng 301 | Chừa fromSlug; trùng thêm `-2` cuối URL (2026-09-07) |
-| **068** | HIGH | STILL_OPEN | Hub `/xa/…` đổi theo tập lô, không 301 | Lớn — làm sau 069/070; hoặc persist hub |  |
+| **068** | HIGH | FIXED | Hub `/xa/…` đổi theo tập lô, không 301 | Persist xã; 0 lô vẫn 200 + 301 đổi tên (2026-09-07) | Trang xã cố định; thôn để sau |
 | **069** | HIGH | STILL_OPEN | Breadcrumb lô trỏ `/xa/…` 404 | **SỬA** cùng tập lô Mở bán |  |
 | **070** | HIGH | STILL_OPEN | Tạm dừng / sửa địa chỉ không làm mới hub | **SỬA** revalidate thêm `/xa/…` |  |
 | **071** | MED | STILL_OPEN | Sitemap + index 5 chuyên mục **trống** (live) | **SỬA** noindex / bỏ khỏi sitemap khi 0 bài |  |
@@ -239,11 +239,9 @@ Admin không tạo chăm sóc — kịch bản «Admin ghi care rồi xóa NV» 
 
 ### BUG-068 — Hub `/xa/…` tính lúc đọc, không 301
 
-**Còn.** Slug xã/thôn = hàm catalog sống. Không bảng hub. Live sitemap có **29** URL `/xa/`.
+**FIXED (2026-09-07).** `PublicCommuneHub` theo `wardId`. 0 lô đang bán → **200** empty, sitemap giữ. Đổi tên xã → 301. Thôn chưa persist.
 
-**Tôi vào vai Admin.** Đổi tên xã / ẩn ward / còn 1 huyện trùng tên → URL hub đổi, Google 404.
-
-**Đề xuất:** Lớn. Làm **sau 069+070** (vá link/cache). Persist hub + 301 = PR riêng khi owner muốn SEO ổn lâu.
+**Tôi vào vai Admin.** Đổi tên xã / hết lô Mở bán trong xã → Google vẫn vào URL cũ (200 hoặc 301), không 404.
 
 ---
 

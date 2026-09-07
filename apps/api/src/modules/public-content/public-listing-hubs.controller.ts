@@ -1,10 +1,18 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Query } from '@nestjs/common';
 import { Public } from '../../common/decorators/public.decorator';
 import { PublicContentService } from './public-content.service';
 
 @Controller('public/listing-hubs')
 export class PublicListingHubsController {
   constructor(private readonly publicContent: PublicContentService) {}
+
+  @Public()
+  @Get('commune-redirects/:fromSlug')
+  async getCommuneRedirect(@Param('fromSlug') fromSlug: string) {
+    const item = await this.publicContent.findCommuneHubRedirect(fromSlug);
+    if (!item) throw new NotFoundException('Không tìm thấy khu vực');
+    return item;
+  }
 
   @Public()
   @Get('communes')

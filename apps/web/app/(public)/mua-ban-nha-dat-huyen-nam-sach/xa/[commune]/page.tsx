@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { JsonLd } from '@/features/public/json-ld';
 import {
   communeHubBreadcrumbJsonLd,
@@ -12,27 +12,45 @@ import {
   communeHubDescription,
   communeHubHeadline,
   getCommuneHubDetail,
+  getCommuneHubRedirect,
   listPlaceHubs,
 } from '@/features/public/listing-hubs';
 import { ListingProductGrid } from '@/features/public/listing-product-grid';
-import { listingPlaceHubPath, PUBLIC_LISTING_PATH } from '@/features/public/site';
+import {
+  listingCommuneHubPath,
+  listingPlaceHubPath,
+  PUBLIC_LISTING_PATH,
+} from '@/features/public/site';
 import '@/features/public/public-home.css';
 
 type Props = { params: Promise<{ commune: string }> };
 
 export const revalidate = false;
 
+async function redirectIfLegacyCommuneSlug(slug: string): Promise<void> {
+  const toSlug = await getCommuneHubRedirect(slug);
+  if (toSlug && toSlug !== slug) {
+    permanentRedirect(listingCommuneHubPath(toSlug));
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { commune } = await params;
   const hub = await getCommuneHubDetail(commune);
-  if (!hub) return unpublishedHubMetadata();
+  if (!hub) {
+    await redirectIfLegacyCommuneSlug(commune);
+    return unpublishedHubMetadata();
+  }
   return communeHubMetadata(hub);
 }
 
 export default async function CommuneListingHubPage({ params }: Props) {
   const { commune } = await params;
   const hub = await getCommuneHubDetail(commune);
-  if (!hub) notFound();
+  if (!hub) {
+    await redirectIfLegacyCommuneSlug(commune);
+    notFound();
+  }
 
   const placeHubs = await listPlaceHubs(commune);
   const headline = communeHubHeadline(hub);
@@ -40,7 +58,7 @@ export default async function CommuneListingHubPage({ params }: Props) {
   return (
     <div className="ph">
       <JsonLd data={communeHubBreadcrumbJsonLd(hub)} />
-      <JsonLd data={communeHubItemListJsonLd(hub)} />
+      {hub.items.length > 0 ? <JsonLd data={communeHubItemListJsonLd(hub)} /> : null}
       <div className="ph-list-page">
         <nav className="ph-detail-back" aria-label="Đường dẫn">
           <Link href="/">Trang chủ</Link>
@@ -66,7 +84,10 @@ export default async function CommuneListingHubPage({ params }: Props) {
             </ul>
           </nav>
         ) : null}
-        <ListingProductGrid listings={hub.items} />
+        <ListingProductGrid
+          listings={hub.items}
+          emptyText={`Hiện không có lô đang bán tại ${hub.label}.`}
+        />
       </div>
     </div>
   );

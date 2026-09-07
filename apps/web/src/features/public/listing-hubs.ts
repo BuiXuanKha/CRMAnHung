@@ -6,6 +6,7 @@ import {
 } from '@crmanhung/shared';
 import {
   getCommuneHubDetailFromApi,
+  getCommuneHubRedirect as getCommuneHubRedirectFromApi,
   getPlaceHubDetailFromApi,
   listCommuneHubsFromApi,
   listPlaceHubsFromApi,
@@ -138,6 +139,10 @@ export async function getCommuneHubDetail(
   return getCommuneHubDetailFromCatalog(communeSlug);
 }
 
+export async function getCommuneHubRedirect(communeSlug: string): Promise<string | null> {
+  return getCommuneHubRedirectFromApi(communeSlug);
+}
+
 export function communeHubHeadline(hub: PublicListingHub): string {
   if (hub.districtLabel?.trim()) {
     return `Nhà đất ${hub.label}, ${hub.districtLabel.trim()}`;
@@ -150,6 +155,9 @@ export function communeHubDescription(hub: PublicListingHub): string {
   const where = hub.districtLabel?.trim()
     ? `${hub.label}, ${hub.districtLabel.trim()}`
     : hub.label;
+  if (n === 0) {
+    return `Hiện không có lô đang bán tại ${where} trên An Hưng Land.`;
+  }
   return `${n} lô đang giới thiệu tại ${where} trên An Hưng Land. Xem và chia sẻ không cần đăng nhập.`;
 }
 

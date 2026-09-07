@@ -101,6 +101,21 @@ export async function getCommuneHubDetailFromApi(
   }
 }
 
+/** Old commune hub slug → current slug after xã rename (301 on guest). */
+export async function getCommuneHubRedirect(
+  fromSlug: string,
+): Promise<string | null> {
+  try {
+    const row = await apiFetch<{ toSlug: string }>(
+      `/public/listing-hubs/commune-redirects/${encodeURIComponent(fromSlug)}`,
+    );
+    return row.toSlug?.trim() || null;
+  } catch (err) {
+    if (err instanceof ApiError && err.status === 404) return null;
+    return null;
+  }
+}
+
 export async function listPlaceHubsFromApi(
   communeSlug?: string,
 ): Promise<PublicListingHub[] | null> {
