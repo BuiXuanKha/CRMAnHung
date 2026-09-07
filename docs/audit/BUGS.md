@@ -263,7 +263,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-067 | HIGH | public-content / slug | `uniqueSlug` không chừa `PublicLotSlugRedirect.fromSlug` — listing mới chiếm URL đang 301. | FIXED |
 | BUG-068 | HIGH | public-content / hub | Hub `/xa/…` tính lúc đọc, đổi khi tập lô đổi; không bảng 301. | FIXED |
 | BUG-069 | HIGH | public-content / hub | Hub slug chi tiết (mọi `isPublished`) ≠ catalog/sitemap (chỉ Mở bán) → link nội bộ 404. | OPEN |
-| BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN |
+| BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN (HOÃN) |
 | BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | OPEN |
 | BUG-072 | HIGH | public web / sitemap | Guest fetch nuốt lỗi API → sitemap/catalog rỗng; chi tiết slug thành 404 giả. | OPEN |
 | BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm `isPublished` / Mở bán — trỏ tới 404 hoặc BUG-023. | OPEN |
@@ -1196,7 +1196,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Revalidate gắn publish overlay, không gắn sale/address; path list thiếu hub.
 - **Impact:** Sitemap/HTML lệch nhau; crawler index URL stale hoặc bỏ URL còn 200.
 - **Evidence:** `revalidateListing` array paths. Grep `PublicWebRevalidate` chỉ `public-content.service`. Hub pages `revalidate = false`.
-- **Status:** OPEN
+- **Status:** OPEN (HOÃN — owner 2026-09-07: **không sửa**, giữ logic hiện tại. Đăng web vẫn revalidate chi tiết + catalog + sitemap; không bắt buộc làm mới `/xa/…` khi Tạm dừng / sửa địa chỉ. Đóng PR #308.)
 
 ### BUG-071 — Sitemap luôn đưa 6 URL chuyên mục bài, kể cả chuyên mục trống
 

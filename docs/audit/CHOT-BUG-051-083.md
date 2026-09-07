@@ -32,7 +32,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **067** | HIGH | FIXED | Lô mới chiếm URL 301 của lô cũ | **SỬA** `uniqueSlug` chừa bảng 301 | Chừa fromSlug; trùng thêm `-2` cuối URL (2026-09-07) |
 | **068** | HIGH | FIXED | Hub `/xa/…` đổi theo tập lô, không 301 | Persist xã; 0 lô vẫn 200 + 301 đổi tên (2026-09-07) | Trang xã cố định; thôn để sau |
 | **069** | HIGH | STILL_OPEN | Breadcrumb lô trỏ `/xa/…` 404 | **SỬA** cùng tập lô Mở bán |  |
-| **070** | HIGH | STILL_OPEN | Tạm dừng / sửa địa chỉ không làm mới hub | **SỬA** revalidate thêm `/xa/…` |  |
+| **070** | HIGH | STILL_OPEN | Tạm dừng / sửa địa chỉ không làm mới hub | **SỬA** revalidate thêm `/xa/…` | HOÃN (owner 2026-09-07 — giữ logic hiện tại) |
 | **071** | MED | STILL_OPEN | Sitemap + index 5 chuyên mục **trống** (live) | **SỬA** noindex / bỏ khỏi sitemap khi 0 bài |  |
 | **072** | HIGH | STILL_OPEN | API lỗi → sitemap/catalog rỗng, slug 404 giả | **SỬA** không nuốt 5xx lúc chạy |  |
 | **073** | MED | STILL_OPEN | 301 tới lô đã gỡ / Tạm dừng | SỬA cùng 074 |  |
@@ -49,10 +49,10 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 
 **Gợi ý thứ tự nếu bảo «sửa các ô SỬA»:**  
 1) (059/060 FIXED; 061 by design)  
-2) 066 · 067 · 069 · 072 · 070 (SEO khách)  
+2) 066 · 067 · 069 · 072 (SEO khách)  
 3) 055 · 081 · 079 · 071 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
-5) Hoãn: **056**, **057** (owner làm sau), 065, 068, 077, 078, 080.
+5) Hoãn: **056**, **057**, **070** (owner giữ logic hiện tại), 065, 068, 077, 078, 080.
 
 
 ---
@@ -257,11 +257,9 @@ Admin không tạo chăm sóc — kịch bản «Admin ghi care rồi xóa NV» 
 
 ### BUG-070 — Revalidate không gồm hub; Tạm dừng / sửa địa chỉ không làm mới
 
-**Còn.** Revalidate: chi tiết + catalog + sitemap, **không** `/xa/…`. Công tắc Mở bán / sửa địa chỉ **không** gọi revalidate.
+**Chốt: HOÃN** (owner 2026-09-07 — không sửa, giữ logic hiện tại). Đóng PR #308.
 
-**Tôi vào vai kha.** Tạm dừng lô đã Đăng web → hub/catalog HTML cũ đến khi có publish khác.
-
-**Đề xuất: SỬA** — thêm path hub; gọi revalidate khi đổi Mở bán và khi sửa địa chỉ đang có listing.
+Vẫn OPEN trên code: revalidate khi Đăng web = chi tiết + catalog + sitemap, **không** `/xa/…`. Tạm dừng / sửa địa chỉ không gọi revalidate. Owner chấp nhận trang xã có thể chậm hơn catalog đến lần Đăng web khác.
 
 ---
 
