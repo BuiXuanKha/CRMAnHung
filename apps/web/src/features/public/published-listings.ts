@@ -1,5 +1,4 @@
 import {
-  toGuestListing,
   type PublicCatalogListing,
   type PublicGuestListing,
 } from '@crmanhung/shared';
@@ -14,7 +13,6 @@ import {
   pickRelatedListingSections,
   type RelatedListingSection,
 } from './related-listings';
-import type { PublicProduct } from './mock-data';
 
 export type { RelatedListingSection };
 
@@ -58,28 +56,6 @@ function catalogToView(row: PublicCatalogListing): PublicListingView {
     ...(row.placeLabel != null ? { placeLabel: row.placeLabel } : {}),
     ...(row.addressKind != null ? { addressKind: row.addressKind } : {}),
     ...(row.saleStatus != null ? { saleStatus: row.saleStatus } : {}),
-  };
-}
-
-export function productToListingView(product: PublicProduct): PublicListingView | null {
-  const guest = toGuestListing({
-    isPublished: product.isPublished,
-    slug: product.slug,
-    title: product.title,
-    location: product.location,
-    priceLabel: product.priceLabel,
-    excerpt: product.excerpt,
-    coverImageUrl: product.imageUrl,
-    metaDescription: product.metaDescription,
-  });
-  if (!guest) return null;
-  return {
-    ...guest,
-    kindLabel: product.typeLabel,
-    areaLabel: product.areaLabel,
-    frontageLabel: product.frontageLabel,
-    directionLabel: product.directionLabel,
-    ...(product.gallery?.length ? { imageUrls: product.gallery } : {}),
   };
 }
 

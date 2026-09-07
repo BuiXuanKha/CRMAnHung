@@ -41,7 +41,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **076** | MED | STILL_OPEN | Category lạ: code thiếu `canonical: null` (live đang được `not-found` cứu) | SỬA 1 dòng cho chắc |  |
 | **077** | MED | STILL_OPEN | Hai thôn slug gập một hub | HOÃN — chưa thấy case live |  |
 | **078** | MED | STILL_OPEN | Hai URL cùng `<title>` | HOÃN — 25 lô Đăng web **không** trùng title |  |
-| **079** | LOW | STILL_OPEN | Mock Unsplash đè gallery nếu trùng slug demo | **SỬA** gỡ mock (rẻ) |  |
+| **079** | LOW | FIXED | Mock Unsplash đè gallery nếu trùng slug demo | **SỬA** gỡ mock (rẻ) | FIXED (2026-09-07) |
 | **080** | LOW | STILL_OPEN | Slug không cắt độ dài | HOÃN — live dài nhất **88** ký tự |  |
 | **081** | MED | STILL_OPEN | Title trang chủ lặp «An Hưng Land» **hai lần** (live) | **SỬA** |  |
 | **082** | MED | STILL_OPEN (một phần) | Guest `/dashbroad` → 307 login, `next` vẫn gõ sai | SỬA nốt: 308 về `/dashboard` trước login |  |
@@ -307,11 +307,7 @@ Vẫn OPEN trên code: revalidate khi Đăng web = chi tiết + catalog + sitema
 
 ### BUG-079 — Mock demo đè gallery listing thật
 
-**Còn.** `getProductBySlug` (Unsplash) nếu slug trùng demo (`nen-tho-cu-long-thanh-mat-tien`, …).
-
-**Live:** 25 slug **không** trùng bộ demo → **chưa** gãy trang thật. Rủi ro khi GPT/NV đặt đúng slug mẫu.
-
-**Đề xuất: SỬA** — gỡ mock khỏi trang production (rẻ, an toàn).
+**FIXED (2026-09-07).** Xóa `mock-data.ts`; trang chi tiết chỉ gallery/body từ API.
 
 ---
 
