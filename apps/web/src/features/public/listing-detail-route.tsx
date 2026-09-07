@@ -13,6 +13,7 @@ import {
   getPublicLotSlugRedirect,
   getRelatedListingSections,
 } from '@/features/public/published-listings';
+import { isNextProductionBuild } from '@/features/public/next-production-build';
 import {
   getShareAttribution,
   shareContactFrom,
@@ -27,9 +28,15 @@ type Props = {
 export const revalidate = false;
 
 async function redirectIfLegacySlug(slug: string, shareCode?: string): Promise<void> {
-  const toSlug = await getPublicLotSlugRedirect(slug);
-  if (toSlug && toSlug !== slug) {
-    permanentRedirect(listingHref(toSlug, shareCode));
+  try {
+    const toSlug = await getPublicLotSlugRedirect(slug);
+    if (toSlug && toSlug !== slug) {
+      permanentRedirect(listingHref(toSlug, shareCode));
+    }
+  } catch (err) {
+    // Build collect without Nest; runtime outages must not look like "no redirect".
+    if (isNextProductionBuild()) return;
+    throw err;
   }
 }
 

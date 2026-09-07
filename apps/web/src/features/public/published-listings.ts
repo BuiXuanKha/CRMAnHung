@@ -8,6 +8,7 @@ import {
   getPublicLotSlugRedirect,
   listPublishedCatalog,
 } from '@/features/public-content/api';
+import { isNextProductionBuild } from '@/features/public/next-production-build';
 import {
   pickRelatedListingSection,
   pickRelatedListingSections,
@@ -83,8 +84,14 @@ export function productToListingView(product: PublicProduct): PublicListingView 
 }
 
 export async function listPublishedOverlayListings(): Promise<PublicListingView[]> {
-  const items = await listPublishedCatalog();
-  return items.map(catalogToView);
+  try {
+    const items = await listPublishedCatalog();
+    return items.map(catalogToView);
+  } catch (err) {
+    // CI `next build` has no Nest — soft-fail only during production build collect.
+    if (isNextProductionBuild()) return [];
+    throw err;
+  }
 }
 
 export async function listSitemapListings(): Promise<PublicGuestListing[]> {
@@ -96,8 +103,13 @@ export async function listPublicCatalog(): Promise<PublicListingView[]> {
 }
 
 export async function getPublicListingBySlug(slug: string): Promise<PublicListingView | null> {
-  const fromApi = await getPublishedCatalogBySlug(slug);
-  return fromApi ? catalogToView(fromApi) : null;
+  try {
+    const fromApi = await getPublishedCatalogBySlug(slug);
+    return fromApi ? catalogToView(fromApi) : null;
+  } catch (err) {
+    if (isNextProductionBuild()) return null;
+    throw err;
+  }
 }
 
 export async function getRelatedListingSection(

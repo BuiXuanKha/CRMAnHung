@@ -266,7 +266,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-069 | HIGH | public-content / hub | Hub slug chi tiết (mọi `isPublished`) ≠ catalog/sitemap (chỉ Mở bán) → link nội bộ 404. | FIXED |
 | BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN (HOÃN) |
 | BUG-071 | MEDIUM | public-content / sitemap | Sitemap luôn emit 6 URL chuyên mục bài (kể cả 0 bài); trang vẫn `index`. | CLOSED |
-| BUG-072 | HIGH | public web / sitemap | Guest fetch nuốt lỗi API → sitemap/catalog rỗng; chi tiết slug thành 404 giả. | OPEN |
+| BUG-072 | HIGH | public web / sitemap | Guest fetch nuốt lỗi API → sitemap/catalog rỗng; chi tiết slug thành 404 giả. | FIXED |
 | BUG-073 | MEDIUM | public-content / redirect | 301 lot slug không kiểm `isPublished` / Mở bán — trỏ tới 404 hoặc BUG-023. | OPEN |
 | BUG-074 | MEDIUM | public-content / redirect | Xóa lô cascade listing, không xóa `PublicLotSlugRedirect` — 301 mồ côi. | OPEN |
 | BUG-075 | MEDIUM | public web / OG | `/og-default.png` không có trong `apps/web/public` — OG/Twitter/JSON-LD fallback 404. | OPEN |
@@ -1224,7 +1224,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Fail-soft cho `next build` dùng luôn lúc runtime ISR/request.
 - **Impact:** Crawl thấy nội dung «biến»; soft 404 hàng loạt.
 - **Evidence:** comment «next build: API chưa chạy». `sitemap.ts` `listSitemapListings` → `listPublishedCatalog`. `buildListingDetailMetadata` unpublished khi `!listing`.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Guest catalog/slug-redirect: chỉ 404 → null; 5xx/mạng ném lỗi. Soft-fail `[]`/`null` chỉ khi `next build` (`NEXT_PHASE`) ở caller homepage/sitemap/detail — không nuốt lỗi lúc runtime.
 
 ### BUG-073 — 301 slug lô không kiểm tra đích còn published / Mở bán
 
