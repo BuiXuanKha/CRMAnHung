@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 41 |
+| OPEN | 40 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 42 |
+| FIXED / CLOSED | 43 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -259,7 +259,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | FIXED |
 | BUG-065 | MEDIUM | customers / messenger / users | Ingest tin `employeeFacebookUid` không khớp profile NV; không API gắn UID NV. | CLOSED (by design) |
 | BUG-066 | HIGH | public-content / slug | Slug lô từ editor/GPT lưu raw — không `toPublicSlug` (dấu, hoa, khoảng, `/`). | OPEN |
-| BUG-067 | HIGH | public-content / slug | `uniqueSlug` không chừa `PublicLotSlugRedirect.fromSlug` — listing mới chiếm URL đang 301. | OPEN |
+| BUG-067 | HIGH | public-content / slug | `uniqueSlug` không chừa `PublicLotSlugRedirect.fromSlug` — listing mới chiếm URL đang 301. | FIXED |
 | BUG-068 | HIGH | public-content / hub | Hub `/xa/…` tính lúc đọc, đổi khi tập lô đổi; không bảng 301. | OPEN |
 | BUG-069 | HIGH | public-content / hub | Hub slug chi tiết (mọi `isPublished`) ≠ catalog/sitemap (chỉ Mở bán) → link nội bộ 404. | OPEN |
 | BUG-070 | HIGH | public-content / ISR | Revalidate không gồm `/xa/…`; Tạm dừng / sửa địa chỉ không gọi revalidate catalog/sitemap. | OPEN |
@@ -1156,7 +1156,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Unique guest URL = unique listing slug, không gồm `fromSlug`.
 - **Impact:** Backlink/index của URL cũ đổi nội dung; duplicate/sai listing; 301 thành dead.
 - **Evidence:** `uniqueSlug` không query `publicLotSlugRedirect`. `ListingDetailRoute` thứ tự fetch listing rồi redirect.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Owner: lúc cấp URL lô mới, không lấy slug đang là `fromSlug` 301. Trùng thì thêm chữ `-2` (rồi `-3`) vào **cuối** đường dẫn. `uniqueSlug` API + script regen cùng `lotGuestSlugOccupied`.
 
 ### BUG-068 — Hub `/xa/…` không lưu slug, đổi theo tập lô, không 301
 
