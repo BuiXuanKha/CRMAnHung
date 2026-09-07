@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 44 |
+| OPEN | 43 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 39 |
+| FIXED / CLOSED | 40 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -256,7 +256,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | FIXED |
 | BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | OPEN |
 | BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | OPEN |
-| BUG-065 | MEDIUM | customers / messenger / users | Ingest tin `employeeFacebookUid` không khớp profile NV; không API gắn UID NV. | OPEN |
+| BUG-065 | MEDIUM | customers / messenger / users | Ingest tin `employeeFacebookUid` không khớp profile NV; không API gắn UID NV. | CLOSED (by design) |
 | BUG-066 | HIGH | public-content / slug | Slug lô từ editor/GPT lưu raw — không `toPublicSlug` (dấu, hoa, khoảng, `/`). | OPEN |
 | BUG-067 | HIGH | public-content / slug | `uniqueSlug` không chừa `PublicLotSlugRedirect.fromSlug` — listing mới chiếm URL đang 301. | OPEN |
 | BUG-068 | HIGH | public-content / hub | Hub `/xa/…` tính lúc đọc, đổi khi tập lô đổi; không bảng 301. | OPEN |
@@ -1129,7 +1129,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Ingest tin client; User và Messenger không cùng bảng profile lúc runtime.
 - **Impact:** Sai nhóm kênh/thống kê nick; khó biết chat thuộc nick nào; trùng Person theo thread vẫn BUG-013.
 - **Evidence:** `from-extension.service.ts` gán `fields.employeeUid`. Grep `employeeFacebookProfile.create` chỉ script migrate. `contactChannelWhere` `fb:`.
-- **Status:** OPEN
+- **Status:** CLOSED (by design, 2026-09-07) — Owner: **không** đăng ký kênh trước. Extension gửi kênh/page mới (`employeeUid`) → ingest khách + tin + UID **bình thường**. Không chặn vì thiếu `EmployeeFacebookProfile`. Không bắt Admin gắn nick trên `/quan-tri/nguoi-dung`. Khách vẫn thuộc JWT. Trùng Person theo thread vẫn BUG-013.
 
 ### BUG-066 — Slug lô từ editor/GPT không chạy `toPublicSlug`
 
