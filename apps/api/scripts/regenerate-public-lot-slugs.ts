@@ -7,7 +7,11 @@
  *   APPLY=1 pnpm --filter @crmanhung/api lots:regenerate-public-slugs
  */
 import { PrismaClient } from '@prisma/client';
-import { PUBLIC_LISTING_PATH, reservePublicLotSlug, toListingPublicSlug } from '@crmanhung/shared';
+import { PUBLIC_LISTING_PATH, toListingPublicSlug } from '@crmanhung/shared';
+import {
+  lotGuestSlugOccupied,
+  nextUniqueLotGuestSlug,
+} from '../src/modules/public-content/lot-guest-slug';
 
 const prisma = new PrismaClient();
 
@@ -21,19 +25,12 @@ async function uniqueSlug(
   excludeId: string,
   reservedNext: Set<string>,
 ): Promise<string> {
-  const root = reservePublicLotSlug(base || 'lo-dat');
-  let slug = root;
-  let n = 2;
-  for (;;) {
-    const hit = await prisma.publicLotListing.findUnique({ where: { slug } });
-    const takenByPlan = reservedNext.has(slug);
-    if ((!hit || hit.id === excludeId) && !takenByPlan) {
-      reservedNext.add(slug);
-      return slug;
-    }
-    slug = `${root}-${n}`;
-    n += 1;
-  }
+  const next = await nextUniqueLotGuestSlug(base, async (slug) => {
+    if (reservedNext.has(slug)) return true;
+    return lotGuestSlugOccupied(prisma, slug, excludeId);
+  });
+  reservedNext.add(next);
+  return next;
 }
 
 async function revalidatePaths(paths: string[]): Promise<void> {

@@ -643,7 +643,7 @@ Sửa nhỏ kèm Phase 7: `(public)/not-found.tsx` metadata 404; `unpublishedPos
 | Gỡ web | **Đã bỏ (2026-09-05).** Không tắt `isPublished` từ UI/API user. Ẩn khách = hết Mở bán. (Sibling auto-unpublish khi Đăng lô kho khác vẫn giữ.) |
 | Khách thấy lô | `isPublished` ∩ map `DANG_BAN` (rule guest API sẵn có — không đụng công tắc Đăng web) |
 | Một listing / ProjectLot | STAFF không gỡ luồng NV khác đang hiện. Admin không đăng lô. |
-| Slug ổn định | Slug = `toListingPublicSlug(title, leftover location)` lúc **tạo** listing (không trần 80; cấm `xa`; `uniqueSlug` luôn `toPublicSlug`). `PATCH draft` / Đăng lại **không** đổi slug. NV **không** sửa URL tay (BUG-066). |
+| Slug ổn định | Slug = `toListingPublicSlug(title, leftover location)` lúc **tạo** listing (không trần 80; cấm `xa`; `uniqueSlug` luôn `toPublicSlug`). Không cấp chuỗi đang là `PublicLotSlugRedirect.fromSlug` (BUG-067): trùng thì thêm `-2` / `-3` vào **cuối** URL. `PATCH draft` / Đăng lại **không** đổi slug. NV **không** sửa URL tay (BUG-066). |
 | Đổi URL lô cũ | `pnpm lots:regenerate-public-slugs` dry-run; `APPLY=1` mới ghi `PublicLotSlugRedirect` + revalidate. Deploy **không** tự APPLY. VPS: commit `[apply-lot-slugs]` (hoặc `APPLY_LOT_SLUGS=1` trong `remote_deploy.sh`). Guest slug cũ → **301**. **Không** đổi tên file ảnh CDN |
 | Revalidate fail | `PublicWebRevalidateService` log `warn` (kèm paths); **không throw** |
 

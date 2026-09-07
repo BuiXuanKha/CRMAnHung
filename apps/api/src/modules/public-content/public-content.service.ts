@@ -27,9 +27,12 @@ import {
   type HubSlugMaps,
 } from './public-listing-hub-slugs';
 import {
+  lotGuestSlugOccupied,
+  nextUniqueLotGuestSlug,
+} from './lot-guest-slug';
+import {
   formatM,
   kindLabel,
-  reservePublicLotSlug,
   toListingPublicSlug,
   toPublicPostSlug,
   toPublicSlug,
@@ -583,14 +586,9 @@ export class PublicContentService {
   }
 
   private async uniqueSlug(base: string): Promise<string> {
-    const root = reservePublicLotSlug(toPublicSlug(base, 0, 'lo-dat'));
-    let slug = root;
-    let n = 2;
-    while (await this.prisma.publicLotListing.findUnique({ where: { slug } })) {
-      slug = `${root}-${n}`;
-      n += 1;
-    }
-    return slug;
+    return nextUniqueLotGuestSlug(toPublicSlug(base, 0, 'lo-dat'), (slug) =>
+      lotGuestSlugOccupied(this.prisma, slug),
+    );
   }
 
   private isOpenSale(lodat: LodatLoaded): boolean {

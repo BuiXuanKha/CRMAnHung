@@ -29,7 +29,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **064** | MED | FIXED | Xóa User → 500 vì care/tiến độ/xem file | Owner: **không xóa cứng**; chỉ vô hiệu hóa | Không xóa cứng (2026-09-07) |
 | **065** | MED | CLOSED (by design) | Extension gửi UID nick; không khớp hồ sơ NV | Owner: **không** đăng ký kênh trước; kênh mới từ extension cứ vào | Không chặn ingest (2026-09-07) |
 | **066** | HIGH | FIXED | GPT/sửa slug lô không bỏ dấu | Owner: **không** sửa slug tay; URL từ tiêu đề lúc tạo | Không ô slug (2026-09-07) |
-| **067** | HIGH | STILL_OPEN | Lô mới chiếm URL 301 của lô cũ | **SỬA** `uniqueSlug` chừa bảng 301 |  |
+| **067** | HIGH | FIXED | Lô mới chiếm URL 301 của lô cũ | **SỬA** `uniqueSlug` chừa bảng 301 | Chừa fromSlug; trùng thêm `-2` cuối URL (2026-09-07) |
 | **068** | HIGH | STILL_OPEN | Hub `/xa/…` đổi theo tập lô, không 301 | Lớn — làm sau 069/070; hoặc persist hub |  |
 | **069** | HIGH | STILL_OPEN | Breadcrumb lô trỏ `/xa/…` 404 | **SỬA** cùng tập lô Mở bán |  |
 | **070** | HIGH | STILL_OPEN | Tạm dừng / sửa địa chỉ không làm mới hub | **SỬA** revalidate thêm `/xa/…` |  |
@@ -231,11 +231,9 @@ Admin không tạo chăm sóc — kịch bản «Admin ghi care rồi xóa NV» 
 
 ### BUG-067 — Listing mới chiếm URL đang 301
 
-**Còn.** `uniqueSlug` chỉ bảng listing, không `PublicLotSlugRedirect`. Guest: có listing thì **200**, không 301.
+**FIXED (2026-09-07).** Khi hệ thống cấp đường dẫn cho lô mới, nó cũng tránh các URL cũ đang chuyển hướng 301. Nếu trùng, lô mới nhận cùng gốc rồi thêm chữ `-2` vào cuối (ví dụ `lo-dat-nam-sach-2`), để Google mở link cũ vẫn ra lô A.
 
-**Ví dụ giả định:** Lô A đổi slug `cu`→`moi` (301 `cu`). Lô B Đăng web nhận `cu` → Google mở URL cũ ra B.
-
-**Đề xuất: SỬA** — slug đã nằm `fromSlug` thì không cấp cho lô mới (`-2`).
+**Tôi vào vai nhân viên `kha`.** Tôi Đăng web một lô có tiêu đề trùng đường dẫn cũ của lô khác. Trang khách của URL cũ vẫn nhảy về lô cũ, không hiện lô mới.
 
 ---
 
