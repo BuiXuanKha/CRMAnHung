@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
   applyPersistedCommuneSlugs,
+  guestHubRevalidatePaths,
   nextUniqueHubSlug,
   type CommuneSlugMeta,
   type HubSlugMaps,
@@ -64,5 +65,29 @@ describe('applyPersistedCommuneSlugs', () => {
     const next = applyPersistedCommuneSlugs(maps, persisted);
     assert.equal(next.communeByWardId.get('w1')?.slug, 'dong-lac');
     assert.equal(next.placeByWardDetail.get('w1|nham cap')?.communeSlug, 'dong-lac');
+  });
+});
+
+describe('guestHubRevalidatePaths', () => {
+  it('includes commune and place hub URLs', () => {
+    assert.deepEqual(guestHubRevalidatePaths({ communeSlug: 'dong-lac', placeSlug: 'truc-khe' }), [
+      '/mua-ban-nha-dat-huyen-nam-sach/xa/dong-lac',
+      '/mua-ban-nha-dat-huyen-nam-sach/xa/dong-lac/truc-khe',
+    ]);
+  });
+
+  it('keeps the previous xã URL after a ward change', () => {
+    const paths = guestHubRevalidatePaths({
+      communeSlug: 'hong-phong',
+      previousCommuneSlug: 'dong-lac',
+      placeSlug: 'khu-do-thi-dong-khe',
+      previousPlaceSlug: 'truc-khe',
+    });
+    assert.equal(paths.includes('/mua-ban-nha-dat-huyen-nam-sach/xa/dong-lac'), true);
+    assert.equal(paths.includes('/mua-ban-nha-dat-huyen-nam-sach/xa/hong-phong'), true);
+    assert.equal(
+      paths.includes('/mua-ban-nha-dat-huyen-nam-sach/xa/dong-lac/truc-khe'),
+      true,
+    );
   });
 });

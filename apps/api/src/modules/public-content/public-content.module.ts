@@ -7,12 +7,12 @@ import { PublicListingHubsController } from './public-listing-hubs.controller';
 import { PublicListingsController } from './public-listings.controller';
 import { PublicPostsController } from './public-posts.controller';
 import { PublicSlugRedirectsController } from './public-slug-redirects.controller';
-import { PublicWebRevalidateService } from './public-web-revalidate.service';
+import { PublicWebRevalidateModule } from './public-web-revalidate.module';
 import { LotGptService } from './lot-gpt.service';
 import { PostGptService } from './post-gpt.service';
 
 @Module({
-  imports: [LotSharesModule],
+  imports: [LotSharesModule, PublicWebRevalidateModule],
   controllers: [
     PublicListingHubsController,
     PublicListingsController,
@@ -23,7 +23,6 @@ import { PostGptService } from './post-gpt.service';
   providers: [
     PublicContentService,
     PublicCommuneHubsService,
-    PublicWebRevalidateService,
     LotGptService,
     PostGptService,
   ],

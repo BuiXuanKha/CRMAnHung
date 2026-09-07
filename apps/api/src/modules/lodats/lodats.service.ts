@@ -26,6 +26,7 @@ import {
   uniqueSeoLotImageKey,
 } from './lodat-seo-image-upload';
 import { facebookPageUrlFromRawMeta } from '@crmanhung/shared';
+import { PublicWebRevalidateService } from '../public-content/public-web-revalidate.service';
 
 const ADDRESS_INCLUDE = {
   province: { select: { name: true, isHidden: true } },
@@ -97,6 +98,7 @@ export class LodatsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly revalidate: PublicWebRevalidateService,
   ) {}
 
   private publicUrl(objectKey: string | null | undefined): string | null {
@@ -637,6 +639,7 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
+    await this.revalidatePublishedLodat(id);
     return this.mapDetail(refreshed, user);
   }
 
@@ -1251,5 +1254,15 @@ export class LodatsService {
       include: LIST_INCLUDE,
     });
     return this.mapDetail(await this.retargetImagesAfterWrite(refreshed), user);
+  }
+
+  /** BUG-070: Tạm dừng / Mở bán must refresh guest catalog, sitemap, and `/xa/…`. */
+  private async revalidatePublishedLodat(lodatId: string): Promise<void> {
+    const listing = await this.prisma.publicLotListing.findUnique({
+      where: { lodatId },
+      select: { slug: true, isPublished: true },
+    });
+    if (!listing?.isPublished) return;
+    await this.revalidate.revalidateListing(listing.slug, { includeHome: true });
   }
 }

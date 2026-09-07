@@ -13,6 +13,9 @@ import type {
 } from './dto/address.dto';
 import { uniqueSeoAddressImageKey } from '../lodats/lodat-seo-image-upload';
 import { importProjectLotsForAddress } from './import-project-lots';
+import { PublicWebRevalidateService } from '../public-content/public-web-revalidate.service';
+import { guestHubRevalidatePaths } from '../public-content/public-listing-hub-slugs';
+import { toPublicSlug } from '../public-content/public-slug';
 
 type WardChain = {
   wardId: string;
@@ -28,6 +31,7 @@ export class AddressesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly revalidate: PublicWebRevalidateService,
   ) {}
 
   private publicUrl(objectKey: string | null | undefined): string | null {
@@ -214,7 +218,10 @@ export class AddressesService {
   }
 
   async update(id: string, dto: UpdateAddressDto) {
-    const existing = await this.prisma.address.findUnique({ where: { id } });
+    const existing = await this.prisma.address.findUnique({
+      where: { id },
+      include: { ward: { select: { name: true } } },
+    });
     if (!existing) throw new NotFoundException('Không tìm thấy địa chỉ.');
 
     const kind = dto.kind ?? (existing.kind as 'REGULAR' | 'PROJECT');
@@ -272,6 +279,11 @@ export class AddressesService {
           select: { objectKey: true },
         },
       },
+    });
+    await this.revalidatePublishedAddress(id, {
+      wardId: existing.wardId,
+      wardName: existing.ward?.name ?? '',
+      detail: existing.detail,
     });
     return { item: this.mapAddressRow(row) };
   }
@@ -399,5 +411,45 @@ export class AddressesService {
       // DB already dropped the row; orphan object is acceptable for now.
     }
     return { ok: true };
+  }
+
+  /** BUG-070: ward/detail change must bust hub + catalog ISR for published lots. */
+  private async revalidatePublishedAddress(
+    addressId: string,
+    previous: { wardId: string; wardName: string; detail: string | null },
+  ): Promise<void> {
+    const listings = await this.prisma.publicLotListing.findMany({
+      where: {
+        isPublished: true,
+        lodat: {
+          OR: [{ addressId }, { projectLot: { addressId } }],
+        },
+      },
+      select: { slug: true },
+    });
+    if (listings.length === 0) return;
+
+    const prevHub = await this.prisma.publicCommuneHub.findUnique({
+      where: { wardId: previous.wardId },
+      select: { slug: true },
+    });
+    const previousCommuneSlug =
+      prevHub?.slug ??
+      (previous.wardName.trim()
+        ? toPublicSlug(previous.wardName, 60, 'xa')
+        : null);
+    const previousPlaceSlug = previous.detail?.trim()
+      ? toPublicSlug(previous.detail, 60, 'khu')
+      : null;
+    await this.revalidate.revalidateListings(
+      listings.map((row) => row.slug),
+      {
+        includeHome: true,
+        extraPaths: guestHubRevalidatePaths({
+          previousCommuneSlug,
+          previousPlaceSlug,
+        }),
+      },
+    );
   }
 }

@@ -1,3 +1,4 @@
+import { listingCommuneHubPath, listingPlaceHubPath } from '@crmanhung/shared';
 import { toPublicSlug } from './public-slug';
 
 export type AddressGeo = {
@@ -168,4 +169,36 @@ export function placeMetaForGeo(
 ): PlaceSlugMeta | null {
   if (!geo?.detail) return null;
   return maps.placeByWardDetail.get(placeDetailKey(geo.wardId, geo.detail)) ?? null;
+}
+
+/** ISR paths for commune/place hubs (current + previous after ward/detail change). */
+export function guestHubRevalidatePaths(input: {
+  communeSlug?: string | null;
+  placeSlug?: string | null;
+  previousCommuneSlug?: string | null;
+  previousPlaceSlug?: string | null;
+}): string[] {
+  const paths: string[] = [];
+  const seen = new Set<string>();
+  const add = (path: string | null | undefined) => {
+    const next = path?.trim();
+    if (!next || seen.has(next)) return;
+    seen.add(next);
+    paths.push(next);
+  };
+  const commune = input.communeSlug?.trim() || null;
+  const prevCommune = input.previousCommuneSlug?.trim() || null;
+  const place = input.placeSlug?.trim() || null;
+  const prevPlace = input.previousPlaceSlug?.trim() || null;
+  if (commune) add(listingCommuneHubPath(commune));
+  if (prevCommune) add(listingCommuneHubPath(prevCommune));
+  if (commune && place) add(listingPlaceHubPath(commune, place));
+  if (prevCommune && prevPlace) add(listingPlaceHubPath(prevCommune, prevPlace));
+  if (commune && prevPlace && prevPlace !== place) {
+    add(listingPlaceHubPath(commune, prevPlace));
+  }
+  if (prevCommune && place && prevCommune !== commune) {
+    add(listingPlaceHubPath(prevCommune, place));
+  }
+  return paths;
 }
