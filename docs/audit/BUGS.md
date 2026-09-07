@@ -252,7 +252,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-058 | MEDIUM | transactions / lodats | Form tạo GD (không `?lodatId`) picker tối đa 200 lô — lô cũ không chọn được. | FIXED |
 | BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | OPEN |
 | BUG-060 | HIGH | lodats / transactions | Xóa ảnh lô không đếm `TransactionSnapshotImage` — xóa R2, ảnh GD gãy. | OPEN |
-| BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | OPEN |
+| BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | CLOSED (by design) |
 | BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | OPEN |
 | BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | OPEN |
 | BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | OPEN |
@@ -1077,7 +1077,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Ảnh dự án dùng chung một key; xóa địa chỉ coi là exclusive owner.
 - **Impact:** Một thao tác sổ địa chỉ phá list lô + Đăng web + hồ sơ GD.
 - **Evidence:** `addresses.service.ts` `deleteImage` vs `lodats` `ADDRESS_INCLUDE.images`. `public-content.service.ts` `imageUrls` project address. `transactions-snapshot.ts` nhánh `projectLotId && addr?.images`.
-- **Status:** OPEN
+- **Status:** CLOSED (by design, 2026-09-07) — Owner: ảnh dự án **dùng chung** có chủ đích. Admin xóa/đổi = ảnh đó hết giá trị với dự án; gallery lô CRM + Đăng web **đọc live** `AddressImage` nên cập nhật theo. Không copy nhân bản theo NV. GD đã tạo: snapshot đã đóng băng (sau BUG-060 = file riêng) — không đổi theo kho; chấp nhận.
 
 ### BUG-062 — Sửa lô CRM không cập nhật overlay Đăng web (title/location); catalog trộn dữ liệu cũ và mới
 
