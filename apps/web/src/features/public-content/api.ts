@@ -27,6 +27,7 @@ import {
 } from '@crmanhung/shared';
 import { ApiError, apiFetch } from '@/shared/api/client';
 import { listLodats } from '@/features/lodats/api';
+import { isNextProductionBuild } from '@/features/public/next-production-build';
 import { catalogToGuestLot, type PublicGuestLot } from './guest-listing';
 import { buildPublicWebDashboard, buildStaffOpenLots } from './staff-lots';
 
@@ -55,13 +56,9 @@ export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
 
 /** Guest catalog — GET /public/listings (no JWT). */
 export async function listPublishedCatalog(): Promise<PublicCatalogListing[]> {
-  try {
-    const res = await apiFetch<PublicCatalogListResponse>('/public/listings');
-    return res.items;
-  } catch {
-    // next build: API chưa chạy — đừng crash collect page data.
-    return [];
-  }
+  // BUG-072: do not treat API outages as an empty catalog (sitemap / SEO).
+  const res = await apiFetch<PublicCatalogListResponse>('/public/listings');
+  return res.items;
 }
 
 export async function getPublishedCatalogBySlug(
@@ -72,8 +69,9 @@ export async function getPublishedCatalogBySlug(
       `/public/listings/${encodeURIComponent(slug)}`,
     );
   } catch (err) {
+    // Missing / unpublished listing only — other failures must propagate (BUG-072).
     if (err instanceof ApiError && err.status === 404) return null;
-    return null;
+    throw err;
   }
 }
 
@@ -157,14 +155,21 @@ export async function getPublicLotSlugRedirect(
     );
     return row.toSlug?.trim() || null;
   } catch (err) {
+    // No redirect row only — other failures must propagate (BUG-072).
     if (err instanceof ApiError && err.status === 404) return null;
-    return null;
+    throw err;
   }
 }
 
 export async function listPublishedPublicLots(): Promise<PublicGuestLot[]> {
-  const items = await listPublishedCatalog();
-  return items.map(catalogToGuestLot);
+  try {
+    const items = await listPublishedCatalog();
+    return items.map(catalogToGuestLot);
+  } catch (err) {
+    // CI `next build` has no Nest — soft-fail only during production build collect.
+    if (isNextProductionBuild()) return [];
+    throw err;
+  }
 }
 
 export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {

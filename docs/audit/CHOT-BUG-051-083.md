@@ -34,7 +34,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 | **069** | HIGH | FIXED | Breadcrumb lô trỏ `/xa/…` 404 | **SỬA** cùng tập lô Mở bán | Cùng `loadPublishedCatalog` (2026-09-07) |
 | **070** | HIGH | STILL_OPEN | Tạm dừng / sửa địa chỉ không làm mới hub | **SỬA** revalidate thêm `/xa/…` | HOÃN (owner 2026-09-07 — giữ logic hiện tại) |
 | **071** | MED | CLOSED | Sitemap + index 5 chuyên mục **trống** (live) | Giữ sitemap đủ chuyên mục; đã seed bài | Đóng sổ (owner 2026-09-07) |
-| **072** | HIGH | STILL_OPEN | API lỗi → sitemap/catalog rỗng, slug 404 giả | **SỬA** không nuốt 5xx lúc chạy |  |
+| **072** | HIGH | FIXED | API lỗi → sitemap/catalog rỗng, slug 404 giả | **SỬA** không nuốt 5xx lúc chạy | FIXED (2026-09-07) |
 | **073** | MED | STILL_OPEN | 301 tới lô đã gỡ / Tạm dừng | SỬA cùng 074 |  |
 | **074** | MED | STILL_OPEN | Xóa lô còn hàng 301 | SỬA cùng 067/073 |  |
 | **075** | MED | **ALREADY_FIXED** | `/og-default.png` live **200** | Đóng sổ FIXED — không sửa |  |
@@ -49,7 +49,7 @@ Cách chốt nhanh: sửa cột **Chốt** trong bảng §1 (SỬA / BỎ / HOÃ
 
 **Gợi ý thứ tự nếu bảo «sửa các ô SỬA»:**  
 1) (059/060 FIXED; 061 by design)  
-2) 066 · 067 · 069 · 072 (SEO khách)  
+2) 066 · 067 · 069 (SEO khách; 072 FIXED)  
 3) 055 · 081 · 079 · 082 (nhanh, thấy ngay)  
 4) 051 · 053 · 054 · 064 · 076 · 073+074  
 5) Hoãn: **056**, **057**, **070** (owner), 065, 068, 077, 078, 080. **071** CLOSED.
@@ -269,13 +269,7 @@ Vẫn OPEN trên code: revalidate khi Đăng web = chi tiết + catalog + sitema
 
 ### BUG-072 — Lỗi API guest bị nuốt → sitemap rỗng / 404 giả
 
-**Còn.** `catch { return [] }` / lỗi ≠ 404 → `null` → `notFound()`. Sitemap `revalidate = false` có thể **đóng băng** catalog rỗng.
-
-**Guest / Googlebot** lúc Nest timeout: mất URL lô/hub; slug đang sống thành 404.
-
-**Live neo:** catalog API hiện **25** lô, sitemap **65** loc — đang khỏe. Bug là khi API **gãy**.
-
-**Đề xuất: SỬA** — chỉ nuốt lỗi lúc `next build`; runtime 5xx **không** cache rỗng / không biến thành 404.
+**FIXED (2026-09-07).** `listPublishedCatalog` / `getPublishedCatalogBySlug` / `getPublicLotSlugRedirect`: 404 → null; lỗi khác ném. Soft-fail chỉ ở caller khi `next build` (CI không có Nest). Runtime không còn giả catalog trống / 404 giả vì API chết.
 
 ---
 
