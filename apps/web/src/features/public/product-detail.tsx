@@ -10,7 +10,6 @@ import {
 } from './product-detail-client';
 import { LotDetailMetaPixel } from './lot-detail-meta-pixel';
 import type { PublicListingView, RelatedListingSection } from './published-listings';
-import { getProductBySlug } from './mock-data';
 import { listingCommuneHubCrumb, listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import { saleStatusLabel } from './sale-status-label';
@@ -24,9 +23,8 @@ import {
 import './public-home.css';
 import './product-detail.css';
 
+/** Gallery from API listing only — no mock Unsplash (BUG-079). */
 function listingImages(listing: PublicListingView): string[] {
-  const product = getProductBySlug(listing.slug);
-  if (product?.gallery?.length) return product.gallery;
   if (listing.imageUrls?.length) return listing.imageUrls;
   if (listing.coverImageUrl) return [listing.coverImageUrl];
   return [];
@@ -90,23 +88,18 @@ export function ProductDetailView({
   relatedSections: RelatedListingSection[];
   shareContact?: LotShareContact | null;
 }) {
-  const product = getProductBySlug(listing.slug);
   const images = listingImages(listing);
   const price = listing.priceLabel ?? 'Liên hệ';
   const area = listing.areaLabel;
   const h1 = listingPageH1(listing);
   const communeCrumb = listingCommuneHubCrumb(listing);
   const bodyHtml = sanitizeListingHtml(listing.bodyHtml ?? '');
-  const fallbackBody = product?.description?.trim() || '';
   const showHtmlBody = Boolean(bodyHtml);
-  const showPlainBody =
-    !showHtmlBody && Boolean(fallbackBody) && fallbackBody !== listing.excerpt.trim();
-  const highlights = product?.highlights ?? [];
   const shareUrl = listingCanonicalUrl(listing.slug);
   const shareText = listingShareText(listing);
   const saleLabel = saleStatusLabel(listing.saleStatus);
   const hasSummaryStats = Boolean(
-    area || listing.frontageLabel || listing.directionLabel || product?.legalLabel,
+    area || listing.frontageLabel || listing.directionLabel,
   );
 
   return (
@@ -159,7 +152,6 @@ export function ProductDetailView({
               />
             ) : null}
 
-            {product?.postedLabel ? <p className="pd-posted">{product.postedLabel}</p> : null}
             <h1>{h1}</h1>
             {saleLabel ? <p className="pd-sale-badge">{saleLabel}</p> : null}
             {listing.location ? (
@@ -205,12 +197,6 @@ export function ProductDetailView({
                       <strong className="pd-summary-value">{listing.directionLabel}</strong>
                     </li>
                   ) : null}
-                  {product?.legalLabel ? (
-                    <li className="pd-summary-spec">
-                      <span className="pd-summary-label">Pháp lý</span>
-                      <strong className="pd-summary-value">{product.legalLabel}</strong>
-                    </li>
-                  ) : null}
                 </ul>
               ) : null}
               <div className="pd-summary-share">
@@ -234,22 +220,6 @@ export function ProductDetailView({
                   className="pd-body"
                   dangerouslySetInnerHTML={{ __html: bodyHtml }}
                 />
-              </section>
-            ) : showPlainBody ? (
-              <section className="pd-section" aria-labelledby="pd-desc-title">
-                <h2 id="pd-desc-title">Mô tả</h2>
-                <p>{fallbackBody}</p>
-              </section>
-            ) : null}
-
-            {highlights.length > 0 ? (
-              <section className="pd-section" aria-labelledby="pd-hl-title">
-                <h2 id="pd-hl-title">Điểm nổi bật</h2>
-                <ul className="pd-highlights">
-                  {highlights.map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
-                </ul>
               </section>
             ) : null}
           </div>

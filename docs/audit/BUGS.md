@@ -273,7 +273,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-076 | MEDIUM | public web / canonical | `[category]` không hợp lệ: metadata noindex nhưng không gỡ canonical trang chủ. | FIXED |
 | BUG-077 | MEDIUM | public-content / hub | Hai địa chỉ khác nhau `toPublicSlug` trùng → một hub URL, trộn listing. | OPEN |
 | BUG-078 | MEDIUM | public-content / metadata | `title` / `seoTitle` không unique — hai lô/bài trùng document title. | OPEN |
-| BUG-079 | LOW | public web | `getProductBySlug` mock đè gallery/mô tả listing thật nếu trùng slug demo. | OPEN |
+| BUG-079 | LOW | public web | `getProductBySlug` mock đè gallery/mô tả listing thật nếu trùng slug demo. | FIXED |
 | BUG-080 | LOW | public-content / slug | Slug lô `toPublicSlug(..., 0)` không cắt độ dài; title+location → URL cực dài. | OPEN |
 | BUG-081 | MEDIUM | public web / metadata | `<title>` trang chủ lặp «An Hưng Land» hai lần (live). | OPEN |
 | BUG-082 | MEDIUM | public web / CRM | `/dashbroad` (alias gõ sai) trả HTTP 200 cache, không redirect `/dashboard`. | OPEN |
@@ -1311,7 +1311,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Fallback mock còn trong trang production.
 - **Impact:** Nội dung sai; ImageObject ≠ gallery DOM. Xác suất thấp (slug demo cụ thể).
 - **Evidence:** `getProductBySlug` trong `product-detail.tsx`. `mock-data.ts` `GALLERY.house` Unsplash.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Gỡ mock: xóa `mock-data.ts`; chi tiết lô chỉ dùng ảnh/mô tả API.
 
 ### BUG-080 — Slug lô không giới hạn độ dài khi generate từ title+địa chỉ
 
