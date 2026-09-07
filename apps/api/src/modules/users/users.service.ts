@@ -158,45 +158,14 @@ export class UsersService {
     return { ok: true };
   }
 
-  async remove(id: string, actorId: string) {
-    if (id === actorId) {
-      throw new BadRequestException('Không thể xóa tài khoản đang đăng nhập.');
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id },
-      select: { id: true, role: true, isActive: true, avatarObjectKey: true },
-    });
-    if (!user) {
-      throw new NotFoundException('Không tìm thấy người dùng.');
-    }
-
-    if (user.role === 'ADMIN' && user.isActive) {
-      const adminCount = await this.prisma.user.count({
-        where: { role: 'ADMIN', isActive: true },
-      });
-      if (adminCount <= 1) {
-        throw new BadRequestException('Không thể xóa Admin cuối cùng.');
-      }
-    }
-
-    const [customers, lodats, transactions, titleServices] = await Promise.all([
-      this.prisma.customer.count({ where: { employeeId: id } }),
-      this.prisma.lodat.count({ where: { createdByEmployeeId: id } }),
-      this.prisma.transaction.count({ where: { createdByEmployeeId: id } }),
-      this.prisma.titleService.count({ where: { createdByEmployeeId: id } }),
-    ]);
-
-    if (customers + lodats + transactions + titleServices > 0) {
-      throw new BadRequestException(
-        'Không thể xóa nhân viên đã có khách, lô, giao dịch hoặc hồ sơ sổ đỏ. Hãy vô hiệu hóa tài khoản.',
-      );
-    }
-
-    await this.revokeRefreshTokens(id);
-    await this.prisma.user.delete({ where: { id } });
-    await this.deleteAvatarObject(user.avatarObjectKey);
-    return { ok: true };
+  /**
+   * Hard-delete is forbidden: User FKs (customers, lots, deals, title, care)
+   * must stay. Soft-disable via PATCH `isActive: false`.
+   */
+  async remove(_id: string) {
+    throw new BadRequestException(
+      'Không xóa cứng nhân viên. Hãy vô hiệu hóa tài khoản (Sửa → bỏ tick Tài khoản đang hoạt động) để giữ khách, lô, giao dịch, sổ đỏ và chăm sóc.',
+    );
   }
 
   async setAvatar(

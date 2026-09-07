@@ -3,14 +3,13 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Plus, Users } from 'lucide-react';
+import { Plus, Users } from 'lucide-react';
 import { UserRole, type UserAdminListItem } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
-import { CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
+import { CrmToast } from '@/shared/ui/dialog';
 import { Icon } from '@/shared/ui/icon';
 import {
   createUser,
-  deleteUser,
   deleteUserAvatar,
   listUsers,
   resetUserPassword,
@@ -31,7 +30,6 @@ export function UserAdminPage() {
   const [formMode, setFormMode] = useState<'create' | 'edit'>('create');
   const [editing, setEditing] = useState<UserAdminListItem | null>(null);
   const [resetTarget, setResetTarget] = useState<UserAdminListItem | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<UserAdminListItem | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [resetError, setResetError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
@@ -115,20 +113,6 @@ export function UserAdminPage() {
     onError: (err: Error) => setResetError(err.message),
   });
 
-  const deleteMut = useMutation({
-    mutationFn: deleteUser,
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ['users-admin'] });
-      await qc.invalidateQueries({ queryKey: ['user-directory'] });
-      setDeleteTarget(null);
-      setToast('Đã xóa người dùng.');
-    },
-    onError: (err: Error) => {
-      setDeleteTarget(null);
-      setToast(err.message);
-    },
-  });
-
   if (authLoading || !user || user.role !== UserRole.ADMIN) {
     return <div className="boot-screen">Đang tải…</div>;
   }
@@ -185,13 +169,11 @@ export function UserAdminPage() {
       ) : (
         <UserTable
           items={items}
-          currentUserId={user.id}
           onEdit={openEdit}
           onResetPassword={(target) => {
             setResetError(null);
             setResetTarget(target);
           }}
-          onDelete={setDeleteTarget}
         />
       )}
 
@@ -223,28 +205,6 @@ export function UserAdminPage() {
           if (!resetTarget) return;
           setResetError(null);
           resetMut.mutate({ id: resetTarget.id, password });
-        }}
-      />
-
-      <CrmConfirmDialog
-        open={Boolean(deleteTarget)}
-        title="Xóa người dùng"
-        message={
-          deleteTarget
-            ? `Bạn có chắc muốn xóa «${deleteTarget.fullName}» (${deleteTarget.username})? Thao tác không hoàn tác.`
-            : ''
-        }
-        icon={AlertTriangle}
-        danger
-        busy={deleteMut.isPending}
-        confirmLabel="Xóa"
-        onCancel={() => {
-          if (deleteMut.isPending) return;
-          setDeleteTarget(null);
-        }}
-        onConfirm={() => {
-          if (!deleteTarget) return;
-          deleteMut.mutate(deleteTarget.id);
         }}
       />
 

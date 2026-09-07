@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 43 |
+| OPEN | 42 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 40 |
+| FIXED / CLOSED | 41 |
 | Lần audit gần nhất | 2026-09-03 — Browser audit (public + CRM Admin/kha, chỉ đọc) |
 
 ## Cách ghi một bug
@@ -256,7 +256,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-061 | HIGH | addresses / lodats / public / transactions | Xóa ảnh dự án luôn xóa R2, không đếm ref — gãy gallery lô, web khách, snapshot GD. | CLOSED (by design) |
 | BUG-062 | MEDIUM | lodats / public-content | Sửa tiêu đề/địa chỉ lô CRM không ghi overlay listing; catalog lẫn copy cũ + DT/ảnh mới. | FIXED |
 | BUG-063 | MEDIUM | customers / lodats / transactions / title-services / messenger | Ẩn Person không lan: map/GD/sổ đỏ/chat API vẫn dùng khách đã xóa mềm. | CLOSED (by design) |
-| BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | OPEN |
+| BUG-064 | MEDIUM | users / FK | Xóa User không đếm care note / tiến độ sổ đỏ / view file — Prisma Restrict 500. | FIXED |
 | BUG-065 | MEDIUM | customers / messenger / users | Ingest tin `employeeFacebookUid` không khớp profile NV; không API gắn UID NV. | OPEN |
 | BUG-066 | HIGH | public-content / slug | Slug lô từ editor/GPT lưu raw — không `toPublicSlug` (dấu, hoa, khoảng, `/`). | OPEN |
 | BUG-067 | HIGH | public-content / slug | `uniqueSlug` không chừa `PublicLotSlugRedirect.fromSlug` — listing mới chiếm URL đang 301. | OPEN |
@@ -1117,7 +1117,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Precheck không phủ mọi Restrict.
 - **Impact:** Không xóa được user «sạch» khách; Admin tưởng xóa xong; lỗi không rõ.
 - **Evidence:** `remove` bốn `count`. Prisma care note / title progress / view log không Cascade.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-07) — Owner chốt: **không xóa cứng** nhân viên. Chỉ xóa mềm `isActive: false` (Sửa → bỏ tick Tài khoản đang hoạt động) để giữ khách/lô/GD/sổ/chăm sóc. `DELETE /users/:id` luôn 400 tiếng Việt; UI bỏ cột Xoá. Admin không tạo chăm sóc — không mở rộng chặn care trong PR này.
 
 ### BUG-065 — Import Messenger ghi `employeeFacebookUid` không chứng thực profile NV; không API gắn UID
 
