@@ -1,13 +1,15 @@
 # Domain: Nội dung web công khai (Khách / đăng web)
 
 - **Slug:** `public-content`
-- **Status:** Done — STAFF soạn/đăng **lô của mình** trên `/dashboard/lo-dat`. ADMIN **không** vào trang lô / không đăng-sửa-tạo listing (lô thuộc NV). ADMIN: Tổng quan + bài CMS + thống kê. Bốn trang CRM không thêm công tắc Đăng web.
+- **Status:** Done — STAFF **soạn/cập nhật** bài lô của mình trên `/dashboard/lo-dat`. ADMIN **không** vào trang lô / không sửa listing lô. ADMIN: Tổng quan + bài CMS + thống kê. Bốn trang CRM không thêm công tắc Đăng web.
 - **Owner:** An Hưng Land
 - **IA khách:** [`PUBLIC-WEB.md`](../PUBLIC-WEB.md) · SEO: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md)
-- **Lô nguồn:** [`lodats.md`](./lodats.md) — **không** tự đẩy mọi lô Mở bán lên web
+- **Lô nguồn:** [`lodats.md`](./lodats.md) — tạo lô / gắn chủ → **một** `PublicLotListing` + slug (sống mãi)
 - **Không phải:** registry xóa cứng khách (`/quan-tri/khach-hang`, P4)
 
 Hệ cũ **không** có CMS web công khai. Đây là bề mặt mới.
+
+**Chốt owner 2026-09-07:** một lô = một bài; CRM đổi → đồng bộ overlay (title/location); trạng thái khách = hangtag theo CRM; catalog + sitemap gồm **mọi** trạng thái bán; không «chờ Đăng web» / không gỡ slug.
 
 ---
 
@@ -17,8 +19,8 @@ Hai chế độ trên cùng domain `anhungland.com`:
 
 | Chế độ | Ai | Thấy |
 |--------|----|------|
-| **Khách** | Chưa login | Tin tức, bài đăng, lô đất **đã Đăng web** |
-| **NV đăng lô** | STAFF đã login CRM | Soạn / Đăng **lô mình tạo** đang Mở bán (`/dashboard/lo-dat`) |
+| **Khách** | Chưa login | Tin tức, bài CMS, **mọi lô đã có listing** (mọi trạng thái CRM; hangtag tình trạng) |
+| **NV soạn lô** | STAFF đã login CRM | Soạn / cập nhật copy public **lô mình tạo** (`/dashboard/lo-dat`) |
 | **Admin đăng web** | ADMIN đã login CRM | Soạn **bài CMS** rồi public / gỡ; xem tổng quan. **Không** đăng/sửa/tạo lô |
 
 Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên khách, SĐT, NV, hoa hồng, GD, chăm sóc).
@@ -29,11 +31,11 @@ Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên k
 
 | Actor | Được | Không |
 |-------|------|--------|
-| Khách (chưa login) | Đọc bài / lô **đã public**; share URL | Sửa, xem bản nháp, vào CRM |
-| STAFF | CRM của mình + soạn / **Đăng web** **lô `createdByEmployeeId` = mình** (không Gỡ web) | Bài CMS (`/dashboard/bai-viet`); lô NV khác; Tổng quan dashboard |
-| ADMIN | Bài CMS + thống kê + xem tổng quan (số lô trên web) | Đăng / soạn / tạo listing lô (thuộc NV); `/dashboard/lo-dat` |
+| Khách (chưa login) | Đọc bài CMS + lô có listing; share URL | Sửa overlay, vào CRM |
+| STAFF | CRM của mình + soạn / **cập nhật** listing **lô `createdByEmployeeId` = mình** | Bài CMS (`/dashboard/bai-viet`); lô NV khác; Tổng quan dashboard |
+| ADMIN | Bài CMS + thống kê + xem tổng quan (số lô trên web) | Soạn / tạo listing lô (thuộc NV); `/dashboard/lo-dat` |
 
-Chốt (2026-09-06): lô không của Admin — STAFF tự đăng lô của mình. Bài viết CMS vẫn **chỉ ADMIN**. Trang khách vẫn thương hiệu công ty — không lộ PII / hoa hồng / tên NV.
+Chốt (2026-09-06): lô không của Admin — STAFF tự soạn lô của mình. Bài viết CMS vẫn **chỉ ADMIN**. Trang khách vẫn thương hiệu công ty — không lộ PII / hoa hồng / tên NV.
 
 ---
 
@@ -43,22 +45,20 @@ Ba loại nội dung khách thấy:
 
 | Loại | Nguồn | Public khi |
 |------|--------|------------|
-| **Lô đất cần bán** | Một `Lodat` CRM (luồng NV) | NV của lô bật **Đăng web** |
+| **Lô đất** | Một `Lodat` CRM (có chủ) | Có `PublicLotListing` (tạo lúc tạo lô / gắn chủ) — **mọi** trạng thái bán |
 | **Tin tức** | Bài CMS (`PublicPost`, chuyên mục tin) | Admin **Xuất bản** |
 | **Bài đăng** | Cùng CMS; chuyên mục dự án / kiến thức / kinh nghiệm | Admin **Xuất bản** |
 
-### 3.1 Lô trên web ≠ mọi lô Mở bán
+### 3.1 Một lô = một bài (slug sống mãi)
 
-CRM: công tắc **Mở bán / Tạm dừng** là việc nội bộ NV–khách.
+| Sự kiện CRM | Web |
+|-------------|-----|
+| NV tạo lô hoặc gắn chủ | Đảm bảo đúng **một** `PublicLotListing` + slug ổn định (`isPublished` từ lúc tạo) |
+| Sửa tiêu đề / địa chỉ / ảnh lô | Đồng bộ overlay (title/location/ảnh); **không** đổi slug |
+| Đổi Mở bán / Tạm dừng / Đã cọc / Đã bán | Hangtag trên trang khách + catalog/sitemap **vẫn giữ** URL |
+| Soạn trên `/dashboard/lo-dat` | Cập nhật copy public (giá làm mờ, mô tả…) — không công tắc «Đăng / Chờ đăng» |
 
-Web: công tắc **Đăng web** là việc NV của lô chọn lô nào khách được thấy.
-
-| CRM | Web khách |
-|-----|-----------|
-| Tạm dừng / nháp / thiếu ảnh | Không hiện |
-| Mở bán nhưng chưa Đăng web | Không hiện |
-| Đăng web + đang Mở bán | Hiện `/mua-ban-nha-dat-huyen-nam-sach/[slug]` |
-| Đang Đăng web rồi Tạm dừng / Đã cọc / Đã bán | Khách: list/chi tiết chỉ hiện khi **Đăng web ∩ Mở bán**. **Không** tự tắt công tắc Đăng web — Gỡ tường minh trên dashboard |
+Catalog + hub + sitemap: mọi listing còn tồn tại (mọi `saleStatus`). Chi tiết + slug không gỡ khi hết Mở bán.
 
 ### 3.2 Bài viết
 
@@ -76,27 +76,27 @@ Cùng entity `PublicPost`:
 
 Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú nội bộ lô/map, lịch sử GD, chat, file mật.
 
-Được hiện (khi đã Đăng web): tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất, địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi hết cookie share; **SĐT nhân viên share** khi còn cookie 30 ngày (trang chủ + chi tiết lô, kể cả lô NV khác); **tên + SĐT + avatar NV đã login** khi NV xem trang khách (§18). JSON-LD/canonical luôn hotline công ty.
+Được hiện: tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất + **hangtag trạng thái bán** (khi không Mở bán), địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi hết cookie share; **SĐT nhân viên share** khi còn cookie 30 ngày (trang chủ + chi tiết lô, kể cả lô NV khác); **tên + SĐT + avatar NV đã login** khi NV xem trang khách (§18). JSON-LD/canonical luôn hotline công ty.
 
 ---
 
 ## 4. Use cases
 
-1. **Khách vào /** — hero brand + **ô tìm bài đăng** + lô đã đăng + teaser tin/bài. Không login.
-2. **Khách xem lô** — `/mua-ban-nha-dat-huyen-nam-sach` và `/…/[slug]`; share OG.
+1. **Khách vào /** — hero brand + **ô tìm bài đăng** + lô trên catalog + teaser tin/bài. Không login.
+2. **Khách xem lô** — `/mua-ban-nha-dat-huyen-nam-sach` và `/…/[slug]` (mọi trạng thái; hangtag); share OG.
 3. **Khách đọc bài** — list + chi tiết theo chuyên mục.
-4. **NV đăng lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn bài đăng** (prefill copy đã lọc) → Lưu nháp / Đăng web. STAFF chỉ thấy lô mình tạo. ADMIN không vào trang này.
-5. **Gỡ lô** — **đã bỏ** Gỡ Đăng web; khách ẩn khi hết Mở bán.
+4. **NV soạn lô** — list `/dashboard/lo-dat`: một lần bấm = preview; double-click = modal **Soạn / cập nhật bài** → Lưu. STAFF chỉ thấy lô mình tạo. ADMIN không vào trang này.
+5. **Gỡ slug / Gỡ Đăng web** — **không** (slug + bài tồn tại mãi khi lô còn).
 6. **Admin soạn bài** — nháp → Xuất bản / Gỡ về nháp. Chỉ ADMIN.
-7. **Lô đổi trạng thái CRM** — không tự tắt Đăng web; Gỡ tường minh trên dashboard nếu cần.
+7. **Lô đổi trạng thái CRM** — hangtag + catalog/sitemap cập nhật; không ẩn URL.
 
 ---
 
 ## 5. Quan hệ dữ liệu
 
 ```
-Lodat  1──0..1  PublicListing     (slug, isPublished, pricePublic, publicTitle, excerpt, metaDescription?, cover)
-PublicPost                        (category, slug, status, cover, body) — không gắn khách
+Lodat  1──1  PublicListing     (slug forever, overlay copy; saleStatus từ map CRM)
+PublicPost                     (category, slug, status, cover, body) — không gắn khách
 ```
 
 - Một `Lodat` tối đa một listing.

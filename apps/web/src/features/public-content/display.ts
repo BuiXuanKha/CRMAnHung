@@ -18,7 +18,7 @@ import type { BadgeTone } from '@/shared/ui/badge';
 import type { ColumnFilterOption } from '@/shared/ui/column-filter';
 
 export function lotWebLabel(isPublished: boolean): string {
-  return isPublished ? 'Đang hiện' : 'Chờ đăng';
+  return isPublished ? 'Đã soạn' : 'Chưa soạn';
 }
 
 export function lotWebTone(isPublished: boolean): BadgeTone {
@@ -135,9 +135,9 @@ export const DEFAULT_STAFF_LOT_EXTRA: ExtraFilters = {
 };
 
 export const WEB_FILTER_OPTIONS: { value: StaffLotWebFilter; label: string }[] = [
-  { value: 'all', label: 'Tất cả web' },
-  { value: 'published', label: 'Đang hiện' },
-  { value: 'pending', label: 'Chờ đăng' },
+  { value: 'all', label: 'Tất cả' },
+  { value: 'published', label: 'Đã soạn' },
+  { value: 'pending', label: 'Chưa soạn' },
 ];
 
 export function staffNameFilterOptions(

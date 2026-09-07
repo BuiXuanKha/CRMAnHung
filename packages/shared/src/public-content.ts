@@ -189,7 +189,7 @@ export const publicWebLotRowSchema = z.object({
   seoTitle: z.string().trim().max(160).nullable().optional(),
   location: z.string(),
   coverImageUrl: z.string().nullable(),
-  /** Hiện trên web khách */
+  /** Hiện trên web khách (always-on: true từ lúc tạo lô/gắn chủ). Staff list reuse: Đã soạn. */
   isPublished: z.boolean(),
   priceMode: publicListingPriceModeSchema,
   priceLabel: z.string().nullable(),
@@ -202,8 +202,8 @@ export const publicWebLotRowSchema = z.object({
 export type PublicWebLotRow = z.infer<typeof publicWebLotRowSchema>;
 
 /**
- * BUG-062: lệch giữa overlay Đăng web và lô CRM (title/location).
- * Staff cân nhắc cập nhật bài trên editor — không tự đẩy.
+ * BUG-062 (cũ hướng B): lệch overlay vs CRM — owner 2026-09-07: CRM sửa → sync title/location.
+ * Drift badge còn để NV biết khi soạn tay lệch; sync API giảm case.
  */
 export const publicWebListingCrmDriftItemSchema = z.object({
   field: z.enum(['title', 'location']),

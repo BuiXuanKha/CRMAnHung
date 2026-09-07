@@ -5,12 +5,11 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import type { PublicWebStaffLotRow, UpdatePublicListingDraftInput } from '@crmanhung/shared';
 import type { ExtraFilters, PriceBracket } from '@/features/lodats/display';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
-import { listStaffOpenLots, setPublicLotPublished, updatePublicListingDraft } from './api';
+import { listStaffOpenLots, updatePublicListingDraft } from './api';
 import { LotGptContentDialog } from './components/lot-gpt-content-dialog';
 import { LotListingEditorDialog } from './components/lot-listing-editor-dialog';
 import type { LotGptEditorPrefill } from './lot-gpt-apply';
 import { LotListingPreview } from './components/lot-listing-preview';
-import { LotWebConfirm } from './components/lot-web-confirm';
 import { StaffLotFilterBar } from './components/staff-lot-filter-bar';
 import { StaffOpenLotCards } from './components/staff-open-lot-cards';
 import { StaffOpenLotTable } from './components/staff-open-lot-table';
@@ -42,7 +41,6 @@ export function PublicLotListPage() {
   const [web, setWeb] = useState<StaffLotWebFilter>(peeked?.web ?? 'all');
   const [filterOpen, setFilterOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(peeked?.selectedId ?? null);
-  const [lotConfirm, setLotConfirm] = useState<PublicWebStaffLotRow | null>(null);
   const [editorLot, setEditorLot] = useState<PublicWebStaffLotRow | null>(null);
   const [editorGptPrefill, setEditorGptPrefill] = useState<LotGptEditorPrefill | null>(null);
   const [editorGptApplyId, setEditorGptApplyId] = useState(0);
@@ -132,25 +130,10 @@ export function PublicLotListPage() {
 
   const onCrmDrift = (row: PublicWebStaffLotRow) => {
     setAlertBox({
-      title: 'CRM khác bản Đăng web',
-      message: `${formatListingCrmDriftMessage(row.crmDrift ?? [])}\n\nCập nhật lại bài trên Soạn đăng web nếu cần khớp CRM.`,
+      title: 'CRM khác bản đăng web',
+      message: `${formatListingCrmDriftMessage(row.crmDrift ?? [])}\n\nLưu lại bài trên Soạn đăng web để khớp CRM (hoặc đợi đồng bộ khi sửa lô).`,
     });
   };
-
-  const lotMut = useMutation({
-    mutationFn: (lot: PublicWebStaffLotRow) =>
-      setPublicLotPublished(lot.lodatId, { isPublished: true }),
-    onSuccess: async (updated) => {
-      await invalidatePublicWebQueries(qc);
-      setLotConfirm(null);
-      setSelectedId(updated.lodatId);
-      persist(updated.lodatId);
-      flash(`Đã đăng «${updated.title}» lên web khách.`);
-    },
-    onError: (err: Error) => {
-      setAlertBox({ title: 'Không đăng được lô', message: err.message });
-    },
-  });
 
   const draftMut = useMutation({
     mutationFn: ({ lodatId, input }: { lodatId: string; input: UpdatePublicListingDraftInput }) =>
@@ -162,33 +145,13 @@ export function PublicLotListPage() {
     },
   });
 
-  async function saveDraft(input: UpdatePublicListingDraftInput) {
+  async function saveListing(input: UpdatePublicListingDraftInput) {
     if (!editorLot) return;
     setEditorError(null);
     try {
       const updated = await draftMut.mutateAsync({ lodatId: editorLot.lodatId, input });
       setEditorLot(null);
-      flash(
-        updated.isPublished
-          ? `Đã cập nhật «${updated.title}» trên web khách.`
-          : `Đã lưu nháp «${updated.title}».`,
-      );
-    } catch (err) {
-      setEditorError(err instanceof Error ? err.message : 'Không lưu được bài đăng.');
-    }
-  }
-
-  async function saveAndPublish(input: UpdatePublicListingDraftInput) {
-    if (!editorLot) return;
-    setEditorError(null);
-    try {
-      const updated = await draftMut.mutateAsync({ lodatId: editorLot.lodatId, input });
-      setEditorLot(null);
-      if (updated.isPublished) {
-        flash(`Đã cập nhật «${updated.title}» trên web khách.`);
-        return;
-      }
-      setLotConfirm({ ...editorLot, ...updated });
+      flash(`Đã lưu «${updated.title}» trên web khách.`);
     } catch (err) {
       setEditorError(err instanceof Error ? err.message : 'Không lưu được bài đăng.');
     }
@@ -198,7 +161,7 @@ export function PublicLotListPage() {
 
   return (
     <div className="pw-page">
-      <section className="pw-filter-wrap" aria-label="Tìm lô đang mở bán">
+      <section className="pw-filter-wrap" aria-label="Tìm lô đăng web">
         <StaffLotFilterBar
           keyword={search}
           onKeyword={onSearch}
@@ -298,13 +261,7 @@ export function PublicLotListPage() {
               />
             </div>
           </div>
-          <LotListingPreview
-            lot={selected}
-            busy={lotMut.isPending}
-            onPublish={() => {
-              if (selected && !selected.isPublished) setLotConfirm(selected);
-            }}
-          />
+          <LotListingPreview lot={selected} />
         </div>
       )}
 
@@ -322,8 +279,7 @@ export function PublicLotListPage() {
             setEditorError(null);
           }
         }}
-        onSaveDraft={saveDraft}
-        onPublish={saveAndPublish}
+        onSave={saveListing}
       />
       <LotGptContentDialog
         lot={gptLot}
@@ -337,16 +293,6 @@ export function PublicLotListPage() {
           setEditorLot(gptLot);
           setGptLot(null);
           flash('Đã mở Soạn bài đăng với nội dung GPT.');
-        }}
-      />
-      <LotWebConfirm
-        lot={lotConfirm}
-        busy={lotMut.isPending}
-        onCancel={() => setLotConfirm(null)}
-        onConfirm={() => {
-          if (lotConfirm && !lotMut.isPending) {
-            void lotMut.mutateAsync(lotConfirm);
-          }
         }}
       />
       <CrmAlertDialog
