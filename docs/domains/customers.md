@@ -46,7 +46,9 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 
 **Lô đất trên list / cột phụ / chi tiết — API** (đếm map active, cột phụ + thẻ chi tiết). **Tạo lô từ khách** (mục 6) — STAFF form `/khach-hang/[id]/them-lo-dat`.
 
-**Ba chỗ Facebook — đừng lẫn:**
+**Nguồn Facebook** (dữ liệu extension gửi vào CRM) gồm ba nhánh: **Nhánh Page**, **Nhánh Messenger thường**, **Nhánh Messenger E2EE** — glossary [`facebook-source.md`](./facebook-source.md).
+
+**Ba chỗ Facebook trên list CRM — đừng lẫn với nguồn quét:**
 
 | Chỗ | Là gì | Trạng thái |
 |-----|--------|------------|
@@ -621,7 +623,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 - Body JSON tối đa 32MB (data URL). Tối đa 500 tin / lần (khớp extension `MESSAGE_MAX_COUNT`).
 - Chỉ lưu tin có ID bong bóng `mid.$…` hoặc `…@msgr.…` (BUG-044). Tin `orphan::` / không mid: API bỏ qua; migrate xóa hàng cũ.
 
-Scanner Chrome: Load unpacked `apps/extension` (cùng panel Business Suite / Messenger / E2EE). Gửi `POST /api/v1/customers/from-extension`.
+Scanner Chrome: Load unpacked `apps/extension`. Ba nhánh nguồn Facebook (Page / Messenger thường / Messenger E2EE): [`facebook-source.md`](./facebook-source.md). Gửi `POST /api/v1/customers/from-extension`.
 
 **Để khi làm extension (owner 2026-09-06, BUG-043):** scanner còn gửi tin không ID bong bóng (`orphan::`). **API không ghi** (BUG-044). Ghi chú: `apps/extension/README.md`.
 
