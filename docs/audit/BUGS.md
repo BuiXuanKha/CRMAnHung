@@ -27,9 +27,9 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 16 |
+| OPEN | 15 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 67 |
+| FIXED / CLOSED | 68 |
 | Lần audit gần nhất | 2026-09-07 — Rà soát HOÃN / bỏ qua / không làm (main `fe24906`, sau deploy) |
 
 ## Cách ghi một bug
@@ -125,6 +125,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-04 | web authz | BUG-012 FIXED | Middleware CRM theo cookie role; STAFF không vào route Admin (kèm BUG-083). |
 | 2026-09-04 | customers | BUG-013 note | DB prod: trùng UID khác page = đúng; 4 case buinam cùng page + E2EE khác thread (legacy) — để xử lý sau. |
 | 2026-09-04 | customers | BUG-014 deferred | Owner: để sau. Acknowledge trùng SĐT lúc tạo vẫn rename+unhide. |
+| 2026-09-08 | customers | BUG-014 FIXED | Owner chốt: trùng SĐT lúc tạo → đổi tên + lưu + mở nếu ẩn. Modal thẻ khách (avatar, bảng nghiệp vụ, lô, chăm sóc). |
 | 2026-09-04 | customers | BUG-015 FIXED | PATCH/DELETE theo `phoneId` (không wipe số phụ); modal quản lý SĐT; FAB/gọi: 1 số → tel, ≥2 → picker. |
 | 2026-09-05 | customers / permission | BUG-017 FIXED | Owner: Admin không gộp; chỉ NV gộp khách của mình (`source/target.employeeId === user.id`). |
 | 2026-09-05 | customers | BUG-016 defer | Owner: nghiêm trọng — bàn chi tiết / chốt thiết kế sau; **chưa code**. Giữ Person đích, chuyển hết quan hệ rồi mới xóa nguồn (không tạo Person mới). |
@@ -205,7 +206,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-010 | MEDIUM | users | Kiểm tra Admin cuối cùng không atomic — race có thể hết Admin. | CLOSED |
 | BUG-011 | LOW | users / auth | Mật khẩu tối thiểu 6 ký tự, không độ phức tạp. | FIXED || BUG-012 | LOW | web authz | Chặn route/role CRM chỉ ở client; Guest/STAFF vẫn tải JS trang admin. | FIXED |
 | BUG-013 | HIGH | customers / extension | Cùng NV+page+UID vẫn có thể 2 Person (E2EE khác thread; prod: 4 case buinam). | FIXED |
-| BUG-014 | HIGH | customers | Trùng SĐT lúc tạo: bấm OK ghi đè `fullName` và mở lại khách cũ. | OPEN |
+| BUG-014 | HIGH | customers | Trùng SĐT lúc tạo: bấm OK ghi đè `fullName` và mở lại khách cũ. | FIXED |
 | BUG-015 | HIGH | customers | Sửa SĐT xóa mọi số phụ (khách migrate nhiều số). | FIXED |
 | BUG-016 | HIGH | customers | Gộp Facebook: mất SĐT nguồn, party SetNull, xóa map trùng lô; TitleService Restrict → merge vỡ. | OPEN |
 | BUG-017 | HIGH | customers / permission | Admin gộp Facebook giữa hai `employeeId` khác nhau — chuyển hồ sơ sang NV khác. | FIXED |
@@ -475,7 +476,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Acknowledge = rename + unhide, tái sử dụng như “không tạo trùng”.
 - **Impact:** Ghi đè danh tính Person; khách ẩn bị hiện lại với tên sai.
 - **Evidence:** `customers-phone.ts` `acknowledgePhoneDuplicate`. `customer-list-page.tsx` `dup.mode === 'create'` → `acknowledgePhoneDuplicate(dup.existing.id, { fullName: dup.fullName \|\| existing })`. Modal: “bấm OK để cập nhật tên”.
-- **Status:** OPEN (deferred — 2026-09-04; owner: để sau)
+- **Status:** FIXED (2026-09-08) — Owner chốt: trùng SĐT lúc **thêm khách** thì **đổi tên** hồ sơ cũ, **lưu**, đang ẩn thì **mở lại** (giữ `acknowledgePhoneDuplicate`). Modal làm lại: thẻ khách (avatar, tên, hangtag, bảng SĐT/kênh/nhu cầu/tài chính/lô/chat, lô đã gắn, lịch sử chăm sóc). Nút **Cập nhật tên** thay OK.
 
 ### BUG-015 — Sửa SĐT xóa mọi số phụ
 
@@ -1396,7 +1397,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | ID | Quyết định owner | Kết quả rà soát | Bằng chứng ngắn |
 |----|------------------|-----------------|-----------------|
 | **013** | deferred | **CÒN** | `CustomerFacebook` unique `(employeeId, facebookUid)` — không unique theo thread; E2EE multi-thread vẫn tách Person. |
-| **014** | deferred | **CÒN** | `acknowledgePhoneDuplicate` vẫn ghi `fullName` + `isHidden: false` trên khách cũ. |
+| **014** | chốt 2026-09-08: đổi tên + mở ẩn | **FIXED** | API giữ nguyên; UI modal thẻ khách §12.1.2.1. |
 | **016** | deferred (chưa chốt thiết kế) | **CÒN** | `mergeFacebookIntoPhoneHolder`: chuyển FB + care + map; **xóa** map trùng lô; `customer.delete` nguồn — không chuyển hết SĐT nguồn / TitleService / party. |
 | **041** | deferred | **CÒN** | Ingest vẫn `sortOrder: i` theo batch; `sentAt` schema có nhưng không dùng để sắp xếp ổn định. |
 | **043** | deferred phần extension | **CÒN** (API đã siết mid qua BUG-044) | Không unique DB `(facebook, mid)`; extension vẫn có thể gửi `orphan::` — API bỏ qua ghi. |

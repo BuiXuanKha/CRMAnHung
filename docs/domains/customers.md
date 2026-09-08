@@ -82,7 +82,7 @@ Khung list đã có: ô tìm `@`/`@@`, lọc (icon cột / Bộ lọc mobile), g
 12. **Sửa tên khách** — bút trên tên (máy tính). Có trên staging.
 13. **Sửa tên Facebook** — **không làm.** Không bút / modal sửa tay. Tên FB (`facebookName`) do **extension** ghi khi scan.
 14. **Thêm khách bằng SĐT đủ field** — hotline *, tên *, SĐT *. Chưa có hotline → Cài đặt SĐT. Có trên staging.
-15. **Trùng số điện thoại** — modal xác nhận / gộp hồ sơ. Có trên staging.
+15. **Trùng số điện thoại** — modal thẻ khách (avatar + nghiệp vụ). Lúc thêm khách: **Cập nhật tên** = đổi tên + lưu + mở nếu ẩn (owner 2026-09-08). Có trên staging.
 16. **Khôi phục khách đã ẩn** — menu chỉ còn «Khôi phục khách» → `PATCH isHidden: false` (xoá `autoRestoredAt`). **Xong.** Tìm lại bằng `@` / `@@`. Extension tự khôi phục = mục 25.
 17. **Nhu cầu trên list = `NeedSummary` mới nhất** (care, không rỗng). Có trên staging (237 khách có lịch sử).
 18. **Tìm trong mọi lần chăm sóc** — nhu cầu + ghi chú. Có trên staging.
@@ -148,7 +148,31 @@ STAFF không thấy khách người khác.
 
 Cùng hàng ô tìm, bên phải.
 
-Bấm → modal **Thêm khách hàng bằng số điện**: hotline * (bắt buộc), tên *, SĐT * (`0` + 9 số). Trùng SĐT → modal xác nhận. Chưa có hotline → bảo vào Cài đặt SĐT.
+Bấm → modal **Thêm khách hàng bằng số điện**: hotline * (bắt buộc), tên *, SĐT * (`0` + 9 số). Trùng SĐT → modal **12.1.2.1**. Chưa có hotline → bảo vào Cài đặt SĐT.
+
+##### 12.1.2.1 Modal trùng SĐT lúc thêm khách (máy tính)
+
+Owner 2026-09-08: **đồng ý đổi tên khách cũ + lưu**; đang ẩn thì **mở lại**. Không tạo Person mới.
+
+```
+┌ Số điện thoại đã có trên hồ sơ khách ────────────────────────┐
+├ Câu ngắn: số … đã thuộc hồ sơ dưới. Không tạo khách mới.     ┤
+├ Thẻ khách: avatar · tên · hangtag trạng thái (/ Đã ẩn)      ┤
+├ Bảng: SĐT · Kênh · Nhu cầu · Tài chính · Lô · Chat           ┤
+├ Lô đã gắn (tối đa 3 dòng) · Lịch sử chăm sóc (tối đa 5)     ┤
+├ Câu hành động: Cập nhật tên thành «tên vừa gõ», lưu, mở ẩn  ┤
+└ Đóng · Cập nhật tên ─────────────────────────────────────────┘
+```
+
+1. **Avatar** — ảnh Facebook nếu có; không có / lỗi ảnh → chữ cái đầu (cùng list).
+2. **Tên** — `fullName` đậm. Tên Facebook khác tên CRM thì dòng phụ.
+3. **Hangtag** — trạng thái (`CrmBadge`). Hồ sơ ẩn thêm hangtag **Đã ẩn**.
+4. **Bảng nghiệp vụ** — SĐT (mọi số), kênh, nhu cầu mới nhất, tài chính, số lô, số tin đã lưu.
+5. **Lô đã gắn** — tối đa 3 tiêu đề (+ địa chỉ); còn thì «Còn N lô nữa».
+6. **Lịch sử chăm sóc** — tối đa 5 lần: giờ, NV, nhu cầu, ghi chú. Trống → «Chưa có lần chăm sóc.»
+7. **Cập nhật tên** (primary) — `PATCH acknowledge-phone-duplicate` với tên vừa gõ. **Đóng** — không đổi.
+
+Cùng modal khi trùng lúc thêm SĐT cam / quản lý số (mode gộp hoặc chỉ thông tin — cùng thẻ khách).
 
 #### 12.1.3 Bộ lọc
 
@@ -334,7 +358,7 @@ Nút **Bộ lọc** (sheet) + **Tìm**. Cùng nghĩa 12.1.3. Xoá lọc.
 
 #### 12.2.3 Nút Thêm SĐT (đáy)
 
-Cùng modal 12.1.2.
+Cùng modal 12.1.2. Trùng SĐT → cùng 12.1.2.1.
 
 #### 12.2.4 Item (thẻ)
 
@@ -586,7 +610,7 @@ Máy tính: xanh vẫn copy + tick. Điện thoại: xanh vẫn `tel:`; cam khô
 
 ### 13.11 Slice này — thêm khách SĐT, trùng/gộp, sửa tên, lọc
 
-- **POST `/api/v1/customers`** `{ fullName, phone, sourceHotlineId }`. Hotline phải của NV đang bật. Trùng SĐT cùng NV → `409 PHONE_DUPLICATE`; OK = cập nhật tên + khôi phục nếu đang ẩn (`PATCH .../acknowledge-phone-duplicate`).
+- **POST `/api/v1/customers`** `{ fullName, phone, sourceHotlineId }`. Hotline phải của NV đang bật. Trùng SĐT cùng NV → `409 PHONE_DUPLICATE`; **Cập nhật tên** = đổi tên + lưu + mở nếu ẩn (`PATCH .../acknowledge-phone-duplicate`). Owner 2026-09-08 chốt đúng nghiệp vụ. Modal: §12.1.2.1.
 - **GET `/api/v1/users/me/hotlines`**. Chưa có hotline → Cài đặt → Quản lý SĐT (thêm / bật-tắt).
 - **SĐT chuẩn (BUG-018):** mọi ghi qua `digitsFromPhoneRaw` → `0` + 9 số. DB: `CustomerPhone.employeeId` + unique `(employeeId, phone)` và `(customerId, phone)` — cùng số hai NV vẫn được; race → `409`. Không unique SĐT toàn hệ.
 - Thêm SĐT cam trùng: `409` kèm `mergeAllowed` (chỉ **STAFF** phụ trách khách; Admin không gộp). Gộp Facebook → khách chỉ có SĐT: **POST `/customers/merge-facebook-into-phone-holder`** — chỉ NV, hai hồ sơ cùng `employeeId` = user; Admin → 403.
