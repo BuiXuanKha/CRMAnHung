@@ -54,8 +54,9 @@ import { type CustomerAction } from './components/action-menu';
 import { CustomerTable } from './components/customer-table';
 import { FilterBar } from './components/filter-bar';
 import { CustomerCardList } from './components/customer-card-list';
+import { CustomersAddFab } from './components/customers-add-fab';
 import { RightRail, visibleRailTabs, type RailKey } from './components/right-rail';
-import { applyExtraFilters, countCustomerStats, countMobileCustomerFilters, parseSearchKeyword, type ExtraFilters } from './display';
+import { applyExtraFilters, countMobileCustomerFilters, parseSearchKeyword, type ExtraFilters } from './display';
 import { openExternalUrl, facebookInboxChatUrl, messengerComUrl } from './messenger';
 import {
   getActiveListScrollEl,
@@ -221,7 +222,6 @@ export function CustomerListPage() {
     extra.demand,
     extra.lodat,
   ].join('\0');
-  const stats = useMemo(() => countCustomerStats(items), [items]);
   const channelOptions = useMemo(
     () =>
       (channels.data?.items ?? []).map((item) => ({
@@ -754,7 +754,8 @@ export function CustomerListPage() {
   }
 
   return (
-    <div className="kh-page">
+    <>
+    <div className="kh-page has-fab">
       <div className={`kh-s32${rail ? ' is-rail-open' : ''}`}>
         {/* §3.2.1 */}
         <div className={`kh-s321${listConcealed ? ' is-restoring' : ''}`}>
@@ -816,18 +817,14 @@ export function CustomerListPage() {
           {restoreReady && !list.isLoading && !list.error ? (
             <CustomerCardList
               items={items}
-              total={total}
-              loadingMore={list.isFetchingNextPage}
               selectedId={selectedId}
               menuId={menuId}
-              stats={stats}
               onSelect={selectCustomer}
               onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
               onCloseMenu={() => setMenuId(null)}
               onAction={(c, a) => {
                 void handleAction(c, a);
               }}
-              onAdd={() => setAddOpen(true)}
               onAddPhone={(c) => openManagePhones(c)}
               onCallPhone={(c) => requestCall(c)}
               scrollRef={cardsScrollRef}
@@ -1024,5 +1021,8 @@ export function CustomerListPage() {
 
       <CrmToast message={toast} />
     </div>
+    {/* Sibling ngoài overflow — FAB mobile Thêm khách bằng SĐT (§12.2.3) */}
+    <CustomersAddFab onAdd={() => setAddOpen(true)} />
+    </>
   );
 }
