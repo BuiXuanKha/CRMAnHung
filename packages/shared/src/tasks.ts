@@ -53,20 +53,29 @@ export function taskDueCountdown(dueOn: string, todayYmd = ymdInVietnam(0)): Tas
   return { days, label: `Quá hạn ${Math.abs(days)} ngày`, tone: 'red' };
 }
 
+function upperVi(value: string): string {
+  const t = value.trim();
+  return t ? t.toLocaleUpperCase('vi-VN') : '—';
+}
+
+/**
+ * Dòng nguồn trên list / chi tiết / modal thêm.
+ * VD. «DỊCH VỤ SỔ ĐỎ | CÔ CHI - CỘNG HOÀ» (in hoa).
+ */
 export function taskContextLine(type: TaskTargetType, label: string): string {
   if (type === TaskTargetType.NONE) {
-    return 'Công việc này lấy từ trang Công việc';
+    return 'TRANG CÔNG VIỆC';
   }
-  const name = label.trim() || '—';
+  const name = upperVi(label);
   switch (type) {
     case TaskTargetType.CUSTOMER:
-      return `Công việc này cho Khách hàng ${name}`;
+      return `KHÁCH HÀNG | ${name}`;
     case TaskTargetType.LODAT:
-      return `Công việc này cho Lô đất ${name}`;
+      return `LÔ ĐẤT | ${name}`;
     case TaskTargetType.TITLE_SERVICE:
-      return `Công việc này cho dịch vụ sổ đỏ của khách ${name}`;
+      return `DỊCH VỤ SỔ ĐỎ | ${name}`;
     case TaskTargetType.TRANSACTION:
-      return `Công việc này cho Giao dịch ${name}`;
+      return `GIAO DỊCH | ${name}`;
     default:
       return name;
   }

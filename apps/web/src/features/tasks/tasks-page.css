@@ -238,8 +238,12 @@
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  color: #64748b;
+  color: var(--cv-blue);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
   line-height: 1.35;
+  text-transform: uppercase;
 }
 
 .cv-due {
@@ -336,9 +340,12 @@
 
 .cv-detail-source {
   margin: 10px 0 0;
-  color: #64748b;
+  color: var(--cv-blue);
   font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
   line-height: 1.4;
+  text-transform: uppercase;
 }
 
 .cv-detail-due {
@@ -475,9 +482,12 @@
 
   .cv-card-source {
     margin: 0;
-    font-size: 0.82rem;
-    color: #64748b;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: var(--cv-blue);
     line-height: 1.35;
+    text-transform: uppercase;
   }
 
   .cv-cards-count {

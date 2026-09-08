@@ -129,7 +129,7 @@ Cùng mục **Công việc** đã có. Icon `ListTodo`.
 
 ##### 3. Nguồn
 
-`taskContextLine` (mục 12.4). `NONE` / FAB → «Công việc này lấy từ trang Công việc». Tối đa 2 dòng.
+`taskContextLine` (mục 12.4). In hoa + `|`. VD. sổ đỏ: «DỊCH VỤ SỔ ĐỎ | CÔ CHI - CỘNG HOÀ». `NONE` → «TRANG CÔNG VIỆC». Tối đa 2 dòng. Màu nổi `#2563eb`.
 
 ##### 4. Hạn làm
 
@@ -205,13 +205,15 @@ Mở từ **FAB** `/cong-viec` hoặc menu Thao tác 4 list. `CrmDialog` §4.7. 
 
 Không sửa được. Copy:
 
-| Nguồn | Câu |
+| Nguồn | Câu (in hoa) |
 |-------|------|
-| FAB `/cong-viec` (`NONE`) | Công việc này lấy từ trang Công việc |
-| Khách hàng | Công việc này cho Khách hàng [tên] |
-| Lô đất | Công việc này cho Lô đất [tiêu đề] |
-| Sổ đỏ | Công việc này cho dịch vụ sổ đỏ của khách [tên khách] |
-| Giao dịch | Công việc này cho Giao dịch [mã] |
+| FAB `/cong-viec` (`NONE`) | TRANG CÔNG VIỆC |
+| Khách hàng | KHÁCH HÀNG \| [TÊN] |
+| Lô đất | LÔ ĐẤT \| [TIÊU ĐỀ] |
+| Sổ đỏ | DỊCH VỤ SỔ ĐỎ \| [TÊN KHÁCH] |
+| Giao dịch | GIAO DỊCH \| [MÃ] |
+
+Màu `#2563eb` (nổi).
 
 #### 12.3.2 Nội dung công việc
 
@@ -242,7 +244,7 @@ Mục **Thêm công việc** (icon `ListTodo`). Khách đã ẩn: **không** hi�
 
 Mở khi bấm dòng / thẻ / **Xem chi tiết**. `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề: **Công việc**.
 
-Nội dung (`content`; đã xong → gạch ngang). Dòng nguồn (`NONE` → «Công việc này lấy từ trang Công việc»). Hạn `D/M/YYYY` + hangtag đếm ngược (cùng 12.1.3 mục 5).
+Nội dung (`content`; đã xong → gạch ngang). Dòng nguồn (`NONE` → «TRANG CÔNG VIỆC»; sổ đỏ → «DỊCH VỤ SỔ ĐỎ | …»). Hạn `D/M/YYYY` + hangtag đếm ngược (cùng 12.1.3 mục 5).
 
 **Chưa xong:** **Đóng** · **Hoàn thành** (primary). Busy khi PATCH. Xong: đóng, toast «Đã hoàn thành công việc.»
 

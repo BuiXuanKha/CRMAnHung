@@ -428,7 +428,7 @@ Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`tasks.md` 
 |-----|------------|
 | `#` | Số thứ tự; nếu **ghim** thì icon Lucide `Star` (vàng `#ca8a04`) thay số — **không** emoji, **không** icon lọc |
 | `Nội dung` | `content`, tối đa 3 dòng |
-| `Nguồn` | Câu `taskContextLine` (khách / lô / GD / sổ đỏ) |
+| `Nguồn` | `taskContextLine` in hoa — VD. **DỊCH VỤ SỔ ĐỎ \| TÊN**; màu `#2563eb` |
 | `Hạn làm` | `D/M/YYYY` |
 | `Đếm ngược` | Hangtag: **Hôm nay** `amber` · `N ngày` `green` · `Quá hạn N ngày` `red` — **không** icon lọc |
 | `Thao tác` | Chevron → **Xem chi tiết**; việc chưa xong thêm **Ghim / Bỏ ghim**, **Hoàn thành** |
@@ -715,6 +715,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | `/cong-viec`: FAB **Tạo công việc** (Plus) góc phải dưới — máy tính + mobile; modal không bắt buộc gắn nguồn |
 | 2026-09-08 | `/cong-viec`: sắp xếp ghim→hạn gần; đã xong ở cuối + gạch ngang |
 | 2026-09-08 | `/dich-vu-so-do`: **Thêm công việc** → tiến độ **Công việc**; avatar CRM: **Đổi mật khẩu** |
+| 2026-09-08 | `/cong-viec` nguồn: bỏ «Công việc này cho…»; in hoa `LOẠI \| TÊN` màu `#2563eb` |
 
 ---
 

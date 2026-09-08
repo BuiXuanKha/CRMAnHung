@@ -11,27 +11,21 @@ import {
 } from './tasks.js';
 
 describe('taskContextLine', () => {
-  it('names the source entity', () => {
+  it('formats source as uppercase TYPE | NAME', () => {
     assert.equal(
       taskContextLine(TaskTargetType.CUSTOMER, 'Tuyet Anh'),
-      'Công việc này cho Khách hàng Tuyet Anh',
+      'KHÁCH HÀNG | TUYET ANH',
     );
+    assert.equal(taskContextLine(TaskTargetType.LODAT, 'LK12'), 'LÔ ĐẤT | LK12');
     assert.equal(
-      taskContextLine(TaskTargetType.LODAT, 'LK12'),
-      'Công việc này cho Lô đất LK12',
-    );
-    assert.equal(
-      taskContextLine(TaskTargetType.TITLE_SERVICE, 'Anh Nam'),
-      'Công việc này cho dịch vụ sổ đỏ của khách Anh Nam',
+      taskContextLine(TaskTargetType.TITLE_SERVICE, 'Cô Chi - Cộng Hoà'),
+      'DỊCH VỤ SỔ ĐỎ | CÔ CHI - CỘNG HOÀ',
     );
     assert.equal(
       taskContextLine(TaskTargetType.TRANSACTION, 'GD-1'),
-      'Công việc này cho Giao dịch GD-1',
+      'GIAO DỊCH | GD-1',
     );
-    assert.equal(
-      taskContextLine(TaskTargetType.NONE, ''),
-      'Công việc này lấy từ trang Công việc',
-    );
+    assert.equal(taskContextLine(TaskTargetType.NONE, ''), 'TRANG CÔNG VIỆC');
   });
 });
 
