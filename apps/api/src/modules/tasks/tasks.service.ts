@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { compareWorkTasksForList } from '@crmanhung/shared';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { assertCanAccess as assertCustomerAccess } from '../customers/customers-view';
@@ -28,18 +29,15 @@ export class TasksService {
 
   async list(user: RequestUser) {
     const rows = await this.prisma.workTask.findMany({
-      where: { employeeId: user.id, completedAt: null },
-      orderBy: [
-        { isPinned: 'desc' },
-        { pinnedAt: 'desc' },
-        { dueOn: 'asc' },
-        { createdAt: 'desc' },
-      ],
+      where: { employeeId: user.id },
       take: 200,
     });
+    const items = rows
+      .map((row) => this.toItem(row))
+      .sort(compareWorkTasksForList);
     return {
-      items: rows.map((row) => this.toItem(row)),
-      total: rows.length,
+      items,
+      total: items.length,
     };
   }
 

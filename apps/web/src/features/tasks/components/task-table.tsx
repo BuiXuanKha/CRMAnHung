@@ -4,6 +4,7 @@ import { Star } from 'lucide-react';
 import {
   TaskTargetType,
   formatTaskDueOn,
+  isWorkTaskCompleted,
   taskContextLine,
   taskDueCountdown,
   type WorkTask,
@@ -53,11 +54,14 @@ export function TaskTable({
       <div className="cv-table-scroll" role="rowgroup">
         {items.length === 0 ? (
           <div className="cv-empty-row" role="row">
-            Chưa có công việc. Bấm nút + để thêm, hoặc thêm từ menu Thao tác trên khách, lô đất, giao dịch hoặc sổ đỏ.
+            Chưa có công việc. Bấm nút + để thêm, hoặc thêm từ menu Thao tác trên khách, lô đất,
+            giao dịch hoặc sổ đỏ.
           </div>
         ) : (
           items.map((item, index) => {
             const countdown = taskDueCountdown(item.dueOn);
+            const done = isWorkTaskCompleted(item);
+            const showPin = item.isPinned && !done;
             return (
               <div
                 key={item.id}
@@ -67,14 +71,15 @@ export function TaskTable({
                   'cv-grid-row',
                   selectedId === item.id ? 'is-selected' : '',
                   menuId === item.id ? 'is-menu-open' : '',
-                  item.isPinned ? 'is-hot' : '',
+                  showPin ? 'is-hot' : '',
+                  done ? 'is-done' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
                 onClick={() => onSelect(item.id)}
               >
                 <div className="cv-cell col-idx" role="cell">
-                  {item.isPinned ? (
+                  {showPin ? (
                     <span className="cv-pin" title="Đã ghim">
                       <Icon icon={Star} size={14} strokeWidth={2.4} />
                     </span>

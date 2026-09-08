@@ -213,6 +213,26 @@
   white-space: pre-wrap;
 }
 
+.cv-grid-row.is-done .cv-content,
+.cv-grid-row.is-done .cv-source,
+.cv-card.is-done .cv-card-title strong,
+.cv-card.is-done .cv-card-source {
+  text-decoration: line-through;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.cv-grid-row.is-done,
+.cv-card.is-done {
+  opacity: 0.92;
+}
+
+.cv-detail-content.is-done,
+.cv-detail-source.is-done {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
 .cv-source {
   display: -webkit-box;
   -webkit-line-clamp: 2;

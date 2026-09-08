@@ -3,7 +3,7 @@
 import { Check, ChevronDown, ChevronUp, Eye, Pin } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { WorkTask } from '@crmanhung/shared';
+import { isWorkTaskCompleted, type WorkTask } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 
 export type WorkTaskAction = 'detail' | 'pin' | 'complete';
@@ -23,6 +23,7 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
   const [triggerVisible, setTriggerVisible] = useState(false);
+  const done = isWorkTaskCompleted(item);
 
   useEffect(() => {
     setMounted(true);
@@ -70,16 +71,20 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
                 <Icon icon={Eye} /> Xem chi tiết
               </button>
             </li>
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('pin')}>
-                <Icon icon={Pin} /> {item.isPinned ? 'Bỏ ghim' : 'Ghim lên đầu'}
-              </button>
-            </li>
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('complete')}>
-                <Icon icon={Check} /> Hoàn thành
-              </button>
-            </li>
+            {!done ? (
+              <>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('pin')}>
+                    <Icon icon={Pin} /> {item.isPinned ? 'Bỏ ghim' : 'Ghim lên đầu'}
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('complete')}>
+                    <Icon icon={Check} /> Hoàn thành
+                  </button>
+                </li>
+              </>
+            ) : null}
           </ul>,
           document.body,
         )
