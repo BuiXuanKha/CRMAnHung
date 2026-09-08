@@ -179,9 +179,9 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 | Mục | Việc |
 |-----|------|
 | Xem chi tiết | `/dich-vu-so-do/[id]`. Máy tính: bấm dòng vẫn mở panel. Menu portal `document.body` |
-| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai). Gắn sổ đỏ — «của khách [tên]» |
+| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai). Gắn sổ đỏ — «của khách [tên]». **Đồng thời** ghi tiến độ bước **Công việc** (`CONG_VIEC`), ghi chú = nội dung việc |
 | Ghim / Bỏ ghim | `isPinned` |
-| Thêm tiến độ | Dialog mock |
+| Thêm tiến độ | Dialog: chọn bước (gồm **Công việc**) + ghi chú + ngày |
 | Nhập thu | Dialog mock |
 | Nhập chi phí | Dialog mock |
 | Thêm tài liệu | Dialog: loại + chọn file (R2 private). Mobile không tràn mép |

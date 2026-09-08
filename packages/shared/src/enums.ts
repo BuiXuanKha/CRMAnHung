@@ -70,6 +70,8 @@ export enum TitleServiceStepType {
   LAM_VIEC_CO_QUAN = 'LAM_VIEC_CO_QUAN',
   NHAN_KET_QUA = 'NHAN_KET_QUA',
   BAN_GIAO = 'BAN_GIAO',
+  /** Việc cần làm — cũng tạo khi «Thêm công việc» từ hồ sơ sổ đỏ. */
+  CONG_VIEC = 'CONG_VIEC',
   KHAC = 'KHAC',
 }
 
@@ -174,6 +176,7 @@ export const TITLE_SERVICE_STEP_LABELS: Record<TitleServiceStepType, string> = {
   [TitleServiceStepType.LAM_VIEC_CO_QUAN]: 'Làm việc cơ quan',
   [TitleServiceStepType.NHAN_KET_QUA]: 'Nhận kết quả',
   [TitleServiceStepType.BAN_GIAO]: 'Bàn giao khách',
+  [TitleServiceStepType.CONG_VIEC]: 'Công việc',
   [TitleServiceStepType.KHAC]: 'Khác',
 };
 

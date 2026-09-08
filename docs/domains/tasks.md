@@ -63,10 +63,17 @@ Prefix `/api/v1`. Schema: `packages/shared/src/tasks.ts`.
 
 | Method | Path | Body / query | Response | Auth |
 |--------|------|--------------|----------|------|
+<<<<<<< HEAD
 | GET | `/tasks` | — | `{ items, total }` việc của user (**kể cả đã xong**) | JWT |
 | POST | `/tasks` | `content`, `dueOn`; `targetType`+`targetId` (bỏ hoặc `NONE` = không gắn) | `WorkTask` | JWT |
 | PATCH | `/tasks/:id/pin` | `{ pinned }` | `WorkTask` | JWT, chủ việc, **chưa xong** |
 | PATCH | `/tasks/:id/complete` | — | `WorkTask` (`completedAt`) | JWT, chủ việc, **chưa xong** |
+=======
+| GET | `/tasks` | — | `{ items, total }` việc **chưa xong** của user | JWT |
+| POST | `/tasks` | `content`, `dueOn`; `targetType`+`targetId` (bỏ hoặc `NONE` = không gắn). `TITLE_SERVICE` → đồng thời tạo tiến độ `CONG_VIEC` | `WorkTask` | JWT |
+| PATCH | `/tasks/:id/pin` | `{ pinned }` | `WorkTask` | JWT, chủ việc |
+| PATCH | `/tasks/:id/complete` | — | `WorkTask` (`completedAt`) | JWT, chủ việc |
+>>>>>>> origin/cursor/title-task-adds-progress-15c3
 
 Sắp xếp GET:
 
@@ -236,7 +243,7 @@ Lưu xong: đóng modal, toast «Đã thêm công việc.» FAB: `targetType` = 
 Mục **Thêm công việc** (icon `ListTodo`). Khách đã ẩn: **không** hiện (menu chỉ Khôi phục).
 
 - `/khach-hang` — sau Cập nhật chăm sóc
-- `/lo-dat` · `/giao-dich` · `/dich-vu-so-do` — sau Xem chi tiết
+- `/dich-vu-so-do` — sau Xem chi tiết. **Thêm công việc** trên sổ đỏ → API cũng tạo bước tiến độ `CONG_VIEC` (ghi chú = nội dung việc).
 
 ## 12.5 Modal chi tiết công việc
 
