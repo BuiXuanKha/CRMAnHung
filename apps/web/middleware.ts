@@ -157,6 +157,8 @@ export const config = {
     '/giao-dich/:path*',
     '/dich-vu-so-do',
     '/dich-vu-so-do/:path*',
+    '/cong-viec',
+    '/cong-viec/:path*',
     '/dashboard',
     '/dashboard/:path*',
     '/dashbroad',

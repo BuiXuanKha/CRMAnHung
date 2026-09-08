@@ -1,3 +1,5 @@
+import { isTasksPath } from './tasks.js';
+
 /** HttpOnly role cookie for Next.js CRM route guards (BUG-012). Not an auth secret — API still authorizes. */
 export const WEB_ROLE_COOKIE = 'crmanhung_web_role';
 
@@ -17,6 +19,7 @@ export function isCrmAppPath(pathname: string): boolean {
     pathname.startsWith('/lo-dat') ||
     pathname.startsWith('/giao-dich') ||
     pathname.startsWith('/dich-vu-so-do') ||
+    isTasksPath(pathname) ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/quan-tri') ||
     pathname.startsWith('/cai-dat')

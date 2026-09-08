@@ -8,6 +8,7 @@ export * from './addresses.js';
 export * from './lodats.js';
 export * from './transactions.js';
 export * from './title-services.js';
+export * from './tasks.js';
 export * from './public-content.js';
 export * from './lot-shares.js';
 export * from './seo-image.js';

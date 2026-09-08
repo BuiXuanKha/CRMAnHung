@@ -3,7 +3,8 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { CreditCard, FileText, Globe, Home, Map, Menu, UserCog, Users } from 'lucide-react';
+import { CreditCard, FileText, Globe, Home, ListTodo, Map, Menu, UserCog, Users } from 'lucide-react';
+import { TASKS_WEB_PATH } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { crmHomePath } from '@/features/auth/home-path';
 import { Icon } from './icon';
@@ -14,6 +15,7 @@ import './layout.css';
 const homeNavItem = { href: '/', label: 'Trang chủ', icon: Home };
 
 const navItems = [
+  { href: TASKS_WEB_PATH, label: 'Công việc', icon: ListTodo },
   { href: '/khach-hang', label: 'Quản lý khách hàng', icon: Users },
   { href: '/lo-dat', label: 'Quản lý lô đất', icon: Map },
   { href: '/giao-dich', label: 'Quản lý giao dịch', icon: CreditCard },
