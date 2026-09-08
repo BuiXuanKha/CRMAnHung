@@ -8,6 +8,7 @@ import { AlertTriangle, type LucideIcon, Trash2 } from 'lucide-react';
 import {
   CUSTOMER_LIST_PAGE_SIZE,
   CustomerStatus,
+  TaskTargetType,
   UserRole,
   type CreateCustomerInput,
   type CustomerDetail,
@@ -18,6 +19,7 @@ import {
 import { resetListScrollIfFiltersChanged, patchInfiniteListItem, useCrmInfiniteList, withPreservedListScroll } from '@/shared/list-state';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
+import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
 import { HotlinesSettingsDialog } from '@/features/settings/hotlines-dialog';
 import {
   consumeCareToast,
@@ -257,6 +259,10 @@ export function CustomerListPage() {
     window.setTimeout(() => setToast(null), 2800);
   }
 
+  const { openTaskModal, dialog: createTaskDialog } = useCreateTaskModal(() =>
+    flash('Đã thêm công việc.'),
+  );
+
   const createMut = useMutation({
     mutationFn: (input: CreateCustomerInput) => createCustomer(input),
     onSuccess: async (created) => {
@@ -481,6 +487,14 @@ export function CustomerListPage() {
 
     if (action === 'care') {
       openCareEdit(customer);
+      return;
+    }
+    if (action === 'task') {
+      openTaskModal({
+        type: TaskTargetType.CUSTOMER,
+        id: customer.id,
+        label: customer.fullName,
+      });
       return;
     }
     if (action === 'phone') {
@@ -970,6 +984,8 @@ export function CustomerListPage() {
         }}
         onSubmit={submitRename}
       />
+
+      {createTaskDialog}
 
       <PhoneDuplicateModal
         open={Boolean(dup)}

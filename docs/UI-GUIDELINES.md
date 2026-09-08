@@ -224,6 +224,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 | Mở chat | Tab ngoài: Page → URL Business Suite; E2EE → `/messages/e2ee/t/…`; còn lại `facebook.com/messages/t/…`. Ẩn mobile; thiếu URL → CrmAlert |
 | Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu mã → CrmAlert |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
+| Thêm công việc | CrmDialog: nội dung, hạn mặc định ngày mai, Lưu / Huỷ. Gắn khách đang mở menu |
 | Thêm / Sửa số điện thoại | Modal nhỏ. Chưa có số: thêm. Đã có: Lưu ghi đè + Xóa (confirm). Icon cam cạnh tên = thêm nhanh |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (form §12.5 lodats). ADMIN: CrmAlert không tạo từ menu khách |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` (form tạo hồ sơ; ADMIN được tạo) |
@@ -274,7 +275,7 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 | `DT · MT · Hướng` | Dòng 1: diện tích (`90 m²`); dòng 2: `MT 4,5 m · Bắc` — thiếu = `—`. Lọc cột: **khoảng DT** (1–100 / 100–200 / &gt;200) + **hướng** (Đông…Khác), AND |
 | `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng chữ đã lưu (`1%` / `2%` / `Chưa trao đổi`). Lọc cột: khoảng giá bước **500tr** + «Chưa có giá» (đồng bộ mobile) |
 | `Trạng thái` | **Chỉ** Mở bán ↔ Tạm dừng (công tắc). **Không** phải đã bán / đặt cọc. Track xanh `#10b981` khi Mở bán; xám khi Tạm dừng |
-| `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Giao dịch**, **Sửa** |
+| `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Thêm công việc**, **Giao dịch**, **Sửa** |
 
 **Không** hiện cột `Cập nhật` trên list `/lo-dat` (timestamp vẫn dùng cho sort API).
 
@@ -336,7 +337,7 @@ Thẻ: nền trắng, viền `#e2e8f0`, bo 12px. Số tiền dùng `crm-money`.
 | `Hẹn CC` | Ngày `D/M/YYYY`. Đếm ngược **chỉ** Của tôi + Đã cọc: `Còn N ngày` (xanh), `Hôm nay` (amber), `Quá N ngày` (đỏ). RECORD / không ngày / không còn Đã cọc = ngày hoặc `—` |
 | `Ghi chú` | Một dòng, cắt `…`; thiếu = `—` |
 | `Ngày tạo` | `HH:mm:ss D/M/YYYY` — **không** icon lọc (timestamp) |
-| `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Sửa**, **Xóa** (đỏ + `CrmConfirmDialog`) |
+| `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Thêm công việc**, **Sửa**, **Xóa** (đỏ + `CrmConfirmDialog`) |
 
 **Thanh tìm (§4.3.4, biến thể giao dịch):** desktop chỉ ô tìm, **không** H1, **không** dropdown loại/trạng thái trên thanh (lọc bằng icon cột). Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới. Placeholder: `Tìm mã GD, lô đất, người bán, người mua, ghi chú...`. Không rail phải. Không nút «Thêm GD». Cột NV (admin) chưa mock.
 
@@ -381,7 +382,7 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 | `Giá / Thu / Chi` | Ba dòng: Giá `crm-money`; Thu chữ xanh `#047857`; Chi chữ đỏ `#b91c1c`; thiếu giá / 0 = `0 đ` hoặc `—` với giá |
 | `Tài liệu` | `N file` hoặc `Chưa có` |
 | `Số ngày` | Hangtag `CrmBadge` green (`30 ngày` / `Hôm nay`) — **không** icon lọc |
-| `Thao tác` | Chevron → menu: **Xem chi tiết**, **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**, **Xóa hồ sơ** (đỏ + confirm) |
+| `Thao tác` | Chevron → menu: **Xem chi tiết**, **Thêm công việc**, **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**, **Xóa hồ sơ** (đỏ + confirm) |
 
 **Thanh tìm:** desktop chỉ ô tìm (+ **ADMIN:** select nhân viên tạo). Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ trên desktop. Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới.
 

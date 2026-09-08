@@ -46,6 +46,7 @@ model User {
   viewedTitleServiceAttachments TitleServiceAttachmentView[] @relation("TitleServiceAttachmentViewer")
   publicLotShares           PublicLotShare[]
   publicShareViewStat       PublicShareViewStat?
+  workTasks             WorkTask[]
 }
 
 model RefreshToken {
@@ -85,6 +86,7 @@ model Customer {
   lodatMaps     LodatCustomerMap[]
   transactionParties TransactionParty[]
   titleServices TitleService[]
+  workTasks     WorkTask[]
 
   @@index([employeeId])
   @@index([status])
@@ -357,6 +359,7 @@ model Lodat {
   maps           LodatCustomerMap[]
   transactions   Transaction[]
   publicListing  PublicLotListing?
+  workTasks      WorkTask[]
 
   @@index([addressId])
   @@index([projectLotId])
@@ -562,6 +565,7 @@ model Transaction {
   parties          TransactionParty[]
   attachments      TransactionAttachment[]
   snapshot         TransactionSnapshot?
+  workTasks        WorkTask[]
 
   @@index([lodatId])
   @@index([lodatCustomerMapId])
@@ -659,6 +663,7 @@ model TitleService {
   progress     TitleServiceProgress[]
   moneyEntries TitleServiceMoney[]
   attachments  TitleServiceAttachment[]
+  workTasks    WorkTask[]
 
   @@index([customerId])
   @@index([createdByEmployeeId])
@@ -732,6 +737,34 @@ model TitleServiceAttachmentView {
 
   @@index([attachmentId, viewedAt])
   @@index([viewedByEmployeeId])
+}
+
+/// Nhắc việc cá nhân — tạo từ menu Thao tác 4 list CRM.
+model WorkTask {
+  id             String   @id @default(cuid())
+  employeeId     String
+  content        String
+  dueOn          DateTime @db.Date
+  targetType     String
+  customerId     String?
+  lodatId        String?
+  transactionId  String?
+  titleServiceId String?
+  targetLabel    String
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  employee     User          @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  customer     Customer?     @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  lodat        Lodat?        @relation(fields: [lodatId], references: [id], onDelete: Restrict)
+  transaction  Transaction? @relation(fields: [transactionId], references: [id], onDelete: Restrict)
+  titleService TitleService? @relation(fields: [titleServiceId], references: [id], onDelete: Restrict)
+
+  @@index([employeeId, dueOn])
+  @@index([customerId])
+  @@index([lodatId])
+  @@index([transactionId])
+  @@index([titleServiceId])
 }
 
 model ImageRotation {

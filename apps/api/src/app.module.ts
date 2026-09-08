@@ -15,6 +15,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 import { TitleServicesModule } from './modules/title-services/title-services.module';
 import { PublicContentModule } from './modules/public-content/public-content.module';
 import { LotSharesModule } from './modules/lot-shares/lot-shares.module';
+import { TasksModule } from './modules/tasks/tasks.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -41,6 +42,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     TitleServicesModule,
     PublicContentModule,
     LotSharesModule,
+    TasksModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

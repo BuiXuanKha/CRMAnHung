@@ -1,12 +1,12 @@
 'use client';
 
-import { ChevronDown, ChevronUp, Eye, Pencil, Trash2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, ListTodo, Pencil, Trash2 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { TransactionListItem } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 
-export type TransactionAction = 'detail' | 'edit' | 'delete';
+export type TransactionAction = 'detail' | 'task' | 'edit' | 'delete';
 
 type Props = {
   item: TransactionListItem;
@@ -39,7 +39,7 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
       return;
     }
     const r = btn.getBoundingClientRect();
-    const width = 196;
+    const width = 220;
     const left = Math.min(r.right - width, window.innerWidth - width - 8);
     setPos({ top: r.bottom + 4, left: Math.max(8, left) });
     setTriggerVisible(true);
@@ -68,6 +68,11 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
             <li>
               <button type="button" role="menuitem" onClick={() => onAction('detail')}>
                 <Icon icon={Eye} /> Xem chi tiết
+              </button>
+            </li>
+            <li>
+              <button type="button" role="menuitem" onClick={() => onAction('task')}>
+                <Icon icon={ListTodo} /> Thêm công việc
               </button>
             </li>
             <li>

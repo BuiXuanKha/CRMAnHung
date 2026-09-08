@@ -5,6 +5,7 @@ import {
   ChevronUp,
   FilePlus,
   ListPlus,
+  ListTodo,
   Pencil,
   Pin,
   Receipt,
@@ -19,6 +20,7 @@ import { Icon } from '@/shared/ui/icon';
 
 export type TitleServiceAction =
   | 'detail'
+  | 'task'
   | 'pin'
   | 'progress'
   | 'thu'
@@ -87,6 +89,11 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
             <li>
               <button type="button" role="menuitem" onClick={() => onAction('detail')}>
                 <Icon icon={Eye} /> Xem chi tiết
+              </button>
+            </li>
+            <li>
+              <button type="button" role="menuitem" onClick={() => onAction('task')}>
+                <Icon icon={ListTodo} /> Thêm công việc
               </button>
             </li>
             <li>

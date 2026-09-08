@@ -4,6 +4,7 @@ import {
   ChevronDown,
   ChevronUp,
   FileText,
+  ListTodo,
   Map,
   MessageCircle,
   MessageSquare,
@@ -22,6 +23,7 @@ export type CustomerAction =
   | 'chat'
   | 'messenger'
   | 'care'
+  | 'task'
   | 'phone'
   | 'lodat'
   | 'sodo'
@@ -234,6 +236,11 @@ export function ActionMenu({ customer, open, onToggle, onClose, onAction }: Prop
                 <li>
                   <button type="button" role="menuitem" onClick={() => run('care')}>
                     <Icon icon={NotebookPen} /> Cập nhật chăm sóc
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => run('task')}>
+                    <Icon icon={ListTodo} /> Thêm công việc
                   </button>
                 </li>
                 <li>
