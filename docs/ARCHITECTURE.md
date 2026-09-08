@@ -122,6 +122,7 @@ apps/extension/   # Load unpacked — scanner Meta
 | **Addresses** | Địa chỉ REGULAR / PROJECT + đơn vị hành chính |
 | **Transactions** | Giao dịch trên map lô–khách: snapshot lô, bên mua/bán, đính kèm R2 |
 | **Title services** | Hồ sơ dịch vụ sổ đỏ |
+| **Tasks** | Nhắc việc / ghi chú nhỏ (`/cong-viec`) — khung trang; tạo việc chưa chốt |
 | **Admin registry** | Xem / xóa cứng khách toàn hệ thống |
 
 Vai trò: `STAFF` (dữ liệu theo `employeeId`) · `ADMIN` (toàn cục + cấu hình).

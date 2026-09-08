@@ -24,7 +24,7 @@ Agent đọc file này + [`AGENTS.md`](../AGENTS.md) trước khi làm P1+.
 | ADR / Playbook / Architecture | Ready | `docs/adr`, `PLAYBOOK.md` |
 | Cursor skills | Ready | gồm `cloudflare-r2` |
 | API scaffold (auth/users/health) | Ready | nhánh foundation + branch hiện tại |
-| Web shell CRM `(crm)/*` | Ready | login API + list khách / lô / GD / sổ đỏ |
+| Web shell CRM `(crm)/*` | Ready | login API + list khách / lô / GD / sổ đỏ + khung `/cong-viec` |
 | Web shell **public** `/` | Ready | landing stub — chuẩn SEO: `PUBLIC-SEO.md` |
 | Postgres local (`docker compose`) | **Skipped (owner)** | Không bắt buộc để đọc docs; list CRM cần API + Postgres. VPS đã có Postgres |
 | R2 keys + endpoint + bucket | Ready | skill `cloudflare-r2` + `.env` |

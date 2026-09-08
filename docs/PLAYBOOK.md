@@ -124,7 +124,7 @@ Trong mỗi phase domain: **luôn** đi ①→⑨, không code API trước docs
 |-----|---------|
 | Code / file / symbol | Tiếng Anh |
 | Copy UI, message lỗi user | Tiếng Việt |
-| Domain folder | `users`, `customers`, `lodats`, `addresses`, `transactions`, `title-services` |
+| Domain folder | `users`, `customers`, `lodats`, `addresses`, `transactions`, `title-services`, `tasks` |
 | API prefix | `/api/v1` |
 | Enum status | Giữ semantic gần hệ cũ (`KHACH_MOI`, `DANG_BAN`…) để migrate dễ |
 

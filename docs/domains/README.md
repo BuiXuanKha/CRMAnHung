@@ -11,6 +11,7 @@
 | Addresses | [addresses.md](./addresses.md) | Ready for API — Admin `/cai-dat/dia-chi`; copy data sau |
 | Transactions | [transactions.md](./transactions.md) | Ready for API — Prisma + contract; UI mock list + chi tiết + form |
 | Title services | [title-services.md](./title-services.md) | Ready for API — copy script + ADMIN lọc NV + audit xem file |
+| Công việc (nhắc việc) | [tasks.md](./tasks.md) | Ready for mock — khung `/cong-viec`; tạo việc bàn sau |
 | Users / admin registry | [users.md](./users.md) §11 mục 5 | P4 — CRUD NV, chưa làm |
 | Public content (web khách) | [public-content.md](./public-content.md) | Done — STAFF `/dashboard/lo-dat`; bài CMS ADMIN |
 
