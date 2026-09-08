@@ -1,4 +1,5 @@
-import { IsIn, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import { Transform } from 'class-transformer';
+import { IsBoolean, IsIn, IsString, Matches, MaxLength, MinLength } from 'class-validator';
 
 const TARGET_TYPES = ['CUSTOMER', 'LODAT', 'TRANSACTION', 'TITLE_SERVICE'] as const;
 
@@ -19,4 +20,14 @@ export class CreateWorkTaskDto {
   @MinLength(1)
   @MaxLength(60)
   targetId!: string;
+}
+
+export class PinWorkTaskDto {
+  @Transform(({ value }) => {
+    if (value === true || value === 'true' || value === '1') return true;
+    if (value === false || value === 'false' || value === '0') return false;
+    return value;
+  })
+  @IsBoolean({ message: 'Cần chọn ghim hoặc bỏ ghim.' })
+  pinned!: boolean;
 }

@@ -751,6 +751,9 @@ model WorkTask {
   transactionId  String?
   titleServiceId String?
   targetLabel    String
+  isPinned       Boolean  @default(false)
+  pinnedAt       DateTime?
+  completedAt    DateTime?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
@@ -761,6 +764,8 @@ model WorkTask {
   titleService TitleService? @relation(fields: [titleServiceId], references: [id], onDelete: Restrict)
 
   @@index([employeeId, dueOn])
+  @@index([employeeId, isPinned, pinnedAt])
+  @@index([employeeId, completedAt])
   @@index([customerId])
   @@index([lodatId])
   @@index([transactionId])

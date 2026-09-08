@@ -1,6 +1,8 @@
 import {
   createWorkTaskSchema,
+  pinWorkTaskSchema,
   type CreateWorkTaskInput,
+  type PinWorkTaskInput,
   type WorkTask,
   type WorkTaskList,
 } from '@crmanhung/shared';
@@ -18,5 +20,19 @@ export async function createWorkTask(input: CreateWorkTaskInput): Promise<WorkTa
   return apiFetch<WorkTask>('/tasks', {
     method: 'POST',
     body: JSON.stringify(parsed.data),
+  });
+}
+
+export async function pinWorkTask(id: string, input: PinWorkTaskInput): Promise<WorkTask> {
+  const parsed = pinWorkTaskSchema.parse(input);
+  return apiFetch<WorkTask>(`/tasks/${id}/pin`, {
+    method: 'PATCH',
+    body: JSON.stringify(parsed),
+  });
+}
+
+export async function completeWorkTask(id: string): Promise<WorkTask> {
+  return apiFetch<WorkTask>(`/tasks/${id}/complete`, {
+    method: 'PATCH',
   });
 }

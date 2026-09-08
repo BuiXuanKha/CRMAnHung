@@ -418,9 +418,30 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 
 Desktop giữ bảng §4.5 + panel Chi tiết hồ sơ.
 
+#### 4.3.8 Bảng dữ liệu — trang công việc (đã chốt cột)
+
+Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`tasks.md` §12](./domains/tasks.md) (màn [`/cong-viec`](https://anhungland.com/cong-viec)).
+
+**Cột — Danh sách công việc** (desktop):
+
+| Cột | Nội dung ô |
+|-----|------------|
+| `#` | Số thứ tự; nếu **ghim** thì icon Lucide `Star` (vàng `#ca8a04`) thay số — **không** emoji, **không** icon lọc |
+| `Nội dung` | `content`, tối đa 3 dòng |
+| `Nguồn` | Câu `taskContextLine` (khách / lô / GD / sổ đỏ) |
+| `Hạn làm` | `D/M/YYYY` |
+| `Đếm ngược` | Hangtag: **Hôm nay** `amber` · `N ngày` `green` · `Quá hạn N ngày` `red` — **không** icon lọc |
+| `Thao tác` | Chevron → **Xem chi tiết**, **Ghim / Bỏ ghim**, **Hoàn thành** |
+
+**Không** ô tìm, **không** lọc cột (list việc của chính mình). Bấm dòng → modal chi tiết + **Hoàn thành**. Việc xong ẩn khỏi list.
+
+**Mobile (≤767px):** thẻ xếp dọc. Đầu thẻ: sao ghim (nếu có) + nội dung + chevron. Hạn + hangtag đếm ngược. Dòng nguồn. Footer «Hiển thị N / Tổng M công việc».
+
+Desktop giữ bảng §4.5.
+
 ### 4.5 Bảng danh sách CRM — dùng chung (đã chốt)
 
-Áp dụng **mọi** màn CRM có list dạng bảng (khách hàng, lô đất, giao dịch, sổ đỏ…).  
+Áp dụng **mọi** màn CRM có list dạng bảng (khách hàng, lô đất, giao dịch, sổ đỏ, công việc…).  
 Cột / dữ liệu đổi theo domain; **hình thức** (font, hover, scroll, icon, footer…) **một bộ**.  
 Skill: `crm-data-table`. Tham chiếu triển khai: `/khach-hang` (`features/customers`).
 

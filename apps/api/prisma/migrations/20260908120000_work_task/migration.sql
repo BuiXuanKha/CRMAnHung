@@ -10,6 +10,9 @@ CREATE TABLE "WorkTask" (
     "transactionId" TEXT,
     "titleServiceId" TEXT,
     "targetLabel" TEXT NOT NULL,
+    "isPinned" BOOLEAN NOT NULL DEFAULT false,
+    "pinnedAt" TIMESTAMP(3),
+    "completedAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
@@ -17,6 +20,8 @@ CREATE TABLE "WorkTask" (
 );
 
 CREATE INDEX "WorkTask_employeeId_dueOn_idx" ON "WorkTask"("employeeId", "dueOn");
+CREATE INDEX "WorkTask_employeeId_isPinned_pinnedAt_idx" ON "WorkTask"("employeeId", "isPinned", "pinnedAt");
+CREATE INDEX "WorkTask_employeeId_completedAt_idx" ON "WorkTask"("employeeId", "completedAt");
 CREATE INDEX "WorkTask_customerId_idx" ON "WorkTask"("customerId");
 CREATE INDEX "WorkTask_lodatId_idx" ON "WorkTask"("lodatId");
 CREATE INDEX "WorkTask_transactionId_idx" ON "WorkTask"("transactionId");

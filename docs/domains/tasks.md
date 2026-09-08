@@ -1,7 +1,7 @@
 # Domain: Công việc
 
 - **Slug:** `tasks`
-- **Status:** Ready for API — tạo từ menu Thao tác 4 list; xem trên `/cong-viec`
+- **Status:** Ready for API — bảng `/cong-viec` + ghim + hoàn thành; tạo từ Thao tác 4 list
 - **Owner:** Khả Bùi Xuân
 - **Liên quan hệ cũ:** không có màn tương đương (không copy)
 
@@ -17,27 +17,30 @@ Nhân viên ghi việc cần làm, gắn với khách / lô / giao dịch / hồ
 
 | Actor | Được làm | Không được |
 |-------|----------|------------|
-| STAFF | Tạo việc trên bản ghi **của mình**; xem việc **mình tạo** | Việc của NV khác |
-| ADMIN | Tạo việc trên bản ghi mình đang thấy trên list; xem việc **mình tạo** | (chưa) xem việc cả công ty |
+| STAFF | Tạo việc trên bản ghi **của mình**; xem / ghim / hoàn thành việc **mình tạo** | Việc của NV khác |
+| ADMIN | Tạo việc trên bản ghi mình đang thấy trên list; xem / ghim / hoàn thành việc **mình tạo** | Xem việc cả công ty |
 
-STAFF tạo trên bản ghi không phải của mình → 404 (cùng BUG-008).
+STAFF tạo trên bản ghi không phải của mình → 404 (cùng BUG-008). Pin / complete việc người khác (kể cả Admin) → 404.
 
 ## 3. Khái niệm & trạng thái
 
 | Thuật ngữ | Nghĩa |
 |-----------|--------|
 | Công việc | Nội dung + hạn ngày + nguồn (một khách / lô / GD / sổ đỏ) |
-| Hạn làm việc | Ngày lịch (`dueOn`). Mở modal: **ngày mai**. Có thể đổi lịch hoặc **Hôm nay** |
+| Hạn làm việc | Ngày lịch (`dueOn`). Mở modal thêm: **ngày mai**. Có thể đổi lịch hoặc **Hôm nay** |
+| Đếm ngược | Hôm nay · `N ngày` còn lại · `Quá hạn N ngày` |
+| Ghim | `isPinned` — lên đầu list, nền vàng |
+| Hoàn thành | `completedAt` — **ẩn** khỏi list |
 
 **Enum nguồn** (`targetType`): `CUSTOMER` · `LODAT` · `TRANSACTION` · `TITLE_SERVICE`.
 
-Không có trạng thái xong/hủy (chưa chốt).
-
 ## 4. Use cases
 
-1. **Mở `/cong-viec`** — list việc của mình, hạn gần trước.
+1. **Mở `/cong-viec`** — bảng việc chưa xong của mình; ghim trước, rồi hạn gần trước.
 2. **Thêm từ list** — menu Thao tác → **Thêm công việc** → modal → Lưu.
 3. **Huỷ modal** — không lưu.
+4. **Ghim / Bỏ ghim** — menu Thao tác trên dòng.
+5. **Bấm dòng** — modal chi tiết + **Hoàn thành**.
 
 ## 5. Quan hệ dữ liệu
 
@@ -49,8 +52,9 @@ Không có trạng thái xong/hủy (chưa chốt).
 
 | Màn | Route | Hành vi chính |
 |-----|-------|----------------|
-| Công việc | `/cong-viec` | List việc của mình |
+| Công việc | `/cong-viec` | Bảng việc của mình (chưa xong) |
 | Modal thêm | trên 4 list | Nội dung, hạn, Lưu / Huỷ |
+| Modal chi tiết | trên `/cong-viec` | Nội dung, hạn, đếm ngược, Hoàn thành |
 
 ## 7. Contract / API
 
@@ -58,8 +62,12 @@ Prefix `/api/v1`. Schema: `packages/shared/src/tasks.ts`.
 
 | Method | Path | Body / query | Response | Auth |
 |--------|------|--------------|----------|------|
-| GET | `/tasks` | — | `{ items, total }` việc của user | JWT |
+| GET | `/tasks` | — | `{ items, total }` việc **chưa xong** của user | JWT |
 | POST | `/tasks` | `content`, `dueOn`, `targetType`, `targetId` | `WorkTask` | JWT |
+| PATCH | `/tasks/:id/pin` | `{ pinned }` | `WorkTask` | JWT, chủ việc |
+| PATCH | `/tasks/:id/complete` | — | `WorkTask` (`completedAt`) | JWT, chủ việc |
+
+Sắp xếp GET: `isPinned` desc → `pinnedAt` desc → `dueOn` asc → `createdAt` desc. Tối đa 200.
 
 ## 8. Mock data
 
@@ -75,22 +83,23 @@ Không map.
 
 ## 11. Open questions
 
-- Đánh dấu xong / xóa việc?
 - Admin xem việc cả công ty?
 - Badge số việc trên menu?
+- Xem lại việc đã hoàn thành?
 
 ---
 
 ## 12. Trang `/cong-viec`
 
-Thứ tự: **12.1 máy tính** → **12.2 mobile**.
+Thứ tự: **12.1 máy tính** → **12.2 mobile**. Bảng tuân [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.5. **Không** lọc cột (list cá nhân, không thanh tìm).
 
 ### 12.1 Giao diện máy tính
 
 ```
 ┌ Header CRM (Công việc xanh) ─────────────────────────────────┐
 ├ Tiêu đề: Công việc                                             ┤
-└ List: nội dung · hạn · dòng nguồn. Trống: «Chưa có công việc.» ┘
+├ Bảng §4.5: # · Nội dung · Nguồn · Hạn làm · Đếm ngược · Thao tác ┤
+└ Footer: Hiển thị N / Tổng M công việc                          ┘
 ```
 
 #### 12.1.1 Menu header
@@ -101,25 +110,77 @@ Cùng mục **Công việc** đã có. Icon `ListTodo`.
 
 `h1` **Công việc**. Dòng phụ: nhắc việc và ghi chú nhỏ.
 
-#### 12.1.3 List việc
+#### 12.1.3 Item (dòng bảng)
 
-Khối trắng, viền `#e2e8f0`, bo 12px.
+##### 1. STT
 
-Mỗi việc:
+`#` 1…N. Ghim: icon Lucide `Star` vàng thay số.
 
-1. Nội dung (`content`)
-2. Hạn: `D/M/YYYY` (`dueOn`)
-3. Dòng nguồn — `taskContextLine` (mục 12.4)
+##### 2. Nội dung
 
-Sắp xếp: `dueOn` tăng, rồi `createdAt` mới hơn.
+`content`. Tối đa 3 dòng, còn thì `…`.
 
-Trống: icon `ListTodo` + «Chưa có công việc.»
+##### 3. Nguồn
 
-**Không** nút Thêm trên trang này (tạo từ list).
+`taskContextLine` (mục 12.4). Tối đa 2 dòng.
+
+##### 4. Hạn làm
+
+`D/M/YYYY` (`dueOn`).
+
+##### 5. Đếm ngược
+
+Hangtag `CrmBadge`:
+
+| Điều kiện | Chữ | Tone |
+|----------|-----|------|
+| Hạn = hôm nay (VN) | Hôm nay | amber |
+| Còn ngày | `N ngày` | green |
+| Quá hạn | `Quá hạn N ngày` | red |
+
+##### 6. Menu thao tác (chevron)
+
+Portal `position: fixed`.
+
+| Mục | Việc |
+|-----|------|
+| Xem chi tiết | Modal mục 12.5 |
+| Ghim / Bỏ ghim | `isPinned` |
+| Hoàn thành | `completedAt`; dòng biến khỏi list; toast «Đã hoàn thành công việc.» |
+
+##### 7. Ghim / chọn
+
+Ghim: nền vàng. Đang chọn / menu mở: highlight. Bấm dòng (không phải chevron) → modal 12.5.
+
+Sắp xếp: ghim trước (ghim mới hơn trên), rồi hạn gần trước.
+
+Trống: «Chưa có công việc. Thêm từ menu Thao tác trên khách, lô đất, giao dịch hoặc sổ đỏ.»
+
+**Không** nút Thêm trên trang này (tạo từ 4 list).
+
+#### 12.1.4 Footer
+
+`Hiển thị N / Tổng M công việc`. Cùng màu header cột.
 
 ### 12.2 Giao diện mobile
 
-Cùng 12.1. Menu hamburger.
+Menu hamburger. **Thẻ xếp dọc**, không bảng cuộn ngang.
+
+#### 12.2.1 Tiêu đề trang
+
+Cùng 12.1.2.
+
+#### 12.2.2 Item (thẻ)
+
+Sao ghim cạnh nội dung (nếu ghim). Chevron thao tác cùng 12.1.3 mục 6.
+
+Hạn + hangtag đếm ngược. Dòng nguồn = `taskContextLine`.
+
+Bấm thẻ → modal 12.5.
+
+#### 12.2.3 Footer
+
+Cùng câu 12.1.4.
 
 ---
 
@@ -132,7 +193,7 @@ Mở từ menu Thao tác 4 list. `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề
 Không sửa được. Copy:
 
 | Nguồn | Câu |
-|-------|-----|
+|-------|------|
 | Khách hàng | Công việc này cho Khách hàng [tên] |
 | Lô đất | Công việc này cho Lô đất [tiêu đề] |
 | Sổ đỏ | Công việc này cho dịch vụ sổ đỏ của khách [tên khách] |
@@ -162,3 +223,11 @@ Mục **Thêm công việc** (icon `ListTodo`). Khách đã ẩn: **không** hi�
 
 - `/khach-hang` — sau Cập nhật chăm sóc
 - `/lo-dat` · `/giao-dich` · `/dich-vu-so-do` — sau Xem chi tiết
+
+## 12.5 Modal chi tiết công việc
+
+Mở khi bấm dòng / thẻ / **Xem chi tiết**. `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề: **Công việc**.
+
+Nội dung (`content`). Dòng nguồn. Hạn `D/M/YYYY` + hangtag đếm ngược (cùng 12.1.3 mục 5).
+
+**Đóng** · **Hoàn thành** (primary). Busy khi PATCH. Xong: đóng, toast «Đã hoàn thành công việc.»

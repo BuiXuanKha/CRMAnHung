@@ -2,7 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { assertCanAccess as assertCustomerAccess } from '../customers/customers-view';
-import type { CreateWorkTaskDto } from './dto/task.dto';
+import type { CreateWorkTaskDto, PinWorkTaskDto } from './dto/task.dto';
 
 const TARGET_TYPES = ['CUSTOMER', 'LODAT', 'TRANSACTION', 'TITLE_SERVICE'] as const;
 type TargetType = (typeof TARGET_TYPES)[number];
@@ -28,8 +28,13 @@ export class TasksService {
 
   async list(user: RequestUser) {
     const rows = await this.prisma.workTask.findMany({
-      where: { employeeId: user.id },
-      orderBy: [{ dueOn: 'asc' }, { createdAt: 'desc' }],
+      where: { employeeId: user.id, completedAt: null },
+      orderBy: [
+        { isPinned: 'desc' },
+        { pinnedAt: 'desc' },
+        { dueOn: 'asc' },
+        { createdAt: 'desc' },
+      ],
       take: 200,
     });
     return {
@@ -60,6 +65,36 @@ export class TasksService {
     return this.toItem(row);
   }
 
+  async pin(user: RequestUser, id: string, dto: PinWorkTaskDto) {
+    const current = await this.requireOwnOpen(user, id);
+    const updated = await this.prisma.workTask.update({
+      where: { id },
+      data: {
+        isPinned: dto.pinned,
+        pinnedAt: dto.pinned ? (current.pinnedAt ?? new Date()) : null,
+      },
+    });
+    return this.toItem(updated);
+  }
+
+  async complete(user: RequestUser, id: string) {
+    await this.requireOwnOpen(user, id);
+    const updated = await this.prisma.workTask.update({
+      where: { id },
+      data: { completedAt: new Date() },
+    });
+    return this.toItem(updated);
+  }
+
+  /** Own open task only — even Admin cannot see another employee's tasks (404). */
+  private async requireOwnOpen(user: RequestUser, id: string) {
+    const row = await this.prisma.workTask.findUnique({ where: { id } });
+    if (!row || row.employeeId !== user.id || row.completedAt) {
+      throw new NotFoundException('Không tìm thấy công việc.');
+    }
+    return row;
+  }
+
   private toItem(row: {
     id: string;
     content: string;
@@ -70,6 +105,9 @@ export class TasksService {
     transactionId: string | null;
     titleServiceId: string | null;
     targetLabel: string;
+    isPinned: boolean;
+    pinnedAt: Date | null;
+    completedAt: Date | null;
     createdAt: Date;
   }) {
     const targetId =
@@ -81,6 +119,9 @@ export class TasksService {
       targetType: row.targetType,
       targetId,
       targetLabel: row.targetLabel,
+      isPinned: row.isPinned,
+      pinnedAt: row.pinnedAt?.toISOString() ?? null,
+      completedAt: row.completedAt?.toISOString() ?? null,
       createdAt: row.createdAt.toISOString(),
     };
   }
