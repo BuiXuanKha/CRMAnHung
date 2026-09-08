@@ -3,6 +3,9 @@ import { isTasksPath } from './tasks.js';
 /** HttpOnly role cookie for Next.js CRM route guards (BUG-012). Not an auth secret — API still authorizes. */
 export const WEB_ROLE_COOKIE = 'crmanhung_web_role';
 
+/** STAFF soạn / đăng bài lô lên web khách. */
+export const DANG_BAI_WEB_PATH = '/dang-bai' as const;
+
 export type WebCrmRole = 'ADMIN' | 'STAFF';
 
 export function normalizeWebCrmRole(raw: string | undefined | null): WebCrmRole | null {
@@ -20,23 +23,27 @@ export function isCrmAppPath(pathname: string): boolean {
     pathname.startsWith('/giao-dich') ||
     pathname.startsWith('/dich-vu-so-do') ||
     isTasksPath(pathname) ||
+    isStaffDangBaiPath(pathname) ||
     pathname.startsWith('/dashboard') ||
     pathname.startsWith('/quan-tri') ||
     pathname.startsWith('/cai-dat')
   );
 }
 
-/** STAFF-only: soạn / đăng lô trên web. Admin không vào (lô thuộc NV). */
-export function isStaffLotWebPath(pathname: string): boolean {
-  return pathname === '/dashboard/lo-dat' || pathname.startsWith('/dashboard/lo-dat/');
+/** STAFF-only: soạn / đăng bài lô trên web (`/dang-bai`). Admin không vào. */
+export function isStaffDangBaiPath(pathname: string): boolean {
+  return pathname === DANG_BAI_WEB_PATH || pathname.startsWith(`${DANG_BAI_WEB_PATH}/`);
 }
 
-/** ADMIN-only CRM areas (STAFF blocked). `/dashboard/lo-dat` is STAFF-only. */
+/** @deprecated dùng `isStaffDangBaiPath` */
+export function isStaffLotWebPath(pathname: string): boolean {
+  return isStaffDangBaiPath(pathname);
+}
+
+/** ADMIN-only CRM areas (STAFF blocked). Toàn bộ `/dashboard` là ADMIN. */
 export function isAdminOnlyCrmPath(pathname: string): boolean {
   if (pathname.startsWith('/quan-tri') || pathname.startsWith('/cai-dat')) return true;
-  if (!pathname.startsWith('/dashboard')) return false;
-  if (isStaffLotWebPath(pathname)) return false;
-  return true;
+  return pathname.startsWith('/dashboard');
 }
 
 /** Where to send a user after login / wrong-role redirect. */
@@ -44,7 +51,7 @@ export function crmHomePathForRole(role: WebCrmRole): string {
   return role === 'ADMIN' ? '/dashboard' : '/khach-hang';
 }
 
-/** STAFF hitting a non-lot dashboard path → lot publish page. */
+/** STAFF hitting Dashboard → trang Đăng bài. */
 export function staffDashboardFallbackPath(): string {
-  return '/dashboard/lo-dat';
+  return DANG_BAI_WEB_PATH;
 }

@@ -7,7 +7,7 @@ import {
   crmHomePathForRole,
   isAdminOnlyCrmPath,
   isCrmAppPath,
-  isStaffLotWebPath,
+  isStaffDangBaiPath,
   nextPublicShareCookie,
   normalizeShareCode,
   normalizeWebCrmRole,
@@ -96,7 +96,7 @@ function guardCrmRoutes(request: NextRequest): NextResponse | null {
     return NextResponse.redirect(login);
   }
 
-  if (role === 'ADMIN' && isStaffLotWebPath(pathname)) {
+  if (role === 'ADMIN' && isStaffDangBaiPath(pathname)) {
     return redirectCrm(request, crmHomePathForRole('ADMIN'));
   }
 
@@ -159,6 +159,8 @@ export const config = {
     '/dich-vu-so-do/:path*',
     '/cong-viec',
     '/cong-viec/:path*',
+    '/dang-bai',
+    '/dang-bai/:path*',
     '/dashboard',
     '/dashboard/:path*',
     '/dashbroad',

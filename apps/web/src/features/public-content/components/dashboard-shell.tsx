@@ -3,8 +3,8 @@
 import { useEffect, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileText, LayoutDashboard, Map, BarChart3 } from 'lucide-react';
-import { UserRole, isStaffLotWebPath } from '@crmanhung/shared';
+import { FileText, LayoutDashboard, BarChart3 } from 'lucide-react';
+import { UserRole } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from '@/shared/ui/icon';
 import './dashboard-shell.css';
@@ -15,19 +15,12 @@ const ADMIN_MENU = [
   { href: '/dashboard/thong-ke', label: 'Thống kê', icon: BarChart3, exact: false },
 ] as const;
 
-const STAFF_MENU = [
-  { href: '/dashboard/lo-dat', label: 'Lô đất', icon: Map, exact: false },
-] as const;
-
+/** Dashboard shell — ADMIN only. STAFF soạn bài lô ở `/dang-bai` (peer CRM route). */
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading } = useAuth();
   const isAdmin = user?.role === UserRole.ADMIN;
-  const isStaff = user?.role === UserRole.STAFF;
-  const onStaffLots = isStaffLotWebPath(pathname);
-  const staffOnLots = Boolean(isStaff && onStaffLots);
-  const adminOnLots = Boolean(isAdmin && onStaffLots);
 
   useEffect(() => {
     if (loading) return;
@@ -35,34 +28,23 @@ export function DashboardShell({ children }: { children: ReactNode }) {
       router.replace('/login');
       return;
     }
-    if (user.role === UserRole.ADMIN) {
-      if (isStaffLotWebPath(pathname)) {
-        router.replace('/dashboard');
-      }
-      return;
-    }
     if (user.role === UserRole.STAFF) {
-      if (!isStaffLotWebPath(pathname)) {
-        router.replace('/dashboard/lo-dat');
-      }
+      router.replace('/dang-bai');
       return;
     }
-    router.replace('/khach-hang');
-  }, [loading, user, router, pathname]);
+    if (user.role !== UserRole.ADMIN) {
+      router.replace('/khach-hang');
+    }
+  }, [loading, user, router]);
 
-  if (loading || !user) {
+  if (loading || !user || !isAdmin) {
     return <div className="boot-screen">Đang tải…</div>;
   }
-  if (adminOnLots || (!isAdmin && !staffOnLots)) {
-    return <div className="boot-screen">Đang tải…</div>;
-  }
-
-  const menu = isAdmin ? ADMIN_MENU : STAFF_MENU;
 
   return (
     <div className="pw-shell">
       <nav className="pw-side" aria-label="Menu dashboard">
-        {menu.map((item) => {
+        {ADMIN_MENU.map((item) => {
           const active = item.exact
             ? pathname === item.href
             : pathname === item.href || pathname.startsWith(`${item.href}/`);

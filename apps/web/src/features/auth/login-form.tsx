@@ -8,7 +8,7 @@ import {
   crmHomePathForRole,
   isAdminOnlyCrmPath,
   isCrmAppPath,
-  isStaffLotWebPath,
+  isStaffDangBaiPath,
   normalizeWebCrmRole,
   staffDashboardFallbackPath,
 } from '@crmanhung/shared';
@@ -27,7 +27,7 @@ function safeCrmNext(next: string | null, role: string): string | null {
   if (!isCrmAppPath(path)) return null;
   const webRole = normalizeWebCrmRole(role);
   if (!webRole) return null;
-  if (webRole === 'ADMIN' && isStaffLotWebPath(path)) {
+  if (webRole === 'ADMIN' && isStaffDangBaiPath(path)) {
     return crmHomePathForRole('ADMIN');
   }
   if (webRole === 'STAFF' && isAdminOnlyCrmPath(path)) {
