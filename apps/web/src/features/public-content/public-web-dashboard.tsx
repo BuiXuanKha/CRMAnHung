@@ -10,8 +10,6 @@ import '@/shared/ui/dialog.css';
 import { Icon } from '@/shared/ui/icon';
 import { createPublicPost, getPublicWebDashboard, setPublicPostStatus } from './api';
 import { ComposePostDialog } from './components/compose-post-dialog';
-import { DashboardLotCards } from './components/dashboard-lot-cards';
-import { DashboardLotTable } from './components/dashboard-lot-table';
 import { DashboardPostCards } from './components/dashboard-post-cards';
 import { DashboardPostTable } from './components/dashboard-post-table';
 import { DashboardStats } from './components/dashboard-stats';
@@ -21,10 +19,10 @@ import { useFlash } from './use-flash';
 import './public-web-dashboard.css';
 import '@/shared/ui/money.css';
 
+/** Admin `/dashboard` Tổng quan — bài CMS only. Lô đăng web = STAFF `/dang-bai`. */
 export function PublicWebDashboard() {
   const qc = useQueryClient();
   const { toast, flash } = useFlash();
-  const [selectedLotId, setSelectedLotId] = useState<string | null>(null);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [postConfirm, setPostConfirm] = useState<PublicWebPostRow | null>(null);
   const [composeOpen, setComposeOpen] = useState(false);
@@ -37,7 +35,6 @@ export function PublicWebDashboard() {
   });
 
   const data = query.data;
-  const lotTotal = data ? data.publishedLotCount + data.pendingLotCount : 0;
   const postTotal = data ? data.publishedPostCount + data.draftPostCount : 0;
 
   const postMut = useMutation({
@@ -85,7 +82,7 @@ export function PublicWebDashboard() {
       <header className="pw-head">
         <div>
           <h1>Dashboard</h1>
-          <p>Khách trên anhungland.com chỉ thấy lô và bài đã đăng.</p>
+          <p>Quản lý bài viết trên anhungland.com. Lô đăng web do nhân viên soạn ở Đăng bài.</p>
         </div>
         <div className="pw-head-actions">
           <Link href="/" className="crm-btn" target="_blank" rel="noreferrer">
@@ -109,19 +106,11 @@ export function PublicWebDashboard() {
       ) : (
         <>
           <DashboardStats
-            publishedLotCount={data.publishedLotCount}
-            pendingLotCount={data.pendingLotCount}
             publishedPostCount={data.publishedPostCount}
             draftPostCount={data.draftPostCount}
           />
 
           <div className="pw-panels pw-panels-desktop">
-            <DashboardLotTable
-              items={data.recentLots}
-              total={lotTotal}
-              selectedId={selectedLotId}
-              onSelect={setSelectedLotId}
-            />
             <DashboardPostTable
               items={data.recentPosts}
               total={postTotal}
@@ -135,11 +124,6 @@ export function PublicWebDashboard() {
           </div>
 
           <div className="pw-panels pw-panels-mobile">
-            <DashboardLotCards
-              items={data.recentLots}
-              total={lotTotal}
-              onSelect={setSelectedLotId}
-            />
             <DashboardPostCards
               items={data.recentPosts}
               total={postTotal}

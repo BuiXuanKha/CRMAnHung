@@ -7,7 +7,6 @@ import {
   crmHomePathForRole,
   isAdminOnlyCrmPath,
   isCrmAppPath,
-  isStaffDangBaiPath,
   nextPublicShareCookie,
   normalizeShareCode,
   normalizeWebCrmRole,
@@ -94,10 +93,6 @@ function guardCrmRoutes(request: NextRequest): NextResponse | null {
     const next = pathname + (request.nextUrl.search || '');
     if (next && next !== '/') login.searchParams.set('next', next);
     return NextResponse.redirect(login);
-  }
-
-  if (role === 'ADMIN' && isStaffDangBaiPath(pathname)) {
-    return redirectCrm(request, crmHomePathForRole('ADMIN'));
   }
 
   if (role === 'STAFF' && isAdminOnlyCrmPath(pathname)) {

@@ -8,7 +8,6 @@ import {
   crmHomePathForRole,
   isAdminOnlyCrmPath,
   isCrmAppPath,
-  isStaffDangBaiPath,
   normalizeWebCrmRole,
   staffDashboardFallbackPath,
 } from '@crmanhung/shared';
@@ -27,9 +26,7 @@ function safeCrmNext(next: string | null, role: string): string | null {
   if (!isCrmAppPath(path)) return null;
   const webRole = normalizeWebCrmRole(role);
   if (!webRole) return null;
-  if (webRole === 'ADMIN' && isStaffDangBaiPath(path)) {
-    return crmHomePathForRole('ADMIN');
-  }
+  // `/dang-bai` = CRM page like `/khach-hang` (STAFF menu); no Admin rewrite.
   if (webRole === 'STAFF' && isAdminOnlyCrmPath(path)) {
     return path.startsWith('/dashboard')
       ? staffDashboardFallbackPath()

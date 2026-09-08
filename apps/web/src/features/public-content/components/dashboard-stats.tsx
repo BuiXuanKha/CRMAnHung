@@ -1,30 +1,12 @@
-import { PUBLIC_LISTING_PATH } from '@crmanhung/shared';
-
 type Props = {
-  publishedLotCount: number;
-  pendingLotCount: number;
   publishedPostCount: number;
   draftPostCount: number;
 };
 
-export function DashboardStats({
-  publishedLotCount,
-  pendingLotCount,
-  publishedPostCount,
-  draftPostCount,
-}: Props) {
+/** Admin Tổng quan — chỉ số bài CMS (lô đăng web thuộc `/dang-bai` của NV). */
+export function DashboardStats({ publishedPostCount, draftPostCount }: Props) {
   return (
-    <section className="pw-stats" aria-label="Tổng quan web công khai">
-      <article className="pw-stat">
-        <p className="pw-stat-label">Đã soạn</p>
-        <p className="pw-stat-value">{publishedLotCount}</p>
-        <p className="pw-stat-hint">Có mô tả trên {PUBLIC_LISTING_PATH}</p>
-      </article>
-      <article className="pw-stat">
-        <p className="pw-stat-label">Chưa soạn</p>
-        <p className="pw-stat-value">{pendingLotCount}</p>
-        <p className="pw-stat-hint">Đã có slug — cần bổ sung copy</p>
-      </article>
+    <section className="pw-stats" aria-label="Tổng quan bài viết">
       <article className="pw-stat">
         <p className="pw-stat-label">Bài đã đăng</p>
         <p className="pw-stat-value">{publishedPostCount}</p>
