@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, type ReactNode } from 'react';
+import { useEffect, useRef, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FileText, LayoutDashboard, BarChart3 } from 'lucide-react';
-import { UserRole } from '@crmanhung/shared';
+import { UserRole, staffDashboardFallbackPath } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from '@/shared/ui/icon';
 import './dashboard-shell.css';
@@ -15,27 +15,39 @@ const ADMIN_MENU = [
   { href: '/dashboard/thong-ke', label: 'Thống kê', icon: BarChart3, exact: false },
 ] as const;
 
-/** Dashboard shell — ADMIN only. STAFF soạn bài lô ở `/dang-bai` (peer CRM route). */
+/**
+ * Dashboard shell — ADMIN only.
+ *
+ * STAFF lỡ vào đây → về `/khach-hang` (luồng CRM thường). Soft `router.replace`
+ * dễ kẹt «Đang tải…» khi cookie role lệch ADMIN; sync `/auth/me` rồi hard-navigate.
+ * `/dang-bai` không phải đích fallback — chỉ khi NV mở menu Đăng bài.
+ */
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, reloadMe } = useAuth();
   const isAdmin = user?.role === UserRole.ADMIN;
+  const leavingRef = useRef(false);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || leavingRef.current) return;
     if (!user) {
       router.replace('/login');
       return;
     }
-    if (user.role === UserRole.STAFF) {
-      router.replace('/dang-bai');
-      return;
-    }
-    if (user.role !== UserRole.ADMIN) {
-      router.replace('/khach-hang');
-    }
-  }, [loading, user, router]);
+    if (user.role === UserRole.ADMIN) return;
+
+    leavingRef.current = true;
+    const dest = staffDashboardFallbackPath();
+    void (async () => {
+      try {
+        await reloadMe();
+      } catch {
+        // Still leave /dashboard — cookie may already match, or login is next.
+      }
+      window.location.replace(dest);
+    })();
+  }, [loading, user, router, reloadMe]);
 
   if (loading || !user || !isAdmin) {
     return <div className="boot-screen">Đang tải…</div>;

@@ -44,10 +44,9 @@ export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
 }
 
 export async function getPublicWebDashboard(): Promise<PublicWebDashboard> {
-  const overlay = await listPublicWebLots();
+  // Admin Tổng quan = bài CMS. Lô đăng web không còn trên Dashboard.
   const posts = await listPublicWebPosts();
-  const staff = buildStaffOpenLots(await loadStaffPlots(), overlay);
-  return buildPublicWebDashboard(overlay, posts, staff);
+  return buildPublicWebDashboard([], posts, []);
 }
 
 export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {

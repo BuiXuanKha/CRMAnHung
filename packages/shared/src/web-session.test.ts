@@ -39,7 +39,8 @@ describe('isCrmAppPath + fallback', () => {
     assert.equal(isCrmAppPath('/dang-bai'), true);
   });
 
-  it('falls STAFF dashboard hits to dang-bai', () => {
-    assert.equal(staffDashboardFallbackPath(), DANG_BAI_WEB_PATH);
+  it('falls STAFF dashboard hits to CRM home (khach-hang)', () => {
+    assert.equal(staffDashboardFallbackPath(), '/khach-hang');
+    assert.notEqual(staffDashboardFallbackPath(), DANG_BAI_WEB_PATH);
   });
 });

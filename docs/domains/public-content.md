@@ -33,7 +33,7 @@ Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên k
 |-------|------|--------|
 | Khách (chưa login) | Đọc bài CMS + lô có listing; share URL | Sửa overlay, vào CRM |
 | STAFF | CRM của mình + soạn / **cập nhật** listing **lô `createdByEmployeeId` = mình** | Bài CMS (`/dashboard/bai-viet`); lô NV khác; Tổng quan dashboard |
-| ADMIN | Bài CMS + thống kê + xem tổng quan (số lô trên web) | Soạn / tạo listing lô (thuộc NV); `/dang-bai` |
+| ADMIN | Bài CMS + thống kê + Tổng quan bài | Soạn / tạo / đăng listing lô (thuộc NV trên `/dang-bai`) |
 
 Chốt (2026-09-06): lô không của Admin — STAFF tự soạn lô của mình. Bài viết CMS vẫn **chỉ ADMIN**. Trang khách vẫn thương hiệu công ty — không lộ PII / hoa hồng / tên NV.
 
@@ -112,16 +112,16 @@ PublicPost                     (category, slug, status, cover, body) — không 
 | Màn | Route | Việc |
 |-----|--------|------|
 | **Dashboard** | `/dashboard` | Tổng quan + menu trái. **ADMIN.** §12 |
-| **Đăng bài** | `/dang-bai` | List lô đăng web (peer CRM, không nằm trong Dashboard). **STAFF.** Admin vào URL này → `/dashboard`. §13 |
+| **Đăng bài** | `/dang-bai` | List lô đăng web — trang CRM **như** `/khach-hang` (AppShell + login). Menu header **STAFF**. Soạn/đăng API chỉ STAFF (lô mình). §13 |
 | **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). **ADMIN.** §14 |
 | **Thống kê** | `/dashboard/thong-ke` | List NV + số lô đã share + lượt xem (cookie NV và **Truy cập trực tiếp**). **ADMIN.** §20 |
 | Trang chủ khách | `/` | Ô tìm bài đăng (trên «Sản phẩm dành cho bạn») → catalog `?q=` · lô đã Đăng web · **Dự án nổi bật** = bài `PUBLISHED` `/du-an` (tối đa 3) |
 
 **Không** thêm công tắc Đăng web trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
-Menu **trong** Dashboard: **chỉ ADMIN** = Tổng quan · Bài viết · Thống kê (không mục lô / Đăng bài). STAFF vào `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` → `/dang-bai`. ADMIN vào `/dang-bai` → `/dashboard`.
+Menu **trong** Dashboard: **chỉ ADMIN** = Tổng quan (bài CMS) · Bài viết · Thống kê. **Không** còn «Lô trên web» / đăng web lô trên Dashboard — việc đó thuộc `/dang-bai`. STAFF vào `/dashboard*` → `/khach-hang`.
 
-Header CRM: bốn mục NV. STAFF thêm **Đăng bài** → `/dang-bai`. ADMIN thêm **Dashboard** (không thêm mục Đăng bài trùng).
+Header CRM: bốn mục chung. STAFF thêm **Đăng bài** → `/dang-bai` (cùng kiểu trang CRM với khách/sổ đỏ). ADMIN thêm **Dashboard** (không mục Đăng bài).
 
 **Sau login thành công:** ADMIN vào **`/dashboard` trước** (trang đầu). STAFF vào `/khach-hang`. Logo CRM (góc trái) của admin cũng về `/dashboard`.
 
@@ -172,7 +172,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 ## 11. Luật dashboard / Đăng bài (chốt 2026-09-08)
 
-1. STAFF vào `/dang-bai` (header **Đăng bài** — peer route CRM, **không** nằm dưới `/dashboard`). `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` của STAFF → `/dang-bai`. ADMIN **không** vào `/dang-bai` (redirect `/dashboard`). Bốn trang CRM **không** thêm công tắc Đăng web.
+1. STAFF vào `/dang-bai` qua header **Đăng bài** — trang CRM peer (AppShell), **không** nằm dưới `/dashboard`. Đăng nhập / cookie role giống `/khach-hang`. STAFF lỡ vào `/dashboard*` → `/khach-hang`. Admin **không** quản lô đăng web trên Dashboard (đã bỏ «Lô trên web»). Bốn trang CRM **không** thêm công tắc Đăng web.
 2. Lô lên web = công tắc tường minh **STAFF lô mình** — không auto theo Mở bán hay giao dịch. Admin không đăng/sửa/tạo listing.
 3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. **Không** còn Gỡ Đăng web — listing đã đăng giữ `isPublished`; khách chỉ thấy khi Đăng web ∩ đang Mở bán.
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
@@ -209,48 +209,29 @@ STAFF **không** có menu trái Dashboard — soạn lô trên header **Đăng b
 
 ```
 ┌ Dashboard              [Xem trang khách] [Soạn bài] ┐
-│ Dòng phụ: khách chỉ thấy nội dung đã đăng                    │
-├ 4 thẻ đếm (kiểu §4.3.6, không card marketing)                │
-├ Hai cột: bảng Lô trên web · bảng Bài viết gần đây  (§4.5)    │
-└ Không rail phải                                              │
+│ Dòng phụ: bài CMS trên anhungland.com; lô = NV Đăng bài   │
+├ 2 thẻ đếm (Bài đã đăng · Bài nháp)                         │
+├ Một cột: bảng Bài viết gần đây  (§4.5)                     │
+└ Không «Lô trên web» — không rail phải                      │
 ```
 
 #### 12.1.1 Thanh đầu trang
 
 1. **H1** `Dashboard`
-2. Dòng phụ: `Khách trên anhungland.com chỉ thấy lô và bài đã đăng.`
+2. Dòng phụ: `Quản lý bài viết trên anhungland.com. Lô đăng web do nhân viên soạn ở Đăng bài.`
 3. **Xem trang khách** — viền; mở `/` tab mới
 4. **Soạn bài** — primary → dialog tiêu đề + chuyên mục → Lưu nháp / Xuất bản
 
-#### 12.1.2 Bốn thẻ đếm
+#### 12.1.2 Hai thẻ đếm
 
-Cùng hình thức thẻ GD: nền trắng, viền `#e2e8f0`, bo 12px. 4 cột.
+Cùng hình thức thẻ GD: nền trắng, viền `#e2e8f0`, bo 12px. 2 cột.
 
 | Thẻ | Số | Gợi ý |
 |-----|----|--------|
-| Lô đang hiện | `publishedLotCount` | Khách thấy trên `/mua-ban-nha-dat-huyen-nam-sach` |
-| Chờ đăng | `pendingLotCount` | Mở bán CRM, chưa Đăng web |
 | Bài đã đăng | `publishedPostCount` | Khách đọc được |
 | Bài nháp | `draftPostCount` | Chỉ admin |
 
-#### 12.1.3 Bảng Lô trên web
-
-§4.5. Không icon lọc cột (hub). Không cột Thao tác.
-
-| Cột | Ô |
-|-----|---|
-| Ảnh | Thumb 52px; thiếu = ô xám + `ImageOff` |
-| Tiêu đề | **Đậm**; dòng phụ địa chỉ. **Không** tên khách / NV |
-| Giá | `crm-money` nếu hiện số; không thì chữ `Liên hệ` |
-| Web | Hangtag **Đang hiện** `green` · **Chờ đăng** `gray` |
-
-Bấm nền hàng: chọn dòng (xem). **Không** Đăng web từ Tổng quan — lô thuộc NV (`/dang-bai`). Lô đang hiện: hangtag; không Gỡ web.
-
-Footer: `Hiển thị N / Tổng M lô` (N = dòng trên hub; M = đang hiện + chờ đăng).
-
-Trống: `Không có lô trên web.`
-
-#### 12.1.4 Bảng Bài viết gần đây
+#### 12.1.3 Bảng Bài viết gần đây
 
 §4.5. Không lọc cột.
 
@@ -274,24 +255,26 @@ Trống: `Không có bài viết.`
 ┌ H1 + dòng phụ                    ┐
 ├ [Xem trang khách]                │
 ├ [Soạn bài]                       │
-├ 4 thẻ đếm — lưới 2×2             │
-├ Thẻ lô xếp dọc                   │
+├ 2 thẻ đếm — 1 hàng               │
 └ Thẻ bài xếp dọc                  │
 ```
 
 #### 12.2.1 Thanh đầu — cùng 12.1.1
 
-Nút đủ vùng chạm. `Xem trang khách` full ngang. **Soạn bài** một hàng (không nút Đăng lô).
+Nút đủ vùng chạm. `Xem trang khách` full ngang. **Soạn bài** một hàng.
 
 #### 12.2.2 Thẻ đếm — cùng 12.1.2
 
-Lưới **2×2**. Ẩn gợi ý dưới số. Chữ nhỏ hơn (như GD mobile).
+Một hàng 2 cột. Ẩn gợi ý dưới số trên mobile hẹp.
 
-#### 12.2.3 Item lô (thẻ)
+#### 12.2.3 Item bài (thẻ)
 
-1. Thumb trái
-2. Tiêu đề đậm + hangtag Web
-3. Địa chỉ dòng phụ
+1. Chuyên mục hangtag
+2. Tiêu đề đậm
+3. Trạng thái hangtag
+4. Bấm thẻ → confirm Xuất bản / Về nháp (cùng 12.1.3)
+
+---
 4. Giá `crm-money` hoặc `Liên hệ`
 5. Bấm thẻ → chọn dòng (xem). Không confirm Đăng web.
 
@@ -868,7 +851,7 @@ Contract: `matchPublicListingSearch` + `listingCatalogSearchPath` (`packages/sha
 
 ## 20. Thống kê share `/dashboard/thong-ke` (chốt 2026-09-02)
 
-**ADMIN.** STAFF không vào (redirect `/dang-bai`). List NV + số lô đã bấm **Chia sẻ** + **lượt xem** trang khách (cookie NV **và** không cookie). Không đếm Gọi/Zalo.
+**ADMIN.** STAFF không vào (redirect `/khach-hang`). List NV + số lô đã bấm **Chia sẻ** + **lượt xem** trang khách (cookie NV **và** không cookie). Không đếm Gọi/Zalo.
 
 Zod: `shareEmployeeStatsResponseSchema` — `GET /admin/lot-shares/employee-stats` (`items` NV + `directViewCount`).
 

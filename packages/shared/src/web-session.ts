@@ -51,7 +51,10 @@ export function crmHomePathForRole(role: WebCrmRole): string {
   return role === 'ADMIN' ? '/dashboard' : '/khach-hang';
 }
 
-/** STAFF hitting Dashboard → trang Đăng bài. */
+/**
+ * STAFF lỡ vào `/dashboard` (Admin) → về nhà CRM thường (`/khach-hang`).
+ * `/dang-bai` chỉ khi NV chủ động mở Đăng bài — không dùng làm chỗ đá từ Dashboard.
+ */
 export function staffDashboardFallbackPath(): string {
-  return DANG_BAI_WEB_PATH;
+  return crmHomePathForRole('STAFF');
 }
