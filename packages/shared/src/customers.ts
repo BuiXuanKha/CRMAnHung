@@ -46,6 +46,9 @@ export const customerCareNoteSchema = z.object({
   employeeId: z.string(),
   employeeName: z.string(),
   createdAt: z.string(),
+  /** Khi lần chăm sóc gắn WorkTask đã hoàn thành. */
+  completedAt: z.string().nullable().optional(),
+  workTaskId: z.string().nullable().optional(),
 });
 
 export type CustomerCareNote = z.infer<typeof customerCareNoteSchema>;

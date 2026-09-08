@@ -59,6 +59,10 @@ export function TasksPage() {
         await qc.invalidateQueries({ queryKey: ['title-services'] });
         await qc.invalidateQueries({ queryKey: ['title-service', updated.targetId] });
       }
+      if (updated.targetType === 'CUSTOMER' && updated.targetId) {
+        await qc.invalidateQueries({ queryKey: ['customers'] });
+        await qc.invalidateQueries({ queryKey: ['customer', updated.targetId] });
+      }
       setDetailId(null);
       setSelectedId(null);
       setCompleteError(null);

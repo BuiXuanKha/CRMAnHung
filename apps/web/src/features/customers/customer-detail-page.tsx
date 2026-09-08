@@ -163,7 +163,10 @@ export function CustomerDetailPage() {
               {careNotes.map((entry) => {
                 const ago = formatRelativeAgo(entry.createdAt);
                 return (
-                  <li key={entry.id} className="kh-detail-care">
+                  <li
+                    key={entry.id}
+                    className={`kh-detail-care${entry.completedAt ? ' is-done' : ''}`}
+                  >
                     <div className="kh-detail-care-meta">
                       <span>
                         {formatCareTimestamp(entry.createdAt)}
@@ -175,7 +178,12 @@ export function CustomerDetailPage() {
                           </>
                         ) : null}
                       </span>
-                      <span className="kh-detail-care-nv">{entry.employeeName}</span>
+                      <span className="kh-detail-care-nv">
+                        {entry.employeeName}
+                        {entry.completedAt ? (
+                          <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+                        ) : null}
+                      </span>
                     </div>
                     {entry.needSummary?.trim() ? (
                       <div className="kh-detail-care-field">

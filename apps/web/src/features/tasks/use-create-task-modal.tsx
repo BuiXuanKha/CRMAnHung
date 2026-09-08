@@ -19,10 +19,14 @@ export function useCreateTaskModal(onSaved?: () => void) {
     onSuccess: async (_created, input) => {
       await qc.invalidateQueries({ queryKey: ['tasks'] });
       const type = input.targetType ?? TaskTargetType.NONE;
-      const titleId = input.targetId?.trim();
-      if (type === TaskTargetType.TITLE_SERVICE && titleId) {
+      const targetId = input.targetId?.trim();
+      if (type === TaskTargetType.TITLE_SERVICE && targetId) {
         await qc.invalidateQueries({ queryKey: ['title-services'] });
-        await qc.invalidateQueries({ queryKey: ['title-service', titleId] });
+        await qc.invalidateQueries({ queryKey: ['title-service', targetId] });
+      }
+      if (type === TaskTargetType.CUSTOMER && targetId) {
+        await qc.invalidateQueries({ queryKey: ['customers'] });
+        await qc.invalidateQueries({ queryKey: ['customer', targetId] });
       }
       setOpen(false);
       setTarget(null);

@@ -52,6 +52,7 @@ export class TasksService {
             type: 'NONE' as const,
             label: '',
             customerId: null as string | null,
+            customerHidden: false,
             lodatId: null as string | null,
             transactionId: null as string | null,
             titleServiceId: null as string | null,
@@ -91,6 +92,23 @@ export class TasksService {
         });
       }
 
+      // Thêm công việc trên khách = lần chăm sóc (ghi chú = nội dung việc).
+      if (target.type === 'CUSTOMER' && target.customerId && !target.customerHidden) {
+        await tx.customerCareNote.create({
+          data: {
+            customerId: target.customerId,
+            employeeId: user.id,
+            needSummary: null,
+            note: content,
+            workTaskId: created.id,
+          },
+        });
+        await tx.customer.update({
+          where: { id: target.customerId },
+          data: { updatedAt: new Date() },
+        });
+      }
+
       return created;
     });
 
@@ -119,14 +137,14 @@ export class TasksService {
       });
 
       // Bước tiến độ Công việc gắn việc này → hangtag Đã hoàn thành.
-      const linked = await tx.titleServiceProgress.updateMany({
+      const linkedProgress = await tx.titleServiceProgress.updateMany({
         where: { workTaskId: id, completedAt: null },
         data: { completedAt: now },
       });
 
       // Việc cũ (trước khi có workTaskId): khớp sổ đỏ + CONG_VIEC + cùng nội dung.
       if (
-        linked.count === 0 &&
+        linkedProgress.count === 0 &&
         current.targetType === 'TITLE_SERVICE' &&
         current.titleServiceId
       ) {
@@ -145,6 +163,35 @@ export class TasksService {
       if (current.titleServiceId) {
         await tx.titleService.update({
           where: { id: current.titleServiceId },
+          data: { updatedAt: now },
+        });
+      }
+
+      // Lần chăm sóc gắn việc này → hangtag Đã hoàn thành.
+      const linkedCare = await tx.customerCareNote.updateMany({
+        where: { workTaskId: id, completedAt: null },
+        data: { completedAt: now },
+      });
+
+      if (
+        linkedCare.count === 0 &&
+        current.targetType === 'CUSTOMER' &&
+        current.customerId
+      ) {
+        await tx.customerCareNote.updateMany({
+          where: {
+            customerId: current.customerId,
+            workTaskId: null,
+            completedAt: null,
+            note: current.content,
+          },
+          data: { completedAt: now, workTaskId: id },
+        });
+      }
+
+      if (current.customerId) {
+        await tx.customer.update({
+          where: { id: current.customerId },
           data: { updatedAt: now },
         });
       }
@@ -201,7 +248,7 @@ export class TasksService {
     if (type === 'CUSTOMER') {
       const row = await this.prisma.customer.findUnique({
         where: { id: targetId },
-        select: { id: true, fullName: true, employeeId: true },
+        select: { id: true, fullName: true, employeeId: true, isHidden: true },
       });
       if (!row) throw new NotFoundException('Không tìm thấy khách hàng.');
       assertCustomerAccess(user, row.employeeId);
@@ -209,6 +256,7 @@ export class TasksService {
         type,
         label: row.fullName.trim() || 'Khách hàng',
         customerId: row.id,
+        customerHidden: row.isHidden,
         lodatId: null as string | null,
         transactionId: null as string | null,
         titleServiceId: null as string | null,
@@ -234,6 +282,7 @@ export class TasksService {
         type,
         label,
         customerId: null,
+        customerHidden: false,
         lodatId: row.id,
         transactionId: null,
         titleServiceId: null,
@@ -253,6 +302,7 @@ export class TasksService {
         type,
         label: row.code,
         customerId: null,
+        customerHidden: false,
         lodatId: null,
         transactionId: row.id,
         titleServiceId: null,
@@ -275,6 +325,7 @@ export class TasksService {
       type,
       label: row.customer.fullName.trim() || 'Khách hàng',
       customerId: null,
+      customerHidden: false,
       lodatId: null,
       transactionId: null,
       titleServiceId: row.id,

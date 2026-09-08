@@ -64,9 +64,9 @@ Prefix `/api/v1`. Schema: `packages/shared/src/tasks.ts`.
 | Method | Path | Body / query | Response | Auth |
 |--------|------|--------------|----------|------|
 | GET | `/tasks` | — | `{ items, total }` việc của user (**kể cả đã xong**) | JWT |
-| POST | `/tasks` | `content`, `dueOn`; `targetType`+`targetId` (bỏ hoặc `NONE` = không gắn). `TITLE_SERVICE` → đồng thời tạo tiến độ `CONG_VIEC` (gắn `workTaskId`) | `WorkTask` | JWT |
+| POST | `/tasks` | `content`, `dueOn`; `targetType`+`targetId` (bỏ hoặc `NONE` = không gắn). `TITLE_SERVICE` → tiến độ `CONG_VIEC` (gắn `workTaskId`). `CUSTOMER` → lịch sử chăm sóc (ghi chú = nội dung việc) | `WorkTask` | JWT |
 | PATCH | `/tasks/:id/pin` | `{ pinned }` | `WorkTask` | JWT, chủ việc, **chưa xong** |
-| PATCH | `/tasks/:id/complete` | — | `WorkTask` (`completedAt`). Gắn sổ đỏ → tiến độ `CONG_VIEC` cùng việc: hangtag **Đã hoàn thành** | JWT, chủ việc, **chưa xong** |
+| PATCH | `/tasks/:id/complete` | — | `WorkTask` (`completedAt`). Gắn sổ đỏ → tiến độ `CONG_VIEC`: hangtag **Đã hoàn thành**. Gắn khách → lần chăm sóc: hangtag **Đã hoàn thành** | JWT, chủ việc, **chưa xong** |
 
 Sắp xếp GET:
 
@@ -237,7 +237,7 @@ Lưu xong: đóng modal, toast «Đã thêm công việc.» FAB: `targetType` = 
 
 Mục **Thêm công việc** (icon `ListTodo`). Khách đã ẩn: **không** hiện (menu chỉ Khôi phục).
 
-- `/khach-hang` — sau Cập nhật chăm sóc
+- `/khach-hang` — sau Cập nhật chăm sóc. **Thêm công việc** → API cũng ghi lịch sử chăm sóc (ghi chú = nội dung việc; không đổi trạng thái / tài chính / nhu cầu). **Hoàn thành** việc → lần chăm sóc đó `completedAt` (UI hangtag **Đã hoàn thành**).
 - `/dich-vu-so-do` — sau Xem chi tiết. **Thêm công việc** trên sổ đỏ → API cũng tạo bước tiến độ `CONG_VIEC` (ghi chú = nội dung việc). **Hoàn thành** việc → bước đó `completedAt` (UI hangtag **Đã hoàn thành**).
 
 ## 12.5 Modal chi tiết công việc

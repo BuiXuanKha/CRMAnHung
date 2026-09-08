@@ -223,7 +223,7 @@ Cột **Thao tác** trên mỗi dòng bảng: **một nút** mở **menu hành �
 | Mở chat | Tab ngoài: Page → URL Business Suite; E2EE → `/messages/e2ee/t/…`; còn lại `facebook.com/messages/t/…`. Ẩn mobile; thiếu URL → CrmAlert |
 | Mở Messenger | Tab `messenger.com/t/…` (thread hoặc uid số); thiếu mã → CrmAlert |
 | Cập nhật chăm sóc | CrmDialog form: trạng thái, nhu cầu, chip tài chính, ghi chú. Mobile: trang `/khach-hang/[id]/cham-soc` |
-| Thêm công việc | CrmDialog: nội dung, hạn mặc định ngày mai, Lưu / Huỷ. Gắn khách đang mở menu |
+| Thêm công việc | CrmDialog: nội dung, hạn mặc định ngày mai, Lưu / Huỷ. Gắn khách đang mở menu. **Đồng thời** ghi lịch sử chăm sóc (ghi chú = nội dung việc) |
 | Thêm / Sửa số điện thoại | Modal nhỏ. Chưa có số: thêm. Đã có: Lưu ghi đè + Xóa (confirm). Icon cam cạnh tên = thêm nhanh |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (form §12.5 lodats). ADMIN: CrmAlert không tạo từ menu khách |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` (form tạo hồ sơ; ADMIN được tạo) |
@@ -719,6 +719,8 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | `/cong-viec` FAB `+`: `fixed` nổi trên footer/list (không nằm dưới dòng «Hiển thị») |
 | 2026-09-08 | `/khach-hang` mobile: bỏ footer All/KN/…; **Thêm khách bằng SĐT** → FAB tròn xanh lá |
 | 2026-09-08 | `/dich-vu-so-do`: hoàn thành việc gắn sổ đỏ → tiến độ **Công việc** hangtag **Đã hoàn thành** |
+| 2026-09-08 | `/khach-hang`: **Thêm công việc** → đồng thời ghi lịch sử chăm sóc (ghi chú = nội dung việc) |
+| 2026-09-08 | `/khach-hang`: hoàn thành việc gắn khách → lần chăm sóc hangtag **Đã hoàn thành** |
 
 ---
 
