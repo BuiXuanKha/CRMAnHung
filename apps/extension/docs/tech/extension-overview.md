@@ -232,13 +232,13 @@ Nút **Quét DOM LIVE** trên panel vẫn có thể tạo file tải về máy l
 - Không có test tự động trong thư mục extension.
 - `options.html` placeholder version có thể lệch cho đến khi `options.js` chạy (giá trị thật từ manifest).
 
-### 11.1 Tin không mid — BUG-043 (owner để khi làm extension)
+### 11.1 Tin không mid — BUG-043 (owner bỏ qua)
 
 `data-message-id` (`mid.$…` hoặc `\d+@msgr.…`) = ID **một bong bóng**. Scanner còn `collectOrphanBubbleMessages` (`content-inbox.js`): gửi tin `id` rỗng + `orphan::…`. Contract `extensionChatMessageSchema.id` optional.
 
-**API (BUG-044, 2026-09-06):** không ghi tin thiếu mid; migrate xóa hàng cũ. Extension vẫn gửi — lúc làm scanner thì đừng gửi.
+**API (BUG-044, 2026-09-06):** không ghi tin thiếu mid; migrate xóa hàng cũ. Extension vẫn gửi; server vứt.
 
-Owner **2026-09-06**: **không sửa extension lúc này**. Unique `(facebook, mid)` trên DB vẫn chưa (BUG-043).
+Owner **2026-09-08**: **bỏ qua** — không cấm gửi `orphan::`, không unique `(facebook, mid)`.
 
 Xem `docs/audit/BUGS.md` BUG-043 và `apps/extension/README.md` mục «Khi làm lại / sửa extension».
 

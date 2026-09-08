@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-084` |
 | Tổng bug đã ghi | 83 |
-| OPEN | 15 |
+| OPEN | 13 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 68 |
-| Lần audit gần nhất | 2026-09-07 — Rà soát HOÃN / bỏ qua / không làm (main `fe24906`, sau deploy) |
+| FIXED / CLOSED | 70 |
+| Lần audit gần nhất | 2026-09-08 — Owner đóng hẳn BUG-041 và BUG-043 (won't fix); không sửa code |
 
 ## Cách ghi một bug
 
@@ -166,6 +166,8 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-08 | customers / extension | nguồn Facebook | Glossary ba nhánh (Page / Messenger thường / Messenger E2EE): `docs/domains/facebook-source.md`. Bàn BUG-013, chưa sửa code. |
 | 2026-09-08 | customers / extension | chuẩn data | `facebook-source.md` §12: tầng NV → kênh Page/nick → KEY → trường phụ. Chưa chốt KEY = người hay cuộc chat. Chưa code. |
 | 2026-09-08 | customers / extension | BUG-013 FIXED | Ingest khóa NV + nick/page + UID khách; E2EE không POST/không tạo khi thiếu UID; không lấy thread thế UID. 4 cặp `buinam` cũ không gộp (BUG-016). |
+| 2026-09-08 | customers / messenger | BUG-041 CLOSED | Owner: **bỏ hẳn luôn** — không sửa `sortOrder` / `sentAt`. Chat CRM chỉ tham khảo. |
+| 2026-09-08 | customers / messenger | BUG-043 CLOSED | Owner: **thôi bỏ qua** — không cấm gửi `orphan::`, không unique `(facebook, mid)`. API BUG-044 vẫn bỏ tin không mã. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -241,9 +243,9 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-038 | MEDIUM | lot-shares | `POST …/visit` tăng `visitCount` không check `isActive`; listing gỡ vẫn +1 rồi 404. | CLOSED |
 | BUG-039 | MEDIUM | lot-shares | `resolve` đòi SĐT; `findActiveShare` (đếm view) không — NV mất SĐT vẫn nhận thống kê, khách không thấy liên hệ. | FIXED |
 | BUG-040 | LOW | lot-shares | `GET /public/lot-shares/:code` trả `employeeId` + `visitCount` (không cần để hiện SĐT). | FIXED |
-| BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | OPEN (deferred) |
+| BUG-041 | HIGH | customers / messenger | `sortOrder` = chỉ số batch lần quét (≤200); quét lại cửa sổ khác làm loạn thứ tự tin. | CLOSED (won't fix) |
 | BUG-042 | HIGH | customers / messenger | API cắt im lặng còn 200 tin; scanner cũ giữ 500 — mất tin không báo. | FIXED |
-| BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). Extension gửi bubble không mid (`orphan::`) — **để khi làm extension**. | OPEN |
+| BUG-043 | HIGH | customers / messenger | Không unique `externalMessageId`; khóa fallback gộp/trùng tin (đặc biệt tin chỉ ảnh). Extension gửi bubble không mid (`orphan::`). | CLOSED (won't fix) |
 | BUG-044 | MEDIUM | customers / messenger | Trùng khóa yếu: body dài hơn ghi đè; ảnh chỉ thêm khi số URL tăng. | FIXED |
 | BUG-045 | MEDIUM | customers / messenger | Scan lại có tên Facebook không cập nhật `Customer.fullName` (chỉ `facebookName`). | CLOSED |
 | BUG-046 | MEDIUM | customers / messenger | `GET …/messages` không phân trang; `sentAt` không ghi; chi tiết khách không hiện chat. | CLOSED |
@@ -827,7 +829,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** `sortOrder` = thứ tự batch, không phải thứ tự hội thoại ổn định; không merge theo `sentAt` / mid.
 - **Impact:** Cột phụ «Nội dung chat» sai thứ tự sau import lại. Ảnh lô lấy từ chat theo thứ tự tin cũng lệch.
 - **Evidence:** `appendMessages` `found.sortOrder !== i` → update `sortOrder: i`. Schema `sentAt DateTime?` không có trong `create`/`update` ingest. `listMessages` không `sentAt`.
-- **Status:** OPEN (deferred — 2026-09-05; owner: tạm bỏ — extension không lấy giờ tin; nội dung chat trên CRM ít giá trị; **không sửa code** cho đến khi owner mở lại)
+- **Status:** CLOSED (won't fix, 2026-09-08) — Owner: **bỏ hẳn luôn**. Trước đó (2026-09-05) tạm bỏ vì extension không lấy giờ tin và nội dung chat trên CRM ít giá trị. Không sửa `sortOrder` / `sentAt`; không mở lại trừ khi owner bảo.
 
 ### BUG-042 — Cắt 200 tin im lặng; lệch scanner cũ 500
 
@@ -853,7 +855,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Không `@@unique([customerFacebookId, externalMessageId])`; fallback không đủ phân biệt bubble.
 - **Impact:** Lịch sử nhân bản hoặc mất bubble ảnh. `messageCount` phình.
 - **Evidence:** Schema `CustomerMessengerMessage`. `messageStorageKey`. `appendMessages` không `P2002`/unique. `isStableMessengerMessageId`. DB `kha` (2026-09-06): 18.617 tin; 899 không `mid.$`/`@msgr.` — **toàn** `dedupeKey` `orphan::` (hàm `collectOrphanBubbleMessages` trong `apps/extension/content-inbox.js`). `extensionChatMessageSchema.id` optional.
-- **Status:** OPEN — **DEFERRED phần extension (owner 2026-09-06):** chưa sửa scanner. **API (BUG-044):** không ghi tin thiếu `mid.$` / `@msgr.`; migrate xóa hàng cũ. Unique `(facebook, mid)` trên DB vẫn chưa. Ghi chú: `apps/extension/README.md`, `apps/extension/docs/tech/extension-overview.md` §11.1.
+- **Status:** CLOSED (won't fix, 2026-09-08) — Owner: **thôi bỏ qua**. Trước đó (2026-09-06) để khi làm extension. Không cấm gửi `orphan::`; không thêm unique `(facebook, mid)`. **API BUG-044 vẫn bỏ tin không mã.** Không mở lại trừ khi owner bảo.
 
 ### BUG-044 — Khớp nhầm rồi ghi đè nội dung / bỏ ảnh
 
@@ -1396,11 +1398,9 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 
 | ID | Quyết định owner | Kết quả rà soát | Bằng chứng ngắn |
 |----|------------------|-----------------|-----------------|
-| **013** | deferred | **CÒN** | `CustomerFacebook` unique `(employeeId, facebookUid)` — không unique theo thread; E2EE multi-thread vẫn tách Person. |
+| **013** | deferred | **FIXED** | Ingest khóa NV + nick/page + UID khách (2026-09-08). |
 | **014** | chốt 2026-09-08: đổi tên + mở ẩn | **FIXED** | API giữ nguyên; UI modal thẻ khách §12.1.2.1. |
 | **016** | deferred (chưa chốt thiết kế) | **CÒN** | `mergeFacebookIntoPhoneHolder`: chuyển FB + care + map; **xóa** map trùng lô; `customer.delete` nguồn — không chuyển hết SĐT nguồn / TitleService / party. |
-| **041** | deferred | **CÒN** | Ingest vẫn `sortOrder: i` theo batch; `sentAt` schema có nhưng không dùng để sắp xếp ổn định. |
-| **043** | deferred phần extension | **CÒN** (API đã siết mid qua BUG-044) | Không unique DB `(facebook, mid)`; extension vẫn có thể gửi `orphan::` — API bỏ qua ghi. |
 | **051** (phần Admin lọc NV) | Owner: phân trang **có**; lọc NV **không làm** | **CÒN** phần lọc NV | API đã `limit`/`offset` + COUNT → bug gốc FIXED; UI Admin vẫn không filter theo NV. |
 | **056** | HOÃN | **CÒN** | Chỉ `POST` tạo bài + `setPostStatus`; không PATCH `title`/`bodyHtml`/`cover`. |
 | **057** | HOÃN | **CÒN** | `PROJECT`→`REGULAR` chỉ chặn khi còn **ảnh**; không `count` `ProjectLot`. |
@@ -1427,6 +1427,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | **010** | Race Admin cuối — won't fix. |
 | **033** | Không CHECK XOR DB — owner chấp nhận. |
 | **036 / 038** | Link share sống mãi / visit — owner đóng. |
+| **041** | won't fix (2026-09-08) — owner bỏ hẳn; không sửa thứ tự tin / giờ gửi. |
+| **043** | won't fix (2026-09-08) — owner bỏ qua; API vẫn bỏ tin không mã (BUG-044). |
 | **045 / 046** | won't fix (đổi tên tay; chat chỉ tham khảo). |
 | **061 / 063 / 065** | by design (ảnh dự án chung; ẩn khách không cascade; không đăng ký kênh trước). |
 
@@ -1434,5 +1436,5 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 
 `BUG-023`, `025`, `026`, `027`, `029` — vẫn OPEN trên detail. Riêng **023** (URL Tạm dừng vẫn mở): sau chốt listing always-on, hành vi guest thấy lô + hangtag trạng thái có thể **đúng sản phẩm**; chưa đổi Status cho đến khi owner chốt CLOSED by design.
 
-**Đếm sau rà soát (theo Status detail):** OPEN **16** · FIXED **55** · CLOSED **12** · tổng **83**.
+**Đếm sau đóng BUG-041 và BUG-043 (2026-09-08, theo Status detail + header):** OPEN **13** · FIXED / CLOSED **70** · tổng **83**.
 

@@ -138,7 +138,7 @@ Bốn cặp trùng của **`buinam`** (đối chiếu Postgres 2026-09-04, copy 
 - [x] Có — Chrome MV3 `apps/extension`. Load unpacked thư mục đó. API mặc định `https://anhungland.com/api/v1`.
 - File nhận diện URL: `ext-source.js`. Context: `ext-context-business-suite.js`, `ext-context-facebook-com.js`. Panel + payload: `content-inbox.js`.
 - Kỹ thuật runtime: [`apps/extension/docs/tech/extension-overview.md`](../../apps/extension/docs/tech/extension-overview.md).
-- Owner 2026-09-06: **chưa sửa scanner** vì tin thiếu `mid` (BUG-043 / BUG-044). Bàn định danh Person (BUG-013) **tách** đợt tin nhắn.
+- Owner 2026-09-08: **bỏ qua BUG-043** (tin thiếu `mid` / `orphan::`). API vẫn bỏ tin không mã (BUG-044). Định danh Person là BUG-013 (đã FIXED).
 
 ## 10. Migrate từ hệ cũ
 
