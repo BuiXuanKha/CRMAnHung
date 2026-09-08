@@ -51,3 +51,5 @@ Không gửi lên `crm.anhungland.com`.
 ## Khi làm lại / sửa extension (để bàn)
 
 **Owner 2026-09-06 — chưa sửa scanner.** Extension vẫn gửi tin không ID bong bóng (`collectOrphanBubbleMessages`, `orphan::`). **API (BUG-044) không ghi** những tin đó; migrate xóa hàng cũ trên DB. Lúc làm đợt extension: đừng gửi bubble thiếu `mid.$` / `@msgr.`. Chi tiết: `docs/audit/BUGS.md` **BUG-043** / **BUG-044**.
+
+**Owner 2026-09-08 — chat nhóm Messenger (làm sau, chưa sửa).** An Hưng **có** hội thoại nhóm (ba người trở lên) trên Messenger, nhưng **ít**. Hiện máy chỉ đúng với chat **từng người**: Messenger thường lấy số trên URL `/messages/t/{số}` vừa làm mã cuộc chat vừa làm UID khách. Chat nhóm thì số đó **không** phải UID một người; nếu NV bật quét trên nhóm, CRM có thể tạo Person mang mã nhóm. Lúc làm đợt extension: nhận diện nhóm rồi **không** gán `customerUid` = mã nhóm; thiếu UID người thì không POST (cùng quy tắc BUG-013). Chỗ code: `ext-context-facebook-com.js` `resolveCustomerUid`, `content-inbox.js` (gán UID = `threadId` khi Messenger thường). Domain: `docs/domains/facebook-source.md` §13.1.
