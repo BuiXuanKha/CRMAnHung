@@ -14,5 +14,6 @@ Dành cho lập trình viên: kiến trúc, file runtime, nguồn quét, API, st
 ## Liên quan
 
 - Cài đặt nhanh: [../README.md](../README.md)
-- Frontend CRM: `Web/docs/`
-- API CRM: thư mục `API/` ở root repo
+- **Nguồn Facebook** (ba nhánh Page / Messenger thường / Messenger E2EE): [`docs/domains/facebook-source.md`](../../../docs/domains/facebook-source.md)
+- Frontend CRM: `apps/web`
+- API CRM: `apps/api`

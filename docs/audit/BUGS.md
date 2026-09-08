@@ -162,6 +162,9 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-07 | public-content / hub | BUG-068 FIXED | Owner: persist trang xã; 0 lô đang bán vẫn 200 + empty; đổi tên xã → 301 slug cũ. Không persist thôn. |
 | 2026-09-07 | public-content / hub | BUG-069 FIXED | Chi tiết lô dùng cùng hub maps Mở bán như catalog/sitemap (`guestCatalogHubMaps`). |
 | 2026-09-07 | audit | Rà soát HOÃN/bỏ qua | Sau deploy `fe24906`: đối chiếu code + live. Còn lỗi → giữ OPEN/HOÃN; **075 → FIXED** (file + live 200); **081** ghi HOÃN (owner Ko cần). Xem § «Rà soát HOÃN…». Không sửa nghiệp vụ. |
+| 2026-09-08 | customers / extension | nguồn Facebook | Glossary ba nhánh (Page / Messenger thường / Messenger E2EE): `docs/domains/facebook-source.md`. Bàn BUG-013, chưa sửa code. |
+| 2026-09-08 | customers / extension | chuẩn data | `facebook-source.md` §12: tầng NV → kênh Page/nick → KEY → trường phụ. Chưa chốt KEY = người hay cuộc chat. Chưa code. |
+
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
 Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Không phải kết luận audit.
@@ -458,7 +461,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Không unique theo NV+page+UID/thread; heuristic UID = threadId; lookup không gộp e2ee/non-e2ee.
 - **Impact:** Trùng hồ sơ, chat/chăm sóc/lô tách đôi; gộp tay dễ mất dữ liệu (BUG-016).
 - **Evidence:** Code như trên. **Đối chiếu Postgres production 2026-09-04 (chỉ đọc):** ~1384 FB; đếm thô trùng UID cùng NV = 51 nhóm — trong đó **47 khác `employeeFacebookUid` (khác page) = đúng nghiệp vụ** (vd. Lê Tuấn Doanh: Page Bùi Xuân Khả vs Em Hà). **Còn 4 nhóm thật sự cùng NV + cùng UID + cùng page:** toàn **`buinam`**, nguồn `messenger_e2ee`, **khác `threadId`**, tạo 2026-05-29, đã có trong `migrate.legacy_id_map` (copy CRM cũ). `kha` = 0 case cùng-page. Trùng cùng `threadId` = 0. Owner: chưa rõ vì sao chỉ buinam; **note lại, xử lý sau** (chưa sửa code).
-- **Status:** OPEN (deferred — 2026-09-04; scope còn lại ≈ 4 Person-pair `buinam` E2EE)
+- **Status:** OPEN (deferred — 2026-09-04; scope còn lại ≈ 4 Person-pair `buinam` E2EE). Bàn định danh: [`docs/domains/facebook-source.md`](../domains/facebook-source.md) §12 — chưa chốt KEY = người Facebook hay cuộc chat (2026-09-08, chưa sửa code).
 
 ### BUG-014 — Trùng SĐT lúc tạo: OK ghi đè tên khách cũ
 
