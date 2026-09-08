@@ -6,7 +6,7 @@
 - **Liên quan:** [`customers.md`](./customers.md) §13.14 · Chrome extension `apps/extension` · audit **BUG-013**
 - **Code scanSource:** `business_suite` · `messenger_standard` · `messenger_e2ee`
 
-Tài liệu này **đặt tên chung** cho dữ liệu extension gửi vào CRM. Dùng tên tiếng Việt khi bàn với owner. Không thay contract. **Chưa code** theo doc này.
+Tài liệu này **đặt tên chung** cho dữ liệu extension gửi vào CRM. Dùng tên tiếng Việt khi bàn với owner. Không thay contract. Ingest khóa UID (BUG-013) và panel **Thông tin quét** Cách A (extension v2.15.0) **đã code**.
 
 ---
 
@@ -61,6 +61,35 @@ Khách thuộc **NV đang login** trên panel, không thuộc nick Facebook trê
 Không có màn CRM riêng cho «nguồn Facebook». NV thao tác trên **tab Meta** + **panel extension**. List `/khach-hang` chỉ **đọc** khách đã lưu.
 
 Menu **Mở chat** / **Mở Messenger** trên CRM = tab ngoài, theo nhánh lúc quét — [`customers.md`](./customers.md) mục 21. **Không** phải inbox sống.
+
+### 6.1 Panel extension — khối Thông tin quét (v2.15.0, Cách A)
+
+Panel nổi trên tab Meta (máy tính; điện thoại Meta cùng panel, hẹp hơn). **Không** bắt buộc kênh đã đăng ký trước trên CRM (BUG-065).
+
+```
+┌ Copy thông tin quét ─────────────────────────────────────────┐
+├ [avatar tròn]  Tên Facebook                                  ┤
+├ Nguồn                                                        ┤
+├ Kênh NV                                                      ┤
+├ UID khách                                                    ┤
+└ Link cuộc chat (rút gọn; hover / Copy = URL đủ) ─────────────┘
+```
+
+#### 6.1.1 Hàng avatar + tên
+
+1. Avatar tròn bên trái. Có ảnh quét được thì hiện ảnh. Không có (hoặc ảnh lỗi) → chữ cái đầu tên Facebook trên nền tròn. Không viết «Avatar khách: Có».
+2. Tên Facebook (`facebookName` lúc ingest) cùng hàng, bên phải avatar. Trống thì gạch ngang.
+
+#### 6.1.2 Các dòng dưới
+
+1. **Nguồn** — giữ nhãn cũ: Business Suite / Messenger (facebook.com) / Messenger E2EE (facebook.com).
+2. **Kênh NV** — Cách A: nhánh Page → `Page {uid}`; nhánh Messenger → `Profile {uid}`. Tên đẹp («Page Bùi Xuân Khả») làm sau (DOM hoặc `EmployeeFacebookProfile.nickname`).
+3. **UID khách** — một nhãn cho cả ba nhánh (Page không còn ghi `selected_item_id` trên panel). E2EE chưa đọc được UID: câu gợi ý mở Chi tiết liên hệ.
+4. **Link cuộc chat** — Page: URL Business Suite đang mở. Messenger thường: `facebook.com/messages/t/{threadId}`. E2EE: `facebook.com/messages/e2ee/t/{threadId}`. Panel rút giữa; Copy giữ URL đủ.
+
+#### 6.1.3 Ẩn trên panel, giữ trong Copy
+
+`asset_id`, `mailbox_id`, `business_id`, `thread_type`, nguồn/điểm Lightspeed E2EE, `avatar_url`. Nút **Copy thông tin quét** dán khối đọc được rồi mục DEBUG.
 
 ## 7. Contract / API
 
@@ -254,5 +283,5 @@ Kết luận: nhánh này **quét được UID nhiều lúc**, kể cả trên d
 ### 13.3 Việc tiếp theo
 
 1. Live `kha` 2026-09-08: E2EE **có** UID (Chị Bình, lightspeed score 100). Messenger thường UID = URL (Bùi Dung).
-2. Chốt: chưa có UID thì **không POST** — đã làm (BUG-013, extension v2.14.0 + API).
+2. Chốt: chưa có UID thì **không POST** — đã làm (BUG-013, extension v2.14.0 + API). Panel Thông tin quét Cách A: extension **v2.15.0**.
 3. ~~Sửa ingest~~ **Xong.** Tìm NV + nick/page + UID; thread chỉ Mở chat / fallback hàng cũ. Bốn cặp `buinam` không gộp ở đây (BUG-016).

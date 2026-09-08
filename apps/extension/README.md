@@ -19,9 +19,9 @@ Chrome MV3 — quét khách + tin từ Meta Inbox / Messenger, gửi vào **CRM 
 4. Mở Business Suite Inbox hoặc Messenger → panel: đăng nhập `kha` / Admin → **Bật quét** → đổi hội thoại để gửi (hoặc **Dừng** để gửi khách đang mở).
 5. Sửa file xong: Reload extension, refresh tab Meta.
 
-**Thông tin quét:** nút **Copy thông tin quét** copy các trường panel (UID, thread, tên, …) để dán gửi dev. Bản tin nhắn vẫn dùng nút Copy ở mục tin.
+**Thông tin quét (v2.15.0):** một hàng avatar tròn + tên Facebook; bên dưới: Nguồn, Kênh NV (`Page {uid}` / `Profile {uid}`), UID khách, Link cuộc chat (rút gọn trên panel, URL đầy đủ khi Copy). Trường debug (`asset_id`, Lightspeed…) chỉ nằm trong **Copy thông tin quét**.
 
-Ingest (v2.14.0): **bắt buộc UID Facebook khách**. Messenger E2EE chưa hiện UID thì không gửi lên CRM.
+Ingest (v2.14.0+): **bắt buộc UID Facebook khách**. Messenger E2EE chưa hiện UID thì không gửi lên CRM.
 
 ## Nguồn
 

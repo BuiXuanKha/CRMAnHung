@@ -117,6 +117,53 @@
     return getScanSource();
   }
 
+  function facebookNameInitial(name) {
+    const text = normalizeText(name);
+    if (!text) return "?";
+    const ch = Array.from(text).find((c) => /\p{L}|\p{N}/u.test(c));
+    return String(ch || "?").toLocaleUpperCase("vi");
+  }
+
+  function truncateMiddle(text, maxLen) {
+    const value = String(text || "").trim();
+    const max = Math.max(12, Number(maxLen) || 52);
+    if (value.length <= max) return value;
+    const keep = Math.floor((max - 1) / 2);
+    return `${value.slice(0, keep)}…${value.slice(-keep)}`;
+  }
+
+  function getStaffChannelUid() {
+    return String(STATE.employeeUid || STATE.myPageUid || "").trim();
+  }
+
+  function getStaffChannelLabel() {
+    const uid = getStaffChannelUid();
+    if (!uid) return "";
+    return getScanSource() === "business_suite" ? `Page ${uid}` : `Profile ${uid}`;
+  }
+
+  function buildChatLinkUrl() {
+    const href = String(window.location.href || "").trim();
+    const threadId = String(STATE.threadId || "").trim();
+    const source = getScanSource();
+    if (source === "messenger_e2ee" && threadId) {
+      return `https://www.facebook.com/messages/e2ee/t/${threadId}`;
+    }
+    if (source === "messenger_standard" && threadId) {
+      return `https://www.facebook.com/messages/t/${threadId}`;
+    }
+    return href;
+  }
+
+  function getCustomerUidPanelValue() {
+    const uid = String(STATE.customerUid || "").trim();
+    if (uid) return uid;
+    if (getScanSource() === "messenger_e2ee") {
+      return "Chưa có — mở Chi tiết liên hệ bên phải rồi quét lại";
+    }
+    return "";
+  }
+
   function getMessengerScanner() {
     return window.__ANHUNGLAND_MESSENGER_SCANNER__ || null;
   }
@@ -2991,48 +3038,46 @@
       `extension_version: ${UI_VERSION}`,
       `url: ${window.location.href}`,
       "",
+      scanInfoClipboardLine("Nguồn", getScanSourceLabel()),
+      scanInfoClipboardLine("Kênh NV", getStaffChannelLabel()),
+      scanInfoClipboardLine("UID khách", STATE.customerUid),
+      scanInfoClipboardLine("Link cuộc chat", buildChatLinkUrl()),
+      scanInfoClipboardLine("Tên Facebook", STATE.customerName),
+      "",
+      "===== DEBUG =====",
+      scanInfoClipboardLine("scanSource", getScanSource()),
+      scanInfoClipboardLine("thread_id", STATE.threadId),
+      scanInfoClipboardLine("thread_type", STATE.threadType || (isBusinessSuiteSource() ? "FB_MESSAGE" : "")),
+      scanInfoClipboardLine("employeeUid", STATE.employeeUid),
+      scanInfoClipboardLine("myPageUid", STATE.myPageUid),
+      scanInfoClipboardLine("customerUid", STATE.customerUid),
     ];
 
-    if (isMessengerSource()) {
-      const uidLabel =
-        getScanSource() === "messenger_e2ee" ? "UID FB khách (E2EE)" : "UID FB khách";
-      const e2eeUidHint =
-        getScanSource() === "messenger_e2ee" && !STATE.customerUid
-          ? "(chưa có — mở Chi tiết liên hệ bên phải rồi quét lại)"
-          : STATE.customerUid;
+    if (isBusinessSuiteSource()) {
       lines.push(
-        scanInfoClipboardLine("Nguồn quét", getScanSourceLabel()),
-        scanInfoClipboardLine("thread_id (URL)", STATE.threadId),
-        scanInfoClipboardLine("thread_type", STATE.threadType),
-        scanInfoClipboardLine("UID Page / nick NV (nguồn quét)", STATE.employeeUid),
-        scanInfoClipboardLine(uidLabel, e2eeUidHint),
-      );
-      if (getScanSource() === "messenger_e2ee" && STATE.scanDebug?.e2eeCustomerUidSource) {
-        lines.push(
-          scanInfoClipboardLine(
-            "Nguồn UID E2EE",
-            `${STATE.scanDebug.e2eeCustomerUidSource} (score ${STATE.scanDebug.e2eeCustomerUidScore || 0})`,
-          ),
-        );
-      }
-      lines.push(
-        scanInfoClipboardLine("Tên khách", STATE.customerName),
-        scanInfoClipboardLine("Avatar khách", STATE.avatarUrl ? "Có" : ""),
-      );
-    } else {
-      lines.push(
-        scanInfoClipboardLine("Nguồn quét", getScanSourceLabel()),
+        scanInfoClipboardLine("selected_item_id", STATE.customerUid),
         scanInfoClipboardLine("asset_id", STATE.assetId),
         scanInfoClipboardLine("mailbox_id", STATE.mailboxId),
         scanInfoClipboardLine("business_id", STATE.businessId),
-        scanInfoClipboardLine("selected_item_id", STATE.customerUid),
-        scanInfoClipboardLine("thread_type", STATE.threadType || "FB_MESSAGE"),
-        scanInfoClipboardLine("UID Page (đồng bộ)", STATE.myPageUid),
-        scanInfoClipboardLine("Tên khách", STATE.customerName),
-        scanInfoClipboardLine("Avatar khách", STATE.avatarUrl ? "Có" : ""),
       );
     }
 
+    if (getScanSource() === "messenger_e2ee" && !STATE.customerUid) {
+      lines.push(
+        scanInfoClipboardLine(
+          "UID khách (gợi ý)",
+          "chưa có — mở Chi tiết liên hệ bên phải rồi quét lại",
+        ),
+      );
+    }
+    if (getScanSource() === "messenger_e2ee" && STATE.scanDebug?.e2eeCustomerUidSource) {
+      lines.push(
+        scanInfoClipboardLine(
+          "Nguồn UID E2EE",
+          `${STATE.scanDebug.e2eeCustomerUidSource} (score ${STATE.scanDebug.e2eeCustomerUidScore || 0})`,
+        ),
+      );
+    }
     if (STATE.avatarUrl) {
       lines.push(scanInfoClipboardLine("avatar_url", STATE.avatarUrl));
     }
@@ -3302,14 +3347,56 @@
       #${PANEL_ID} .pf-btn.primary { background: linear-gradient(135deg, #3b82f6, #2563eb); color: #fff; }
       #${PANEL_ID} .pf-btn.danger { background: rgba(239, 68, 68, 0.2); color: #fecaca; border: 1px solid rgba(239, 68, 68, 0.35); }
       #${PANEL_ID} .pf-btn.ghost { background: rgba(148, 163, 184, 0.15); color: #e2e8f0; }
-      #${PANEL_ID} .pf-avatar {
+      #${PANEL_ID} .pf-scan-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 8px 0 4px;
+      }
+      #${PANEL_ID} .pf-scan-avatar-wrap {
+        position: relative;
         width: 44px;
         height: 44px;
-        border-radius: 12px;
+        flex-shrink: 0;
+      }
+      #${PANEL_ID} .pf-scan-avatar,
+      #${PANEL_ID} .pf-scan-avatar-fallback {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+      }
+      #${PANEL_ID} .pf-scan-avatar-fallback {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, #3b82f6, #2563eb);
+        color: #fff;
+        font-weight: 700;
+        font-size: 16px;
+      }
+      #${PANEL_ID} .pf-scan-avatar {
+        position: absolute;
+        inset: 0;
         object-fit: cover;
         background: #334155;
         display: block;
-        margin-bottom: 8px;
+        z-index: 1;
+      }
+      #${PANEL_ID} .pf-scan-header-name {
+        font-size: 14px;
+        font-weight: 700;
+        color: #f1f5f9;
+        line-height: 1.35;
+        word-break: break-word;
+        min-width: 0;
+      }
+      #${PANEL_ID} .pf-scan-url {
+        display: block;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        word-break: normal;
+        max-width: 100%;
       }
       #${PANEL_ID} .pf-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
       #${PANEL_ID} .pf-tag {
@@ -3531,12 +3618,21 @@
     document.documentElement.appendChild(style);
   }
 
-  function renderScanFieldStack(label, value, enabled) {
-    const display = enabled
-      ? value
-        ? escapeHtml(value)
-        : '<span style="color:#64748b">—</span>'
-      : '<span style="color:#64748b">Chưa quét</span>';
+  function renderScanFieldStack(label, value, enabled, options = {}) {
+    const truncate = Boolean(options.truncate);
+    const raw = String(value || "").trim();
+    let display;
+    if (!enabled) {
+      display = '<span style="color:#64748b">Chưa quét</span>';
+    } else if (!raw) {
+      display = '<span style="color:#64748b">—</span>';
+    } else if (truncate) {
+      display = `<span class="pf-scan-url" title="${escapeHtml(raw)}">${escapeHtml(
+        truncateMiddle(raw, 52),
+      )}</span>`;
+    } else {
+      display = escapeHtml(raw);
+    }
     return `
       <div class="pf-scan-stack ${enabled ? "" : "pf-scan-off"}">
         <div class="pf-scan-stack-label">${enabled ? "✓" : "○"} ${escapeHtml(label)}</div>
@@ -3666,45 +3762,40 @@
     });
   }
 
-  function buildScanInfoFieldsHtml() {
-    const sourceLabel = escapeHtml(getScanSourceLabel());
-    if (isMessengerSource()) {
-      return `
-        ${renderScanFieldStack("Nguồn quét", sourceLabel, true)}
-        ${renderScanFieldStack("thread_id (URL)", STATE.threadId, true)}
-        ${renderScanFieldStack("thread_type", STATE.threadType, true)}
-        ${renderScanFieldStack("UID Page / nick NV (nguồn quét)", STATE.employeeUid, true)}
-        ${renderScanFieldStack(
-          getScanSource() === "messenger_e2ee" ? "UID FB khách (E2EE)" : "UID FB khách",
-          STATE.customerUid ||
-            (getScanSource() === "messenger_e2ee"
-              ? "(chưa có — mở Chi tiết liên hệ bên phải rồi quét lại)"
-              : ""),
-          true,
-        )}
-        ${
-          getScanSource() === "messenger_e2ee" && STATE.scanDebug?.e2eeCustomerUidSource
-            ? renderScanFieldStack(
-                "Nguồn UID E2EE",
-                `${STATE.scanDebug.e2eeCustomerUidSource} (score ${STATE.scanDebug.e2eeCustomerUidScore || 0})`,
-                true,
-              )
-            : ""
-        }
-        ${renderScanFieldStack("Tên khách", STATE.customerName, true)}
-        ${renderScanFieldStack("Avatar khách", STATE.avatarUrl ? "Có" : "", true)}
-      `;
-    }
+  function renderScanAvatarHtml() {
+    const initial = facebookNameInitial(STATE.customerName);
+    const fallback = `<div class="pf-scan-avatar-fallback" aria-hidden="true">${escapeHtml(initial)}</div>`;
+    const img = STATE.avatarUrl
+      ? `<img class="pf-scan-avatar" data-role="scan-avatar" src="${escapeHtml(STATE.avatarUrl)}" alt="" />`
+      : "";
+    const name = normalizeText(STATE.customerName);
+    const nameHtml = name
+      ? escapeHtml(name)
+      : '<span style="color:#64748b">—</span>';
     return `
-        ${renderScanFieldStack("Nguồn quét", sourceLabel, true)}
-        ${renderScanFieldStack("asset_id", STATE.assetId, true)}
-        ${renderScanFieldStack("mailbox_id", STATE.mailboxId, true)}
-        ${renderScanFieldStack("business_id", STATE.businessId, true)}
-        ${renderScanFieldStack("selected_item_id", STATE.customerUid, true)}
-        ${renderScanFieldStack("thread_type", STATE.threadType || "FB_MESSAGE", true)}
-        ${renderScanFieldStack("UID Page (đồng bộ)", STATE.myPageUid, true)}
-        ${renderScanFieldStack("Tên khách", STATE.customerName, true)}
-        ${renderScanFieldStack("Avatar khách", STATE.avatarUrl ? "Có" : "", true)}
+      <div class="pf-scan-header">
+        <div class="pf-scan-avatar-wrap">${fallback}${img}</div>
+        <div class="pf-scan-header-name">${nameHtml}</div>
+      </div>
+    `;
+  }
+
+  function hydrateScanAvatar(panel) {
+    if (!(panel instanceof HTMLElement)) return;
+    panel.querySelectorAll('[data-role="scan-avatar"]').forEach((node) => {
+      if (!(node instanceof HTMLImageElement)) return;
+      node.addEventListener("error", () => {
+        node.style.display = "none";
+      });
+    });
+  }
+
+  function buildScanInfoFieldsHtml() {
+    return `
+        ${renderScanFieldStack("Nguồn", getScanSourceLabel(), true)}
+        ${renderScanFieldStack("Kênh NV", getStaffChannelLabel(), true)}
+        ${renderScanFieldStack("UID khách", getCustomerUidPanelValue(), true)}
+        ${renderScanFieldStack("Link cuộc chat", buildChatLinkUrl(), true, { truncate: true })}
       `;
   }
 
@@ -3718,11 +3809,7 @@
             : ""
         }
       </div>
-      ${
-        STATE.avatarUrl
-          ? `<img class="pf-avatar" src="${escapeHtml(STATE.avatarUrl)}" alt="" />`
-          : ""
-      }
+      ${renderScanAvatarHtml()}
       <div class="pf-scan-list">
         ${buildScanInfoFieldsHtml()}
       </div>
@@ -3809,6 +3896,7 @@
       toggleBtn.textContent = STATE.collapsed ? "Mo rong" : "Thu gon";
     }
     hydrateMessageImagePreviews(panel);
+    hydrateScanAvatar(panel);
   }
 
   let panelClickBound = false;

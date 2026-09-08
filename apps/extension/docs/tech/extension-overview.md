@@ -6,7 +6,7 @@ Tài liệu kỹ thuật cho lập trình viên, dựa trên source trong `Anhun
 |---|---|
 | **Ngày khảo sát** | 16/07/2026 |
 | **Branch khảo sát** | `main` (sau cleanup dump) |
-| **Manifest version** | `2.11.0` (`manifest.json`) |
+| **Manifest version** | `2.15.0` (`manifest.json`) |
 | **Loại** | Chrome Extension Manifest V3 |
 
 ---
@@ -59,7 +59,7 @@ Nguồn: `manifest.json`.
 | Hạng mục | Giá trị |
 |----------|---------|
 | `manifest_version` | `3` |
-| `version` | `2.11.0` (single source of truth — JS đọc qua `chrome.runtime.getManifest()`) |
+| `version` | `2.15.0` (single source of truth — JS đọc qua `chrome.runtime.getManifest()`) |
 | Permissions | `activeTab`, `storage` |
 | Background | `background.js` (service worker) |
 | UI cài đặt | `options.html` (popup `action` + `options_ui` mở tab) |
