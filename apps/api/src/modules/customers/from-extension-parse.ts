@@ -34,6 +34,48 @@ export function trimText(value: unknown): string {
   return String(value ?? '').trim();
 }
 
+/** Facebook person key on a staff nick/page — never the E2EE URL thread id. */
+export function resolveIngestCustomerUid(
+  scanSource: string,
+  rawUid: string,
+  threadId: string,
+): string {
+  const source = trimText(scanSource);
+  const uid = trimText(rawUid);
+  const thread = trimText(threadId);
+  if (source === 'messenger_e2ee') {
+    if (uid && uid === thread) return '';
+    return uid;
+  }
+  return uid || thread;
+}
+
+export type FacebookLookupStep =
+  | { kind: 'uidPage'; customerUid: string; employeeFacebookUid: string }
+  | { kind: 'uidNoPage'; customerUid: string }
+  | { kind: 'threadPage'; threadId: string; employeeFacebookUid: string }
+  | { kind: 'threadNoPage'; threadId: string };
+
+/**
+ * Find Person: NV + nick/page + UID first. Thread only as fallback
+ * (legacy row with empty UID). Never prefer thread over UID (BUG-013).
+ */
+export function existingCustomerLookupPlan(fields: ScanFields): FacebookLookupStep[] {
+  const uid = trimText(fields.customerUid);
+  const page = trimText(fields.employeeUid);
+  const thread = trimText(fields.threadId);
+  const steps: FacebookLookupStep[] = [];
+  if (uid && page) {
+    steps.push({ kind: 'uidPage', customerUid: uid, employeeFacebookUid: page });
+  }
+  if (uid) steps.push({ kind: 'uidNoPage', customerUid: uid });
+  if (thread && page) {
+    steps.push({ kind: 'threadPage', threadId: thread, employeeFacebookUid: page });
+  }
+  if (thread) steps.push({ kind: 'threadNoPage', threadId: thread });
+  return steps;
+}
+
 export function parseRawMetaObject(raw: string | null | undefined): Record<string, unknown> {
   if (!raw?.trim()) return {};
   try {
@@ -71,7 +113,7 @@ export function parseScan(draft: FromExtensionDraft): ScanFields {
   const scanSource = trimText(draft.scanSource || scan.scanSource) || 'unknown';
   const threadId = trimText(scan.threadId);
   const rawUid = trimText(scan.customerUid);
-  const isE2ee = scanSource === 'messenger_e2ee';
+  const customerUid = resolveIngestCustomerUid(scanSource, rawUid, threadId);
   let rawMeta: string | null = null;
   if (scan.scanDebug != null) {
     try {
@@ -84,7 +126,7 @@ export function parseScan(draft: FromExtensionDraft): ScanFields {
     scanSource,
     scanSourceLabel: trimText(draft.scanSourceLabel),
     customerName: trimText(scan.customerName),
-    customerUid: isE2ee ? rawUid : rawUid || threadId,
+    customerUid,
     threadId,
     avatarUrl: trimText(scan.avatarUrl),
     employeeUid: trimText(scan.employeeUid) || trimText(scan.myPageUid),

@@ -2560,13 +2560,25 @@
     return prepared;
   }
 
+  function payloadHasIngestCustomerUid(payload) {
+    const scan = payload?.scan || {};
+    const uid = normalizeText(scan.customerUid);
+    const thread = normalizeText(scan.threadId);
+    const source = normalizeText(payload?.scanSource || scan.scanSource);
+    if (!uid) return false;
+    if (source === "messenger_e2ee" && uid === thread) return false;
+    return true;
+  }
+
   async function submitDraftScanToBackend(payloadOverride) {
     if (!hasAuthToken()) {
       throw new Error("Đăng nhập CRM trước khi gửi.");
     }
     const basePayload = payloadOverride || buildExtensionDraftPayload();
-    if (!basePayload.scan?.customerUid && !basePayload.scan?.threadId) {
-      throw new Error("Chưa có dữ liệu quét hợp lệ.");
+    if (!payloadHasIngestCustomerUid(basePayload)) {
+      throw new Error(
+        "Chưa có UID Facebook của khách. Messenger mã hóa: đợi panel hiện UID rồi gửi lại.",
+      );
     }
 
     const chatMessages = await prepareChatMessagesForBackend(basePayload.chatMessages || []);
@@ -2597,9 +2609,12 @@
     if (!snap || snap.scanKey !== prevKey) return;
 
     const payload = draftPayloadFromSnapshot(snap);
-    if (!payload?.scan?.customerUid && !payload?.scan?.threadId) return;
-
     const label = draftCustomerLabel(snap);
+    if (!payloadHasIngestCustomerUid(payload)) {
+      STATE.draftStatus = `Chưa có UID Facebook — «${label}» chưa gửi BE.`;
+      renderPanel();
+      return;
+    }
 
     if (!hasAuthToken()) {
       STATE.draftStatus = `Chưa đăng nhập — «${label}» chưa gửi BE.`;

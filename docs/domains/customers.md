@@ -613,9 +613,9 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 
 ### 13.14 Slice này — ingest extension (ảnh chat + avatar WebP)
 
-**POST `/api/v1/customers/from-extension`** (JWT). Payload giống CRM cũ: `scan.threadId` hoặc `scan.customerUid` + `scan.avatarUrl` + `chatMessages[].imageUrls` (data URL / Facebook CDN).
+**POST `/api/v1/customers/from-extension`** (JWT). Payload: `scan.customerUid` **bắt buộc** (UID người Facebook) + `scan.avatarUrl` + `chatMessages[].imageUrls`. `scan.threadId` = mã cuộc chat (Messenger); Nhánh Page có thể trống.
 
-- Khớp khách của **NV đang login** theo thread rồi UID. Chưa có → tạo `KHACH_MOI`. Khách đang ẩn → **tự khôi phục** (`isHidden: false`, `autoRestoredAt`) + hangtag «Tự khôi phục» (§11 mục 25). **Không** đổi SĐT.
+- Khớp khách của **NV đang login** theo **UID + nick/page**, không theo mã cuộc chat trước (BUG-013). Chưa có → tạo `KHACH_MOI`. Thiếu UID → 400. Khách đang ẩn → **tự khôi phục** (`isHidden: false`, `autoRestoredAt`) + hangtag «Tự khôi phục» (§11 mục 25). **Không** đổi SĐT.
 - Kênh Facebook (`employeeFacebookUid` từ `scan.employeeUid` / `myPageUid`): **không** bắt nick có sẵn trong `EmployeeFacebookProfile`. Nick/page mới từ extension vẫn ghi; không chặn ingest (BUG-065, owner 2026-09-07).
 - Avatar: URL rỗng → giữ ảnh cũ. Cùng pathname FB CDN (`rawMeta.avatarSourceKey`) và đã có R2 → không tải lại. URL mới → `sharp` WebP → R2 `customers/avatars/<customerId>/<hash>.webp` (`avatarObjectKey`). Tải/upload fail: giữ R2 cũ; chưa có ảnh thì lưu URL FB tạm (list vẫn hiện được).
 - Ảnh chat raster mới → `sharp` WebP (cạnh dài ≤ 2560) → R2 `customers/chat/<customerId>/{mid}-{n}.webp`. Video / path `/img/imgsmessenger/` cũ: bỏ qua.

@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import {
+  existingCustomerLookupPlan,
   mergeFacebookRawMeta,
   messagesWithStableBubbleId,
   parseScan,
@@ -60,5 +61,56 @@ describe('from-extension-parse', () => {
     const obj = JSON.parse(merged ?? '{}') as { avatarSourceKey?: string; mailboxId?: string };
     assert.equal(obj.avatarSourceKey, '/v/t1/keep.jpg');
     assert.equal(obj.mailboxId, 'mb-2');
+  });
+
+  it('Messenger thường uses URL thread as customerUid when scan omits UID', () => {
+    const fields = parseScan({
+      scanSource: 'messenger_standard',
+      scan: { threadId: '100006413621569', employeeUid: '100003051909934' },
+    });
+    assert.equal(fields.customerUid, '100006413621569');
+    assert.equal(fields.threadId, '100006413621569');
+  });
+
+  it('E2EE does not treat thread id as customerUid', () => {
+    const fields = parseScan({
+      scanSource: 'messenger_e2ee',
+      scan: {
+        threadId: '6846994922073317',
+        employeeUid: '100003051909934',
+      },
+    });
+    assert.equal(fields.customerUid, '');
+    assert.equal(fields.threadId, '6846994922073317');
+  });
+
+  it('E2EE drops customerUid when it equals the thread id', () => {
+    const fields = parseScan({
+      scanSource: 'messenger_e2ee',
+      scan: {
+        threadId: '6846994922073317',
+        customerUid: '6846994922073317',
+      },
+    });
+    assert.equal(fields.customerUid, '');
+  });
+
+  it('E2EE keeps a real Facebook person UID distinct from thread', () => {
+    const fields = parseScan({
+      scanSource: 'messenger_e2ee',
+      scan: {
+        threadId: '6846994922073317',
+        customerUid: '100015038463287',
+        employeeUid: '100003051909934',
+      },
+    });
+    assert.equal(fields.customerUid, '100015038463287');
+    const plan = existingCustomerLookupPlan(fields);
+    assert.equal(plan[0]?.kind, 'uidPage');
+    assert.equal(plan[0] && plan[0].kind === 'uidPage' ? plan[0].customerUid : '', '100015038463287');
+    assert.equal(
+      plan[0] && plan[0].kind === 'uidPage' ? plan[0].employeeFacebookUid : '',
+      '100003051909934',
+    );
   });
 });

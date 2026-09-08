@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "An Hưng Land CRM Extension",
-  "version": "2.13.0",
+  "version": "2.14.0",
   "description": "Quét khách từ Meta Inbox / Messenger, gửi vào CRM An Hưng Land (anhungland.com)",
   "permissions": ["activeTab", "storage"],
   "background": {

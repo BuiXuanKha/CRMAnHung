@@ -21,6 +21,8 @@ Chrome MV3 — quét khách + tin từ Meta Inbox / Messenger, gửi vào **CRM 
 
 **Thông tin quét:** nút **Copy thông tin quét** copy các trường panel (UID, thread, tên, …) để dán gửi dev. Bản tin nhắn vẫn dùng nút Copy ở mục tin.
 
+Ingest (v2.14.0): **bắt buộc UID Facebook khách**. Messenger E2EE chưa hiện UID thì không gửi lên CRM.
+
 ## Nguồn
 
 | Nguồn | URL |
