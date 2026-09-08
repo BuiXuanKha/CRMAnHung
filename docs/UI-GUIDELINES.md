@@ -717,6 +717,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | `/dich-vu-so-do`: **Thêm công việc** → tiến độ **Công việc**; avatar CRM: **Đổi mật khẩu** |
 | 2026-09-08 | `/cong-viec` nguồn: bỏ «Công việc này cho…»; in hoa `LOẠI \| TÊN` màu `#2563eb` |
 | 2026-09-08 | STAFF **Đăng bài** → `/dang-bai` (peer CRM; bỏ `/dashboard/lo-dat`, không redirect cũ). Dashboard chỉ ADMIN |
+| 2026-09-08 | `/cong-viec` FAB `+`: `fixed` nổi trên footer/list (không nằm dưới dòng «Hiển thị») |
 
 ---
 

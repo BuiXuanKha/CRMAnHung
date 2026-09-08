@@ -169,7 +169,7 @@ Trống: «Chưa có công việc. Bấm nút + để thêm, hoặc thêm từ m
 
 Nút tròn cố định góc phải dưới (máy tính + mobile). Icon Lucide `Plus`. `aria-label`: **Tạo công việc**. Bấm → modal 12.3 (không gắn nguồn).
 
-Nổi trên footer bảng / thẻ. Không che menu thao tác (z-index cao hơn dòng; đóng menu khi mở FAB).
+Nổi trên footer bảng / thẻ (cùng kiểu FAB chi tiết khách / lô — `position: fixed`, không nằm trong flow dưới dòng đếm). Không che menu thao tác (z-index cao hơn dòng; đóng menu khi mở FAB). Padding đáy vùng cuộn + lệch phải footer để chữ «Hiển thị…» không bị nút che.
 
 #### 12.1.5 Footer
 

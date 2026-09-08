@@ -134,6 +134,10 @@
   scrollbar-color: #cbd5e1 transparent;
 }
 
+.cv-page.has-fab .cv-table-scroll {
+  padding-bottom: 72px;
+}
+
 .cv-grid-row {
   display: grid;
   grid-template-columns: var(--cv-cols);
@@ -262,6 +266,10 @@
   color: #475569;
 }
 
+.cv-page.has-fab .cv-table-foot {
+  padding-right: 88px;
+}
+
 .cv-table-foot strong {
   color: #0f172a;
   font-weight: 600;
@@ -388,6 +396,10 @@
     padding: 0 0 8px;
   }
 
+  .cv-page.has-fab .cv-cards {
+    padding-bottom: 88px;
+  }
+
   .cv-empty-cards {
     display: block;
     margin: 0;
@@ -498,14 +510,19 @@
     color: #475569;
   }
 
+  .cv-page.has-fab .cv-cards-count {
+    padding-right: 72px;
+  }
+
   .cv-cards-count strong {
     color: #0f172a;
     font-weight: 600;
   }
 }
 
-/* FAB tạo công việc — máy tính + mobile (§12.1.4) */
+/* FAB tạo công việc — máy tính + mobile (§12.1.4); nổi trên footer/list */
 .cv-fab {
+  --cv-blue: #2563eb;
   position: fixed;
   right: 20px;
   bottom: max(24px, env(safe-area-inset-bottom, 0px));
@@ -522,6 +539,7 @@
   box-shadow: 0 6px 18px rgb(37 99 235 / 38%);
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
 }
 
 .cv-fab:hover {
@@ -532,17 +550,9 @@
   transform: scale(0.96);
 }
 
-.cv-page.has-fab {
-  padding-bottom: 72px;
-}
-
 @media (max-width: 767px) {
   .cv-fab {
     right: 16px;
     bottom: max(20px, env(safe-area-inset-bottom, 0px));
-  }
-
-  .cv-page.has-fab {
-    padding-bottom: 88px;
   }
 }
