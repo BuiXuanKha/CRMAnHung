@@ -74,6 +74,7 @@
     scanInfoSectionCollapsed: true,
     messagesSectionCollapsed: false,
     messagesCopyStatus: "",
+    scanInfoCopyStatus: "",
     draftSubmitting: false,
     draftStatus: "",
     /** Snapshot khách vừa quét — tự gửi BE khi chuyển sang khách khác. */
@@ -2962,6 +2963,82 @@
     return sender || "Không rõ";
   }
 
+  function scanInfoClipboardLine(label, value) {
+    const text = String(value || "").trim();
+    return `${label}: ${text || "(empty)"}`;
+  }
+
+  function buildScanInfoClipboardPayload() {
+    const capturedAt = new Date().toISOString();
+    const lines = [
+      "AN HƯNG LAND CRM — THÔNG TIN QUÉT",
+      `copied_at: ${capturedAt}`,
+      `extension_version: ${UI_VERSION}`,
+      `url: ${window.location.href}`,
+      "",
+    ];
+
+    if (isMessengerSource()) {
+      const uidLabel =
+        getScanSource() === "messenger_e2ee" ? "UID FB khách (E2EE)" : "UID FB khách";
+      const e2eeUidHint =
+        getScanSource() === "messenger_e2ee" && !STATE.customerUid
+          ? "(chưa có — mở Chi tiết liên hệ bên phải rồi quét lại)"
+          : STATE.customerUid;
+      lines.push(
+        scanInfoClipboardLine("Nguồn quét", getScanSourceLabel()),
+        scanInfoClipboardLine("thread_id (URL)", STATE.threadId),
+        scanInfoClipboardLine("thread_type", STATE.threadType),
+        scanInfoClipboardLine("UID Page / nick NV (nguồn quét)", STATE.employeeUid),
+        scanInfoClipboardLine(uidLabel, e2eeUidHint),
+      );
+      if (getScanSource() === "messenger_e2ee" && STATE.scanDebug?.e2eeCustomerUidSource) {
+        lines.push(
+          scanInfoClipboardLine(
+            "Nguồn UID E2EE",
+            `${STATE.scanDebug.e2eeCustomerUidSource} (score ${STATE.scanDebug.e2eeCustomerUidScore || 0})`,
+          ),
+        );
+      }
+      lines.push(
+        scanInfoClipboardLine("Tên khách", STATE.customerName),
+        scanInfoClipboardLine("Avatar khách", STATE.avatarUrl ? "Có" : ""),
+      );
+    } else {
+      lines.push(
+        scanInfoClipboardLine("Nguồn quét", getScanSourceLabel()),
+        scanInfoClipboardLine("asset_id", STATE.assetId),
+        scanInfoClipboardLine("mailbox_id", STATE.mailboxId),
+        scanInfoClipboardLine("business_id", STATE.businessId),
+        scanInfoClipboardLine("selected_item_id", STATE.customerUid),
+        scanInfoClipboardLine("thread_type", STATE.threadType || "FB_MESSAGE"),
+        scanInfoClipboardLine("UID Page (đồng bộ)", STATE.myPageUid),
+        scanInfoClipboardLine("Tên khách", STATE.customerName),
+        scanInfoClipboardLine("Avatar khách", STATE.avatarUrl ? "Có" : ""),
+      );
+    }
+
+    if (STATE.avatarUrl) {
+      lines.push(scanInfoClipboardLine("avatar_url", STATE.avatarUrl));
+    }
+    return lines.join("\n");
+  }
+
+  async function copyScanInfoToClipboard() {
+    const payload = buildScanInfoClipboardPayload();
+    const ok = await copyTextToClipboard(payload);
+    STATE.scanInfoCopyStatus = ok
+      ? "Đã copy thông tin quét — dán (Ctrl+V) gửi dev."
+      : "Copy thất bại — thử bấm lại.";
+    renderPanel();
+    window.setTimeout(() => {
+      if (STATE.scanInfoCopyStatus.includes("Đã copy")) {
+        STATE.scanInfoCopyStatus = "";
+        renderPanel();
+      }
+    }, 4500);
+  }
+
   function buildMessagesClipboardPayload() {
     const capturedAt = new Date().toISOString();
     const url = window.location.href;
@@ -3618,6 +3695,14 @@
 
   function renderScanInfoSection() {
     const scanBody = `
+      <div class="pf-msg-toolbar">
+        <button type="button" class="pf-btn ghost" data-role="copy-scan-info">Copy thông tin quét</button>
+        ${
+          STATE.scanInfoCopyStatus
+            ? `<span class="pf-msg-copy-status">${escapeHtml(STATE.scanInfoCopyStatus)}</span>`
+            : ""
+        }
+      </div>
       ${
         STATE.avatarUrl
           ? `<img class="pf-avatar" src="${escapeHtml(STATE.avatarUrl)}" alt="" />`
@@ -3750,6 +3835,10 @@
       if (event.target.closest('[data-role="toggle-dom-live-section"]')) {
         STATE.domLiveSectionCollapsed = !STATE.domLiveSectionCollapsed;
         renderPanel();
+        return;
+      }
+      if (event.target.closest('[data-role="copy-scan-info"]')) {
+        await copyScanInfoToClipboard();
         return;
       }
       if (event.target.closest('[data-role="copy-messages"]')) {
