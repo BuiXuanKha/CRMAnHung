@@ -6,6 +6,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
   TITLE_SERVICE_LIST_PAGE_SIZE,
+  TaskTargetType,
   TitleServiceMoneyKind,
   TitleServiceStatus,
   UserRole,
@@ -18,6 +19,7 @@ import {
   useCrmInfiniteList,
 } from '@/shared/list-state';
 import { useAuth } from '@/features/auth/auth-context';
+import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
 import { listUserDirectory } from '@/features/users/api';
 import {
   addTitleServiceAttachment,
@@ -289,6 +291,10 @@ export function TitleServiceListPage() {
     window.setTimeout(() => setToast(null), 2800);
   }
 
+  const { openTaskModal, dialog: createTaskDialog } = useCreateTaskModal(() =>
+    flash('Đã thêm công việc.'),
+  );
+
   function selectRow(id: string) {
     setSelectedId(id);
     setPanelOpen(true);
@@ -313,6 +319,15 @@ export function TitleServiceListPage() {
     setMenuId(null);
     if (action === 'detail') {
       openDetail(item);
+      return;
+    }
+    if (action === 'task') {
+      selectRow(item.id);
+      openTaskModal({
+        type: TaskTargetType.TITLE_SERVICE,
+        id: item.id,
+        label: item.customerName,
+      });
       return;
     }
     selectRow(item.id);
@@ -546,6 +561,7 @@ export function TitleServiceListPage() {
       />
 
       <CrmToast message={toast} />
+      {createTaskDialog}
     </div>
   );
 }

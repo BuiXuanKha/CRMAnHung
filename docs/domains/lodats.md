@@ -275,6 +275,7 @@ Không phải đã bán / đặt cọc.
 | Mục | Việc hiện tại |
 |-----|----------------|
 | Xem chi tiết | `/lo-dat/[id]` |
+| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai). Gắn lô này |
 | Giao dịch | `/giao-dich/tao?lodatId=` — không GD mở → form tạo (khoá lô); có GD `DA_COC`/`DA_CONG_CHUNG` → `/giao-dich/[id]/sua` |
 | Sửa | `/lo-dat/[id]/sua` |
 

@@ -201,3 +201,11 @@ export const PUBLIC_POST_STATUS_LABELS: Record<PublicPostStatus, string> = {
   [PublicPostStatus.DRAFT]: 'Nháp',
   [PublicPostStatus.PUBLISHED]: 'Đã xuất bản',
 };
+
+/** Nguồn tạo công việc — một việc gắn đúng một đối tượng list. */
+export enum TaskTargetType {
+  CUSTOMER = 'CUSTOMER',
+  LODAT = 'LODAT',
+  TRANSACTION = 'TRANSACTION',
+  TITLE_SERVICE = 'TITLE_SERVICE',
+}

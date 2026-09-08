@@ -6,6 +6,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Trash2 } from 'lucide-react';
 import {
   TRANSACTION_LIST_PAGE_SIZE,
+  TaskTargetType,
   TransactionStatus,
   TransactionType,
   type TransactionListItem,
@@ -17,6 +18,7 @@ import {
   resetListScrollIfFiltersChanged,
   useCrmInfiniteList,
 } from '@/shared/list-state';
+import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
 import { deleteTransaction, listTransactions } from './api';
 import { type TransactionAction } from './components/action-menu';
 import { FilterBar } from './components/filter-bar';
@@ -245,6 +247,10 @@ export function TransactionListPage() {
     window.setTimeout(() => setToast(null), 2800);
   }
 
+  const { openTaskModal, dialog: createTaskDialog } = useCreateTaskModal(() =>
+    flash('Đã thêm công việc.'),
+  );
+
   function saveListBeforeLeave(id: string) {
     restoreDone.current = true;
     persistListState(id);
@@ -253,6 +259,14 @@ export function TransactionListPage() {
   function handleAction(item: TransactionListItem, action: TransactionAction) {
     setMenuId(null);
     setSelectedId(item.id);
+    if (action === 'task') {
+      openTaskModal({
+        type: TaskTargetType.TRANSACTION,
+        id: item.id,
+        label: item.code,
+      });
+      return;
+    }
     saveListBeforeLeave(item.id);
     if (action === 'detail') {
       router.push(`/giao-dich/${item.id}`);
@@ -395,6 +409,7 @@ export function TransactionListPage() {
       />
 
       <CrmToast message={toast} />
+      {createTaskDialog}
     </div>
   );
 }

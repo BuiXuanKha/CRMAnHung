@@ -7,6 +7,7 @@ import { AlertTriangle, type LucideIcon } from 'lucide-react';
 import {
   LodatKind,
   LodatSaleStatus,
+  TaskTargetType,
   UserRole,
   type LodatDetail,
   type LodatImage,
@@ -17,6 +18,7 @@ import {
 import { needsMoreListScrollHeight, resetListScrollIfFiltersChanged, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
+import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
 import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { createTransactionHref } from './transaction-href';
@@ -224,6 +226,10 @@ export function LodatListPage() {
     window.setTimeout(() => setToast(null), 2800);
   }
 
+  const { openTaskModal, dialog: createTaskDialog } = useCreateTaskModal(() =>
+    flash('Đã thêm công việc.'),
+  );
+
   useLayoutEffect(() => {
     const snap = peekLodatListState();
     restoreSnap.current = snap;
@@ -349,6 +355,15 @@ export function LodatListPage() {
   function handleAction(id: string, action: LodatAction) {
     setMenuId(null);
     setSelectedId(id);
+    if (action === 'task') {
+      const plot = rawItems.find((p) => p.id === id);
+      openTaskModal({
+        type: TaskTargetType.LODAT,
+        id,
+        label: plot?.title?.trim() || 'Lô đất',
+      });
+      return;
+    }
     saveListBeforeLeave(id);
     if (action === 'detail') {
       router.push(`/lo-dat/${id}`);
@@ -494,6 +509,7 @@ export function LodatListPage() {
       />
 
       <CrmToast message={toast} />
+      {createTaskDialog}
     </div>
   );
 }

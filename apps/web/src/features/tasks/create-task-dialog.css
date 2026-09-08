@@ -1,0 +1,17 @@
+.cv-dialog-context {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #0f172a;
+  line-height: 1.45;
+}
+
+.cv-due-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cv-due-row input[type='date'] {
+  flex: 1 1 auto;
+}

@@ -1,19 +1,19 @@
 'use client';
 
-import { ChevronDown, ChevronUp, Eye, ListTodo, Pencil, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Eye, Pin } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { TransactionListItem } from '@crmanhung/shared';
+import type { WorkTask } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 
-export type TransactionAction = 'detail' | 'task' | 'edit' | 'delete';
+export type WorkTaskAction = 'detail' | 'pin' | 'complete';
 
 type Props = {
-  item: TransactionListItem;
+  item: WorkTask;
   open: boolean;
   onToggle: () => void;
   onClose: () => void;
-  onAction: (action: TransactionAction) => void;
+  onAction: (action: WorkTaskAction) => void;
 };
 
 /** Menu portal body — overflow bảng/thẻ cắt hit-test nếu fixed trong list. */
@@ -61,7 +61,7 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
       ? createPortal(
           <ul
             ref={menuRef}
-            className="tx-action-menu"
+            className="cv-action-menu"
             role="menu"
             style={{ top: pos.top, left: pos.left }}
           >
@@ -71,23 +71,13 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
               </button>
             </li>
             <li>
-              <button type="button" role="menuitem" onClick={() => onAction('task')}>
-                <Icon icon={ListTodo} /> Thêm công việc
+              <button type="button" role="menuitem" onClick={() => onAction('pin')}>
+                <Icon icon={Pin} /> {item.isPinned ? 'Bỏ ghim' : 'Ghim lên đầu'}
               </button>
             </li>
             <li>
-              <button type="button" role="menuitem" onClick={() => onAction('edit')}>
-                <Icon icon={Pencil} /> Sửa
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                role="menuitem"
-                className="danger"
-                onClick={() => onAction('delete')}
-              >
-                <Icon icon={Trash2} /> Xóa
+              <button type="button" role="menuitem" onClick={() => onAction('complete')}>
+                <Icon icon={Check} /> Hoàn thành
               </button>
             </li>
           </ul>,
@@ -96,13 +86,13 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
       : null;
 
   return (
-    <div className="tx-action" ref={wrapRef}>
+    <div className="cv-action" ref={wrapRef}>
       <button
         type="button"
-        className="tx-action-btn"
+        className="cv-action-btn"
         aria-haspopup="menu"
         aria-expanded={open}
-        aria-label={`Thao tác ${item.code}`}
+        aria-label="Thao tác công việc"
         onClick={onToggle}
       >
         <Icon icon={open ? ChevronUp : ChevronDown} size={14} strokeWidth={2.4} />
