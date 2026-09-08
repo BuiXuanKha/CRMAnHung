@@ -146,13 +146,13 @@ Bốn cặp trùng của **`buinam`** (đối chiếu Postgres 2026-09-04, copy 
 
 Trùng Person theo thread E2EE đã copy nguyên — không tự gộp lúc migrate. Gộp tay liên quan BUG-016 (để sau).
 
-## 11. Open questions (BUG-013 — chưa sửa code)
+## 11. Open questions (BUG-013)
 
-Owner 2026-09-08: **Nhánh Page không bàn** UID — chắc chắn gửi `customerUid`. Việc còn lại: hai nhánh Messenger **có quét được UID không**, có thì **chuẩn hoá đưa về** (`customerUid` thật, không lấy mã cuộc chat thế). Chi tiết **§13**.
+Owner 2026-09-08: **Nhánh Page không bàn** UID — chắc chắn gửi `customerUid`. Hai nhánh Messenger **có quét được UID** (live `kha`) và ingest **đã chuẩn hoá** đưa UID về.
 
-1. Nhánh Messenger E2EE lúc panel hiện «chưa đọc được UID FB»: **không POST**, hay đợi / bảo NV mở Chi tiết liên hệ? (Live `kha` 2026-09-08: case đang mở **có** UID.)
-2. Nhánh Messenger thường: NV An Hưng có chat **nhóm** (`/messages/t/` không phải UID người) không?
-3. KEY Person = **UID khách** (sau khi hai nhánh Messenger đã chuẩn hoá gửi UID) — coi như nghiêng **A** ở §12.3; mã cuộc chat vẫn gửi để Mở chat.
+1. Nhánh Messenger E2EE lúc panel hiện «chưa đọc được UID FB»: **không POST** — đã làm. (Live `kha` 2026-09-08: case đang mở **có** UID; chưa gặp case trống.)
+2. Nhánh Messenger thường: NV An Hưng có chat **nhóm** (`/messages/t/` không phải UID người) không? (vẫn mở)
+3. KEY Person = **UID khách** — đã chốt A; mã cuộc chat vẫn gửi để Mở chat.
 
 ---
 
@@ -269,7 +269,7 @@ Số trên URL **không** phải UID khách. Extension **cố đọc** UID thậ
 4. Prefix `data-message-id` dạng `{uid}@msgr.…` trên bong bóng tin (bỏ uid của NV và mã cuộc chat).
 5. Retry khoảng 6 lần trong vài giây (`scheduleE2eeUidRetry`). Panel khuyên «mở Chi tiết liên hệ / profile» nếu vẫn trống.
 
-Đoán được → gửi `customerUid` **khác** `threadId`. Đoán không được → hiện tại **vẫn POST**, `customerUid` trống.
+Đoán được → gửi `customerUid` **khác** `threadId`. Đoán không được → **không POST** (BUG-013).
 
 Bốn cặp **`buinam`** trên DB (2026-09-04) **đều có cùng UID** trên hai Person — chứng tỏ máy **đã lấy được** UID E2EE; lỗi là tạo hai hồ sơ theo hai mã cuộc chat, không phải «không bao giờ quét được UID».
 
