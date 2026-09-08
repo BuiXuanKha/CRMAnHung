@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import type { CreateWorkTaskInput } from '@crmanhung/shared';
+import { TaskTargetType, type CreateWorkTaskInput } from '@crmanhung/shared';
 import { createWorkTask } from './api';
 import { CreateTaskDialog, type TaskCreateTarget } from './create-task-dialog';
 
@@ -16,8 +16,14 @@ export function useCreateTaskModal(onSaved?: () => void) {
 
   const mut = useMutation({
     mutationFn: createWorkTask,
-    onSuccess: async () => {
+    onSuccess: async (_created, input) => {
       await qc.invalidateQueries({ queryKey: ['tasks'] });
+      const type = input.targetType ?? TaskTargetType.NONE;
+      const titleId = input.targetId?.trim();
+      if (type === TaskTargetType.TITLE_SERVICE && titleId) {
+        await qc.invalidateQueries({ queryKey: ['title-services'] });
+        await qc.invalidateQueries({ queryKey: ['title-service', titleId] });
+      }
       setOpen(false);
       setTarget(null);
       setError(null);

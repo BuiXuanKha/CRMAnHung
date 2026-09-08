@@ -675,7 +675,7 @@ model TitleService {
 model TitleServiceProgress {
   id                  String   @id @default(cuid())
   titleServiceId      String
-  stepType            String // BAN_GIA | THU_THAP_GIAY_TO | DO_DAC | NOP_HO_SO | BO_SUNG | LAM_VIEC_CO_QUAN | NHAN_KET_QUA | BAN_GIAO | KHAC
+  stepType            String // BAN_GIA | THU_THAP_GIAY_TO | DO_DAC | NOP_HO_SO | BO_SUNG | LAM_VIEC_CO_QUAN | NHAN_KET_QUA | BAN_GIAO | CONG_VIEC | KHAC
   note                String?
   happenedAt          DateTime
   createdByEmployeeId String

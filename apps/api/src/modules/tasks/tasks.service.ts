@@ -60,19 +60,41 @@ export class TasksService {
           }
         : await this.resolveTarget(user, targetType, dto.targetId ?? '');
 
-    const row = await this.prisma.workTask.create({
-      data: {
-        employeeId: user.id,
-        content,
-        dueOn,
-        targetType: target.type,
-        customerId: target.customerId,
-        lodatId: target.lodatId,
-        transactionId: target.transactionId,
-        titleServiceId: target.titleServiceId,
-        targetLabel: target.label,
-      },
+    const row = await this.prisma.$transaction(async (tx) => {
+      const created = await tx.workTask.create({
+        data: {
+          employeeId: user.id,
+          content,
+          dueOn,
+          targetType: target.type,
+          customerId: target.customerId,
+          lodatId: target.lodatId,
+          transactionId: target.transactionId,
+          titleServiceId: target.titleServiceId,
+          targetLabel: target.label,
+        },
+      });
+
+      // Thêm công việc trên sổ đỏ = xử lý hồ sơ → ghi luôn bước tiến độ «Công việc».
+      if (target.type === 'TITLE_SERVICE' && target.titleServiceId) {
+        await tx.titleServiceProgress.create({
+          data: {
+            titleServiceId: target.titleServiceId,
+            stepType: 'CONG_VIEC',
+            note: content,
+            happenedAt: new Date(),
+            createdByEmployeeId: user.id,
+          },
+        });
+        await tx.titleService.update({
+          where: { id: target.titleServiceId },
+          data: { updatedAt: new Date() },
+        });
+      }
+
+      return created;
     });
+
     return this.toItem(row);
   }
 

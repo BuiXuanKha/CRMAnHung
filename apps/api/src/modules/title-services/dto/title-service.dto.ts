@@ -124,6 +124,7 @@ const TITLE_STEPS = [
   'LAM_VIEC_CO_QUAN',
   'NHAN_KET_QUA',
   'BAN_GIAO',
+  'CONG_VIEC',
   'KHAC',
 ] as const;
 
