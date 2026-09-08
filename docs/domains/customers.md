@@ -649,7 +649,7 @@ Mục 24 (cuộn 50 + nhớ vị trí) = §12.1.5 — **đã code** (`GET /custo
 
 Scanner Chrome: Load unpacked `apps/extension`. Ba nhánh nguồn Facebook (Page / Messenger thường / Messenger E2EE): [`facebook-source.md`](./facebook-source.md). Gửi `POST /api/v1/customers/from-extension`.
 
-**Để khi làm extension (owner 2026-09-06, BUG-043):** scanner còn gửi tin không ID bong bóng (`orphan::`). **API không ghi** (BUG-044). Ghi chú: `apps/extension/README.md`.
+**BUG-043 CLOSED (owner 2026-09-08, bỏ qua):** scanner còn gửi tin không ID bong bóng (`orphan::`). **API không ghi** (BUG-044). Không unique `(facebook, mid)` trừ khi owner mở lại.
 
 ---
 
