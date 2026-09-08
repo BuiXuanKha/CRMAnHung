@@ -168,6 +168,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-08 | customers / extension | BUG-013 FIXED | Ingest khóa NV + nick/page + UID khách; E2EE không POST/không tạo khi thiếu UID; không lấy thread thế UID. 4 cặp `buinam` cũ không gộp (BUG-016). |
 | 2026-09-08 | customers / messenger | BUG-041 CLOSED | Owner: **bỏ hẳn luôn** — không sửa `sortOrder` / `sentAt`. Chat CRM chỉ tham khảo. |
 | 2026-09-08 | customers / messenger | BUG-043 CLOSED | Owner: **thôi bỏ qua** — không cấm gửi `orphan::`, không unique `(facebook, mid)`. API BUG-044 vẫn bỏ tin không mã. |
+| 2026-09-08 | customers / web | chăm sóc list scroll | Máy tính: Lưu chăm sóc cập nhật dòng tại chỗ, giữ chỗ cuộn (không refetch `updatedAt` kéo khách lên đầu). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
