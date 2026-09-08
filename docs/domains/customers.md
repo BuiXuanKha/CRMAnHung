@@ -471,7 +471,7 @@ Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** h
 5. **Tài chính** — khoảng ngân sách; trống `—`
 6. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú
 7. **Danh sách lô đất** — API. Cùng thẻ §12.1.6: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
-8. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Lần từ **Thêm công việc** đã xong: hangtag **Đã hoàn thành** (`CrmBadge` green). Không có → «Chưa có lịch sử chăm sóc.»
+8. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Lần từ **Thêm công việc** đã xong: hangtag **Đã hoàn thành** (`CrmBadge` green); **không** gạch chữ ghi chú. Không có → «Chưa có lịch sử chăm sóc.»
 9. **FAB mobile** — §12.3.2 («⋯» / gọi / Zalo / mở Messenger)
 
 Không form chăm sóc trên trang này (form = **§12.4**).
