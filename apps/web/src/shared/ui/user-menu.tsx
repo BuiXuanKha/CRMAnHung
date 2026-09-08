@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut, Settings } from 'lucide-react';
+import { KeyRound, LogOut, Settings } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Icon } from './icon';
 import './user-menu.css';
@@ -11,6 +11,7 @@ type Props = {
   avatarUrl?: string | null;
   onLogout: () => void;
   onOpenSettings?: () => void;
+  onChangePassword?: () => void;
 };
 
 function initials(name: string): string {
@@ -20,7 +21,14 @@ function initials(name: string): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export function UserMenu({ fullName, roleLabel, avatarUrl, onLogout, onOpenSettings }: Props) {
+export function UserMenu({
+  fullName,
+  roleLabel,
+  avatarUrl,
+  onLogout,
+  onOpenSettings,
+  onChangePassword,
+}: Props) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
 
@@ -66,6 +74,16 @@ export function UserMenu({ fullName, roleLabel, avatarUrl, onLogout, onOpenSetti
             }}
           >
             <Icon icon={Settings} size="sm" /> Cài đặt
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            onClick={() => {
+              setOpen(false);
+              onChangePassword?.();
+            }}
+          >
+            <Icon icon={KeyRound} size="sm" /> Đổi mật khẩu
           </button>
           <button
             type="button"

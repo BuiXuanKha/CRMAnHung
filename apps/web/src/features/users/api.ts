@@ -1,9 +1,11 @@
 import {
+  type ChangeOwnPasswordInput,
   type CreateUserInput,
   type ResetUserPasswordInput,
   type UpdateUserInput,
   type UserAdminListItem,
   type UserDirectoryItem,
+  changeOwnPasswordSchema,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
 
@@ -45,6 +47,20 @@ export async function resetUserPassword(
       body: JSON.stringify(input),
     },
   );
+}
+
+/** STAFF/ADMIN đổi mật khẩu chính mình (avatar menu). */
+export async function changeOwnPassword(
+  input: ChangeOwnPasswordInput,
+): Promise<{ ok: boolean }> {
+  const parsed = changeOwnPasswordSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? 'Không đổi được mật khẩu.');
+  }
+  return apiFetch<{ ok: boolean }>('/users/me/change-password', {
+    method: 'POST',
+    body: JSON.stringify(parsed.data),
+  });
 }
 
 export async function uploadUserAvatar(

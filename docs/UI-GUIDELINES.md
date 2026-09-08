@@ -83,7 +83,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 | Header phải | Menu chính **cạnh avatar**, mục cách nhau **vạch đứng 1px** (không dùng ký tự `|` trong DOM); **cũng có vạch trước avatar** |
 | Menu | **Công việc** \| Quản lý khách hàng \| Quản lý lô đất \| Quản lý giao dịch \| Dịch vụ sổ đỏ (+ **Đăng web** STAFF → `/dashboard/lo-dat`; + Dashboard / quản trị nếu ADMIN) |
 | Active | Chữ **xanh** `#2563eb` **700** — không pill nền riêng |
-| Avatar | Click → menu: tên + vai trò; **Cài đặt**; **Đăng xuất** cuối (đỏ) |
+| Avatar | Click → menu: tên + vai trò; **Cài đặt**; **Đổi mật khẩu**; **Đăng xuất** cuối (đỏ) |
 | Typography CRM | **Noto Sans**, gốc **14px** (public vẫn Be Vietnam Pro) |
 | Mobile | Menu cuộn ngang trong header; không ẩn mất mục chính |
 | Mobile ô nhập | **16px** tối thiểu (`input` / `textarea` / `select`) — Safari phóng to trang nếu nhỏ hơn khi gõ |
@@ -714,6 +714,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-04 | List `/lo-dat` thẻ mobile: thêm dòng **Ghi chú giá** + **Hoa hồng** (cùng cột Giá bán desktop; thiếu thì ẩn) |
 | 2026-09-08 | `/cong-viec`: FAB **Tạo công việc** (Plus) góc phải dưới — máy tính + mobile; modal không bắt buộc gắn nguồn |
 | 2026-09-08 | `/cong-viec`: sắp xếp ghim→hạn gần; đã xong ở cuối + gạch ngang |
+| 2026-09-08 | `/dich-vu-so-do`: **Thêm công việc** → tiến độ **Công việc**; avatar CRM: **Đổi mật khẩu** |
 
 ---
 

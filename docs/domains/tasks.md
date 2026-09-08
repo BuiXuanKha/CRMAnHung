@@ -63,17 +63,10 @@ Prefix `/api/v1`. Schema: `packages/shared/src/tasks.ts`.
 
 | Method | Path | Body / query | Response | Auth |
 |--------|------|--------------|----------|------|
-<<<<<<< HEAD
 | GET | `/tasks` | — | `{ items, total }` việc của user (**kể cả đã xong**) | JWT |
-| POST | `/tasks` | `content`, `dueOn`; `targetType`+`targetId` (bỏ hoặc `NONE` = không gắn) | `WorkTask` | JWT |
+| POST | `/tasks` | `content`, `dueOn`; `targetType`+`targetId` (bỏ hoặc `NONE` = không gắn). `TITLE_SERVICE` → đồng thời tạo tiến độ `CONG_VIEC` | `WorkTask` | JWT |
 | PATCH | `/tasks/:id/pin` | `{ pinned }` | `WorkTask` | JWT, chủ việc, **chưa xong** |
 | PATCH | `/tasks/:id/complete` | — | `WorkTask` (`completedAt`) | JWT, chủ việc, **chưa xong** |
-=======
-| GET | `/tasks` | — | `{ items, total }` việc **chưa xong** của user | JWT |
-| POST | `/tasks` | `content`, `dueOn`; `targetType`+`targetId` (bỏ hoặc `NONE` = không gắn). `TITLE_SERVICE` → đồng thời tạo tiến độ `CONG_VIEC` | `WorkTask` | JWT |
-| PATCH | `/tasks/:id/pin` | `{ pinned }` | `WorkTask` | JWT, chủ việc |
-| PATCH | `/tasks/:id/complete` | — | `WorkTask` (`completedAt`) | JWT, chủ việc |
->>>>>>> origin/cursor/title-task-adds-progress-15c3
 
 Sắp xếp GET:
 

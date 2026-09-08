@@ -117,3 +117,21 @@ export const resetUserPasswordSchema = z.object({
 });
 
 export type ResetUserPasswordInput = z.infer<typeof resetUserPasswordSchema>;
+
+/** Self-service — avatar → Đổi mật khẩu. */
+export const changeOwnPasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Nhập mật khẩu hiện tại.'),
+    newPassword: userPasswordSchema,
+  })
+  .superRefine((data, ctx) => {
+    if (data.currentPassword === data.newPassword) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Mật khẩu mới phải khác mật khẩu hiện tại.',
+        path: ['newPassword'],
+      });
+    }
+  });
+
+export type ChangeOwnPasswordInput = z.infer<typeof changeOwnPasswordSchema>;

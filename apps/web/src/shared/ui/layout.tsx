@@ -10,7 +10,11 @@ import { crmHomePath } from '@/features/auth/home-path';
 import { Icon } from './icon';
 import { UserMenu } from './user-menu';
 import { SettingsHubDialog } from '@/features/settings/settings-hub-dialog';
+import { ChangePasswordDialog } from '@/features/auth/change-password-dialog';
+import { changeOwnPassword } from '@/features/users/api';
 import './layout.css';
+
+const PASSWORD_CHANGED_FLASH_KEY = 'crmanhung_flash_password_changed';
 
 const homeNavItem = { href: '/', label: 'Trang chủ', icon: Home };
 
@@ -28,6 +32,9 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { user, loading, logout } = useAuth();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
+  const [changePasswordBusy, setChangePasswordBusy] = useState(false);
+  const [changePasswordError, setChangePasswordError] = useState<string | null>(null);
   const mobileNavRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -110,6 +117,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                 roleLabel={user.role === 'ADMIN' ? 'Admin' : 'Nhân viên'}
                 avatarUrl={user.avatarUrl}
                 onOpenSettings={() => setSettingsOpen(true)}
+                onChangePassword={() => {
+                  setChangePasswordError(null);
+                  setChangePasswordOpen(true);
+                }}
                 onLogout={() => {
                   void logout().then(() => router.replace('/login'));
                 }}
@@ -142,6 +153,40 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <main className="content">{children}</main>
       <SettingsHubDialog open={settingsOpen} onClose={() => setSettingsOpen(false)} />
+      <ChangePasswordDialog
+        open={changePasswordOpen}
+        busy={changePasswordBusy}
+        error={changePasswordError}
+        onClose={() => {
+          if (!changePasswordBusy) {
+            setChangePasswordOpen(false);
+            setChangePasswordError(null);
+          }
+        }}
+        onSubmit={(currentPassword, newPassword) => {
+          setChangePasswordBusy(true);
+          setChangePasswordError(null);
+          void changeOwnPassword({ currentPassword, newPassword })
+            .then(async () => {
+              setChangePasswordOpen(false);
+              try {
+                sessionStorage.setItem(PASSWORD_CHANGED_FLASH_KEY, '1');
+              } catch {
+                /* ignore */
+              }
+              await logout();
+              router.replace('/login');
+            })
+            .catch((err) => {
+              setChangePasswordError(
+                err instanceof Error ? err.message : 'Không đổi được mật khẩu.',
+              );
+            })
+            .finally(() => {
+              setChangePasswordBusy(false);
+            });
+        }}
+      />
     </div>
   );
 }

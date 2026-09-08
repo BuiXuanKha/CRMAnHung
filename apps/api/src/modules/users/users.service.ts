@@ -11,7 +11,7 @@ import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
 import { toAdminUser } from './users-view';
 import type { CreateHotlineDto } from './dto/create-hotline.dto';
 import type { UpdateHotlineDto } from './dto/update-hotline.dto';
-import type { CreateUserDto, ResetUserPasswordDto, UpdateUserDto } from './dto/user-admin.dto';
+import type { CreateUserDto, ChangeOwnPasswordDto, ResetUserPasswordDto, UpdateUserDto } from './dto/user-admin.dto';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -155,6 +155,39 @@ export class UsersService {
       },
     });
     await this.revokeRefreshTokens(id);
+    return { ok: true };
+  }
+
+  /** STAFF/ADMIN đổi MK mình — cần mật khẩu hiện tại đúng. */
+  async changeOwnPassword(userId: string, dto: ChangeOwnPasswordDto) {
+    const current = dto.currentPassword;
+    const next = dto.newPassword;
+    if (current === next) {
+      throw new BadRequestException('Mật khẩu mới phải khác mật khẩu hiện tại.');
+    }
+
+    const existing = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { id: true, passwordHash: true, isActive: true },
+    });
+    if (!existing || !existing.isActive) {
+      throw new NotFoundException('Không tìm thấy người dùng.');
+    }
+
+    const ok = await bcrypt.compare(current, existing.passwordHash);
+    if (!ok) {
+      throw new BadRequestException('Mật khẩu hiện tại không đúng.');
+    }
+
+    const passwordHash = await bcrypt.hash(next, BCRYPT_ROUNDS);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash,
+        sessionVersion: { increment: 1 },
+      },
+    });
+    await this.revokeRefreshTokens(userId);
     return { ok: true };
   }
 

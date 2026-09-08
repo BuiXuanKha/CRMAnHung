@@ -17,6 +17,8 @@ import { ApiError } from '@/shared/api/client';
 import { ANHUNG_BRAND } from '@/features/public/brand';
 import './login.css';
 
+const PASSWORD_CHANGED_FLASH_KEY = 'crmanhung_flash_password_changed';
+
 function safeCrmNext(next: string | null, role: string): string | null {
   if (!next || !next.startsWith('/') || next.startsWith('//')) return null;
   let path = next.split('?')[0] ?? next;
@@ -44,11 +46,23 @@ export function LoginForm() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
 
   const goAfterAuth = (role: string) => {
     const next = safeCrmNext(searchParams.get('next'), role);
     router.replace(next ?? crmHomePathForRole(normalizeWebCrmRole(role) ?? 'STAFF'));
   };
+
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem(PASSWORD_CHANGED_FLASH_KEY) === '1') {
+        sessionStorage.removeItem(PASSWORD_CHANGED_FLASH_KEY);
+        setInfo('Đã đổi mật khẩu. Đăng nhập lại bằng mật khẩu mới.');
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
 
   useEffect(() => {
     if (!loading && user) {
@@ -125,6 +139,7 @@ export function LoginForm() {
             />
           </label>
 
+          {info ? <p className="login-info">{info}</p> : null}
           {error ? <p className="login-error">{error}</p> : null}
 
           <button type="submit" disabled={submitting || loading}>

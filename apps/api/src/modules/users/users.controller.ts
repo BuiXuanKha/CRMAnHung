@@ -20,6 +20,7 @@ import { CreateHotlineDto } from './dto/create-hotline.dto';
 import { UpdateHotlineDto } from './dto/update-hotline.dto';
 import {
   CreateUserDto,
+  ChangeOwnPasswordDto,
   ResetUserPasswordDto,
   UpdateUserDto,
 } from './dto/user-admin.dto';
@@ -57,6 +58,11 @@ export class UsersController {
     @Body() dto: UpdateHotlineDto,
   ) {
     return this.usersService.updateHotline(user.id, id, dto);
+  }
+
+  @Post('me/change-password')
+  changeOwnPassword(@CurrentUser() user: RequestUser, @Body() dto: ChangeOwnPasswordDto) {
+    return this.usersService.changeOwnPassword(user.id, dto);
   }
 
   @Post()

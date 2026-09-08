@@ -21,8 +21,8 @@ Nhân viên / admin vào CRM bằng username + mật khẩu. Mọi khách / lô 
 | Actor | Được | Không |
 |-------|------|--------|
 | Chưa login | `/login` | Mọi trang CRM |
-| STAFF | Vào CRM; khách của mình (khi có API) | CRUD user; registry |
-| ADMIN | Vào CRM; (sau) quản lý NV | — |
+| STAFF | Vào CRM; khách của mình (khi có API); **đổi mật khẩu** (avatar) | CRUD user; registry |
+| ADMIN | Vào CRM; (sau) quản lý NV; **đổi mật khẩu** (avatar) | — |
 | `isActive = false` | — | Login |
 
 ## 3. Khái niệm
@@ -42,6 +42,7 @@ Mật khẩu: bcrypt cost ≥ 12. Không lưu plaintext.
 2. **Sai / khoá** — cùng câu: «Tên đăng nhập hoặc mật khẩu không đúng»; user `isActive=false` không vào được
 3. **Phiên** — access ~15 phút (tự refresh); refresh **30 ngày**. F5: còn refresh thì `/auth/me`; hết hạn → `/login`
 4. **Đăng xuất** — avatar menu → revoke refresh → `/login`
+5. **Đổi mật khẩu** — avatar → **Đổi mật khẩu** → nhập MK hiện tại + MK mới (chuẩn 6–18, chữ+số) → Lưu. Đúng → revoke phiên khác + bump `sessionVersion` → toast → về `/login` đăng nhập lại. Sai MK hiện tại → «Mật khẩu hiện tại không đúng.»
 
 ## 5. Quan hệ
 
@@ -96,6 +97,15 @@ Cùng control 6.1. Ô nhập ≥ 16px (không zoom). Nút đủ vùng chạm.
 
 Cùng cột (kể cả Avatar 32px); cuộn ngang bảng. Nút thêm full-width trên header.
 
+### 6.5 Avatar menu (STAFF + ADMIN)
+
+Click avatar header →:
+
+1. Tên + vai trò  
+2. **Cài đặt**  
+3. **Đổi mật khẩu** — `CrmDialog` §4.7, icon `KeyRound`: MK hiện tại *, MK mới *, Nhập lại *. Hint `USER_PASSWORD_HINT`. Huỷ / **Lưu**.  
+4. **Đăng xuất** (đỏ, cuối)
+
 ## 7. API (đã có)
 
 Prefix `/api/v1`
@@ -113,6 +123,7 @@ Prefix `/api/v1`
 | DELETE | `/users/:id/avatar` | ADMIN — gỡ avatar |
 | DELETE | `/users/:id` | ADMIN — **luôn 400**; không xóa cứng User. Vô hiệu hóa = `PATCH` `isActive: false` |
 | POST | `/users/:id/reset-password` | ADMIN — đặt lại mật khẩu |
+| POST | `/users/me/change-password` | JWT (STAFF/ADMIN) — đổi MK mình: `currentPassword` + `newPassword` |
 
 `GET /users`, `POST /users`, `PATCH /users/:id`, `/auth/me` trả `avatarUrl` (CDN) khi có ảnh. Header CRM + khối liên hệ trang khách (chi tiết lô, thẻ khi NV login) dùng ảnh đó. `GET /public/lot-shares/:code` cũng trả `employee.avatarUrl`. Không nhét URL vào JWT.
 
