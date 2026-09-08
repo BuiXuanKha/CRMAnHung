@@ -112,6 +112,8 @@ export async function loadCareNotes(prisma: PrismaService, customerId: string) {
     employeeId: row.employeeId,
     employeeName: row.employee.fullName,
     createdAt: row.createdAt.toISOString(),
+    completedAt: row.completedAt?.toISOString() ?? null,
+    workTaskId: row.workTaskId ?? null,
   }));
 }
 

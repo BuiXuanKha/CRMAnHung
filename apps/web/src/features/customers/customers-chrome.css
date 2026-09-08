@@ -220,6 +220,19 @@
   background: #fff;
 }
 
+.kh-care li strong {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.kh-care li.is-done .kh-care-note,
+.kh-care li.is-done p {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
 .kh-care time {
   color: #64748b;
   font-size: 0.78rem;

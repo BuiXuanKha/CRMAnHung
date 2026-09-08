@@ -253,7 +253,7 @@ Một menu (portal `position: fixed`). Khách đã xoá: **chỉ** «Khôi phụ
 | Mở chat | Tab ngoài. Khách **Page** (Business Suite): URL inbox lúc quét (`pageUrl`). Messenger E2EE: `facebook.com/messages/e2ee/t/{threadId}`. Messenger thường: `facebook.com/messages/t/{threadId}`. Hiện khi khách có Facebook; thiếu URL → CrmAlert; **ẩn mobile**. Tin đã lưu xem cột phụ «Nội dung chat». **Không** phải inbox sống |
 | Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
-| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai), Lưu / Huỷ. Gắn khách này. **Đồng thời** ghi **lịch sử chăm sóc** (ghi chú = nội dung việc; không đổi trạng thái / tài chính / nhu cầu) |
+| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai), Lưu / Huỷ. Gắn khách này. **Đồng thời** ghi **lịch sử chăm sóc** (ghi chú = nội dung việc; không đổi trạng thái / tài chính / nhu cầu). Khi **Hoàn thành** việc → lần chăm sóc đó hangtag **Đã hoàn thành** |
 | Thêm / Sửa số điện thoại | Chưa có số: modal thêm. Đã có: sửa (Lưu / Xóa). Icon cam = thêm nhanh |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (lodats.md §12.5). ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` (form tạo hồ sơ) |
@@ -471,7 +471,7 @@ Cùng khối 12.3.3. SĐT trong hero bấm = `tel:`. Padding gọn. **Không** h
 5. **Tài chính** — khoảng ngân sách; trống `—`
 6. **Thông tin hiện tại** — chỉ hiện nếu có `latestNeedSummary` hoặc `latestCareNote`. Hai nhãn: Nhu cầu / Ghi chú
 7. **Danh sách lô đất** — API. Cùng thẻ §12.1.6: ảnh trái (+N) · tiêu đề · địa chỉ · DT·MT·hướng · giá. Bấm ảnh → gallery; bấm chữ → `/lo-dat/[id]`. Không có → «Chưa gắn lô đất.»
-8. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Không có → «Chưa có lịch sử chăm sóc.»
+8. **Lịch sử chăm sóc** — mới → cũ. Mỗi dòng: ngày giờ + «n phút/giờ trước» + tên NV; Nhu cầu; Ghi chú. Lần từ **Thêm công việc** đã xong: hangtag **Đã hoàn thành** (`CrmBadge` green). Không có → «Chưa có lịch sử chăm sóc.»
 9. **FAB mobile** — §12.3.2 («⋯» / gọi / Zalo / mở Messenger)
 
 Không form chăm sóc trên trang này (form = **§12.4**).

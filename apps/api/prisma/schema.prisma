@@ -171,15 +171,20 @@ model CustomerMessengerImage {
 }
 
 model CustomerCareNote {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   customerId  String
   employeeId  String
   needSummary String?
-  note        String   @default("")
-  createdAt   DateTime @default(now())
+  note        String    @default("")
+  /** Liên kết việc nhắc — lần chăm sóc tạo từ «Thêm công việc». */
+  workTaskId  String?   @unique
+  /** Đồng bộ khi hoàn thành WorkTask gắn (hangtag Đã hoàn thành). */
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
 
-  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  employee User     @relation(fields: [employeeId], references: [id])
+  customer Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  employee User      @relation(fields: [employeeId], references: [id])
+  workTask WorkTask? @relation(fields: [workTaskId], references: [id], onDelete: SetNull)
 
   @@index([customerId])
   @@index([customerId, createdAt])
@@ -768,6 +773,7 @@ model WorkTask {
   transaction  Transaction? @relation(fields: [transactionId], references: [id], onDelete: Restrict)
   titleService TitleService? @relation(fields: [titleServiceId], references: [id], onDelete: Restrict)
   titleServiceProgress TitleServiceProgress?
+  customerCareNote CustomerCareNote?
 
   @@index([employeeId, dueOn])
   @@index([employeeId, isPinned, pinnedAt])

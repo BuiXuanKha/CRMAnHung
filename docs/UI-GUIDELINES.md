@@ -720,6 +720,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | `/khach-hang` mobile: bỏ footer All/KN/…; **Thêm khách bằng SĐT** → FAB tròn xanh lá |
 | 2026-09-08 | `/dich-vu-so-do`: hoàn thành việc gắn sổ đỏ → tiến độ **Công việc** hangtag **Đã hoàn thành** |
 | 2026-09-08 | `/khach-hang`: **Thêm công việc** → đồng thời ghi lịch sử chăm sóc (ghi chú = nội dung việc) |
+| 2026-09-08 | `/khach-hang`: hoàn thành việc gắn khách → lần chăm sóc hangtag **Đã hoàn thành** |
 
 ---
 

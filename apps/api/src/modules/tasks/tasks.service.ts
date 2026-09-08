@@ -100,6 +100,7 @@ export class TasksService {
             employeeId: user.id,
             needSummary: null,
             note: content,
+            workTaskId: created.id,
           },
         });
         await tx.customer.update({
@@ -136,14 +137,14 @@ export class TasksService {
       });
 
       // Bước tiến độ Công việc gắn việc này → hangtag Đã hoàn thành.
-      const linked = await tx.titleServiceProgress.updateMany({
+      const linkedProgress = await tx.titleServiceProgress.updateMany({
         where: { workTaskId: id, completedAt: null },
         data: { completedAt: now },
       });
 
       // Việc cũ (trước khi có workTaskId): khớp sổ đỏ + CONG_VIEC + cùng nội dung.
       if (
-        linked.count === 0 &&
+        linkedProgress.count === 0 &&
         current.targetType === 'TITLE_SERVICE' &&
         current.titleServiceId
       ) {
@@ -162,6 +163,35 @@ export class TasksService {
       if (current.titleServiceId) {
         await tx.titleService.update({
           where: { id: current.titleServiceId },
+          data: { updatedAt: now },
+        });
+      }
+
+      // Lần chăm sóc gắn việc này → hangtag Đã hoàn thành.
+      const linkedCare = await tx.customerCareNote.updateMany({
+        where: { workTaskId: id, completedAt: null },
+        data: { completedAt: now },
+      });
+
+      if (
+        linkedCare.count === 0 &&
+        current.targetType === 'CUSTOMER' &&
+        current.customerId
+      ) {
+        await tx.customerCareNote.updateMany({
+          where: {
+            customerId: current.customerId,
+            workTaskId: null,
+            completedAt: null,
+            note: current.content,
+          },
+          data: { completedAt: now, workTaskId: id },
+        });
+      }
+
+      if (current.customerId) {
+        await tx.customer.update({
+          where: { id: current.customerId },
           data: { updatedAt: now },
         });
       }

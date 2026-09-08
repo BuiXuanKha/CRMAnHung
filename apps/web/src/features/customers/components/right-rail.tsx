@@ -8,6 +8,7 @@ import type {
   CustomerMessengerMessage,
 } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
+import { CrmBadge } from '@/shared/ui/badge';
 import { ChatThread } from './chat-thread';
 import { CustomerLodatCards } from './customer-lodat-cards';
 
@@ -126,8 +127,11 @@ function renderBody(
     return (
       <ul className="kh-care">
         {notes.map((n) => (
-          <li key={n.id}>
-            <strong>{n.employeeName}</strong>
+          <li key={n.id} className={n.completedAt ? 'is-done' : undefined}>
+            <strong>
+              {n.employeeName}
+              {n.completedAt ? <CrmBadge tone="green">Đã hoàn thành</CrmBadge> : null}
+            </strong>
             {n.needSummary?.trim() ? <p>{n.needSummary}</p> : null}
             {n.note.trim() ? <p className="kh-care-note">{n.note}</p> : null}
             <time>{new Date(n.createdAt).toLocaleString('vi-VN')}</time>
