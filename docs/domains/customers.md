@@ -340,11 +340,10 @@ Thẻ (ảnh trái, chữ phải) — **cùng trang chi tiết** §12.3.3 mục 
 ┌ Ô tìm ───────────────────────────────────────────────────────┐
 ├ [Bộ lọc] [Tìm] ──────────────────────────────────────────────┤
 ├ Thẻ xếp dọc ─────────────────────────────────────────────────┤
-├ Footer All · KN · KM · CCS · KH · ĐG ────────────────────────┤
-└ Nút Thêm SĐT dính đáy ───────────────────────────────────────┘
+└ FAB «+» góc phải dưới (Thêm khách bằng SĐT) ─────────────────┘
 ```
 
-Không bảng, không cột phụ.
+Không bảng, không cột phụ. **Không** footer All/KN/KM/CCS/KH/ĐG.
 
 **Bấm thẻ** → `/khach-hang/[id]`.
 
@@ -358,7 +357,9 @@ Nút **Tìm** = lọc ngay + đóng bàn phím.
 
 Nút **Bộ lọc** (sheet) + **Tìm**. Cùng nghĩa 12.1.3. Xoá lọc.
 
-#### 12.2.3 Nút Thêm SĐT (đáy)
+#### 12.2.3 FAB Thêm khách bằng SĐT
+
+Nút tròn cố định góc phải dưới (chỉ mobile). Icon Lucide `Plus`. Màu xanh lá `#16a34a` (cùng CTA cũ). `aria-label`: **Thêm khách bằng SĐT**. Nổi trên list thẻ (`position: fixed`; sibling ngoài khung `overflow`). Padding đáy vùng cuộn thẻ để không che thẻ cuối.
 
 Cùng modal 12.1.2. Trùng SĐT → cùng 12.1.2.1.
 
@@ -412,7 +413,7 @@ Page/nick FB hoặc hotline. Chữ thuần, không link.
 
 Cùng menu máy tính (portal). Khách đã xoá: **chỉ** «Khôi phục khách».
 
-**Vị trí / cuộn** — giống §12.1.4 mục 12: ưu tiên dưới nút, thiếu chỗ thì trên; **không** khóa cuộn; cuộn thẻ / resize → đóng menu (tránh che thanh «Thêm khách bằng SĐT»).
+**Vị trí / cuộn** — giống §12.1.4 mục 12: ưu tiên dưới nút, thiếu chỗ thì trên; **không** khóa cuộn; cuộn thẻ / resize → đóng menu (tránh che FAB Thêm khách).
 
 | Mục | Việc |
 |-----|------|
@@ -430,11 +431,9 @@ Cùng menu máy tính (portal). Khách đã xoá: **chỉ** «Khôi phục khác
 
 Ghim: nền vàng. Đã xoá: thẻ kiểu ẩn.
 
-#### 12.2.5 Footer + cuộn
+#### 12.2.5 Cuộn tải thêm
 
-All · KN · KM · CCS · KH · ĐG — đếm trên **trang đang nạp**. `All n / N` khi còn trang.
-
-Cuộn tải 50 + nhớ vị trí/lọc: **cùng 12.1.5**. Vùng cuộn = danh sách thẻ.
+Không footer đếm All/KN/… trên mobile. Cuộn tải 50 + nhớ vị trí/lọc: **cùng 12.1.5**. Vùng cuộn = danh sách thẻ.
 
 ---
 

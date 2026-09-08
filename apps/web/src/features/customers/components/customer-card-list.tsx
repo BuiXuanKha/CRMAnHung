@@ -1,7 +1,7 @@
 'use client';
 
 import type { Ref } from 'react';
-import { Map, Phone, Plus, SquarePen } from 'lucide-react';
+import { Map, Phone, SquarePen } from 'lucide-react';
 import type { CustomerListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
@@ -17,16 +17,12 @@ import { ActionMenu, type CustomerAction } from './action-menu';
 
 type Props = {
   items: CustomerListItem[];
-  total: number;
-  loadingMore?: boolean;
   selectedId: string | null;
   menuId: string | null;
-  stats: { KN: number; KM: number; CCS: number; KH: number; pinned: number };
   onSelect: (id: string) => void;
   onToggleMenu: (id: string) => void;
   onCloseMenu: () => void;
   onAction: (customer: CustomerListItem, action: CustomerAction) => void;
-  onAdd: () => void;
   onAddPhone?: (customer: CustomerListItem) => void;
   onCallPhone?: (customer: CustomerListItem) => void;
   scrollRef?: Ref<HTMLDivElement>;
@@ -35,16 +31,12 @@ type Props = {
 
 export function CustomerCardList({
   items,
-  total,
-  loadingMore = false,
   selectedId,
   menuId,
-  stats,
   onSelect,
   onToggleMenu,
   onCloseMenu,
   onAction,
-  onAdd,
   onAddPhone,
   onCallPhone,
   scrollRef,
@@ -166,35 +158,6 @@ export function CustomerCardList({
           })
         )}
       </div>
-      <div className="kh-cards-stats">
-        <span>
-          All:{' '}
-          <strong>
-            {items.length}
-            {total > items.length ? ` / ${total}` : ''}
-            {loadingMore ? '…' : ''}
-          </strong>
-        </span>
-        <span>
-          KN: <strong>{stats.KN}</strong>
-        </span>
-        <span>
-          KM: <strong>{stats.KM}</strong>
-        </span>
-        <span>
-          CCS: <strong>{stats.CCS}</strong>
-        </span>
-        <span>
-          KH: <strong>{stats.KH}</strong>
-        </span>
-        <span>
-          ĐG: <strong>{stats.pinned}</strong>
-        </span>
-      </div>
-      <button type="button" className="kh-cards-add" onClick={onAdd}>
-        <Icon icon={Plus} size={18} />
-        Thêm khách bằng SĐT
-      </button>
     </div>
   );
 }

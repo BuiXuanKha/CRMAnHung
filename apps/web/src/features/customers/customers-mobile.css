@@ -345,59 +345,8 @@
     place-items: center;
   }
 
-  .kh-cards-stats {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    overflow-x: auto;
-    padding: 8px 12px;
-    background: #f8fafc;
-    border: 1px solid var(--kh-line);
-    border-radius: 12px;
-    font-size: 0.78rem;
-    color: #475569;
-  }
-
-  .kh-cards-stats span {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    white-space: nowrap;
-  }
-
-  .kh-cards-stats span + span {
-    border-left: 1px solid #cbd5e1;
-    padding-left: 8px;
-  }
-
-  .kh-cards-stats strong {
-    color: #0f172a;
-    font-weight: 700;
-  }
-
-  .kh-cards-add {
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    border: 0;
-    background: #16a34a;
-    color: #fff;
-    font-size: 1rem;
-    font-weight: 700;
-    padding: 14px 16px;
-    border-radius: 12px;
-    cursor: pointer;
-    font-family: inherit;
-    margin-bottom: 8px;
-  }
-
-  .kh-cards-add:hover,
-  .kh-cards-add:active {
-    background: #15803d;
+  .kh-page.has-fab .kh-cards {
+    padding-bottom: 88px;
   }
 
   .kh-cards .kh-empty {
@@ -410,3 +359,39 @@
     color: #64748b;
   }
 }
+
+/* FAB Thêm khách bằng SĐT — chỉ mobile (§12.2.3); nổi trên list */
+.kh-add-fab {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .kh-add-fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    right: 16px;
+    bottom: max(20px, env(safe-area-inset-bottom, 0px));
+    z-index: 45;
+    width: 56px;
+    height: 56px;
+    border: 0;
+    border-radius: 999px;
+    background: #16a34a;
+    color: #fff;
+    box-shadow: 0 6px 18px rgb(22 163 74 / 38%);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    pointer-events: auto;
+  }
+
+  .kh-add-fab:hover {
+    background: #15803d;
+  }
+
+  .kh-add-fab:active {
+    transform: scale(0.96);
+  }
+}
+

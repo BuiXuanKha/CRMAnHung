@@ -149,20 +149,19 @@ Cột «Số lô đất» đã bỏ — lô = icon Map + số cạnh tên; lọc
 │              kênh    [hangtag]   │
 │              ngân sách           │
 │              nhu cầu     [sửa][▾]│
-└─ All N/M · KN · KM · CCS · KH · ĐG ┘
-└─ [ + Thêm khách bằng SĐT ] ──────┘
+└─ FAB «+» góc phải dưới ─────────┘
 ```
 
 | Hạng mục | Quy tắc |
 |----------|---------|
-| Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel lọc inline: trạng thái, tài chính, kênh, lô đất, nhu cầu. Ẩn nút «Thêm khách…» trên thanh (chuyển xuống đáy) |
+| Tìm / lọc | Cùng **một hàng**: ô tìm + **Bộ lọc** + **Tìm** (nền xanh). Panel lọc inline: trạng thái, tài chính, kênh, lô đất, nhu cầu. Ẩn nút «Thêm khách…» trên thanh (chuyển sang FAB) |
 | Thẻ | Grid `48px / 1fr / auto`. Ghim: nền `#fef9c3` + viền trái `#ca8a04`. **Không** `<button>` chứa `<div>`. `flex-shrink: 0` |
 | Trái | Avatar tròn 48px (ảnh FB hoặc initials) |
 | Giữa | Tên; SĐT **xanh** = gọi `tel:`; SĐT **cam** = thêm số; Map+số nếu có lô; hangtag (kể **Đã xoá**); kênh; ngân sách; nhu cầu. **Không** tên Facebook; **không** icon mess |
 | Phải | `SquarePen` = Cập nhật chăm sóc; chevron = menu §4.3.3 |
 | Bấm thẻ | Mở `/khach-hang/[id]` |
-| Footer | `All N / M` · `KN` · `KM` · `CCS` · `KH` · `ĐG` (ghim) |
-| CTA đáy | Nút full-width xanh lá `#16a34a`: **Thêm khách bằng SĐT** |
+| Footer thống kê | **Không** (bỏ All/KN/KM/CCS/KH/ĐG) |
+| FAB | Nút tròn `Plus` góc phải dưới, xanh lá `#16a34a`, `aria-label` **Thêm khách bằng SĐT**; nổi trên list (`fixed`) |
 
 Desktop giữ bảng §4.5 + cột phụ (§4.3.2).
 
@@ -718,6 +717,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | `/cong-viec` nguồn: bỏ «Công việc này cho…»; in hoa `LOẠI \| TÊN` màu `#2563eb` |
 | 2026-09-08 | STAFF **Đăng bài** → `/dang-bai` (peer CRM; bỏ `/dashboard/lo-dat`, không redirect cũ). Dashboard chỉ ADMIN |
 | 2026-09-08 | `/cong-viec` FAB `+`: `fixed` nổi trên footer/list (không nằm dưới dòng «Hiển thị») |
+| 2026-09-08 | `/khach-hang` mobile: bỏ footer All/KN/…; **Thêm khách bằng SĐT** → FAB tròn xanh lá |
 
 ---
 
