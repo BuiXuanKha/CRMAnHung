@@ -38,7 +38,7 @@ export function TaskCardList({
       <div className="cv-cards" role="list" aria-label="Danh sách công việc">
         {items.length === 0 ? (
           <p className="cv-empty-cards">
-            Chưa có công việc. Thêm từ menu Thao tác trên khách, lô đất, giao dịch hoặc sổ đỏ.
+            Chưa có công việc. Bấm nút + để thêm, hoặc thêm từ menu Thao tác trên khách, lô đất, giao dịch hoặc sổ đỏ.
           </p>
         ) : (
           items.map((item) => {

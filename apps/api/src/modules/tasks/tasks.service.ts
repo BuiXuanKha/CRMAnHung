@@ -4,7 +4,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { assertCanAccess as assertCustomerAccess } from '../customers/customers-view';
 import type { CreateWorkTaskDto, PinWorkTaskDto } from './dto/task.dto';
 
-const TARGET_TYPES = ['CUSTOMER', 'LODAT', 'TRANSACTION', 'TITLE_SERVICE'] as const;
+const TARGET_TYPES = ['NONE', 'CUSTOMER', 'LODAT', 'TRANSACTION', 'TITLE_SERVICE'] as const;
 type TargetType = (typeof TARGET_TYPES)[number];
 
 function parseDueOn(raw: string): Date {
@@ -47,7 +47,18 @@ export class TasksService {
     const content = dto.content.trim();
     if (!content) throw new BadRequestException('Nhập nội dung công việc.');
     const dueOn = parseDueOn(dto.dueOn);
-    const target = await this.resolveTarget(user, dto.targetType, dto.targetId);
+    const targetType = (dto.targetType ?? 'NONE') as TargetType;
+    const target =
+      targetType === 'NONE'
+        ? {
+            type: 'NONE' as const,
+            label: '',
+            customerId: null as string | null,
+            lodatId: null as string | null,
+            transactionId: null as string | null,
+            titleServiceId: null as string | null,
+          }
+        : await this.resolveTarget(user, targetType, dto.targetId ?? '');
 
     const row = await this.prisma.workTask.create({
       data: {
@@ -126,7 +137,10 @@ export class TasksService {
     };
   }
 
-  private async resolveTarget(user: RequestUser, type: TargetType, targetId: string) {
+  private async resolveTarget(user: RequestUser, type: Exclude<TargetType, 'NONE'>, targetId: string) {
+    if (!targetId.trim()) {
+      throw new BadRequestException('Chọn nguồn công việc.');
+    }
     if (type === 'CUSTOMER') {
       const row = await this.prisma.customer.findUnique({
         where: { id: targetId },

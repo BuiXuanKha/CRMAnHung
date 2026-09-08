@@ -53,7 +53,7 @@ export function TaskTable({
       <div className="cv-table-scroll" role="rowgroup">
         {items.length === 0 ? (
           <div className="cv-empty-row" role="row">
-            Chưa có công việc. Thêm từ menu Thao tác trên khách, lô đất, giao dịch hoặc sổ đỏ.
+            Chưa có công việc. Bấm nút + để thêm, hoặc thêm từ menu Thao tác trên khách, lô đất, giao dịch hoặc sổ đỏ.
           </div>
         ) : (
           items.map((item, index) => {

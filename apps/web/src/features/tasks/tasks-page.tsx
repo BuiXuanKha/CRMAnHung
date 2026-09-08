@@ -9,6 +9,8 @@ import { type WorkTaskAction } from './components/action-menu';
 import { TaskCardList } from './components/task-card-list';
 import { TaskDetailDialog } from './components/task-detail-dialog';
 import { TaskTable } from './components/task-table';
+import { TasksCreateFab } from './components/tasks-create-fab';
+import { useCreateTaskModal } from './use-create-task-modal';
 import './tasks-page.css';
 
 export function TasksPage() {
@@ -28,6 +30,15 @@ export function TasksPage() {
   const loading = query.isLoading;
   const error = query.error instanceof Error ? query.error.message : null;
   const detail = items.find((row) => row.id === detailId) ?? null;
+
+  function flash(msg: string) {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2800);
+  }
+
+  const { openStandaloneTaskModal, dialog: createTaskDialog } = useCreateTaskModal(() =>
+    flash('Đã thêm công việc.'),
+  );
 
   const pinMut = useMutation({
     mutationFn: (item: WorkTask) => pinWorkTask(item.id, { pinned: !item.isPinned }),
@@ -56,11 +67,6 @@ export function TasksPage() {
     },
   });
 
-  function flash(msg: string) {
-    setToast(msg);
-    window.setTimeout(() => setToast(null), 2800);
-  }
-
   function openDetail(item: WorkTask) {
     setSelectedId(item.id);
     setDetailId(item.id);
@@ -83,8 +89,13 @@ export function TasksPage() {
     void completeMut.mutateAsync(item.id);
   }
 
+  function openCreate() {
+    setMenuId(null);
+    openStandaloneTaskModal();
+  }
+
   return (
-    <section className="cv-page" aria-labelledby="cv-title">
+    <section className="cv-page has-fab" aria-labelledby="cv-title">
       <header className="cv-head">
         <h1 id="cv-title">Công việc</h1>
         <p className="cv-lead">Trang nhắc việc và ghi chú nhỏ cho việc cần làm.</p>
@@ -126,6 +137,8 @@ export function TasksPage() {
         </div>
       ) : null}
 
+      <TasksCreateFab onCreate={openCreate} />
+
       <TaskDetailDialog
         item={detail}
         busy={completeMut.isPending}
@@ -140,6 +153,7 @@ export function TasksPage() {
           if (detail) void completeMut.mutateAsync(detail.id);
         }}
       />
+      {createTaskDialog}
       <CrmToast message={toast} />
     </section>
   );

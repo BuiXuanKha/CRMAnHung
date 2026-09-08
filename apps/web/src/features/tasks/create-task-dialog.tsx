@@ -19,6 +19,7 @@ export type TaskCreateTarget = {
 
 type Props = {
   open: boolean;
+  /** null = ghi chú cá nhân (FAB /cong-viec). */
   target: TaskCreateTarget | null;
   busy?: boolean;
   error?: string | null;
@@ -38,28 +39,36 @@ export function CreateTaskDialog({
   const [dueOn, setDueOn] = useState(ymdInVietnam(1));
 
   useEffect(() => {
-    if (!open || !target) return;
+    if (!open) return;
     setContent('');
     setDueOn(ymdInVietnam(1));
   }, [open, target]);
 
-  if (!target) return null;
-  const current = target;
-
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (target) {
+      onSubmit({
+        content,
+        dueOn,
+        targetType: target.type,
+        targetId: target.id,
+      });
+      return;
+    }
     onSubmit({
       content,
       dueOn,
-      targetType: current.type,
-      targetId: current.id,
+      targetType: TaskTargetType.NONE,
+      targetId: '',
     });
   }
 
   return (
     <CrmDialog open={open} title="Thêm công việc" icon={ListTodo} onClose={onClose} busy={busy}>
       <form onSubmit={handleSubmit}>
-        <p className="cv-dialog-context">{taskContextLine(current.type, current.label)}</p>
+        {target ? (
+          <p className="cv-dialog-context">{taskContextLine(target.type, target.label)}</p>
+        ) : null}
         <label>
           Nội dung công việc
           <textarea

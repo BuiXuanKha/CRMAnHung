@@ -21,6 +21,7 @@ describe('taskContextLine', () => {
       taskContextLine(TaskTargetType.TRANSACTION, 'GD-1'),
       'Công việc này cho Giao dịch GD-1',
     );
+    assert.equal(taskContextLine(TaskTargetType.NONE, ''), 'Ghi chú cá nhân');
   });
 });
 

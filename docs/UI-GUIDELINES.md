@@ -435,7 +435,9 @@ Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`tasks.md` 
 
 **Không** ô tìm, **không** lọc cột (list việc của chính mình). Bấm dòng → modal chi tiết + **Hoàn thành**. Việc xong ẩn khỏi list.
 
-**Mobile (≤767px):** thẻ xếp dọc. Đầu thẻ: sao ghim (nếu có) + nội dung + chevron. Hạn + hangtag đếm ngược. Dòng nguồn. Footer «Hiển thị N / Tổng M công việc».
+**FAB** góc phải dưới (máy tính + mobile): nút tròn `Plus` — **Tạo công việc** → modal thêm (không bắt buộc gắn nguồn). Chi tiết [`tasks.md` §12.1.4](./domains/tasks.md).
+
+**Mobile (≤767px):** thẻ xếp dọc. Đầu thẻ: sao ghim (nếu có) + nội dung + chevron. Hạn + hangtag đếm ngược. Dòng nguồn. Footer «Hiển thị N / Tổng M công việc». Cùng FAB.
 
 Desktop giữ bảng §4.5.
 
@@ -710,6 +712,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-04 | List `/khach-hang` menu Thao tác: ưu tiên mở dưới chevron, thiếu chỗ thì trên; không khóa cuộn — cuộn list/resize đóng menu |
 | 2026-09-04 | Menu Thao tác: đóng khi cuộn trên iOS — `touchmove` + listener trực tiếp `.kh-cards` / `.kh-table-scroll` + theo dõi vị trí nút (window capture scroll không đủ) |
 | 2026-09-04 | List `/lo-dat` thẻ mobile: thêm dòng **Ghi chú giá** + **Hoa hồng** (cùng cột Giá bán desktop; thiếu thì ẩn) |
+| 2026-09-08 | `/cong-viec`: FAB **Tạo công việc** (Plus) góc phải dưới — máy tính + mobile; modal không bắt buộc gắn nguồn |
 
 ---
 

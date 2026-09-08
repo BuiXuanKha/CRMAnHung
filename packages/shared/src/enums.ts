@@ -202,8 +202,9 @@ export const PUBLIC_POST_STATUS_LABELS: Record<PublicPostStatus, string> = {
   [PublicPostStatus.PUBLISHED]: 'Đã xuất bản',
 };
 
-/** Nguồn tạo công việc — một việc gắn đúng một đối tượng list. */
+/** Nguồn tạo công việc — NONE = ghi chú cá nhân; còn lại gắn đúng một đối tượng list. */
 export enum TaskTargetType {
+  NONE = 'NONE',
   CUSTOMER = 'CUSTOMER',
   LODAT = 'LODAT',
   TRANSACTION = 'TRANSACTION',

@@ -1,7 +1,8 @@
 /**
  * Personal work reminders (Công việc).
  *
- * Create from list Thao tác (customer / lodat / transaction / title-service).
+ * Create from FAB on /cong-viec (NONE / no target) or list Thao tác
+ * (customer / lodat / transaction / title-service).
  * dueOn = calendar date YYYY-MM-DD (Vietnam). Default UI = tomorrow.
  */
 import { z } from 'zod';
@@ -53,6 +54,7 @@ export function taskDueCountdown(dueOn: string, todayYmd = ymdInVietnam(0)): Tas
 }
 
 export function taskContextLine(type: TaskTargetType, label: string): string {
+  if (type === TaskTargetType.NONE) return 'Ghi chú cá nhân';
   const name = label.trim() || '—';
   switch (type) {
     case TaskTargetType.CUSTOMER:
@@ -90,12 +92,33 @@ export const workTaskListSchema = z.object({
 
 export type WorkTaskList = z.infer<typeof workTaskListSchema>;
 
-export const createWorkTaskSchema = z.object({
-  content: z.string().trim().min(1, 'Nhập nội dung công việc.').max(2000),
-  dueOn: z.string().regex(YMD, 'Chọn hạn làm việc.'),
-  targetType: z.nativeEnum(TaskTargetType),
-  targetId: z.string().min(1),
-});
+export const createWorkTaskSchema = z
+  .object({
+    content: z.string().trim().min(1, 'Nhập nội dung công việc.').max(2000),
+    dueOn: z.string().regex(YMD, 'Chọn hạn làm việc.'),
+    targetType: z.nativeEnum(TaskTargetType).optional(),
+    targetId: z.string().min(1).optional(),
+  })
+  .superRefine((data, ctx) => {
+    const type = data.targetType ?? TaskTargetType.NONE;
+    if (type === TaskTargetType.NONE) return;
+    if (!data.targetId?.trim()) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: 'Chọn nguồn công việc.',
+        path: ['targetId'],
+      });
+    }
+  })
+  .transform((data) => {
+    const targetType = data.targetType ?? TaskTargetType.NONE;
+    return {
+      content: data.content,
+      dueOn: data.dueOn,
+      targetType,
+      targetId: targetType === TaskTargetType.NONE ? '' : (data.targetId ?? ''),
+    };
+  });
 
 export type CreateWorkTaskInput = z.infer<typeof createWorkTaskSchema>;
 

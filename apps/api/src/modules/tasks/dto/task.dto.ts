@@ -1,7 +1,16 @@
 import { Transform } from 'class-transformer';
-import { IsBoolean, IsIn, IsString, Matches, MaxLength, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsOptional,
+  IsString,
+  Matches,
+  MaxLength,
+  MinLength,
+  ValidateIf,
+} from 'class-validator';
 
-const TARGET_TYPES = ['CUSTOMER', 'LODAT', 'TRANSACTION', 'TITLE_SERVICE'] as const;
+const TARGET_TYPES = ['NONE', 'CUSTOMER', 'LODAT', 'TRANSACTION', 'TITLE_SERVICE'] as const;
 
 export class CreateWorkTaskDto {
   @IsString()
@@ -13,13 +22,15 @@ export class CreateWorkTaskDto {
   @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Chọn hạn làm việc.' })
   dueOn!: string;
 
+  @IsOptional()
   @IsIn(TARGET_TYPES, { message: 'Nguồn công việc không hợp lệ.' })
-  targetType!: (typeof TARGET_TYPES)[number];
+  targetType?: (typeof TARGET_TYPES)[number];
 
+  @ValidateIf((o: CreateWorkTaskDto) => Boolean(o.targetType && o.targetType !== 'NONE'))
   @IsString()
   @MinLength(1)
   @MaxLength(60)
-  targetId!: string;
+  targetId?: string;
 }
 
 export class PinWorkTaskDto {
