@@ -189,7 +189,7 @@ Cùng 12.1.2.
 
 Sao ghim cạnh nội dung (nếu ghim **và chưa xong**). Chevron thao tác cùng 12.1.3 mục 6.
 
-Hạn + hangtag đếm ngược. Dòng nguồn = `taskContextLine`. Đã xong: gạch ngang nội dung + nguồn (cùng 12.1.3 mục 7).
+Hạn + hangtag đếm ngược (chưa xong) hoặc **Đã hoàn thành** (đã xong). Dòng nguồn = `taskContextLine`. Đã xong: gạch ngang nội dung + nguồn (cùng 12.1.3 mục 7).
 
 Bấm thẻ → modal 12.5.
 
@@ -246,7 +246,7 @@ Mục **Thêm công việc** (icon `ListTodo`). Khách đã ẩn: **không** hi�
 
 Mở khi bấm dòng / thẻ / **Xem chi tiết**. `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề: **Công việc**.
 
-Nội dung (`content`; đã xong → gạch ngang). Dòng nguồn (`NONE` → «TRANG CÔNG VIỆC»; sổ đỏ → «DỊCH VỤ SỔ ĐỎ | …»). Hạn `D/M/YYYY` + hangtag đếm ngược (cùng 12.1.3 mục 5).
+Nội dung (`content`; đã xong → gạch ngang). Dòng nguồn (`NONE` → «TRANG CÔNG VIỆC»; sổ đỏ → «DỊCH VỤ SỔ ĐỎ | …»). Hạn `D/M/YYYY` + hangtag đếm ngược nếu chưa xong; đã xong → hangtag **Đã hoàn thành** (`green`), **không** đếm hạn.
 
 **Chưa xong:** **Đóng** · **Hoàn thành** (primary). Busy khi PATCH. Xong: đóng, toast «Đã hoàn thành công việc.»
 

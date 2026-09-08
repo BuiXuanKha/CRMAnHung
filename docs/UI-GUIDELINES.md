@@ -429,14 +429,14 @@ Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`tasks.md` 
 | `Nội dung` | `content`, tối đa 3 dòng |
 | `Nguồn` | `taskContextLine` in hoa — VD. **DỊCH VỤ SỔ ĐỎ \| TÊN**; màu `#2563eb` |
 | `Hạn làm` | `D/M/YYYY` |
-| `Đếm ngược` | Hangtag: **Hôm nay** `amber` · `N ngày` `green` · `Quá hạn N ngày` `red` — **không** icon lọc |
+| `Đếm ngược` | Chưa xong: hangtag **Hôm nay** `amber` · `N ngày` `green` · `Quá hạn N ngày` `red`. Đã xong: hangtag **Đã hoàn thành** `green` (**không** đếm hạn) — **không** icon lọc |
 | `Thao tác` | Chevron → **Xem chi tiết**; việc chưa xong thêm **Ghim / Bỏ ghim**, **Hoàn thành** |
 
-**Không** ô tìm, **không** lọc cột (list việc của chính mình). Bấm dòng → modal chi tiết. **Sắp xếp:** ghim chưa xong (hạn gần trước) → không ghim chưa xong (hạn gần trước) → đã xong cuối list. Việc xong: chữ gạch ngang.
+**Không** ô tìm, **không** lọc cột (list việc của chính mình). Bấm dòng → modal chi tiết. **Sắp xếp:** ghim chưa xong (hạn gần trước) → không ghim chưa xong (hạn gần trước) → đã xong cuối list. Việc xong: chữ gạch ngang + hangtag **Đã hoàn thành** (dừng đếm hạn).
 
 **FAB** góc phải dưới (máy tính + mobile): nút tròn `Plus` — **Tạo công việc** → modal thêm (không bắt buộc gắn nguồn). Chi tiết [`tasks.md` §12.1.4](./domains/tasks.md).
 
-**Mobile (≤767px):** thẻ xếp dọc. Đầu thẻ: sao ghim (nếu có, chưa xong) + nội dung + chevron. Hạn + hangtag đếm ngược. Dòng nguồn. Việc xong gạch ngang. Footer «Hiển thị N / Tổng M công việc». Cùng FAB.
+**Mobile (≤767px):** thẻ xếp dọc. Đầu thẻ: sao ghim (nếu có, chưa xong) + nội dung + chevron. Hạn + hangtag đếm ngược (hoặc **Đã hoàn thành** nếu xong). Dòng nguồn. Việc xong gạch ngang. Footer «Hiển thị N / Tổng M công việc». Cùng FAB.
 
 Desktop giữ bảng §4.5.
 
@@ -722,6 +722,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | `/khach-hang`: **Thêm công việc** → đồng thời ghi lịch sử chăm sóc (ghi chú = nội dung việc) |
 | 2026-09-08 | `/khach-hang`: hoàn thành việc gắn khách → lần chăm sóc hangtag **Đã hoàn thành** |
 | 2026-09-08 | Lịch sử chăm sóc + tiến độ sổ đỏ: **không** gạch chữ khi xong (chỉ hangtag **Đã hoàn thành**) |
+| 2026-09-08 | `/cong-viec`: việc xong → hangtag **Đã hoàn thành**; dừng đếm hạn (Hôm nay / Quá hạn…) |
 
 ---
 
