@@ -253,7 +253,7 @@ Một menu (portal `position: fixed`). Khách đã xoá: **chỉ** «Khôi phụ
 | Mở chat | Tab ngoài. Khách **Page** (Business Suite): URL inbox lúc quét (`pageUrl`). Messenger E2EE: `facebook.com/messages/e2ee/t/{threadId}`. Messenger thường: `facebook.com/messages/t/{threadId}`. Hiện khi khách có Facebook; thiếu URL → CrmAlert; **ẩn mobile**. Tin đã lưu xem cột phụ «Nội dung chat». **Không** phải inbox sống |
 | Mở Messenger | Tab `messenger.com/t/{threadId\|uid}` (CRM cũ). Hiện khi khách có Facebook; thiếu mã số → CrmAlert |
 | Cập nhật chăm sóc | Modal. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
-| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai), Lưu / Huỷ. Gắn khách này |
+| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai), Lưu / Huỷ. Gắn khách này. **Đồng thời** ghi **lịch sử chăm sóc** (ghi chú = nội dung việc; không đổi trạng thái / tài chính / nhu cầu) |
 | Thêm / Sửa số điện thoại | Chưa có số: modal thêm. Đã có: sửa (Lưu / Xóa). Icon cam = thêm nhanh |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat` (lodats.md §12.5). ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` (form tạo hồ sơ) |
@@ -420,7 +420,7 @@ Cùng menu máy tính (portal). Khách đã xoá: **chỉ** «Khôi phục khác
 | Mở chat | **Ẩn mobile.** Máy tính: Page → URL Business Suite; E2EE `/messages/e2ee/t/…`; còn lại `facebook.com/messages/t/…` |
 | Mở Messenger | Tab `messenger.com/t/…` (có FB; thiếu mã → CrmAlert) |
 | Cập nhật chăm sóc | Trang `/khach-hang/[id]/cham-soc`. Form: trạng thái, nhu cầu, tài chính (chip), ghi chú |
-| Thêm công việc | Cùng modal 12.1.4 (gắn khách này) |
+| Thêm công việc | Cùng modal 12.1.4 (gắn khách này). **Đồng thời** ghi lịch sử chăm sóc — ghi chú = nội dung việc |
 | Thêm / Sửa số điện thoại | Cùng 12.1.4 mục 5 |
 | Tạo lô đất | STAFF → `/khach-hang/[id]/them-lo-dat`. ADMIN: báo không được tạo |
 | Dịch vụ sổ đỏ | `/khach-hang/[id]/dich-vu-so-do` |

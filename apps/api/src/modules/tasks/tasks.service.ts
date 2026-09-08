@@ -52,6 +52,7 @@ export class TasksService {
             type: 'NONE' as const,
             label: '',
             customerId: null as string | null,
+            customerHidden: false,
             lodatId: null as string | null,
             transactionId: null as string | null,
             titleServiceId: null as string | null,
@@ -87,6 +88,22 @@ export class TasksService {
         });
         await tx.titleService.update({
           where: { id: target.titleServiceId },
+          data: { updatedAt: new Date() },
+        });
+      }
+
+      // Thêm công việc trên khách = lần chăm sóc (ghi chú = nội dung việc).
+      if (target.type === 'CUSTOMER' && target.customerId && !target.customerHidden) {
+        await tx.customerCareNote.create({
+          data: {
+            customerId: target.customerId,
+            employeeId: user.id,
+            needSummary: null,
+            note: content,
+          },
+        });
+        await tx.customer.update({
+          where: { id: target.customerId },
           data: { updatedAt: new Date() },
         });
       }
@@ -201,7 +218,7 @@ export class TasksService {
     if (type === 'CUSTOMER') {
       const row = await this.prisma.customer.findUnique({
         where: { id: targetId },
-        select: { id: true, fullName: true, employeeId: true },
+        select: { id: true, fullName: true, employeeId: true, isHidden: true },
       });
       if (!row) throw new NotFoundException('Không tìm thấy khách hàng.');
       assertCustomerAccess(user, row.employeeId);
@@ -209,6 +226,7 @@ export class TasksService {
         type,
         label: row.fullName.trim() || 'Khách hàng',
         customerId: row.id,
+        customerHidden: row.isHidden,
         lodatId: null as string | null,
         transactionId: null as string | null,
         titleServiceId: null as string | null,
@@ -234,6 +252,7 @@ export class TasksService {
         type,
         label,
         customerId: null,
+        customerHidden: false,
         lodatId: row.id,
         transactionId: null,
         titleServiceId: null,
@@ -253,6 +272,7 @@ export class TasksService {
         type,
         label: row.code,
         customerId: null,
+        customerHidden: false,
         lodatId: null,
         transactionId: row.id,
         titleServiceId: null,
@@ -275,6 +295,7 @@ export class TasksService {
       type,
       label: row.customer.fullName.trim() || 'Khách hàng',
       customerId: null,
+      customerHidden: false,
       lodatId: null,
       transactionId: null,
       titleServiceId: row.id,
