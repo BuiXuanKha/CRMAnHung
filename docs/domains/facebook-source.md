@@ -121,7 +121,7 @@ Trùng Person theo thread E2EE đã copy nguyên — không tự gộp lúc migr
 
 Owner 2026-09-08: **Nhánh Page không bàn** UID — chắc chắn gửi `customerUid`. Việc còn lại: hai nhánh Messenger **có quét được UID không**, có thì **chuẩn hoá đưa về** (`customerUid` thật, không lấy mã cuộc chat thế). Chi tiết **§13**.
 
-1. Nhánh Messenger E2EE lúc panel hiện «chưa đọc được UID FB»: **không POST**, hay đợi / bảo NV mở Chi tiết liên hệ?
+1. Nhánh Messenger E2EE lúc panel hiện «chưa đọc được UID FB»: **không POST**, hay đợi / bảo NV mở Chi tiết liên hệ? (Live `kha` 2026-09-08: case đang mở **có** UID.)
 2. Nhánh Messenger thường: NV An Hưng có chat **nhóm** (`/messages/t/` không phải UID người) không?
 3. KEY Person = **UID khách** (sau khi hai nhánh Messenger đã chuẩn hoá gửi UID) — coi như nghiêng **A** ở §12.3; mã cuộc chat vẫn gửi để Mở chat.
 
@@ -215,7 +215,7 @@ Quy tắc gửi: đủ tầng khóa → mới `POST`. Thiếu khóa → panel b�
 
 Owner: Nhánh Page **không bàn**. Chỉ xác định Nhánh Messenger thường và Nhánh Messenger E2EE. **Có UID thật thì chuẩn hoá gửi `customerUid`**. Chưa sửa code.
 
-Đọc code `ext-context-facebook-com.js` + `scanner-messenger-web.js` + `content-inbox.js`. Không mở được inbox Facebook từ môi trường agent — chưa live-test trên máy NV.
+Đọc code `ext-context-facebook-com.js` + `scanner-messenger-web.js` + `content-inbox.js`. **Live 2026-09-08** — owner `kha` Copy thông tin quét v2.13.0, hai hội thoại nick `100003051909934`. Xem **§13.4**.
 
 ### 13.1 Nhánh Messenger thường — có, nguồn là URL, không phải quét DOM
 
@@ -228,7 +228,7 @@ Khi NV mở `facebook.com/messages/t/{số}`:
 
 **Chuẩn hoá (đề xuất, chưa code):** luôn gửi `customerUid` khi số URL là UID người (một-một). Vẫn gửi `threadId` (cùng số) để Mở chat. Không bịa UID từ tên. Nếu sau này gặp nhóm: **không** gán `customerUid` = mã nhóm.
 
-Kết luận: nhánh này **có** `customerUid` trên JSON với chat một-một. Việc «quét» thực ra là **copy số URL**.
+Kết luận: nhánh này **có** `customerUid` trên JSON với chat một-một. Việc «quét» thực ra là **copy số URL**. Live `kha` × **Bùi Dung**: `thread_id` = `customerUid` = `100006413621569`.
 
 ### 13.2 Nhánh Messenger E2EE — có thể quét được, không phải lần nào cũng có
 
@@ -249,10 +249,25 @@ Bốn cặp **`buinam`** trên DB (2026-09-04) **đều có cùng UID** trên ha
 - Có UID → **bắt buộc** gửi `customerUid` (số người), `threadId` riêng (mã cuộc chat). Không gán `customerUid` = `threadId`.
 - Chưa có UID → **không tạo Person**. Panel giữ khách đang mở, đợi quét được hoặc NV mở Chi tiết liên hệ. Không gửi khách chỉ có mã cuộc chat.
 
-Kết luận: nhánh này **quét được UID nhiều lúc**, kể cả trên data cũ của `buinam`. Chỗ phải chuẩn hoá là **đưa UID về khi có**, và **đừng gửi** khi chưa có.
+Kết luận: nhánh này **quét được UID nhiều lúc**, kể cả trên data cũ của `buinam`. Chỗ phải chuẩn hoá là **đưa UID về khi có**, và **đừng gửi** khi chưa có. Live `kha` × **Gia Đình. Chị Bình**: mã cuộc chat `6846994922073317` **khác** UID khách `100015038463287`; nguồn `lightspeed-otid-mapping` (score 100).
 
 ### 13.3 Việc tiếp theo (chưa làm)
 
-1. Owner mở **Nhánh Messenger E2EE** trên máy: panel hiện «UID FB …» hay «chưa đọc được UID FB».
-2. Chốt: chưa có UID thì không POST (đề xuất) hay vẫn gửi tạm.
-3. Khi chốt xong mới sửa extension + API (không lấy `threadId` thế UID; tìm khách theo UID trên kênh trước).
+1. ~~Owner mở Nhánh Messenger E2EE: panel hiện UID hay trống.~~ **Xong 2026-09-08** — có UID (score 100). Vẫn chưa có case «trống» trên máy `kha`.
+2. Chốt: lúc E2EE **chưa** có UID thì không POST (đề xuất) hay vẫn gửi tạm.
+3. Khi chốt xong mới sửa extension + API (không lấy `threadId` thế UID; tìm khách theo **UID trên kênh** trước, mã cuộc chat chỉ để Mở chat).
+
+### 13.4 Live Copy thông tin quét — `kha`, 2026-09-08
+
+Cùng nick NV `100003051909934`, extension v2.13.0. Không ghi URL avatar.
+
+| | Nhánh Messenger thường | Nhánh Messenger E2EE |
+|--|------------------------|----------------------|
+| URL | `/messages/t/100006413621569` | `/messages/e2ee/t/6846994922073317` |
+| Tên khách | Bùi Dung | Gia Đình. Chị Bình |
+| Mã cuộc chat (`threadId`) | `100006413621569` | `6846994922073317` |
+| UID khách (`customerUid`) | `100006413621569` **trùng** mã cuộc chat | `100015038463287` **khác** mã cuộc chat |
+| Nguồn UID | Số trên URL | `lightspeed-otid-mapping` (score 100) |
+| Link profile | `facebook.com/100006413621569` | `facebook.com/100015038463287` |
+
+Hai nhánh **đều đưa về được UID khách**. Khác nhau: Messenger thường UID = số URL; E2EE UID phải đọc map, không được lấy số URL thế.
