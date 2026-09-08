@@ -54,7 +54,9 @@ export function taskDueCountdown(dueOn: string, todayYmd = ymdInVietnam(0)): Tas
 }
 
 export function taskContextLine(type: TaskTargetType, label: string): string {
-  if (type === TaskTargetType.NONE) return 'Ghi chú cá nhân';
+  if (type === TaskTargetType.NONE) {
+    return 'Công việc này lấy từ trang Công việc';
+  }
   const name = label.trim() || '—';
   switch (type) {
     case TaskTargetType.CUSTOMER:

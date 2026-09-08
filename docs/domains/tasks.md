@@ -124,7 +124,7 @@ Cùng mục **Công việc** đã có. Icon `ListTodo`.
 
 ##### 3. Nguồn
 
-`taskContextLine` (mục 12.4). `NONE` / không gắn → «Ghi chú cá nhân». Tối đa 2 dòng.
+`taskContextLine` (mục 12.4). `NONE` / FAB → «Công việc này lấy từ trang Công việc». Tối đa 2 dòng.
 
 ##### 4. Hạn làm
 
@@ -196,11 +196,11 @@ Mở từ **FAB** `/cong-viec` hoặc menu Thao tác 4 list. `CrmDialog` §4.7. 
 
 #### 12.3.1 Dòng nguồn
 
-- FAB / không gắn: **không** hiện dòng nguồn (hoặc ẩn).
-- Từ list: không sửa được. Copy:
+Không sửa được. Copy:
 
 | Nguồn | Câu |
 |-------|------|
+| FAB `/cong-viec` (`NONE`) | Công việc này lấy từ trang Công việc |
 | Khách hàng | Công việc này cho Khách hàng [tên] |
 | Lô đất | Công việc này cho Lô đất [tiêu đề] |
 | Sổ đỏ | Công việc này cho dịch vụ sổ đỏ của khách [tên khách] |
@@ -235,6 +235,6 @@ Mục **Thêm công việc** (icon `ListTodo`). Khách đã ẩn: **không** hi�
 
 Mở khi bấm dòng / thẻ / **Xem chi tiết**. `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề: **Công việc**.
 
-Nội dung (`content`). Dòng nguồn (`NONE` → «Ghi chú cá nhân»). Hạn `D/M/YYYY` + hangtag đếm ngược (cùng 12.1.3 mục 5).
+Nội dung (`content`). Dòng nguồn (`NONE` → «Công việc này lấy từ trang Công việc»). Hạn `D/M/YYYY` + hangtag đếm ngược (cùng 12.1.3 mục 5).
 
 **Đóng** · **Hoàn thành** (primary). Busy khi PATCH. Xong: đóng, toast «Đã hoàn thành công việc.»

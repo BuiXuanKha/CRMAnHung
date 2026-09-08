@@ -65,9 +65,9 @@ export function CreateTaskDialog({
   return (
     <CrmDialog open={open} title="Thêm công việc" icon={ListTodo} onClose={onClose} busy={busy}>
       <form onSubmit={handleSubmit}>
-        {target ? (
-          <p className="cv-dialog-context">{taskContextLine(target.type, target.label)}</p>
-        ) : null}
+        <p className="cv-dialog-context">
+          {taskContextLine(target?.type ?? TaskTargetType.NONE, target?.label ?? '')}
+        </p>
         <label>
           Nội dung công việc
           <textarea
