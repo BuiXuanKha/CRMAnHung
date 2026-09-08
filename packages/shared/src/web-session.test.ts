@@ -1,39 +1,45 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
-import { isAdminOnlyCrmPath, isCrmAppPath, isStaffLotWebPath } from './web-session.js';
-import { isTasksPath } from './tasks.js';
+import {
+  DANG_BAI_WEB_PATH,
+  isAdminOnlyCrmPath,
+  isCrmAppPath,
+  isStaffDangBaiPath,
+  isStaffLotWebPath,
+  staffDashboardFallbackPath,
+} from './web-session.js';
 
-describe('isStaffLotWebPath', () => {
-  it('matches the staff lot publish page', () => {
-    assert.equal(isStaffLotWebPath('/dashboard/lo-dat'), true);
-    assert.equal(isStaffLotWebPath('/dashboard/lo-dat/x'), true);
-    assert.equal(isStaffLotWebPath('/dashboard'), false);
-    assert.equal(isStaffLotWebPath('/dashboard/bai-viet'), false);
+describe('isStaffDangBaiPath', () => {
+  it('matches /dang-bai only', () => {
+    assert.equal(isStaffDangBaiPath('/dang-bai'), true);
+    assert.equal(isStaffDangBaiPath('/dang-bai/x'), true);
+    assert.equal(isStaffDangBaiPath('/dashboard/lo-dat'), false);
+    assert.equal(isStaffDangBaiPath('/dashboard'), false);
+    assert.equal(isStaffDangBaiPath('/dashboard/bai-viet'), false);
+  });
+
+  it('keeps deprecated alias in sync', () => {
+    assert.equal(isStaffLotWebPath('/dang-bai'), true);
+    assert.equal(isStaffLotWebPath('/dashboard/lo-dat'), false);
   });
 });
 
 describe('isAdminOnlyCrmPath', () => {
-  it('keeps lot publish off the admin-only list', () => {
-    assert.equal(isAdminOnlyCrmPath('/dashboard/lo-dat'), false);
+  it('treats all dashboard as admin-only', () => {
     assert.equal(isAdminOnlyCrmPath('/dashboard'), true);
     assert.equal(isAdminOnlyCrmPath('/dashboard/bai-viet'), true);
+    assert.equal(isAdminOnlyCrmPath('/dashboard/lo-dat'), true);
+    assert.equal(isAdminOnlyCrmPath('/dang-bai'), false);
     assert.equal(isAdminOnlyCrmPath('/quan-tri/nguoi-dung'), true);
-    assert.equal(isAdminOnlyCrmPath('/cong-viec'), false);
   });
 });
 
-describe('isCrmAppPath', () => {
-  it('treats Công việc as a logged-in CRM route', () => {
-    assert.equal(isCrmAppPath('/cong-viec'), true);
-    assert.equal(isCrmAppPath('/cong-viec/x'), true);
-    assert.equal(isCrmAppPath('/cong-viec-x'), false);
+describe('isCrmAppPath + fallback', () => {
+  it('includes dang-bai', () => {
+    assert.equal(isCrmAppPath('/dang-bai'), true);
   });
-});
 
-describe('isTasksPath', () => {
-  it('matches the tasks page and nested paths', () => {
-    assert.equal(isTasksPath('/cong-viec'), true);
-    assert.equal(isTasksPath('/cong-viec/x'), true);
-    assert.equal(isTasksPath('/khach-hang'), false);
+  it('falls STAFF dashboard hits to dang-bai', () => {
+    assert.equal(staffDashboardFallbackPath(), DANG_BAI_WEB_PATH);
   });
 });

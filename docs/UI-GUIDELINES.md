@@ -81,7 +81,7 @@ Phần **chung** (AppShell), không thuộc nội dung từng trang:
 | Kiểu shell | **Một hàng header**, **full chiều ngang viewport** (workbench) |
 | Header trái | Logo + tên ứng dụng **An Hưng Land CRM** |
 | Header phải | Menu chính **cạnh avatar**, mục cách nhau **vạch đứng 1px** (không dùng ký tự `|` trong DOM); **cũng có vạch trước avatar** |
-| Menu | **Công việc** \| Quản lý khách hàng \| Quản lý lô đất \| Quản lý giao dịch \| Dịch vụ sổ đỏ (+ **Đăng web** STAFF → `/dashboard/lo-dat`; + Dashboard / quản trị nếu ADMIN) |
+| Menu | **Công việc** \| Quản lý khách hàng \| Quản lý lô đất \| Quản lý giao dịch \| Dịch vụ sổ đỏ (+ **Đăng bài** STAFF → `/dang-bai`; + Dashboard / quản trị nếu ADMIN) |
 | Active | Chữ **xanh** `#2563eb` **700** — không pill nền riêng |
 | Avatar | Click → menu: tên + vai trò; **Cài đặt**; **Đổi mật khẩu**; **Đăng xuất** cuối (đỏ) |
 | Typography CRM | **Noto Sans**, gốc **14px** (public vẫn Be Vietnam Pro) |
@@ -595,7 +595,7 @@ Hai việc **khác nhau** — không gộp một màn:
 
 | Việc | Trạng thái |
 |------|------------|
-| **Đăng web công khai** (tin, bài, lô bán) | **Dashboard** `/dashboard` — ADMIN: Tổng quan, Lô đất, Bài viết. STAFF: header **Đăng web** → `/dashboard/lo-dat` (chỉ lô mình). Bài CMS chỉ ADMIN. [`public-content.md`](./domains/public-content.md). **Không** thêm công tắc Đăng web trên 4 trang CRM. |
+| **Đăng web công khai** (tin, bài, lô bán) | **Dashboard** `/dashboard` — ADMIN: Tổng quan, Bài viết, Thống kê. STAFF: header **Đăng bài** → `/dang-bai` (chỉ lô mình; không nằm dưới Dashboard). Bài CMS chỉ ADMIN. [`public-content.md`](./domains/public-content.md). **Không** thêm công tắc Đăng web trên 4 trang CRM. |
 | Registry / xóa cứng khách, CRUD NV | **Tạm hoãn** (P4). `/quan-tri/khach-hang` vẫn placeholder. |
 
 Khi mock Đăng web: shell CRM §4.2; bảng list §4.5; dialog §4.7. Không dùng layout marketing public cho màn admin.
@@ -685,12 +685,12 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-26 | `/dich-vu-so-do` ADMIN: select nhân viên tạo; xem file mật ghi nhật ký `TitleServiceAttachmentView` |
 | 2026-08-26 | **Dashboard** `/dashboard` (ADMIN): menu Tổng quan · Lô đất public mở bán · Bài viết. Bốn trang CRM không thêm quyền admin |
 | 2026-08-26 | Mock dashboard: Đăng/Gỡ lô, Soạn bài / Xuất bản / Về nháp; admin login → `/dashboard` |
-| 2026-08-26 | `/dashboard/lo-dat`: giữa = lô NV đang Mở bán; phải = preview bài đăng trang khách |
-| 2026-08-26 | `/dashboard/lo-dat`: không H1, không nút Đăng lô cạnh ô tìm; ô tìm chrome như `/lo-dat`; preview ~440px; cột bảng sát list lô NV |
-| 2026-08-26 | `/dashboard/lo-dat` preview: **Đăng web** khi chờ đăng; lô đang hiện chỉ còn link xem trang khách — không nút Gỡ web |
+| 2026-08-26 | `/dang-bai`: giữa = lô NV đang Mở bán; phải = preview bài đăng trang khách |
+| 2026-08-26 | `/dang-bai`: không H1, không nút Đăng lô cạnh ô tìm; ô tìm chrome như `/lo-dat`; preview ~440px; cột bảng sát list lô NV |
+| 2026-08-26 | `/dang-bai` preview: **Đăng web** khi chờ đăng; lô đang hiện chỉ còn link xem trang khách — không nút Gỡ web |
 | 2026-08-26 | Menu trong Dashboard: **Lô đất** (trước: Lô đất public mở bán) |
-| 2026-08-26 | `/dashboard/lo-dat` panel phải: tiêu đề **Preview Post** |
-| 2026-08-26 | `/dashboard/lo-dat`: lọc cột §4.5.5 (ảnh, địa chỉ, phân loại, DT/hướng, giá, NV, Web); mobile Bộ lọc |
+| 2026-08-26 | `/dang-bai` panel phải: tiêu đề **Preview Post** |
+| 2026-08-26 | `/dang-bai`: lọc cột §4.5.5 (ảnh, địa chỉ, phân loại, DT/hướng, giá, NV, Web); mobile Bộ lọc |
 | 2026-08-30 | Dialog CRM mobile: panel không tràn viewport; ô file dùng hàng «Chọn tệp» + tên (không native width) |
 | 2026-08-30 | `/dich-vu-so-do` mobile: bấm thẻ / Xem chi tiết → trang `/dich-vu-so-do/[id]` (panel vẫn máy tính) |
 | 2026-08-30 | Docs `/khach-hang` khớp code: tạo lô từ khách STAFF; menu khôi phục ẩn; lô rail/chi tiết = API; không nhớ panel rail; lọc lô/nhu cầu `has|empty` |
@@ -702,7 +702,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-30 | Docs khách: Inbox Facebook sống ≠ cột phụ tin đã lưu / menu Mở chat; ô tìm API không khớp tên FB |
 | 2026-08-31 | List `/lo-dat` cột Giá bán: dòng hoa hồng = chữ đã lưu (`brokerFeeNote`), không phải `%` số `commissionPercent` |
 | 2026-08-31 | `/lo-dat`: thiếu ảnh = ô xám + `ImageOff`; ô tìm không map chữ Nhà/Đất sang hangtag (lọc cột Phân loại) |
-| 2026-09-02 | STAFF header **Đăng web** → `/dashboard/lo-dat` (lô mình tạo). Preview **Gỡ web** khi đang hiện. Bài CMS + Tổng quan vẫn ADMIN |
+| 2026-09-02 | STAFF header **Đăng bài** → `/dang-bai` (lô mình tạo). Preview **Gỡ web** khi đang hiện. Bài CMS + Tổng quan vẫn ADMIN |
 | 2026-09-02 | Dashboard menu **Thống kê** `/dashboard/thong-ke` (ADMIN): list NV + cột số lô đã tạo link share + lượt xem khách (cookie, gồm trang chủ, F5 = +1) |
 | 2026-09-02 | Thống kê: thêm dòng **Truy cập trực tiếp** (khách không cookie share); cùng F5 = +1; icon Lucide `Globe` |
 | 2026-09-03 | Chi tiết `/khach-hang/[id]` mobile: ẩn «← Danh sách khách»; FAB gọi (`tel:`) + **Zalo** (`zalo.me`) khi có SĐT + **Mở Messenger** (cùng menu list mobile); máy tính không đổi |
@@ -716,6 +716,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | `/cong-viec`: sắp xếp ghim→hạn gần; đã xong ở cuối + gạch ngang |
 | 2026-09-08 | `/dich-vu-so-do`: **Thêm công việc** → tiến độ **Công việc**; avatar CRM: **Đổi mật khẩu** |
 | 2026-09-08 | `/cong-viec` nguồn: bỏ «Công việc này cho…»; in hoa `LOẠI \| TÊN` màu `#2563eb` |
+| 2026-09-08 | STAFF **Đăng bài** → `/dang-bai` (peer CRM; bỏ `/dashboard/lo-dat`, không redirect cũ). Dashboard chỉ ADMIN |
 
 ---
 

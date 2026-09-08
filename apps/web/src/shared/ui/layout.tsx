@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     ...(user.role === 'STAFF' ? [homeNavItem] : []),
     ...navItems,
     ...(user.role === 'STAFF'
-      ? [{ href: '/dashboard/lo-dat', label: 'Đăng web', icon: Globe }]
+      ? [{ href: '/dang-bai', label: 'Đăng bài', icon: Globe }]
       : []),
     ...(user.role === 'ADMIN'
       ? [

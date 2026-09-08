@@ -214,7 +214,7 @@ export const publicWebListingCrmDriftItemSchema = z.object({
 
 export type PublicWebListingCrmDriftItem = z.infer<typeof publicWebListingCrmDriftItemSchema>;
 
-/** Lô CRM đang Mở bán — list giữa `/dashboard/lo-dat` + preview phải. */
+/** Lô CRM đang Mở bán — list giữa `/dang-bai` + preview phải. */
 export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   staffName: z.string(),
   kind: z.nativeEnum(LodatKind),
@@ -222,11 +222,11 @@ export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   frontageM: z.number().nullable(),
   direction: z.string().nullable(),
   excerpt: z.string(),
-  /** Giá CRM — lọc khoảng giá trên `/dashboard/lo-dat`; không hiện cho khách */
+  /** Giá CRM — lọc khoảng giá trên `/dang-bai`; không hiện cho khách */
   priceVnd: z.union([z.number(), z.string()]).nullable(),
   /** Optional SERP/OG snippet. Empty → use excerpt. Overlay editor can set later. */
   metaDescription: z.string().trim().max(320).nullable().optional(),
-  /** Lệch overlay vs CRM — có phần tử thì hiện chấm than đỏ trên Đăng web. */
+  /** Lệch overlay vs CRM — có phần tử thì hiện chấm than đỏ trên Đăng bài. */
   crmDrift: z.array(publicWebListingCrmDriftItemSchema).default([]),
 });
 
