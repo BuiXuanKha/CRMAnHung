@@ -378,8 +378,13 @@ export class PublicContentService {
 
   /**
    * Đồng bộ title/location overlay từ CRM (slug giữ nguyên). Revalidate hangtag/catalog.
+   * Nếu listing đã tồn tại + published trước lần sync → bật needsWebUpdate (icon đỏ /dang-bai).
    */
   async syncListingFromLodat(lodatId: string): Promise<void> {
+    const existingBefore = await this.prisma.publicLotListing.findUnique({
+      where: { lodatId },
+      select: { id: true, isPublished: true },
+    });
     await this.ensureListingForLodat(lodatId);
     const lodat = await this.prisma.lodat.findUnique({
       where: { id: lodatId },
@@ -396,6 +401,7 @@ export class PublicContentService {
       listing.bodyHtml?.trim()
         ? listing.excerpt
         : [title, location].filter(Boolean).join('. ');
+    const markNeedsWebUpdate = Boolean(existingBefore?.isPublished);
     const saved = await this.prisma.publicLotListing.update({
       where: { id: listing.id },
       data: {
@@ -404,6 +410,7 @@ export class PublicContentService {
         excerpt,
         isPublished: true,
         ...(!listing.publishedAt ? { publishedAt: new Date() } : {}),
+        ...(markNeedsWebUpdate ? { needsWebUpdate: true } : {}),
       },
     });
     const hub = await this.persistCommuneHubForLodat(lodat);
@@ -531,6 +538,7 @@ export class PublicContentService {
       excerpt: string;
       bodyHtml: string;
       isPublished: boolean;
+      needsWebUpdate: boolean;
       publishedAt?: Date;
       metaDescription?: string | null;
       seoTitle?: string | null;
@@ -542,6 +550,7 @@ export class PublicContentService {
       excerpt,
       bodyHtml,
       isPublished: true,
+      needsWebUpdate: false,
       ...(!existing.publishedAt ? { publishedAt: new Date() } : {}),
     };
     if (metaDescription !== undefined) {
@@ -795,6 +804,7 @@ export class PublicContentService {
       priceLabel: row.priceLabel,
       excerpt: row.excerpt,
       bodyHtml: row.bodyHtml ?? '',
+      needsWebUpdate: Boolean(row.needsWebUpdate),
     };
   }
 

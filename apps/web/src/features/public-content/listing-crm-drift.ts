@@ -1,68 +1,23 @@
-import type { LodatListItem, PublicWebListingCrmDriftItem, PublicWebLotRow } from '@crmanhung/shared';
-
-function norm(value: string | null | undefined): string {
-  return String(value ?? '')
-    .trim()
-    .replace(/\s+/g, ' ');
-}
-
-function sameText(a: string, b: string): boolean {
-  return a.toLocaleLowerCase('vi') === b.toLocaleLowerCase('vi');
-}
-
 /**
- * BUG-062 hướng B: so overlay Đăng web với lô CRM (tiêu đề + địa chỉ).
- * Chỉ khi đã có hàng listing (đã soạn / xuất bản).
+ * Icon đỏ /dang-bai: CRM đã cập nhật sau lần NV lưu bài web (`needsWebUpdate`).
+ * Không so khớp title/location overlay vs CRM.
  */
-export function computeListingCrmDrift(
-  plot: LodatListItem,
-  listing: PublicWebLotRow | undefined,
-): PublicWebListingCrmDriftItem[] {
-  if (!listing) return [];
 
-  const items: PublicWebListingCrmDriftItem[] = [];
-  const listingTitle = norm(listing.title);
-  const crmTitle = norm(plot.title);
-  if (listingTitle && crmTitle && !sameText(listingTitle, crmTitle)) {
-    items.push({
-      field: 'title',
-      label: 'Tiêu đề',
-      listingValue: listingTitle,
-      crmValue: crmTitle,
-    });
-  }
-
-  const listingLocation = norm(listing.location);
-  const crmLocation = norm(plot.address);
-  if (listingLocation && crmLocation && !sameText(listingLocation, crmLocation)) {
-    items.push({
-      field: 'location',
-      label: 'Địa chỉ',
-      listingValue: listingLocation,
-      crmValue: crmLocation,
-    });
-  }
-
-  return items;
+export function formatNeedsWebUpdateMessage(): string {
+  return [
+    'Lô đất trên CRM đã được cập nhật sau lần lưu bài đăng web.',
+    '',
+    'Vào Soạn bài đăng và Lưu lại để cập nhật nội dung trên web khách (ảnh, mô tả, giá công khai…).',
+  ].join('\n');
 }
 
-export function formatListingCrmDriftMessage(items: PublicWebListingCrmDriftItem[]): string {
-  if (!items.length) return 'Không có thay đổi.';
-  return items
-    .map(
-      (item) =>
-        `• ${item.label}\n  Đăng web: ${item.listingValue}\n  CRM: ${item.crmValue}`,
-    )
-    .join('\n\n');
-}
-
-/** Lô có lệch CRM xếp trước; giữ thứ tự tương đối trong mỗi nhóm. */
-export function sortStaffLotsByCrmDrift<T extends { crmDrift?: PublicWebListingCrmDriftItem[] }>(
+/** Lô cần cập nhật bài web xếp trước; giữ thứ tự tương đối trong mỗi nhóm. */
+export function sortStaffLotsByNeedsWebUpdate<T extends { needsWebUpdate?: boolean }>(
   items: T[],
 ): T[] {
   return [...items].sort((a, b) => {
-    const ad = a.crmDrift?.length ? 1 : 0;
-    const bd = b.crmDrift?.length ? 1 : 0;
+    const ad = a.needsWebUpdate ? 1 : 0;
+    const bd = b.needsWebUpdate ? 1 : 0;
     return bd - ad;
   });
 }

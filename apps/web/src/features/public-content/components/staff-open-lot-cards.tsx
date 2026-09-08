@@ -15,7 +15,7 @@ type Props = {
   onSelect: (lodatId: string) => void;
   onEdit: (lodatId: string) => void;
   onGptContent: (lodatId: string) => void;
-  onCrmDrift: (row: PublicWebStaffLotRow) => void;
+  onNeedsWebUpdate: (row: PublicWebStaffLotRow) => void;
 };
 
 export function StaffOpenLotCards({
@@ -25,7 +25,7 @@ export function StaffOpenLotCards({
   onSelect,
   onEdit,
   onGptContent,
-  onCrmDrift,
+  onNeedsWebUpdate,
 }: Props) {
   const lastTap = useRef<{ id: string; at: number } | null>(null);
 
@@ -49,7 +49,7 @@ export function StaffOpenLotCards({
         <ul className="pw-card-list">
           {items.map((row) => {
             const price = lotPriceDisplay(row);
-            const hasDrift = Boolean(row.crmDrift?.length);
+            const hasNeedsWebUpdate = Boolean(row.needsWebUpdate);
             return (
               <li key={row.lodatId} data-list-row-id={row.lodatId} className="pw-card-item">
                 <button
@@ -72,23 +72,23 @@ export function StaffOpenLotCards({
                     <span className="pw-card-top">
                       <span className="pw-title-row">
                         <strong className="pw-title">{row.title}</strong>
-                        {hasDrift ? (
+                        {hasNeedsWebUpdate ? (
                           <span
                             role="button"
                             tabIndex={0}
                             className="pw-crm-drift-btn"
-                            title="CRM đã đổi — xem chi tiết"
-                            aria-label="CRM đã đổi so với bản Đăng web"
+                            title="Lô CRM đã cập nhật — cần cập nhật bài web"
+                            aria-label="Lô CRM đã cập nhật, cần cập nhật bài đăng web"
                             onClick={(event) => {
                               event.preventDefault();
                               event.stopPropagation();
-                              onCrmDrift(row);
+                              onNeedsWebUpdate(row);
                             }}
                             onKeyDown={(event) => {
                               if (event.key !== 'Enter' && event.key !== ' ') return;
                               event.preventDefault();
                               event.stopPropagation();
-                              onCrmDrift(row);
+                              onNeedsWebUpdate(row);
                             }}
                           >
                             <Icon icon={CircleAlert} size="sm" />

@@ -178,10 +178,10 @@ export function applyStaffLotFilters(
     }
     return true;
   });
-  // Giữ lô lệch CRM (BUG-062) ở đầu sau khi lọc.
+  // Lô CRM đã cập nhật (cần Soạn/Lưu lại bài web) xếp đầu.
   return [...filtered].sort((a, b) => {
-    const ad = a.crmDrift?.length ? 1 : 0;
-    const bd = b.crmDrift?.length ? 1 : 0;
+    const ad = a.needsWebUpdate ? 1 : 0;
+    const bd = b.needsWebUpdate ? 1 : 0;
     return bd - ad;
   });
 }

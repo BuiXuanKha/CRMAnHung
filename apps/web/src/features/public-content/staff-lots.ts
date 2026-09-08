@@ -10,7 +10,7 @@ import {
 } from '@crmanhung/shared';
 import { toListingPublicSlug } from './display';
 import { plainTextToListingBodyHtml, suggestPublicExcerpt, suggestPublicPrice } from './listing-copy';
-import { computeListingCrmDrift, sortStaffLotsByCrmDrift } from './listing-crm-drift';
+import { sortStaffLotsByNeedsWebUpdate } from './listing-crm-drift';
 
 function listingNeedsCompose(listing: PublicWebLotRow | undefined): boolean {
   return !listing?.bodyHtml?.trim();
@@ -49,7 +49,6 @@ export function buildStaffOpenLots(
       listing?.excerpt?.trim() ||
       listingBodyToExcerpt(bodyHtml) ||
       suggestedExcerpt;
-    const crmDrift = computeListingCrmDrift(plot, listing);
     const needsCompose = listingNeedsCompose(listing);
     return {
       id: listing?.id ?? `pending-${plot.id}`,
@@ -70,11 +69,11 @@ export function buildStaffOpenLots(
       frontageM,
       direction,
       priceVnd: plot.priceVnd ?? null,
-      crmDrift,
+      needsWebUpdate: Boolean(listing?.needsWebUpdate),
       ...(listing?.seoTitle != null ? { seoTitle: listing.seoTitle } : {}),
     };
   });
-  return sortStaffLotsByCrmDrift(rows);
+  return sortStaffLotsByNeedsWebUpdate(rows);
 }
 
 export function buildPublicWebDashboard(

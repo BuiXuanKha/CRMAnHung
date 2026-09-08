@@ -723,6 +723,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | `/khach-hang`: hoàn thành việc gắn khách → lần chăm sóc hangtag **Đã hoàn thành** |
 | 2026-09-08 | Lịch sử chăm sóc + tiến độ sổ đỏ: **không** gạch chữ khi xong (chỉ hangtag **Đã hoàn thành**) |
 | 2026-09-08 | `/cong-viec`: việc xong → hangtag **Đã hoàn thành**; dừng đếm hạn (Hôm nay / Quá hạn…) |
+| 2026-09-09 | `/dang-bai`: icon đỏ = CRM đã cập nhật sau bài web (`needsWebUpdate`); không so khớp title/địa chỉ |
 
 ---
 

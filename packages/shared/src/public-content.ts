@@ -197,22 +197,14 @@ export const publicWebLotRowSchema = z.object({
   excerpt: z.string().optional(),
   /** HTML mô tả công khai (TipTap). Ảnh trong bài = URL CDN. */
   bodyHtml: z.string().optional(),
+  /**
+   * CRM đã cập nhật thuộc tính sau lần NV lưu bài web — icon đỏ /dang-bai.
+   * Không phải so khớp title/location (GPT đổi H1 không bật).
+   */
+  needsWebUpdate: z.boolean().optional().default(false),
 });
 
 export type PublicWebLotRow = z.infer<typeof publicWebLotRowSchema>;
-
-/**
- * BUG-062 (cũ hướng B): lệch overlay vs CRM — owner 2026-09-07: CRM sửa → sync title/location.
- * Drift badge còn để NV biết khi soạn tay lệch; sync API giảm case.
- */
-export const publicWebListingCrmDriftItemSchema = z.object({
-  field: z.enum(['title', 'location']),
-  label: z.string(),
-  listingValue: z.string(),
-  crmValue: z.string(),
-});
-
-export type PublicWebListingCrmDriftItem = z.infer<typeof publicWebListingCrmDriftItemSchema>;
 
 /** Lô CRM đang Mở bán — list giữa `/dang-bai` + preview phải. */
 export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
@@ -226,8 +218,6 @@ export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   priceVnd: z.union([z.number(), z.string()]).nullable(),
   /** Optional SERP/OG snippet. Empty → use excerpt. Overlay editor can set later. */
   metaDescription: z.string().trim().max(320).nullable().optional(),
-  /** Lệch overlay vs CRM — có phần tử thì hiện chấm than đỏ trên Đăng bài. */
-  crmDrift: z.array(publicWebListingCrmDriftItemSchema).default([]),
 });
 
 export type PublicWebStaffLotRow = z.infer<typeof publicWebStaffLotRowSchema>;
