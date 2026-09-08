@@ -14,6 +14,7 @@ import {
   resolveAvatarFromScan,
 } from './messenger-avatar-ingest';
 import {
+  existingCustomerLookupPlan,
   fullNameSeed,
   incomingImageUrls,
   isPlaceholder,
@@ -27,6 +28,7 @@ import {
   toSender,
   trimText,
   type ExistingMessage,
+  type FacebookLookupStep,
   type ScanFields,
 } from './from-extension-parse';
 
@@ -43,8 +45,10 @@ export class FromExtensionService {
       throw new BadRequestException('Payload không hợp lệ.');
     }
     const fields = parseScan(parsed.data);
-    if (!fields.threadId && !fields.customerUid) {
-      throw new BadRequestException('Thiếu threadId hoặc UID khách.');
+    if (!fields.customerUid) {
+      throw new BadRequestException(
+        'Thiếu UID Facebook của khách. Messenger mã hóa: đợi panel hiện UID rồi gửi lại.',
+      );
     }
 
     const existing = await this.findExisting(user.id, fields);
@@ -73,34 +77,50 @@ export class FromExtensionService {
     };
   }
 
+  private facebookWhereForLookup(step: FacebookLookupStep) {
+    const missingPage = {
+      OR: [{ employeeFacebookUid: null }, { employeeFacebookUid: '' }],
+    };
+    switch (step.kind) {
+      case 'uidPage':
+        return {
+          customerUid: step.customerUid,
+          employeeFacebookUid: step.employeeFacebookUid,
+        };
+      case 'uidNoPage':
+        return { customerUid: step.customerUid, ...missingPage };
+      case 'threadPage':
+        return {
+          threadId: step.threadId,
+          employeeFacebookUid: step.employeeFacebookUid,
+        };
+      case 'threadNoPage':
+        return { threadId: step.threadId, ...missingPage };
+      default: {
+        const _never: never = step;
+        return _never;
+      }
+    }
+  }
+
   private async findExisting(
     employeeId: string,
     fields: ScanFields,
   ): Promise<{ id: string; facebookId: string } | null> {
-    if (fields.threadId) {
-      const byThread = await this.prisma.customer.findFirst({
+    for (const step of existingCustomerLookupPlan(fields)) {
+      const byFacebook = await this.prisma.customer.findFirst({
         where: {
           employeeId,
-          facebook: { threadId: fields.threadId },
+          facebook: this.facebookWhereForLookup(step),
         },
         select: { id: true, facebook: { select: { id: true } } },
         orderBy: { createdAt: 'desc' },
       });
-      if (byThread?.facebook) {
-        return { id: byThread.id, facebookId: byThread.facebook.id };
+      if (byFacebook?.facebook) {
+        return { id: byFacebook.id, facebookId: byFacebook.facebook.id };
       }
     }
-    if (!fields.customerUid) return null;
-    const byUid = await this.prisma.customer.findFirst({
-      where: {
-        employeeId,
-        facebook: { customerUid: fields.customerUid },
-      },
-      select: { id: true, facebook: { select: { id: true } } },
-      orderBy: { createdAt: 'desc' },
-    });
-    if (!byUid?.facebook) return null;
-    return { id: byUid.id, facebookId: byUid.facebook.id };
+    return null;
   }
 
   private async touchExisting(

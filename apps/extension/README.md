@@ -9,13 +9,19 @@ Chrome MV3 — quét khách + tin từ Meta Inbox / Messenger, gửi vào **CRM 
 ## Cài đặt
 
 1. Gỡ bản cũ **Anhungland Extension** trên `chrome://extensions` (nếu còn).
-2. Bật Developer mode → **Load unpacked** → chọn:
+2. Bật Developer mode → **Load unpacked** → chọn thư mục có `manifest.json`:
 
    `crmanhung/apps/extension`
+
+   Hoặc giải nén zip bản phát hành rồi chọn thư mục đó.
 
 3. Icon extension / Options: API URL mặc định `https://anhungland.com/api/v1`. Dev: `http://localhost:5050/api/v1`.
 4. Mở Business Suite Inbox hoặc Messenger → panel: đăng nhập `kha` / Admin → **Bật quét** → đổi hội thoại để gửi (hoặc **Dừng** để gửi khách đang mở).
 5. Sửa file xong: Reload extension, refresh tab Meta.
+
+**Thông tin quét (v2.15.0):** một hàng avatar tròn + tên Facebook; bên dưới: Nguồn, Kênh NV (`Page {uid}` / `Profile {uid}`), UID khách, Link cuộc chat (rút gọn trên panel, URL đầy đủ khi Copy). Trường debug (`asset_id`, Lightspeed…) chỉ nằm trong **Copy thông tin quét**.
+
+Ingest (v2.14.0+): **bắt buộc UID Facebook khách**. Messenger E2EE chưa hiện UID thì không gửi lên CRM.
 
 ## Nguồn
 
