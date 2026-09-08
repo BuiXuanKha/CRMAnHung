@@ -137,13 +137,15 @@ Cùng mục **Công việc** đã có. Icon `ListTodo`.
 
 ##### 5. Đếm ngược
 
-Hangtag `CrmBadge`:
+Hangtag `CrmBadge` (chỉ việc **chưa xong**):
 
 | Điều kiện | Chữ | Tone |
 |----------|-----|------|
 | Hạn = hôm nay (VN) | Hôm nay | amber |
 | Còn ngày | `N ngày` | green |
 | Quá hạn | `Quá hạn N ngày` | red |
+
+Việc **đã xong:** không đếm hạn — hangtag **Đã hoàn thành** (`green`) thay cột/ô đếm ngược.
 
 ##### 6. Menu thao tác (chevron)
 
@@ -159,7 +161,7 @@ Portal `position: fixed`.
 
 Ghim (chưa xong): nền vàng. Đang chọn / menu mở: highlight. Bấm dòng → modal 12.5.
 
-**Đã xong:** cuối list; `content` (+ nguồn) **gạch ngang** (`text-decoration: line-through`); màu chữ xám. Menu chỉ **Xem chi tiết**. Không nền vàng ghim (kể cả còn `isPinned`).
+**Đã xong:** cuối list; `content` (+ nguồn) **gạch ngang** (`text-decoration: line-through`); màu chữ xám; hangtag **Đã hoàn thành** (`green`); **không** hangtag Hôm nay / N ngày / Quá hạn. Menu chỉ **Xem chi tiết**. Không nền vàng ghim (kể cả còn `isPinned`).
 
 **Sắp xếp:** nhóm ghim chưa xong (hạn gần → xa) → nhóm không ghim chưa xong (hạn gần → xa) → đã xong (cuối).
 
@@ -187,7 +189,7 @@ Cùng 12.1.2.
 
 Sao ghim cạnh nội dung (nếu ghim **và chưa xong**). Chevron thao tác cùng 12.1.3 mục 6.
 
-Hạn + hangtag đếm ngược. Dòng nguồn = `taskContextLine`. Đã xong: gạch ngang nội dung + nguồn (cùng 12.1.3 mục 7).
+Hạn + hangtag đếm ngược (chưa xong) hoặc **Đã hoàn thành** (đã xong). Dòng nguồn = `taskContextLine`. Đã xong: gạch ngang nội dung + nguồn (cùng 12.1.3 mục 7).
 
 Bấm thẻ → modal 12.5.
 
@@ -244,7 +246,7 @@ Mục **Thêm công việc** (icon `ListTodo`). Khách đã ẩn: **không** hi�
 
 Mở khi bấm dòng / thẻ / **Xem chi tiết**. `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề: **Công việc**.
 
-Nội dung (`content`; đã xong → gạch ngang). Dòng nguồn (`NONE` → «TRANG CÔNG VIỆC»; sổ đỏ → «DỊCH VỤ SỔ ĐỎ | …»). Hạn `D/M/YYYY` + hangtag đếm ngược (cùng 12.1.3 mục 5).
+Nội dung (`content`; đã xong → gạch ngang). Dòng nguồn (`NONE` → «TRANG CÔNG VIỆC»; sổ đỏ → «DỊCH VỤ SỔ ĐỎ | …»). Hạn `D/M/YYYY` + hangtag đếm ngược nếu chưa xong; đã xong → hangtag **Đã hoàn thành** (`green`), **không** đếm hạn.
 
 **Chưa xong:** **Đóng** · **Hoàn thành** (primary). Busy khi PATCH. Xong: đóng, toast «Đã hoàn thành công việc.»
 
