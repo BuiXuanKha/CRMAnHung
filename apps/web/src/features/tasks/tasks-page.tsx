@@ -96,19 +96,34 @@ export function TasksPage() {
   }
 
   return (
-    <section className="cv-page has-fab" aria-labelledby="cv-title">
-      <header className="cv-head">
-        <h1 id="cv-title">Công việc</h1>
-        <p className="cv-lead">Trang nhắc việc và ghi chú nhỏ cho việc cần làm.</p>
-      </header>
+    <>
+      <section className="cv-page has-fab" aria-labelledby="cv-title">
+        <header className="cv-head">
+          <h1 id="cv-title">Công việc</h1>
+          <p className="cv-lead">Trang nhắc việc và ghi chú nhỏ cho việc cần làm.</p>
+        </header>
 
-      {loading ? <p className="cv-state">Đang tải…</p> : null}
-      {error ? <p className="cv-state is-error">{error}</p> : null}
+        {loading ? <p className="cv-state">Đang tải…</p> : null}
+        {error ? <p className="cv-state is-error">{error}</p> : null}
 
-      {!loading && !error ? (
-        <div className="cv-list-restore">
-          <section className="cv-table-shell" aria-label="Danh sách công việc">
-            <TaskTable
+        {!loading && !error ? (
+          <div className="cv-list-restore">
+            <section className="cv-table-shell" aria-label="Danh sách công việc">
+              <TaskTable
+                items={items}
+                total={total}
+                selectedId={selectedId}
+                menuId={menuId}
+                onSelect={(id) => {
+                  const item = items.find((row) => row.id === id);
+                  if (item) openDetail(item);
+                }}
+                onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
+                onCloseMenu={() => setMenuId(null)}
+                onAction={handleAction}
+              />
+            </section>
+            <TaskCardList
               items={items}
               total={total}
               selectedId={selectedId}
@@ -121,41 +136,29 @@ export function TasksPage() {
               onCloseMenu={() => setMenuId(null)}
               onAction={handleAction}
             />
-          </section>
-          <TaskCardList
-            items={items}
-            total={total}
-            selectedId={selectedId}
-            menuId={menuId}
-            onSelect={(id) => {
-              const item = items.find((row) => row.id === id);
-              if (item) openDetail(item);
-            }}
-            onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
-            onCloseMenu={() => setMenuId(null)}
-            onAction={handleAction}
-          />
-        </div>
-      ) : null}
+          </div>
+        ) : null}
 
+        <TaskDetailDialog
+          item={detail}
+          busy={completeMut.isPending}
+          error={completeError}
+          onClose={() => {
+            if (!completeMut.isPending) {
+              setDetailId(null);
+              setCompleteError(null);
+            }
+          }}
+          onComplete={() => {
+            if (detail) void completeMut.mutateAsync(detail.id);
+          }}
+        />
+        {createTaskDialog}
+        <CrmToast message={toast} />
+      </section>
+
+      {/* Sibling của vùng cuộn — giống FAB chi tiết khách: fixed nổi trên footer/list */}
       <TasksCreateFab onCreate={openCreate} />
-
-      <TaskDetailDialog
-        item={detail}
-        busy={completeMut.isPending}
-        error={completeError}
-        onClose={() => {
-          if (!completeMut.isPending) {
-            setDetailId(null);
-            setCompleteError(null);
-          }
-        }}
-        onComplete={() => {
-          if (detail) void completeMut.mutateAsync(detail.id);
-        }}
-      />
-      {createTaskDialog}
-      <CrmToast message={toast} />
-    </section>
+    </>
   );
 }
