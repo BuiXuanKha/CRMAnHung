@@ -223,11 +223,6 @@
   margin-right: auto;
 }
 
-.sd-timeline li.is-done p {
-  text-decoration: line-through;
-  color: #64748b;
-}
-
 .sd-progress-line {
   display: inline-flex;
   flex-wrap: wrap;

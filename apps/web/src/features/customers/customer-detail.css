@@ -202,11 +202,6 @@
   gap: 6px;
 }
 
-.kh-detail-care.is-done .kh-detail-care-field {
-  text-decoration: line-through;
-  color: #64748b;
-}
-
 .kh-detail-care-field {
   margin-top: 4px;
   font-size: 0.88rem;
