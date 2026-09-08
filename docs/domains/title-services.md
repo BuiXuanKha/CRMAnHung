@@ -204,7 +204,7 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 
 - Thu hẹp: thanh dọc, chữ xoay 90°, nhãn **Chi tiết hồ sơ**.
 - Mở: tên + mã · SĐT; lưới Trạng thái / Giá / Đã thu / Đã chi; hộp Nhu cầu; nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline tiến độ, file, thu/chi.
-- Timeline: bước **Công việc** gắn việc còn mở — chỉ tên bước; việc đã xong — hangtag **Đã hoàn thành** (`CrmBadge` green) cạnh tên bước.
+- Timeline: bước **Công việc** gắn việc còn mở — chỉ tên bước; việc đã xong — hangtag **Đã hoàn thành** (`CrmBadge` green) cạnh tên bước (**không** gạch chữ ghi chú).
 - File tài liệu: hangtag loại **Sổ đỏ** / **CCCD** / **Giấy tờ khác** trên đầu mỗi file; tên file dòng dưới (bấm → mở); ngày đính kèm cạnh hangtag.
 - Chưa chọn: «Chọn một hồ sơ…»
 
