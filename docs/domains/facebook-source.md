@@ -1,7 +1,7 @@
 # Domain: Nguồn Facebook
 
 - **Slug:** `facebook-source`
-- **Status:** Draft — glossary ba nhánh + **§12 chuẩn tầng khóa**; chưa chốt KEY tầng 3 (người vs cuộc chat)
+- **Status:** Draft — §13: Nhánh Page bỏ qua (luôn có UID); đang xác định `customerUid` hai nhánh Messenger. **Chưa sửa** extension.
 - **Owner:** Bùi Xuân Khả
 - **Liên quan:** [`customers.md`](./customers.md) §13.14 · Chrome extension `apps/extension` · audit **BUG-013**
 - **Code scanSource:** `business_suite` · `messenger_standard` · `messenger_e2ee`
@@ -91,7 +91,7 @@ Nhân viên mở chat **không mã hóa**: `facebook.com/messages/t/{id}` (hoặ
 - Extension **coi số đó cũng là UID Facebook** (`scan.customerUid` = mã cuộc chat) — giả định chat **một-một**.
 - Nick NV = UID người đang login Messenger trên trang (`scan.employeeUid`).
 
-Giả định sai nếu URL **không** phải UID khách (nhóm, hoặc Facebook đổi dạng URL). Chưa chốt NV có gặp case đó không.
+Giả định sai nếu URL **không** phải UID khách (nhóm, hoặc Facebook đổi dạng URL). Xác định 2026-09-08: **§13.1**.
 
 ### 8.3 Nhánh Messenger E2EE
 
@@ -102,7 +102,7 @@ Nhân viên mở chat **mã hóa đầu cuối**: `facebook.com/messages/e2ee/t/
 - API: UID trống thì **không** lấy `threadId` thế UID, nhưng **vẫn tạo Person** theo mã cuộc chat.
 - Facebook đổi mã cuộc chat → cùng người, cùng nick, có thể thành **Person thứ hai**.
 
-Bốn cặp trùng của **`buinam`** (đối chiếu Postgres 2026-09-04, copy CRM cũ, tạo 2026-05-29) nằm ở **nhánh này**: cùng NV, cùng UID, cùng page, **khác** mã cuộc chat.
+Bốn cặp trùng của **`buinam`** (đối chiếu Postgres 2026-09-04, copy CRM cũ, tạo 2026-05-29) nằm ở **nhánh này**: cùng NV, cùng UID, cùng page, **khác** mã cuộc chat. Vậy lúc copy, hai hồ sơ **đã có** `customerUid` — máy **đã từng lấy được** UID, lỗi là tạo hai Person theo mã cuộc chat. Xác định 2026-09-08: **§13.2**.
 
 ## 9. Extension
 
@@ -119,12 +119,11 @@ Trùng Person theo thread E2EE đã copy nguyên — không tự gộp lúc migr
 
 ## 11. Open questions (BUG-013 — chưa sửa code)
 
-Câu chốt nằm ở **§12.3**: KEY tầng 3 là **người Facebook** hay **cuộc chat**. Các câu 2–4 phụ thuộc câu đó.
+Owner 2026-09-08: **Nhánh Page không bàn** UID — chắc chắn gửi `customerUid`. Việc còn lại: hai nhánh Messenger **có quét được UID không**, có thì **chuẩn hoá đưa về** (`customerUid` thật, không lấy mã cuộc chat thế). Chi tiết **§13**.
 
-1. KEY Person trên một kênh = UID người Facebook, hay = ID cuộc trò chuyện?
-2. Nhánh Messenger E2EE chưa đọc được UID người: **không gửi**, hay gửi tạm theo mã cuộc chat?
-3. Nhánh Messenger thường: NV có gặp URL không phải UID người không?
-4. Một hồ sơ Facebook hiện **một** `threadId`. Nếu KEY là người mà một người hai cuộc E2EE: giữ URL mới nhất, hay nhiều cuộc trên một Person?
+1. Nhánh Messenger E2EE lúc panel hiện «chưa đọc được UID FB»: **không POST**, hay đợi / bảo NV mở Chi tiết liên hệ?
+2. Nhánh Messenger thường: NV An Hưng có chat **nhóm** (`/messages/t/` không phải UID người) không?
+3. KEY Person = **UID khách** (sau khi hai nhánh Messenger đã chuẩn hoá gửi UID) — coi như nghiêng **A** ở §12.3; mã cuộc chat vẫn gửi để Mở chat.
 
 ---
 
@@ -209,3 +208,51 @@ Quy tắc gửi: đủ tầng khóa → mới `POST`. Thiếu khóa → panel b�
 - Nhánh Messenger thường **gán** `customerUid` = `threadId` (gộp hai ứng viên KEY).
 - API tìm khách **theo `threadId` trước**, rồi mới UID; tìm thấy thì **đè** `threadId` rồi nối tin.
 - Contract Zod: `threadId` và `customerUid` đều optional; đủ **một** trong hai là ingest.
+
+---
+
+## 13. Hai nhánh Messenger — có quét được `customerUid` không? (2026-09-08)
+
+Owner: Nhánh Page **không bàn**. Chỉ xác định Nhánh Messenger thường và Nhánh Messenger E2EE. **Có UID thật thì chuẩn hoá gửi `customerUid`**. Chưa sửa code.
+
+Đọc code `ext-context-facebook-com.js` + `scanner-messenger-web.js` + `content-inbox.js`. Không mở được inbox Facebook từ môi trường agent — chưa live-test trên máy NV.
+
+### 13.1 Nhánh Messenger thường — có, nguồn là URL, không phải quét DOM
+
+Khi NV mở `facebook.com/messages/t/{số}`:
+
+- Extension lấy `{số}` làm `threadId`.
+- Cùng số đó **gán luôn** `customerUid`. Không đọc profile, không đọc `data-message-id`.
+- Chat **một-một** (cách NV An Hưng hay chat khách): Facebook để UID người kia trên URL → `customerUid` **đúng** UID khách. `facebook.com/{uid}` ra trang Facebook.
+- Chat **nhóm** hoặc URL không phải UID người: JSON vẫn có `customerUid` nhưng số đó **không** mở profile khách.
+
+**Chuẩn hoá (đề xuất, chưa code):** luôn gửi `customerUid` khi số URL là UID người (một-một). Vẫn gửi `threadId` (cùng số) để Mở chat. Không bịa UID từ tên. Nếu sau này gặp nhóm: **không** gán `customerUid` = mã nhóm.
+
+Kết luận: nhánh này **có** `customerUid` trên JSON với chat một-một. Việc «quét» thực ra là **copy số URL**.
+
+### 13.2 Nhánh Messenger E2EE — có thể quét được, không phải lần nào cũng có
+
+Số trên URL **không** phải UID khách. Extension **cố đọc** UID thật, theo thứ tự gần như:
+
+1. Map JSON Lightspeed trong HTML (OTID ↔ thread).
+2. Link / hovercard hàng list trái, header chat, cột Chi tiết liên hệ.
+3. JSON gần thread (`participant_fbid`, `other_user_id`, …).
+4. Prefix `data-message-id` dạng `{uid}@msgr.…` trên bong bóng tin (bỏ uid của NV và mã cuộc chat).
+5. Retry khoảng 6 lần trong vài giây (`scheduleE2eeUidRetry`). Panel khuyên «mở Chi tiết liên hệ / profile» nếu vẫn trống.
+
+Đoán được → gửi `customerUid` **khác** `threadId`. Đoán không được → hiện tại **vẫn POST**, `customerUid` trống.
+
+Bốn cặp **`buinam`** trên DB (2026-09-04) **đều có cùng UID** trên hai Person — chứng tỏ máy **đã lấy được** UID E2EE; lỗi là tạo hai hồ sơ theo hai mã cuộc chat, không phải «không bao giờ quét được UID».
+
+**Chuẩn hoá (đề xuất, chưa code):**
+
+- Có UID → **bắt buộc** gửi `customerUid` (số người), `threadId` riêng (mã cuộc chat). Không gán `customerUid` = `threadId`.
+- Chưa có UID → **không tạo Person**. Panel giữ khách đang mở, đợi quét được hoặc NV mở Chi tiết liên hệ. Không gửi khách chỉ có mã cuộc chat.
+
+Kết luận: nhánh này **quét được UID nhiều lúc**, kể cả trên data cũ của `buinam`. Chỗ phải chuẩn hoá là **đưa UID về khi có**, và **đừng gửi** khi chưa có.
+
+### 13.3 Việc tiếp theo (chưa làm)
+
+1. Owner mở **Nhánh Messenger E2EE** trên máy: panel hiện «UID FB …» hay «chưa đọc được UID FB».
+2. Chốt: chưa có UID thì không POST (đề xuất) hay vẫn gửi tạm.
+3. Khi chốt xong mới sửa extension + API (không lấy `threadId` thế UID; tìm khách theo UID trên kênh trước).
