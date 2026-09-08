@@ -151,7 +151,7 @@ Trùng Person theo thread E2EE đã copy nguyên — không tự gộp lúc migr
 Owner 2026-09-08: **Nhánh Page không bàn** UID — chắc chắn gửi `customerUid`. Hai nhánh Messenger **có quét được UID** (live `kha`) và ingest **đã chuẩn hoá** đưa UID về.
 
 1. Nhánh Messenger E2EE lúc panel hiện «chưa đọc được UID FB»: **không POST** — đã làm. (Live `kha` 2026-09-08: case đang mở **có** UID; chưa gặp case trống.)
-2. Nhánh Messenger thường: NV An Hưng có chat **nhóm** (`/messages/t/` không phải UID người) không? (vẫn mở)
+2. Nhánh Messenger thường — chat **nhóm** (ba người trở lên): owner 2026-09-08 xác nhận **có, nhưng ít**. **Chưa sửa.** Ghi ở extension (README + overview §11.2). Lúc làm: không lấy mã nhóm làm UID khách.
 3. KEY Person = **UID khách** — đã chốt A; mã cuộc chat vẫn gửi để Mở chat.
 
 ---
@@ -255,7 +255,9 @@ Khi NV mở `facebook.com/messages/t/{số}`:
 - Chat **một-một** (cách NV An Hưng hay chat khách): Facebook để UID người kia trên URL → `customerUid` **đúng** UID khách. `facebook.com/{uid}` ra trang Facebook.
 - Chat **nhóm** hoặc URL không phải UID người: JSON vẫn có `customerUid` nhưng số đó **không** mở profile khách.
 
-**Chuẩn hoá (đã làm 2026-09-08):** luôn gửi `customerUid` khi số URL là UID người (một-một). Vẫn gửi `threadId` (cùng số) để Mở chat. Không bịa UID từ tên. Nếu sau này gặp nhóm: **không** gán `customerUid` = mã nhóm.
+**Chuẩn hoá (đã làm 2026-09-08):** luôn gửi `customerUid` khi số URL là UID người (một-một). Vẫn gửi `threadId` (cùng số) để Mở chat. Không bịa UID từ tên.
+
+**Chat nhóm (owner 2026-09-08 — làm sau, chưa sửa):** An Hưng **có** nhóm trên Messenger, **ít**. Máy hiện vẫn lấy số URL làm UID. Lúc làm extension: **không** gán `customerUid` = mã nhóm; xem `apps/extension/README.md` và overview §11.2.
 
 Kết luận: nhánh này **có** `customerUid` trên JSON với chat một-một. Việc «quét» thực ra là **copy số URL**. Live `kha` × **Bùi Dung**: `thread_id` = `customerUid` = `100006413621569`.
 

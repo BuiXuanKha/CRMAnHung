@@ -292,6 +292,8 @@
     if (isMessengerSource()) {
       STATE.threadId = ctx?.resolveThreadId?.() || "";
       STATE.customerUid = ctx?.resolveCustomerUid?.() || "";
+      // Messenger thường 1-1: URL number = person UID. Group chats (rare at An Hưng):
+      // that number is the group thread — do not treat as customerUid (deferred 2026-09-08).
       if (!STATE.customerUid && STATE.threadId && getScanSource() !== "messenger_e2ee") {
         STATE.customerUid = STATE.threadId;
       }

@@ -410,7 +410,9 @@
 
   /**
    * UID Facebook thật của khách.
-   * - Messenger thường: threadId URL = UID khách (1-1).
+   * - Messenger thường: threadId URL = UID khách (chat từng người / 1-1).
+   *   Chat nhóm (3+): số URL là mã cuộc chat, không phải UID người — owner 2026-09-08
+   *   ghi nhận có nhưng ít; làm sau, chưa chặn POST. Xem docs/tech §11.2.
    * - E2EE: threadId URL ≠ UID FB — cố đọc UID từ DOM/JSON; không có thì "".
    */
   function resolveCustomerUid() {

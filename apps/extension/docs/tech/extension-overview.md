@@ -125,6 +125,7 @@ Cả hai gắn `window.__ANHUNGLAND_EXT_CONTEXT__` (content-inbox cũng chấp n
 
 - `source` getter: `messenger_standard` | `messenger_e2ee`
 - Thread từ pathname `/messages/t/{id}` hoặc `/messages/e2ee/t/{id}`
+- Messenger thường: `resolveCustomerUid()` = số URL (đúng chat **từng người**; chat **nhóm** làm sau — §11.2)
 - E2EE: suy UID khách từ prefix `data-message-id` dạng `{uid}@msgr.…`
 - `resolveEmployeeUid()` từ HTML/JSON nhúng trang
 
@@ -240,3 +241,11 @@ Nút **Quét DOM LIVE** trên panel vẫn có thể tạo file tải về máy l
 Owner **2026-09-06**: **không sửa extension lúc này**. Unique `(facebook, mid)` trên DB vẫn chưa (BUG-043).
 
 Xem `docs/audit/BUGS.md` BUG-043 và `apps/extension/README.md` mục «Khi làm lại / sửa extension».
+
+### 11.2 Chat nhóm Messenger (owner để làm sau)
+
+Owner **2026-09-08**: An Hưng **có** chat nhóm (ba người trở lên) trên Messenger, **ít**, **chưa sửa bây giờ**.
+
+Hiện `resolveCustomerUid()` Messenger thường **trả số URL**. Chat từng người: số đó = UID Facebook khách (live `kha` × Bùi Dung). Chat nhóm: số đó = mã cuộc chat nhóm, không mở profile một người. Extension **không** nhận diện nhóm và **vẫn POST** nếu có số trên URL.
+
+Lúc làm: nhận nhóm (DOM / `thread_type` / số URL không phải UID người) → **không** gán `customerUid` = mã nhóm; thiếu UID người thì không gửi (cùng BUG-013). File: `ext-context-facebook-com.js`, `content-inbox.js`. Domain: `docs/domains/facebook-source.md` §13.1.
