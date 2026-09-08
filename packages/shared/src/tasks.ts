@@ -72,6 +72,51 @@ export function taskContextLine(type: TaskTargetType, label: string): string {
   }
 }
 
+/** true khi đã hoàn thành (có completedAt). */
+export function isWorkTaskCompleted(task: { completedAt?: string | null }): boolean {
+  return Boolean(task.completedAt);
+}
+
+/**
+ * Sắp xếp list /cong-viec:
+ * 1) chưa xong + ghim — hạn gần trước
+ * 2) chưa xong + không ghim — hạn gần trước
+ * 3) đã xong — cuối; hạn gần trước
+ */
+export function compareWorkTasksForList(
+  a: {
+    isPinned: boolean;
+    dueOn: string;
+    createdAt: string;
+    completedAt?: string | null;
+  },
+  b: {
+    isPinned: boolean;
+    dueOn: string;
+    createdAt: string;
+    completedAt?: string | null;
+  },
+): number {
+  const aDone = isWorkTaskCompleted(a) ? 1 : 0;
+  const bDone = isWorkTaskCompleted(b) ? 1 : 0;
+  if (aDone !== bDone) return aDone - bDone;
+
+  if (!aDone) {
+    if (a.isPinned !== b.isPinned) return a.isPinned ? -1 : 1;
+  }
+
+  if (a.dueOn !== b.dueOn) return a.dueOn < b.dueOn ? -1 : 1;
+
+  if (aDone) {
+    const aAt = a.completedAt ?? '';
+    const bAt = b.completedAt ?? '';
+    if (aAt !== bAt) return aAt > bAt ? -1 : 1;
+  }
+
+  if (a.createdAt !== b.createdAt) return a.createdAt > b.createdAt ? -1 : 1;
+  return 0;
+}
+
 export const workTaskSchema = z.object({
   id: z.string(),
   content: z.string(),

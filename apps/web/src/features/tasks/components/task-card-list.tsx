@@ -4,6 +4,7 @@ import { Star } from 'lucide-react';
 import {
   TaskTargetType,
   formatTaskDueOn,
+  isWorkTaskCompleted,
   taskContextLine,
   taskDueCountdown,
   type WorkTask,
@@ -38,11 +39,14 @@ export function TaskCardList({
       <div className="cv-cards" role="list" aria-label="Danh sách công việc">
         {items.length === 0 ? (
           <p className="cv-empty-cards">
-            Chưa có công việc. Bấm nút + để thêm, hoặc thêm từ menu Thao tác trên khách, lô đất, giao dịch hoặc sổ đỏ.
+            Chưa có công việc. Bấm nút + để thêm, hoặc thêm từ menu Thao tác trên khách, lô đất,
+            giao dịch hoặc sổ đỏ.
           </p>
         ) : (
           items.map((item) => {
             const countdown = taskDueCountdown(item.dueOn);
+            const done = isWorkTaskCompleted(item);
+            const showPin = item.isPinned && !done;
             return (
               <article
                 key={item.id}
@@ -52,7 +56,8 @@ export function TaskCardList({
                   'cv-card',
                   selectedId === item.id ? 'is-selected' : '',
                   menuId === item.id ? 'is-menu-open' : '',
-                  item.isPinned ? 'is-pinned' : '',
+                  showPin ? 'is-pinned' : '',
+                  done ? 'is-done' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -67,7 +72,7 @@ export function TaskCardList({
               >
                 <header className="cv-card-head">
                   <span className="cv-card-title">
-                    {item.isPinned ? (
+                    {showPin ? (
                       <span className="cv-card-pin" title="Đã ghim">
                         <Icon icon={Star} size={14} strokeWidth={2.4} />
                       </span>

@@ -79,6 +79,7 @@ export function TasksPage() {
       openDetail(item);
       return;
     }
+    if (item.completedAt) return;
     if (action === 'pin') {
       setSelectedId(item.id);
       void pinMut.mutateAsync(item);
