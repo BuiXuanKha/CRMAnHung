@@ -27,6 +27,7 @@ export const TITLE_STEP = {
   LAM_VIEC_CO_QUAN: 'LAM_VIEC_CO_QUAN',
   NHAN_KET_QUA: 'NHAN_KET_QUA',
   BAN_GIAO: 'BAN_GIAO',
+  CONG_VIEC: 'CONG_VIEC',
   KHAC: 'KHAC',
 } as const;
 
@@ -142,6 +143,8 @@ function toProgress(row: {
   stepType: string;
   note: string | null;
   happenedAt: Date;
+  completedAt?: Date | null;
+  workTaskId?: string | null;
   createdByEmployeeId: string;
   createdBy?: { fullName: string };
 }): TitleServiceProgress {
@@ -150,6 +153,8 @@ function toProgress(row: {
     stepType: row.stepType as TitleServiceProgress['stepType'],
     note: row.note,
     happenedAt: row.happenedAt.toISOString(),
+    completedAt: row.completedAt?.toISOString() ?? null,
+    workTaskId: row.workTaskId ?? null,
     createdByEmployeeId: row.createdByEmployeeId,
     employeeName: row.createdBy?.fullName ?? null,
   };

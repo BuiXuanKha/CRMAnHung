@@ -81,6 +81,7 @@ export class TasksService {
             stepType: 'CONG_VIEC',
             note: content,
             happenedAt: new Date(),
+            workTaskId: created.id,
             createdByEmployeeId: user.id,
           },
         });
@@ -109,10 +110,46 @@ export class TasksService {
   }
 
   async complete(user: RequestUser, id: string) {
-    await this.requireOwnOpen(user, id);
-    const updated = await this.prisma.workTask.update({
-      where: { id },
-      data: { completedAt: new Date() },
+    const current = await this.requireOwnOpen(user, id);
+    const now = new Date();
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const row = await tx.workTask.update({
+        where: { id },
+        data: { completedAt: now },
+      });
+
+      // Bước tiến độ Công việc gắn việc này → hangtag Đã hoàn thành.
+      const linked = await tx.titleServiceProgress.updateMany({
+        where: { workTaskId: id, completedAt: null },
+        data: { completedAt: now },
+      });
+
+      // Việc cũ (trước khi có workTaskId): khớp sổ đỏ + CONG_VIEC + cùng nội dung.
+      if (
+        linked.count === 0 &&
+        current.targetType === 'TITLE_SERVICE' &&
+        current.titleServiceId
+      ) {
+        await tx.titleServiceProgress.updateMany({
+          where: {
+            titleServiceId: current.titleServiceId,
+            stepType: 'CONG_VIEC',
+            workTaskId: null,
+            completedAt: null,
+            note: current.content,
+          },
+          data: { completedAt: now, workTaskId: id },
+        });
+      }
+
+      if (current.titleServiceId) {
+        await tx.titleService.update({
+          where: { id: current.titleServiceId },
+          data: { updatedAt: now },
+        });
+      }
+
+      return row;
     });
     return this.toItem(updated);
   }

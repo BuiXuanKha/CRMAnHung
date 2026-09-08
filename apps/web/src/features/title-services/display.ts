@@ -99,9 +99,14 @@ export function stepLabel(step: TitleServiceStepType): string {
 export function progressLine(latest?: TitleServiceProgress | null): {
   title: string;
   date: string | null;
+  completed: boolean;
 } {
-  if (!latest) return { title: 'Chưa ghi tiến độ', date: null };
-  return { title: stepLabel(latest.stepType), date: formatDateShort(latest.happenedAt) };
+  if (!latest) return { title: 'Chưa ghi tiến độ', date: null, completed: false };
+  return {
+    title: stepLabel(latest.stepType),
+    date: formatDateShort(latest.happenedAt),
+    completed: Boolean(latest.completedAt),
+  };
 }
 
 export const STATUS_FILTER_OPTIONS = [

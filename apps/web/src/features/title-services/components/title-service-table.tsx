@@ -201,7 +201,12 @@ export function TitleServiceTable({
                 <div className="sd-cell" role="cell">
                   <div className="sd-stack">
                     {latest.date ? (
-                      <strong>{latest.title}</strong>
+                      <span className="sd-progress-line">
+                        <strong>{latest.title}</strong>
+                        {latest.completed ? (
+                          <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+                        ) : null}
+                      </span>
                     ) : (
                       <span className="sd-empty">{latest.title}</span>
                     )}

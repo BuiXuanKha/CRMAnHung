@@ -213,9 +213,27 @@
 
 .sd-timeline-meta {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   gap: 8px;
-  align-items: baseline;
+  align-items: center;
+}
+
+.sd-timeline-meta strong {
+  margin-right: auto;
+}
+
+.sd-timeline li.is-done p {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+.sd-progress-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
 }
 
 .sd-file-head {

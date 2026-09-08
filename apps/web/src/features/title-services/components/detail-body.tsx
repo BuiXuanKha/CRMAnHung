@@ -75,9 +75,12 @@ export function TitleServiceDetailBody({
         ) : (
           <ul className="sd-timeline">
             {detail.progress.map((p) => (
-              <li key={p.id}>
+              <li key={p.id} className={p.completedAt ? 'is-done' : undefined}>
                 <div className="sd-timeline-meta">
                   <strong>{stepLabel(p.stepType)}</strong>
+                  {p.completedAt ? (
+                    <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+                  ) : null}
                   <span>{formatDateTime(p.happenedAt)}</span>
                 </div>
                 {p.note ? <p>{p.note}</p> : null}
