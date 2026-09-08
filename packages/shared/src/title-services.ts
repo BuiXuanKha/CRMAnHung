@@ -23,6 +23,9 @@ export const titleServiceProgressSchema = z.object({
   stepType: z.nativeEnum(TitleServiceStepType),
   note: z.string().nullable().optional(),
   happenedAt: z.string(),
+  /** Khi bước Công việc gắn WorkTask đã hoàn thành. */
+  completedAt: z.string().nullable().optional(),
+  workTaskId: z.string().nullable().optional(),
   createdByEmployeeId: z.string().optional(),
   employeeName: z.string().nullable().optional(),
 });

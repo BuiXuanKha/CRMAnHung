@@ -381,7 +381,7 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 | `Giá / Thu / Chi` | Ba dòng: Giá `crm-money`; Thu chữ xanh `#047857`; Chi chữ đỏ `#b91c1c`; thiếu giá / 0 = `0 đ` hoặc `—` với giá |
 | `Tài liệu` | `N file` hoặc `Chưa có` |
 | `Số ngày` | Hangtag `CrmBadge` green (`30 ngày` / `Hôm nay`) — **không** icon lọc |
-| `Thao tác` | Chevron → menu: **Xem chi tiết**, **Thêm công việc** (đồng thời ghi tiến độ **Công việc**), **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**, **Xóa hồ sơ** (đỏ + confirm) |
+| `Thao tác` | Chevron → menu: **Xem chi tiết**, **Thêm công việc** (đồng thời ghi tiến độ **Công việc**; hoàn thành việc → hangtag **Đã hoàn thành**), **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**, **Xóa hồ sơ** (đỏ + confirm) |
 
 **Thanh tìm:** desktop chỉ ô tìm (+ **ADMIN:** select nhân viên tạo). Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ trên desktop. Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới.
 
@@ -718,6 +718,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | STAFF **Đăng bài** → `/dang-bai` (peer CRM; bỏ `/dashboard/lo-dat`, không redirect cũ). Dashboard chỉ ADMIN |
 | 2026-09-08 | `/cong-viec` FAB `+`: `fixed` nổi trên footer/list (không nằm dưới dòng «Hiển thị») |
 | 2026-09-08 | `/khach-hang` mobile: bỏ footer All/KN/…; **Thêm khách bằng SĐT** → FAB tròn xanh lá |
+| 2026-09-08 | `/dich-vu-so-do`: hoàn thành việc gắn sổ đỏ → tiến độ **Công việc** hangtag **Đã hoàn thành** |
 
 ---
 

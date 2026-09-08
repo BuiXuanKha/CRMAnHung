@@ -673,15 +673,20 @@ model TitleService {
 }
 
 model TitleServiceProgress {
-  id                  String   @id @default(cuid())
+  id                  String    @id @default(cuid())
   titleServiceId      String
   stepType            String // BAN_GIA | THU_THAP_GIAY_TO | DO_DAC | NOP_HO_SO | BO_SUNG | LAM_VIEC_CO_QUAN | NHAN_KET_QUA | BAN_GIAO | CONG_VIEC | KHAC
   note                String?
   happenedAt          DateTime
+  /** Liên kết việc nhắc — bước CONG_VIEC tạo từ «Thêm công việc». */
+  workTaskId          String?   @unique
+  /** Đồng bộ khi hoàn thành WorkTask gắn (hangtag Đã hoàn thành). */
+  completedAt         DateTime?
   createdByEmployeeId String
-  createdAt           DateTime @default(now())
+  createdAt           DateTime  @default(now())
 
   titleService TitleService @relation(fields: [titleServiceId], references: [id], onDelete: Cascade)
+  workTask     WorkTask?    @relation(fields: [workTaskId], references: [id], onDelete: SetNull)
   createdBy    User         @relation("TitleServiceProgressCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
 
   @@index([titleServiceId, happenedAt])
@@ -762,6 +767,7 @@ model WorkTask {
   lodat        Lodat?        @relation(fields: [lodatId], references: [id], onDelete: Restrict)
   transaction  Transaction? @relation(fields: [transactionId], references: [id], onDelete: Restrict)
   titleService TitleService? @relation(fields: [titleServiceId], references: [id], onDelete: Restrict)
+  titleServiceProgress TitleServiceProgress?
 
   @@index([employeeId, dueOn])
   @@index([employeeId, isPinned, pinnedAt])

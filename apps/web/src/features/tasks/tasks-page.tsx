@@ -53,8 +53,12 @@ export function TasksPage() {
 
   const completeMut = useMutation({
     mutationFn: (id: string) => completeWorkTask(id),
-    onSuccess: async () => {
+    onSuccess: async (updated) => {
       await qc.invalidateQueries({ queryKey: ['tasks'] });
+      if (updated.targetType === 'TITLE_SERVICE' && updated.targetId) {
+        await qc.invalidateQueries({ queryKey: ['title-services'] });
+        await qc.invalidateQueries({ queryKey: ['title-service', updated.targetId] });
+      }
       setDetailId(null);
       setSelectedId(null);
       setCompleteError(null);
