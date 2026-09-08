@@ -119,9 +119,9 @@ PublicPost                     (category, slug, status, cover, body) — không 
 
 **Không** thêm công tắc Đăng web trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
-Menu **trong** Dashboard: **chỉ ADMIN** = Tổng quan · Bài viết · Thống kê (không mục lô / Đăng bài). STAFF vào `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` → `/dang-bai`. ADMIN vào `/dang-bai` → `/dashboard`.
+Menu **trong** Dashboard: **chỉ ADMIN** = Tổng quan · Bài viết · Thống kê (không mục lô / Đăng bài). STAFF vào `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` → `/khach-hang` (luồng CRM thường). ADMIN vào `/dang-bai` → `/dashboard` (Admin không dùng Đăng bài).
 
-Header CRM: bốn mục NV. STAFF thêm **Đăng bài** → `/dang-bai`. ADMIN thêm **Dashboard** (không thêm mục Đăng bài trùng).
+Header CRM: bốn mục NV. STAFF thêm **Đăng bài** → `/dang-bai` (chỉ khi NV chủ động mở). ADMIN thêm **Dashboard** (không thêm mục Đăng bài).
 
 **Sau login thành công:** ADMIN vào **`/dashboard` trước** (trang đầu). STAFF vào `/khach-hang`. Logo CRM (góc trái) của admin cũng về `/dashboard`.
 
@@ -172,7 +172,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 ## 11. Luật dashboard / Đăng bài (chốt 2026-09-08)
 
-1. STAFF vào `/dang-bai` (header **Đăng bài** — peer route CRM, **không** nằm dưới `/dashboard`). `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` của STAFF → `/dang-bai`. ADMIN **không** vào `/dang-bai` (redirect `/dashboard`). Bốn trang CRM **không** thêm công tắc Đăng web.
+1. STAFF vào `/dang-bai` chỉ khi bấm header **Đăng bài** (peer CRM, **không** nằm dưới `/dashboard`). STAFF lỡ vào `/dashboard`, `/dashboard/bai-viet`, `/dashboard/thong-ke` → `/khach-hang`. ADMIN **không** vào `/dang-bai` (redirect `/dashboard`). Bốn trang CRM **không** thêm công tắc Đăng web.
 2. Lô lên web = công tắc tường minh **STAFF lô mình** — không auto theo Mở bán hay giao dịch. Admin không đăng/sửa/tạo listing.
 3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. **Không** còn Gỡ Đăng web — listing đã đăng giữ `isPublished`; khách chỉ thấy khi Đăng web ∩ đang Mở bán.
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
@@ -868,7 +868,7 @@ Contract: `matchPublicListingSearch` + `listingCatalogSearchPath` (`packages/sha
 
 ## 20. Thống kê share `/dashboard/thong-ke` (chốt 2026-09-02)
 
-**ADMIN.** STAFF không vào (redirect `/dang-bai`). List NV + số lô đã bấm **Chia sẻ** + **lượt xem** trang khách (cookie NV **và** không cookie). Không đếm Gọi/Zalo.
+**ADMIN.** STAFF không vào (redirect `/khach-hang`). List NV + số lô đã bấm **Chia sẻ** + **lượt xem** trang khách (cookie NV **và** không cookie). Không đếm Gọi/Zalo.
 
 Zod: `shareEmployeeStatsResponseSchema` — `GET /admin/lot-shares/employee-stats` (`items` NV + `directViewCount`).
 

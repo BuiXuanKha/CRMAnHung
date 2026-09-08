@@ -4,7 +4,7 @@ import { useEffect, useRef, type ReactNode } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FileText, LayoutDashboard, BarChart3 } from 'lucide-react';
-import { UserRole, crmHomePathForRole, staffDashboardFallbackPath } from '@crmanhung/shared';
+import { UserRole, staffDashboardFallbackPath } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { Icon } from '@/shared/ui/icon';
 import './dashboard-shell.css';
@@ -16,11 +16,11 @@ const ADMIN_MENU = [
 ] as const;
 
 /**
- * Dashboard shell — ADMIN only. STAFF soạn bài lô ở `/dang-bai`.
+ * Dashboard shell — ADMIN only.
  *
- * Soft `router.replace('/dang-bai')` loops when `crmanhung_web_role` is stale ADMIN
- * (middleware sends STAFF client back to `/dashboard`). Sync role via `/auth/me` then
- * hard-navigate so the Set-Cookie is visible to middleware.
+ * STAFF lỡ vào đây → về `/khach-hang` (luồng CRM thường). Soft `router.replace`
+ * dễ kẹt «Đang tải…» khi cookie role lệch ADMIN; sync `/auth/me` rồi hard-navigate.
+ * `/dang-bai` không phải đích fallback — chỉ khi NV mở menu Đăng bài.
  */
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -38,13 +38,9 @@ export function DashboardShell({ children }: { children: ReactNode }) {
     if (user.role === UserRole.ADMIN) return;
 
     leavingRef.current = true;
-    const dest =
-      user.role === UserRole.STAFF
-        ? staffDashboardFallbackPath()
-        : crmHomePathForRole('STAFF');
+    const dest = staffDashboardFallbackPath();
     void (async () => {
       try {
-        // Refresh HttpOnly role cookie from JWT/DB before full navigation.
         await reloadMe();
       } catch {
         // Still leave /dashboard — cookie may already match, or login is next.
