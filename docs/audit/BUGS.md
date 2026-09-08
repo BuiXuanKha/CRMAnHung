@@ -166,6 +166,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-08 | customers / extension | nguồn Facebook | Glossary ba nhánh (Page / Messenger thường / Messenger E2EE): `docs/domains/facebook-source.md`. Bàn BUG-013, chưa sửa code. |
 | 2026-09-08 | customers / extension | chuẩn data | `facebook-source.md` §12: tầng NV → kênh Page/nick → KEY → trường phụ. Chưa chốt KEY = người hay cuộc chat. Chưa code. |
 | 2026-09-08 | customers / extension | BUG-013 FIXED | Ingest khóa NV + nick/page + UID khách; E2EE không POST/không tạo khi thiếu UID; không lấy thread thế UID. 4 cặp `buinam` cũ không gộp (BUG-016). |
+| 2026-09-08 | customers / web | chăm sóc list scroll | Máy tính: Lưu chăm sóc cập nhật dòng tại chỗ, giữ chỗ cuộn (không refetch `updatedAt` kéo khách lên đầu). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 

@@ -23,3 +23,8 @@ export {
   useCrmInfiniteList,
   type CrmListPage,
 } from './use-crm-infinite-list';
+
+export {
+  patchInfiniteListItem,
+  withPreservedListScroll,
+} from './patch-infinite';

@@ -277,6 +277,7 @@ Ghim: nền vàng. Đang chọn: highlight. Đã xoá: hàng kiểu ẩn.
 3. Cuộn vùng **thân bảng** (không phải window). Còn cách đáy **< 160px** và `n < N` và không đang tải → gọi tiếp `offset = n`, **nối** vào list (không thay trang).
 4. Đổi ô tìm / lọc / `@` `@@` → **reset**: `offset=0`, bỏ list cũ, cuộn lên đầu. Không giữ scroll lần trước.
 5. Ghim / ẩn / sửa một dòng: giữ `scrollTop` hiện tại; không tải lại từ đầu nếu không cần.
+6. **Lưu chăm sóc trên máy tính** (double-click / menu → modal): cập nhật **đúng dòng đang đứng**, không `invalidate` list (API `updatedAt` sẽ kéo khách lên đầu nếu refetch). NV làm khách kế tiếp không phải cuộn lại.
 
 **Nhớ vị trí + lọc khi rời list**
 

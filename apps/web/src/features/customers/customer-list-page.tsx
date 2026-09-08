@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, type LucideIcon, Trash2 } from 'lucide-react';
@@ -9,11 +10,12 @@ import {
   CustomerStatus,
   UserRole,
   type CreateCustomerInput,
+  type CustomerDetail,
   type CustomerListItem,
   type PhoneDuplicateExisting,
   type UpdateCustomerCareInput,
 } from '@crmanhung/shared';
-import { resetListScrollIfFiltersChanged, useCrmInfiniteList } from '@/shared/list-state';
+import { resetListScrollIfFiltersChanged, patchInfiniteListItem, useCrmInfiniteList, withPreservedListScroll } from '@/shared/list-state';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
 import { HotlinesSettingsDialog } from '@/features/settings/hotlines-dialog';
@@ -97,6 +99,13 @@ type AlertState = {
   icon?: LucideIcon;
   confirmLabel?: string;
 } | null;
+
+function customerDetailToListItem(
+  detail: CustomerDetail & { unchanged?: boolean },
+): CustomerListItem {
+  const { careNotes: _careNotes, unchanged: _unchanged, ...item } = detail;
+  return item;
+}
 
 export function CustomerListPage() {
   const router = useRouter();
@@ -537,17 +546,27 @@ export function CustomerListPage() {
     if (!careEdit) return;
     setCareBusy(true);
     setCareError(null);
+    const customerId = careEdit.customer.id;
     try {
-      const result = await updateCustomerCare(careEdit.customer.id, input);
-      await qc.invalidateQueries({ queryKey: ['customers'] });
-      await qc.invalidateQueries({ queryKey: ['customer', careEdit.customer.id] });
-      setRail('care');
-      setCareEdit(null);
-      flash(
-        result.unchanged
-          ? 'Không có thay đổi. Bỏ qua cập nhật.'
-          : 'Đã lưu cập nhật chăm sóc.',
-      );
+      await withPreservedListScroll(getListScrollEl, async () => {
+        const result = await updateCustomerCare(customerId, input);
+        const { unchanged, ...detail } = result;
+        flushSync(() => {
+          patchInfiniteListItem<CustomerListItem>(qc, ['customers'], customerId, () =>
+            customerDetailToListItem(detail),
+          );
+          qc.setQueryData(['customer', customerId], detail);
+          setSelectedId(customerId);
+          setRail('care');
+          setCareEdit(null);
+        });
+        flash(
+          unchanged
+            ? 'Không có thay đổi. Bỏ qua cập nhật.'
+            : 'Đã lưu cập nhật chăm sóc.',
+        );
+      });
+      persistListState(customerId);
     } catch (err) {
       setCareError(err instanceof Error ? err.message : 'Không lưu được.');
     } finally {

@@ -1,5 +1,6 @@
 import {
   createListStateStore,
+  captureListScroll,
   getActiveListScrollEl,
   needsMoreListScrollHeight,
   restoreListScroll,
@@ -60,6 +61,7 @@ export function clearCustomerListState() {
 }
 
 export {
+  captureListScroll,
   getActiveListScrollEl,
   needsMoreListScrollHeight,
   restoreListScroll,
