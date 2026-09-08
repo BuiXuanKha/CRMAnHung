@@ -21,7 +21,7 @@ import {
   staffNameFilterOptions,
   type StaffLotWebFilter,
 } from './display';
-import { formatListingCrmDriftMessage } from './listing-crm-drift';
+import { formatNeedsWebUpdateMessage } from './listing-crm-drift';
 import { publicLotListState } from './list-state';
 import { invalidatePublicWebQueries, publicWebKeys } from './query';
 import { useFlash } from './use-flash';
@@ -128,10 +128,10 @@ export function PublicLotListPage() {
     setGptLot(row);
   };
 
-  const onCrmDrift = (row: PublicWebStaffLotRow) => {
+  const onNeedsWebUpdate = (_row: PublicWebStaffLotRow) => {
     setAlertBox({
-      title: 'CRM khác bản đăng web',
-      message: `${formatListingCrmDriftMessage(row.crmDrift ?? [])}\n\nLưu lại bài trên Soạn đăng web để khớp CRM (hoặc đợi đồng bộ khi sửa lô).`,
+      title: 'Lô CRM đã cập nhật',
+      message: formatNeedsWebUpdateMessage(),
     });
   };
 
@@ -219,7 +219,7 @@ export function PublicLotListPage() {
                 onSelect={onSelect}
                 onEdit={onEdit}
                 onGptContent={onGptContent}
-                onCrmDrift={onCrmDrift}
+                onNeedsWebUpdate={onNeedsWebUpdate}
                 scrollRef={scrollRef}
                 kind={kind}
                 extra={extra}
@@ -257,7 +257,7 @@ export function PublicLotListPage() {
                 onSelect={onSelect}
                 onEdit={onEdit}
                 onGptContent={onGptContent}
-                onCrmDrift={onCrmDrift}
+                onNeedsWebUpdate={onNeedsWebUpdate}
               />
             </div>
           </div>

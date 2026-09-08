@@ -1103,6 +1103,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Impact:** SEO/nội dung khách sai; lệch dashboard preview (`cover` live, `title` overlay).
 - **Evidence:** `lodats.update` không prisma `publicLotListing`. `toCatalog` `row.title` vs `lodat.areaM2`. Domain: Đăng web ≠ mọi lô Mở bán — không nói sửa lô tự đẩy title.
 - **Status:** FIXED (2026-09-07) — Owner chốt hướng B: giữ overlay độc lập. `/dashboard/lo-dat` so title/location CRM vs listing; lô lệch xếp đầu + icon đỏ; bấm xem Đăng web vs CRM; NV cập nhật web tay trên editor. Không auto-sync.
+- **Cập nhật 2026-09-09:** Owner đổi nghĩa icon đỏ — không so khớp title/location. Icon = `needsWebUpdate` khi CRM cập nhật lô đã có bài web publish; tắt khi NV Lưu Soạn bài. Sync title/location khi sửa CRM vẫn giữ.
 
 ### BUG-063 — Ẩn Person không cắt GD, sổ đỏ, chat API, chủ trên lô
 

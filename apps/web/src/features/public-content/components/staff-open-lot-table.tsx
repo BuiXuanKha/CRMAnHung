@@ -31,7 +31,7 @@ type Props = {
   onSelect: (lodatId: string) => void;
   onEdit: (lodatId: string) => void;
   onGptContent: (lodatId: string) => void;
-  onCrmDrift: (row: PublicWebStaffLotRow) => void;
+  onNeedsWebUpdate: (row: PublicWebStaffLotRow) => void;
   scrollRef?: Ref<HTMLDivElement>;
   kind: string;
   extra: ExtraFilters;
@@ -53,7 +53,7 @@ export function StaffOpenLotTable({
   onSelect,
   onEdit,
   onGptContent,
-  onCrmDrift,
+  onNeedsWebUpdate,
   scrollRef,
   kind,
   extra,
@@ -205,15 +205,15 @@ export function StaffOpenLotTable({
                   <div>
                     <div className="pw-title-row">
                       <p className="pw-title">{row.title}</p>
-                      {row.crmDrift?.length ? (
+                      {row.needsWebUpdate ? (
                         <button
                           type="button"
                           className="pw-crm-drift-btn"
-                          title="CRM đã đổi — xem chi tiết"
-                          aria-label="CRM đã đổi so với bản Đăng web"
+                          title="Lô CRM đã cập nhật — cần cập nhật bài web"
+                          aria-label="Lô CRM đã cập nhật, cần cập nhật bài đăng web"
                           onClick={(event) => {
                             event.stopPropagation();
-                            onCrmDrift(row);
+                            onNeedsWebUpdate(row);
                           }}
                         >
                           <Icon icon={CircleAlert} size="sm" />

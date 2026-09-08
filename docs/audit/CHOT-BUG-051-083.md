@@ -197,6 +197,8 @@ Mỗi mục: vai trò / bấm gì / ví dụ / xấu / đề xuất / khi xong. 
 
 **Check:** sửa title lô đã Đăng web trên `/lo-dat` → vào Đăng web thấy icon + dòng lệch; H1 khách vẫn bản overlay đến khi Soạn lại.
 
+**Cập nhật 2026-09-09:** Owner đổi nghĩa icon đỏ → cờ `needsWebUpdate` (CRM cập nhật + đã publish; tắt khi Lưu Soạn bài). Không còn so khớp title/location. Sync title/location khi sửa CRM vẫn giữ.
+
 ---
 
 ### BUG-063 — Ẩn khách không cắt lô / GD / sổ / chat

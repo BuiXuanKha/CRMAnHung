@@ -11,6 +11,8 @@ Hệ cũ **không** có CMS web công khai. Đây là bề mặt mới.
 
 **Chốt owner 2026-09-07:** một lô = một bài; CRM đổi → đồng bộ overlay (title/location); trạng thái khách = hangtag theo CRM; catalog + sitemap gồm **mọi** trạng thái bán; không «chờ Đăng web» / không gỡ slug.
 
+**Chốt owner 2026-09-09:** icon đỏ trên `/dang-bai` = lô CRM **đã cập nhật** trong khi đã có bài đăng web (`isPublished`) → NV cần vào Soạn bài và **Lưu** lại. **Không** so khớp tiêu đề/địa chỉ CRM ↔ overlay (GPT đổi H1 không ra đỏ).
+
 ---
 
 ## 1. Mục đích
@@ -333,7 +335,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 | Cột | Ô |
 |-----|---|
 | Ảnh | Thumb 52px; thiếu = ô xám + `ImageOff` |
-| Tiêu đề / Địa chỉ | **Đậm**; dòng phụ địa chỉ. Không tên khách |
+| Tiêu đề / Địa chỉ | **Đậm**; dòng phụ địa chỉ. Không tên khách. Icon đỏ (`CircleAlert`) khi `needsWebUpdate` — CRM đã sửa sau lần lưu bài web; bấm → alert nhắc Soạn/Lưu lại |
 | Phân loại | Hangtag Nhà `blue` / Đất `amber` |
 | DT · MT · Hướng | DT dòng 1; MT · hướng dòng phụ. Trống: `—` |
 | Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM |
@@ -399,7 +401,7 @@ Trống: `Không có lô đang mở bán.`
 
 ### 13.2 Mobile
 
-Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ + phân loại + DT/MT/hướng + NV + giá). Preview **dưới** list khi đã chọn dòng — không rail phải.
+Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ + phân loại + DT/MT/hướng + NV + giá). Icon đỏ cạnh tiêu đề khi `needsWebUpdate` (cùng 13.1). Preview **dưới** list khi đã chọn dòng — không rail phải.
 
 Thanh tìm: ô tìm + **Bộ lọc** + **Tìm**. Panel: Phân loại · Giá · Web · NV. **Xoá lọc** xóa mọi lọc (cả cột desktop). Desktop không hiện Bộ lọc / Tìm.
 
@@ -417,7 +419,9 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 4. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, **mô tả rich text (TipTap)**. **Không** ô sửa slug — URL chỉ đọc (tạo = `toListingPublicSlug` từ tiêu đề+địa chỉ; đã có listing = slug đã lưu). Ảnh bìa = ảnh lô (không upload slice này).
 5. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload mock/R2 public CDN).
 6. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`; được thiếu mô tả) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng — **bắt buộc** có nội dung mô tả).
-7. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web. Preview render HTML mô tả.
+7. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web; **tắt** icon đỏ (`needsWebUpdate = false`). Preview render HTML mô tả.
+
+**Icon đỏ (`needsWebUpdate`):** bật khi NV/API **cập nhật lô CRM** mà listing đã `isPublished` (đồng thời vẫn sync title/location overlay). Tắt khi **Lưu** Soạn bài đăng. GPT đổi H1 **không** bật icon. Lô lệch xếp đầu list.
 
 ---
 
