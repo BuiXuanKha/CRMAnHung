@@ -44,8 +44,8 @@ export function TaskCardList({
           </p>
         ) : (
           items.map((item) => {
-            const countdown = taskDueCountdown(item.dueOn);
             const done = isWorkTaskCompleted(item);
+            const countdown = done ? null : taskDueCountdown(item.dueOn);
             const showPin = item.isPinned && !done;
             return (
               <article
@@ -91,7 +91,11 @@ export function TaskCardList({
                 </header>
                 <p className="cv-card-meta">
                   <span>Hạn {formatTaskDueOn(item.dueOn)}</span>
-                  <CrmBadge tone={countdown.tone}>{countdown.label}</CrmBadge>
+                  {done ? (
+                    <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+                  ) : countdown ? (
+                    <CrmBadge tone={countdown.tone}>{countdown.label}</CrmBadge>
+                  ) : null}
                 </p>
                 <p className="cv-card-source">
                   {taskContextLine(item.targetType as TaskTargetType, item.targetLabel)}

@@ -59,8 +59,8 @@ export function TaskTable({
           </div>
         ) : (
           items.map((item, index) => {
-            const countdown = taskDueCountdown(item.dueOn);
             const done = isWorkTaskCompleted(item);
+            const countdown = done ? null : taskDueCountdown(item.dueOn);
             const showPin = item.isPinned && !done;
             return (
               <div
@@ -99,7 +99,11 @@ export function TaskTable({
                   <span className="cv-due">{formatTaskDueOn(item.dueOn)}</span>
                 </div>
                 <div className="cv-cell" role="cell">
-                  <CrmBadge tone={countdown.tone}>{countdown.label}</CrmBadge>
+                  {done ? (
+                    <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+                  ) : countdown ? (
+                    <CrmBadge tone={countdown.tone}>{countdown.label}</CrmBadge>
+                  ) : null}
                 </div>
                 <div
                   className="col-act cv-cell"

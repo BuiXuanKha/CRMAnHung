@@ -28,8 +28,8 @@ export function TaskDetailDialog({
   onComplete,
 }: Props) {
   if (!item) return null;
-  const countdown = taskDueCountdown(item.dueOn);
   const done = isWorkTaskCompleted(item);
+  const countdown = done ? null : taskDueCountdown(item.dueOn);
 
   return (
     <CrmDialog open title="Công việc" icon={ListTodo} onClose={onClose} busy={busy}>
@@ -39,8 +39,11 @@ export function TaskDetailDialog({
       </p>
       <p className="cv-detail-due">
         <span>Hạn {formatTaskDueOn(item.dueOn)}</span>
-        <CrmBadge tone={countdown.tone}>{countdown.label}</CrmBadge>
-        {done ? <CrmBadge tone="gray">Đã hoàn thành</CrmBadge> : null}
+        {done ? (
+          <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+        ) : countdown ? (
+          <CrmBadge tone={countdown.tone}>{countdown.label}</CrmBadge>
+        ) : null}
       </p>
       {error ? <p className="crm-form-error">{error}</p> : null}
       <div className="crm-dialog-actions">

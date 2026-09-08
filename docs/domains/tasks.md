@@ -137,13 +137,15 @@ Cùng mục **Công việc** đã có. Icon `ListTodo`.
 
 ##### 5. Đếm ngược
 
-Hangtag `CrmBadge`:
+Hangtag `CrmBadge` (chỉ việc **chưa xong**):
 
 | Điều kiện | Chữ | Tone |
 |----------|-----|------|
 | Hạn = hôm nay (VN) | Hôm nay | amber |
 | Còn ngày | `N ngày` | green |
 | Quá hạn | `Quá hạn N ngày` | red |
+
+Việc **đã xong:** không đếm hạn — hangtag **Đã hoàn thành** (`green`) thay cột/ô đếm ngược.
 
 ##### 6. Menu thao tác (chevron)
 
@@ -159,7 +161,7 @@ Portal `position: fixed`.
 
 Ghim (chưa xong): nền vàng. Đang chọn / menu mở: highlight. Bấm dòng → modal 12.5.
 
-**Đã xong:** cuối list; `content` (+ nguồn) **gạch ngang** (`text-decoration: line-through`); màu chữ xám. Menu chỉ **Xem chi tiết**. Không nền vàng ghim (kể cả còn `isPinned`).
+**Đã xong:** cuối list; `content` (+ nguồn) **gạch ngang** (`text-decoration: line-through`); màu chữ xám; hangtag **Đã hoàn thành** (`green`); **không** hangtag Hôm nay / N ngày / Quá hạn. Menu chỉ **Xem chi tiết**. Không nền vàng ghim (kể cả còn `isPinned`).
 
 **Sắp xếp:** nhóm ghim chưa xong (hạn gần → xa) → nhóm không ghim chưa xong (hạn gần → xa) → đã xong (cuối).
 
