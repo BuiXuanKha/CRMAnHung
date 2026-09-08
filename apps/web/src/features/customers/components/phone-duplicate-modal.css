@@ -1,0 +1,167 @@
+/* Duplicate-phone confirm — customer snapshot card (BUG-014 UI). */
+
+.crm-dialog.phone-dup-dialog {
+  width: min(520px, 100%);
+  max-height: min(90vh, 800px);
+  display: flex;
+  flex-direction: column;
+}
+
+.crm-dialog.phone-dup-dialog .crm-dialog-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.phone-dup-body {
+  display: grid;
+  gap: 12px;
+}
+
+.phone-dup-card {
+  margin: 0;
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.phone-dup-hero {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.phone-dup-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: #334155;
+  font-size: 0.85rem;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  flex: 0 0 48px;
+}
+
+.phone-dup-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.phone-dup-identity {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.phone-dup-name {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.3;
+  word-break: break-word;
+}
+
+.phone-dup-fb {
+  font-size: 0.82rem;
+  color: #64748b;
+  word-break: break-word;
+}
+
+.phone-dup-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+.phone-dup-facts {
+  display: grid;
+  grid-template-columns: 88px 1fr;
+  gap: 6px 10px;
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.phone-dup-facts dt {
+  margin: 0;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.phone-dup-facts dd {
+  margin: 0;
+  color: #0f172a;
+  word-break: break-word;
+}
+
+.phone-dup-block {
+  margin-top: 12px;
+}
+
+.phone-dup-block h3 {
+  margin: 0 0 8px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.phone-dup-lots,
+.phone-dup-care {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 8px;
+}
+
+.phone-dup-lots li,
+.phone-dup-care li {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #334155;
+}
+
+.phone-dup-lot-title {
+  display: block;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.phone-dup-lot-meta {
+  display: block;
+  margin-top: 2px;
+  color: #64748b;
+}
+
+.phone-dup-care-meta {
+  color: #64748b;
+  margin-bottom: 4px;
+}
+
+.phone-dup-k {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.phone-dup-k::after {
+  content: ': ';
+  font-weight: 600;
+}
+
+.phone-dup-action {
+  margin-top: 0;
+}
