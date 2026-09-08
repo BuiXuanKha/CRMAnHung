@@ -1,7 +1,13 @@
 import assert from 'node:assert/strict';
 import { describe, it } from 'node:test';
 import { TaskTargetType } from './enums.js';
-import { formatTaskDueOn, taskContextLine, taskDueCountdown, ymdInVietnam } from './tasks.js';
+import {
+  createWorkTaskSchema,
+  formatTaskDueOn,
+  taskContextLine,
+  taskDueCountdown,
+  ymdInVietnam,
+} from './tasks.js';
 
 describe('taskContextLine', () => {
   it('names the source entity', () => {
@@ -22,6 +28,50 @@ describe('taskContextLine', () => {
       'Công việc này cho Giao dịch GD-1',
     );
     assert.equal(taskContextLine(TaskTargetType.NONE, ''), 'Ghi chú cá nhân');
+  });
+});
+
+describe('createWorkTaskSchema', () => {
+  it('accepts personal notes without targetId', () => {
+    assert.deepEqual(
+      createWorkTaskSchema.parse({
+        content: 'Chú ý hỏi lô Anh Sử',
+        dueOn: '2026-09-09',
+        targetType: TaskTargetType.NONE,
+      }),
+      {
+        content: 'Chú ý hỏi lô Anh Sử',
+        dueOn: '2026-09-09',
+        targetType: TaskTargetType.NONE,
+        targetId: '',
+      },
+    );
+    assert.deepEqual(
+      createWorkTaskSchema.parse({
+        content: 'Note',
+        dueOn: '2026-09-09',
+        targetType: TaskTargetType.NONE,
+        targetId: '',
+      }),
+      {
+        content: 'Note',
+        dueOn: '2026-09-09',
+        targetType: TaskTargetType.NONE,
+        targetId: '',
+      },
+    );
+  });
+
+  it('requires targetId when source is attached', () => {
+    assert.throws(
+      () =>
+        createWorkTaskSchema.parse({
+          content: 'Note',
+          dueOn: '2026-09-09',
+          targetType: TaskTargetType.CUSTOMER,
+        }),
+      /Chọn nguồn công việc/,
+    );
   });
 });
 

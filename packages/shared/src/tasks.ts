@@ -97,7 +97,8 @@ export const createWorkTaskSchema = z
     content: z.string().trim().min(1, 'Nhập nội dung công việc.').max(2000),
     dueOn: z.string().regex(YMD, 'Chọn hạn làm việc.'),
     targetType: z.nativeEnum(TaskTargetType).optional(),
-    targetId: z.string().min(1).optional(),
+    /** Empty / omitted when NONE (FAB ghi chú cá nhân). */
+    targetId: z.string().optional(),
   })
   .superRefine((data, ctx) => {
     const type = data.targetType ?? TaskTargetType.NONE;
@@ -116,11 +117,12 @@ export const createWorkTaskSchema = z
       content: data.content,
       dueOn: data.dueOn,
       targetType,
-      targetId: targetType === TaskTargetType.NONE ? '' : (data.targetId ?? ''),
+      targetId: targetType === TaskTargetType.NONE ? '' : (data.targetId ?? '').trim(),
     };
   });
 
-export type CreateWorkTaskInput = z.infer<typeof createWorkTaskSchema>;
+export type CreateWorkTaskInput = z.input<typeof createWorkTaskSchema>;
+export type CreateWorkTaskPayload = z.output<typeof createWorkTaskSchema>;
 
 export const pinWorkTaskSchema = z.object({
   pinned: z.boolean(),

@@ -59,7 +59,6 @@ export function CreateTaskDialog({
       content,
       dueOn,
       targetType: TaskTargetType.NONE,
-      targetId: '',
     });
   }
 
