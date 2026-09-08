@@ -6,7 +6,7 @@
 |--------|------|--------|
 | Users (login + quản lý NV) | [users.md](./users.md) | Ready — `/login`; ADMIN `/quan-tri/nguoi-dung` |
 | Customers | [customers.md](./customers.md) | Ready for API — list + chi tiết `[id]`; lô đất API; tạo lô từ khách STAFF đã có |
-| Nguồn Facebook (extension) | [facebook-source.md](./facebook-source.md) | Draft — ba nhánh Page / Messenger thường / Messenger E2EE; bàn BUG-013 |
+| Nguồn Facebook (extension) | [facebook-source.md](./facebook-source.md) | Draft — ba nhánh; §12 tầng khóa NV → kênh → KEY; chưa chốt KEY |
 | Lodats | [lodats.md](./lodats.md) | Done STAFF `/lo-dat`; list ADMIN chưa bàn |
 | Addresses | [addresses.md](./addresses.md) | Ready for API — Admin `/cai-dat/dia-chi`; copy data sau |
 | Transactions | [transactions.md](./transactions.md) | Ready for API — Prisma + contract; UI mock list + chi tiết + form |

@@ -1,7 +1,7 @@
 # Domain: Nguồn Facebook
 
 - **Slug:** `facebook-source`
-- **Status:** Draft — glossary để bàn ingest extension / BUG-013; **chưa chốt** khóa định danh Person
+- **Status:** Draft — glossary ba nhánh + **§12 chuẩn tầng khóa**; chưa chốt KEY tầng 3 (người vs cuộc chat)
 - **Owner:** Bùi Xuân Khả
 - **Liên quan:** [`customers.md`](./customers.md) §13.14 · Chrome extension `apps/extension` · audit **BUG-013**
 - **Code scanSource:** `business_suite` · `messenger_standard` · `messenger_e2ee`
@@ -119,9 +119,93 @@ Trùng Person theo thread E2EE đã copy nguyên — không tự gộp lúc migr
 
 ## 11. Open questions (BUG-013 — chưa sửa code)
 
-1. Trên **cùng nick/page của một NV**, một UID Facebook là **một Person** dù mã cuộc chat đổi — hay **mỗi cuộc chat một Person**?
-2. Nhánh Messenger E2EE **chưa đọc được UID**: extension **không gửi**, hay gửi tạm theo `threadId` rồi gắn UID sau?
-3. Nhánh Messenger thường: NV có gặp URL **không** phải UID không? Nếu có, không được gán `customerUid = threadId`.
-4. Một hồ sơ Facebook hiện **một** `threadId`. Một người hai cuộc E2EE: ghi đè sẽ trộn tin. Giữ URL mới nhất, hay nhiều cuộc trên một Person?
+Câu chốt nằm ở **§12.3**: KEY tầng 3 là **người Facebook** hay **cuộc chat**. Các câu 2–4 phụ thuộc câu đó.
 
-Hướng đang bàn (chưa chốt): Person khóa **NV + nick/page + UID**; `threadId` chỉ mở chat và nối tin; E2EE không POST khi UID trống; bốn cặp `buinam` cũ **không xóa** ở bước khóa — gộp sau BUG-016.
+1. KEY Person trên một kênh = UID người Facebook, hay = ID cuộc trò chuyện?
+2. Nhánh Messenger E2EE chưa đọc được UID người: **không gửi**, hay gửi tạm theo mã cuộc chat?
+3. Nhánh Messenger thường: NV có gặp URL không phải UID người không?
+4. Một hồ sơ Facebook hiện **một** `threadId`. Nếu KEY là người mà một người hai cuộc E2EE: giữ URL mới nhất, hay nhiều cuộc trên một Person?
+
+---
+
+## 12. Chuẩn data extension phải gửi (đề xuất 2026-09-08 — chưa chốt)
+
+Owner: đi theo tầng. **Khóa trước, trường phụ sau.** Không gửi được tầng khóa thì **không** tạo Person.
+
+```
+Nhân viên đăng nhập extension
+  → Page / nick Facebook đang mở hội thoại (chat bằng gì)
+    → KEY xác định khách trên kênh đó
+      → trường bổ sung (tên, avatar, tin, …)
+```
+
+### 12.1 Tầng 1 — Nhân viên CRM (cố định, bắt buộc)
+
+Ai đang quét. Lấy từ **JWT lúc login panel**, không lấy từ Facebook.
+
+Ví dụ: nhân viên **`kha`** login extension thì khách vào hồ sơ `kha`, dù tab Meta đang mở Page hay nick cá nhân.
+
+Thiếu tầng này → không ingest.
+
+### 12.2 Tầng 2 — Kênh đang nói chuyện (cố định, bắt buộc)
+
+NV đang tương tác với khách **bằng gì**.
+
+| NV đang mở | Nhánh | Field cố định |
+|------------|--------|----------------|
+| Inbox Page công ty | Nhánh Page | UID Page (`employeeUid` / `myPageUid`) + nhánh = Page |
+| Nick Messenger cá nhân, chat thường | Nhánh Messenger thường | UID nick NV + nhánh = Messenger thường |
+| Nick Messenger cá nhân, chat mã hóa | Nhánh Messenger E2EE | UID nick NV + nhánh = Messenger E2EE |
+
+Cùng một người khách, **`kha`** chat bằng Page An Hưng và chat bằng nick cá nhân = **hai Person**. Đúng nghiệp vụ (đã đối chiếu: khác `employeeFacebookUid`).
+
+Thiếu tầng này → không biết khách thuộc Page nào / nick nào → không ingest.
+
+### 12.3 Tầng 3 — KEY khách trên kênh đó (cố định, bắt buộc) — cần chốt
+
+Không gọi chung một chữ **UID** cho cả người và cuộc chat. Hai số **trùng nhau** trên Nhánh Page và nhiều chat Messenger thường một-một; **tách nhau** trên Nhánh Messenger E2EE.
+
+| Ứng viên KEY | Nghĩa thường | Field | Ổn khi nào |
+|--------------|--------------|-------|------------|
+| **Người Facebook** | Mã tài khoản khách trên Facebook | `customerUid` | Nhánh Page = `selected_item_id`. Messenger thường 1-1 thường trùng số URL. E2EE phải đọc riêng, URL không phải số này |
+| **Cuộc trò chuyện** | Mã hội thoại đang mở | `threadId` (Messenger). Nhánh Page **không** có `threadId` riêng | Messenger: số trên URL `/messages/t/…` hoặc `/e2ee/t/…` |
+
+**Câu hỏi chốt (một trong hai):**
+
+- **A — KEY = người Facebook trên kênh** (tầng 1 + tầng 2 + `customerUid`). Đổi mã cuộc chat vẫn cùng Person. Bốn cặp **`buinam`** E2EE khác `threadId` cùng UID = **trùng hồ sơ** (BUG-013 còn đúng). Tên, avatar, tin, URL chat = tầng 4. Mã cuộc chat lưu để **Mở chat**, không phải khóa tạo Person.
+- **B — KEY = cuộc trò chuyện trên kênh** (tầng 1 + tầng 2 + `threadId` / trên Page dùng `selected_item_id`). Mỗi hội thoại một Person. Bốn cặp `buinam` = **hai cuộc chat, hai hồ sơ** — không phải bug định danh. UID người (nếu có) = tầng 4, dùng để gợi ý gộp sau.
+
+Đường owner mô tả («UID, ID cuộc trò chuyện chẳng hạn») gần **B** trên Messenger, gần **A** trên Nhánh Page. Cần chọn **một** quy tắc cho cả ba nhánh, hoặc nói rõ Page dùng A còn Messenger dùng B.
+
+### 12.4 Tầng 4 — Trường bổ sung (không khóa Person)
+
+Thiếu vẫn được **cập nhật** khách đã có. **Không** đủ để tạo Person mới nếu thiếu tầng 1–3.
+
+| Nhóm | Ví dụ | Ghi chú |
+|------|--------|---------|
+| Nhận diện hiển thị | Tên nick (`customerName`), avatar | Tên Facebook không sửa tay trên CRM |
+| Mở lại hội thoại | `pageUrl`, `threadId` nếu KEY là người | Menu Mở chat |
+| Tin đã lưu | `chatMessages` (id bong bóng `mid.$` / `@msgr.`, chữ, ảnh) | API đã bỏ tin không mid (BUG-044) |
+| Kỹ thuật | `scanSource`, `capturedAt`, `scanDebug` | Debug; không khóa Person |
+
+### 12.5 Extension phải gửi — bảng tối thiểu (theo nhánh)
+
+Cột «Khóa» = tầng 1–3. Cột «Phụ» = tầng 4. Dấu * = phụ thuộc câu chốt §12.3.
+
+| Field | Nhánh Page | Nhánh Messenger thường | Nhánh Messenger E2EE |
+|-------|------------|------------------------|----------------------|
+| JWT NV (tầng 1) | Khóa | Khóa | Khóa |
+| Nhánh (`scanSource`) | Khóa = Page | Khóa = Messenger thường | Khóa = Messenger E2EE |
+| UID Page / nick NV | Khóa | Khóa | Khóa |
+| UID người Facebook (`customerUid`) | Khóa (A) / khóa luôn vì không có thread riêng | Khóa nếu A; phụ nếu B | Khóa nếu A — **không POST** khi trống; phụ nếu B |
+| ID cuộc chat (`threadId`) | Không có | Khóa nếu B; phụ nếu A (thường trùng UID) | Khóa nếu B; phụ nếu A |
+| Tên, avatar, tin, URL trang | Phụ | Phụ | Phụ |
+
+Quy tắc gửi: đủ tầng khóa → mới `POST`. Thiếu khóa → panel báo, **không** tạo khách «Khách {threadId}».
+
+### 12.6 Hiện tại lệch chuẩn (để đối chiếu, chưa sửa)
+
+- Cho phép Nhánh Messenger E2EE gửi khi **chưa** có UID người — chỉ cần `threadId`.
+- Nhánh Messenger thường **gán** `customerUid` = `threadId` (gộp hai ứng viên KEY).
+- API tìm khách **theo `threadId` trước**, rồi mới UID; tìm thấy thì **đè** `threadId` rồi nối tin.
+- Contract Zod: `threadId` và `customerUid` đều optional; đủ **một** trong hai là ingest.
