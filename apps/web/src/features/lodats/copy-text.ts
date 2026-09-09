@@ -1,36 +1,52 @@
 /**
- * Copy text lô đất gửi Zalo — theo CRM cũ (không copy giá).
+ * Copy text lô đất — nút «Copy gửi sales» (nội bộ NV, có giá / hoa hồng).
+ * Không kèm footer công khai (hotline / địa chỉ VP).
  */
 import type { LodatDetail } from '@crmanhung/shared';
-import { formatArea } from './display';
+import { formatArea, formatBrokerFee, formatPriceVnd } from './display';
 
-const LODAT_COPY_FOOTER = `💰 Giá đẹp – thương lượng trực tiếp với chủ.
+const INTERNAL_COPY_HEADER = 'THÔNG TIN NỘI BỘ - KHÔNG GỬI KHÁCH';
 
-☎️☎️☎️: 0977 656 280 Xuân Khả - VP BĐS AN HƯNG LAND
-📍 Địa chỉ: BT6.8 Tây Nam Sách - TT Nam Sách - HD`;
+export function buildLodatCopyText(detail: LodatDetail, shareUrl: string): string {
+  const lines: string[] = [INTERNAL_COPY_HEADER, ''];
 
-export function buildLodatCopyText(detail: LodatDetail): string {
-  const lines: string[] = [];
   const title = detail.title?.trim();
-  if (title) lines.push(title);
+  if (title) lines.push(`📌 ${title}`);
   const address = detail.address?.trim();
-  if (address) lines.push(address);
+  if (address) lines.push(`📍 Địa chỉ: ${address}`);
 
   const specs: string[] = [];
-  if (detail.areaM2 != null) specs.push(`Diện tích: ${formatArea(detail.areaM2)}`);
+  if (detail.areaM2 != null) specs.push(`📐 Diện tích: ${formatArea(detail.areaM2)}`);
   if (detail.frontageM != null) {
-    specs.push(`Mặt tiền: MT ${detail.frontageM.toLocaleString('vi-VN')} m`);
+    specs.push(`↔️ Mặt tiền: MT ${detail.frontageM.toLocaleString('vi-VN')} m`);
   }
   const direction = detail.direction?.trim();
-  if (direction) specs.push(`Hướng: ${direction}`);
+  if (direction) specs.push(`🧭 Hướng: ${direction}`);
   if (specs.length) {
-    if (lines.length) lines.push('');
+    lines.push('');
     lines.push(...specs);
   }
 
-  const body = lines.join('\n').trim();
-  if (!body) return LODAT_COPY_FOOTER;
-  return `${body}\n\n${LODAT_COPY_FOOTER}`;
+  const priceLines: string[] = [];
+  if (detail.priceVnd != null && detail.priceVnd !== '') {
+    priceLines.push(`💰 Giá bán: ${formatPriceVnd(detail.priceVnd)}`);
+  }
+  const priceNote = detail.priceNote?.trim();
+  if (priceNote) priceLines.push(`📝 Ghi chú giá: ${priceNote}`);
+  const broker = formatBrokerFee(detail.brokerFeeNote, detail.commissionPercent);
+  if (broker) priceLines.push(`🤝 Hoa hồng: ${broker}`);
+  if (priceLines.length) {
+    lines.push('');
+    lines.push(...priceLines);
+  }
+
+  const url = shareUrl.trim();
+  if (url) {
+    lines.push('');
+    lines.push(`🔗 ${url}`);
+  }
+
+  return lines.join('\n').trim();
 }
 
 /** Copy Zalo/Facebook — mô tả lô + link share có mã NV. */

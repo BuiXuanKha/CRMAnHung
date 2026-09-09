@@ -50,6 +50,7 @@ export function LodatDetailPage() {
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [shareBusy, setShareBusy] = useState(false);
+  const [copyBusy, setCopyBusy] = useState(false);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
 
   const q = useQuery({
@@ -136,12 +137,19 @@ export function LodatDetailPage() {
   }
 
   async function handleCopy() {
-    if (!detail) return;
+    if (!detail || copyBusy) return;
+    setCopyBusy(true);
     try {
-      await copyTextToClipboard(buildLodatCopyText(detail));
-      flash('Đã copy thông tin lô đất.');
-    } catch {
-      setAlertMsg('Không copy được thông tin lô đất.');
+      const res = await createLodatShareLink(detail.id);
+      const shareUrl = guestLotShareUrl(res.slug, res.shareCode);
+      await copyTextToClipboard(buildLodatCopyText(detail, shareUrl));
+      flash('Đã copy nội dung gửi sales.');
+    } catch (err) {
+      setAlertMsg(
+        err instanceof Error ? err.message : 'Không copy được nội dung gửi sales.',
+      );
+    } finally {
+      setCopyBusy(false);
     }
   }
 
@@ -229,10 +237,11 @@ export function LodatDetailPage() {
                 <button
                   type="button"
                   className="ld-detail-copy-btn"
+                  disabled={copyBusy}
                   onClick={() => void handleCopy()}
                 >
                   <Copy size={14} aria-hidden />
-                  Copy thông tin
+                  {copyBusy ? 'Đang tạo…' : 'Copy gửi sales'}
                 </button>
                 <button
                   type="button"
