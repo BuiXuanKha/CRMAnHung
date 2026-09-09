@@ -104,7 +104,7 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 | Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng hoặc gắn path ảnh chat (reuse) |
 | Ảnh **thêm** trên thửa dự án (`LodatImage` theo luồng NV) | NV giữ luồng: tạo/sửa | **Không** ghi sổ địa chỉ / kho `ProjectLot`. Tối đa 5. Ghép sau ảnh dự án trên chi tiết + web khách (giống CRM cũ `tblLodatImages`). NV khác cùng số lô kho không thấy ảnh này. |
 
-Upload **mới** từ máy (tạo lô hoặc sửa lô): object key CDN = `{slug tên+địa chỉ}-anh-{n}.webp` (API convert WebP). Đổi tiêu đề / địa chỉ rồi Lưu → đổi lại key cho khớp. Ảnh gắn từ chat: **copy** sang key lô SEO WebP, **giữ** file `customers/chat/` (WebP sau `images:webp-replace`; cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}.webp` từ `Address.detail`. **Đăng web không làm SEO ảnh lần nữa.**
+Upload **mới** từ máy (tạo lô hoặc sửa lô): object key CDN = `{slug tên+địa chỉ}-anh-{n}.webp` (API convert WebP). **Web nén JPEG cạnh dài ≤ 2560 trước khi gửi** (giảm dung lượng mạng điện thoại). Đổi tiêu đề / địa chỉ rồi Lưu → đổi lại key cho khớp. Ảnh gắn từ chat: **copy** sang key lô SEO WebP, **giữ** file `customers/chat/` (WebP sau `images:webp-replace`; cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}.webp` từ `Address.detail`. **Đăng web không làm SEO ảnh lần nữa.**
 
 **Kho cũ:** ảnh lô + ảnh dự án — `pnpm images:seo-copy` rồi `APPLY=1`. Ảnh lô trỏ chat: copy SEO, giữ chat. Ảnh dự án còn UUID: `pnpm images:seo-copy-addresses`.
 
@@ -516,7 +516,7 @@ Layout 2 cột như §12.4.1: trái form; phải Hình ảnh + Xem nhanh sticky;
 
 - Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs. **Được thêm ảnh riêng thửa** (chat / dán / file) — không phải ảnh dự án trên sổ địa chỉ.
 - Lô **dân**: bắt buộc tiêu đề + địa chỉ REGULAR; specs như trang sửa; chip hướng/ghi chú giá/hoa hồng §12.4.3.
-- Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ (nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`.
+- Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ lần lượt (mỗi file **nén client** trước; nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`. Nút Lưu hiện `Đang tải ảnh k/n…` khi đang gửi file.
 - 1 luồng active / NV / lô kho — API chặn, picker cũng khoá («Bạn đang giữ»).
 
 #### 12.5.2 Mobile

@@ -78,6 +78,7 @@ export function LodatCreatePage() {
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [saveProgress, setSaveProgress] = useState<string | null>(null);
 
   const fileRef = useRef<HTMLInputElement>(null);
   const zoneRef = useRef<HTMLDivElement>(null);
@@ -227,15 +228,18 @@ export function LodatCreatePage() {
       .map((img) => img.id);
     if (chatIds.length) input.chatImageIds = chatIds;
 
+    const files = queue.filter(
+      (img): img is Extract<QueueImage, { kind: 'file' }> => img.kind === 'file',
+    );
+
     setSaving(true);
+    setSaveProgress(files.length ? 'Đang tạo lô…' : null);
     try {
       const created = await createLodat(input);
-      const files = queue.filter(
-        (img): img is Extract<QueueImage, { kind: 'file' }> => img.kind === 'file',
-      );
-      for (const img of files) {
+      for (let i = 0; i < files.length; i += 1) {
+        setSaveProgress(`Đang tải ảnh ${i + 1}/${files.length}…`);
         try {
-          await uploadLodatImage(created.id, img.file);
+          await uploadLodatImage(created.id, files[i]!.file);
         } catch {
           setAlertMsg(
             'Tạo lô thành công nhưng một số ảnh chưa tải lên được. Thêm lại ảnh trong trang Sửa.',
@@ -248,6 +252,7 @@ export function LodatCreatePage() {
     } catch (err) {
       setFormError(err instanceof Error ? err.message : 'Không tạo được lô đất.');
       setSaving(false);
+      setSaveProgress(null);
     }
   }
 
@@ -678,7 +683,7 @@ export function LodatCreatePage() {
                 Hủy
               </button>
               <button type="submit" className="ld-edit-save" disabled={saving}>
-                {saving ? 'Đang lưu…' : 'Lưu'}
+                {saveProgress ?? (saving ? 'Đang lưu…' : 'Lưu')}
               </button>
             </footer>
           </div>

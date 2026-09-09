@@ -16,6 +16,7 @@ import {
   type UpdateLodatSaleStatusInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
+import { compressImageForUpload } from '@/shared/compress-image';
 
 export async function listLodats(query: LodatListQuery = {}): Promise<LodatListResponse> {
   const params = new URLSearchParams();
@@ -92,8 +93,9 @@ export async function uploadLodatImage(
   lodatId: string,
   file: File,
 ): Promise<LodatDetail> {
+  const prepared = await compressImageForUpload(file);
   const body = new FormData();
-  body.append('file', file);
+  body.append('file', prepared);
   return apiFetch<LodatDetail>(`/lodats/${lodatId}/images`, {
     method: 'POST',
     body,
