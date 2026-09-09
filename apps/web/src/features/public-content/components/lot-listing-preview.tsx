@@ -21,7 +21,11 @@ export function LotListingPreview({ lot }: Props) {
   const price = lot ? lotPriceDisplay(lot) : null;
 
   return (
-    <aside className="pw-preview" aria-label="Preview Post">
+    <aside
+      className={`pw-preview${lot ? '' : ' is-empty'}`}
+      aria-label="Preview Post"
+      {...(lot ? {} : { 'aria-hidden': true as const })}
+    >
       <header className="pw-preview-head">
         <h2>Preview Post</h2>
       </header>
