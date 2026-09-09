@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Sparkles, PenLine } from 'lucide-react';
+import { ChevronDown, ChevronRight, Sparkles, PenLine } from 'lucide-react';
 import {
   lotGptRequestPayloadSchema,
   LOT_GPT_SYSTEM_PROMPT,
@@ -31,6 +31,8 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
   const [responseText, setResponseText] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [systemOpen, setSystemOpen] = useState(false);
+  const [jsonOpen, setJsonOpen] = useState(false);
 
   const canSend = extraDescription.trim().length > 0 && !busy;
 
@@ -40,12 +42,16 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
       setJsonText('');
       setResponseText('');
       setParseError(null);
+      setSystemOpen(false);
+      setJsonOpen(false);
       return;
     }
     setExtraDescription('');
     setJsonText(formatLotGptRequestJson(lot));
     setResponseText('');
     setParseError(null);
+    setSystemOpen(false);
+    setJsonOpen(false);
   }, [lot]);
 
   function onExtraDescriptionChange(value: string) {
@@ -113,12 +119,8 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
     >
       {lot ? (
         <>
-          <p className="crm-dialog-message">
-            Nhập <strong>mô tả thêm</strong> (bắt buộc) — điểm nổi bật thực địa để GPT viết bài
-            sinh động. JSON bên dưới tự cập nhật.
-          </p>
           <label className="pw-gpt-json-label" htmlFor="pw-gpt-extra">
-            Mô tả thêm <span className="pw-gpt-required">*</span>
+            Mô tả thêm <span className="pw-gpt-required">* (Bắt buộc)</span>
           </label>
           <textarea
             id="pw-gpt-extra"
@@ -132,31 +134,53 @@ export function LotGptContentDialog({ lot, onClose, onFlash, onApplyToEditor }: 
             aria-label="Mô tả thêm gửi GPT"
             aria-required="true"
           />
-          <label className="pw-gpt-json-label" htmlFor="pw-gpt-system-prompt">
-            Prompt hệ thống gửi GPT API (system)
-          </label>
-          <textarea
-            id="pw-gpt-system-prompt"
-            className="pw-gpt-json pw-gpt-prompt"
-            spellCheck={false}
-            rows={10}
-            readOnly
-            value={LOT_GPT_SYSTEM_PROMPT}
-            aria-label="System prompt gửi GPT API"
-          />
-          <label className="pw-gpt-json-label" htmlFor="pw-gpt-json">
-            Dữ liệu gửi GPT (JSON — user message)
-          </label>
-          <textarea
-            id="pw-gpt-json"
-            className="pw-gpt-json"
-            spellCheck={false}
-            rows={10}
-            value={jsonText}
-            disabled={busy}
-            onChange={(e) => setJsonText(e.target.value)}
-            aria-label="JSON gửi GPT"
-          />
+          <div className="pw-gpt-fold">
+            <button
+              type="button"
+              className="pw-gpt-fold-toggle"
+              aria-expanded={systemOpen}
+              aria-controls="pw-gpt-system-prompt"
+              onClick={() => setSystemOpen((v) => !v)}
+            >
+              <Icon icon={systemOpen ? ChevronDown : ChevronRight} size="mini" />
+              Prompt hệ thống gửi GPT API (system)
+            </button>
+            {systemOpen ? (
+              <textarea
+                id="pw-gpt-system-prompt"
+                className="pw-gpt-json pw-gpt-prompt"
+                spellCheck={false}
+                rows={10}
+                readOnly
+                value={LOT_GPT_SYSTEM_PROMPT}
+                aria-label="System prompt gửi GPT API"
+              />
+            ) : null}
+          </div>
+          <div className="pw-gpt-fold">
+            <button
+              type="button"
+              className="pw-gpt-fold-toggle"
+              aria-expanded={jsonOpen}
+              aria-controls="pw-gpt-json"
+              onClick={() => setJsonOpen((v) => !v)}
+            >
+              <Icon icon={jsonOpen ? ChevronDown : ChevronRight} size="mini" />
+              Dữ liệu gửi GPT (JSON — user message)
+            </button>
+            {jsonOpen ? (
+              <textarea
+                id="pw-gpt-json"
+                className="pw-gpt-json"
+                spellCheck={false}
+                rows={10}
+                value={jsonText}
+                disabled={busy}
+                onChange={(e) => setJsonText(e.target.value)}
+                aria-label="JSON gửi GPT"
+              />
+            ) : null}
+          </div>
           {responseText ? (
             <>
               <label className="pw-gpt-json-label" htmlFor="pw-gpt-response">

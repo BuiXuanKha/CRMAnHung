@@ -1171,12 +1171,46 @@
   color: #64748b;
 }
 
+.pw-gpt-required {
+  font-weight: 700;
+  color: #b91c1c;
+}
+
 .pw-gpt-json-label {
   display: block;
   margin: 0 0 6px;
   font-size: 0.8rem;
   font-weight: 700;
   color: #475569;
+}
+
+.pw-gpt-fold {
+  margin: 0 0 10px;
+}
+
+.pw-gpt-fold-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin: 0 0 6px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pw-gpt-fold-toggle:hover {
+  color: #2563eb;
+}
+
+.pw-gpt-fold .pw-gpt-json {
+  margin-bottom: 6px;
 }
 
 .pw-editor-gpt-hint {
