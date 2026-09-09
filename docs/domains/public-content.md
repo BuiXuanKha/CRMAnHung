@@ -401,7 +401,7 @@ Trống: `Không có lô đang mở bán.`
 
 ### 13.2 Mobile
 
-Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ + phân loại + DT/MT/hướng + NV + giá). Icon đỏ cạnh tiêu đề khi `needsWebUpdate` (cùng 13.1). Preview **dưới** list khi đã chọn dòng — không rail phải.
+Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ + phân loại + DT/MT/hướng + NV + giá). Icon đỏ cạnh tiêu đề khi `needsWebUpdate` (cùng 13.1). Preview **chỉ** hiện **dưới** list khi đã chọn dòng — **không** khung empty «Chọn một lô…», không rail phải.
 
 Thanh tìm: ô tìm + **Bộ lọc** + **Tìm**. Panel: Phân loại · Giá · Web · NV. **Xoá lọc** xóa mọi lọc (cả cột desktop). Desktop không hiện Bộ lọc / Tìm.
 

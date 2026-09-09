@@ -910,11 +910,26 @@
   .pw-split {
     display: flex;
     flex-direction: column;
+    flex: none;
+    min-height: 0;
     overflow: visible;
   }
 
+  .pw-split-list {
+    flex: none;
+    min-height: 0;
+  }
+
+  /* Mobile: không khung Preview empty — chỉ hiện khi đã chọn lô (dưới list). */
+  .pw-preview.is-empty {
+    display: none;
+  }
+
   .pw-preview {
+    flex: none;
     overflow: visible;
+    margin-top: 8px;
+    margin-bottom: 12px;
   }
 }
 
