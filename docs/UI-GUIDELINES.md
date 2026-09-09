@@ -735,6 +735,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/dich-vu-so-do`: bỏ Xóa; Tạm dừng/Hoàn thành cuối list + mờ; menu Khôi phục; Hủy=`TAM_DUNG` |
 | 2026-09-09 | `/dich-vu-so-do` tiến độ **Công việc** còn mở → hangtag **Đang làm** (amber) |
 | 2026-09-09 | Trang khách: nhãn góc ảnh **Mở bán** / **Tạm dừng** / **Đã bán** (và Đặt cọc) — không đổi CRM |
+| 2026-09-09 | `/dich-vu-so-do` Tạm dừng/Hoàn thành: menu chỉ Xem chi tiết + Khôi phục; tự bỏ ghim |
 
 ---
 

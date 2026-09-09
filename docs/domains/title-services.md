@@ -203,6 +203,8 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 | **Khôi phục** | Chỉ khi Tạm dừng hoặc Hoàn thành → `DANG_LAM` (xóa `completedAt`) |
 | ~~Xóa hồ sơ~~ | **Bỏ** — không xoá cứng / mềm |
 
+**Tạm dừng / Hoàn thành:** menu Thao tác **chỉ** **Xem chi tiết** + **Khôi phục**. Chuyển sang Tạm dừng/Hoàn thành → **tự bỏ ghim** nếu đang ghim. Không ghim hồ sơ đang muted.
+
 #### 12.1.4 Footer + cuộn tải thêm
 
 `Hiển thị n / Tổng M hồ sơ sổ đỏ` (`n` = số dòng đang có, `M` = `total` API). Đang nối: thêm `— Đang tải thêm…`.
