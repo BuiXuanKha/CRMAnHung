@@ -88,19 +88,13 @@ export function LodatEditImages({
   return (
     <section className="ld-edit-card">
       <h2 className="ld-edit-section-title">Hình ảnh</h2>
-      {canEditImages ? (
-        <p className="ld-edit-hint">
-          {isProject
-            ? 'Ảnh dự án chỉ xem. Ảnh bạn thêm có thể gỡ bằng nút ×.'
-            : 'Ảnh chat và ảnh tự thêm có thể gỡ bằng nút ×.'}
-        </p>
-      ) : (
+      {!canEditImages ? (
         <p className="ld-edit-hint muted">
           {isProject
             ? 'Ảnh dự án chỉ xem. Admin sửa ảnh trên sổ địa chỉ.'
             : 'Bạn không có quyền thêm hoặc gỡ ảnh trên lô này.'}
         </p>
-      )}
+      ) : null}
 
       {canEditImages ? (
         <>
@@ -109,12 +103,7 @@ export function LodatEditImages({
               Đã đủ {LODAT_MAX_UPLOAD_IMAGES} ảnh bạn thêm. Vẫn có thể xem ảnh
               dự án bên dưới.
             </p>
-          ) : (
-            <p className="ld-edit-limit-hint">
-              Ảnh bạn thêm: tối đa {LODAT_MAX_UPLOAD_IMAGES} (dán, kéo thả hoặc
-              chọn file).
-            </p>
-          )}
+          ) : null}
 
           <div className="ld-edit-paste">
             <div className="ld-edit-paste-head">
@@ -123,10 +112,6 @@ export function LodatEditImages({
                 {lodatCount}/{LODAT_MAX_UPLOAD_IMAGES}
               </span>
             </div>
-            <p className="ld-edit-paste-hint">
-              Click vào khung bên dưới, rồi dán (Ctrl+V) hoặc kéo thả ảnh từ máy
-              / trang web. Không tính ảnh chat hay ảnh dự án.
-            </p>
             <div
               ref={zoneRef}
               className={zoneClass}
