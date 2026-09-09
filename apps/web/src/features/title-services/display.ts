@@ -22,6 +22,34 @@ export function formatMoneyVnd(n?: number | string | null): string {
   return `${v.toLocaleString('vi-VN')} đ`;
 }
 
+export function formatStatMoneyVnd(n?: number | string | null): string {
+  const v = toVndNumber(n) ?? 0;
+  return `${v.toLocaleString('vi-VN')} đ`;
+}
+
+/** Số tiền rút gọn trên thẻ thống kê mobile (2,6 tỷ / 26 triệu). */
+export function formatStatShortVnd(n?: number | string | null): string {
+  const v = toVndNumber(n);
+  if (v == null || v <= 0) return '0 đ';
+  if (v >= 1_000_000_000) {
+    const ty = v / 1_000_000_000;
+    const text = new Intl.NumberFormat('vi-VN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 3,
+    }).format(ty);
+    return `${text} tỷ`;
+  }
+  if (v >= 1_000_000) {
+    const trieu = v / 1_000_000;
+    const text = new Intl.NumberFormat('vi-VN', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(trieu);
+    return `${text} triệu`;
+  }
+  return `${v.toLocaleString('vi-VN')} đ`;
+}
+
 export function sumVnd(amounts: Array<number | string>): number {
   return amounts.reduce<number>((s, n) => s + (toVndNumber(n) ?? 0), 0);
 }

@@ -70,6 +70,40 @@
 }
 
 @media (max-width: 767px) {
+  .sd-stats {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .sd-stat {
+    padding: 10px 6px;
+    text-align: center;
+  }
+
+  .sd-stat-label {
+    font-size: 0.62rem;
+    letter-spacing: 0;
+    text-transform: none;
+    line-height: 1.25;
+  }
+
+  .sd-stat-value {
+    font-size: 1.05rem;
+    word-break: break-word;
+  }
+
+  .sd-stat-full {
+    display: none;
+  }
+
+  .sd-stat-short {
+    display: inline;
+  }
+
+  .sd-stat-hint {
+    display: none;
+  }
+
   .sd-layout,
   .sd-layout.is-panel-open {
     grid-template-columns: 1fr;

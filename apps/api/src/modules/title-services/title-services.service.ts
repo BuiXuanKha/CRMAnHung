@@ -26,6 +26,7 @@ import {
   TITLE_DOC_KINDS,
   TITLE_FILE_MAX_BYTES,
   TITLE_FILE_MIMES,
+  TITLE_MONEY_KIND,
   TITLE_STATUS,
   TITLE_STATUSES,
   keywordWhere,
@@ -52,7 +53,7 @@ export class TitleServicesService {
     };
     const take = Math.min(Math.max(query.limit ?? 50, 1), 200);
     const skip = Math.max(query.offset ?? 0, 0);
-    const [rows, total] = await Promise.all([
+    const [rows, total, thuAgg, chiAgg] = await Promise.all([
       this.prisma.titleService.findMany({
         where,
         orderBy: [{ isPinned: 'desc' }, { pinnedAt: 'desc' }, { updatedAt: 'desc' }],
@@ -61,9 +62,26 @@ export class TitleServicesService {
         include: LIST_INCLUDE,
       }),
       this.prisma.titleService.count({ where }),
+      this.prisma.titleServiceMoney.aggregate({
+        where: { kind: TITLE_MONEY_KIND.THU, titleService: where },
+        _sum: { amountVnd: true },
+      }),
+      this.prisma.titleServiceMoney.aggregate({
+        where: { kind: TITLE_MONEY_KIND.CHI, titleService: where },
+        _sum: { amountVnd: true },
+      }),
     ]);
     const items = rows.map(toListItem);
-    return { items, total };
+    const thuSum = thuAgg._sum.amountVnd;
+    const chiSum = chiAgg._sum.amountVnd;
+    return {
+      items,
+      total,
+      stats: {
+        totalThuVnd: thuSum == null ? 0 : Number(thuSum),
+        totalChiVnd: chiSum == null ? 0 : Number(chiSum),
+      },
+    };
   }
 
   async getById(user: RequestUser, id: string) {

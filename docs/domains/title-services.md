@@ -107,7 +107,8 @@ Thứ tự mỗi trang: **12.1 máy tính** → **12.2 mobile** → trong từng
 ### 12.1 Giao diện máy tính
 
 ```
-┌ Ô tìm ───────────────────────────────────────────────────────┐
+┌ 3 thẻ: Số hồ sơ · Tổng thu · Tổng chi ───────────────────────┐
+├ Ô tìm ───────────────────────────────────────────────────────┤
 ├ Bảng: # · Tên khách · Nhu cầu · Lịch sử · Giá/Thu/Chi        │
 │       · Tài liệu · Số ngày · Thao tác                        │
 ├ Footer đếm ──────────────────────────────────────────────────┤
@@ -121,6 +122,18 @@ Không nút thêm hồ sơ — thêm từ màn khách.
 Sort: ghim trước, rồi `updatedAt` mới.
 
 Ghim: nền vàng `#fef9c3`. Đang chọn: `#eff6ff`.
+
+#### 12.1.0 Thẻ tổng hợp (giống `/giao-dich`)
+
+Ba thẻ trên ô tìm / cạnh layout chính (máy tính + mobile):
+
+| Thẻ | Nội dung |
+|-----|----------|
+| Số hồ sơ sổ đỏ | `total` API cùng filter tìm / trạng thái / NV |
+| Tổng thu | Sum `TitleServiceMoney` kind `THU` trên cùng filter |
+| Tổng chi | Sum kind `CHI` trên cùng filter |
+
+Đổi ô tìm / trạng thái / NV → 3 thẻ đổi theo tập API (không chỉ trang đang xem). Lọc cột client (nhu cầu/tiến độ…) không đổi thẻ. Tiền `crm-money`; mobile rút gọn (triệu / tỷ). Hint desktop: «Theo bộ lọc hiện tại».
 
 #### 12.1.1 Ô tìm kiếm
 
@@ -232,7 +245,8 @@ Máy tính (thân bảng) và mobile (danh sách thẻ) cùng quy tắc.
 ### 12.2 Giao diện mobile
 
 ```
-┌ Ô tìm ───────────────────────────────────────────────────────┐
+┌ 3 thẻ: Số hồ sơ · Tổng thu · Tổng chi ───────────────────────┐
+├ Ô tìm ───────────────────────────────────────────────────────┤
 ├ [Bộ lọc] [Tìm] ──────────────────────────────────────────────┤
 ├ Thẻ xếp dọc ─────────────────────────────────────────────────┤
 ├ Footer đếm ──────────────────────────────────────────────────┤

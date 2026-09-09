@@ -11,6 +11,7 @@ import {
   TitleServiceStatus,
   UserRole,
   type TitleServiceListItem,
+  type TitleServiceListStats,
 } from '@crmanhung/shared';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import {
@@ -38,6 +39,7 @@ import { DetailPanel } from './components/detail-panel';
 import { FilterBar } from './components/filter-bar';
 import { TitleServiceCardList } from './components/title-service-card-list';
 import { TitleServiceTable } from './components/title-service-table';
+import { TitleServiceStats } from './components/stats';
 import { applyExtraFilters, countMobileTitleServiceFilters } from './display';
 import {
   DEFAULT_TITLE_SERVICE_EXTRA,
@@ -125,6 +127,8 @@ export function TitleServiceListPage() {
 
   const filtered = useMemo(() => applyExtraFilters(rawItems, extra), [rawItems, extra]);
 
+  const apiStats = (list.data?.pages[0] as { stats?: TitleServiceListStats } | undefined)?.stats;
+  const stats = apiStats ?? { totalThuVnd: 0, totalChiVnd: 0 };
   const selected =
     filtered.find((row) => row.id === selectedId) ??
     rawItems.find((row) => row.id === selectedId) ??
@@ -392,6 +396,12 @@ export function TitleServiceListPage() {
     <div className="sd-page">
       <div className={`sd-layout${panelOpen ? ' is-panel-open' : ''}`}>
         <div className="sd-main">
+          <TitleServiceStats
+            count={total}
+            totalThuVnd={stats.totalThuVnd}
+            totalChiVnd={stats.totalChiVnd}
+          />
+
           <section className="sd-filter-wrap" aria-label="Tìm kiếm hồ sơ sổ đỏ">
             <FilterBar
               keyword={keyword}
