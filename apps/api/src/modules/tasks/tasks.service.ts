@@ -3,7 +3,7 @@ import { compareWorkTasksForList } from '@crmanhung/shared';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
 import { assertCanAccess as assertCustomerAccess } from '../customers/customers-view';
-import type { CreateWorkTaskDto, PinWorkTaskDto } from './dto/task.dto';
+import type { CreateWorkTaskDto, PinWorkTaskDto, UpdateWorkTaskDto } from './dto/task.dto';
 
 const TARGET_TYPES = ['NONE', 'CUSTOMER', 'LODAT', 'TRANSACTION', 'TITLE_SERVICE'] as const;
 type TargetType = (typeof TARGET_TYPES)[number];
@@ -113,6 +113,48 @@ export class TasksService {
     });
 
     return this.toItem(row);
+  }
+
+  async update(user: RequestUser, id: string, dto: UpdateWorkTaskDto) {
+    const current = await this.requireOwnOpen(user, id);
+    const content = dto.content.trim();
+    if (!content) throw new BadRequestException('Nhập nội dung công việc.');
+    const dueOn = parseDueOn(dto.dueOn);
+    const contentChanged = content !== current.content;
+
+    const updated = await this.prisma.$transaction(async (tx) => {
+      const row = await tx.workTask.update({
+        where: { id },
+        data: { content, dueOn },
+      });
+
+      if (contentChanged) {
+        await tx.customerCareNote.updateMany({
+          where: { workTaskId: id },
+          data: { note: content },
+        });
+        await tx.titleServiceProgress.updateMany({
+          where: { workTaskId: id },
+          data: { note: content },
+        });
+        if (current.customerId) {
+          await tx.customer.update({
+            where: { id: current.customerId },
+            data: { updatedAt: new Date() },
+          });
+        }
+        if (current.titleServiceId) {
+          await tx.titleService.update({
+            where: { id: current.titleServiceId },
+            data: { updatedAt: new Date() },
+          });
+        }
+      }
+
+      return row;
+    });
+
+    return this.toItem(updated);
   }
 
   async pin(user: RequestUser, id: string, dto: PinWorkTaskDto) {

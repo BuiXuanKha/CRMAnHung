@@ -2,14 +2,15 @@
 
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { WorkTask } from '@crmanhung/shared';
+import type { UpdateWorkTaskInput, WorkTask } from '@crmanhung/shared';
 import { CrmToast } from '@/shared/ui/dialog';
-import { completeWorkTask, listWorkTasks, pinWorkTask } from './api';
+import { completeWorkTask, listWorkTasks, pinWorkTask, updateWorkTask } from './api';
 import { type WorkTaskAction } from './components/action-menu';
 import { TaskCardList } from './components/task-card-list';
 import { TaskDetailDialog } from './components/task-detail-dialog';
 import { TaskTable } from './components/task-table';
 import { TasksCreateFab } from './components/tasks-create-fab';
+import { CreateTaskDialog } from './create-task-dialog';
 import { useCreateTaskModal } from './use-create-task-modal';
 import './tasks-page.css';
 
@@ -22,6 +23,8 @@ export function TasksPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [menuId, setMenuId] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editError, setEditError] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [completeError, setCompleteError] = useState<string | null>(null);
 
@@ -30,6 +33,7 @@ export function TasksPage() {
   const loading = query.isLoading;
   const error = query.error instanceof Error ? query.error.message : null;
   const detail = items.find((row) => row.id === detailId) ?? null;
+  const editing = items.find((row) => row.id === editId) ?? null;
 
   function flash(msg: string) {
     setToast(msg);
@@ -48,6 +52,28 @@ export function TasksPage() {
     },
     onError: (err) => {
       flash(err instanceof Error ? err.message : 'Không ghim được công việc.');
+    },
+  });
+
+  const updateMut = useMutation({
+    mutationFn: ({ id, input }: { id: string; input: UpdateWorkTaskInput }) =>
+      updateWorkTask(id, input),
+    onSuccess: async (updated) => {
+      await qc.invalidateQueries({ queryKey: ['tasks'] });
+      if (updated.targetType === 'TITLE_SERVICE' && updated.targetId) {
+        await qc.invalidateQueries({ queryKey: ['title-services'] });
+        await qc.invalidateQueries({ queryKey: ['title-service', updated.targetId] });
+      }
+      if (updated.targetType === 'CUSTOMER' && updated.targetId) {
+        await qc.invalidateQueries({ queryKey: ['customers'] });
+        await qc.invalidateQueries({ queryKey: ['customer', updated.targetId] });
+      }
+      setEditId(null);
+      setEditError(null);
+      flash('Đã cập nhật công việc.');
+    },
+    onError: (err) => {
+      setEditError(err instanceof Error ? err.message : 'Không cập nhật được công việc.');
     },
   });
 
@@ -81,6 +107,14 @@ export function TasksPage() {
     setCompleteError(null);
   }
 
+  function openEdit(item: WorkTask) {
+    if (item.completedAt) return;
+    setSelectedId(item.id);
+    setDetailId(null);
+    setEditError(null);
+    setEditId(item.id);
+  }
+
   function handleAction(item: WorkTask, action: WorkTaskAction) {
     setMenuId(null);
     if (action === 'detail') {
@@ -88,6 +122,10 @@ export function TasksPage() {
       return;
     }
     if (item.completedAt) return;
+    if (action === 'edit') {
+      openEdit(item);
+      return;
+    }
     if (action === 'pin') {
       setSelectedId(item.id);
       void pinMut.mutateAsync(item);
@@ -161,6 +199,25 @@ export function TasksPage() {
             if (detail) void completeMut.mutateAsync(detail.id);
           }}
         />
+        {editing ? (
+          <CreateTaskDialog
+            mode="edit"
+            open
+            item={editing}
+            busy={updateMut.isPending}
+            error={editError}
+            onClose={() => {
+              if (!updateMut.isPending) {
+                setEditId(null);
+                setEditError(null);
+              }
+            }}
+            onSubmit={(input) => {
+              setEditError(null);
+              updateMut.mutate({ id: editing.id, input });
+            }}
+          />
+        ) : null}
         {createTaskDialog}
         <CrmToast message={toast} />
       </section>

@@ -55,6 +55,7 @@ STAFF tạo trên bản ghi không phải của mình → 404 (cùng BUG-008). P
 |-----|-------|----------------|
 | Công việc | `/cong-viec` | Bảng việc của mình (gồm đã xong) + FAB tạo |
 | Modal thêm | FAB `/cong-viec` hoặc 4 list | Nội dung, hạn, Lưu / Huỷ |
+| Modal sửa | menu **Sửa** trên `/cong-viec` | Nội dung + hạn (nguồn không đổi); chỉ việc chưa xong |
 | Modal chi tiết | trên `/cong-viec` | Nội dung, hạn, đếm ngược; **Hoàn thành** nếu chưa xong |
 
 ## 7. Contract / API
@@ -65,6 +66,7 @@ Prefix `/api/v1`. Schema: `packages/shared/src/tasks.ts`.
 |--------|------|--------------|----------|------|
 | GET | `/tasks` | — | `{ items, total }` việc của user (**kể cả đã xong**) | JWT |
 | POST | `/tasks` | `content`, `dueOn`; `targetType`+`targetId` (bỏ hoặc `NONE` = không gắn). `TITLE_SERVICE` → tiến độ `CONG_VIEC` (gắn `workTaskId`). `CUSTOMER` → lịch sử chăm sóc (ghi chú = nội dung việc) | `WorkTask` | JWT |
+| PATCH | `/tasks/:id` | `content`, `dueOn` | `WorkTask`. Đồng bộ ghi chú care / tiến độ `CONG_VIEC` gắn `workTaskId` nếu đổi nội dung | JWT, chủ việc, **chưa xong** |
 | PATCH | `/tasks/:id/pin` | `{ pinned }` | `WorkTask` | JWT, chủ việc, **chưa xong** |
 | PATCH | `/tasks/:id/complete` | — | `WorkTask` (`completedAt`). Gắn sổ đỏ → tiến độ `CONG_VIEC`: hangtag **Đã hoàn thành**. Gắn khách → lần chăm sóc: hangtag **Đã hoàn thành** | JWT, chủ việc, **chưa xong** |
 
@@ -154,6 +156,7 @@ Portal `position: fixed`.
 | Mục | Việc |
 |-----|------|
 | Xem chi tiết | Modal mục 12.5 |
+| Sửa | Chỉ việc **chưa xong** → modal §12.6 (nội dung + hạn; nguồn không đổi) |
 | Ghim / Bỏ ghim | Chỉ việc **chưa xong** |
 | Hoàn thành | Chỉ việc **chưa xong** → toast «Đã hoàn thành công việc.»; dòng xuống cuối + gạch ngang |
 
@@ -161,7 +164,7 @@ Portal `position: fixed`.
 
 Ghim (chưa xong): nền vàng. Đang chọn / menu mở: highlight. Bấm dòng → modal 12.5.
 
-**Đã xong:** cuối list; `content` (+ nguồn) **gạch ngang** (`text-decoration: line-through`); màu chữ xám; hangtag **Đã hoàn thành** (`green`); **không** hangtag Hôm nay / N ngày / Quá hạn. Menu chỉ **Xem chi tiết**. Không nền vàng ghim (kể cả còn `isPinned`).
+**Đã xong:** cuối list; `content` (+ nguồn) **gạch ngang** (`text-decoration: line-through`); màu chữ xám; hangtag **Đã hoàn thành** (`green`); **không** hangtag Hôm nay / N ngày / Quá hạn. Menu chỉ **Xem chi tiết** (không Sửa / Ghim / Hoàn thành). Không nền vàng ghim (kể cả còn `isPinned`).
 
 **Sắp xếp:** nhóm ghim chưa xong (hạn gần → xa) → nhóm không ghim chưa xong (hạn gần → xa) → đã xong (cuối).
 
@@ -251,3 +254,12 @@ Nội dung (`content`; đã xong → gạch ngang). Dòng nguồn (`NONE` → «
 **Chưa xong:** **Đóng** · **Hoàn thành** (primary). Busy khi PATCH. Xong: đóng, toast «Đã hoàn thành công việc.»
 
 **Đã xong:** chỉ **Đóng** (không Hoàn thành).
+
+## 12.6 Modal Sửa công việc
+
+Mở từ menu **Sửa** (chỉ việc chưa xong). `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề: **Sửa công việc**.
+
+- Dòng nguồn: cùng 12.3.1 — **không sửa** (`taskContextLine`).
+- Prefill `content` + `dueOn`. Có nút **Hôm nay**.
+- **Huỷ** · **Lưu** (primary). Toast «Đã cập nhật công việc.»
+- Đổi nội dung → cập nhật ghi chú care / tiến độ `CONG_VIEC` gắn `workTaskId` (nếu có). **Không** đổi nguồn / ghim / hoàn thành.
