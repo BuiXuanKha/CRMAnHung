@@ -296,7 +296,7 @@ Footer đếm dưới list bài.
 
 Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (**STAFF = lô mình tạo**). Overlay đăng web (slug, copy, `isPublished`) từ API. Một lần bấm hàng → preview phải. Double-click → modal **Soạn bài đăng**. **Đăng web** từ preview (lô chờ đăng) hoặc từ modal (lưu copy rồi `CrmConfirm`). **ADMIN không vào trang này.**
 
-Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồng, ghi chú nội bộ / thương lượng chủ nhà. Giá cột + preview = giá **công khai** (đã làm mờ), không đúng số CRM.
+Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồng, ghi chú nội bộ / thương lượng chủ nhà. Giá cột + preview = giá **công khai** (đã làm mờ), không đúng số CRM. Lô **Chưa soạn**: nếu CRM có giá → gợi ý làm mờ (`3 tỷ xxx` / `9xx triệu`); CRM không giá / = 0 → **Liên hệ**. NV đã Lưu Soạn với Liên hệ hoặc nhãn giá tay thì giữ bản đã lưu.
 
 ### 13.1 Máy tính
 
@@ -338,7 +338,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 | Tiêu đề / Địa chỉ | **Đậm**; dòng phụ địa chỉ. Không tên khách. Icon đỏ (`CircleAlert`) khi `needsWebUpdate` — CRM đã sửa sau lần lưu bài web; bấm → alert nhắc Soạn/Lưu lại |
 | Phân loại | Hangtag Nhà `blue` / Đất `amber` |
 | DT · MT · Hướng | DT dòng 1; MT · hướng dòng phụ. Trống: `—` |
-| Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM |
+| Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM. Chưa soạn + CRM có giá → nhãn làm mờ gợi ý |
 | NV | Tên nhân viên đang rao lô |
 | Web | **Đang hiện** `green` · **Chờ đăng** `gray` |
 | AI GPT | Nút **GPT** (`Sparkles`) → `LotGptContentDialog` — JSON request + Gửi GPT + phản hồi |
@@ -359,6 +359,7 @@ Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (
   "direction": "Bắc",
   "price": null,
   "priceText": "2 tỷ xxx",
+  "titleDeedStatus": "Đã có sổ sẵn (sổ đỏ/giấy tờ đủ) — sẵn sàng sang tên chuyển nhượng",
   "kind": "DAT",
   "excerpt": "…",
   "slug": "lo-33-dau-gia-…",
@@ -371,8 +372,9 @@ Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (
 - `price`: số VND từ nhãn giá công khai khi parse được; không thì `null` + `priceText`.
 - `kind`, `excerpt`, `slug`: từ overlay lô khi có.
 - `extraDescription`: **bắt buộc** — từ ô «Mô tả thêm *» trong modal.
+- `titleDeedStatus`: luôn gửi — mọi lô An Hưng Land đăng bán **đã có sổ sẵn**, sẵn sàng sang tên chuyển nhượng (GPT được phép viết điều này).
 
-**System prompt:** chuyên gia SEO An Hưng Land (Nam Sách) — quy tắc dữ liệu, SEO, không bịa pháp lý/quy hoạch; ưu tiên structured fields; `extraDescription` = thực địa NV.
+**System prompt:** chuyên gia SEO An Hưng Land (Nam Sách) — quy tắc dữ liệu, SEO, không bịa pháp lý/quy hoạch; ưu tiên structured fields; `extraDescription` = thực địa NV; **được** nêu sổ sẵn / sang tên theo `titleDeedStatus`.
 
 **Response JSON (GPT trả về):**
 

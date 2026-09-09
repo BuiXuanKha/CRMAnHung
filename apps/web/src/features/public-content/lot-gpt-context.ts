@@ -1,4 +1,5 @@
 import {
+  LOT_GPT_TITLE_DEED_STATUS,
   publicPriceLabelToVnd,
   type LotGptLocation,
   type LotGptRequestDraft,
@@ -94,6 +95,7 @@ export function buildLotGptRequestPayload(
     direction: lot.direction?.trim() || null,
     price: parsedPrice,
     priceText,
+    titleDeedStatus: LOT_GPT_TITLE_DEED_STATUS,
   };
 
   if (lot.kind) payload.kind = lot.kind;

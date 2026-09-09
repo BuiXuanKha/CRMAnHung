@@ -13,6 +13,7 @@ import {
   listingBodyToExcerpt,
   listingCommuneHubPath,
   postBodyToExcerpt,
+  suggestPublicPrice,
 } from '@crmanhung/shared';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -107,7 +108,7 @@ const LODAT_INCLUDE = {
   maps: {
     where: { isActive: true },
     take: 1,
-    select: { status: true },
+    select: { status: true, priceVnd: true },
   },
 } satisfies Prisma.LodatInclude;
 
@@ -353,6 +354,10 @@ export class PublicContentService {
     if (!lodat.maps.length) return;
     const title = this.lodatTitle(lodat);
     const location = this.lodatLocation(lodat);
+    const mapPrice = lodat.maps[0]?.priceVnd;
+    const suggestedPrice = suggestPublicPrice(
+      mapPrice == null ? null : Number(mapPrice),
+    );
     const created = await this.prisma.publicLotListing.create({
       data: {
         lodatId: lodat.id,
@@ -360,8 +365,8 @@ export class PublicContentService {
         title,
         location,
         isPublished: true,
-        priceMode: 'CONTACT',
-        priceLabel: null,
+        priceMode: suggestedPrice.priceMode,
+        priceLabel: suggestedPrice.priceLabel,
         excerpt: [title, location].filter(Boolean).join('. '),
         bodyHtml: '',
         publishedAt: new Date(),

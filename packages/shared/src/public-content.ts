@@ -247,6 +247,11 @@ export const lotGptRequestBaseSchema = z.object({
   price: z.number().nullable(),
   /** Human price copy when `price` is null or for GPT wording. */
   priceText: z.string().nullable(),
+  /**
+   * Pháp lý công ty: mọi lô đăng bán đã có sổ sẵn, sẵn sàng sang tên.
+   * GPT được phép nêu trong bài.
+   */
+  titleDeedStatus: z.string().optional(),
   /** Extra public fields when available */
   kind: z.string().optional(),
   excerpt: z.string().optional(),
@@ -514,6 +519,70 @@ export function toGuestListing(row: {
     ...(row.updatedAt ? { updatedAt: row.updatedAt } : {}),
   };
 }
+
+/**
+ * Guest-facing price suggestion from CRM map VND.
+ * 3,7 tỷ → «3 tỷ xxx»; 950tr → «9xx triệu». Null/0 → Liên hệ.
+ * Never expose the exact CRM amount.
+ */
+export function obfuscatePublicPriceLabel(priceVnd?: number | string | null): string | null {
+  if (priceVnd == null || priceVnd === '') return null;
+  const v = typeof priceVnd === 'string' ? Number(priceVnd) : priceVnd;
+  if (!Number.isFinite(v) || v <= 0) return null;
+  if (v >= 1_000_000_000) {
+    const ty = Math.floor(v / 1_000_000_000);
+    return `${ty.toLocaleString('vi-VN')} tỷ xxx`;
+  }
+  if (v >= 100_000_000) {
+    const hundreds = Math.floor(v / 100_000_000);
+    return `${hundreds.toLocaleString('vi-VN')}xx triệu`;
+  }
+  if (v >= 1_000_000) return 'xxx triệu';
+  return null;
+}
+
+export function suggestPublicPrice(priceVnd?: number | string | null): {
+  priceMode: 'AMOUNT' | 'CONTACT';
+  priceLabel: string | null;
+} {
+  const label = obfuscatePublicPriceLabel(priceVnd);
+  if (!label) return { priceMode: 'CONTACT', priceLabel: null };
+  return { priceMode: 'AMOUNT', priceLabel: label };
+}
+
+/**
+ * Resolve public price for Đăng bài list/editor.
+ * - Staff đã Lưu AMOUNT → giữ nhãn đã lưu
+ * - Staff đã soạn và chọn Liên hệ → Liên hệ
+ * - Chưa soạn (body trống) + CRM có giá → gợi ý làm mờ
+ */
+export function resolveStaffListingPublicPrice(input: {
+  crmPriceVnd?: number | string | null;
+  listingPriceMode?: string | null;
+  listingPriceLabel?: string | null;
+  needsCompose: boolean;
+}): { priceMode: 'AMOUNT' | 'CONTACT'; priceLabel: string | null } {
+  const suggested = suggestPublicPrice(input.crmPriceVnd);
+  const listingMode = input.listingPriceMode === 'AMOUNT' ? 'AMOUNT' : 'CONTACT';
+  const listingLabel = input.listingPriceLabel?.trim() || null;
+  const staffChoseAmount = listingMode === 'AMOUNT' && Boolean(listingLabel);
+  const staffChoseContact = listingMode === 'CONTACT' && !input.needsCompose;
+
+  if (staffChoseAmount) {
+    return { priceMode: 'AMOUNT', priceLabel: listingLabel };
+  }
+  if (staffChoseContact) {
+    return { priceMode: 'CONTACT', priceLabel: null };
+  }
+  if (suggested.priceMode === 'AMOUNT') {
+    return suggested;
+  }
+  return { priceMode: 'CONTACT', priceLabel: null };
+}
+
+/** Company fact for lot GPT — every listed lot has title deed ready for transfer. */
+export const LOT_GPT_TITLE_DEED_STATUS =
+  'Đã có sổ sẵn (sổ đỏ/giấy tờ đủ) — sẵn sàng sang tên chuyển nhượng';
 
 /**
  * Parse the **public** price label to VND for JSON-LD Offer.

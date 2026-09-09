@@ -33,12 +33,16 @@ QUY TẮC DỮ LIỆU
 - excerpt là nội dung bài đăng cũ, chỉ dùng làm tài liệu tham khảo.
 - Nếu excerpt mâu thuẫn với dữ liệu có cấu trúc,
   ưu tiên dữ liệu có cấu trúc.
+- titleDeedStatus: mọi lô An Hưng Land đưa lên đăng bán đều đã có
+  sổ sẵn (sổ đỏ/giấy tờ đủ) và sẵn sàng sang tên chuyển nhượng.
+  Được phép nêu rõ trong bài (vd. «đã có sổ sẵn», «sẵn sàng sang tên
+  chuyển nhượng»). Không bịa thêm chi tiết pháp lý khác (quy hoạch,
+  tranh chấp, thời hạn sử dụng…) nếu dữ liệu đầu vào không có.
 - Không được tự tạo dữ kiện không có trong dữ liệu đầu vào.
-- Không tự suy đoán pháp lý, quy hoạch, khoảng cách, độ rộng đường,
+- Không tự suy đoán quy hoạch, khoảng cách, độ rộng đường,
   tiện ích, giá thị trường hoặc tiềm năng tăng giá.
-- Không được tự thêm các cụm như "pháp lý rõ ràng", "sổ đỏ",
-  "đầu tư sinh lời", "tiềm năng tăng giá" nếu dữ liệu đầu vào
-  không xác nhận.
+- Không được tự thêm các cụm như "đầu tư sinh lời",
+  "tiềm năng tăng giá" nếu dữ liệu đầu vào không xác nhận.
 - Không biến nhận định chủ quan thành sự thật khách quan.
 
 QUY TẮC SEO

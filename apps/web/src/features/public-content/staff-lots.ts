@@ -2,6 +2,7 @@ import {
   LodatKind,
   PublicPostStatus,
   listingBodyToExcerpt,
+  resolveStaffListingPublicPrice,
   type LodatListItem,
   type PublicWebDashboard,
   type PublicWebLotRow,
@@ -9,7 +10,7 @@ import {
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { toListingPublicSlug } from './display';
-import { plainTextToListingBodyHtml, suggestPublicExcerpt, suggestPublicPrice } from './listing-copy';
+import { plainTextToListingBodyHtml, suggestPublicExcerpt } from './listing-copy';
 import { sortStaffLotsByNeedsWebUpdate } from './listing-crm-drift';
 
 function listingNeedsCompose(listing: PublicWebLotRow | undefined): boolean {
@@ -23,10 +24,13 @@ export function buildStaffOpenLots(
 ): PublicWebStaffLotRow[] {
   const rows = plots.map((plot) => {
     const listing = listings.find((row) => row.lodatId === plot.id);
-    const suggested = suggestPublicPrice(plot.priceVnd);
-    const priceMode = listing?.priceMode ?? suggested.priceMode;
-    const priceLabel =
-      priceMode === 'AMOUNT' ? (listing?.priceLabel ?? suggested.priceLabel) : null;
+    const needsCompose = listingNeedsCompose(listing);
+    const { priceMode, priceLabel } = resolveStaffListingPublicPrice({
+      crmPriceVnd: plot.priceVnd,
+      listingPriceMode: listing?.priceMode,
+      listingPriceLabel: listing?.priceLabel,
+      needsCompose,
+    });
     const staffName = plot.createdByEmployeeName?.trim() || '—';
     const title = listing?.title ?? plot.title;
     const location = listing?.location ?? plot.address ?? '';
@@ -49,7 +53,6 @@ export function buildStaffOpenLots(
       listing?.excerpt?.trim() ||
       listingBodyToExcerpt(bodyHtml) ||
       suggestedExcerpt;
-    const needsCompose = listingNeedsCompose(listing);
     return {
       id: listing?.id ?? `pending-${plot.id}`,
       lodatId: plot.id,
