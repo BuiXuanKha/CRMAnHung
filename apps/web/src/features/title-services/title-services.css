@@ -37,6 +37,57 @@
   overflow: hidden;
 }
 
+.sd-stats {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.sd-stat {
+  background: #fff;
+  border: 1px solid var(--sd-line);
+  border-radius: 12px;
+  padding: 14px 16px;
+  min-width: 0;
+}
+
+.sd-stat-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.sd-stat-value {
+  margin: 6px 0 0;
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: #0f172a;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+}
+
+.sd-stat-thu {
+  color: #047857;
+}
+
+.sd-stat-chi {
+  color: #b91c1c;
+}
+
+.sd-stat-short {
+  display: none;
+}
+
+.sd-stat-hint {
+  margin: 6px 0 0;
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
 .sd-list-restore {
   display: flex;
   flex-direction: column;

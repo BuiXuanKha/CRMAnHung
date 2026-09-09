@@ -117,9 +117,18 @@ export const titleServiceListQuerySchema = z.object({
 
 export type TitleServiceListQuery = z.infer<typeof titleServiceListQuerySchema>;
 
+/** Thẻ tổng hợp list — thu/chi theo cùng filter API (không chỉ trang đang xem). */
+export const titleServiceListStatsSchema = z.object({
+  totalThuVnd: titleServiceVndSchema,
+  totalChiVnd: titleServiceVndSchema,
+});
+
+export type TitleServiceListStats = z.infer<typeof titleServiceListStatsSchema>;
+
 export const titleServiceListResponseSchema = z.object({
   items: z.array(titleServiceListItemSchema),
   total: z.number().int().nonnegative(),
+  stats: titleServiceListStatsSchema,
 });
 
 export type TitleServiceListResponse = z.infer<typeof titleServiceListResponseSchema>;

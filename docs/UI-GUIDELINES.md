@@ -731,6 +731,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/dang-bai` Soạn bài đăng: mặc định **Giá gợi ý**; nút **Sinh giá gợi ý** từ CRM |
 | 2026-09-09 | `/lo-dat/[id]/sua` Hình ảnh: bỏ hint dài (gỡ × / tối đa 5 / Ctrl+V) |
 | 2026-09-09 | `/lo-dat/[id]/sua` (và tạo): Huỷ / Lưu căn trái |
+| 2026-09-09 | `/dich-vu-so-do`: 3 thẻ tổng hợp Số hồ sơ · Tổng thu · Tổng chi (như `/giao-dich`) |
 
 ---
 
