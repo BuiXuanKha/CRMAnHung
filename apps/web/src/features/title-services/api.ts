@@ -133,7 +133,3 @@ export function assertTitleServiceFile(file: File) {
     throw new Error('Chỉ nhận ảnh (JPEG/PNG/WebP/GIF) hoặc PDF.');
   }
 }
-
-export async function deleteTitleService(id: string): Promise<void> {
-  await apiFetch<void>(`/title-services/${id}`, { method: 'DELETE' });
-}

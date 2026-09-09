@@ -249,6 +249,20 @@
     background: #fef3c7;
   }
 
+  .sd-card.is-muted {
+    opacity: 0.58;
+    color: #64748b;
+  }
+
+  .sd-card.is-muted strong {
+    color: #64748b;
+    font-weight: 600;
+  }
+
+  .sd-card.is-muted.is-selected {
+    opacity: 0.85;
+  }
+
   .sd-card-head {
     display: flex;
     align-items: flex-start;

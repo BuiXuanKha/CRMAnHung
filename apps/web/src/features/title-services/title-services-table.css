@@ -129,6 +129,25 @@
   background: #fef3c7;
 }
 
+.sd-table-scroll .sd-grid-row.is-muted {
+  opacity: 0.58;
+  color: #64748b;
+}
+
+.sd-table-scroll .sd-grid-row.is-muted strong,
+.sd-table-scroll .sd-grid-row.is-muted .sd-name-row strong {
+  color: #64748b;
+  font-weight: 600;
+}
+
+.sd-table-scroll .sd-grid-row.is-muted:hover {
+  opacity: 0.78;
+}
+
+.sd-table-scroll .sd-grid-row.is-muted.is-selected {
+  opacity: 0.85;
+}
+
 .sd-cell {
   padding: 8px 10px;
   display: flex;

@@ -8,6 +8,7 @@ import { Icon } from '@/shared/ui/icon';
 import {
   formatDaysWorking,
   formatMoneyVnd,
+  isTitleServiceMuted,
   progressLine,
   statusLabel,
   statusTone,
@@ -65,6 +66,7 @@ export function TitleServiceCardList({
                   selectedId === item.id ? 'is-selected' : '',
                   menuId === item.id ? 'is-menu-open' : '',
                   item.isPinned ? 'is-pinned' : '',
+                  isTitleServiceMuted(item.status) ? 'is-muted' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
@@ -120,6 +122,8 @@ export function TitleServiceCardList({
                       <strong>{latest.title}</strong>
                       {latest.completed ? (
                         <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+                      ) : latest.isWorkTask ? (
+                        <CrmBadge tone="amber">Đang làm</CrmBadge>
                       ) : null}
                       <span> · {latest.date}</span>
                     </>

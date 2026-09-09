@@ -44,10 +44,11 @@ export class TitleServicesService {
   ) {}
 
   async list(user: RequestUser, query: ListTitleServicesQueryDto) {
+    const statusWhere = this.statusFilterWhere(query.status);
     const where: Prisma.TitleServiceWhereInput = {
       AND: [
         this.ownershipWhere(user, query.createdByEmployeeId),
-        query.status ? { status: query.status } : {},
+        statusWhere,
         ...keywordWhere(query.keyword),
       ],
     };
@@ -56,7 +57,13 @@ export class TitleServicesService {
     const [rows, total, thuAgg, chiAgg] = await Promise.all([
       this.prisma.titleService.findMany({
         where,
-        orderBy: [{ isPinned: 'desc' }, { pinnedAt: 'desc' }, { updatedAt: 'desc' }],
+        // Đang làm trước (status ASC: DANG_LAM < HOAN_THANH < HUY < TAM_DUNG), rồi ghim / mới.
+        orderBy: [
+          { status: 'asc' },
+          { isPinned: 'desc' },
+          { pinnedAt: 'desc' },
+          { updatedAt: 'desc' },
+        ],
         skip,
         take,
         include: LIST_INCLUDE,
@@ -145,7 +152,9 @@ export class TitleServicesService {
     const current = await this.requireDetail(id);
     this.assertCanAccess(user, current.createdByEmployeeId);
 
-    const nextStatus = dto.status ?? current.status;
+    let nextStatus = dto.status ?? current.status;
+    // Hủy legacy = Tạm dừng.
+    if (nextStatus === TITLE_STATUS.HUY) nextStatus = TITLE_STATUS.TAM_DUNG;
     if (!TITLE_STATUSES.includes(nextStatus as (typeof TITLE_STATUSES)[number])) {
       throw new BadRequestException('Trạng thái không hợp lệ.');
     }
@@ -193,18 +202,20 @@ export class TitleServicesService {
   }
 
   async remove(user: RequestUser, id: string) {
-    const row = await this.prisma.titleService.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        createdByEmployeeId: true,
-        attachments: { select: { objectKey: true } },
-      },
-    });
-    if (!row) throw new NotFoundException('Không tìm thấy hồ sơ sổ đỏ.');
-    this.assertCanAccess(user, row.createdByEmployeeId);
-    await this.prisma.titleService.delete({ where: { id } });
-    await this.deletePrivateKeys(row.attachments.map((a) => a.objectKey));
+    void user;
+    void id;
+    throw new BadRequestException(
+      'Không xóa hồ sơ sổ đỏ. Dùng Tạm dừng hoặc Hoàn thành, rồi Khôi phục khi cần.',
+    );
+  }
+
+  /** Lọc Tạm dừng gồm cả `HUY` legacy. */
+  private statusFilterWhere(status?: string): Prisma.TitleServiceWhereInput {
+    if (!status) return {};
+    if (status === TITLE_STATUS.TAM_DUNG || status === TITLE_STATUS.HUY) {
+      return { status: { in: [TITLE_STATUS.TAM_DUNG, TITLE_STATUS.HUY] } };
+    }
+    return { status };
   }
 
   async addAttachment(

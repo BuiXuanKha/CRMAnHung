@@ -13,7 +13,7 @@ import {
   type TitleServiceListItem,
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
-import { parseMoneyInput, todayInputValue } from '../display';
+import { parseMoneyInput, todayInputValue, TITLE_SERVICE_EDIT_STATUSES, normalizeEditStatus } from '../display';
 import { assertTitleServiceFile } from '../api';
 import type { TitleServiceAction } from './action-menu';
 
@@ -85,7 +85,7 @@ export function ActionDialogs({
     setDocKind(TitleServiceDocKind.SO_DO);
     setFile(null);
     setFileError(null);
-    setStatus(item.status);
+    setStatus(normalizeEditStatus(item.status));
     setFeeText(item.agreedFeeVnd != null ? String(item.agreedFeeVnd) : '');
     setNeedSummary(item.needSummary ?? '');
   }, [kind, item]);
@@ -223,7 +223,7 @@ export function ActionDialogs({
                 value={status}
                 onChange={(e) => setStatus(e.target.value as TitleServiceStatus)}
               >
-                {Object.values(TitleServiceStatus).map((v) => (
+                {TITLE_SERVICE_EDIT_STATUSES.map((v) => (
                   <option key={v} value={v}>
                     {TITLE_SERVICE_STATUS_LABELS[v]}
                   </option>

@@ -84,7 +84,9 @@ export function computeDaysWorking(
   const start = new Date(startedAt).getTime();
   if (Number.isNaN(start) || start <= 0) return 0;
   const done =
-    (status === TitleServiceStatus.HOAN_THANH || status === TitleServiceStatus.HUY) &&
+    (status === TitleServiceStatus.HOAN_THANH ||
+      status === TitleServiceStatus.TAM_DUNG ||
+      status === TitleServiceStatus.HUY) &&
     completedAt
       ? new Date(completedAt).getTime()
       : Date.now();
@@ -96,17 +98,36 @@ export function statusLabel(status: TitleServiceStatus): string {
   return TITLE_SERVICE_STATUS_LABELS[status];
 }
 
+/** Tạm dừng / Hoàn thành (và Hủy legacy) — cuối list, UI nhạt. */
+export function isTitleServiceMuted(status: TitleServiceStatus): boolean {
+  return (
+    status === TitleServiceStatus.TAM_DUNG ||
+    status === TitleServiceStatus.HOAN_THANH ||
+    status === TitleServiceStatus.HUY
+  );
+}
+
 export function statusTone(status: TitleServiceStatus): BadgeTone {
   switch (status) {
     case TitleServiceStatus.DANG_LAM:
       return 'green';
     case TitleServiceStatus.TAM_DUNG:
+    case TitleServiceStatus.HUY:
       return 'gray';
     case TitleServiceStatus.HOAN_THANH:
       return 'blue';
-    case TitleServiceStatus.HUY:
-      return 'red';
   }
+}
+
+/** Trạng thái chọn được trên form (không hiện Hủy riêng). */
+export const TITLE_SERVICE_EDIT_STATUSES: TitleServiceStatus[] = [
+  TitleServiceStatus.DANG_LAM,
+  TitleServiceStatus.TAM_DUNG,
+  TitleServiceStatus.HOAN_THANH,
+];
+
+export function normalizeEditStatus(status: TitleServiceStatus): TitleServiceStatus {
+  return status === TitleServiceStatus.HUY ? TitleServiceStatus.TAM_DUNG : status;
 }
 
 export function docKindTone(kind: TitleServiceDocKind): BadgeTone {
@@ -128,13 +149,25 @@ export function progressLine(latest?: TitleServiceProgress | null): {
   title: string;
   date: string | null;
   completed: boolean;
+  isWorkTask: boolean;
 } {
-  if (!latest) return { title: 'Chưa ghi tiến độ', date: null, completed: false };
+  if (!latest) return { title: 'Chưa ghi tiến độ', date: null, completed: false, isWorkTask: false };
   return {
     title: stepLabel(latest.stepType),
     date: formatDateShort(latest.happenedAt),
     completed: Boolean(latest.completedAt),
+    isWorkTask: latest.stepType === TitleServiceStepType.CONG_VIEC,
   };
+}
+
+/** Hangtag bước Công việc trên timeline / cột tiến độ. */
+export function workProgressBadge(
+  stepType: TitleServiceStepType,
+  completedAt?: string | null,
+): { label: string; tone: BadgeTone } | null {
+  if (stepType !== TitleServiceStepType.CONG_VIEC) return null;
+  if (completedAt) return { label: 'Đã hoàn thành', tone: 'green' };
+  return { label: 'Đang làm', tone: 'amber' };
 }
 
 export const STATUS_FILTER_OPTIONS = [
@@ -151,7 +184,6 @@ export const STATUS_FILTER_OPTIONS = [
     value: TitleServiceStatus.HOAN_THANH,
     label: TITLE_SERVICE_STATUS_LABELS[TitleServiceStatus.HOAN_THANH],
   },
-  { value: TitleServiceStatus.HUY, label: TITLE_SERVICE_STATUS_LABELS[TitleServiceStatus.HUY] },
 ];
 
 export const STEP_FILTER_OPTIONS = Object.values(TitleServiceStepType).map((value) => ({

@@ -16,7 +16,11 @@ export const TITLE_STATUS = {
 } as const;
 
 export const TITLE_STATUSES = Object.values(TITLE_STATUS);
-export const DONE_STATUSES = [TITLE_STATUS.HOAN_THANH, TITLE_STATUS.HUY] as const;
+export const DONE_STATUSES = [
+  TITLE_STATUS.HOAN_THANH,
+  TITLE_STATUS.TAM_DUNG,
+  TITLE_STATUS.HUY,
+] as const;
 
 export const TITLE_STEP = {
   BAN_GIA: 'BAN_GIA',
