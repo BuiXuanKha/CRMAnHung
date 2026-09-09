@@ -1,8 +1,10 @@
 import {
   createWorkTaskSchema,
   pinWorkTaskSchema,
+  updateWorkTaskSchema,
   type CreateWorkTaskInput,
   type PinWorkTaskInput,
+  type UpdateWorkTaskInput,
   type WorkTask,
   type WorkTaskList,
 } from '@crmanhung/shared';
@@ -19,6 +21,17 @@ export async function createWorkTask(input: CreateWorkTaskInput): Promise<WorkTa
   }
   return apiFetch<WorkTask>('/tasks', {
     method: 'POST',
+    body: JSON.stringify(parsed.data),
+  });
+}
+
+export async function updateWorkTask(id: string, input: UpdateWorkTaskInput): Promise<WorkTask> {
+  const parsed = updateWorkTaskSchema.safeParse(input);
+  if (!parsed.success) {
+    throw new Error(parsed.error.issues[0]?.message ?? 'Không cập nhật được công việc.');
+  }
+  return apiFetch<WorkTask>(`/tasks/${id}`, {
+    method: 'PATCH',
     body: JSON.stringify(parsed.data),
   });
 }

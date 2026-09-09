@@ -1,12 +1,12 @@
 'use client';
 
-import { Check, ChevronDown, ChevronUp, Eye, Pin } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Eye, Pencil, Pin } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { isWorkTaskCompleted, type WorkTask } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 
-export type WorkTaskAction = 'detail' | 'pin' | 'complete';
+export type WorkTaskAction = 'detail' | 'edit' | 'pin' | 'complete';
 
 type Props = {
   item: WorkTask;
@@ -73,6 +73,11 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
             </li>
             {!done ? (
               <>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('edit')}>
+                    <Icon icon={Pencil} /> Sửa
+                  </button>
+                </li>
                 <li>
                   <button type="button" role="menuitem" onClick={() => onAction('pin')}>
                     <Icon icon={Pin} /> {item.isPinned ? 'Bỏ ghim' : 'Ghim lên đầu'}

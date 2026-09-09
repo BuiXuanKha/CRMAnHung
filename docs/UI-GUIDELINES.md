@@ -430,7 +430,7 @@ Mọi bảng list CRM tuân **§4.5**. **Hành vi từng control:** [`tasks.md` 
 | `Nguồn` | `taskContextLine` in hoa — VD. **DỊCH VỤ SỔ ĐỎ \| TÊN**; màu `#2563eb` |
 | `Hạn làm` | `D/M/YYYY` |
 | `Đếm ngược` | Chưa xong: hangtag **Hôm nay** `amber` · `N ngày` `green` · `Quá hạn N ngày` `red`. Đã xong: hangtag **Đã hoàn thành** `green` (**không** đếm hạn) — **không** icon lọc |
-| `Thao tác` | Chevron → **Xem chi tiết**; việc chưa xong thêm **Ghim / Bỏ ghim**, **Hoàn thành** |
+| `Thao tác` | Chevron → **Xem chi tiết**; việc chưa xong thêm **Sửa**, **Ghim / Bỏ ghim**, **Hoàn thành** |
 
 **Không** ô tìm, **không** lọc cột (list việc của chính mình). Bấm dòng → modal chi tiết. **Sắp xếp:** ghim chưa xong (hạn gần trước) → không ghim chưa xong (hạn gần trước) → đã xong cuối list. Việc xong: chữ gạch ngang + hangtag **Đã hoàn thành** (dừng đếm hạn).
 
@@ -726,6 +726,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/dang-bai`: icon đỏ = CRM đã cập nhật sau bài web (`needsWebUpdate`); không so khớp title/địa chỉ |
 | 2026-09-09 | `/dang-bai` mobile: Preview chỉ khi đã chọn lô; ẩn empty «Chọn một lô…» |
 | 2026-09-09 | `/dang-bai`: Chưa soạn + CRM có giá → gợi ý giá làm mờ; GPT được nêu sổ sẵn / sang tên |
+| 2026-09-09 | `/cong-viec`: menu **Sửa** (chưa xong) — sửa nội dung + hạn; nguồn không đổi |
 
 ---
 

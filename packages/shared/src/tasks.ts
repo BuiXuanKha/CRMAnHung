@@ -180,6 +180,14 @@ export const createWorkTaskSchema = z
 export type CreateWorkTaskInput = z.input<typeof createWorkTaskSchema>;
 export type CreateWorkTaskPayload = z.output<typeof createWorkTaskSchema>;
 
+/** PATCH /tasks/:id — chỉ nội dung + hạn; nguồn / ghim / hoàn thành không đổi. */
+export const updateWorkTaskSchema = z.object({
+  content: z.string().trim().min(1, 'Nhập nội dung công việc.').max(2000),
+  dueOn: z.string().regex(YMD, 'Chọn hạn làm việc.'),
+});
+
+export type UpdateWorkTaskInput = z.infer<typeof updateWorkTaskSchema>;
+
 export const pinWorkTaskSchema = z.object({
   pinned: z.boolean(),
 });

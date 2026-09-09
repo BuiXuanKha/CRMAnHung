@@ -7,6 +7,8 @@ import {
   taskContextLine,
   ymdInVietnam,
   type CreateWorkTaskInput,
+  type UpdateWorkTaskInput,
+  type WorkTask,
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
 import './create-task-dialog.css';
@@ -17,7 +19,8 @@ export type TaskCreateTarget = {
   label: string;
 };
 
-type Props = {
+type CreateProps = {
+  mode?: 'create';
   open: boolean;
   /** null = ghi chú cá nhân (FAB /cong-viec). */
   target: TaskCreateTarget | null;
@@ -27,27 +30,50 @@ type Props = {
   onSubmit: (input: CreateWorkTaskInput) => void;
 };
 
-export function CreateTaskDialog({
-  open,
-  target,
-  busy = false,
-  error = null,
-  onClose,
-  onSubmit,
-}: Props) {
+type EditProps = {
+  mode: 'edit';
+  open: boolean;
+  item: WorkTask;
+  busy?: boolean;
+  error?: string | null;
+  onClose: () => void;
+  onSubmit: (input: UpdateWorkTaskInput) => void;
+};
+
+type Props = CreateProps | EditProps;
+
+export function CreateTaskDialog(props: Props) {
+  const { open, busy = false, error = null, onClose } = props;
+  const isEdit = props.mode === 'edit';
+  const editId = isEdit ? props.item.id : '';
+  const editContent = isEdit ? props.item.content : '';
+  const editDueOn = isEdit ? props.item.dueOn : '';
+  const createTargetKey = !isEdit
+    ? `${props.target?.type ?? 'NONE'}:${props.target?.id ?? ''}`
+    : '';
   const [content, setContent] = useState('');
   const [dueOn, setDueOn] = useState(ymdInVietnam(1));
 
   useEffect(() => {
     if (!open) return;
+    if (isEdit) {
+      setContent(editContent);
+      setDueOn(editDueOn);
+      return;
+    }
     setContent('');
     setDueOn(ymdInVietnam(1));
-  }, [open, target]);
+  }, [open, isEdit, editId, editContent, editDueOn, createTargetKey]);
 
   function handleSubmit(e: FormEvent) {
     e.preventDefault();
+    if (isEdit) {
+      props.onSubmit({ content, dueOn });
+      return;
+    }
+    const target = props.target;
     if (target) {
-      onSubmit({
+      props.onSubmit({
         content,
         dueOn,
         targetType: target.type,
@@ -55,19 +81,28 @@ export function CreateTaskDialog({
       });
       return;
     }
-    onSubmit({
+    props.onSubmit({
       content,
       dueOn,
       targetType: TaskTargetType.NONE,
     });
   }
 
+  const contextType = isEdit
+    ? (props.item.targetType as TaskTargetType)
+    : (props.target?.type ?? TaskTargetType.NONE);
+  const contextLabel = isEdit ? props.item.targetLabel : (props.target?.label ?? '');
+
   return (
-    <CrmDialog open={open} title="Thêm công việc" icon={ListTodo} onClose={onClose} busy={busy}>
+    <CrmDialog
+      open={open}
+      title={isEdit ? 'Sửa công việc' : 'Thêm công việc'}
+      icon={ListTodo}
+      onClose={onClose}
+      busy={busy}
+    >
       <form onSubmit={handleSubmit}>
-        <p className="cv-dialog-context">
-          {taskContextLine(target?.type ?? TaskTargetType.NONE, target?.label ?? '')}
-        </p>
+        <p className="cv-dialog-context">{taskContextLine(contextType, contextLabel)}</p>
         <label>
           Nội dung công việc
           <textarea

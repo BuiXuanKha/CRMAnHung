@@ -3,7 +3,7 @@ import {
   CurrentUser,
   type RequestUser,
 } from '../../common/decorators/current-user.decorator';
-import { CreateWorkTaskDto, PinWorkTaskDto } from './dto/task.dto';
+import { CreateWorkTaskDto, PinWorkTaskDto, UpdateWorkTaskDto } from './dto/task.dto';
 import { TasksService } from './tasks.service';
 
 @Controller('tasks')
@@ -32,5 +32,14 @@ export class TasksController {
   @Patch(':id/complete')
   complete(@CurrentUser() user: RequestUser, @Param('id') id: string) {
     return this.tasks.complete(user, id);
+  }
+
+  @Patch(':id')
+  update(
+    @CurrentUser() user: RequestUser,
+    @Param('id') id: string,
+    @Body() dto: UpdateWorkTaskDto,
+  ) {
+    return this.tasks.update(user, id, dto);
   }
 }

@@ -42,3 +42,14 @@ export class PinWorkTaskDto {
   @IsBoolean({ message: 'Cần chọn ghim hoặc bỏ ghim.' })
   pinned!: boolean;
 }
+
+export class UpdateWorkTaskDto {
+  @IsString()
+  @MinLength(1, { message: 'Nhập nội dung công việc.' })
+  @MaxLength(2000)
+  content!: string;
+
+  @IsString()
+  @Matches(/^\d{4}-\d{2}-\d{2}$/, { message: 'Chọn hạn làm việc.' })
+  dueOn!: string;
+}
