@@ -108,7 +108,7 @@ function ExistingCustomerCard({
         <dt>Nhu cầu</dt>
         <dd>{demandLabel(detail)}</dd>
         <dt>Tài chính</dt>
-        <dd>{formatBudget(detail.budgetMinVnd, detail.budgetMaxVnd)}</dd>
+        <dd className="crm-money">{formatBudget(detail.budgetMinVnd, detail.budgetMaxVnd)}</dd>
         <dt>Lô đất</dt>
         <dd>{detail.lodatCount > 0 ? `${detail.lodatCount} lô` : 'Chưa gắn lô'}</dd>
         <dt>Chat đã lưu</dt>

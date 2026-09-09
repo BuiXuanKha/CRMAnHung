@@ -312,7 +312,7 @@
   .kh-card-budget {
     font-size: 0.86rem;
     font-weight: 700;
-    color: var(--kh-blue);
+    /* Màu tiền: class `crm-money` (`--crm-money`) — không dùng xanh nav */
   }
 
   .kh-card-need {

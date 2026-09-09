@@ -1,7 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, MessageCircle, MoreHorizontal, Phone } from 'lucide-react';
+import {
+  AlertTriangle,
+  Handshake,
+  MessageCircle,
+  MoreHorizontal,
+  Pencil,
+  Phone,
+} from 'lucide-react';
 import type { LodatOwner } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 import { CrmAlertDialog } from '@/shared/ui/dialog';
@@ -79,6 +86,7 @@ export function LodatOwnerFab({ owner, onTransaction, onEdit }: Props) {
                 className="ld-owner-fab-menu-item"
                 onClick={() => { setMenuOpen(false); onTransaction(); }}
               >
+                <Icon icon={Handshake} size={16} />
                 Giao dịch
               </button>
               <button
@@ -87,6 +95,7 @@ export function LodatOwnerFab({ owner, onTransaction, onEdit }: Props) {
                 className="ld-owner-fab-menu-item"
                 onClick={() => { setMenuOpen(false); onEdit(); }}
               >
+                <Icon icon={Pencil} size={16} />
                 Sửa lô đất
               </button>
             </div>

@@ -13,7 +13,13 @@ import {
   type TitleServiceListItem,
 } from '@crmanhung/shared';
 import { CrmDialog } from '@/shared/ui/dialog';
-import { parseMoneyInput, todayInputValue, TITLE_SERVICE_EDIT_STATUSES, normalizeEditStatus } from '../display';
+import {
+  formatMoneyInput,
+  parseMoneyInput,
+  todayInputValue,
+  TITLE_SERVICE_EDIT_STATUSES,
+  normalizeEditStatus,
+} from '../display';
 import { assertTitleServiceFile } from '../api';
 import type { TitleServiceAction } from './action-menu';
 
@@ -86,7 +92,9 @@ export function ActionDialogs({
     setFile(null);
     setFileError(null);
     setStatus(normalizeEditStatus(item.status));
-    setFeeText(item.agreedFeeVnd != null ? String(item.agreedFeeVnd) : '');
+    setFeeText(
+      item.agreedFeeVnd != null ? formatMoneyInput(String(item.agreedFeeVnd)) : '',
+    );
     setNeedSummary(item.needSummary ?? '');
   }, [kind, item]);
 
@@ -168,8 +176,9 @@ export function ActionDialogs({
               Số tiền
               <input
                 value={amountText}
-                onChange={(e) => setAmountText(e.target.value)}
-                placeholder="vd. 3000000"
+                onChange={(e) => setAmountText(formatMoneyInput(e.target.value))}
+                placeholder="vd. 3.000.000"
+                inputMode="numeric"
                 required
               />
             </label>
@@ -234,8 +243,9 @@ export function ActionDialogs({
               Giá thỏa thuận
               <input
                 value={feeText}
-                onChange={(e) => setFeeText(e.target.value)}
-                placeholder="vd. 30000000"
+                onChange={(e) => setFeeText(formatMoneyInput(e.target.value))}
+                placeholder="vd. 30.000.000"
+                inputMode="numeric"
               />
             </label>
             <label>

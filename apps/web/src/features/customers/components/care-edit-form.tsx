@@ -133,7 +133,9 @@ export function CustomerCareEditForm({
               className="is-active"
               disabled={busy}
             >
-              {formatBudget(customer.budgetMinVnd, customer.budgetMaxVnd)}
+              <span className="crm-money">
+                {formatBudget(customer.budgetMinVnd, customer.budgetMaxVnd)}
+              </span>
             </button>
           ) : null}
           <button

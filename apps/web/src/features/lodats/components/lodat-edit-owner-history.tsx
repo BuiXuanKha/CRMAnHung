@@ -57,7 +57,7 @@ export function LodatEditOwnerHistory({ detail }: Props) {
             </div>
             <div className="ld-edit-history-meta">
               <span>{statusLabel(row.status)}</span>
-              <span>{formatPriceVnd(row.priceVnd)}</span>
+              <span className="crm-money">{formatPriceVnd(row.priceVnd)}</span>
             </div>
             <div className="ld-edit-history-dates">
               Từ {formatUpdatedAt(row.startedAt)}
