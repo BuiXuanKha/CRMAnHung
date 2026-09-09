@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { guestLotShareUrl } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { createListingShareLinkBySlug } from '@/features/lot-shares/api';
+import { PublicSaleBadge } from './public-sale-badge';
 import { copySharePayload, shareToFacebook } from './share';
 import './share.css';
+import './public-home.css';
 
 export function ProductShareButton({
   url,
@@ -98,9 +100,11 @@ export function ProductShareButton({
 export function ProductGallery({
   images,
   alts,
+  saleStatus,
 }: {
   images: string[];
   alts: string[];
+  saleStatus?: string | null;
 }) {
   const [active, setActive] = useState(0);
   const total = images.length;
@@ -132,6 +136,7 @@ export function ProductGallery({
             />
           ))}
         </div>
+        <PublicSaleBadge status={saleStatus} className="pd-gallery-sale" />
         {total > 1 ? (
           <>
             <button

@@ -12,7 +12,7 @@ import { LotDetailMetaPixel } from './lot-detail-meta-pixel';
 import type { PublicListingView, RelatedListingSection } from './published-listings';
 import { listingCommuneHubCrumb, listingCoverAlt, listingImageAltText, listingPageH1 } from './listing-seo';
 import { sanitizeListingHtml } from './sanitize-listing-html';
-import { saleStatusLabel } from './sale-status-label';
+import { PublicSaleBadge } from './public-sale-badge';
 import { listingShareText } from './share';
 import {
   PUBLIC_LISTING_PATH,
@@ -55,6 +55,7 @@ function RelatedListingBlock({
               ) : (
                 <span className="ph-product-media-empty">Chưa có ảnh</span>
               )}
+              <PublicSaleBadge status={p.saleStatus} />
             </Link>
             <div className="ph-product-body">
               <Link href={listingHref(p.slug)}>
@@ -97,7 +98,8 @@ export function ProductDetailView({
   const showHtmlBody = Boolean(bodyHtml);
   const shareUrl = listingCanonicalUrl(listing.slug);
   const shareText = listingShareText(listing);
-  const saleLabel = saleStatusLabel(listing.saleStatus);
+
+  return (
   const hasSummaryStats = Boolean(
     area || listing.frontageLabel || listing.directionLabel,
   );
@@ -149,11 +151,11 @@ export function ProductDetailView({
                 alts={images.map((url, i) =>
                   listingImageAltText(listing, i, images.length, url),
                 )}
+                saleStatus={listing.saleStatus}
               />
             ) : null}
 
             <h1>{h1}</h1>
-            {saleLabel ? <p className="pd-sale-badge">{saleLabel}</p> : null}
             {listing.location ? (
               <p className="pd-location">
                 <span className="pd-location-pin" aria-hidden />

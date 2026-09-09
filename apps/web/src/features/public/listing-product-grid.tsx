@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { PublicListingCard } from '@crmanhung/shared';
 import { PublicCardContact } from './listing-visitor-contact';
 import { listingCoverAlt } from './listing-seo';
-import { saleStatusLabel } from './sale-status-label';
+import { PublicSaleBadge } from './public-sale-badge';
 import { listingHref } from './site';
 
 type Props = {
@@ -17,38 +17,35 @@ export function ListingProductGrid({ listings, emptyText }: Props) {
   }
   return (
     <div className="ph-product-grid">
-      {listings.map((p) => {
-        const saleLabel = saleStatusLabel(p.saleStatus);
-        return (
-          <article key={p.slug} className="ph-product">
-            <Link href={listingHref(p.slug)} className="ph-product-media">
-              {p.coverImageUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={p.coverImageUrl} alt={listingCoverAlt(p)} loading="lazy" />
-              ) : (
-                <span className="ph-product-media-empty">Chưa có ảnh</span>
-              )}
-              {saleLabel ? <span className="ph-product-sale">{saleLabel}</span> : null}
+      {listings.map((p) => (
+        <article key={p.slug} className="ph-product">
+          <Link href={listingHref(p.slug)} className="ph-product-media">
+            {p.coverImageUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={p.coverImageUrl} alt={listingCoverAlt(p)} loading="lazy" />
+            ) : (
+              <span className="ph-product-media-empty">Chưa có ảnh</span>
+            )}
+            <PublicSaleBadge status={p.saleStatus} />
+          </Link>
+          <div className="ph-product-body">
+            <Link href={listingHref(p.slug)}>
+              <h3>{p.title}</h3>
             </Link>
-            <div className="ph-product-body">
-              <Link href={listingHref(p.slug)}>
-                <h3>{p.title}</h3>
-              </Link>
-              <p className="ph-product-meta">
-                <span>{p.priceLabel ?? 'Liên hệ'}</span>
-                {p.areaLabel ? (
-                  <>
-                    <span aria-hidden>·</span>
-                    <span>{p.areaLabel}</span>
-                  </>
-                ) : null}
-              </p>
-              {p.location ? <p className="ph-product-loc">{p.location}</p> : null}
-              <PublicCardContact />
-            </div>
-          </article>
-        );
-      })}
+            <p className="ph-product-meta">
+              <span>{p.priceLabel ?? 'Liên hệ'}</span>
+              {p.areaLabel ? (
+                <>
+                  <span aria-hidden>·</span>
+                  <span>{p.areaLabel}</span>
+                </>
+              ) : null}
+            </p>
+            {p.location ? <p className="ph-product-loc">{p.location}</p> : null}
+            <PublicCardContact />
+          </div>
+        </article>
+      ))}
     </div>
   );
 }

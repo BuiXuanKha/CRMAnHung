@@ -8,6 +8,7 @@ import { publicWebKeys } from '@/features/public-content/query';
 import { PublicCardContact } from './listing-visitor-contact';
 import { PublicHotlineLink } from './public-hotline-link';
 import { ProductShareButton } from './product-detail-client';
+import { PublicSaleBadge } from './public-sale-badge';
 import { listingShareText } from './share';
 import { listingCoverAlt } from './listing-seo';
 import { listingCanonicalUrl, listingHref, PUBLIC_LISTING_PATH } from './site';
@@ -54,6 +55,7 @@ export function HomeProductSection({ initialLots }: { initialLots: PublicGuestLo
                 ) : (
                   <span className="ph-product-media-empty">Chưa có ảnh</span>
                 )}
+                <PublicSaleBadge status={lot.saleStatus} />
               </Link>
               <div className="ph-product-body">
                 <Link href={listingHref(lot.slug)}>

@@ -57,7 +57,7 @@ Ba loại nội dung khách thấy:
 |-------------|-----|
 | NV tạo lô hoặc gắn chủ | Đảm bảo đúng **một** `PublicLotListing` + slug ổn định (`isPublished` từ lúc tạo) |
 | Sửa tiêu đề / địa chỉ / ảnh lô | Đồng bộ overlay (title/location/ảnh); **không** đổi slug |
-| Đổi Mở bán / Tạm dừng / Đã cọc / Đã bán | Hangtag trên trang khách + catalog/sitemap **vẫn giữ** URL |
+| Đổi Mở bán / Tạm dừng / Đã cọc / Đã bán | Nhãn góc ảnh trên trang khách + catalog/sitemap **vẫn giữ** URL |
 | Soạn trên `/dang-bai` | Cập nhật copy public (giá làm mờ, mô tả…) — không công tắc «Đăng / Chờ đăng» |
 
 Catalog + hub + sitemap: mọi listing còn tồn tại (mọi `saleStatus`). Chi tiết + slug không gỡ khi hết Mở bán.
@@ -78,7 +78,7 @@ Cùng entity `PublicPost`:
 
 Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú nội bộ lô/map, lịch sử GD, chat, file mật.
 
-Được hiện: tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất + **hangtag trạng thái bán** (khi không Mở bán), địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi hết cookie share; **SĐT nhân viên share** khi còn cookie 30 ngày (trang chủ + chi tiết lô, kể cả lô NV khác); **tên + SĐT + avatar NV đã login** khi NV xem trang khách (§18). JSON-LD/canonical luôn hotline công ty.
+Được hiện: tiêu đề, ảnh lô/dự án, DT · MT · hướng, hangtag Nhà/Đất + **nhãn trạng thái bán góc ảnh** (**Mở bán** / **Tạm dừng** / **Đã bán** / **Đặt cọc** — map CRM; giống nhãn VIP góc cover), địa chỉ (tỉnh/huyện/xã/thôn-dự án), giá **nếu** người soạn chọn công bố (**đã làm mờ**, không đúng số CRM — vd. 3,2 tỷ → `3 tỷ xxx`), mô tả public, nút gọi. Liên hệ: **hotline công ty** khi hết cookie share; **SĐT nhân viên share** khi còn cookie 30 ngày (trang chủ + chi tiết lô, kể cả lô NV khác); **tên + SĐT + avatar NV đã login** khi NV xem trang khách (§18). JSON-LD/canonical luôn hotline công ty.
 
 ---
 
