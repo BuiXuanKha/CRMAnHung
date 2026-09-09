@@ -345,7 +345,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 
 ### 13.3a Modal Tạo content bằng AI GPT
 
-Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm** (bắt buộc — NV nhập điểm nổi bật thực địa) + textarea JSON request (tự cập nhật, sửa được) + **Gửi** (disabled khi chưa nhập mô tả) → `POST /admin/public-web/lots/gpt-content` (STAFF, Nest gọi OpenAI `gpt-5.6-sol`) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` + `OPENAI_MODEL` trên server — không commit.
+Icon Lucide `Sparkles`. `CrmDialog` rộng. Body = textarea **Mô tả thêm * (Bắt buộc)** (NV nhập điểm nổi bật thực địa) + hai khối **mặc định thu hẹp** (bấm để mở): Prompt hệ thống (readonly) và JSON request (tự cập nhật, sửa được) + **Gửi** (disabled khi chưa nhập mô tả) → `POST /admin/public-web/lots/gpt-content` (STAFF, Nest gọi OpenAI `gpt-5.6-sol`) + textarea **Phản hồi GPT** (readonly). `OPENAI_API_KEY` + `OPENAI_MODEL` trên server — không commit.
 
 **Request JSON (bắt buộc + tùy chọn):**
 
@@ -403,7 +403,7 @@ Trống: `Không có lô đang mở bán.`
 
 ### 13.2 Mobile
 
-Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ + phân loại + DT/MT/hướng + NV + giá). Icon đỏ cạnh tiêu đề khi `needsWebUpdate` (cùng 13.1). Preview **chỉ** hiện **dưới** list khi đã chọn dòng — **không** khung empty «Chọn một lô…», không rail phải.
+Cùng 13.1. Thẻ xếp dọc (ảnh + tiêu đề + hangtag Web + địa chỉ + phân loại + DT/MT/hướng + NV + giá + **nút GPT trong thẻ**). Nút GPT nằm **trong** khung thẻ (không tách dưới thẻ). Icon đỏ cạnh tiêu đề khi `needsWebUpdate` (cùng 13.1). Preview **chỉ** hiện **dưới** list khi đã chọn dòng — **không** khung empty «Chọn một lô…», không rail phải.
 
 Thanh tìm: ô tìm + **Bộ lọc** + **Tìm**. Panel: Phân loại · Giá · Web · NV. **Xoá lọc** xóa mọi lọc (cả cột desktop). Desktop không hiện Bộ lọc / Tìm.
 
