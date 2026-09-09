@@ -98,8 +98,6 @@ export function ProductDetailView({
   const showHtmlBody = Boolean(bodyHtml);
   const shareUrl = listingCanonicalUrl(listing.slug);
   const shareText = listingShareText(listing);
-
-  return (
   const hasSummaryStats = Boolean(
     area || listing.frontageLabel || listing.directionLabel,
   );
