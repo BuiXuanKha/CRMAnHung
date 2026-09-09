@@ -13,6 +13,8 @@ type Props = {
   error?: string | null;
   /** Ẩn hẳn khi không có xã (không gọi API / không có ward). */
   visible: boolean;
+  /** Gọi trước khi chuyển sang lô khác (nhớ cuộn trang chi tiết). */
+  onBeforeNavigate?: () => void;
 };
 
 function statusLabel(status: LodatListItem['status']): string {
@@ -26,6 +28,7 @@ export function SameWardList({
   loading,
   error,
   visible,
+  onBeforeNavigate,
 }: Props) {
   if (!visible) return null;
 
@@ -53,7 +56,12 @@ export function SameWardList({
               const extra = p.extraPhotoCount ?? 0;
               return (
                 <li key={p.id}>
-                  <Link href={`/lo-dat/${p.id}`} className="ld-same-ward-card">
+                  <Link
+                    href={`/lo-dat/${p.id}`}
+                    scroll={false}
+                    className="ld-same-ward-card"
+                    onClick={() => onBeforeNavigate?.()}
+                  >
                     <div className="ld-same-ward-thumb" aria-hidden>
                       {p.coverImageUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element

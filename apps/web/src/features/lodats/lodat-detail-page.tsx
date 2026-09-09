@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -23,6 +23,10 @@ import { LodatTransactionHistory } from './components/lodat-transaction-history'
 import { SameWardList } from './components/same-ward-list';
 import { SaleToggle } from './components/sale-toggle';
 import { buildLodatCopyText, buildLodatShareClipboard, copyTextToClipboard } from './copy-text';
+import {
+  peekLodatDetailScroll,
+  saveLodatDetailScroll,
+} from './detail-scroll-state';
 import { createTransactionHref } from './transaction-href';
 import {
   formatArea,
@@ -44,6 +48,10 @@ export function LodatDetailPage() {
   const { user } = useAuth();
   const qc = useQueryClient();
   const isAdmin = user?.role === UserRole.ADMIN;
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const skipScrollSaveRef = useRef(false);
+  const restoredForIdRef = useRef<string | null>(null);
 
   const [heroIdx, setHeroIdx] = useState(0);
   const [galleryOpen, setGalleryOpen] = useState(false);
@@ -91,6 +99,69 @@ export function LodatDetailPage() {
   useEffect(() => {
     setHeroIdx(0);
   }, [id, imageCount]);
+
+  useEffect(() => {
+    restoredForIdRef.current = null;
+    skipScrollSaveRef.current = true;
+    const el = scrollRef.current;
+    if (el) el.scrollTop = 0;
+  }, [id]);
+
+  const persistDetailScroll = useCallback(() => {
+    if (skipScrollSaveRef.current || !id) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    saveLodatDetailScroll(id, el.scrollTop);
+  }, [id]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => persistDetailScroll();
+    el.addEventListener('scroll', onScroll, { passive: true });
+    const onHide = () => persistDetailScroll();
+    window.addEventListener('pagehide', onHide);
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      window.removeEventListener('pagehide', onHide);
+      persistDetailScroll();
+    };
+  }, [persistDetailScroll]);
+
+  /** Khôi phục cuộn sau khi nội dung (kể cả lô cùng xã) đã có chiều cao. */
+  useEffect(() => {
+    if (!id || !detail) return;
+    if (sameWardQ.isLoading) return;
+    if (restoredForIdRef.current === id) return;
+
+    const target = peekLodatDetailScroll(id);
+    skipScrollSaveRef.current = true;
+
+    const el = scrollRef.current;
+    if (!el) {
+      skipScrollSaveRef.current = false;
+      return;
+    }
+
+    let cancelled = false;
+    const apply = () => {
+      if (cancelled) return;
+      const max = Math.max(0, el.scrollHeight - el.clientHeight);
+      el.scrollTop = Math.min(target, max);
+      restoredForIdRef.current = id;
+      skipScrollSaveRef.current = false;
+    };
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        void document.fonts.ready.then(apply).catch(apply);
+      });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, detail, sameWardQ.isLoading, sameWardQ.isFetched]);
 
   const goPrev = useCallback(() => {
     if (imageCount < 2) return;
@@ -185,6 +256,7 @@ export function LodatDetailPage() {
 
   return (
     <div
+      ref={scrollRef}
       className={[
         'ld-detail-page',
         detail ? 'has-owner-fab' : '',
@@ -404,6 +476,7 @@ export function LodatDetailPage() {
               items={sameWardItems}
               loading={sameWardQ.isLoading}
               error={sameWardError}
+              onBeforeNavigate={persistDetailScroll}
             />
 
             <div className="ld-detail-desktop-actions">
@@ -432,6 +505,7 @@ export function LodatDetailPage() {
             items={sameWardItems}
             loading={sameWardQ.isLoading}
             error={sameWardError}
+            onBeforeNavigate={persistDetailScroll}
           />
         </div>
       ) : null}
