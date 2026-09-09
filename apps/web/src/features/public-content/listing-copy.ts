@@ -1,10 +1,14 @@
 import {
   LODAT_KIND_LABELS,
   LodatKind,
+  obfuscatePublicPriceLabel,
+  suggestPublicPrice,
   type PublicListingPriceMode,
   type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from '@/features/public/brand';
+
+export { obfuscatePublicPriceLabel, suggestPublicPrice };
 
 function parseVnd(n?: number | string | null): number | null {
   if (n == null || n === '') return null;
@@ -28,34 +32,6 @@ export function crmAmountLabel(priceVnd?: number | string | null): string | null
     return `${new Intl.NumberFormat('vi-VN').format(Math.round(v / 1_000_000))} triệu`;
   }
   return `${v.toLocaleString('vi-VN')} đ`;
-}
-
-/**
- * Guest-facing price suggestion.
- * CRM 3,2 tỷ → «3 tỷ xxx». Never the exact map amount.
- */
-export function obfuscatePublicPriceLabel(priceVnd?: number | string | null): string | null {
-  const v = parseVnd(priceVnd);
-  if (v == null) return null;
-  if (v >= 1_000_000_000) {
-    const ty = Math.floor(v / 1_000_000_000);
-    return `${ty.toLocaleString('vi-VN')} tỷ xxx`;
-  }
-  if (v >= 100_000_000) {
-    const hundreds = Math.floor(v / 100_000_000);
-    return `${hundreds.toLocaleString('vi-VN')}xx triệu`;
-  }
-  if (v >= 1_000_000) return 'xxx triệu';
-  return null;
-}
-
-export function suggestPublicPrice(priceVnd?: number | string | null): {
-  priceMode: PublicListingPriceMode;
-  priceLabel: string | null;
-} {
-  const label = obfuscatePublicPriceLabel(priceVnd);
-  if (!label) return { priceMode: 'CONTACT', priceLabel: null };
-  return { priceMode: 'AMOUNT', priceLabel: label };
 }
 
 /**
