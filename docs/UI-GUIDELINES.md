@@ -732,8 +732,12 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/lo-dat/[id]/sua` Hình ảnh: bỏ hint dài (gỡ × / tối đa 5 / Ctrl+V) |
 | 2026-09-09 | `/lo-dat/[id]/sua` (và tạo): Huỷ / Lưu căn trái |
 | 2026-09-09 | `/dich-vu-so-do`: 3 thẻ tổng hợp Số hồ sơ · Tổng thu · Tổng chi (như `/giao-dich`) |
+<<<<<<< HEAD
 | 2026-09-09 | `/dich-vu-so-do`: bỏ Xóa; Tạm dừng/Hoàn thành cuối list + mờ; menu Khôi phục; Hủy=`TAM_DUNG` |
 | 2026-09-09 | `/dich-vu-so-do` tiến độ **Công việc** còn mở → hangtag **Đang làm** (amber) |
+=======
+| 2026-09-09 | Trang khách: nhãn góc ảnh **Mở bán** / **Tạm dừng** / **Đã bán** (và Đặt cọc) — không đổi CRM |
+>>>>>>> origin/cursor/public-sale-badge-15c3
 
 ---
 
