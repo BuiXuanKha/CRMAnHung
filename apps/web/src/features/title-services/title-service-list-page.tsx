@@ -3,7 +3,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Trash2 } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import {
   TITLE_SERVICE_LIST_PAGE_SIZE,
   TaskTargetType,
@@ -13,7 +13,7 @@ import {
   type TitleServiceListItem,
   type TitleServiceListStats,
 } from '@crmanhung/shared';
-import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
+import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import {
   needsMoreListScrollHeight,
   resetListScrollIfFiltersChanged,
@@ -26,7 +26,6 @@ import {
   addTitleServiceAttachment,
   addTitleServiceMoney,
   addTitleServiceProgress,
-  deleteTitleService,
   getTitleService,
   getTitleServiceAttachmentUrl,
   listTitleServices,
@@ -71,7 +70,6 @@ export function TitleServiceListPage() {
   const [panelOpen, setPanelOpen] = useState(true);
   const [toast, setToast] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<AlertState>(null);
-  const [confirmDelete, setConfirmDelete] = useState<TitleServiceListItem | null>(null);
   const [dialog, setDialog] = useState<{ kind: DialogKind; item: TitleServiceListItem } | null>(
     null,
   );
@@ -283,13 +281,6 @@ export function TitleServiceListPage() {
     },
   });
 
-  const deleteMut = useMutation({
-    mutationFn: (id: string) => deleteTitleService(id),
-    onSuccess: async () => {
-      await qc.invalidateQueries({ queryKey: ['title-services'] });
-    },
-  });
-
   function flash(msg: string) {
     setToast(msg);
     window.setTimeout(() => setToast(null), 2800);
@@ -341,8 +332,19 @@ export function TitleServiceListPage() {
       });
       return;
     }
-    if (action === 'delete') {
-      setConfirmDelete(item);
+    if (action === 'restore') {
+      void updateTitleService(item.id, { status: TitleServiceStatus.DANG_LAM })
+        .then(async () => {
+          await qc.invalidateQueries({ queryKey: ['title-services'] });
+          await qc.invalidateQueries({ queryKey: ['title-service', item.id] });
+          flash(`Đã khôi phục ${item.code} về Đang làm.`);
+        })
+        .catch((err) => {
+          setAlertBox({
+            title: 'Không khôi phục được hồ sơ',
+            message: (err as Error).message,
+          });
+        });
       return;
     }
     openDialog(action, item);
@@ -375,20 +377,6 @@ export function TitleServiceListPage() {
         title: 'Không mở được tài liệu',
         message: (err as Error).message,
       });
-    }
-  }
-
-  async function confirmRemove() {
-    if (!confirmDelete) return;
-    const code = confirmDelete.code;
-    try {
-      await deleteMut.mutateAsync(confirmDelete.id);
-      setConfirmDelete(null);
-      if (selectedId === confirmDelete.id) setSelectedId(null);
-      flash(`Đã xóa hồ sơ ${code}.`);
-    } catch (err) {
-      setConfirmDelete(null);
-      setAlertBox({ title: 'Không xóa được hồ sơ', message: (err as Error).message });
     }
   }
 
@@ -539,26 +527,6 @@ export function TitleServiceListPage() {
             await refreshDetail(dialog.item.id);
             flash('Đã cập nhật hồ sơ.');
           });
-        }}
-      />
-
-      <CrmConfirmDialog
-        open={Boolean(confirmDelete)}
-        title="Xóa hồ sơ sổ đỏ"
-        icon={Trash2}
-        message={
-          confirmDelete
-            ? `Xóa hồ sơ ${confirmDelete.code}? Toàn bộ tiến độ, thu/chi và tài liệu sẽ bị gỡ.`
-            : ''
-        }
-        confirmLabel="Xóa hồ sơ"
-        danger
-        busy={deleteMut.isPending}
-        onCancel={() => {
-          if (!deleteMut.isPending) setConfirmDelete(null);
-        }}
-        onConfirm={() => {
-          void confirmRemove();
         }}
       />
 

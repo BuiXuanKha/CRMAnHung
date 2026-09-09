@@ -25,25 +25,26 @@ Tạo hồ sơ từ menu khách «Dịch vụ sổ đỏ». **Không** nút Thê
 
 ## 3. Khái niệm
 
-| Trạng thái | Enum | Hangtag |
-|------------|------|---------|
-| Đang làm | `DANG_LAM` | green |
-| Tạm dừng | `TAM_DUNG` | gray — **vẫn hiện** mặc định (không ẩn như lô) |
-| Hoàn thành | `HOAN_THANH` | blue |
-| Hủy | `HUY` | red |
+| Trạng thái | Enum | Hangtag | List |
+|------------|------|---------|------|
+| Đang làm | `DANG_LAM` | green | Đầu list (ghim trong nhóm) |
+| Tạm dừng | `TAM_DUNG` | gray | **Cuối list**, chữ/nền nhạt |
+| Hoàn thành | `HOAN_THANH` | blue | **Cuối list**, chữ/nền nhạt |
 
-**Số ngày:** từ `startedAt` đến nay; khi **Hoàn thành hoặc Hủy** dừng tại `completedAt` (CRM mới ghi cả hai). `0` → «Hôm nay».
+**Không xoá hồ sơ** (không menu Xóa, không soft-delete). `HUY` legacy = **Tạm dừng** (UI hiện «Tạm dừng»; lọc Tạm dừng gồm cả `HUY`; API `PATCH` gửi `HUY` → lưu `TAM_DUNG`).
+
+**Số ngày:** từ `startedAt` đến nay; khi **Tạm dừng / Hoàn thành** (và `HUY` cũ) dừng tại `completedAt`. **Khôi phục** → `DANG_LAM` + xóa `completedAt`. `0` → «Hôm nay».
 
 Tiến độ gợi ý: Bàn giá, Thu thập giấy tờ, Đo đạc, Nộp hồ sơ, Bổ sung, Làm việc cơ quan, Nhận kết quả, Bàn giao, Khác — API cũ **không chặn** `StepType` ngoài list. Thu/Chi. Tài liệu: Sổ đỏ / CCCD / Khác (hoặc chuỗi tự nhập).
 
 ## 4. Use cases (CRM cũ)
 
 1. **Tạo từ khách** — `POST` STAFF; khách phải thuộc NV và không ẩn. ADMIN → 403. Mã `SD-YYYY-NNNN`. Status `DANG_LAM`.
-2. **List** — STAFF chỉ hồ sơ mình; ADMIN tất cả + `?employeeId=`. Tìm: mã + tên + SĐT (không tìm nhu cầu/ghi chú). Sort: ghim → `pinnedAt` → `updatedAt`. `limit` mặc định 50, tối đa 200; `offset` từ 0; `total` = COUNT.
-3. **Sửa** — trạng thái, phí thỏa thuận, nhu cầu, ghi chú, ngày dự kiến xong. Chuyển **Hoàn thành** ghi `completedAt`; rời Hoàn thành thì xóa `completedAt`.
+2. **List** — STAFF chỉ hồ sơ mình; ADMIN tất cả + `?employeeId=`. Tìm: mã + tên + SĐT. Sort: **Đang làm trước** → Tạm dừng/Hoàn thành sau; trong nhóm: ghim → `pinnedAt` → `updatedAt`. `limit` mặc định 50, tối đa 200; `offset` từ 0; `total` = COUNT.
+3. **Sửa** — trạng thái (`DANG_LAM` / `TAM_DUNG` / `HOAN_THANH`), phí thỏa thuận, nhu cầu, ghi chú, ngày dự kiến xong. Tạm dừng / Hoàn thành ghi `completedAt`; về Đang làm thì xóa `completedAt`.
 4. **Ghim** — `PATCH /:id/pin` `{ pinned }`.
 5. **Tiến độ / thu-chi / file** — thêm/xóa trên hồ sơ mình. File tối đa 12 MB, disk `/img/title-services/`.
-6. **Xóa cứng** — hồ sơ + tiến độ + tiền + file.
+6. **Không xóa hồ sơ** — dùng Tạm dừng / Hoàn thành; menu **Khôi phục** khi đang Tạm dừng hoặc Hoàn thành.
 
 ## 5. Quan hệ dữ liệu
 
@@ -68,7 +69,7 @@ Ownership list = `CreatedByEmployeeId`, không phải `Customer.employeeId` (tr�
 
 `packages/shared/src/title-services.ts` + Prisma `TitleService*` khớp CRM cũ: `code`, `customerId`, `createdByEmployeeId`, `agreedFeeVnd` BigInt, ghim, `startedAt` / `expectedDoneAt` / `completedAt`, tiến độ `stepType`, tiền `kind` THU|CHI, file `objectKey` **private** (contract **không** trả URL public).
 
-Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim / xóa + tiến độ / thu-chi + file private (multipart, signed GET, xóa object).
+Prefix `/api/v1/title-services` — list / get / tạo / sửa / ghim + tiến độ / thu-chi + file private (multipart, signed GET, xóa object). **Không** `DELETE` hồ sơ.
 
 ## 8. Dữ liệu
 
@@ -119,9 +120,9 @@ Không nút thêm hồ sơ — thêm từ màn khách.
 
 **Bấm nền hàng** → chọn + **mở panel** Chi tiết hồ sơ.
 
-Sort: ghim trước, rồi `updatedAt` mới.
+Sort: **Đang làm** trước (ghim trong nhóm), rồi `updatedAt` mới. **Tạm dừng / Hoàn thành** (và `HUY` cũ) xếp **cuối**, opacity thấp / chữ nhạt.
 
-Ghim: nền vàng `#fef9c3`. Đang chọn: `#eff6ff`.
+Ghim: nền vàng `#fef9c3` (chỉ nổi trong nhóm Đang làm). Đang chọn: `#eff6ff`.
 
 #### 12.1.0 Thẻ tổng hợp (giống `/giao-dich`)
 
@@ -195,11 +196,12 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 | Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai). Gắn sổ đỏ — «của khách [tên]». **Đồng thời** ghi tiến độ bước **Công việc** (`CONG_VIEC`), ghi chú = nội dung việc. Khi **Hoàn thành** việc trên `/cong-viec` → bước tiến độ đó hangtag **Đã hoàn thành** |
 | Ghim / Bỏ ghim | `isPinned` |
 | Thêm tiến độ | Dialog: chọn bước (gồm **Công việc**) + ghi chú + ngày |
-| Nhập thu | Dialog mock |
-| Nhập chi phí | Dialog mock |
+| Nhập thu | Dialog |
+| Nhập chi phí | Dialog |
 | Thêm tài liệu | Dialog: loại + chọn file (R2 private). Mobile không tràn mép |
-| Sửa thông tin | Dialog mock (trạng thái, giá, nhu cầu) |
-| Xóa hồ sơ | Đỏ → confirm → gỡ list (mock) |
+| Sửa thông tin | Dialog (trạng thái Đang làm / Tạm dừng / Hoàn thành, giá, nhu cầu) |
+| **Khôi phục** | Chỉ khi Tạm dừng hoặc Hoàn thành → `DANG_LAM` (xóa `completedAt`) |
+| ~~Xóa hồ sơ~~ | **Bỏ** — không xoá cứng / mềm |
 
 #### 12.1.4 Footer + cuộn tải thêm
 
@@ -343,8 +345,8 @@ CRM cũ **đủ dùng** cho 1–vài hồ sơ: một hồ sơ / khách, trạng 
 | Vấn đề cũ | Làm mới |
 |-----------|---------|
 | File trên disk `/img/title-services/` — cùng cây `img` có thể **public** | **Private R2** (`uploadPrivate` + signed URL). **Không** CDN, **không** URL tĩnh. Chỉ NV có quyền hồ sơ mới lấy link (TTL ngắn) |
-| Xóa cứng + xóa file | STAFF xóa = confirm; file mật **không** public kể cả sau xóa (xóa object private). Không soft-delete trừ khi chủ bảo thêm |
-| `HUY` không ghi `completedAt` → số ngày vẫn chạy | Hủy **và** Hoàn thành đều ghi `completedAt`, dừng đếm ngày |
+| Xóa cứng + xóa file | **Bỏ** — không xoá hồ sơ; Tạm dừng / Hoàn thành + Khôi phục; file mật vẫn private |
+| `HUY` không ghi `completedAt` → số ngày vẫn chạy | **Hủy = Tạm dừng**; Tạm dừng / Hoàn thành ghi `completedAt`, dừng đếm ngày |
 | `StepType` / loại giấy tùy ý | Enum chốt + «Khác» (ghi chú). Không nhận chuỗi tự do làm `kind` lưu DB |
 | Prisma stub lệch | Sửa schema **trước** copy. Tiền **BigInt** |
 | ~~Tạo từ khách trên web mới chưa có~~ | **Xong** — `/khach-hang/[id]/dich-vu-so-do` |

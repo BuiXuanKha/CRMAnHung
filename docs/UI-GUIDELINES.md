@@ -375,13 +375,13 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 | Cột | Nội dung ô |
 |-----|------------|
 | `#` | Số thứ tự; nếu **ghim** thì icon Lucide `Star` (vàng `#ca8a04`) thay số — **không** emoji, **không** icon lọc |
-| `Tên khách` | **Tên đậm** + hangtag trạng thái + dòng phụ mã hồ sơ (`SD-2026-0001`) · SĐT. Hangtag: Đang làm `green` · Tạm dừng `gray` · Hoàn thành `blue` · Hủy `red`. Lọc cột = trạng thái |
+| `Tên khách` | **Tên đậm** + hangtag trạng thái + dòng phụ mã hồ sơ (`SD-2026-0001`) · SĐT. Hangtag: Đang làm `green` · Tạm dừng `gray` · Hoàn thành `blue` (`HUY` legacy = Tạm dừng). Lọc cột = trạng thái |
 | `Nhu cầu` | Mô tả; thiếu = `—` |
 | `Lịch sử đang làm` | Bước mới nhất **đậm** + ngày `D/M/YYYY`; chưa có = `Chưa ghi tiến độ` |
 | `Giá / Thu / Chi` | Ba dòng: Giá `crm-money`; Thu chữ xanh `#047857`; Chi chữ đỏ `#b91c1c`; thiếu giá / 0 = `0 đ` hoặc `—` với giá |
 | `Tài liệu` | `N file` hoặc `Chưa có` |
 | `Số ngày` | Hangtag `CrmBadge` green (`30 ngày` / `Hôm nay`) — **không** icon lọc |
-| `Thao tác` | Chevron → menu: **Xem chi tiết**, **Thêm công việc** (đồng thời ghi tiến độ **Công việc**; hoàn thành việc → hangtag **Đã hoàn thành**), **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**, **Xóa hồ sơ** (đỏ + confirm) |
+| `Thao tác` | Chevron → menu: **Xem chi tiết**, **Thêm công việc**, **Khôi phục** (khi Tạm dừng/Hoàn thành), **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**. **Không** Xóa hồ sơ. Tạm dừng/Hoàn thành xếp cuối list + `is-muted` (opacity/chữ nhạt) |
 
 **Thanh tìm:** desktop chỉ ô tìm (+ **ADMIN:** select nhân viên tạo). Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ trên desktop. Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới.
 
@@ -732,6 +732,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/lo-dat/[id]/sua` Hình ảnh: bỏ hint dài (gỡ × / tối đa 5 / Ctrl+V) |
 | 2026-09-09 | `/lo-dat/[id]/sua` (và tạo): Huỷ / Lưu căn trái |
 | 2026-09-09 | `/dich-vu-so-do`: 3 thẻ tổng hợp Số hồ sơ · Tổng thu · Tổng chi (như `/giao-dich`) |
+| 2026-09-09 | `/dich-vu-so-do`: bỏ Xóa; Tạm dừng/Hoàn thành cuối list + mờ; menu Khôi phục; Hủy=`TAM_DUNG` |
 
 ---
 

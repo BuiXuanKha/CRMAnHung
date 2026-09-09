@@ -164,7 +164,8 @@ export const TITLE_SERVICE_STATUS_LABELS: Record<TitleServiceStatus, string> = {
   [TitleServiceStatus.DANG_LAM]: 'Đang làm',
   [TitleServiceStatus.TAM_DUNG]: 'Tạm dừng',
   [TitleServiceStatus.HOAN_THANH]: 'Hoàn thành',
-  [TitleServiceStatus.HUY]: 'Hủy',
+  /** Legacy — UI/API coi như Tạm dừng. */
+  [TitleServiceStatus.HUY]: 'Tạm dừng',
 };
 
 export const TITLE_SERVICE_STEP_LABELS: Record<TitleServiceStepType, string> = {

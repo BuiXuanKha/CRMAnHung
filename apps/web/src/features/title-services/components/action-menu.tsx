@@ -9,14 +9,15 @@ import {
   Pencil,
   Pin,
   Receipt,
-  Trash2,
+  RotateCcw,
   Wallet,
   Eye,
 } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import type { TitleServiceListItem } from '@crmanhung/shared';
+import { type TitleServiceListItem } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
+import { isTitleServiceMuted } from '../display';
 
 export type TitleServiceAction =
   | 'detail'
@@ -27,7 +28,7 @@ export type TitleServiceAction =
   | 'chi'
   | 'attach'
   | 'edit'
-  | 'delete';
+  | 'restore';
 
 type Props = {
   item: TitleServiceListItem;
@@ -44,6 +45,7 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
   const [triggerVisible, setTriggerVisible] = useState(false);
+  const canRestore = isTitleServiceMuted(item.status);
 
   useEffect(() => {
     setMounted(true);
@@ -96,6 +98,13 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
                 <Icon icon={ListTodo} /> Thêm công việc
               </button>
             </li>
+            {canRestore ? (
+              <li>
+                <button type="button" role="menuitem" onClick={() => onAction('restore')}>
+                  <Icon icon={RotateCcw} /> Khôi phục
+                </button>
+              </li>
+            ) : null}
             <li>
               <button type="button" role="menuitem" onClick={() => onAction('pin')}>
                 <Icon icon={Pin} /> {item.isPinned ? 'Bỏ ghim' : 'Ghim lên đầu'}
@@ -124,16 +133,6 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
             <li>
               <button type="button" role="menuitem" onClick={() => onAction('edit')}>
                 <Icon icon={Pencil} /> Sửa thông tin
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                role="menuitem"
-                className="danger"
-                onClick={() => onAction('delete')}
-              >
-                <Icon icon={Trash2} /> Xóa hồ sơ
               </button>
             </li>
           </ul>,

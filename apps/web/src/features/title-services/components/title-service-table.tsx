@@ -14,6 +14,7 @@ import {
   STATUS_FILTER_OPTIONS,
   formatDaysWorking,
   formatMoneyVnd,
+  isTitleServiceMuted,
   progressLine,
   statusLabel,
   statusTone,
@@ -163,6 +164,7 @@ export function TitleServiceTable({
                   selectedId === item.id ? 'is-selected' : '',
                   menuId === item.id ? 'is-menu-open' : '',
                   item.isPinned ? 'is-hot' : '',
+                  isTitleServiceMuted(item.status) ? 'is-muted' : '',
                 ]
                   .filter(Boolean)
                   .join(' ')}
