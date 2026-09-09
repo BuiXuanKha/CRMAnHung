@@ -13,7 +13,7 @@ export function buildLodatCopyText(detail: LodatDetail, shareUrl: string): strin
   const title = detail.title?.trim();
   if (title) lines.push(`📌 ${title}`);
   const address = detail.address?.trim();
-  if (address) lines.push(`📍 ${address}`);
+  if (address) lines.push(`📍 Địa chỉ: ${address}`);
 
   const specs: string[] = [];
   if (detail.areaM2 != null) specs.push(`📐 Diện tích: ${formatArea(detail.areaM2)}`);
