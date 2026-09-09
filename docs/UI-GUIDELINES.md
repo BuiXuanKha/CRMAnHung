@@ -729,6 +729,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/cong-viec`: menu **Sửa** (chưa xong) — sửa nội dung + hạn; nguồn không đổi |
 | 2026-09-09 | `/cong-viec`: modal Thêm/Sửa — `crm-dialog--wide` (máy tính) |
 | 2026-09-09 | `/dang-bai` Soạn bài đăng: mặc định **Giá gợi ý**; nút **Sinh giá gợi ý** từ CRM |
+| 2026-09-09 | `/lo-dat/[id]/sua` Hình ảnh: bỏ hint dài (gỡ × / tối đa 5 / Ctrl+V) |
 
 ---
 
