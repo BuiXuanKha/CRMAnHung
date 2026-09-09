@@ -415,13 +415,14 @@ Nhớ tìm + lọc + dòng chọn: `sessionStorage` `crmanhung:public-lot-list-s
 
 Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm-dialog--wide`, ~840px). Không `window.confirm`.
 
-1. Prefill copy **công khai** từ lô đang Mở bán: tiêu đề, địa chỉ, giá đã làm mờ, mô tả (DT · MT · hướng · loại + CTA hotline công ty).
+1. Prefill copy **công khai** từ lô đang Mở bán: tiêu đề, địa chỉ, **giá gợi ý** (làm mờ từ CRM qua `suggestPublicPrice`), mô tả (DT · MT · hướng · loại + CTA hotline công ty).
 2. **Không** copy: hoa hồng, ghi chú giá / broker, ghi chú thương lượng chủ nhà, tên/SĐT khách, tên NV.
 3. Ô chỉ đọc: giá gốc CRM không hiện đúng cho khách; người soạn duyệt giá công khai.
-4. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, **mô tả rich text (TipTap)**. **Không** ô sửa slug — URL chỉ đọc (tạo = `toListingPublicSlug` từ tiêu đề+địa chỉ; đã có listing = slug đã lưu). Ảnh bìa = ảnh lô (không upload slice này).
-5. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload mock/R2 public CDN).
-6. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`; được thiếu mô tả) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng — **bắt buộc** có nội dung mô tả).
-7. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web; **tắt** icon đỏ (`needsWebUpdate = false`). Preview render HTML mô tả.
+4. **Giá trên web khách — mặc định `AMOUNT` (Giá gợi ý)** khi CRM có giá; giữ nhãn AMOUNT đã Lưu nếu có. Không có giá CRM → `CONTACT`. Nút **Sinh giá gợi ý** (cạnh nhãn) gọi lại `suggestPublicPrice` từ giá map CRM. Chọn lại `AMOUNT` khi nhãn trống cũng tự điền gợi ý.
+5. Sửa được: tiêu đề, địa chỉ public, chế độ giá (`AMOUNT` / `CONTACT`) + nhãn giá, **mô tả rich text (TipTap)**. **Không** ô sửa slug — URL chỉ đọc (tạo = `toListingPublicSlug` từ tiêu đề+địa chỉ; đã có listing = slug đã lưu). Ảnh bìa = ảnh lô (không upload slice này).
+6. Toolbar editor: Đậm · Nghiêng · H2 · H3 · Danh sách · Chèn ảnh (upload mock/R2 public CDN).
+7. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`; được thiếu mô tả) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng — **bắt buộc** có nội dung mô tả).
+8. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web; **tắt** icon đỏ (`needsWebUpdate = false`). Preview render HTML mô tả.
 
 **Icon đỏ (`needsWebUpdate`):** bật khi NV/API **cập nhật lô CRM** mà listing đã `isPublished` (đồng thời vẫn sync title/location overlay). Tắt khi **Lưu** Soạn bài đăng. GPT đổi H1 **không** bật icon. Lô lệch xếp đầu list.
 

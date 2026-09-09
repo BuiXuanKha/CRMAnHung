@@ -13,7 +13,7 @@ import {
 } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 import { CrmDialog } from '@/shared/ui/dialog';
-import { plainTextToListingBodyHtml, publicListingInternalsHint } from '../listing-copy';
+import { plainTextToListingBodyHtml, publicListingInternalsHint, suggestPublicPrice } from '../listing-copy';
 import { toListingPublicSlug } from '../display';
 import type { LotGptEditorPrefill } from '../lot-gpt-apply';
 import { PostRichEditor } from './post-rich-editor';
@@ -37,6 +37,22 @@ const META_MAX = 320;
 function lotBodyHtml(lot: PublicWebStaffLotRow): string {
   if (lot.bodyHtml?.trim()) return lot.bodyHtml;
   return plainTextToListingBodyHtml(lot.excerpt);
+}
+
+/** Mặc định ưu tiên giá gợi ý từ CRM; giữ nhãn AMOUNT đã lưu nếu có. */
+function defaultPublicPrice(lot: PublicWebStaffLotRow): {
+  priceMode: PublicListingPriceMode;
+  priceLabel: string;
+} {
+  const savedLabel = lot.priceMode === 'AMOUNT' ? lot.priceLabel?.trim() || '' : '';
+  if (savedLabel) {
+    return { priceMode: 'AMOUNT', priceLabel: savedLabel };
+  }
+  const suggested = suggestPublicPrice(lot.priceVnd);
+  if (suggested.priceMode === 'AMOUNT' && suggested.priceLabel) {
+    return { priceMode: 'AMOUNT', priceLabel: suggested.priceLabel };
+  }
+  return { priceMode: 'CONTACT', priceLabel: '' };
 }
 
 export function LotListingEditorDialog({
@@ -75,11 +91,13 @@ export function LotListingEditorDialog({
       return;
     }
 
+    const price = defaultPublicPrice(lot);
+
     if (gptPrefill) {
       setTitle(gptPrefill.title.trim() || lot.title);
       setLocation(lot.location);
-      setPriceMode(lot.priceMode);
-      setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
+      setPriceMode(price.priceMode);
+      setPriceLabel(price.priceLabel);
       setBodyHtml(gptPrefill.bodyHtml);
       setMetaDescription(gptPrefill.metaDescription.trim() || lot.metaDescription?.trim() || '');
       setSeoTitle(gptPrefill.seoTitle.trim() || gptPrefill.title.trim());
@@ -91,8 +109,8 @@ export function LotListingEditorDialog({
         lotOpenKeyRef.current = openKey;
         setTitle(lot.title);
         setLocation(lot.location);
-        setPriceMode(lot.priceMode);
-        setPriceLabel(lot.priceMode === 'AMOUNT' ? (lot.priceLabel ?? '') : '');
+        setPriceMode(price.priceMode);
+        setPriceLabel(price.priceLabel);
         setBodyHtml(lotBodyHtml(lot));
         setMetaDescription(lot.metaDescription?.trim() || '');
         setSeoTitle(lot.seoTitle?.trim() || lot.title.trim());
@@ -107,6 +125,18 @@ export function LotListingEditorDialog({
     const t = window.setTimeout(() => titleRef.current?.focus(), 50);
     return () => window.clearTimeout(t);
   }, [lot, gptApplyId]);
+
+  function applySuggestedPrice() {
+    if (!lot || busy) return;
+    const suggested = suggestPublicPrice(lot.priceVnd);
+    if (suggested.priceMode !== 'AMOUNT' || !suggested.priceLabel) {
+      setParseError('Lô chưa có giá CRM để sinh giá gợi ý.');
+      return;
+    }
+    setParseError(null);
+    setPriceMode('AMOUNT');
+    setPriceLabel(suggested.priceLabel);
+  }
 
   function parsedInput(requireBody: boolean): UpdatePublicListingDraftInput | null {
     const meta = metaDescription.trim();
@@ -241,27 +271,50 @@ export function LotListingEditorDialog({
               value={priceMode}
               onChange={(e) => {
                 const next = e.target.value as PublicListingPriceMode;
-                setPriceMode(next);
-                if (next === 'CONTACT') setPriceLabel('');
+                if (next === 'CONTACT') {
+                  setPriceMode('CONTACT');
+                  setPriceLabel('');
+                  return;
+                }
+                const suggested = suggestPublicPrice(lot.priceVnd);
+                setPriceMode('AMOUNT');
+                setPriceLabel(
+                  priceLabel.trim() || suggested.priceLabel || '',
+                );
               }}
               disabled={busy}
             >
-              <option value="AMOUNT">Hiện giá (đã làm mờ)</option>
+              <option value="AMOUNT">Giá gợi ý (hiện số)</option>
               <option value="CONTACT">Liên hệ</option>
             </select>
           </label>
 
           {priceMode === 'AMOUNT' ? (
-            <label>
-              Nhãn giá công khai
-              <input
-                value={priceLabel}
-                onChange={(e) => setPriceLabel(e.target.value)}
-                placeholder="VD: 3 tỷ xxx"
-                maxLength={80}
-                disabled={busy}
-              />
-            </label>
+            <div className="pw-price-label-row">
+              <label className="pw-price-label-field">
+                Nhãn giá công khai
+                <input
+                  value={priceLabel}
+                  onChange={(e) => setPriceLabel(e.target.value)}
+                  placeholder="VD: 3 tỷ xxx"
+                  maxLength={80}
+                  disabled={busy}
+                />
+              </label>
+              <button
+                type="button"
+                className="crm-btn"
+                disabled={busy || lot.priceVnd == null}
+                onClick={applySuggestedPrice}
+                title={
+                  lot.priceVnd == null
+                    ? 'Lô chưa có giá CRM'
+                    : 'Sinh lại nhãn từ giá CRM (làm mờ)'
+                }
+              >
+                Sinh giá gợi ý
+              </button>
+            </div>
           ) : null}
 
           <div className="pw-compose-body-field">
