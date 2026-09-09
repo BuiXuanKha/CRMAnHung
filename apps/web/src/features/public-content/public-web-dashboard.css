@@ -1069,9 +1069,30 @@
   color: #334155;
 }
 
+.pw-price-label-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.pw-price-label-field {
+  flex: 1 1 12rem;
+  min-width: 0;
+}
+
+.pw-price-label-row > .crm-btn {
+  flex: 0 0 auto;
+  white-space: nowrap;
+}
+
 @media (max-width: 640px) {
   .pw-compose-cover-row {
     grid-template-columns: 1fr;
+  }
+
+  .pw-price-label-row > .crm-btn {
+    width: 100%;
   }
 }
 
