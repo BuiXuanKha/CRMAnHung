@@ -27,7 +27,7 @@ export async function toPublicWebp(buffer: Buffer): Promise<{
       fit: 'inside',
       withoutEnlargement: true,
     })
-    .webp({ quality: PUBLIC_WEBP_QUALITY, effort: 4 })
+    .webp({ quality: PUBLIC_WEBP_QUALITY, effort: 2 })
     .toBuffer();
   return { buffer: out, contentType: PUBLIC_SEO_IMAGE_MIME };
 }
