@@ -445,7 +445,7 @@ Học CRM cũ `LodatEditPage` (route `/lo-dat/:id/sua`) — **không** copy god-
 
 #### 12.4.1 Máy tính
 
-Layout: **2 cột** desktop — trái form (thông số / chủ & giá / lịch sử); phải **Hình ảnh + Xem nhanh** sticky top; **Huỷ/Lưu dưới form** (không sticky/fixed).
+Layout: **2 cột** desktop — trái form (thông số / chủ & giá / lịch sử); phải **Hình ảnh + Xem nhanh** sticky top; **Huỷ/Lưu dưới form** căn trái (không sticky/fixed).
 
 ```
 ← Chi tiết lô · H1 Sửa lô đất · badge
@@ -471,7 +471,7 @@ Xếp dọc: thông số → chủ/giá → lịch sử → hình ảnh → xem 
 - Ghi chú giá: Thương lượng · Cứng giá · Chưa chi tiết  
 - Hoa hồng: 1% · 2% · Chưa trao đổi  
 
-Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thông số thửa; map giá vẫn sửa được. **Ảnh thêm** (`LodatImage`): dán/kéo thả/chọn file, tối đa 5, gỡ bằng ×. **Ảnh dự án** (`AddressImage`): chỉ xem.
+Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thông số thửa; map giá vẫn sửa được. **Ảnh thêm** (`LodatImage`): dán/kéo thả/chọn file, tối đa 5, gỡ bằng × (không hiện đoạn hướng dẫn dài trên UI). **Ảnh dự án** (`AddressImage`): chỉ xem.
 
 #### 12.4.4 Đổi chủ
 
