@@ -95,7 +95,7 @@ Script copy: `pnpm title-services:migrate-legacy` — chi tiết [`MIGRATION.md`
 - Tìm: mã + tên + SĐT (không tìm nhu cầu / ghi chú).
 - Cũ ADMIN: `?employeeId=`. Mới: ADMIN lọc `createdByEmployeeId` trên list (select NV). STAFF không thấy select.
 - Không `@` / `@@`.
-- Xóa cũ = cứng (kèm file). Mock chỉ gỡ list.
+- Web mới: **không xoá hồ sơ**; Tạm dừng / Hoàn thành + Khôi phục.
 
 ---
 
