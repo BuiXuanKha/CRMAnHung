@@ -204,7 +204,7 @@ Cùng câu 12.1.5.
 
 ## 12.3 Modal Thêm công việc (máy tính + mobile)
 
-Mở từ **FAB** `/cong-viec` hoặc menu Thao tác 4 list. `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề: **Thêm công việc**.
+Mở từ **FAB** `/cong-viec` hoặc menu Thao tác 4 list. `CrmDialog` §4.7 (`crm-dialog--wide` trên máy tính). Icon `ListTodo`. Tiêu đề: **Thêm công việc**.
 
 #### 12.3.1 Dòng nguồn
 
@@ -257,7 +257,7 @@ Nội dung (`content`; đã xong → gạch ngang). Dòng nguồn (`NONE` → «
 
 ## 12.6 Modal Sửa công việc
 
-Mở từ menu **Sửa** (chỉ việc chưa xong). `CrmDialog` §4.7. Icon `ListTodo`. Tiêu đề: **Sửa công việc**.
+Mở từ menu **Sửa** (chỉ việc chưa xong). `CrmDialog` §4.7 (`crm-dialog--wide` trên máy tính). Icon `ListTodo`. Tiêu đề: **Sửa công việc**.
 
 - Dòng nguồn: cùng 12.3.1 — **không sửa** (`taskContextLine`).
 - Prefill `content` + `dueOn`. Có nút **Hôm nay**.
