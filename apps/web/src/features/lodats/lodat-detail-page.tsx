@@ -139,9 +139,9 @@ export function LodatDetailPage() {
     if (!detail) return;
     try {
       await copyTextToClipboard(buildLodatCopyText(detail));
-      flash('Đã copy thông tin lô đất.');
+      flash('Đã copy nội dung gửi sales.');
     } catch {
-      setAlertMsg('Không copy được thông tin lô đất.');
+      setAlertMsg('Không copy được nội dung gửi sales.');
     }
   }
 
@@ -232,7 +232,7 @@ export function LodatDetailPage() {
                   onClick={() => void handleCopy()}
                 >
                   <Copy size={14} aria-hidden />
-                  Copy thông tin
+                  Copy gửi sales
                 </button>
                 <button
                   type="button"
