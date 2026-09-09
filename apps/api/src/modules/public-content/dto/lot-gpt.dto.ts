@@ -69,6 +69,12 @@ export class LotGptRequestDto {
   @MaxLength(200)
   priceText?: string | null;
 
+  /** Mọi lô đăng bán đã có sổ sẵn — GPT được phép nêu trong bài. */
+  @IsOptional()
+  @IsString()
+  @MaxLength(300)
+  titleDeedStatus?: string;
+
   @IsOptional()
   @IsString()
   @MaxLength(20)
