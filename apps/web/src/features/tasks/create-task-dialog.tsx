@@ -100,6 +100,7 @@ export function CreateTaskDialog(props: Props) {
       icon={ListTodo}
       onClose={onClose}
       busy={busy}
+      className="crm-dialog--wide cv-task-form-dialog"
     >
       <form onSubmit={handleSubmit}>
         <p className="cv-dialog-context">{taskContextLine(contextType, contextLabel)}</p>
@@ -111,7 +112,7 @@ export function CreateTaskDialog(props: Props) {
             maxLength={2000}
             required
             disabled={busy}
-            rows={4}
+            rows={8}
           />
         </label>
         <label>

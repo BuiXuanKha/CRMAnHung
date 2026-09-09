@@ -727,6 +727,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/dang-bai` mobile: Preview chỉ khi đã chọn lô; ẩn empty «Chọn một lô…» |
 | 2026-09-09 | `/dang-bai`: Chưa soạn + CRM có giá → gợi ý giá làm mờ; GPT được nêu sổ sẵn / sang tên |
 | 2026-09-09 | `/cong-viec`: menu **Sửa** (chưa xong) — sửa nội dung + hạn; nguồn không đổi |
+| 2026-09-09 | `/cong-viec`: modal Thêm/Sửa — `crm-dialog--wide` (máy tính) |
 
 ---
 

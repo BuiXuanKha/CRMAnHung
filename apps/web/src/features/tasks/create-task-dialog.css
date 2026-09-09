@@ -17,3 +17,15 @@
 .cv-due-row input[type='date'] {
   flex: 1 1 auto;
 }
+
+/* Desktop: modal tạo/sửa rộng hơn để nhập nội dung dài */
+.crm-dialog.crm-dialog--wide.cv-task-form-dialog textarea {
+  min-height: 12rem;
+  resize: vertical;
+}
+
+@media (max-width: 767px) {
+  .crm-dialog.crm-dialog--wide.cv-task-form-dialog textarea {
+    min-height: 8rem;
+  }
+}
