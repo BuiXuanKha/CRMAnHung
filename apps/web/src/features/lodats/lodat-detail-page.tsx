@@ -135,7 +135,6 @@ export function LodatDetailPage() {
     if (restoredForIdRef.current === id) return;
 
     const target = peekLodatDetailScroll(id);
-    restoredForIdRef.current = id;
     skipScrollSaveRef.current = true;
 
     const el = scrollRef.current;
@@ -149,6 +148,7 @@ export function LodatDetailPage() {
       if (cancelled) return;
       const max = Math.max(0, el.scrollHeight - el.clientHeight);
       el.scrollTop = Math.min(target, max);
+      restoredForIdRef.current = id;
       skipScrollSaveRef.current = false;
     };
 
