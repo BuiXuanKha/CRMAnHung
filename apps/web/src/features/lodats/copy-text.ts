@@ -7,7 +7,7 @@ import { formatArea, formatBrokerFee, formatPriceVnd } from './display';
 
 const INTERNAL_COPY_HEADER = 'THÔNG TIN NỘI BỘ - KHÔNG GỬI KHÁCH';
 
-export function buildLodatCopyText(detail: LodatDetail): string {
+export function buildLodatCopyText(detail: LodatDetail, shareUrl: string): string {
   const lines: string[] = [INTERNAL_COPY_HEADER, ''];
 
   const title = detail.title?.trim();
@@ -38,6 +38,12 @@ export function buildLodatCopyText(detail: LodatDetail): string {
   if (priceLines.length) {
     lines.push('');
     lines.push(...priceLines);
+  }
+
+  const url = shareUrl.trim();
+  if (url) {
+    lines.push('');
+    lines.push(`🔗 ${url}`);
   }
 
   return lines.join('\n').trim();
