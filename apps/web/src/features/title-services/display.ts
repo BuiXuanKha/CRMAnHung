@@ -149,13 +149,25 @@ export function progressLine(latest?: TitleServiceProgress | null): {
   title: string;
   date: string | null;
   completed: boolean;
+  isWorkTask: boolean;
 } {
-  if (!latest) return { title: 'Chưa ghi tiến độ', date: null, completed: false };
+  if (!latest) return { title: 'Chưa ghi tiến độ', date: null, completed: false, isWorkTask: false };
   return {
     title: stepLabel(latest.stepType),
     date: formatDateShort(latest.happenedAt),
     completed: Boolean(latest.completedAt),
+    isWorkTask: latest.stepType === TitleServiceStepType.CONG_VIEC,
   };
+}
+
+/** Hangtag bước Công việc trên timeline / cột tiến độ. */
+export function workProgressBadge(
+  stepType: TitleServiceStepType,
+  completedAt?: string | null,
+): { label: string; tone: BadgeTone } | null {
+  if (stepType !== TitleServiceStepType.CONG_VIEC) return null;
+  if (completedAt) return { label: 'Đã hoàn thành', tone: 'green' };
+  return { label: 'Đang làm', tone: 'amber' };
 }
 
 export const STATUS_FILTER_OPTIONS = [

@@ -9,7 +9,14 @@ import {
 } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
-import { docKindTone, formatDateTime, formatMoneyVnd, statusLabel, stepLabel } from '../display';
+import {
+  docKindTone,
+  formatDateTime,
+  formatMoneyVnd,
+  statusLabel,
+  stepLabel,
+  workProgressBadge,
+} from '../display';
 
 type Props = {
   detail: TitleServiceDetail;
@@ -74,19 +81,22 @@ export function TitleServiceDetailBody({
           <p className="sd-muted">Chưa có cập nhật tiến độ.</p>
         ) : (
           <ul className="sd-timeline">
-            {detail.progress.map((p) => (
+            {detail.progress.map((p) => {
+              const workBadge = workProgressBadge(p.stepType, p.completedAt);
+              return (
               <li key={p.id} className={p.completedAt ? 'is-done' : undefined}>
                 <div className="sd-timeline-meta">
                   <strong>{stepLabel(p.stepType)}</strong>
-                  {p.completedAt ? (
-                    <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+                  {workBadge ? (
+                    <CrmBadge tone={workBadge.tone}>{workBadge.label}</CrmBadge>
                   ) : null}
                   <span>{formatDateTime(p.happenedAt)}</span>
                 </div>
                 {p.note ? <p>{p.note}</p> : null}
                 {p.employeeName ? <span className="sd-muted">Bởi {p.employeeName}</span> : null}
               </li>
-            ))}
+              );
+            })}
           </ul>
         )}
       </section>

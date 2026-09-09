@@ -193,7 +193,7 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 | Mục | Việc |
 |-----|------|
 | Xem chi tiết | `/dich-vu-so-do/[id]`. Máy tính: bấm dòng vẫn mở panel. Menu portal `document.body` |
-| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai). Gắn sổ đỏ — «của khách [tên]». **Đồng thời** ghi tiến độ bước **Công việc** (`CONG_VIEC`), ghi chú = nội dung việc. Khi **Hoàn thành** việc trên `/cong-viec` → bước tiến độ đó hangtag **Đã hoàn thành** |
+| Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai). Gắn sổ đỏ — «của khách [tên]». **Đồng thời** ghi tiến độ bước **Công việc** (`CONG_VIEC`), ghi chú = nội dung việc. Việc còn mở → hangtag **Đang làm**; khi **Hoàn thành** trên `/cong-viec` → hangtag **Đã hoàn thành** |
 | Ghim / Bỏ ghim | `isPinned` |
 | Thêm tiến độ | Dialog: chọn bước (gồm **Công việc**) + ghi chú + ngày |
 | Nhập thu | Dialog |
@@ -219,7 +219,7 @@ Hangtag xanh: `N ngày` / `Hôm nay`. Không lọc cột.
 
 - Thu hẹp: thanh dọc, chữ xoay 90°, nhãn **Chi tiết hồ sơ**.
 - Mở: tên + mã · SĐT; lưới Trạng thái / Giá / Đã thu / Đã chi; hộp Nhu cầu; nút `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline tiến độ, file, thu/chi.
-- Timeline: bước **Công việc** gắn việc còn mở — chỉ tên bước; việc đã xong — hangtag **Đã hoàn thành** (`CrmBadge` green) cạnh tên bước (**không** gạch chữ ghi chú).
+- Timeline: bước **Công việc** gắn việc còn mở — hangtag **Đang làm** (`CrmBadge` amber); việc đã xong — hangtag **Đã hoàn thành** (`CrmBadge` green) cạnh tên bước (**không** gạch chữ ghi chú).
 - File tài liệu: hangtag loại **Sổ đỏ** / **CCCD** / **Giấy tờ khác** trên đầu mỗi file; tên file dòng dưới (bấm → mở); ngày đính kèm cạnh hangtag.
 - Chưa chọn: «Chọn một hồ sơ…»
 

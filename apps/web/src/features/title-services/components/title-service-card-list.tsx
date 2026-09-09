@@ -122,6 +122,8 @@ export function TitleServiceCardList({
                       <strong>{latest.title}</strong>
                       {latest.completed ? (
                         <CrmBadge tone="green">Đã hoàn thành</CrmBadge>
+                      ) : latest.isWorkTask ? (
+                        <CrmBadge tone="amber">Đang làm</CrmBadge>
                       ) : null}
                       <span> · {latest.date}</span>
                     </>

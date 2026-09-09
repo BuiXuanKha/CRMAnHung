@@ -733,6 +733,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/lo-dat/[id]/sua` (và tạo): Huỷ / Lưu căn trái |
 | 2026-09-09 | `/dich-vu-so-do`: 3 thẻ tổng hợp Số hồ sơ · Tổng thu · Tổng chi (như `/giao-dich`) |
 | 2026-09-09 | `/dich-vu-so-do`: bỏ Xóa; Tạm dừng/Hoàn thành cuối list + mờ; menu Khôi phục; Hủy=`TAM_DUNG` |
+| 2026-09-09 | `/dich-vu-so-do` tiến độ **Công việc** còn mở → hangtag **Đang làm** (amber) |
 
 ---
 
