@@ -160,6 +160,8 @@ export class TitleServicesService {
     }
 
     const isDone = DONE_STATUSES.includes(nextStatus as (typeof DONE_STATUSES)[number]);
+    // Tạm dừng / Hoàn thành: bỏ ghim nếu đang ghim.
+    const clearPin = isDone && current.isPinned;
     const updated = await this.prisma.titleService.update({
       where: { id },
       data: {
@@ -176,6 +178,7 @@ export class TitleServicesService {
             ? (this.parseDate(dto.expectedDoneAt) ?? null)
             : undefined,
         completedAt: isDone ? (current.completedAt ?? new Date()) : null,
+        ...(clearPin ? { isPinned: false, pinnedAt: null } : {}),
       },
       include: LIST_INCLUDE,
     });
@@ -185,10 +188,25 @@ export class TitleServicesService {
   async pin(user: RequestUser, id: string, dto: PinTitleServiceDto) {
     const current = await this.prisma.titleService.findUnique({
       where: { id },
-      select: { id: true, createdByEmployeeId: true, isPinned: true, pinnedAt: true },
+      select: {
+        id: true,
+        createdByEmployeeId: true,
+        isPinned: true,
+        pinnedAt: true,
+        status: true,
+      },
     });
     if (!current) throw new NotFoundException('Không tìm thấy hồ sơ sổ đỏ.');
     this.assertCanAccess(user, current.createdByEmployeeId);
+
+    if (
+      dto.pinned &&
+      DONE_STATUSES.includes(current.status as (typeof DONE_STATUSES)[number])
+    ) {
+      throw new BadRequestException(
+        'Không ghim hồ sơ đang Tạm dừng hoặc Hoàn thành. Khôi phục về Đang làm trước.',
+      );
+    }
 
     const updated = await this.prisma.titleService.update({
       where: { id },

@@ -381,7 +381,7 @@ Dưới đây là **cột / panel** riêng `/dich-vu-so-do` (đối chiếu nghi
 | `Giá / Thu / Chi` | Ba dòng: Giá `crm-money`; Thu chữ xanh `#047857`; Chi chữ đỏ `#b91c1c`; thiếu giá / 0 = `0 đ` hoặc `—` với giá |
 | `Tài liệu` | `N file` hoặc `Chưa có` |
 | `Số ngày` | Hangtag `CrmBadge` green (`30 ngày` / `Hôm nay`) — **không** icon lọc |
-| `Thao tác` | Chevron → menu: **Xem chi tiết**, **Thêm công việc**, **Khôi phục** (khi Tạm dừng/Hoàn thành), **Ghim / Bỏ ghim**, **Thêm tiến độ**, **Nhập thu**, **Nhập chi phí**, **Thêm tài liệu**, **Sửa thông tin**. **Không** Xóa hồ sơ. Tạm dừng/Hoàn thành xếp cuối list + `is-muted` (opacity/chữ nhạt) |
+| `Thao tác` | Đang làm: Xem chi tiết · Thêm công việc · Ghim · Tiến độ · Thu/Chi · Tài liệu · Sửa. **Tạm dừng/Hoàn thành:** chỉ **Xem chi tiết** + **Khôi phục**; tự bỏ ghim. **Không** Xóa. Muted xếp cuối + `is-muted` |
 
 **Thanh tìm:** desktop chỉ ô tìm (+ **ADMIN:** select nhân viên tạo). Placeholder: `Tìm mã hồ sơ, tên khách, SĐT...`. **Không** dropdown trạng thái, **không** nút Tìm, **không** nút Thêm hồ sơ trên desktop. Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới.
 
@@ -735,6 +735,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | `/dich-vu-so-do`: bỏ Xóa; Tạm dừng/Hoàn thành cuối list + mờ; menu Khôi phục; Hủy=`TAM_DUNG` |
 | 2026-09-09 | `/dich-vu-so-do` tiến độ **Công việc** còn mở → hangtag **Đang làm** (amber) |
 | 2026-09-09 | Trang khách: nhãn góc ảnh **Mở bán** / **Tạm dừng** / **Đã bán** (và Đặt cọc) — không đổi CRM |
+| 2026-09-09 | `/dich-vu-so-do` Tạm dừng/Hoàn thành: menu chỉ Xem chi tiết + Khôi phục; tự bỏ ghim |
 
 ---
 

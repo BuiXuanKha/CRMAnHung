@@ -45,7 +45,8 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
   const [pos, setPos] = useState({ top: 0, left: 0 });
   const [mounted, setMounted] = useState(false);
   const [triggerVisible, setTriggerVisible] = useState(false);
-  const canRestore = isTitleServiceMuted(item.status);
+  /** Tạm dừng / Hoàn thành: chỉ Xem chi tiết + Khôi phục. */
+  const mutedOnly = isTitleServiceMuted(item.status);
 
   useEffect(() => {
     setMounted(true);
@@ -93,48 +94,51 @@ export function ActionMenu({ item, open, onToggle, onClose, onAction }: Props) {
                 <Icon icon={Eye} /> Xem chi tiết
               </button>
             </li>
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('task')}>
-                <Icon icon={ListTodo} /> Thêm công việc
-              </button>
-            </li>
-            {canRestore ? (
+            {mutedOnly ? (
               <li>
                 <button type="button" role="menuitem" onClick={() => onAction('restore')}>
                   <Icon icon={RotateCcw} /> Khôi phục
                 </button>
               </li>
-            ) : null}
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('pin')}>
-                <Icon icon={Pin} /> {item.isPinned ? 'Bỏ ghim' : 'Ghim lên đầu'}
-              </button>
-            </li>
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('progress')}>
-                <Icon icon={ListPlus} /> Thêm tiến độ
-              </button>
-            </li>
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('thu')}>
-                <Icon icon={Wallet} /> Nhập thu
-              </button>
-            </li>
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('chi')}>
-                <Icon icon={Receipt} /> Nhập chi phí
-              </button>
-            </li>
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('attach')}>
-                <Icon icon={FilePlus} /> Thêm tài liệu
-              </button>
-            </li>
-            <li>
-              <button type="button" role="menuitem" onClick={() => onAction('edit')}>
-                <Icon icon={Pencil} /> Sửa thông tin
-              </button>
-            </li>
+            ) : (
+              <>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('task')}>
+                    <Icon icon={ListTodo} /> Thêm công việc
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('pin')}>
+                    <Icon icon={Pin} /> {item.isPinned ? 'Bỏ ghim' : 'Ghim lên đầu'}
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('progress')}>
+                    <Icon icon={ListPlus} /> Thêm tiến độ
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('thu')}>
+                    <Icon icon={Wallet} /> Nhập thu
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('chi')}>
+                    <Icon icon={Receipt} /> Nhập chi phí
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('attach')}>
+                    <Icon icon={FilePlus} /> Thêm tài liệu
+                  </button>
+                </li>
+                <li>
+                  <button type="button" role="menuitem" onClick={() => onAction('edit')}>
+                    <Icon icon={Pencil} /> Sửa thông tin
+                  </button>
+                </li>
+              </>
+            )}
           </ul>,
           document.body,
         )
