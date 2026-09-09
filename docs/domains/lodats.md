@@ -445,7 +445,7 @@ Học CRM cũ `LodatEditPage` (route `/lo-dat/:id/sua`) — **không** copy god-
 
 #### 12.4.1 Máy tính
 
-Layout: **2 cột** desktop — trái form (thông số / chủ & giá / lịch sử); phải **Hình ảnh + Xem nhanh** sticky top; **Huỷ/Lưu dưới form** (không sticky/fixed).
+Layout: **2 cột** desktop — trái form (thông số / chủ & giá / lịch sử); phải **Hình ảnh + Xem nhanh** sticky top; **Huỷ/Lưu dưới form** căn trái (không sticky/fixed).
 
 ```
 ← Chi tiết lô · H1 Sửa lô đất · badge
