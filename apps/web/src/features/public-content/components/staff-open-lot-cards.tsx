@@ -51,10 +51,16 @@ export function StaffOpenLotCards({
             const price = lotPriceDisplay(row);
             const hasNeedsWebUpdate = Boolean(row.needsWebUpdate);
             return (
-              <li key={row.lodatId} data-list-row-id={row.lodatId} className="pw-card-item">
+              <li
+                key={row.lodatId}
+                data-list-row-id={row.lodatId}
+                className={
+                  selectedId === row.lodatId ? 'pw-card-item is-selected' : 'pw-card-item'
+                }
+              >
                 <button
                   type="button"
-                  className={selectedId === row.lodatId ? 'pw-card is-selected' : 'pw-card'}
+                  className="pw-card"
                   onClick={() => handleClick(row.lodatId)}
                   onDoubleClick={() => onEdit(row.lodatId)}
                 >
