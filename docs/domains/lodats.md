@@ -209,10 +209,10 @@ Substring, không phân biệt hoa thường, **giữ dấu**.
 
 | Ô tìm | Tập lô |
 |-------|--------|
-| Không `@` + lọc **Mở bán** (mặc định) | Chỉ **Mở bán** |
-| Lọc **Tất cả trạng thái** | Mở bán **+** Tạm dừng **+** Không bán (`includePaused`) |
-| `@` | Mở bán **+** Tạm dừng **+** Không bán |
-| `@@` | **Chỉ** Tạm dừng |
+| Lọc **Tất cả trạng thái** (mặc định) | Mở bán **+** Dừng bán **+** Không bán (`includePaused`) |
+| Lọc **Mở bán** / **Dừng bán** / **Không bán** | Chỉ đúng một trạng thái |
+| `@` | Mở bán **+** Dừng bán **+** Không bán |
+| `@@` | **Chỉ** Dừng bán (`TAM_DUNG`) |
 
 Lọc cột Trạng thái = Tạm dừng / Không bán vẫn hiện đúng tập đó (không cần `@`).
 
@@ -275,8 +275,8 @@ Ba cột riêng: **Mở bán** · **Dừng bán** · **Không bán** (`DANG_BAN`
 | Tắt cột **Mở bán** đang `ON` | → **Dừng bán** (`TAM_DUNG`) |
 | Tắt cột **Dừng bán** đang `ON` | → **Mở bán** (`DANG_BAN`) |
 | Tắt cột **Không bán** đang `ON` | **Không đổi** — ra khỏi Không bán bằng cách bấm Mở bán hoặc Dừng bán |
-| Lọc cột | Icon lọc gắn cột **Mở bán** (cùng `STATUS_FILTER_OPTIONS`) |
-| Sau khi → Dừng bán / Không bán | Lô khỏi list mặc định (chỉ Mở bán); gõ `@` hoặc lọc cột để xem lại |
+| Lọc cột | Icon lọc gắn cột **Mở bán** (cùng `STATUS_FILTER_OPTIONS`; mặc định **Tất cả trạng thái**) |
+| Sau khi → Dừng bán / Không bán | Vẫn còn trên list mặc định (Tất cả); lọc cột Mở bán thì ẩn |
 
 Không phải đã bán / đặt cọc (thuộc GD). **Mobile thẻ:** badge trạng thái (không 3 cột).
 
@@ -527,7 +527,7 @@ Layout 2 cột như §12.4.1: trái form; phải Hình ảnh + Xem nhanh sticky;
 - **Trạng thái mặc định khi tạo = Không bán** (`KHONG_BAN`) — chưa rao; NV chọn Mở bán / Dừng bán trên form nếu cần. API `POST /lodats` nếu thiếu `status` cũng gán `KHONG_BAN`.
 - Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs. **Được thêm ảnh riêng thửa** (chat / dán / file) — không phải ảnh dự án trên sổ địa chỉ.
 - Lô **dân**: bắt buộc tiêu đề + địa chỉ REGULAR; specs như trang sửa; chip hướng/ghi chú giá/hoa hồng §12.4.3.
-- Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ lần lượt (mỗi file **nén client** trước; nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`. Nút Lưu hiện `Đang tải ảnh k/n…` khi đang gửi file. Lô mới **không** hiện list mặc định (chỉ Mở bán) cho đến khi NV bật Mở bán.
+- Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ lần lượt (mỗi file **nén client** trước; nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`. Nút Lưu hiện `Đang tải ảnh k/n…` khi đang gửi file. Lô mới (Không bán) **có** trên list mặc định (Tất cả trạng thái); lọc «Mở bán» thì chưa thấy cho đến khi NV bật Mở bán.
 - 1 luồng active / NV / lô kho — API chặn, picker cũng khoá («Bạn đang giữ»).
 
 #### 12.5.2 Mobile
