@@ -23,6 +23,7 @@ import {
   listWards,
   updateAddress,
 } from './api';
+import { AddressProjectImages } from './components/address-project-images';
 import './addresses.css';
 
 type KindFilter = '' | AddressKind;
@@ -162,10 +163,29 @@ export function AddressesManageDialog({ open, onClose }: Props) {
       if (editing) return updateAddress(editing.id, payload);
       return createAddress(payload);
     },
-    onSuccess: async () => {
-      setToast(editing ? 'Đã cập nhật địa chỉ.' : 'Đã thêm địa chỉ.');
-      resetForm();
+    onSuccess: async (res) => {
+      const item = res.item;
+      const wasCreate = !editing;
+      setToast(wasCreate ? 'Đã thêm địa chỉ.' : 'Đã cập nhật địa chỉ.');
+      setFormError(null);
       await qc.invalidateQueries({ queryKey: ['addresses'] });
+      if (item.kind === AddressKind.PROJECT) {
+        // Giữ form sửa để Admin thêm ảnh dự án ngay.
+        setEditing(item);
+        setForm({
+          kind: item.kind,
+          provinceId: item.provinceId,
+          districtId: item.districtId,
+          wardId: item.wardId,
+          detail: item.detail?.trim() || '',
+          description: item.description?.trim() || '',
+        });
+        if (wasCreate) {
+          setToast('Đã thêm dự án — có thể thêm ảnh bên dưới.');
+        }
+      } else {
+        resetForm();
+      }
     },
     onError: (err: unknown) => {
       setFormError(err instanceof Error ? err.message : 'Không lưu được địa chỉ.');
@@ -531,9 +551,16 @@ export function AddressesManageDialog({ open, onClose }: Props) {
             />
           </label>
 
-          {form.kind === AddressKind.PROJECT ? (
+          {form.kind === AddressKind.PROJECT && editing ? (
+            <AddressProjectImages
+              addressId={editing.id}
+              onFlash={setToast}
+              onError={(msg) => setAlertBox({ title: 'Ảnh dự án', message: msg })}
+            />
+          ) : null}
+          {form.kind === AddressKind.PROJECT && !editing ? (
             <p className="crm-form-hint">
-              Ảnh dự án: thêm sau khi lưu địa chỉ (gallery upload sẽ bổ sung).
+              Lưu dự án xong sẽ hiện khung thêm ảnh (kéo thả / chọn file).
             </p>
           ) : null}
 
