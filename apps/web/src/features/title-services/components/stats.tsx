@@ -16,7 +16,7 @@ export function TitleServiceStats({ count, totalThuVnd, totalChiVnd }: Props) {
       </article>
       <article className="sd-stat">
         <p className="sd-stat-label">Tổng thu</p>
-        <p className="sd-stat-value crm-money sd-stat-thu">
+        <p className="sd-stat-value sd-stat-thu">
           <span className="sd-stat-full">{formatStatMoneyVnd(totalThuVnd)}</span>
           <span className="sd-stat-short">{formatStatShortVnd(totalThuVnd)}</span>
         </p>
@@ -24,7 +24,7 @@ export function TitleServiceStats({ count, totalThuVnd, totalChiVnd }: Props) {
       </article>
       <article className="sd-stat">
         <p className="sd-stat-label">Tổng chi</p>
-        <p className="sd-stat-value crm-money sd-stat-chi">
+        <p className="sd-stat-value sd-stat-chi">
           <span className="sd-stat-full">{formatStatMoneyVnd(totalChiVnd)}</span>
           <span className="sd-stat-short">{formatStatShortVnd(totalChiVnd)}</span>
         </p>

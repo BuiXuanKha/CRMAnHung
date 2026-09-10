@@ -1,7 +1,13 @@
-/* Shared CRM money / price color — UI-GUIDELINES §4.5.2 */
+/* Shared CRM money / price color — UI-GUIDELINES §4.5.2
+ * Owner 2026-09-09: nâu #b45309 không đủ nổi → cam đậm #ea580c.
+ */
+
+:root {
+  --crm-money: #ea580c;
+}
 
 .crm-money {
-  color: #b45309;
-  font-weight: 600;
+  color: var(--crm-money);
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
 }

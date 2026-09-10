@@ -19,6 +19,7 @@ import {
 } from '@crmanhung/shared';
 import { AddressPicker } from '@/features/addresses/components/address-picker';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
+import '@/shared/ui/money.css';
 import {
   changeLodatOwner,
   deleteLodatImage,

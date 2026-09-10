@@ -130,7 +130,9 @@ export function CustomerCardList({
                       ) : null}
                     </span>
                   </div>
-                  {budget !== '—' ? <span className="kh-card-budget">{budget}</span> : null}
+                  {budget !== '—' ? (
+                    <span className="kh-card-budget crm-money">{budget}</span>
+                  ) : null}
                   {demand !== '—' ? <span className="kh-card-need">{demand}</span> : null}
                 </div>
                 <div className="kh-card-actions" onClick={(e) => e.stopPropagation()}>

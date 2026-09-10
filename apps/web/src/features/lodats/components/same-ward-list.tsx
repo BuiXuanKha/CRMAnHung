@@ -84,7 +84,7 @@ export function SameWardList({
                         {formatFrontageDir(p.frontageM, p.direction)}
                       </span>
                       <span className="ld-same-ward-meta">
-                        {formatPriceVnd(p.priceVnd)}
+                        <span className="crm-money">{formatPriceVnd(p.priceVnd)}</span>
                         {p.priceNote ? ` · ${p.priceNote}` : ''}
                       </span>
                     </span>

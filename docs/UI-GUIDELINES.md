@@ -475,7 +475,7 @@ Skill: `crm-data-table`. Tham chiếu triển khai: `/khach-hang` (`features/cus
 | Tên / primary cell | **600** | `#0f172a` |
 | Dòng phụ (vd. tên FB) | **0.78rem**, italic | `#64748b` |
 | Nhu cầu / mô tả | **0.82rem** | `#334155` |
-| Số tiền / tài chính | **0.82rem**, **600** | **`#b45309`** (money — một màu toàn CRM; class `crm-money`) |
+| Số tiền / tài chính | **0.82rem**, **700** | **`#ea580c`** (money — một màu toàn CRM; class `crm-money`; CSS var `--crm-money`) |
 | Link / kênh liên hệ | **0.78rem**, **600** | `#2563eb` (primary) |
 | Cột `#` | **700**, tabular | `#1e40af` |
 | Badge trạng thái | **0.72rem**, **600** | theo tone bên dưới |
@@ -644,6 +644,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-08-17 | **Chốt §4.5 bảng list dùng chung** + skill `crm-data-table` (hover, scroll, font, badge…) |
 | 2026-08-17 | **Chốt §4.6 Lucide**; hangtag 5 tone; **§4.7 CrmDialog** (alert/confirm/form/toast) |
 | 2026-08-17 | **Chốt màu số tiền CRM** `#b45309` (`crm-money`) — thống nhất mọi cột giá / tài chính |
+| 2026-09-09 | **Đổi màu số tiền CRM** `#b45309` → **`#ea580c`** (cam đậm, weight 700) — owner: nâu không đủ nhấn; class `crm-money` + `--crm-money` |
 | 2026-08-17 | **Chốt §4.5.5** icon lọc `ListFilter` trên tên cột dữ liệu; đồng bộ thanh lọc |
 | 2026-08-17 | **Chốt §4.3.5** cột list `/lo-dat` (ảnh, tiêu đề, DT·MT·hướng, giá, hangtag, menu thao tác) |
 | 2026-08-18 | Header: vạch phân cách CSS 1px (không ký tự `|`); ẩn caret soạn thảo trên chữ tĩnh |
