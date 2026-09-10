@@ -44,7 +44,7 @@ export const lodatListItemSchema = z.object({
   createdByEmployeeName: z.string().nullable().optional(),
   /**
    * Đã soạn bài web (`PublicLotListing.bodyHtml` không rỗng).
-   * Cột **Web** trên `/lo-dat` + `/dang-bai` — hangtag Đã soạn / Chưa soạn.
+   * Cột **Web** trên `/lo-dat` + `/lo-dat` — hangtag Đã soạn / Chưa soạn.
    */
   hasWebBody: z.boolean().default(false),
   /** CRM đổi sau lần lưu bài web — icon đỏ (tuỳ chọn hiển thị). */

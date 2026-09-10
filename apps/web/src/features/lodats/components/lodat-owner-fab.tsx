@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   AlertTriangle,
+  FilePenLine,
   Handshake,
   MessageCircle,
   MoreHorizontal,
@@ -29,18 +30,20 @@ type Props = {
   owner: LodatOwner | null;
   onTransaction: () => void;
   onEdit: () => void;
+  onComposeListing: () => void;
   onGptContent: () => void;
 };
 
 /**
  * FAB cụm phải dưới — mobile only (§12.3.2 lodats).
- * «⋯» → popover Giao dịch / Sửa lô đất / AI GPT (thay footer dính).
+ * «⋯» → popover Giao dịch / Sửa lô đất / Soạn bài đăng / AI GPT (thay footer dính).
  * Gọi: 1 số → tel thẳng; ≥2 số → modal chọn số. Zalo dùng số đầu.
  */
 export function LodatOwnerFab({
   owner,
   onTransaction,
   onEdit,
+  onComposeListing,
   onGptContent,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -104,6 +107,15 @@ export function LodatOwnerFab({
               >
                 <Icon icon={Pencil} size={16} />
                 Sửa lô đất
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="ld-owner-fab-menu-item"
+                onClick={() => { setMenuOpen(false); onComposeListing(); }}
+              >
+                <Icon icon={FilePenLine} size={16} />
+                Soạn bài đăng
               </button>
               <button
                 type="button"

@@ -198,7 +198,7 @@ export const publicWebLotRowSchema = z.object({
   /** HTML mô tả công khai (TipTap). Ảnh trong bài = URL CDN. */
   bodyHtml: z.string().optional(),
   /**
-   * CRM đã cập nhật thuộc tính sau lần NV lưu bài web — icon đỏ /dang-bai.
+   * CRM đã cập nhật thuộc tính sau lần NV lưu bài web — icon đỏ /lo-dat.
    * Không phải so khớp title/location (GPT đổi H1 không bật).
    */
   needsWebUpdate: z.boolean().optional().default(false),
@@ -206,7 +206,7 @@ export const publicWebLotRowSchema = z.object({
 
 export type PublicWebLotRow = z.infer<typeof publicWebLotRowSchema>;
 
-/** Lô CRM đang Mở bán — list giữa `/dang-bai` + preview phải. */
+/** Lô CRM đang Mở bán — list giữa `/lo-dat` + preview phải. */
 export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   staffName: z.string(),
   kind: z.nativeEnum(LodatKind),
@@ -214,7 +214,7 @@ export const publicWebStaffLotRowSchema = publicWebLotRowSchema.extend({
   frontageM: z.number().nullable(),
   direction: z.string().nullable(),
   excerpt: z.string(),
-  /** Giá CRM — lọc khoảng giá trên `/dang-bai`; không hiện cho khách */
+  /** Giá CRM — lọc khoảng giá trên `/lo-dat`; không hiện cho khách */
   priceVnd: z.union([z.number(), z.string()]).nullable(),
   /** Optional SERP/OG snippet. Empty → use excerpt. Overlay editor can set later. */
   metaDescription: z.string().trim().max(320).nullable().optional(),
@@ -551,7 +551,7 @@ export function suggestPublicPrice(priceVnd?: number | string | null): {
 }
 
 /**
- * Resolve public price for Đăng bài list/editor.
+ * Resolve public price for soạn bài trên /lo-dat list/editor.
  * - Staff đã Lưu AMOUNT → giữ nhãn đã lưu
  * - Staff đã soạn và chọn Liên hệ → Liên hệ
  * - Chưa soạn (body trống) + CRM có giá → gợi ý làm mờ

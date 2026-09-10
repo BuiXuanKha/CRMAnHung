@@ -391,7 +391,7 @@ model PublicLotListing {
   metaDescription String?
   /// Lần đăng web đầu tiên (giữ khi gỡ).
   publishedAt     DateTime?
-  /// CRM đã sửa thuộc tính sau lần NV lưu bài web — icon đỏ trên /dang-bai.
+  /// CRM đã sửa thuộc tính sau lần NV lưu bài web — icon đỏ trên /lo-dat.
   needsWebUpdate  Boolean  @default(false)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt

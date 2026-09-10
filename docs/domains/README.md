@@ -13,7 +13,7 @@
 | Title services | [title-services.md](./title-services.md) | Ready for API — copy script + ADMIN lọc NV + audit xem file |
 | Công việc (nhắc việc) | [tasks.md](./tasks.md) | Ready for API — bảng `/cong-viec` + FAB tạo + ghim + hoàn thành |
 | Users / admin registry | [users.md](./users.md) §11 mục 5 | P4 — CRUD NV, chưa làm |
-| Public content (web khách) | [public-content.md](./public-content.md) | Done — STAFF `/dang-bai`; bài CMS ADMIN |
+| Public content (web khách) | [public-content.md](./public-content.md) | Done — STAFF soạn listing trên `/lo-dat`; bài CMS ADMIN |
 
 Trước khi code UI/API: domain doc phải ở trạng thái **Ready for mock** trở lên.
 

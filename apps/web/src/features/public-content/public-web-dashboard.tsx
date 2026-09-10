@@ -19,7 +19,7 @@ import { useFlash } from './use-flash';
 import './public-web-dashboard.css';
 import '@/shared/ui/money.css';
 
-/** Admin `/dashboard` Tổng quan — bài CMS only. Lô đăng web = STAFF `/dang-bai`. */
+/** Admin `/dashboard` Tổng quan — bài CMS only. Nhân viên soạn bài đăng lô trên `/lo-dat`. */
 export function PublicWebDashboard() {
   const qc = useQueryClient();
   const { toast, flash } = useFlash();
@@ -82,7 +82,7 @@ export function PublicWebDashboard() {
       <header className="pw-head">
         <div>
           <h1>Dashboard</h1>
-          <p>Quản lý bài viết trên anhungland.com. Lô đăng web do nhân viên soạn ở Đăng bài.</p>
+          <p>Quản lý bài viết trên anhungland.com. Nhân viên soạn bài đăng lô trên Quản lý lô đất.</p>
         </div>
         <div className="pw-head-actions">
           <Link href="/" className="crm-btn" target="_blank" rel="noreferrer">

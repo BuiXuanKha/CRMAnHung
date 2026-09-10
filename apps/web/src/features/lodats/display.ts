@@ -64,7 +64,7 @@ export function hasSpecs(p: LodatListItem): boolean {
 export type ExtraFilters = {
   photo: 'all' | 'has' | 'empty';
   address: 'all' | 'has' | 'empty';
-  /** Web — bodyHtml không rỗng (Đã soạn / Chưa soạn, cùng `/dang-bai`) */
+  /** Web — bodyHtml không rỗng (Đã soạn / Chưa soạn) */
   webBody: 'all' | 'has' | 'empty';
   /** Khoảng diện tích (m²) — cột DT · MT · Hướng */
   area: AreaBracket;
@@ -88,7 +88,7 @@ export const ADDRESS_FILTER_OPTIONS = [
   { value: 'empty', label: 'Chưa có địa chỉ' },
 ];
 
-/** Lọc cột Web — đã soạn bodyHtml / chưa (cùng `/dang-bai`). */
+/** Lọc cột Web — đã soạn bodyHtml / chưa. */
 export const WEB_BODY_FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả web' },
   { value: 'has', label: 'Đã soạn' },

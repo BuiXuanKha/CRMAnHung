@@ -34,6 +34,7 @@ import { LodatCardList } from './components/lodat-card-list';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTable } from './components/lodat-table';
 import { lodatListItemToGptLot } from './lodat-to-gpt-lot';
+import { formatNeedsWebUpdateMessage, sortByNeedsWebUpdate } from './web-listing-drift';
 import {
   DEFAULT_STATUS_COL_FILTERS,
   countMobileLodatFilters,
@@ -212,7 +213,7 @@ export function LodatListPage() {
     }
   }, [galleryLodatId, galleryQ.isLoading, galleryQ.isError, galleryImages.length]);
 
-  const items = rawItems;
+  const items = useMemo(() => sortByNeedsWebUpdate(rawItems), [rawItems]);
   const mobileFilterCount = countMobileLodatFilters(statusCols, priceBracket);
   const filterKey = [
     keyword,
@@ -386,6 +387,23 @@ export function LodatListPage() {
     };
   }, []);
 
+  function openComposeListing(plot: LodatListItem) {
+    if (user?.role === UserRole.ADMIN) {
+      setAlertBox({
+        title: 'Chỉ nhân viên',
+        message:
+          'Soạn bài đăng web cho lô chỉ dành cho tài khoản nhân viên (STAFF). Admin quản bài CMS trên Dashboard.',
+      });
+      return;
+    }
+    setSelectedId(plot.id);
+    setMenuId(null);
+    setEditorGptPrefill(null);
+    setEditorGptApplyId(0);
+    setEditorError(null);
+    setEditorLot(lodatListItemToGptLot(plot));
+  }
+
   function handleAction(id: string, action: LodatAction) {
     setMenuId(null);
     setSelectedId(id);
@@ -412,6 +430,11 @@ export function LodatListPage() {
         return;
       }
       router.push(createTransactionHref(id));
+      return;
+    }
+    if (action === 'compose') {
+      const plot = rawItems.find((p) => p.id === id);
+      if (plot) openComposeListing(plot);
       return;
     }
     router.push(`/lo-dat/${id}/sua`);
@@ -507,6 +530,7 @@ export function LodatListPage() {
                 onAction={(p, a) => handleAction(p.id, a)}
                 onSetSaleStatus={handleSetSaleStatus}
                 onOpenGallery={openGallery}
+                onComposeListing={(plot) => openComposeListing(plot)}
                 onGptContent={(plot) => {
                   if (user?.role === UserRole.ADMIN) {
                     setAlertBox({
@@ -524,7 +548,9 @@ export function LodatListPage() {
                   setAlertBox({
                     title: 'Lô CRM đã cập nhật',
                     message:
-                      `«${plot.title}» đã đổi trên CRM sau lần lưu bài web. Mở Đăng bài để cập nhật lại nội dung công khai.`,
+                      `«${plot.title}» đã đổi trên CRM sau lần lưu bài web.
+
+${formatNeedsWebUpdateMessage()}`,
                   });
                 }}
                 scrollRef={tableScrollRef}

@@ -3,7 +3,7 @@ type Props = {
   draftPostCount: number;
 };
 
-/** Admin Tổng quan — chỉ số bài CMS (lô đăng web thuộc `/dang-bai` của NV). */
+/** Admin Tổng quan — chỉ số bài CMS (lô đăng web thuộc `/lo-dat` của NV). */
 export function DashboardStats({ publishedPostCount, draftPostCount }: Props) {
   return (
     <section className="pw-stats" aria-label="Tổng quan bài viết">

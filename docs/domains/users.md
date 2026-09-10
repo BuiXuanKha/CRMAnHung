@@ -55,7 +55,7 @@ Copy data: **User trước** (`employeeId` bắt buộc). Hotline nguồn có th
 | Màn | Route | Việc |
 |-----|-------|------|
 | Login | `/login` | Form đăng nhập |
-| CRM | sau login | ADMIN → `/dashboard` (trang đầu); STAFF → `/khach-hang` (header **Đăng bài** → `/dang-bai`) |
+| CRM | sau login | ADMIN → `/dashboard` (trang đầu); STAFF → `/khach-hang` (soạn bài đăng lô trên `/lo-dat`) |
 | Quản lý NV | `/quan-tri/nguoi-dung` | ADMIN — bảng NV; thêm / sửa / vô hiệu hóa / reset MK |
 
 ### 6.1 Giao diện máy tính — `/login`

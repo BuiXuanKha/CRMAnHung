@@ -1,7 +1,7 @@
 # Domain: Nội dung web công khai (Khách / đăng web)
 
 - **Slug:** `public-content`
-- **Status:** Done — STAFF **soạn/cập nhật** bài lô của mình trên `/dang-bai`. ADMIN **không** vào trang lô / không sửa listing lô. ADMIN: Tổng quan + bài CMS + thống kê. Bốn trang CRM không thêm công tắc Đăng web.
+- **Status:** Done — STAFF **soạn/cập nhật** bài lô của mình trên `/lo-dat` (cột Web, GPT, Soạn bài đăng). ADMIN **không** soạn listing lô. ADMIN: Tổng quan + bài CMS + thống kê. Bốn trang CRM không thêm công tắc Đăng web.
 - **Owner:** An Hưng Land
 - **IA khách:** [`PUBLIC-WEB.md`](../PUBLIC-WEB.md) · SEO: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md)
 - **Lô nguồn:** [`lodats.md`](./lodats.md) — tạo lô / gắn chủ → **một** `PublicLotListing` + slug (sống mãi)
@@ -13,7 +13,7 @@ Hệ cũ **không** có CMS web công khai. Đây là bề mặt mới.
 
 **Chốt owner 2026-09-10:** `KHONG_BAN` / **Không bán** (có chủ, chưa nhu cầu bán) — **không** hiện trang chủ, catalog, hub, sitemap, hay slug khách.
 
-**Chốt owner 2026-09-09:** icon đỏ trên `/dang-bai` = lô CRM **đã cập nhật** trong khi đã có bài đăng web (`isPublished`) → NV cần vào Soạn bài và **Lưu** lại. **Không** so khớp tiêu đề/địa chỉ CRM ↔ overlay (GPT đổi H1 không ra đỏ).
+**Chốt owner 2026-09-09:** icon đỏ trên `/lo-dat` = lô CRM **đã cập nhật** trong khi đã có bài đăng web (`isPublished`) → NV cần vào Soạn bài và **Lưu** lại. **Không** so khớp tiêu đề/địa chỉ CRM ↔ overlay (GPT đổi H1 không ra đỏ).
 
 ---
 
@@ -24,7 +24,7 @@ Hai chế độ trên cùng domain `anhungland.com`:
 | Chế độ | Ai | Thấy |
 |--------|----|------|
 | **Khách** | Chưa login | Tin tức, bài CMS, lô đã có listing **trừ `KHONG_BAN`** (hangtag tình trạng) |
-| **NV soạn lô** | STAFF đã login CRM | Soạn / cập nhật copy public **lô mình tạo** (`/dang-bai`) |
+| **NV soạn lô** | STAFF đã login CRM | Soạn / cập nhật copy public **lô mình tạo** (`/lo-dat`) |
 | **Admin đăng web** | ADMIN đã login CRM | Soạn **bài CMS** rồi public / gỡ; xem tổng quan. **Không** đăng/sửa/tạo lô |
 
 Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên khách, SĐT, NV, hoa hồng, GD, chăm sóc).
@@ -37,7 +37,7 @@ Khách không cần tài khoản. Không lộ dữ liệu CRM nội bộ (tên k
 |-------|------|--------|
 | Khách (chưa login) | Đọc bài CMS + lô có listing; share URL | Sửa overlay, vào CRM |
 | STAFF | CRM của mình + soạn / **cập nhật** listing **lô `createdByEmployeeId` = mình** | Bài CMS (`/dashboard/bai-viet`); lô NV khác; Tổng quan dashboard |
-| ADMIN | Bài CMS + thống kê + Tổng quan bài | Soạn / tạo / đăng listing lô (thuộc NV trên `/dang-bai`) |
+| ADMIN | Bài CMS + thống kê + Tổng quan bài | Soạn / tạo / đăng listing lô (thuộc NV trên `/lo-dat`) |
 
 Chốt (2026-09-06): lô không của Admin — STAFF tự soạn lô của mình. Bài viết CMS vẫn **chỉ ADMIN**. Trang khách vẫn thương hiệu công ty — không lộ PII / hoa hồng / tên NV.
 
@@ -61,7 +61,7 @@ Ba loại nội dung khách thấy:
 | Sửa tiêu đề / địa chỉ / ảnh lô | Đồng bộ overlay (title/location/ảnh); **không** đổi slug |
 | Đổi Mở bán / Tạm dừng / Đã cọc / Đã bán | Nhãn góc ảnh trên trang khách + catalog/sitemap **vẫn giữ** URL |
 | Đổi sang **Không bán** (`KHONG_BAN`) | **Ẩn** khỏi trang chủ / catalog / hub / sitemap; slug khách **404** (listing CRM vẫn còn) |
-| Soạn trên `/dang-bai` | Cập nhật copy public (giá làm mờ, mô tả…) — không công tắc «Đăng / Chờ đăng» |
+| Soạn trên `/lo-dat` | Cập nhật copy public (giá làm mờ, mô tả…) — không công tắc «Đăng / Chờ đăng» |
 
 Catalog + hub + sitemap: listing còn tồn tại với `saleStatus` ≠ `KHONG_BAN`. Chi tiết + slug không gỡ khi hết Mở bán (trừ khi **Không bán**).
 
@@ -90,7 +90,7 @@ Không bao giờ hiện: tên khách, SĐT khách, tên NV, hoa hồng, ghi chú
 1. **Khách vào /** — hero brand + **ô tìm bài đăng** + lô trên catalog + teaser tin/bài. Không login.
 2. **Khách xem lô** — `/mua-ban-nha-dat-huyen-nam-sach` và `/…/[slug]` (mọi trạng thái **trừ Không bán**; hangtag); share OG.
 3. **Khách đọc bài** — list + chi tiết theo chuyên mục.
-4. **NV soạn lô** — list `/dang-bai`: một lần bấm = preview; double-click = modal **Soạn / cập nhật bài** → Lưu. STAFF chỉ thấy lô mình tạo. ADMIN không vào trang này.
+4. **NV soạn lô** — trên `/lo-dat`: double-click hàng hoặc menu **Soạn bài đăng** (hoặc GPT → Dùng cho bài đăng) mở modal soạn → Lưu. STAFF chỉ soạn lô mình tạo. ADMIN không soạn listing lô.
 5. **Gỡ slug / Gỡ Đăng web** — **không** (slug + bài tồn tại mãi khi lô còn).
 6. **Admin soạn bài** — nháp → Xuất bản / Gỡ về nháp. Chỉ ADMIN.
 7. **Lô đổi trạng thái CRM** — hangtag + catalog/sitemap cập nhật; **Không bán** → ẩn khỏi khách (404 slug).
@@ -117,16 +117,16 @@ PublicPost                     (category, slug, status, cover, body) — không 
 | Màn | Route | Việc |
 |-----|--------|------|
 | **Dashboard** | `/dashboard` | Tổng quan + menu trái. **ADMIN.** §12 |
-| **Đăng bài** | `/dang-bai` | List lô đăng web — trang CRM **như** `/khach-hang` (AppShell + login). Menu header **STAFF**. Soạn/đăng API chỉ STAFF (lô mình). §13 |
+| **Quản lý lô đất** | `/lo-dat` | List lô CRM + soạn bài đăng web (cột Web, GPT, Soạn bài đăng). AppShell + login. API soạn listing chỉ STAFF (lô mình). §13 |
 | **Bài viết** | `/dashboard/bai-viet` | List bài (dự án, kiến thức, liên hệ, chính sách…). **ADMIN.** §14 |
 | **Thống kê** | `/dashboard/thong-ke` | List NV + số lô đã share + lượt xem (cookie NV và **Truy cập trực tiếp**). **ADMIN.** §20 |
 | Trang chủ khách | `/` | Ô tìm bài đăng (trên «Sản phẩm dành cho bạn») → catalog `?q=` · lô đã Đăng web · **Dự án nổi bật** = bài `PUBLISHED` `/du-an` (tối đa 3) |
 
 **Không** thêm công tắc Đăng web trên `/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`.
 
-Menu **trong** Dashboard: **chỉ ADMIN** = Tổng quan (bài CMS) · Bài viết · Thống kê. **Không** còn «Lô trên web» / đăng web lô trên Dashboard — việc đó thuộc `/dang-bai`. STAFF vào `/dashboard*` → `/khach-hang`.
+Menu **trong** Dashboard: **chỉ ADMIN** = Tổng quan (bài CMS) · Bài viết · Thống kê. **Không** còn «Lô trên web» / đăng web lô trên Dashboard — việc đó thuộc `/lo-dat`. STAFF vào `/dashboard*` → `/khach-hang`.
 
-Header CRM: bốn mục chung. STAFF thêm **Đăng bài** → `/dang-bai` (cùng kiểu trang CRM với khách/sổ đỏ). ADMIN thêm **Dashboard** (không mục Đăng bài).
+Header CRM: bốn mục chung (gồm **Quản lý lô đất** → `/lo-dat`). ADMIN thêm **Dashboard**. Không có mục menu riêng cho soạn bài lô.
 
 **Sau login thành công:** ADMIN vào **`/dashboard` trước** (trang đầu). STAFF vào `/khach-hang`. Logo CRM (góc trái) của admin cũng về `/dashboard`.
 
@@ -175,9 +175,9 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 ---
 
-## 11. Luật dashboard / Đăng bài (chốt 2026-09-08)
+## 11. Luật dashboard / soạn bài lô (chốt 2026-09-08)
 
-1. STAFF vào `/dang-bai` qua header **Đăng bài** — trang CRM peer (AppShell), **không** nằm dưới `/dashboard`. Đăng nhập / cookie role giống `/khach-hang`. STAFF lỡ vào `/dashboard*` → `/khach-hang`. Admin **không** quản lô đăng web trên Dashboard (đã bỏ «Lô trên web»). Bốn trang CRM **không** thêm công tắc Đăng web.
+1. STAFF soạn bài đăng lô trên `/lo-dat` (cùng list Quản lý lô đất) — AppShell, **không** nằm dưới `/dashboard`. Đăng nhập / cookie role giống `/khach-hang`. STAFF lỡ vào `/dashboard*` → `/khach-hang`. Admin **không** soạn listing lô. Bốn trang CRM **không** thêm công tắc Đăng web.
 2. Lô lên web = công tắc tường minh **STAFF lô mình** — không auto theo Mở bán hay giao dịch. Admin không đăng/sửa/tạo listing.
 3. Tắt Mở bán / tạo GD **không** tự tắt Đăng web. **Không** còn Gỡ Đăng web — listing đã đăng giữ `isPublished`; khách chỉ thấy khi Đăng web ∩ đang Mở bán.
 4. Giá từng lô: hiện số **đã làm mờ** (không đúng số CRM) hoặc **Liên hệ**.
@@ -192,7 +192,7 @@ Không có bảng CMS cũ. Listing/post = dữ liệu **mới**. Lô nguồn = `
 
 Thứ tự: **12.1 máy tính** → **12.2 mobile**. Không trộn PC/mobile trong một mục.
 
-Không H1 lặp tên menu trên thanh tìm. H1 trên Tổng quan, Bài viết, Thống kê; **`/dang-bai` không H1** (tên đã có trên header CRM **Đăng bài**).
+Không H1 lặp tên menu trên thanh tìm. H1 trên Tổng quan, Bài viết, Thống kê; **`/lo-dat` không H1** (tên đã có trên header **Quản lý lô đất**).
 
 ### 12.0 Menu trong Dashboard (mọi màn `/dashboard/*`)
 
@@ -204,7 +204,7 @@ ADMIN — 3 mục:
 2. **Bài viết** → `/dashboard/bai-viet`
 3. **Thống kê** → `/dashboard/thong-ke`
 
-STAFF **không** có menu trái Dashboard — soạn lô trên header **Đăng bài** → `/dang-bai`.
+STAFF **không** có menu trái Dashboard — soạn bài đăng lô trên `/lo-dat`.
 
 **Mobile:** cùng mục ADMIN, cuộn ngang trên đầu nội dung.
 
@@ -214,7 +214,7 @@ STAFF **không** có menu trái Dashboard — soạn lô trên header **Đăng b
 
 ```
 ┌ Dashboard              [Xem trang khách] [Soạn bài] ┐
-│ Dòng phụ: bài CMS trên anhungland.com; lô = NV Đăng bài   │
+│ Dòng phụ: bài CMS trên anhungland.com; lô = NV soạn trên /lo-dat │
 ├ 2 thẻ đếm (Bài đã đăng · Bài nháp)                         │
 ├ Một cột: bảng Bài viết gần đây  (§4.5)                     │
 └ Không «Lô trên web» — không rail phải                      │
@@ -223,7 +223,7 @@ STAFF **không** có menu trái Dashboard — soạn lô trên header **Đăng b
 #### 12.1.1 Thanh đầu trang
 
 1. **H1** `Dashboard`
-2. Dòng phụ: `Quản lý bài viết trên anhungland.com. Lô đăng web do nhân viên soạn ở Đăng bài.`
+2. Dòng phụ: `Quản lý bài viết trên anhungland.com. Lô đăng web do nhân viên soạn trên Quản lý lô đất.`
 3. **Xem trang khách** — viền; mở `/` tab mới
 4. **Soạn bài** — primary → dialog tiêu đề + chuyên mục → Lưu nháp / Xuất bản
 
@@ -295,9 +295,9 @@ Footer đếm dưới list bài.
 
 ---
 
-## 13. List `/dang-bai` (Đăng bài — STAFF)
+## 13. Soạn bài đăng trên `/lo-dat` (STAFF)
 
-Nguồn list = **cùng lô CRM đang Mở bán** trên `/lo-dat` (**STAFF = lô mình tạo**). Overlay đăng web (slug, copy, `isPublished`) từ API. Một lần bấm hàng → preview phải. Double-click → modal **Soạn bài đăng**. **Đăng web** từ preview (lô chờ đăng) hoặc từ modal (lưu copy rồi `CrmConfirm`). **ADMIN không vào trang này.**
+Soạn trên list/chi tiết `/lo-dat` (**STAFF = lô mình tạo**). Overlay đăng web (slug, copy, `hasWebBody` / `needsWebUpdate`) từ API. Double-click hàng hoặc **Soạn bài đăng** / GPT mở modal soạn. Lô cần cập nhật (`needsWebUpdate`) xếp đầu list. **ADMIN không soạn listing lô.**
 
 Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồng, ghi chú nội bộ / thương lượng chủ nhà. Giá cột + preview = giá **công khai** (đã làm mờ), không đúng số CRM. Lô **Chưa soạn**: nếu CRM có giá → gợi ý làm mờ (`3 tỷ xxx` / `9xx triệu`); CRM không giá / = 0 → **Liên hệ**. NV đã Lưu Soạn với Liên hệ hoặc nhãn giá tay thì giữ bản đã lưu.
 
@@ -554,7 +554,7 @@ Chi tiết kỹ thuật: [`PUBLIC-SEO.md`](../PUBLIC-SEO.md) §7. Overlay soạn
 - [x] Prisma: `bodyHtml`, `publishedAt` trên `PublicLotListing`
 - [x] Contract: draft = `bodyHtml`; guest catalog trả `bodyHtml`; `listingBodyToExcerpt`
 - [x] Nest draft/published lưu + guest `GET /public/listings/:slug` trả body
-- [x] Admin `/dang-bai` TipTap + nối API (PR TipTap modal)
+- [x] Admin `/lo-dat` TipTap + nối API (PR TipTap modal)
 
 ### 16.3 Phase 3 — Lô: guest ISR + revalidate
 

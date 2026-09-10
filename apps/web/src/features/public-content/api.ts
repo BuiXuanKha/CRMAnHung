@@ -1,7 +1,5 @@
 import {
-  LODAT_LIST_MAX_PAGE_SIZE,
   createPublicPostInputSchema,
-  setPublicLotPublishedSchema,
   setPublicPostStatusSchema,
   updatePublicListingDraftSchema,
   type CreatePublicPostInput,
@@ -15,29 +13,18 @@ import {
   type PublicWebDashboard,
   type PublicWebLotRow,
   type PublicWebPostRow,
-  type PublicWebStaffLotRow,
   type LotGptGenerateResponse,
   type LotGptRequestPayload,
   type PostGptGenerateResponse,
   type PostGptRequestPayload,
-  type SetPublicLotPublishedInput,
   type SetPublicPostStatusInput,
   type UpdatePublicListingDraftInput,
 } from '@crmanhung/shared';
 import { ApiError, apiFetch } from '@/shared/api/client';
-import { listLodats } from '@/features/lodats/api';
 import { isNextProductionBuild } from '@/features/public/next-production-build';
 import { catalogToGuestLot, type PublicGuestLot } from './guest-listing';
-import { buildPublicWebDashboard, buildStaffOpenLots } from './staff-lots';
+import { buildPublicWebDashboard } from './public-web-dashboard-data';
 
-async function loadStaffPlots() {
-  // Always-on listing: mọi trạng thái bán (chủ gắn) — hangtag trên khách.
-  const res = await listLodats({
-    includePaused: true,
-    limit: LODAT_LIST_MAX_PAGE_SIZE,
-  });
-  return res.items;
-}
 
 export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
   return apiFetch<PublicWebLotRow[]>('/admin/public-web/lots');
@@ -46,12 +33,9 @@ export async function listPublicWebLots(): Promise<PublicWebLotRow[]> {
 export async function getPublicWebDashboard(): Promise<PublicWebDashboard> {
   // Admin Tổng quan = bài CMS. Lô đăng web không còn trên Dashboard.
   const posts = await listPublicWebPosts();
-  return buildPublicWebDashboard([], posts, []);
+  return buildPublicWebDashboard([], posts);
 }
 
-export async function listStaffOpenLots(): Promise<PublicWebStaffLotRow[]> {
-  return buildStaffOpenLots(await loadStaffPlots(), await listPublicWebLots());
-}
 
 /** Guest catalog — GET /public/listings (no JWT). */
 export async function listPublishedCatalog(): Promise<PublicCatalogListing[]> {
@@ -175,19 +159,6 @@ export async function listPublicWebPosts(): Promise<PublicWebPostRow[]> {
   return apiFetch<PublicWebPostRow[]>('/admin/public-web/posts');
 }
 
-export async function setPublicLotPublished(
-  id: string,
-  input: SetPublicLotPublishedInput,
-): Promise<PublicWebLotRow> {
-  const parsed = setPublicLotPublishedSchema.safeParse(input);
-  if (!parsed.success) {
-    throw new Error(parsed.error.issues[0]?.message ?? 'Không đổi được trạng thái lô.');
-  }
-  return apiFetch<PublicWebLotRow>(`/admin/public-web/lots/${encodeURIComponent(id)}/published`, {
-    method: 'PATCH',
-    body: JSON.stringify(parsed.data),
-  });
-}
 
 export async function updatePublicListingDraft(
   id: string,

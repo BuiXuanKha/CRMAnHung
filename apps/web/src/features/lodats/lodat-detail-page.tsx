@@ -37,6 +37,7 @@ import {
 } from './detail-scroll-state';
 import { createTransactionHref } from './transaction-href';
 import { lodatListItemToGptLot } from './lodat-to-gpt-lot';
+import { formatNeedsWebUpdateMessage } from './web-listing-drift';
 import {
   formatArea,
   formatFrontageDir,
@@ -247,6 +248,21 @@ export function LodatDetailPage() {
     }
   }
 
+  function openComposeListing() {
+    if (!detail) return;
+    if (user?.role === UserRole.ADMIN) {
+      showAlert(
+        'Soạn bài đăng web cho lô chỉ dành cho tài khoản nhân viên (STAFF). Admin quản bài CMS trên Dashboard.',
+        'Chỉ nhân viên',
+      );
+      return;
+    }
+    setEditorGptPrefill(null);
+    setEditorGptApplyId(0);
+    setEditorError(null);
+    setEditorLot(lodatListItemToGptLot(detail));
+  }
+
   function openGptContent() {
     if (!detail) return;
     if (user?.role === UserRole.ADMIN) {
@@ -360,7 +376,7 @@ export function LodatDetailPage() {
                         aria-label="Lô CRM đã cập nhật, cần cập nhật bài đăng web"
                         onClick={() =>
                           showAlert(
-                            `«${detail.title}» đã đổi trên CRM sau lần lưu bài web. Dùng AI GPT hoặc Đăng bài để cập nhật lại nội dung công khai.`,
+                            `«${detail.title}» đã đổi trên CRM sau lần lưu bài web.\n\n${formatNeedsWebUpdateMessage()}`,
                             'Lô CRM đã cập nhật',
                           )
                         }
@@ -577,6 +593,24 @@ export function LodatDetailPage() {
                 <SquarePen size={14} aria-hidden />
                 Sửa lô đất
               </button>
+              {!isAdmin ? (
+                <>
+                  <button
+                    type="button"
+                    className="ld-detail-action-btn secondary"
+                    onClick={openComposeListing}
+                  >
+                    Soạn bài đăng
+                  </button>
+                  <button
+                    type="button"
+                    className="ld-detail-action-btn secondary"
+                    onClick={openGptContent}
+                  >
+                    AI GPT
+                  </button>
+                </>
+              ) : null}
             </div>
           </div>
 
@@ -601,6 +635,7 @@ export function LodatDetailPage() {
           owner={owner}
           onTransaction={goTransaction}
           onEdit={() => router.push(`/lo-dat/${detail.id}/sua`)}
+          onComposeListing={openComposeListing}
           onGptContent={openGptContent}
         />
       ) : null}

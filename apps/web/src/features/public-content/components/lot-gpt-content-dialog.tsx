@@ -14,7 +14,7 @@ import { formatLotGptRequestJson } from '../lot-gpt-context';
 import { lotGptToEditorPrefill, parseLotGptContentResult } from '../lot-gpt-apply';
 import type { LotGptEditorPrefill } from '../lot-gpt-apply';
 import '@/shared/ui/dialog.css';
-/** GPT modal styles (`crm-dialog--gpt`, `pw-gpt-*`) — needed when opened outside `/dang-bai`. */
+/** GPT modal styles (`crm-dialog--gpt`, `pw-gpt-*`) — shared GPT modal styles for CRM lot compose. */
 import '../public-web-dashboard.css';
 
 type Props = {
