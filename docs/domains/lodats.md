@@ -275,7 +275,7 @@ Hangtag: **Đã đăng** (`hasWebBody` — `PublicLotListing.bodyHtml` không r�
 
 ##### 5c. AI GPT
 
-Nút **GPT** (`Sparkles`) → modal tạo content (cùng `LotGptContentDialog` `/dang-bai`). Không lọc cột. Áp dụng bài → mở `/dang-bai` để soạn/lưu.
+Nút **GPT** (`Sparkles`) → modal tạo content (cùng `LotGptContentDialog` `/dang-bai`). Không lọc cột. **Dùng cho bài đăng** → mở `LotListingEditorDialog` (Soạn bài đăng) trên `/lo-dat` với nội dung GPT — cùng hành vi `/dang-bai` (không redirect mất phản hồi). API `POST …/lots/gpt-content` chỉ **STAFF** (ADMIN 403).
 
 ##### 6. Trạng thái — 3 cột công tắc (desktop)
 
