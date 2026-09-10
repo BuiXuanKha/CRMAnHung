@@ -128,14 +128,14 @@ export const KIND_FILTER_OPTIONS = [
 /** Sentinel lọc «Tất cả» = Mở bán + Tạm dừng + Không bán (`includePaused`). */
 export const STATUS_FILTER_ALL = 'all';
 
-/** Mặc định list: chỉ Mở bán (ý owner — tập trung lô đang bán). */
-export const STATUS_FILTER_DEFAULT = LodatSaleStatus.DANG_BAN;
+/** Mặc định list: hiện hết Mở bán / Dừng bán / Không bán. */
+export const STATUS_FILTER_DEFAULT = STATUS_FILTER_ALL;
 
 export const STATUS_FILTER_OPTIONS = [
+  { value: STATUS_FILTER_ALL, label: 'Tất cả trạng thái' },
   { value: LodatSaleStatus.DANG_BAN, label: 'Mở bán' },
   { value: LodatSaleStatus.TAM_DUNG, label: 'Dừng bán' },
   { value: LodatSaleStatus.KHONG_BAN, label: 'Không bán' },
-  { value: STATUS_FILTER_ALL, label: 'Tất cả trạng thái' },
 ];
 
 export function listingSaleStatusLabel(status: string): string {
@@ -191,7 +191,7 @@ export function countActiveLodatFilters(
   priceBracket: PriceBracket = '',
 ): number {
   let n = 0;
-  // Mặc định Mở bán không tính là «đang lọc»; Tất cả / Tạm dừng thì có.
+  // Mặc định «Tất cả» không tính là «đang lọc»; chọn 1 trạng thái thì có.
   if (status && status !== STATUS_FILTER_DEFAULT) n += 1;
   if (kind) n += 1;
   if (extra.photo !== 'all') n += 1;

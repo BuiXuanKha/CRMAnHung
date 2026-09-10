@@ -10,7 +10,8 @@ import {
   type PriceBracket,
 } from './display';
 
-export const LODAT_LIST_STATE_KEY = 'crmanhung:lodat-list-state';
+/** v2: mặc định lọc trạng thái = Tất cả (không chỉ Mở bán). */
+export const LODAT_LIST_STATE_KEY = 'crmanhung:lodat-list-state:v2';
 
 export type LodatListFields = {
   searchKeyword: string;

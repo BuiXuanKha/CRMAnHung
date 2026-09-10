@@ -55,10 +55,11 @@
 }
 
 .ld-col-head.is-status-triad {
-  justify-content: center;
-  gap: 4px;
-  padding-left: 6px;
-  padding-right: 6px;
+  justify-content: flex-start;
+  flex-wrap: nowrap;
+  gap: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
 }
 
 .ld-col-head.is-status-triad > span {
