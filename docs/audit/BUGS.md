@@ -25,12 +25,12 @@ Khi cần xác minh chức năng thực tế trên UI:
 
 | Trường | Giá trị |
 |--------|---------|
-| ID tiếp theo | `BUG-084` |
-| Tổng bug đã ghi | 83 |
-| OPEN | 13 |
+| ID tiếp theo | `BUG-089` |
+| Tổng bug đã ghi | 88 |
+| OPEN | 18 |
 | NEEDS VERIFICATION | 0 |
 | FIXED / CLOSED | 70 |
-| Lần audit gần nhất | 2026-09-08 — Owner đóng hẳn BUG-041 và BUG-043 (won't fix); không sửa code |
+| Lần audit gần nhất | 2026-09-09 — Rà màu giá / ghi chú giá / hoa hồng (source); mở rộng BUG-086 + BUG-087…088; không sửa code |
 
 ## Cách ghi một bug
 
@@ -169,6 +169,8 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-08 | customers / messenger | BUG-041 CLOSED | Owner: **bỏ hẳn luôn** — không sửa `sortOrder` / `sentAt`. Chat CRM chỉ tham khảo. |
 | 2026-09-08 | customers / messenger | BUG-043 CLOSED | Owner: **thôi bỏ qua** — không cấm gửi `orphan::`, không unique `(facebook, mid)`. API BUG-044 vẫn bỏ tin không mã. |
 | 2026-09-08 | customers / web | chăm sóc list scroll | Máy tính: Lưu chăm sóc cập nhật dòng tại chỗ, giữ chỗ cuộn (không refetch `updatedAt` kéo khách lên đầu). |
+| 2026-09-09 | UI FAB / SĐT / tiền | BUG-084 … BUG-086 | Rà source mọi FAB + mọi ô `type=tel` + mọi ô giá/tiền. **SĐT:** 5 form đều `phoneDigitsFromChange` + `handlePhonePaste` — chuẩn. **FAB:** 2 nút `Plus` (khách/công việc) + Gọi/`Phone` + Messenger/`MessageCircle` đủ; Zalo chữ (cố ý). Lệch: menu «⋯» chi tiết lô **không** icon Lucide. **Tiền:** lô/GD format chấm nghìn; sổ đỏ Thu/Chi/Sửa giá **không** format. Thẻ mobile khách ngân sách màu xanh (không `crm-money`). Không sửa code. |
+| 2026-09-09 | UI màu giá / ghi chú / hoa hồng | BUG-086 mở rộng + BUG-087…088 | Chuẩn chốt: số VND = `crm-money` `#b45309`. **Giá:** list lô/GD/sổ (cột Giá) đã gắn; còn thiếu/đè màu → 086/087. **Ghi chú giá + hoa hồng lô:** guidelines = dòng phụ xám (không màu money) — list đúng; chi tiết lô cùng màu chữ đen body. **Hoa hồng GD (VND):** đã `crm-money`. **Thu/Chi sổ đỏ:** cố ý xanh/đỏ; thẻ thống kê vừa `crm-money` vừa `sd-stat-thu/chi` → xung đột cascade (088). Không sửa code. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -287,6 +289,11 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-081 | MEDIUM | public web / metadata | `<title>` trang chủ lặp «An Hưng Land» hai lần (live). | OPEN (HOÃN) — còn |
 | BUG-082 | MEDIUM | public web / CRM | `/dashbroad` (alias gõ sai) trả HTTP 200 cache, không redirect `/dashboard`. | FIXED |
 | BUG-083 | MEDIUM | web authz | STAFF mở `/quan-tri/khach-hang` thấy stub «Registry ADMIN»; không redirect. | FIXED |
+| BUG-084 | LOW | lodats / UI FAB | Menu FAB «⋯» chi tiết lô (Giao dịch / Sửa lô đất) không có icon Lucide — lệch FAB chi tiết khách. | OPEN |
+| BUG-085 | MEDIUM | title-services / UI | Ô Số tiền Thu/Chi và Giá thỏa thuận (Sửa) không format phân tách nghìn; trang tạo hồ sơ thì có. | OPEN |
+| BUG-086 | LOW | customers / lodats / UI | Số VND thiếu/lệch `crm-money` `#b45309`: thẻ mobile khách xanh; list cùng xã; modal trùng SĐT; form chăm sóc; lịch sử chủ. | OPEN |
+| BUG-087 | MEDIUM | lodats / UI | Chi tiết lô: `dd.crm-money` bị `.ld-detail-spec-grid dd { color:#0f172a }` đè — Giá bán không nổi màu money. | OPEN |
+| BUG-088 | LOW | title-services / UI | Thẻ thống kê Thu/Chi gắn cả `crm-money` lẫn `sd-stat-thu/chi` — màu phụ thuộc thứ tự CSS (lệch guidelines xanh/đỏ). | OPEN |
 
 ## Danh sách bug
 
@@ -1390,6 +1397,77 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Cách tái hiện:** Login user `kha` → dán `/quan-tri/khach-hang` trên `anhungland.com`.
 - **Status:** FIXED (2026-09-04) — Cùng middleware BUG-012: STAFF + `/quan-tri/*` → redirect `/khach-hang` trước khi render stub.
 
+### BUG-084 — Menu FAB «⋯» chi tiết lô thiếu icon Lucide
+
+- **Severity:** LOW
+- **Module:** lodats / UI FAB
+- **File:** `apps/web/src/features/lodats/components/lodat-owner-fab.tsx`, `apps/web/src/features/customers/components/detail-mobile-fab.tsx`
+- **Function:** `LodatOwnerFab` (menu Giao dịch / Sửa lô đất)
+- **Vị trí code:** Hai `menuitem` chỉ render chữ «Giao dịch» / «Sửa lô đất» — không `<Icon …/>`. Đối chiếu `DetailMobileFab`: mỗi mục có Lucide (`NotebookPen`, `Map`, `FileText`) đúng `customers.md` §12.3.2 + UI-GUIDELINES §4.6.
+- **Problem:** Trên mobile `/lo-dat/[id]`, bấm FAB «⋯» thấy menu chữ thuần. Cùng kiểu FAB «⋯» trên `/khach-hang/[id]` thì mỗi dòng có icon chuẩn. Các nút FAB còn lại (Plus thêm khách / tạo việc; Phone gọi; MessageCircle Messenger; chữ Zalo) đã đủ icon/chuẩn.
+- **Root cause:** Port menu footer (Giao dịch · Sửa) vào FAB popover nhưng không gắn Lucide như pattern chi tiết khách.
+- **Impact:** UI không đồng bộ; khó nhận diện thao tác nhanh trên mobile; lệch quy tắc «icon CRM = Lucide».
+- **Evidence:** `lodat-owner-fab.tsx` menuitem không import/ dùng icon nghiệp vụ (chỉ `MoreHorizontal` / `Phone` / `MessageCircle` trên nút tròn). `detail-mobile-fab.tsx` menuitem có Icon 16px. Docs `customers.md` §12.3.2 bắt buộc icon Lucide trên popover «⋯».
+- **Status:** OPEN
+
+### BUG-085 — Ô tiền sổ đỏ (Thu/Chi / Sửa giá) không format chuẩn phân tách nghìn
+
+- **Severity:** MEDIUM
+- **Module:** title-services / UI
+- **File:** `apps/web/src/features/title-services/components/action-dialogs.tsx`, `apps/web/src/features/title-services/title-service-create-page.tsx`, `apps/web/src/features/title-services/display.ts`, `apps/web/src/features/lodats/api.ts`, `apps/web/src/features/transactions/api.ts`
+- **Function:** `ActionDialogs` (kind `thu` / `chi` / `edit`); đối chiếu `formatMoneyInput` / `formatPriceInput`
+- **Vị trí code:** Thu/Chi: `onChange={(e) => setAmountText(e.target.value)}` + placeholder `vd. 3000000`. Sửa: `setFeeText(item.agreedFeeVnd != null ? String(item.agreedFeeVnd) : '')` + `onChange` gán raw. Trang tạo: `setFeeText(formatMoneyInput(e.target.value))` + placeholder có dấu chấm. Lô/GD: `formatPriceInput` (copy gần giống nhau ở `lodats/api.ts` và `transactions/api.ts`).
+- **Problem:** NV nhập số tiền trên modal Thu/Chi hoặc Sửa hồ sơ sổ đỏ thấy chuỗi liền `3000000` / `15000000`. Cùng nghiệp vụ tiền trên form tạo hồ sơ sổ đỏ, tạo/sửa lô, form giao dịch thì đang gõ ra `3.000.000`.
+- **Root cause:** Chưa một helper nhập tiền dùng chung; modal action sổ đỏ bỏ qua `formatMoneyInput` dù `parseMoneyInput` vẫn strip non-digit lúc submit.
+- **Impact:** Dễ đếm nhầm số 0 khi nhập phí/thu/chi lớn; trải nghiệm lệch giữa các màn CRM.
+- **Evidence:** `action-dialogs.tsx` không gọi `formatMoneyInput` trên change; create-page có. `formatPriceInput` trùng 2 file lodats/transactions; `formatMoneyInput` dùng `toLocaleString('vi-VN')` — ba bản, hai kiểu.
+- **Status:** OPEN
+
+### BUG-086 — Số VND thiếu / lệch màu chuẩn `crm-money` `#b45309`
+
+- **Severity:** LOW
+- **Module:** customers / lodats / UI
+- **File:** `apps/web/src/features/customers/components/customer-card-list.tsx`, `apps/web/src/features/customers/customers-mobile.css`, `apps/web/src/features/customers/components/phone-duplicate-modal.tsx`, `apps/web/src/features/customers/components/care-edit-form.tsx`, `apps/web/src/features/lodats/components/same-ward-list.tsx`, `apps/web/src/features/lodats/components/lodat-edit-owner-history.tsx`, `apps/web/src/shared/ui/money.css`
+- **Function:** mọi chỗ **hiển thị số tiền VND** (ngân sách khách / giá lô) ngoài bảng-thẻ đã gắn `crm-money`
+- **Vị trí code:**
+  1. Thẻ mobile khách: `kh-card-budget` + CSS `color: var(--kh-blue)` (không `crm-money`).
+  2. Modal trùng SĐT: `<dd>{formatBudget(...)}</dd>` — không class.
+  3. Form chăm sóc (chip ngân sách tùy chỉnh): `{formatBudget(...)}` — không class.
+  4. List «Lô cùng xã»: `{formatPriceVnd(...)}` — không `crm-money` (khác `lodat-card-list` / `lodat-table`).
+  5. Lịch sử chủ trên form sửa lô: `{formatPriceVnd(row.priceVnd)}` — không `crm-money`.
+- **Problem:** UI-GUIDELINES §4.5.2 chốt **một** màu số tiền CRM `#b45309` (`crm-money`). Nhiều chỗ vẫn xanh / chữ thường trong khi bảng khách, bảng lô, GD, cột Giá sổ đỏ đã đúng.
+- **Root cause:** Không dùng class dùng chung; thẻ mobile invent `--kh-blue`.
+- **Impact:** Màu tài chính không «một ngôn ngữ»; số tiền không nổi bật thống nhất.
+- **Evidence:** `money.css` `.crm-money { color: #b45309 }`. Đối chứng đã đúng: `customer-table.tsx`, `customer-detail-page.tsx`, `lodat-table.tsx`, `transaction-table.tsx` (giá + hoa hồng VND).
+- **Ghi chú audit (không phải bug):** **Ghi chú giá** + **hoa hồng chữ** trên list lô (`ld-sub` / `ld-card-note`, `#64748b`) đúng guidelines = dòng phụ, **không** dùng màu money. Hoa hồng **giao dịch** (số VND) đã `crm-money`. Thu/Chi sổ đỏ cố ý xanh/đỏ (xem BUG-088).
+- **Status:** OPEN
+
+### BUG-087 — Chi tiết lô: CSS `dd` đè mất màu `crm-money` của Giá bán
+
+- **Severity:** MEDIUM
+- **Module:** lodats / UI
+- **File:** `apps/web/src/features/lodats/lodat-detail.css`, `apps/web/src/features/lodats/lodat-detail-page.tsx`
+- **Function:** khối thông số chi tiết `/lo-dat/[id]` — trường Giá bán
+- **Vị trí code:** JSX: `<dd className="crm-money">{formatPriceVnd(...)}</dd>`. CSS: `.ld-detail-spec-grid dd { color: #0f172a; font-weight: 600 }` (specificity 0,1,1) **thắng** `.crm-money` (0,1,0).
+- **Problem:** NV mở chi tiết lô thấy **Giá bán** cùng màu đen đậm với DT/MT — không nổi `#b45309` dù đã gắn class. Ghi chú giá / Hoa hồng trên cùng lưới cũng `#0f172a` (list thì xám phụ).
+- **Root cause:** Rule màu trên `dd` lưới specs không trừ / không nhường `.crm-money`.
+- **Impact:** Màu money chuẩn mất trên màn chi tiết lô (màn hay xem giá nhất).
+- **Evidence:** `lodat-detail.css` `.ld-detail-spec-grid dd`. `lodat-detail-page.tsx` Giá bán có `crm-money`. So specificity class+element > class.
+- **Status:** OPEN
+
+### BUG-088 — Thẻ thống kê sổ đỏ: `crm-money` xung đột màu Thu xanh / Chi đỏ
+
+- **Severity:** LOW
+- **Module:** title-services / UI
+- **File:** `apps/web/src/features/title-services/components/stats.tsx`, `apps/web/src/features/title-services/title-services.css`, `apps/web/src/shared/ui/money.css`
+- **Function:** `TitleServiceStats` — Tổng thu / Tổng chi
+- **Vị trí code:** `className="sd-stat-value crm-money sd-stat-thu"` và `… crm-money sd-stat-chi`. CSS: `.sd-stat-thu { color:#047857 }`, `.sd-stat-chi { color:#b91c1c }`, `.crm-money { color:#b45309 }` — cùng specificity (0,1,0); màu cuối phụ thuộc thứ tự import (`title-services.css` rồi `money.css` trên list page).
+- **Problem:** Guidelines: Giá = `crm-money`; **Thu xanh / Chi đỏ**. Hàng list/detail dùng đúng `sd-thu`/`sd-chi` (không `crm-money`). Thẻ thống kê lại gắn **cả hai** → có thể ra nâu money thay vì xanh/đỏ (hoặc ngược lại nếu đổi thứ tự CSS).
+- **Root cause:** Copy class `crm-money` lên thẻ Thu/Chi trong khi đã có tone riêng.
+- **Impact:** Màu Thu/Chi trên thẻ tổng không ổn định / lệch guidelines.
+- **Evidence:** `stats.tsx` dòng Tổng thu/chi. List page import `./title-services.css` trước `@/shared/ui/money.css`. Hàng bảng `title-service-table.tsx` chỉ `sd-thu`/`sd-chi`.
+- **Status:** OPEN
+
 ---
 
 ## Rà soát HOÃN / bỏ qua / không làm — 2026-09-07
@@ -1439,4 +1517,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 `BUG-023`, `025`, `026`, `027`, `029` — vẫn OPEN trên detail. Riêng **023** (URL Tạm dừng vẫn mở): sau chốt listing always-on, hành vi guest thấy lô + hangtag trạng thái có thể **đúng sản phẩm**; chưa đổi Status cho đến khi owner chốt CLOSED by design.
 
 **Đếm sau đóng BUG-041 và BUG-043 (2026-09-08, theo Status detail + header):** OPEN **13** · FIXED / CLOSED **70** · tổng **83**.
+
+**Đếm sau audit FAB / SĐT / tiền (2026-09-09, thêm BUG-084…086):** OPEN **16** · FIXED / CLOSED **70** · tổng **86**.
+
+**Đếm sau rà màu giá / ghi chú giá / hoa hồng (2026-09-09, mở rộng 086 + BUG-087…088):** OPEN **18** · FIXED / CLOSED **70** · tổng **88**.
 
