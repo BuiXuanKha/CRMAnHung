@@ -537,7 +537,7 @@ Layout 2 cột như §12.4.1: trái form; phải Hình ảnh + Xem nhanh sticky;
 ```
 
 - **Trạng thái mặc định khi tạo = Không bán** (`KHONG_BAN`) — chưa rao; NV chọn Mở bán / Dừng bán trên form nếu cần. API `POST /lodats` nếu thiếu `status` cũng gán `KHONG_BAN`.
-- Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs. **Được thêm ảnh riêng thửa** (chat / dán / file) — không phải ảnh dự án trên sổ địa chỉ.
+- Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs. **Panel xem nhanh + thumbnail:** hiện **ảnh dự án** (`AddressImage`, chỉ xem, không gỡ) trước; ảnh chat / dán / file = ảnh riêng thửa (tối đa 5, có ×). Admin sửa ảnh dự án trên sổ địa chỉ.
 - Lô **dân**: bắt buộc tiêu đề + địa chỉ REGULAR; specs như trang sửa; chip hướng/ghi chú giá/hoa hồng §12.4.3.
 - Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ lần lượt (mỗi file **nén client** trước; nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`. Nút Lưu hiện `Đang tải ảnh k/n…` khi đang gửi file. Lô mới (Không bán) **có** trên list mặc định (Tất cả trạng thái); lọc «Mở bán» thì chưa thấy cho đến khi NV bật Mở bán.
 - 1 luồng active / NV / lô kho — API chặn, picker cũng khoá («Bạn đang giữ»).
