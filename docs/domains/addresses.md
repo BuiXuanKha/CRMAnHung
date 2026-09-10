@@ -68,10 +68,11 @@ Ownership: sổ **dùng chung** toàn công ty (không theo NV).
 | Màn | Route / chỗ | Hành vi |
 |-----|-------------|---------|
 | Sổ địa chỉ | Cài đặt → modal (Admin); `/cai-dat/dia-chi` | Tìm kiếm + tab Tất cả/Thường/Dự án + list + form cascade; giống CRM cũ |
+| **Ảnh dự án** | Trong form khi **đang sửa** địa chỉ `PROJECT` | Thumbnail grid: thêm (file / kéo thả), gỡ ×; tối đa **24** ảnh; API `POST/DELETE /addresses/:id/images`. Tạo mới: lưu xong → giữ form sửa để thêm ảnh |
 | Picker | Form tạo/sửa lô | STAFF chọn; không nút thêm địa chỉ |
 | Import kho | Cài đặt → **Import lô đất Excel** (Admin) | Modal giống CRM cũ: chọn dự án **chưa có lô**, Excel 5 cột, xem trước, ghi `ProjectLot`. NV không thấy mục này. |
 
-Đặc tả control: làm khi mock sổ địa chỉ (cascade 4 cấp đã chốt).
+Đặc tả control: cascade 4 cấp đã chốt; gallery ảnh dự án trên form sửa (không placeholder).
 
 ## 7. Contract / API dự kiến
 

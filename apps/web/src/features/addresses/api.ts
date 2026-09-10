@@ -1,5 +1,6 @@
 import {
   formatAddressLabel,
+  type AddressImageItem,
   type AddressListItem,
   type AddressListQuery,
   type AddressListResponse,
@@ -12,6 +13,7 @@ import {
   type UpdateAddressInput,
 } from '@crmanhung/shared';
 import { apiFetch } from '@/shared/api/client';
+import { compressImageForUpload } from '@/shared/compress-image';
 
 export async function listProvinces(includeHidden = false): Promise<AdminUnitListResponse> {
   const qs = includeHidden ? '?includeHidden=1' : '';
@@ -106,6 +108,34 @@ export async function updateAddress(
 
 export async function hideAddress(id: string): Promise<{ item: AddressListItem }> {
   return apiFetch(`/addresses/${id}`, { method: 'DELETE' });
+}
+
+export async function listAddressImages(
+  addressId: string,
+): Promise<{ items: AddressImageItem[] }> {
+  return apiFetch(`/addresses/${addressId}/images`);
+}
+
+export async function uploadAddressImage(
+  addressId: string,
+  file: File,
+): Promise<{ item: AddressImageItem }> {
+  const prepared = await compressImageForUpload(file);
+  const body = new FormData();
+  body.append('file', prepared);
+  return apiFetch(`/addresses/${addressId}/images`, {
+    method: 'POST',
+    body,
+  });
+}
+
+export async function deleteAddressImage(
+  addressId: string,
+  imageId: string,
+): Promise<{ ok: boolean }> {
+  return apiFetch(`/addresses/${addressId}/images/${imageId}`, {
+    method: 'DELETE',
+  });
 }
 
 export { formatAddressLabel };
