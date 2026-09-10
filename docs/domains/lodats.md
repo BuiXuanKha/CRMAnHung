@@ -275,8 +275,8 @@ Ba cột riêng: **Mở bán** · **Dừng bán** · **Không bán** (`DANG_BAN`
 | Tắt cột **Mở bán** đang `ON` | → **Dừng bán** (`TAM_DUNG`) |
 | Tắt cột **Dừng bán** đang `ON` | → **Mở bán** (`DANG_BAN`) |
 | Tắt cột **Không bán** đang `ON` | **Không đổi** — ra khỏi Không bán bằng cách bấm Mở bán hoặc Dừng bán |
-| Lọc cột | Icon lọc gắn cột **Mở bán** (cùng `STATUS_FILTER_OPTIONS`; mặc định **Tất cả trạng thái**) |
-| Sau khi → Dừng bán / Không bán | Vẫn còn trên list mặc định (Tất cả); lọc cột Mở bán thì ẩn |
+| Lọc cột | Icon lọc **trên cả 3 cột** (Mở bán / Dừng bán / Không bán): menu «Tất cả» · «Chỉ …»; mặc định Tất cả; Xóa lọc về Tất cả |
+| Sau khi → Dừng bán / Không bán | Vẫn còn trên list mặc định (Tất cả); chọn «Chỉ Mở bán» thì ẩn |
 
 Không phải đã bán / đặt cọc (thuộc GD). **Mobile thẻ:** badge trạng thái (không 3 cột).
 

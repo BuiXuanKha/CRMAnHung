@@ -3,6 +3,7 @@
 import { useState, type Ref } from 'react';
 import { ImageOff } from 'lucide-react';
 import type { LodatListItem, LodatListingStatus } from '@crmanhung/shared';
+import { LodatSaleStatus } from '@crmanhung/shared';
 import { ColumnFilter } from '@/shared/ui/column-filter';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
@@ -11,7 +12,7 @@ import {
   KIND_FILTER_OPTIONS,
   PHOTO_FILTER_OPTIONS,
   PRICE_BRACKET_OPTIONS,
-  STATUS_FILTER_OPTIONS,
+  STATUS_FILTER_ALL,
   formatArea,
   formatBrokerFee,
   formatFrontageDir,
@@ -28,7 +29,22 @@ import {
 } from './sale-status-cell';
 import { SpecsColumnFilter } from './specs-column-filter';
 
-type HeaderFilter = 'photo' | 'address' | 'kind' | 'specs' | 'price' | 'status' | null;
+type HeaderFilter =
+  | 'photo'
+  | 'address'
+  | 'kind'
+  | 'specs'
+  | 'price'
+  | 'status-dang'
+  | 'status-tam'
+  | 'status-khong'
+  | null;
+
+const STATUS_TRIAD_FILTER_KEYS = {
+  [LodatSaleStatus.DANG_BAN]: 'status-dang',
+  [LodatSaleStatus.TAM_DUNG]: 'status-tam',
+  [LodatSaleStatus.KHONG_BAN]: 'status-khong',
+} as const;
 
 function BrokerFeeLine({ plot }: { plot: LodatListItem }) {
   const fee = formatBrokerFee(plot.brokerFeeNote, plot.commissionPercent);
@@ -162,25 +178,33 @@ export function LodatTable({
               onChange={(v) => onPriceBracket(v as PriceBracket)}
             />
           </div>
-          <div className="ld-col-head is-status-triad" role="columnheader">
-            <span>Mở bán</span>
-            <ColumnFilter
-              label="Trạng thái"
-              value={status}
-              allValue=""
-              options={STATUS_FILTER_OPTIONS}
-              open={headerFilter === 'status'}
-              onToggle={() => toggleFilter('status')}
-              onClose={() => setHeaderFilter(null)}
-              onChange={onStatus}
-            />
-          </div>
-          <div className="ld-col-head is-status-triad" role="columnheader">
-            <span>Dừng bán</span>
-          </div>
-          <div className="ld-col-head is-status-triad" role="columnheader">
-            <span>Không bán</span>
-          </div>
+          {SALE_STATUS_TRIAD_COLUMNS.map((col) => {
+            const filterKey = STATUS_TRIAD_FILTER_KEYS[col.status];
+            const colValue =
+              status === col.status ? col.status : STATUS_FILTER_ALL;
+            return (
+              <div
+                key={col.status}
+                className="ld-col-head is-status-triad"
+                role="columnheader"
+              >
+                <span>{col.label}</span>
+                <ColumnFilter
+                  label={col.label}
+                  value={colValue}
+                  allValue={STATUS_FILTER_ALL}
+                  options={[
+                    { value: STATUS_FILTER_ALL, label: 'Tất cả trạng thái' },
+                    { value: col.status, label: `Chỉ ${col.label}` },
+                  ]}
+                  open={headerFilter === filterKey}
+                  onToggle={() => toggleFilter(filterKey)}
+                  onClose={() => setHeaderFilter(null)}
+                  onChange={onStatus}
+                />
+              </div>
+            );
+          })}
           <div className="col-act" role="columnheader">
             Thao tác
           </div>
