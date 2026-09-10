@@ -179,7 +179,8 @@ Thứ tự mỗi trang: **12.1 máy tính** → **12.2 mobile** → trong từng
 ```
 ┌ Ô tìm ───────────────────────────────────────────────────────┐
 ├ Bảng: Ảnh · Tiêu đề/Địa chỉ · Phân loại · DT·MT·Hướng · Giá ─┤
-│       · Trạng thái · Thao tác                                │
+│       · Đã đăng web · AI GPT · Mở bán · Dừng bán · Không bán │
+│       · Thao tác                                             │
 ├ Footer đếm ──────────────────────────────────────────────────┤
 └ Không rail phải ─────────────────────────────────────────────┘
 ```
@@ -209,9 +210,12 @@ Substring, không phân biệt hoa thường, **giữ dấu**.
 
 | Ô tìm | Tập lô |
 |-------|--------|
-| Lọc **Tất cả trạng thái** (mặc định) | Mở bán **+** Dừng bán **+** Không bán (`includePaused`) |
-| Lọc **Mở bán** / **Dừng bán** / **Không bán** | Chỉ đúng một trạng thái |
-| `@` | Mở bán **+** Dừng bán **+** Không bán |
+| Không `@` + 3 cột lọc mặc định **Tất cả** | Mở bán **+** Dừng bán **+** Không bán (`includePaused` / `statusIn` đủ 3) |
+| Cột **Mở bán**: Mở bán / Không mở bán | Chỉ `DANG_BAN` · hoặc loại trừ `DANG_BAN` |
+| Cột **Dừng bán**: Tạm dừng / Không tạm dừng | Chỉ `TAM_DUNG` · hoặc loại trừ `TAM_DUNG` |
+| Cột **Không bán**: Không bán / Không phải Không bán | Chỉ `KHONG_BAN` · hoặc loại trừ `KHONG_BAN` |
+| Nhiều cột cùng lọc | **AND** (vd. Không mở bán + Không tạm dừng = chỉ Không bán) |
+| `@` | Mở bán **+** Dừng bán **+** Không bán (ghi đè lọc cột trạng thái) |
 | `@@` | **Chỉ** Dừng bán (`TAM_DUNG`) |
 
 Lọc cột Trạng thái = Tạm dừng / Không bán vẫn hiện đúng tập đó (không cần `@`).
@@ -265,6 +269,14 @@ Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
 
 `crm-money`. Phụ: ghi chú giá; hoa hồng chữ đã lưu (ví dụ `1%` · `Chưa trao đổi`). Thiếu giá = `—`. Thiếu hoa hồng = ẩn dòng.
 
+##### 5b. Đã đăng web
+
+Hangtag: **Đã đăng** (`hasWebBody` — `PublicLotListing.bodyHtml` không rỗng) `green` · **Chưa đăng** `gray`. Cùng nghĩa badge Đã soạn / Chưa soạn trên `/dang-bai`. Lọc cột: Tất cả · Đã đăng · Chưa đăng. Icon đỏ `needsWebUpdate` (nếu có) cạnh hangtag — CRM đổi sau lần lưu bài.
+
+##### 5c. AI GPT
+
+Nút **GPT** (`Sparkles`) → modal tạo content (cùng `LotGptContentDialog` `/dang-bai`). Không lọc cột. Áp dụng bài → mở `/dang-bai` để soạn/lưu.
+
 ##### 6. Trạng thái — 3 cột công tắc (desktop)
 
 Ba cột riêng: **Mở bán** · **Dừng bán** · **Không bán** (`DANG_BAN` / `TAM_DUNG` / `KHONG_BAN`). Mỗi ô = một công tắc; **đúng một** cột `ON` trên mỗi dòng.
@@ -275,8 +287,8 @@ Ba cột riêng: **Mở bán** · **Dừng bán** · **Không bán** (`DANG_BAN`
 | Tắt cột **Mở bán** đang `ON` | → **Dừng bán** (`TAM_DUNG`) |
 | Tắt cột **Dừng bán** đang `ON` | → **Mở bán** (`DANG_BAN`) |
 | Tắt cột **Không bán** đang `ON` | **Không đổi** — ra khỏi Không bán bằng cách bấm Mở bán hoặc Dừng bán |
-| Lọc cột | Icon lọc **trên cả 3 cột** (Mở bán / Dừng bán / Không bán): menu «Tất cả» · «Chỉ …»; mặc định Tất cả; Xóa lọc về Tất cả |
-| Sau khi → Dừng bán / Không bán | Vẫn còn trên list mặc định (Tất cả); chọn «Chỉ Mở bán» thì ẩn |
+| Lọc cột | Icon lọc **trên cả 3 cột**. Mỗi cột menu 3 mục: **Tất cả** · **đúng trạng thái** · **không đúng** (AND giữa các cột; mặc định cả 3 = Tất cả) |
+| Sau khi → Dừng bán / Không bán | Vẫn còn trên list mặc định; lọc «Mở bán» / «Không mở bán»… theo cột |
 
 Không phải đã bán / đặt cọc (thuộc GD). **Mobile thẻ:** badge trạng thái (không 3 cột).
 

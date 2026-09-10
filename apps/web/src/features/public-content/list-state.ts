@@ -40,6 +40,7 @@ function parseExtra(raw: unknown): ExtraFilters {
   return {
     photo: extra.photo ?? 'all',
     address: extra.address ?? 'all',
+    webBody: extra.webBody ?? 'all',
     area: extra.area ?? 'all',
     direction: extra.direction ?? 'all',
   };

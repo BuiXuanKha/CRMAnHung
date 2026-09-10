@@ -80,6 +80,9 @@ const LIST_INCLUDE = {
     },
   },
   createdBy: { select: { id: true, fullName: true } },
+  publicListing: {
+    select: { bodyHtml: true, needsWebUpdate: true },
+  },
 } satisfies Prisma.LodatInclude;
 
 type LodatRow = Prisma.LodatGetPayload<{ include: typeof LIST_INCLUDE }>;
@@ -296,6 +299,8 @@ export class LodatsService {
       customerHint: activeMap?.customer?.fullName ?? null,
       projectLotId: row.projectLotId ?? null,
       createdByEmployeeName: row.createdBy?.fullName ?? null,
+      hasWebBody: Boolean(row.publicListing?.bodyHtml?.trim()),
+      needsWebUpdate: Boolean(row.publicListing?.needsWebUpdate),
       updatedAt: updatedAt.toISOString(),
     };
   }
@@ -463,6 +468,19 @@ export class LodatsService {
       and.push({ addressId: null, projectLotId: null });
     }
 
+    if (query.webBody === 'has') {
+      and.push({
+        publicListing: { is: { bodyHtml: { not: '' } } },
+      });
+    } else if (query.webBody === 'empty') {
+      and.push({
+        OR: [
+          { publicListing: { is: null } },
+          { publicListing: { is: { bodyHtml: '' } } },
+        ],
+      });
+    }
+
     return and;
   }
 
@@ -479,6 +497,16 @@ export class LodatsService {
       and.push({
         maps: { some: { isActive: true, status: 'TAM_DUNG' } },
       });
+    } else if (query.statusIn !== undefined) {
+      if (query.statusIn.length === 0) {
+        and.push({ id: { in: [] } });
+      } else {
+        and.push({
+          maps: {
+            some: { isActive: true, status: { in: query.statusIn } },
+          },
+        });
+      }
     } else if (query.status) {
       and.push({
         maps: { some: { isActive: true, status: query.status } },

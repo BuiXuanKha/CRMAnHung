@@ -14,11 +14,13 @@ import {
   type LodatListItem,
   type LodatListQuery,
   type LodatListingStatus,
+  type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { needsMoreListScrollHeight, resetListScrollIfFiltersChanged, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
 import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
+import { LotGptContentDialog } from '@/features/public-content/components/lot-gpt-content-dialog';
 import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { createTransactionHref } from './transaction-href';
@@ -26,13 +28,17 @@ import { FilterBar } from './components/filter-bar';
 import { LodatCardList } from './components/lodat-card-list';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTable } from './components/lodat-table';
+import { lodatListItemToGptLot } from './lodat-to-gpt-lot';
 import {
-  STATUS_FILTER_ALL,
-  STATUS_FILTER_DEFAULT,
+  DEFAULT_STATUS_COL_FILTERS,
   countMobileLodatFilters,
+  mobileStatusFromCols,
   parseSearchKeyword,
+  resolveStatusColFilters,
+  statusColsFromMobileStatus,
   type ExtraFilters,
   type PriceBracket,
+  type StatusColFilters,
 } from './display';
 import {
   getActiveListScrollEl,
@@ -49,6 +55,7 @@ import '@/shared/ui/money.css';
 const DEFAULT_EXTRA: ExtraFilters = {
   photo: 'all',
   address: 'all',
+  webBody: 'all',
   area: 'all',
   direction: 'all',
 };
@@ -88,7 +95,9 @@ export function LodatListPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
   const [keyword, setKeyword] = useState('');
-  const [status, setStatus] = useState<string>(STATUS_FILTER_DEFAULT);
+  const [statusCols, setStatusCols] = useState<StatusColFilters>({
+    ...DEFAULT_STATUS_COL_FILTERS,
+  });
   const [kind, setKind] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [priceBracket, setPriceBracket] = useState<PriceBracket>('');
@@ -99,6 +108,7 @@ export function LodatListPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [galleryLodatId, setGalleryLodatId] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [gptLot, setGptLot] = useState<PublicWebStaffLotRow | null>(null);
   const [restoreReady, setRestoreReady] = useState(false);
   const [listConcealed, setListConcealed] = useState(false);
   const restoreSnap = useRef<LodatListSavedState | null>(null);
@@ -108,7 +118,7 @@ export function LodatListPage() {
   const cardsScrollRef = useRef<HTMLDivElement>(null);
   const persistRef = useRef({
     searchKeyword: keyword,
-    status,
+    statusCols,
     kind,
     extra,
     priceBracket,
@@ -116,7 +126,7 @@ export function LodatListPage() {
   });
   persistRef.current = {
     searchKeyword: keyword,
-    status,
+    statusCols,
     kind,
     extra,
     priceBracket,
@@ -124,22 +134,30 @@ export function LodatListPage() {
   };
 
   const search = parseSearchKeyword(keyword);
-  const statusAll = status === STATUS_FILTER_ALL;
   const searchOverridesStatus = Boolean(search.includePaused || search.pausedOnly);
+  const statusResolved = resolveStatusColFilters(statusCols);
   // Lọc cột đẩy xuống API để phân trang đúng (§12.1.2)
   const listQuery: LodatListQuery = {
     ...search,
-    status:
-      statusAll || searchOverridesStatus || !status
+    status: undefined,
+    statusIn: searchOverridesStatus
+      ? undefined
+      : statusResolved === 'all'
         ? undefined
-        : (status as LodatListingStatus),
-    includePaused: statusAll || Boolean(search.includePaused),
+        : statusResolved === 'empty'
+          ? []
+          : statusResolved,
+    includePaused:
+      searchOverridesStatus
+        ? Boolean(search.includePaused)
+        : statusResolved === 'all',
     kind: (kind || undefined) as LodatKind | undefined,
     priceBracket: priceBracket || undefined,
     areaBracket: extra.area !== 'all' ? extra.area : undefined,
     direction: extra.direction !== 'all' ? extra.direction : undefined,
     photo: extra.photo !== 'all' ? extra.photo : undefined,
     addressFilter: extra.address !== 'all' ? extra.address : undefined,
+    webBody: extra.webBody !== 'all' ? extra.webBody : undefined,
   };
 
   const {
@@ -185,17 +203,21 @@ export function LodatListPage() {
   }, [galleryLodatId, galleryQ.isLoading, galleryQ.isError, galleryImages.length]);
 
   const items = rawItems;
-  const mobileFilterCount = countMobileLodatFilters(status, priceBracket);
+  const mobileFilterCount = countMobileLodatFilters(statusCols, priceBracket);
   const filterKey = [
     keyword,
-    status,
+    statusCols.open,
+    statusCols.paused,
+    statusCols.off,
     kind,
     extra.photo,
     extra.address,
+    extra.webBody,
     extra.area,
     extra.direction,
     priceBracket,
   ].join('\0');
+  const mobileStatus = mobileStatusFromCols(statusCols);
 
   const toggleMut = useMutation({
     mutationFn: ({
@@ -237,7 +259,7 @@ export function LodatListPage() {
     restoreSnap.current = snap;
     if (snap) {
       setKeyword(snap.searchKeyword);
-      setStatus(snap.status);
+      setStatusCols(snap.statusCols);
       setKind(snap.kind);
       setExtra(snap.extra);
       setPriceBracket(snap.priceBracket);
@@ -341,7 +363,7 @@ export function LodatListPage() {
   useEffect(() => {
     if (!restoreReady || listConcealed || !restoreDone.current) return;
     persistListState();
-  }, [keyword, status, kind, extra, priceBracket, selectedId, restoreReady, listConcealed]);
+  }, [keyword, statusCols, kind, extra, priceBracket, selectedId, restoreReady, listConcealed]);
 
   useEffect(() => {
     function persist() {
@@ -413,13 +435,13 @@ export function LodatListPage() {
             onKeyword={setKeyword}
             filtersOpen={filterOpen}
             onToggleFilters={() => setFilterOpen((v) => !v)}
-            status={status}
-            onStatus={setStatus}
+            status={mobileStatus}
+            onStatus={(v) => setStatusCols(statusColsFromMobileStatus(v))}
             priceBracket={priceBracket}
             onPriceBracket={setPriceBracket}
             hasActiveFilters={mobileFilterCount > 0}
             onResetFilters={() => {
-              setStatus(STATUS_FILTER_DEFAULT);
+              setStatusCols({ ...DEFAULT_STATUS_COL_FILTERS });
               setPriceBracket('');
             }}
           />
@@ -439,12 +461,12 @@ export function LodatListPage() {
                 loadingMore={list.isFetchingNextPage}
                 selectedId={selectedId}
                 menuId={menuId}
-                status={status}
+                statusCols={statusCols}
                 kind={kind}
                 extra={extra}
                 priceBracket={priceBracket}
                 togglingId={toggleMut.isPending ? (toggleMut.variables?.plot.id ?? null) : null}
-                onStatus={setStatus}
+                onStatusCols={setStatusCols}
                 onKind={setKind}
                 onExtra={setExtra}
                 onPriceBracket={setPriceBracket}
@@ -454,6 +476,18 @@ export function LodatListPage() {
                 onAction={(p, a) => handleAction(p.id, a)}
                 onSetSaleStatus={handleSetSaleStatus}
                 onOpenGallery={openGallery}
+                onGptContent={(plot) => {
+                  setSelectedId(plot.id);
+                  setMenuId(null);
+                  setGptLot(lodatListItemToGptLot(plot));
+                }}
+                onNeedsWebUpdate={(plot) => {
+                  setAlertBox({
+                    title: 'Lô CRM đã cập nhật',
+                    message:
+                      `«${plot.title}» đã đổi trên CRM sau lần lưu bài web. Mở Đăng bài để cập nhật lại nội dung công khai.`,
+                  });
+                }}
                 scrollRef={tableScrollRef}
                 onScroll={onListScroll}
               />
@@ -513,6 +547,17 @@ export function LodatListPage() {
 
       <CrmToast message={toast} />
       {createTaskDialog}
+
+      <LotGptContentDialog
+        lot={gptLot}
+        onClose={() => setGptLot(null)}
+        onFlash={flash}
+        onApplyToEditor={() => {
+          setGptLot(null);
+          flash('Mở Đăng bài để dán / lưu nội dung GPT lên web khách.');
+          router.push('/dang-bai');
+        }}
+      />
     </div>
   );
 }
