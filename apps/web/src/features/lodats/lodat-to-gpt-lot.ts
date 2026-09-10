@@ -8,7 +8,7 @@ import {
 import { suggestPublicExcerpt } from '@/features/public-content/listing-copy';
 
 /**
- * Staff lot row for GPT modal from `/lo-dat` list item.
+ * Staff lot row for GPT modal from `/lo-dat` list or detail (`LodatDetail` extends list).
  * Mirrors `buildStaffOpenLots` price/excerpt defaults when overlay chưa tải.
  */
 export function lodatListItemToGptLot(plot: LodatListItem): PublicWebStaffLotRow {

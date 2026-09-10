@@ -8,6 +8,7 @@ import {
   MoreHorizontal,
   Pencil,
   Phone,
+  Sparkles,
 } from 'lucide-react';
 import type { LodatOwner } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
@@ -28,14 +29,20 @@ type Props = {
   owner: LodatOwner | null;
   onTransaction: () => void;
   onEdit: () => void;
+  onGptContent: () => void;
 };
 
 /**
  * FAB cụm phải dưới — mobile only (§12.3.2 lodats).
- * «⋯» → popover Giao dịch / Sửa lô đất (thay footer dính).
+ * «⋯» → popover Giao dịch / Sửa lô đất / AI GPT (thay footer dính).
  * Gọi: 1 số → tel thẳng; ≥2 số → modal chọn số. Zalo dùng số đầu.
  */
-export function LodatOwnerFab({ owner, onTransaction, onEdit }: Props) {
+export function LodatOwnerFab({
+  owner,
+  onTransaction,
+  onEdit,
+  onGptContent,
+}: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
   const [callPickerOpen, setCallPickerOpen] = useState(false);
@@ -97,6 +104,15 @@ export function LodatOwnerFab({ owner, onTransaction, onEdit }: Props) {
               >
                 <Icon icon={Pencil} size={16} />
                 Sửa lô đất
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="ld-owner-fab-menu-item"
+                onClick={() => { setMenuOpen(false); onGptContent(); }}
+              >
+                <Icon icon={Sparkles} size={16} />
+                AI GPT
               </button>
             </div>
           ) : null}

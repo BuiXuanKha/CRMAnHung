@@ -399,15 +399,18 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 ┌ detailLayout (grid 2fr | 1fr, ≥1024px) ────────────────────────────┐
 │ ┌ content (trái) ──────────────┐  ┌ relatedAside sticky phải ───┐ │
 │ │ Header: tiêu đề · địa chỉ ·  │  │ Lô đất cùng xã              │ │
-│ │   hangtag · Mở bán · Copy gửi│  │ {tên xã}                    │ │
-│ │   sales · Chia sẻ            │  │ list scroll độc lập         │ │
-│ │ Hero ảnh (prev/next→gallery) │  │ (thumb · title · giá · TT)  │ │
+│ │   hangtag (loại · dân/dự án  │  │ {tên xã}                    │ │
+│ │   · Đã/Chưa đăng) · Mở bán   │  │ list scroll độc lập         │ │
+│ │   · Copy gửi sales · Chia sẻ │  │ (thumb · title · giá · TT)  │ │
+│ │ Hero ảnh (prev/next→gallery) │  │                             │ │
 │ │ Specs · chủ · ghi chú        │  │                             │ │
 │ │ Lịch sử giao dịch (nếu có)   │  │                             │ │
 │ │ Nút Giao dịch / Sửa          │  └─────────────────────────────┘ │
 │ └──────────────────────────────┘                                  │
 └────────────────────────────────────────────────────────────────────┘
 ```
+
+Hangtag hàng dưới tiêu đề: loại · Đất dân/Dự án · **Đã đăng** / **Chưa đăng** (cùng cột **Đã đăng web** list §12.1.5b; `hasWebBody`). Icon đỏ `needsWebUpdate` cạnh hangtag web nếu CRM đổi sau lần lưu bài.
 
 **Giao dịch** → `/giao-dich/tao?lodatId=` (open-or-create, cùng §12.1.3 mục 7). **Sửa lô đất** → `/lo-dat/[id]/sua`. **Copy gửi sales** — clipboard nội bộ: dòng đầu `THÔNG TIN NỘI BỘ - KHÔNG GỬI KHÁCH`, mỗi dòng có icon; gồm tiêu đề / địa chỉ / DT·MT·hướng + **giá bán · ghi chú giá · hoa hồng**; dòng cuối **link share** lô (cùng mã NV như nút Chia sẻ); **không** footer hotline/địa chỉ VP. **Share link** — chỉ khi lô đã publish web; mã cố định theo (NV + lô); URL `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}?share=CODE`. Khách vào bằng mã NV A → liên hệ A trên trang chủ + chi tiết lô **30 ngày** (cùng NV không reset hạn; NV khác ghi đè). Vào thẳng domain hết cookie → hotline công ty. [`public-content.md`](./public-content.md) §18. Lô Tạm dừng / Đã bán — link vẫn mở.
 
@@ -417,15 +420,17 @@ Xếp dọc: content → **Lịch sử giao dịch** (nếu có) → **Lô đấ
 
 **Không** hiện «← Danh sách lô đất» (Back / vuốt hệ thống). Máy tính vẫn hiện.
 
-**FAB liên hệ chủ đất** góc phải dưới, **nổi trên** footer (chỉ khi có nút cần hiện):
+**FAB** góc phải dưới, **nổi trên** footer (máy tính **không** FAB):
 
 | Nút | Điều kiện | Hành vi |
 |-----|-----------|---------|
+| «⋯» Thêm thao tác | Luôn hiện | Popover: **Giao dịch** · **Sửa lô đất** · **AI GPT** |
+| AI GPT (trong «⋯») | Luôn trong menu | Cùng list §12.1.5c: `LotGptContentDialog` → **Dùng cho bài đăng** → `LotListingEditorDialog`. STAFF only; ADMIN → CrmAlert |
 | Gọi điện | Chủ có ≥1 SĐT | **1 số** → `tel:` thẳng; **≥2 số** → modal chọn số |
 | Zalo | Chủ có ≥1 SĐT | Tab `zalo.me/84…` (cùng trang public) |
 | Mở Messenger | Chủ có Facebook và **chưa** ẩn | Cùng menu list khách mobile (`messenger.com` / CrmAlert) |
 
-Không chủ / không SĐT và không FB → không hiện cụm FAB. Máy tính **không** FAB.
+Không chủ / không SĐT và không FB → vẫn hiện «⋯» (Giao dịch / Sửa / AI GPT); ẩn Gọi·Zalo·Messenger.
 
 #### 12.3.3 Gallery ảnh (đã làm)
 
