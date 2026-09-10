@@ -417,15 +417,17 @@ Xếp dọc: content → **Lịch sử giao dịch** (nếu có) → **Lô đấ
 
 **Không** hiện «← Danh sách lô đất» (Back / vuốt hệ thống). Máy tính vẫn hiện.
 
-**FAB liên hệ chủ đất** góc phải dưới, **nổi trên** footer (chỉ khi có nút cần hiện):
+**FAB** góc phải dưới, **nổi trên** footer (máy tính **không** FAB):
 
 | Nút | Điều kiện | Hành vi |
 |-----|-----------|---------|
+| «⋯» Thêm thao tác | Luôn hiện | Popover: **Giao dịch** · **Sửa lô đất** · **AI GPT** |
+| AI GPT (trong «⋯») | Luôn trong menu | Cùng list §12.1.5c: `LotGptContentDialog` → **Dùng cho bài đăng** → `LotListingEditorDialog`. STAFF only; ADMIN → CrmAlert |
 | Gọi điện | Chủ có ≥1 SĐT | **1 số** → `tel:` thẳng; **≥2 số** → modal chọn số |
 | Zalo | Chủ có ≥1 SĐT | Tab `zalo.me/84…` (cùng trang public) |
 | Mở Messenger | Chủ có Facebook và **chưa** ẩn | Cùng menu list khách mobile (`messenger.com` / CrmAlert) |
 
-Không chủ / không SĐT và không FB → không hiện cụm FAB. Máy tính **không** FAB.
+Không chủ / không SĐT và không FB → vẫn hiện «⋯» (Giao dịch / Sửa / AI GPT); ẩn Gọi·Zalo·Messenger.
 
 #### 12.3.3 Gallery ảnh (đã làm)
 

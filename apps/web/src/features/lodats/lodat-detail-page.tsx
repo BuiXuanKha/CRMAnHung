@@ -11,10 +11,17 @@ import {
   guestLotShareUrl,
   type LodatDetail,
   type LodatListingStatus,
+  type PublicWebStaffLotRow,
+  type UpdatePublicListingDraftInput,
 } from '@crmanhung/shared';
 import { useAuth } from '@/features/auth/auth-context';
 import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
+import { updatePublicListingDraft } from '@/features/public-content/api';
+import { LotGptContentDialog } from '@/features/public-content/components/lot-gpt-content-dialog';
+import { LotListingEditorDialog } from '@/features/public-content/components/lot-listing-editor-dialog';
+import type { LotGptEditorPrefill } from '@/features/public-content/lot-gpt-apply';
+import { invalidatePublicWebQueries } from '@/features/public-content/query';
 import { getLodat, listSameWardLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { createLodatShareLink } from '@/features/lot-shares/api';
 import { LodatImageGallery } from './components/lodat-image-gallery';
@@ -28,6 +35,7 @@ import {
   saveLodatDetailScroll,
 } from './detail-scroll-state';
 import { createTransactionHref } from './transaction-href';
+import { lodatListItemToGptLot } from './lodat-to-gpt-lot';
 import {
   formatArea,
   formatFrontageDir,
@@ -59,9 +67,16 @@ export function LodatDetailPage() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [alertTitle, setAlertTitle] = useState('Không thực hiện được');
   const [shareBusy, setShareBusy] = useState(false);
   const [copyBusy, setCopyBusy] = useState(false);
   const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [gptLot, setGptLot] = useState<PublicWebStaffLotRow | null>(null);
+  const [editorLot, setEditorLot] = useState<PublicWebStaffLotRow | null>(null);
+  const [editorGptPrefill, setEditorGptPrefill] = useState<LotGptEditorPrefill | null>(null);
+  const [editorGptApplyId, setEditorGptApplyId] = useState(0);
+  const [editorError, setEditorError] = useState<string | null>(null);
+  const [editorBusy, setEditorBusy] = useState(false);
 
   const q = useQuery({
     queryKey: ['lodat', id],
@@ -194,7 +209,7 @@ export function LodatDetailPage() {
             : `Đã mở bán «${updated.title}».`,
       );
     },
-    onError: (err: Error) => setAlertMsg(err.message),
+    onError: (err: Error) => showAlert(err.message),
   });
 
   function flash(msg: string) {
@@ -202,10 +217,49 @@ export function LodatDetailPage() {
     window.setTimeout(() => setToast(null), 2400);
   }
 
+  function showAlert(message: string, title = 'Không thực hiện được') {
+    setAlertTitle(title);
+    setAlertMsg(message);
+  }
+
+  async function saveListingFromGpt(input: UpdatePublicListingDraftInput) {
+    if (!editorLot) return;
+    setEditorError(null);
+    setEditorBusy(true);
+    try {
+      const updated = await updatePublicListingDraft(editorLot.lodatId, input);
+      setEditorLot(null);
+      setEditorGptPrefill(null);
+      setEditorGptApplyId(0);
+      flash(`Đã lưu «${updated.title}» trên web khách.`);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['lodat', id] }),
+        qc.invalidateQueries({ queryKey: ['lodats'] }),
+        invalidatePublicWebQueries(qc),
+      ]);
+    } catch (err) {
+      setEditorError(err instanceof Error ? err.message : 'Không lưu được bài đăng.');
+    } finally {
+      setEditorBusy(false);
+    }
+  }
+
+  function openGptContent() {
+    if (!detail) return;
+    if (user?.role === UserRole.ADMIN) {
+      showAlert(
+        'Tạo content GPT cho bài đăng lô chỉ dành cho tài khoản nhân viên (STAFF). Admin dùng chuyên mục Dự án trên trang bài viết.',
+        'Chỉ nhân viên',
+      );
+      return;
+    }
+    setGptLot(lodatListItemToGptLot(detail));
+  }
+
   function goTransaction() {
     if (!detail) return;
     if (isAdmin) {
-      setAlertMsg('Admin không tạo giao dịch. Nhân viên tạo giao dịch từ lô của mình.');
+      showAlert('Admin không tạo giao dịch. Nhân viên tạo giao dịch từ lô của mình.');
       return;
     }
     router.push(createTransactionHref(detail.id));
@@ -220,7 +274,7 @@ export function LodatDetailPage() {
       await copyTextToClipboard(buildLodatCopyText(detail, shareUrl));
       flash('Đã copy nội dung gửi sales.');
     } catch (err) {
-      setAlertMsg(
+      showAlert(
         err instanceof Error ? err.message : 'Không copy được nội dung gửi sales.',
       );
     } finally {
@@ -238,7 +292,7 @@ export function LodatDetailPage() {
       );
       flash('Đã copy nội dung + link share.');
     } catch (err) {
-      setAlertMsg(err instanceof Error ? err.message : 'Không tạo được link share.');
+      showAlert(err instanceof Error ? err.message : 'Không tạo được link share.');
     } finally {
       setShareBusy(false);
     }
@@ -523,6 +577,7 @@ export function LodatDetailPage() {
           owner={owner}
           onTransaction={goTransaction}
           onEdit={() => router.push(`/lo-dat/${detail.id}/sua`)}
+          onGptContent={openGptContent}
         />
       ) : null}
 
@@ -545,15 +600,50 @@ export function LodatDetailPage() {
             return saved?.rotationDeg ?? nextDeg;
           }}
           onToast={flash}
-          onError={setAlertMsg}
+          onError={(msg) => showAlert(msg)}
         />
       ) : null}
 
+      <LotGptContentDialog
+        lot={gptLot}
+        onClose={() => setGptLot(null)}
+        onFlash={flash}
+        onApplyToEditor={(prefill) => {
+          if (!gptLot) return;
+          setEditorGptPrefill(prefill);
+          setEditorGptApplyId((n) => n + 1);
+          setEditorError(null);
+          setEditorLot(gptLot);
+          setGptLot(null);
+          flash('Đã mở Soạn bài đăng với nội dung GPT.');
+        }}
+      />
+
+      <LotListingEditorDialog
+        lot={editorLot}
+        gptPrefill={editorGptPrefill}
+        gptApplyId={editorGptApplyId}
+        busy={editorBusy}
+        error={editorError}
+        onClose={() => {
+          if (!editorBusy) {
+            setEditorLot(null);
+            setEditorGptPrefill(null);
+            setEditorGptApplyId(0);
+            setEditorError(null);
+          }
+        }}
+        onSave={saveListingFromGpt}
+      />
+
       <CrmAlertDialog
         open={Boolean(alertMsg)}
-        title="Không thực hiện được"
+        title={alertTitle}
         message={alertMsg ?? ''}
-        onClose={() => setAlertMsg(null)}
+        onClose={() => {
+          setAlertMsg(null);
+          setAlertTitle('Không thực hiện được');
+        }}
       />
       <CrmToast message={toast} />
     </div>
