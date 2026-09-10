@@ -10,9 +10,10 @@ type Props = {
 function statusLabel(status: string): string {
   if (status === LodatSaleStatus.DANG_BAN) return 'Mở bán';
   if (status === LodatSaleStatus.TAM_DUNG) return 'Tạm dừng';
-  if (status === 'DAT_COC') return 'Đã cọc';
-  if (status === 'DA_BAN') return 'Đã bán';
-  return status || '—';
+  if (status === LodatSaleStatus.KHONG_BAN) return 'Không bán';
+  if (status === LodatSaleStatus.DAT_COC) return 'Đặt cọc';
+  if (status === LodatSaleStatus.DA_BAN) return 'Đã bán';
+  return status;
 }
 
 /** Lịch sử chủ — mọi map của lô (lodats.md §12.4.5). */

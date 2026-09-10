@@ -527,7 +527,7 @@ model LodatCustomerMap {
   priceVnd            BigInt?
   priceNote           String?
   brokerFeeNote       String?
-  status              String    @default("TAM_DUNG") // DANG_BAN | TAM_DUNG | DAT_COC | DA_BAN
+  status              String    @default("TAM_DUNG") // DANG_BAN | TAM_DUNG | KHONG_BAN | DAT_COC | DA_BAN
   note                String?
   isActive            Boolean   @default(true)
   endedAt             DateTime?

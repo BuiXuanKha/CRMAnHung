@@ -505,6 +505,7 @@ export function LodatCreatePage() {
                     >
                       <option value={LodatSaleStatus.DANG_BAN}>Mở bán</option>
                       <option value={LodatSaleStatus.TAM_DUNG}>Tạm dừng</option>
+                      <option value={LodatSaleStatus.KHONG_BAN}>Không bán</option>
                     </select>
                   </label>
                 </div>

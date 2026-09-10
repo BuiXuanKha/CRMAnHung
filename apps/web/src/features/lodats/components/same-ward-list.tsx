@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
-import { formatArea, formatFrontageDir, formatPriceVnd } from '../display';
+import {formatArea, formatFrontageDir, formatPriceVnd, listingSaleStatusLabel } from '../display';
 import './same-ward-list.css';
 
 type Props = {
@@ -18,7 +18,7 @@ type Props = {
 };
 
 function statusLabel(status: LodatListItem['status']): string {
-  return status === LodatSaleStatus.DANG_BAN ? 'Mở bán' : 'Tạm dừng';
+  return listingSaleStatusLabel(status);
 }
 
 export function SameWardList({

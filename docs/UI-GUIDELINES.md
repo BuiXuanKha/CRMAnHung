@@ -273,12 +273,12 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 | `Phân loại` | Hangtag `CrmBadge`: **Nhà** `blue` · **Đất** `amber`; lọc cột Tất cả / Nhà / Đất |
 | `DT · MT · Hướng` | Dòng 1: diện tích (`90 m²`); dòng 2: `MT 4,5 m · Bắc` — thiếu = `—`. Lọc cột: **khoảng DT** (1–100 / 100–200 / &gt;200) + **hướng** (Đông…Khác), AND |
 | `Giá bán` | Giá `crm-money`; dòng phụ ghi chú giá; hoa hồng chữ đã lưu (`1%` / `2%` / `Chưa trao đổi`). Lọc cột: khoảng giá bước **500tr** + «Chưa có giá» (đồng bộ mobile) |
-| `Trạng thái` | **Chỉ** Mở bán ↔ Tạm dừng (công tắc). **Không** phải đã bán / đặt cọc. Track xanh `#10b981` khi Mở bán; xám khi Tạm dừng |
+| `Trạng thái` | Form/lọc: **Mở bán** / **Tạm dừng** / **Không bán**. Công tắc list: Mở bán ↔ Tạm dừng (lô Không bán gạt bật → Mở bán). **Không** phải đã bán / đặt cọc. Track xanh `#10b981` khi Mở bán; xám khi Tạm dừng / Không bán |
 | `Thao tác` | Một nút chevron → menu: **Xem chi tiết**, **Thêm công việc**, **Giao dịch**, **Sửa** |
 
 **Không** hiện cột `Cập nhật` trên list `/lo-dat` (timestamp vẫn dùng cho sort API).
 
-**Thanh tìm (§4.3.4, biến thể lô đất):** desktop chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới. Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm lô tạm dừng; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG`. Ô tìm: tiêu đề, địa chỉ, tên chủ, hướng, ghi chú — **không** chữ Nhà/Đất → hangtag (lọc cột Phân loại). Không rail phải trên màn này. Không nút «Thêm lô».
+**Thanh tìm (§4.3.4, biến thể lô đất):** desktop chỉ ô tìm, **không** H1, **không** dropdown trạng thái/giá trên thanh (lọc bằng icon cột). Mobile: ô tìm + Bộ lọc + Tìm — xem khối Mobile bên dưới. Placeholder: `Tìm lô, địa chỉ, khách... (@ cả tạm dừng)`. `@` = gồm tạm dừng **và** không bán; `@@` = chỉ tạm dừng. Mặc định **ẩn** `TAM_DUNG` và `KHONG_BAN`. Ô tìm: tiêu đề, địa chỉ, tên chủ, hướng, ghi chú — **không** chữ Nhà/Đất → hangtag (lọc cột Phân loại). Không rail phải trên màn này. Không nút «Thêm lô».
 
 **Mobile (≤767px) — đã chốt theo ảnh CRM cũ:** **thẻ xếp dọc**, không bảng cuộn ngang. Header CRM vẫn §4.2.
 
@@ -297,7 +297,7 @@ Dưới đây là **cột / nội dung** riêng `/lo-dat` (đối chiếu nghi�
 | Hạng mục | Quy tắc |
 |----------|---------|
 | Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px; **chỉ thông tin cơ bản**: tiêu đề đậm trên cùng; thân 2 cột. **Không** hangtag Nhà/Đất, **không** chevron thao tác, **không** công tắc Mở bán trên thẻ |
-| Ảnh | Thumbnail trái ~80×56, bo 8px; overlay hangtag trạng thái **Mở bán** `green` / **Tạm dừng** `gray` (góc trên trái ảnh); `+N` ảnh thêm góc dưới phải |
+| Ảnh | Thumbnail trái ~80×56, bo 8px; overlay hangtag trạng thái **Mở bán** `green` / **Tạm dừng** `gray` / **Không bán** `gray` (góc trên trái ảnh); `+N` ảnh thêm góc dưới phải |
 | Phải ảnh | Địa chỉ nhạt; giá `crm-money`; **ghi chú giá** / **hoa hồng** (chữ đã lưu) nếu có — cùng cột Giá bán desktop; một dòng `90 m² · MT 8 m · Nam`. Thiếu ghi chú / hoa hồng → ẩn dòng |
 | Bấm thẻ | Mở chi tiết |
 | Tìm / lọc | Cùng **một hàng**: ô tìm + nút **Bộ lọc** + nút **Tìm** (nền xanh). Bộ lọc bung panel **inline** dưới hàng (không `CrmDialog`): select Trạng thái, select khoảng giá (bước 500tr + «Chưa có giá»), nút Xoá lọc khi đang lọc. Nút Tìm đóng bàn phím; gõ ô tìm vẫn lọc. Ô tìm viền vàng khi bắt đầu bằng `@` |

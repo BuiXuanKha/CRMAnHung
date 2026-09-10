@@ -139,6 +139,10 @@ export class PublicContentService {
     if (!row?.isPublished) {
       throw new NotFoundException('Không tìm thấy sản phẩm');
     }
+    const saleStatus = row.lodat.maps[0]?.status ?? 'TAM_DUNG';
+    if (saleStatus === 'KHONG_BAN') {
+      throw new NotFoundException('Không tìm thấy sản phẩm');
+    }
     // BUG-069: same Mở bán hub maps as catalog/sitemap — not every isPublished row.
     const { hubMaps } = await this.loadPublishedCatalog();
     return this.toCatalog(row, hubMaps);
@@ -691,7 +695,8 @@ export class PublicContentService {
 
   /**
    * Catalog / sitemap / hubs / listing detail (BUG-069).
-   * Owner 2026-09-07: mọi trạng thái bán — hangtag trên khách; không lọc Mở bán.
+   * Owner 2026-09-07: hangtag theo CRM; không chỉ Mở bán.
+   * Owner 2026-09-10: loại KHONG_BAN khỏi web khách.
    */
   private async loadPublishedCatalog(): Promise<{
     items: ReturnType<PublicContentService['toCatalog']>[];
@@ -703,7 +708,12 @@ export class PublicContentService {
       include: { lodat: { include: LODAT_INCLUDE } },
       orderBy: { updatedAt: 'desc' },
     });
-    const allGeos = this.geosFromListings(rows);
+    // Owner 2026-09-10: KHONG_BAN = có chủ chưa nhu cầu bán — không hiện web khách.
+    const guestRows = rows.filter((row) => {
+      const saleStatus = row.lodat.maps[0]?.status ?? 'TAM_DUNG';
+      return saleStatus !== 'KHONG_BAN';
+    });
+    const allGeos = this.geosFromListings(guestRows);
     await this.communeHubs.ensurePersisted(
       allGeos,
       preferredCommuneSlugByWardId(allGeos),
@@ -721,7 +731,7 @@ export class PublicContentService {
       ]),
     );
     const hubMaps = guestCatalogHubMaps(allGeos, persistedMap);
-    const items = rows.map((row) => this.toCatalog(row, hubMaps));
+    const items = guestRows.map((row) => this.toCatalog(row, hubMaps));
     return { items, hubMaps, persisted };
   }
 

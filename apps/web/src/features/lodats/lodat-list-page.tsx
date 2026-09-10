@@ -209,6 +209,8 @@ export function LodatListPage() {
       await qc.invalidateQueries({ queryKey: ['lodats'] });
       if (updated.status === LodatSaleStatus.TAM_DUNG) {
         flash(`Đã tạm dừng «${updated.title}». Gõ @ trên ô tìm để xem lại.`);
+      } else if (updated.status === LodatSaleStatus.KHONG_BAN) {
+        flash(`Đã chuyển «${updated.title}» sang Không bán.`);
       } else {
         flash(`Đã mở bán «${updated.title}».`);
       }

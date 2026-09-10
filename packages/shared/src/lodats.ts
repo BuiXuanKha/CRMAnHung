@@ -16,6 +16,7 @@ import { customerFacebookSchema } from './customers.js';
 export const lodatListingStatusSchema = z.enum([
   LodatSaleStatus.DANG_BAN,
   LodatSaleStatus.TAM_DUNG,
+  LodatSaleStatus.KHONG_BAN,
 ]);
 
 export type LodatListingStatus = z.infer<typeof lodatListingStatusSchema>;

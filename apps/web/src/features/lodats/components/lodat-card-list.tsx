@@ -5,7 +5,7 @@ import { ImageOff } from 'lucide-react';
 import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
-import { formatBrokerFee, formatPriceVnd, formatSpecsInline } from '../display';
+import { formatBrokerFee, formatPriceVnd, formatSpecsInline, listingSaleStatusLabel } from '../display';
 
 type Props = {
   items: LodatListItem[];
@@ -98,7 +98,7 @@ export function LodatCardList({
                       </span>
                     )}
                     <CrmBadge tone={open ? 'green' : 'gray'} className="ld-card-status">
-                      {open ? 'Mở bán' : 'Tạm dừng'}
+                      {listingSaleStatusLabel(p.status)}
                     </CrmBadge>
                     {p.extraPhotoCount > 0 ? (
                       <span className="ld-thumb-more">+{p.extraPhotoCount}</span>

@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
+import { type LodatListItem } from '@crmanhung/shared';
 import { listLodats } from '../api';
+import { listingSaleStatusLabel } from '../display';
 import './lodat-search-picker.css';
 
 const PICKER_LIMIT = 30;
@@ -17,7 +18,7 @@ type Props = {
 };
 
 function statusLabel(status: LodatListItem['status']): string {
-  return status === LodatSaleStatus.DANG_BAN ? 'Mở bán' : 'Tạm dừng';
+  return listingSaleStatusLabel(status);
 }
 
 /** Picker tìm lô theo keyword — thay select dump 200 (BUG-058). */
