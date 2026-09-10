@@ -34,6 +34,8 @@ import {
   formatPriceVnd,
   kindLabel,
   kindTone,
+  listingSaleStatusLabel,
+  listingSaleStatusTone,
 } from './display';
 import './lodats.css';
 import './lodat-detail.css';
@@ -187,7 +189,9 @@ export function LodatDetailPage() {
       flash(
         updated.status === LodatSaleStatus.TAM_DUNG
           ? `Đã tạm dừng «${updated.title}».`
-          : `Đã mở bán «${updated.title}».`,
+          : updated.status === LodatSaleStatus.KHONG_BAN
+            ? `Đã chuyển «${updated.title}» sang Không bán.`
+            : `Đã mở bán «${updated.title}».`,
       );
     },
     onError: (err: Error) => setAlertMsg(err.message),
@@ -301,9 +305,9 @@ export function LodatDetailPage() {
                   />
                 ) : (
                   <CrmBadge
-                    tone={detail.status === LodatSaleStatus.DANG_BAN ? 'green' : 'gray'}
+                    tone={listingSaleStatusTone(detail.status)}
                   >
-                    {detail.status === LodatSaleStatus.DANG_BAN ? 'Mở bán' : 'Tạm dừng'}
+                    {listingSaleStatusLabel(detail.status)}
                   </CrmBadge>
                 )}
                 <button

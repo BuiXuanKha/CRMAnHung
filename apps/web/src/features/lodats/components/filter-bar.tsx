@@ -52,7 +52,7 @@ export function FilterBar({
           onKeyDown={(e) => {
             if (e.key === 'Enter') submitSearch();
           }}
-          placeholder="Tìm lô, địa chỉ, khách... (@ cả tạm dừng)"
+          placeholder="Tìm lô, địa chỉ, khách... (@ cả tạm dừng / không bán)"
           aria-label="Tìm lô đất"
         />
         {includePaused ? (

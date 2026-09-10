@@ -49,7 +49,7 @@ type SpecForm = {
 };
 
 type MapForm = {
-  status: typeof LodatSaleStatus.DANG_BAN | typeof LodatSaleStatus.TAM_DUNG;
+  status: typeof LodatSaleStatus.DANG_BAN | typeof LodatSaleStatus.TAM_DUNG | typeof LodatSaleStatus.KHONG_BAN;
   priceVnd: string;
   priceNote: string;
   brokerFeeNote: string;
@@ -462,6 +462,7 @@ export function LodatEditPage() {
                     >
                       <option value={LodatSaleStatus.DANG_BAN}>Mở bán</option>
                       <option value={LodatSaleStatus.TAM_DUNG}>Tạm dừng</option>
+                      <option value={LodatSaleStatus.KHONG_BAN}>Không bán</option>
                     </select>
                   </label>
                   <label className="ld-edit-field">

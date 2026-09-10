@@ -482,6 +482,10 @@
   background: #b45309;
 }
 
+.ph-product-sale--not_for_sale {
+  background: #64748b;
+}
+
 .ph-product-media img {
   width: 100%;
   height: 100%;

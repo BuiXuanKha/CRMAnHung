@@ -267,7 +267,9 @@ export class LodatsService {
     const keys = this.coverObjectKeys(row);
     const rawStatus = activeMap?.status ?? 'TAM_DUNG';
     const status =
-      rawStatus === 'DANG_BAN' || rawStatus === 'TAM_DUNG'
+      rawStatus === 'DANG_BAN' ||
+      rawStatus === 'TAM_DUNG' ||
+      rawStatus === 'KHONG_BAN'
         ? rawStatus
         : 'TAM_DUNG';
     const kind = row.propertyKind === 'NHA' ? 'NHA' : 'DAT';

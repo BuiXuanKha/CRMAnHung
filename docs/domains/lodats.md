@@ -130,12 +130,12 @@ Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo
 | Thứ | Enum / field | List |
 |-----|----------------|------|
 | Loại thửa | `Lodat.projectLotId` trống = dân; có FK = dự án (đọc thông số từ `ProjectLot`) | Không phải hangtag Nhà/Đất |
-| Rao bán | `DANG_BAN` / `TAM_DUNG` trên **map** | Công tắc **Mở bán** ↔ **Tạm dừng** |
+| Rao bán | `DANG_BAN` / `TAM_DUNG` / `KHONG_BAN` trên **map** | Form + lọc cột: **Mở bán** / **Tạm dừng** / **Không bán**. Công tắc list: **Mở bán** ↔ **Tạm dừng** (lô **Không bán** gạt bật → Mở bán) |
 | Phân loại | `Lodat.propertyKind` `NHA` / `DAT` (cột Postgres; mặc định `DAT`) | Hangtag Nhà / Đất — **web mới**. CRM cũ không có → copy gán hết `DAT`. Lọc hangtag = **icon cột Phân loại**, không phải ô tìm |
 | Đã cọc / Đã bán | — | **Không** trên list; thuộc giao dịch |
 | Chủ hiện tại | map `isActive` | Gợi ý tên khách (`customerHint`) |
 
-Mặc định **ẩn** lô tạm dừng. Giá / hoa hồng / ghi chú giá nằm trên **map**, không trên thửa.
+**Không bán** (`KHONG_BAN`): đã có chủ, **chưa có nhu cầu bán** — khác **Tạm dừng** (đã/đang rao, tạm ngưng). Mặc định **ẩn** lô tạm dừng **và** không bán. Giá / hoa hồng / ghi chú giá nằm trên **map**, không trên thửa. Web khách: lô **Không bán** **không** hiện trang chủ / catalog / sitemap / slug (xem `public-content.md`).
 
 ## 4–10.
 
@@ -150,7 +150,7 @@ List:
 - Cũ: chỉ `@` (gồm tạm dừng). Mới: thêm `@@` = chỉ tạm dừng.
 - Cũ: tìm Title + địa chỉ (API **không** tìm tên khách). Mới: ô tìm còn tên chủ + hướng + ghi chú lô; hangtag Nhà/Đất **không** qua ô tìm.
 - Cũ: bấm hàng → chi tiết; nút **GD** / **Sửa** trên dòng. Mới: menu chevron; bấm hàng PC = chọn.
-- Cũ: lọc gồm Đang bán / Đã cọc / Đã bán / Tạm dừng. Mới: **chỉ** Mở bán / Tạm dừng.
+- Cũ: lọc gồm Đang bán / Đã cọc / Đã bán / Tạm dừng. Mới: **Mở bán / Tạm dừng / Không bán** (Đã cọc / Đã bán vẫn thuộc GD).
 
 Quyền đã siết so với cũ: **chỉ Admin** tạo địa chỉ và import kho (cũ: mọi user đăng nhập CRUD địa chỉ).
 
@@ -210,11 +210,11 @@ Substring, không phân biệt hoa thường, **giữ dấu**.
 | Ô tìm | Tập lô |
 |-------|--------|
 | Không `@` + lọc **Mở bán** (mặc định) | Chỉ **Mở bán** |
-| Lọc **Tất cả trạng thái** | Mở bán **+** Tạm dừng (`includePaused`) |
-| `@` | Mở bán **+** Tạm dừng |
+| Lọc **Tất cả trạng thái** | Mở bán **+** Tạm dừng **+** Không bán (`includePaused`) |
+| `@` | Mở bán **+** Tạm dừng **+** Không bán |
 | `@@` | **Chỉ** Tạm dừng |
 
-Lọc cột Trạng thái = Tạm dừng vẫn hiện lô tạm dừng (không cần `@`).
+Lọc cột Trạng thái = Tạm dừng / Không bán vẫn hiện đúng tập đó (không cần `@`).
 
 #### 12.1.2 Bộ lọc
 

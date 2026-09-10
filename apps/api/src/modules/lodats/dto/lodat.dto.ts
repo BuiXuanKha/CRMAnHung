@@ -39,8 +39,8 @@ export class ListLodatsQueryDto {
   keyword?: string;
 
   @IsOptional()
-  @IsIn(['DANG_BAN', 'TAM_DUNG'])
-  status?: 'DANG_BAN' | 'TAM_DUNG';
+  @IsIn(['DANG_BAN', 'TAM_DUNG', 'KHONG_BAN'])
+  status?: 'DANG_BAN' | 'TAM_DUNG' | 'KHONG_BAN';
 
   @IsOptional()
   @IsIn(['NHA', 'DAT'])
@@ -100,8 +100,8 @@ export class ListLodatsQueryDto {
 }
 
 export class UpdateLodatSaleStatusDto {
-  @IsIn(['DANG_BAN', 'TAM_DUNG'], { message: 'Trạng thái rao bán không hợp lệ.' })
-  status!: 'DANG_BAN' | 'TAM_DUNG';
+  @IsIn(['DANG_BAN', 'TAM_DUNG', 'KHONG_BAN'], { message: 'Trạng thái rao bán không hợp lệ.' })
+  status!: 'DANG_BAN' | 'TAM_DUNG' | 'KHONG_BAN';
 }
 
 export class ChangeLodatOwnerDto {
@@ -111,8 +111,8 @@ export class ChangeLodatOwnerDto {
   customerId!: string;
 
   @IsOptional()
-  @IsIn(['DANG_BAN', 'TAM_DUNG'])
-  status?: 'DANG_BAN' | 'TAM_DUNG';
+  @IsIn(['DANG_BAN', 'TAM_DUNG', 'KHONG_BAN'])
+  status?: 'DANG_BAN' | 'TAM_DUNG' | 'KHONG_BAN';
 
   @IsOptional()
   @Transform(({ value }) => emptyToNull(value))
@@ -219,8 +219,8 @@ export class CreateLodatDto {
   note?: string | null;
 
   @IsOptional()
-  @IsIn(['DANG_BAN', 'TAM_DUNG'])
-  status?: 'DANG_BAN' | 'TAM_DUNG';
+  @IsIn(['DANG_BAN', 'TAM_DUNG', 'KHONG_BAN'])
+  status?: 'DANG_BAN' | 'TAM_DUNG' | 'KHONG_BAN';
 
   @IsOptional()
   @Transform(({ value }) => emptyToNull(value))
@@ -331,6 +331,6 @@ export class UpdateLodatDto {
   mapNote?: string | null;
 
   @IsOptional()
-  @IsIn(['DANG_BAN', 'TAM_DUNG'])
-  status?: 'DANG_BAN' | 'TAM_DUNG';
+  @IsIn(['DANG_BAN', 'TAM_DUNG', 'KHONG_BAN'])
+  status?: 'DANG_BAN' | 'TAM_DUNG' | 'KHONG_BAN';
 }
