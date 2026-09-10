@@ -15,12 +15,17 @@ import {
   type LodatListQuery,
   type LodatListingStatus,
   type PublicWebStaffLotRow,
+  type UpdatePublicListingDraftInput,
 } from '@crmanhung/shared';
 import { needsMoreListScrollHeight, resetListScrollIfFiltersChanged, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
 import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
+import { updatePublicListingDraft } from '@/features/public-content/api';
 import { LotGptContentDialog } from '@/features/public-content/components/lot-gpt-content-dialog';
+import { LotListingEditorDialog } from '@/features/public-content/components/lot-listing-editor-dialog';
+import type { LotGptEditorPrefill } from '@/features/public-content/lot-gpt-apply';
+import { invalidatePublicWebQueries } from '@/features/public-content/query';
 import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { createTransactionHref } from './transaction-href';
@@ -109,6 +114,11 @@ export function LodatListPage() {
   const [galleryLodatId, setGalleryLodatId] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [gptLot, setGptLot] = useState<PublicWebStaffLotRow | null>(null);
+  const [editorLot, setEditorLot] = useState<PublicWebStaffLotRow | null>(null);
+  const [editorGptPrefill, setEditorGptPrefill] = useState<LotGptEditorPrefill | null>(null);
+  const [editorGptApplyId, setEditorGptApplyId] = useState(0);
+  const [editorError, setEditorError] = useState<string | null>(null);
+  const [editorBusy, setEditorBusy] = useState(false);
   const [restoreReady, setRestoreReady] = useState(false);
   const [listConcealed, setListConcealed] = useState(false);
   const restoreSnap = useRef<LodatListSavedState | null>(null);
@@ -426,6 +436,27 @@ export function LodatListPage() {
     router.push(`/lo-dat/${id}`);
   }
 
+  async function saveListingFromGpt(input: UpdatePublicListingDraftInput) {
+    if (!editorLot) return;
+    setEditorError(null);
+    setEditorBusy(true);
+    try {
+      const updated = await updatePublicListingDraft(editorLot.lodatId, input);
+      setEditorLot(null);
+      setEditorGptPrefill(null);
+      setEditorGptApplyId(0);
+      flash(`Đã lưu «${updated.title}» trên web khách.`);
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ['lodats'] }),
+        invalidatePublicWebQueries(qc),
+      ]);
+    } catch (err) {
+      setEditorError(err instanceof Error ? err.message : 'Không lưu được bài đăng.');
+    } finally {
+      setEditorBusy(false);
+    }
+  }
+
   return (
     <div className="ld-page">
       <div className="ld-main">
@@ -477,6 +508,14 @@ export function LodatListPage() {
                 onSetSaleStatus={handleSetSaleStatus}
                 onOpenGallery={openGallery}
                 onGptContent={(plot) => {
+                  if (user?.role === UserRole.ADMIN) {
+                    setAlertBox({
+                      title: 'Chỉ nhân viên',
+                      message:
+                        'Tạo content GPT cho bài đăng lô chỉ dành cho tài khoản nhân viên (STAFF). Admin dùng chuyên mục Dự án trên trang bài viết.',
+                    });
+                    return;
+                  }
                   setSelectedId(plot.id);
                   setMenuId(null);
                   setGptLot(lodatListItemToGptLot(plot));
@@ -552,11 +591,32 @@ export function LodatListPage() {
         lot={gptLot}
         onClose={() => setGptLot(null)}
         onFlash={flash}
-        onApplyToEditor={() => {
+        onApplyToEditor={(prefill) => {
+          if (!gptLot) return;
+          setEditorGptPrefill(prefill);
+          setEditorGptApplyId((id) => id + 1);
+          setEditorError(null);
+          setEditorLot(gptLot);
           setGptLot(null);
-          flash('Mở Đăng bài để dán / lưu nội dung GPT lên web khách.');
-          router.push('/dang-bai');
+          flash('Đã mở Soạn bài đăng với nội dung GPT.');
         }}
+      />
+
+      <LotListingEditorDialog
+        lot={editorLot}
+        gptPrefill={editorGptPrefill}
+        gptApplyId={editorGptApplyId}
+        busy={editorBusy}
+        error={editorError}
+        onClose={() => {
+          if (!editorBusy) {
+            setEditorLot(null);
+            setEditorGptPrefill(null);
+            setEditorGptApplyId(0);
+            setEditorError(null);
+          }
+        }}
+        onSave={saveListingFromGpt}
       />
     </div>
   );
