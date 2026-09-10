@@ -130,12 +130,12 @@ Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo
 | Thứ | Enum / field | List |
 |-----|----------------|------|
 | Loại thửa | `Lodat.projectLotId` trống = dân; có FK = dự án (đọc thông số từ `ProjectLot`) | Không phải hangtag Nhà/Đất |
-| Rao bán | `DANG_BAN` / `TAM_DUNG` / `KHONG_BAN` trên **map** | Form + lọc cột: **Mở bán** / **Tạm dừng** / **Không bán**. Công tắc list: **Mở bán** ↔ **Tạm dừng** (lô **Không bán** gạt bật → Mở bán) |
+| Rao bán | `DANG_BAN` / `TAM_DUNG` / `KHONG_BAN` trên **map** | Form + lọc cột: **Mở bán** / **Dừng bán** (`TAM_DUNG`) / **Không bán**. **Desktop list:** 3 cột công tắc **loại trừ** (radio) — bật cột khác → gán status đó; **không** tắt cột đang bật (tránh lô không trạng thái). Mobile / chi tiết: công tắc 2 chiều hoặc badge (xem §12) |
 | Phân loại | `Lodat.propertyKind` `NHA` / `DAT` (cột Postgres; mặc định `DAT`) | Hangtag Nhà / Đất — **web mới**. CRM cũ không có → copy gán hết `DAT`. Lọc hangtag = **icon cột Phân loại**, không phải ô tìm |
 | Đã cọc / Đã bán | — | **Không** trên list; thuộc giao dịch |
 | Chủ hiện tại | map `isActive` | Gợi ý tên khách (`customerHint`) |
 
-**Không bán** (`KHONG_BAN`): đã có chủ, **chưa có nhu cầu bán** — khác **Tạm dừng** (đã/đang rao, tạm ngưng). Mặc định **ẩn** lô tạm dừng **và** không bán. Giá / hoa hồng / ghi chú giá nằm trên **map**, không trên thửa. Web khách: lô **Không bán** **không** hiện trang chủ / catalog / sitemap / slug (xem `public-content.md`).
+**Không bán** (`KHONG_BAN`): đã có chủ, **chưa có nhu cầu bán** — khác **Dừng bán** / Tạm dừng (`TAM_DUNG`: đã/đang rao, tạm ngưng). Mặc định **ẩn** lô dừng bán **và** không bán. Giá / hoa hồng / ghi chú giá nằm trên **map**, không trên thửa. Web khách: lô **Không bán** **không** hiện trang chủ / catalog / sitemap / slug (xem `public-content.md`).
 
 ## 4–10.
 
@@ -265,10 +265,18 @@ Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
 
 `crm-money`. Phụ: ghi chú giá; hoa hồng chữ đã lưu (ví dụ `1%` · `Chưa trao đổi`). Thiếu giá = `—`. Thiếu hoa hồng = ẩn dòng.
 
-##### 6. Trạng thái (công tắc)
+##### 6. Trạng thái — 3 cột công tắc (desktop)
 
-Bật = Mở bán. Tắt = Tạm dừng → lô biến khỏi list mặc định (gõ `@` để thấy).  
-Không phải đã bán / đặt cọc.
+Ba cột riêng: **Mở bán** · **Dừng bán** · **Không bán** (`DANG_BAN` / `TAM_DUNG` / `KHONG_BAN`). Mỗi ô = một công tắc; **đúng một** cột `ON` trên mỗi dòng.
+
+| Hành vi | Rule |
+|--------|------|
+| Bật cột khác trạng thái hiện tại | Gán status cột đó; 2 cột kia tắt |
+| Bật / tắt lại cột đang `ON` | **Không đổi** (không cho lô «không trạng thái») |
+| Lọc cột | Icon lọc gắn cột **Mở bán** (cùng `STATUS_FILTER_OPTIONS`) |
+| Sau khi → Dừng bán / Không bán | Lô khỏi list mặc định (chỉ Mở bán); gõ `@` hoặc lọc cột để xem lại |
+
+Không phải đã bán / đặt cọc (thuộc GD). **Mobile thẻ:** badge trạng thái (không 3 cột).
 
 ##### 7. Thao tác (chevron)
 

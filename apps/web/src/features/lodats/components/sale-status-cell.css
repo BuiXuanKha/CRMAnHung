@@ -1,0 +1,71 @@
+/* Một công tắc trong 3 cột trạng thái desktop /lo-dat */
+
+.ld-sale-status-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  min-width: 0;
+}
+
+.ld-sale-status-switch {
+  position: relative;
+  width: 40px;
+  height: 22px;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: #cbd5e1;
+  cursor: pointer;
+  transition: background-color 0.18s ease;
+}
+
+.ld-sale-status-switch.is-on.is-open {
+  background: #10b981;
+}
+
+.ld-sale-status-switch.is-on.is-paused {
+  background: #f59e0b;
+}
+
+.ld-sale-status-switch.is-on.is-off {
+  background: #64748b;
+}
+
+.ld-sale-status-switch:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+
+.ld-sale-status-knob {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.2);
+  transition: transform 0.18s ease;
+}
+
+.ld-sale-status-switch.is-on .ld-sale-status-knob {
+  transform: translateX(18px);
+}
+
+.ld-col-head.is-status-triad {
+  justify-content: center;
+  gap: 4px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.ld-col-head.is-status-triad > span {
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.ld-cell-status {
+  justify-content: center;
+}

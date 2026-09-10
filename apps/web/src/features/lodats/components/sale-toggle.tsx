@@ -13,7 +13,7 @@ type Props = {
 export function SaleToggle({ title, status, busy = false, onToggle }: Props) {
   const isOpen = status === LodatSaleStatus.DANG_BAN;
   const closedLabel =
-    status === LodatSaleStatus.KHONG_BAN ? 'Không bán' : 'Tạm dừng';
+    status === LodatSaleStatus.KHONG_BAN ? 'Không bán' : 'Dừng bán';
 
   return (
     <div
@@ -25,7 +25,7 @@ export function SaleToggle({ title, status, busy = false, onToggle }: Props) {
         role="switch"
         className={['ld-sale-switch', isOpen ? 'is-on' : ''].filter(Boolean).join(' ')}
         aria-checked={isOpen}
-        aria-label={isOpen ? `Tạm dừng ${title}` : `Mở bán ${title}`}
+        aria-label={isOpen ? `Dừng bán ${title}` : `Mở bán ${title}`}
         disabled={busy}
         onClick={onToggle}
       >

@@ -17,7 +17,7 @@ export enum LodatSaleStatus {
   DAT_COC = 'DAT_COC',
   /** Giao dịch (P3) — không dùng trên cột Trạng thái list */
   DA_BAN = 'DA_BAN',
-  /** Rao bán — cột Trạng thái list = Tạm dừng */
+  /** Rao bán — cột list = Dừng bán (tạm dừng rao) */
   TAM_DUNG = 'TAM_DUNG',
   /** Có chủ, chưa nhu cầu bán — ẩn list mặc định; không hiện web khách */
   KHONG_BAN = 'KHONG_BAN',
@@ -114,7 +114,7 @@ export const LODAT_SALE_STATUS_LABELS: Record<LodatSaleStatus, string> = {
   [LodatSaleStatus.DANG_BAN]: 'Mở bán',
   [LodatSaleStatus.DAT_COC]: 'Đặt cọc',
   [LodatSaleStatus.DA_BAN]: 'Đã bán',
-  [LodatSaleStatus.TAM_DUNG]: 'Tạm dừng',
+  [LodatSaleStatus.TAM_DUNG]: 'Dừng bán',
   [LodatSaleStatus.KHONG_BAN]: 'Không bán',
 };
 
@@ -128,7 +128,7 @@ export const ADDRESS_KIND_LABELS: Record<AddressKind, string> = {
   [AddressKind.PROJECT]: 'Dự án',
 };
 
-/** Cột list /lo-dat: Mở bán / Tạm dừng / Không bán. Đặt cọc / Đã bán thuộc giao dịch (P3). */
+/** Cột list /lo-dat: Mở bán / Dừng bán / Không bán. Đặt cọc / Đã bán thuộc giao dịch (P3). */
 export const LODAT_LISTING_STATUSES = [
   LodatSaleStatus.DANG_BAN,
   LodatSaleStatus.TAM_DUNG,

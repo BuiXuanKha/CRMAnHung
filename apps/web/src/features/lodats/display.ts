@@ -133,14 +133,14 @@ export const STATUS_FILTER_DEFAULT = LodatSaleStatus.DANG_BAN;
 
 export const STATUS_FILTER_OPTIONS = [
   { value: LodatSaleStatus.DANG_BAN, label: 'Mở bán' },
-  { value: LodatSaleStatus.TAM_DUNG, label: 'Tạm dừng' },
+  { value: LodatSaleStatus.TAM_DUNG, label: 'Dừng bán' },
   { value: LodatSaleStatus.KHONG_BAN, label: 'Không bán' },
   { value: STATUS_FILTER_ALL, label: 'Tất cả trạng thái' },
 ];
 
 export function listingSaleStatusLabel(status: string): string {
   if (status === LodatSaleStatus.DANG_BAN) return 'Mở bán';
-  if (status === LodatSaleStatus.TAM_DUNG) return 'Tạm dừng';
+  if (status === LodatSaleStatus.TAM_DUNG) return 'Dừng bán';
   if (status === LodatSaleStatus.KHONG_BAN) return 'Không bán';
   if (status === LodatSaleStatus.DAT_COC) return 'Đặt cọc';
   if (status === LodatSaleStatus.DA_BAN) return 'Đã bán';

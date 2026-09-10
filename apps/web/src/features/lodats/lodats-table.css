@@ -14,11 +14,13 @@
 .ld-table-wrap {
   --ld-cols:
     78px
-    minmax(180px, 1.4fr)
-    108px
-    minmax(120px, 0.85fr)
-    minmax(160px, 1.1fr)
-    168px
+    minmax(160px, 1.3fr)
+    100px
+    minmax(110px, 0.8fr)
+    minmax(140px, 1fr)
+    72px
+    72px
+    78px
     80px;
   --ld-chrome: #f1f5f9;
   display: flex;
@@ -96,7 +98,7 @@
   display: grid;
   grid-template-columns: var(--ld-cols);
   width: 100%;
-  min-width: 1120px;
+  min-width: 1180px;
   border-bottom: 1px solid #f1f5f9;
 }
 
