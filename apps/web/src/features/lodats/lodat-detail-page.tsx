@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, Copy, Phone, Share2, SquarePen } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CircleAlert, Copy, Phone, Share2, SquarePen } from 'lucide-react';
 import {
   LodatSaleStatus,
   UserRole,
@@ -17,6 +17,7 @@ import {
 import { useAuth } from '@/features/auth/auth-context';
 import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
+import { Icon } from '@/shared/ui/icon';
 import { updatePublicListingDraft } from '@/features/public-content/api';
 import { LotGptContentDialog } from '@/features/public-content/components/lot-gpt-content-dialog';
 import { LotListingEditorDialog } from '@/features/public-content/components/lot-listing-editor-dialog';
@@ -44,6 +45,8 @@ import {
   kindTone,
   listingSaleStatusLabel,
   listingSaleStatusTone,
+  lodatWebBodyLabel,
+  lodatWebBodyTone,
 } from './display';
 import './lodats.css';
 import './lodat-detail.css';
@@ -345,6 +348,27 @@ export function LodatDetailPage() {
                   ) : (
                     <CrmBadge tone="gray">Đất dân</CrmBadge>
                   )}
+                  <span className="ld-web-row" title="Đã đăng web">
+                    <CrmBadge tone={lodatWebBodyTone(Boolean(detail.hasWebBody))}>
+                      {lodatWebBodyLabel(Boolean(detail.hasWebBody))}
+                    </CrmBadge>
+                    {detail.needsWebUpdate ? (
+                      <button
+                        type="button"
+                        className="ld-web-drift-btn"
+                        title="Lô CRM đã cập nhật — cần cập nhật bài web"
+                        aria-label="Lô CRM đã cập nhật, cần cập nhật bài đăng web"
+                        onClick={() =>
+                          showAlert(
+                            `«${detail.title}» đã đổi trên CRM sau lần lưu bài web. Dùng AI GPT hoặc Đăng bài để cập nhật lại nội dung công khai.`,
+                            'Lô CRM đã cập nhật',
+                          )
+                        }
+                      >
+                        <Icon icon={CircleAlert} size={14} />
+                      </button>
+                    ) : null}
+                  </span>
                 </div>
               </div>
               <div className="ld-detail-header-actions">
