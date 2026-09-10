@@ -12,7 +12,7 @@ import {
   type StatusColFilters,
 } from './display';
 
-/** v4: + cột Đã đăng web / AI GPT (+ webBody filter). */
+/** v4: + cột Web / AI GPT (+ webBody filter). */
 export const LODAT_LIST_STATE_KEY = 'crmanhung:lodat-list-state:v4';
 
 export type LodatListFields = {
