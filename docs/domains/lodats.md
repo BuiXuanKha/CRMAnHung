@@ -130,7 +130,7 @@ Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo
 | Thứ | Enum / field | List |
 |-----|----------------|------|
 | Loại thửa | `Lodat.projectLotId` trống = dân; có FK = dự án (đọc thông số từ `ProjectLot`) | Không phải hangtag Nhà/Đất |
-| Rao bán | `DANG_BAN` / `TAM_DUNG` / `KHONG_BAN` trên **map** | Form + lọc cột: **Mở bán** / **Dừng bán** (`TAM_DUNG`) / **Không bán**. **Desktop list:** 3 cột công tắc **loại trừ** (radio) — bật cột khác → gán status đó; **không** tắt cột đang bật (tránh lô không trạng thái). Mobile / chi tiết: công tắc 2 chiều hoặc badge (xem §12) |
+| Rao bán | `DANG_BAN` / `TAM_DUNG` / `KHONG_BAN` trên **map** | Form + lọc cột: **Mở bán** / **Dừng bán** (`TAM_DUNG`) / **Không bán**. **Desktop list:** 3 cột công tắc **loại trừ** — bật cột khác → gán status đó; **tắt Mở bán → Dừng bán**, **tắt Dừng bán → Mở bán**; tắt Không bán = no-op (xem §12.6). Mobile / chi tiết: công tắc 2 chiều hoặc badge (xem §12) |
 | Phân loại | `Lodat.propertyKind` `NHA` / `DAT` (cột Postgres; mặc định `DAT`) | Hangtag Nhà / Đất — **web mới**. CRM cũ không có → copy gán hết `DAT`. Lọc hangtag = **icon cột Phân loại**, không phải ô tìm |
 | Đã cọc / Đã bán | — | **Không** trên list; thuộc giao dịch |
 | Chủ hiện tại | map `isActive` | Gợi ý tên khách (`customerHint`) |
@@ -272,7 +272,9 @@ Ba cột riêng: **Mở bán** · **Dừng bán** · **Không bán** (`DANG_BAN`
 | Hành vi | Rule |
 |--------|------|
 | Bật cột khác trạng thái hiện tại | Gán status cột đó; 2 cột kia tắt |
-| Bật / tắt lại cột đang `ON` | **Không đổi** (không cho lô «không trạng thái») |
+| Tắt cột **Mở bán** đang `ON` | → **Dừng bán** (`TAM_DUNG`) |
+| Tắt cột **Dừng bán** đang `ON` | → **Mở bán** (`DANG_BAN`) |
+| Tắt cột **Không bán** đang `ON` | **Không đổi** — ra khỏi Không bán bằng cách bấm Mở bán hoặc Dừng bán |
 | Lọc cột | Icon lọc gắn cột **Mở bán** (cùng `STATUS_FILTER_OPTIONS`) |
 | Sau khi → Dừng bán / Không bán | Lô khỏi list mặc định (chỉ Mở bán); gõ `@` hoặc lọc cột để xem lại |
 
