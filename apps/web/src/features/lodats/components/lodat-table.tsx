@@ -2,7 +2,7 @@
 
 import { useState, type Ref } from 'react';
 import { ImageOff } from 'lucide-react';
-import type { LodatListItem } from '@crmanhung/shared';
+import type { LodatListItem, LodatListingStatus } from '@crmanhung/shared';
 import { ColumnFilter } from '@/shared/ui/column-filter';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
@@ -22,7 +22,10 @@ import {
   type PriceBracket,
 } from '../display';
 import { ActionMenu, type LodatAction } from './action-menu';
-import { SaleToggle } from './sale-toggle';
+import {
+  SALE_STATUS_TRIAD_COLUMNS,
+  SaleStatusCell,
+} from './sale-status-cell';
 import { SpecsColumnFilter } from './specs-column-filter';
 
 type HeaderFilter = 'photo' | 'address' | 'kind' | 'specs' | 'price' | 'status' | null;
@@ -51,7 +54,10 @@ type Props = {
   onCloseMenu: () => void;
   onAction: (plot: LodatListItem, action: LodatAction) => void;
   togglingId: string | null;
-  onToggleSale: (plot: LodatListItem) => void;
+  onSetSaleStatus: (
+    plot: LodatListItem,
+    next: LodatListingStatus,
+  ) => void;
   onOpenGallery: (plot: LodatListItem) => void;
   loadingMore?: boolean;
   scrollRef?: Ref<HTMLDivElement>;
@@ -76,7 +82,7 @@ export function LodatTable({
   onCloseMenu,
   onAction,
   togglingId,
-  onToggleSale,
+  onSetSaleStatus,
   onOpenGallery,
   loadingMore = false,
   scrollRef,
@@ -156,8 +162,8 @@ export function LodatTable({
               onChange={(v) => onPriceBracket(v as PriceBracket)}
             />
           </div>
-          <div className="ld-col-head" role="columnheader">
-            <span>Trạng thái</span>
+          <div className="ld-col-head is-status-triad" role="columnheader">
+            <span>Mở bán</span>
             <ColumnFilter
               label="Trạng thái"
               value={status}
@@ -168,6 +174,12 @@ export function LodatTable({
               onClose={() => setHeaderFilter(null)}
               onChange={onStatus}
             />
+          </div>
+          <div className="ld-col-head is-status-triad" role="columnheader">
+            <span>Dừng bán</span>
+          </div>
+          <div className="ld-col-head is-status-triad" role="columnheader">
+            <span>Không bán</span>
           </div>
           <div className="col-act" role="columnheader">
             Thao tác
@@ -254,14 +266,17 @@ export function LodatTable({
                   <BrokerFeeLine plot={p} />
                 </div>
               </div>
-              <div className="ld-cell" role="cell">
-                <SaleToggle
-                  title={p.title}
-                  status={p.status}
-                  busy={togglingId === p.id}
-                  onToggle={() => onToggleSale(p)}
-                />
-              </div>
+              {SALE_STATUS_TRIAD_COLUMNS.map((col) => (
+                <div key={col.status} className="ld-cell ld-cell-status" role="cell">
+                  <SaleStatusCell
+                    title={p.title}
+                    target={col.status}
+                    current={p.status}
+                    busy={togglingId === p.id}
+                    onSelect={(next) => onSetSaleStatus(p, next)}
+                  />
+                </div>
+              ))}
               <div
                 className="col-act ld-cell"
                 role="cell"

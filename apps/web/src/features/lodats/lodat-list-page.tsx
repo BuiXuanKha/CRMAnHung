@@ -198,17 +198,17 @@ export function LodatListPage() {
   ].join('\0');
 
   const toggleMut = useMutation({
-    mutationFn: (plot: LodatListItem) => {
-      const next =
-        plot.status === LodatSaleStatus.DANG_BAN
-          ? LodatSaleStatus.TAM_DUNG
-          : LodatSaleStatus.DANG_BAN;
-      return updateLodatSaleStatus(plot.id, { status: next });
-    },
+    mutationFn: ({
+      plot,
+      next,
+    }: {
+      plot: LodatListItem;
+      next: LodatListingStatus;
+    }) => updateLodatSaleStatus(plot.id, { status: next }),
     onSuccess: async (updated) => {
       await qc.invalidateQueries({ queryKey: ['lodats'] });
       if (updated.status === LodatSaleStatus.TAM_DUNG) {
-        flash(`Đã tạm dừng «${updated.title}». Gõ @ trên ô tìm để xem lại.`);
+        flash(`Đã dừng bán «${updated.title}». Gõ @ trên ô tìm để xem lại.`);
       } else if (updated.status === LodatSaleStatus.KHONG_BAN) {
         flash(`Đã chuyển «${updated.title}» sang Không bán.`);
       } else {
@@ -385,10 +385,11 @@ export function LodatListPage() {
     router.push(`/lo-dat/${id}/sua`);
   }
 
-  function handleToggleSale(plot: LodatListItem) {
+  function handleSetSaleStatus(plot: LodatListItem, next: LodatListingStatus) {
     if (toggleMut.isPending) return;
+    if (plot.status === next) return;
     setMenuId(null);
-    void toggleMut.mutateAsync(plot);
+    void toggleMut.mutateAsync({ plot, next });
   }
 
   function openGallery(plot: LodatListItem) {
@@ -442,7 +443,7 @@ export function LodatListPage() {
                 kind={kind}
                 extra={extra}
                 priceBracket={priceBracket}
-                togglingId={toggleMut.isPending ? (toggleMut.variables?.id ?? null) : null}
+                togglingId={toggleMut.isPending ? (toggleMut.variables?.plot.id ?? null) : null}
                 onStatus={setStatus}
                 onKind={setKind}
                 onExtra={setExtra}
@@ -451,7 +452,7 @@ export function LodatListPage() {
                 onToggleMenu={(id) => setMenuId((cur) => (cur === id ? null : id))}
                 onCloseMenu={() => setMenuId(null)}
                 onAction={(p, a) => handleAction(p.id, a)}
-                onToggleSale={handleToggleSale}
+                onSetSaleStatus={handleSetSaleStatus}
                 onOpenGallery={openGallery}
                 scrollRef={tableScrollRef}
                 onScroll={onListScroll}
