@@ -6,8 +6,10 @@
  * có URL public / objectKey client (signed GET sau authz). Ghim: `pinTitleServiceSchema`.
  * Số ngày dừng khi Hoàn thành **hoặc** Hủy (`completedAt` luôn ghi).
  * List: `limit` mặc định 50, tối đa 200; `offset` từ 0; `total` = COUNT.
+ * Detail (+FAB): `phones` · `facebook` · `customerIsHidden` — list vẫn chỉ `primaryPhone`.
  */
 import { z } from 'zod';
+import { customerFacebookSchema } from './customers.js';
 import {
   TitleServiceDocKind,
   TitleServiceMoneyKind,
@@ -94,7 +96,22 @@ export const titleServiceListItemSchema = z.object({
 
 export type TitleServiceListItem = z.infer<typeof titleServiceListItemSchema>;
 
+/** SĐT trên chi tiết — FAB gọi / Zalo (đủ id để picker ≥2 số). */
+export const titleServiceCustomerPhoneSchema = z.object({
+  id: z.string(),
+  phone: z.string(),
+  label: z.string().nullable().optional(),
+});
+
+export type TitleServiceCustomerPhone = z.infer<typeof titleServiceCustomerPhoneSchema>;
+
 export const titleServiceDetailSchema = titleServiceListItemSchema.extend({
+  /** Khách ẩn → FAB Messenger không hiện. */
+  customerIsHidden: z.boolean().default(false),
+  /** Đủ mọi SĐT (list chỉ `primaryPhone`). */
+  phones: z.array(titleServiceCustomerPhoneSchema).default([]),
+  /** Meta FB để FAB «Mở Messenger». */
+  facebook: customerFacebookSchema.nullable().optional(),
   progress: z.array(titleServiceProgressSchema).default([]),
   moneyEntries: z.array(titleServiceMoneyEntrySchema).default([]),
   attachments: z.array(titleServiceAttachmentSchema).default([]),

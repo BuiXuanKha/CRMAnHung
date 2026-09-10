@@ -293,13 +293,28 @@ Cùng 12.1.4 (`Hiển thị n / Tổng M` + tải thêm 50). Vùng cuộn = danh
 
 Cùng nội dung panel: tên + mã · SĐT; Trạng thái / Giá / Thu / Chi; nhu cầu; `+ Tiến độ` `+ Tài liệu` `+ Thu` `+ Chi`; timeline, file, thu/chi. Quay lại `/dich-vu-so-do` (giữ list-state).
 
+Detail API thêm `phones` + `facebook` + `customerIsHidden` (cùng shape liên hệ khách) để FAB gọi / Zalo / Messenger — list vẫn chỉ `primaryPhone`.
+
 #### 12.3.1 Máy tính
 
-Một cột, max ~720px. Cùng field panel.
+Một cột, max ~720px. Cùng field panel. **Không** FAB. Nút quay lại «← Dịch vụ sổ đỏ» trên cùng.
 
 #### 12.3.2 Mobile
 
-Cùng 12.3.1. Ô/nút 16px. Nút nhanh 2×2.
+Cùng 12.3.1. Ô/nút 16px. Nút nhanh 2×2 (Tiến độ · Tài liệu · Thu · Chi).
+
+**Không** hiện «← Dịch vụ sổ đỏ» (Back / vuốt hệ thống). Máy tính vẫn hiện.
+
+**FAB** góc phải dưới (máy tính **không** FAB) — cùng kiểu chi tiết khách / lô:
+
+| Nút | Điều kiện | Hành vi |
+|-----|-----------|---------|
+| «⋯» Thêm thao tác | Luôn hiện | Popover + Lucide: **Thêm công việc** · **Ghim / Bỏ ghim** · **Sửa thông tin**. Hồ sơ Tạm dừng / Hoàn thành: chỉ **Khôi phục** |
+| Gọi điện | Khách có ≥1 SĐT | **1 số** → `tel:` thẳng; **≥2 số** → modal chọn số |
+| Zalo | Có ≥1 SĐT | Tab `zalo.me/84…` (cùng trang public) |
+| Mở Messenger | Có Facebook và khách **chưa** ẩn | Cùng menu list khách mobile (`messenger.com` / CrmAlert) |
+
+Không SĐT / không FB → vẫn hiện «⋯»; ẩn Gọi·Zalo·Messenger. Nút nhanh 2×2 giữ nguyên (không đưa vào FAB).
 
 ---
 
