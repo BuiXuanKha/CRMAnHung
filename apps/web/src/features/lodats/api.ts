@@ -33,6 +33,7 @@ export async function listLodats(query: LodatListQuery = {}): Promise<LodatListR
   if (query.direction) params.set('direction', query.direction);
   if (query.photo) params.set('photo', query.photo);
   if (query.addressFilter) params.set('addressFilter', query.addressFilter);
+  if (query.webBody) params.set('webBody', query.webBody);
   if (query.limit != null) params.set('limit', String(query.limit));
   if (query.offset != null) params.set('offset', String(query.offset));
   const qs = params.toString();

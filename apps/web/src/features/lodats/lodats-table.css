@@ -18,6 +18,8 @@
     100px
     minmax(110px, 0.8fr)
     minmax(140px, 1fr)
+    108px
+    72px
     92px
     92px
     98px
@@ -284,4 +286,57 @@
 
 .ld-action-menu button:hover {
   background: #f1f5f9;
+}
+
+.ld-cell-web,
+.ld-cell-gpt {
+  justify-content: center;
+}
+
+.ld-web-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.ld-web-drift-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: #dc2626;
+  cursor: pointer;
+  padding: 0;
+}
+
+.ld-web-drift-btn:hover {
+  background: #fee2e2;
+}
+
+.ld-gpt-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.ld-gpt-btn:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: #eff6ff;
 }

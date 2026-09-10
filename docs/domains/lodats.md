@@ -179,7 +179,8 @@ Thứ tự mỗi trang: **12.1 máy tính** → **12.2 mobile** → trong từng
 ```
 ┌ Ô tìm ───────────────────────────────────────────────────────┐
 ├ Bảng: Ảnh · Tiêu đề/Địa chỉ · Phân loại · DT·MT·Hướng · Giá ─┤
-│       · Trạng thái · Thao tác                                │
+│       · Đã đăng web · AI GPT · Mở bán · Dừng bán · Không bán │
+│       · Thao tác                                             │
 ├ Footer đếm ──────────────────────────────────────────────────┤
 └ Không rail phải ─────────────────────────────────────────────┘
 ```
@@ -267,6 +268,14 @@ Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
 ##### 5. Giá bán
 
 `crm-money`. Phụ: ghi chú giá; hoa hồng chữ đã lưu (ví dụ `1%` · `Chưa trao đổi`). Thiếu giá = `—`. Thiếu hoa hồng = ẩn dòng.
+
+##### 5b. Đã đăng web
+
+Hangtag: **Đã đăng** (`hasWebBody` — `PublicLotListing.bodyHtml` không rỗng) `green` · **Chưa đăng** `gray`. Cùng nghĩa badge Đã soạn / Chưa soạn trên `/dang-bai`. Lọc cột: Tất cả · Đã đăng · Chưa đăng. Icon đỏ `needsWebUpdate` (nếu có) cạnh hangtag — CRM đổi sau lần lưu bài.
+
+##### 5c. AI GPT
+
+Nút **GPT** (`Sparkles`) → modal tạo content (cùng `LotGptContentDialog` `/dang-bai`). Không lọc cột. Áp dụng bài → mở `/dang-bai` để soạn/lưu.
 
 ##### 6. Trạng thái — 3 cột công tắc (desktop)
 

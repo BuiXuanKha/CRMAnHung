@@ -12,8 +12,8 @@ import {
   type StatusColFilters,
 } from './display';
 
-/** v3: 3 cột trạng thái = Tất cả / đúng / không đúng. */
-export const LODAT_LIST_STATE_KEY = 'crmanhung:lodat-list-state:v3';
+/** v4: + cột Đã đăng web / AI GPT (+ webBody filter). */
+export const LODAT_LIST_STATE_KEY = 'crmanhung:lodat-list-state:v4';
 
 export type LodatListFields = {
   searchKeyword: string;
@@ -28,6 +28,7 @@ export type LodatListSavedState = ListSavedState<LodatListFields>;
 const DEFAULT_EXTRA: ExtraFilters = {
   photo: 'all',
   address: 'all',
+  webBody: 'all',
   area: 'all',
   direction: 'all',
 };
@@ -38,6 +39,7 @@ function parseExtra(raw: unknown): ExtraFilters {
   return {
     photo: extra.photo ?? 'all',
     address: extra.address ?? 'all',
+    webBody: extra.webBody ?? 'all',
     area: extra.area ?? 'all',
     direction: extra.direction ?? 'all',
   };

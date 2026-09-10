@@ -14,11 +14,13 @@ import {
   type LodatListItem,
   type LodatListQuery,
   type LodatListingStatus,
+  type PublicWebStaffLotRow,
 } from '@crmanhung/shared';
 import { needsMoreListScrollHeight, resetListScrollIfFiltersChanged, useCrmInfiniteList } from '@/shared/list-state';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
 import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
+import { LotGptContentDialog } from '@/features/public-content/components/lot-gpt-content-dialog';
 import { getLodat, listLodats, updateLodatImageRotation, updateLodatSaleStatus } from './api';
 import { type LodatAction } from './components/action-menu';
 import { createTransactionHref } from './transaction-href';
@@ -26,6 +28,7 @@ import { FilterBar } from './components/filter-bar';
 import { LodatCardList } from './components/lodat-card-list';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTable } from './components/lodat-table';
+import { lodatListItemToGptLot } from './lodat-to-gpt-lot';
 import {
   DEFAULT_STATUS_COL_FILTERS,
   countMobileLodatFilters,
@@ -52,6 +55,7 @@ import '@/shared/ui/money.css';
 const DEFAULT_EXTRA: ExtraFilters = {
   photo: 'all',
   address: 'all',
+  webBody: 'all',
   area: 'all',
   direction: 'all',
 };
@@ -104,6 +108,7 @@ export function LodatListPage() {
   const [filterOpen, setFilterOpen] = useState(false);
   const [galleryLodatId, setGalleryLodatId] = useState<string | null>(null);
   const [galleryIndex, setGalleryIndex] = useState(0);
+  const [gptLot, setGptLot] = useState<PublicWebStaffLotRow | null>(null);
   const [restoreReady, setRestoreReady] = useState(false);
   const [listConcealed, setListConcealed] = useState(false);
   const restoreSnap = useRef<LodatListSavedState | null>(null);
@@ -152,6 +157,7 @@ export function LodatListPage() {
     direction: extra.direction !== 'all' ? extra.direction : undefined,
     photo: extra.photo !== 'all' ? extra.photo : undefined,
     addressFilter: extra.address !== 'all' ? extra.address : undefined,
+    webBody: extra.webBody !== 'all' ? extra.webBody : undefined,
   };
 
   const {
@@ -206,6 +212,7 @@ export function LodatListPage() {
     kind,
     extra.photo,
     extra.address,
+    extra.webBody,
     extra.area,
     extra.direction,
     priceBracket,
@@ -469,6 +476,18 @@ export function LodatListPage() {
                 onAction={(p, a) => handleAction(p.id, a)}
                 onSetSaleStatus={handleSetSaleStatus}
                 onOpenGallery={openGallery}
+                onGptContent={(plot) => {
+                  setSelectedId(plot.id);
+                  setMenuId(null);
+                  setGptLot(lodatListItemToGptLot(plot));
+                }}
+                onNeedsWebUpdate={(plot) => {
+                  setAlertBox({
+                    title: 'Lô CRM đã cập nhật',
+                    message:
+                      `«${plot.title}» đã đổi trên CRM sau lần lưu bài web. Mở Đăng bài để cập nhật lại nội dung công khai.`,
+                  });
+                }}
                 scrollRef={tableScrollRef}
                 onScroll={onListScroll}
               />
@@ -528,6 +547,17 @@ export function LodatListPage() {
 
       <CrmToast message={toast} />
       {createTaskDialog}
+
+      <LotGptContentDialog
+        lot={gptLot}
+        onClose={() => setGptLot(null)}
+        onFlash={flash}
+        onApplyToEditor={() => {
+          setGptLot(null);
+          flash('Mở Đăng bài để dán / lưu nội dung GPT lên web khách.');
+          router.push('/dang-bai');
+        }}
+      />
     </div>
   );
 }

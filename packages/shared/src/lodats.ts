@@ -42,6 +42,13 @@ export const lodatListItemSchema = z.object({
   projectLotId: z.string().nullable().optional(),
   /** NV tạo / đang rao — dashboard admin */
   createdByEmployeeName: z.string().nullable().optional(),
+  /**
+   * Đã soạn bài web (`PublicLotListing.bodyHtml` không rỗng).
+   * Cột «Đã đăng web» trên `/lo-dat` — cùng nghĩa badge Đã soạn `/dang-bai`.
+   */
+  hasWebBody: z.boolean().default(false),
+  /** CRM đổi sau lần lưu bài web — icon đỏ (tuỳ chọn hiển thị). */
+  needsWebUpdate: z.boolean().default(false),
   updatedAt: z.string(),
 });
 
@@ -95,6 +102,8 @@ export const lodatListQuerySchema = z.object({
   direction: z.string().trim().max(40).optional(),
   photo: lodatHasFilterSchema.optional(),
   addressFilter: lodatHasFilterSchema.optional(),
+  /** Lọc cột Đã đăng web: đã soạn bodyHtml / chưa. */
+  webBody: lodatHasFilterSchema.optional(),
   limit: z.coerce.number().int().min(1).max(LODAT_LIST_MAX_PAGE_SIZE).optional(),
   offset: z.coerce.number().int().min(0).optional(),
 });

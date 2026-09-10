@@ -64,6 +64,8 @@ export function hasSpecs(p: LodatListItem): boolean {
 export type ExtraFilters = {
   photo: 'all' | 'has' | 'empty';
   address: 'all' | 'has' | 'empty';
+  /** Đã đăng web — bodyHtml không rỗng */
+  webBody: 'all' | 'has' | 'empty';
   /** Khoảng diện tích (m²) — cột DT · MT · Hướng */
   area: AreaBracket;
   /** Hướng lô — khớp `Lodat.direction` */
@@ -85,6 +87,21 @@ export const ADDRESS_FILTER_OPTIONS = [
   { value: 'has', label: 'Có địa chỉ' },
   { value: 'empty', label: 'Chưa có địa chỉ' },
 ];
+
+/** Lọc cột Đã đăng web — đã soạn bodyHtml / chưa. */
+export const WEB_BODY_FILTER_OPTIONS = [
+  { value: 'all', label: 'Tất cả web' },
+  { value: 'has', label: 'Đã đăng' },
+  { value: 'empty', label: 'Chưa đăng' },
+];
+
+export function lodatWebBodyLabel(hasWebBody: boolean): string {
+  return hasWebBody ? 'Đã đăng' : 'Chưa đăng';
+}
+
+export function lodatWebBodyTone(hasWebBody: boolean): BadgeTone {
+  return hasWebBody ? 'green' : 'gray';
+}
 
 export const AREA_FILTER_OPTIONS: { value: AreaBracket; label: string }[] = [
   { value: 'all', label: 'Tất cả diện tích' },
@@ -295,6 +312,7 @@ export function countActiveLodatFilters(
   if (kind) n += 1;
   if (extra.photo !== 'all') n += 1;
   if (extra.address !== 'all') n += 1;
+  if (extra.webBody !== 'all') n += 1;
   if (extra.area !== 'all') n += 1;
   if (extra.direction !== 'all') n += 1;
   if (priceBracket) n += 1;
@@ -319,6 +337,8 @@ export function applyExtraFilters(
     const hasAddr = Boolean(p.address?.trim());
     if (extra.address === 'has' && !hasAddr) return false;
     if (extra.address === 'empty' && hasAddr) return false;
+    if (extra.webBody === 'has' && !p.hasWebBody) return false;
+    if (extra.webBody === 'empty' && p.hasWebBody) return false;
     if (!matchesAreaBracket(p.areaM2, extra.area)) return false;
     if (extra.direction !== 'all') {
       if ((p.direction?.trim() || '') !== extra.direction) return false;

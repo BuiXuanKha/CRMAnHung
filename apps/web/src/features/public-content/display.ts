@@ -130,6 +130,7 @@ export type StaffLotFilters = {
 export const DEFAULT_STAFF_LOT_EXTRA: ExtraFilters = {
   photo: 'all',
   address: 'all',
+  webBody: 'all',
   area: 'all',
   direction: 'all',
 };

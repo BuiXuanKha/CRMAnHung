@@ -80,6 +80,9 @@ const LIST_INCLUDE = {
     },
   },
   createdBy: { select: { id: true, fullName: true } },
+  publicListing: {
+    select: { bodyHtml: true, needsWebUpdate: true },
+  },
 } satisfies Prisma.LodatInclude;
 
 type LodatRow = Prisma.LodatGetPayload<{ include: typeof LIST_INCLUDE }>;
@@ -296,6 +299,8 @@ export class LodatsService {
       customerHint: activeMap?.customer?.fullName ?? null,
       projectLotId: row.projectLotId ?? null,
       createdByEmployeeName: row.createdBy?.fullName ?? null,
+      hasWebBody: Boolean(row.publicListing?.bodyHtml?.trim()),
+      needsWebUpdate: Boolean(row.publicListing?.needsWebUpdate),
       updatedAt: updatedAt.toISOString(),
     };
   }
@@ -461,6 +466,19 @@ export class LodatsService {
       });
     } else if (query.addressFilter === 'empty') {
       and.push({ addressId: null, projectLotId: null });
+    }
+
+    if (query.webBody === 'has') {
+      and.push({
+        publicListing: { is: { bodyHtml: { not: '' } } },
+      });
+    } else if (query.webBody === 'empty') {
+      and.push({
+        OR: [
+          { publicListing: { is: null } },
+          { publicListing: { is: { bodyHtml: '' } } },
+        ],
+      });
     }
 
     return and;

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type Ref } from 'react';
-import { ImageOff } from 'lucide-react';
+import { CircleAlert, ImageOff, Sparkles } from 'lucide-react';
 import type { LodatListItem, LodatListingStatus } from '@crmanhung/shared';
 import { LodatSaleStatus } from '@crmanhung/shared';
 import { ColumnFilter } from '@/shared/ui/column-filter';
@@ -13,12 +13,15 @@ import {
   PHOTO_FILTER_OPTIONS,
   PRICE_BRACKET_OPTIONS,
   STATUS_COL_FILTER_OPTIONS,
+  WEB_BODY_FILTER_OPTIONS,
   formatArea,
   formatBrokerFee,
   formatFrontageDir,
   formatPriceVnd,
   kindLabel,
   kindTone,
+  lodatWebBodyLabel,
+  lodatWebBodyTone,
   type ExtraFilters,
   type PriceBracket,
   type StatusColFilter,
@@ -37,6 +40,7 @@ type HeaderFilter =
   | 'kind'
   | 'specs'
   | 'price'
+  | 'web'
   | 'status-open'
   | 'status-paused'
   | 'status-off'
@@ -86,6 +90,8 @@ type Props = {
     next: LodatListingStatus,
   ) => void;
   onOpenGallery: (plot: LodatListItem) => void;
+  onGptContent: (plot: LodatListItem) => void;
+  onNeedsWebUpdate?: (plot: LodatListItem) => void;
   loadingMore?: boolean;
   scrollRef?: Ref<HTMLDivElement>;
   onScroll?: () => void;
@@ -111,6 +117,8 @@ export function LodatTable({
   togglingId,
   onSetSaleStatus,
   onOpenGallery,
+  onGptContent,
+  onNeedsWebUpdate,
   loadingMore = false,
   scrollRef,
   onScroll,
@@ -188,6 +196,23 @@ export function LodatTable({
               onClose={() => setHeaderFilter(null)}
               onChange={(v) => onPriceBracket(v as PriceBracket)}
             />
+          </div>
+          <div className="ld-col-head" role="columnheader">
+            <span>Đã đăng web</span>
+            <ColumnFilter
+              label="Đã đăng web"
+              value={extra.webBody}
+              options={WEB_BODY_FILTER_OPTIONS}
+              open={headerFilter === 'web'}
+              onToggle={() => toggleFilter('web')}
+              onClose={() => setHeaderFilter(null)}
+              onChange={(v) =>
+                onExtra({ ...extra, webBody: v as ExtraFilters['webBody'] })
+              }
+            />
+          </div>
+          <div className="ld-col-head" role="columnheader">
+            <span title="Tạo content bằng AI GPT">AI GPT</span>
           </div>
           {SALE_STATUS_TRIAD_COLUMNS.map((col) => {
             const colKey = STATUS_COL_BY_SALE[col.status];
@@ -302,6 +327,38 @@ export function LodatTable({
                   ) : null}
                   <BrokerFeeLine plot={p} />
                 </div>
+              </div>
+              <div className="ld-cell ld-cell-web" role="cell">
+                <div className="ld-web-row">
+                  <CrmBadge tone={lodatWebBodyTone(Boolean(p.hasWebBody))}>
+                    {lodatWebBodyLabel(Boolean(p.hasWebBody))}
+                  </CrmBadge>
+                  {p.needsWebUpdate ? (
+                    <button
+                      type="button"
+                      className="ld-web-drift-btn"
+                      title="Lô CRM đã cập nhật — cần cập nhật bài web"
+                      aria-label="Lô CRM đã cập nhật, cần cập nhật bài đăng web"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onNeedsWebUpdate?.(p);
+                      }}
+                    >
+                      <Icon icon={CircleAlert} size={14} />
+                    </button>
+                  ) : null}
+                </div>
+              </div>
+              <div className="ld-cell ld-cell-gpt" role="cell" onClick={(e) => e.stopPropagation()}>
+                <button
+                  type="button"
+                  className="ld-gpt-btn"
+                  title="Tạo content bằng AI GPT"
+                  onClick={() => onGptContent(p)}
+                >
+                  <Icon icon={Sparkles} size={14} />
+                  GPT
+                </button>
               </div>
               {SALE_STATUS_TRIAD_COLUMNS.map((col) => (
                 <div key={col.status} className="ld-cell ld-cell-status" role="cell">

@@ -103,6 +103,10 @@ export class ListLodatsQueryDto {
   addressFilter?: 'has' | 'empty';
 
   @IsOptional()
+  @IsIn(['has', 'empty'])
+  webBody?: 'has' | 'empty';
+
+  @IsOptional()
   @Transform(({ value }) => toOptionalInt(value))
   @IsInt()
   @Min(1)
