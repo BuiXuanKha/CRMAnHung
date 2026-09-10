@@ -1,8 +1,8 @@
 /**
  * Lodats contract — list + detail + gallery + same-ward + transaction history
  *
- * `status` trên list = trạng thái **rao bán** (Mở bán / Tạm dừng),
- * không phải đã bán / đặt cọc (giao dịch P3).
+ * `status` trên list = trạng thái **rao bán** (Mở bán / Dừng bán / Không bán).
+ * Tạo lô mặc định = Không bán. Đặt cọc / đã bán thuộc giao dịch P3.
  */
 import { z } from 'zod';
 import {
@@ -280,7 +280,7 @@ export const createLodatSchema = z
     direction: z.string().trim().max(40).nullable().optional(),
     kind: z.nativeEnum(LodatKind).optional(),
     note: z.string().trim().max(4000).nullable().optional(),
-    status: lodatListingStatusSchema.optional(),
+    status: lodatListingStatusSchema.default(LodatSaleStatus.KHONG_BAN),
     priceVnd: z.union([z.number().nonnegative(), z.string()]).nullable().optional(),
     priceNote: z.string().trim().max(200).nullable().optional(),
     brokerFeeNote: z.string().trim().max(200).nullable().optional(),

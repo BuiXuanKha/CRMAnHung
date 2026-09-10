@@ -65,7 +65,7 @@ export function LodatCreatePage() {
   const [kind, setKind] = useState<LodatKind>(LodatKind.DAT);
   const [note, setNote] = useState('');
   const [status, setStatus] = useState<CreateLodatInput['status']>(
-    LodatSaleStatus.DANG_BAN,
+    LodatSaleStatus.KHONG_BAN,
   );
   const [priceVnd, setPriceVnd] = useState('');
   const [priceNote, setPriceNote] = useState('');
@@ -503,9 +503,9 @@ export function LodatCreatePage() {
                       }
                       disabled={saving}
                     >
-                      <option value={LodatSaleStatus.DANG_BAN}>Mở bán</option>
-                      <option value={LodatSaleStatus.TAM_DUNG}>Tạm dừng</option>
                       <option value={LodatSaleStatus.KHONG_BAN}>Không bán</option>
+                      <option value={LodatSaleStatus.DANG_BAN}>Mở bán</option>
+                      <option value={LodatSaleStatus.TAM_DUNG}>Dừng bán</option>
                     </select>
                   </label>
                 </div>
