@@ -135,7 +135,7 @@ Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo
 | Đã cọc / Đã bán | — | **Không** trên list; thuộc giao dịch |
 | Chủ hiện tại | map `isActive` | Gợi ý tên khách (`customerHint`) |
 
-**Không bán** (`KHONG_BAN`): đã có chủ, **chưa có nhu cầu bán** — khác **Dừng bán** / Tạm dừng (`TAM_DUNG`: đã/đang rao, tạm ngưng). Mặc định **ẩn** lô dừng bán **và** không bán. Giá / hoa hồng / ghi chú giá nằm trên **map**, không trên thửa. Web khách: lô **Không bán** **không** hiện trang chủ / catalog / sitemap / slug (xem `public-content.md`).
+**Không bán** (`KHONG_BAN`): đã có chủ, **chưa có nhu cầu bán** — khác **Dừng bán** / Tạm dừng (`TAM_DUNG`: đã/đang rao, tạm ngưng). **Tạo lô mới = `KHONG_BAN`** (lưu hồ sơ chủ, chưa rao); NV bật **Mở bán** khi thật sự bán. Mặc định list **ẩn** lô dừng bán **và** không bán. Giá / hoa hồng / ghi chú giá nằm trên **map**, không trên thửa. Web khách: lô **Không bán** **không** hiện trang chủ / catalog / sitemap / slug (xem `public-content.md`).
 
 ## 4–10.
 
@@ -517,14 +517,15 @@ Layout 2 cột như §12.4.1: trái form; phải Hình ảnh + Xem nhanh sticky;
 ┌ Loại thửa: (•) Đất dân   ( ) Lô dự án ─────────────────────────┐
 │ Đất dân: địa chỉ REGULAR + tiêu đề* + DT/MT/hướng/phân loại/ghi chú
 │ Dự án:  địa chỉ PROJECT → chọn lô kho (ẩn/khoá lô NV đã giữ)  │
-│ Giá bán: trạng thái (mặc định Mở bán) · giá · chip ghi chú giá │
-│          · chip hoa hồng · ghi chú liên kết chủ                │
+│ Giá bán: trạng thái (mặc định Không bán) · giá · chip ghi chú giá │
+│          · chip hoa hồng · ghi chú liên kết chủ                  │
 └ Hình ảnh (đất dân + lô dự án, tối đa 5 ảnh thêm) — upload sau khi tạo xong ─┘
 ```
 
+- **Trạng thái mặc định khi tạo = Không bán** (`KHONG_BAN`) — chưa rao; NV chọn Mở bán / Dừng bán trên form nếu cần. API `POST /lodats` nếu thiếu `status` cũng gán `KHONG_BAN`.
 - Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs. **Được thêm ảnh riêng thửa** (chat / dán / file) — không phải ảnh dự án trên sổ địa chỉ.
 - Lô **dân**: bắt buộc tiêu đề + địa chỉ REGULAR; specs như trang sửa; chip hướng/ghi chú giá/hoa hồng §12.4.3.
-- Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ lần lượt (mỗi file **nén client** trước; nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`. Nút Lưu hiện `Đang tải ảnh k/n…` khi đang gửi file.
+- Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ lần lượt (mỗi file **nén client** trước; nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`. Nút Lưu hiện `Đang tải ảnh k/n…` khi đang gửi file. Lô mới **không** hiện list mặc định (chỉ Mở bán) cho đến khi NV bật Mở bán.
 - 1 luồng active / NV / lô kho — API chặn, picker cũng khoá («Bạn đang giữ»).
 
 #### 12.5.2 Mobile

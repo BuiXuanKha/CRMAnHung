@@ -1024,7 +1024,7 @@ export class LodatsService {
             priceNote: dto.priceNote?.trim() || null,
             brokerFeeNote: dto.brokerFeeNote?.trim() || null,
             note: dto.mapNote?.trim() || null,
-            status: dto.status ?? 'DANG_BAN',
+            status: dto.status ?? 'KHONG_BAN',
             isActive: true,
             createdBy: { connect: { id: user.id } },
           },
