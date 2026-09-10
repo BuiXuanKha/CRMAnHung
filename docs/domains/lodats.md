@@ -209,9 +209,12 @@ Substring, không phân biệt hoa thường, **giữ dấu**.
 
 | Ô tìm | Tập lô |
 |-------|--------|
-| Lọc **Tất cả trạng thái** (mặc định) | Mở bán **+** Dừng bán **+** Không bán (`includePaused`) |
-| Lọc **Mở bán** / **Dừng bán** / **Không bán** | Chỉ đúng một trạng thái |
-| `@` | Mở bán **+** Dừng bán **+** Không bán |
+| Không `@` + 3 cột lọc mặc định **Tất cả** | Mở bán **+** Dừng bán **+** Không bán (`includePaused` / `statusIn` đủ 3) |
+| Cột **Mở bán**: Mở bán / Không mở bán | Chỉ `DANG_BAN` · hoặc loại trừ `DANG_BAN` |
+| Cột **Dừng bán**: Tạm dừng / Không tạm dừng | Chỉ `TAM_DUNG` · hoặc loại trừ `TAM_DUNG` |
+| Cột **Không bán**: Không bán / Không phải Không bán | Chỉ `KHONG_BAN` · hoặc loại trừ `KHONG_BAN` |
+| Nhiều cột cùng lọc | **AND** (vd. Không mở bán + Không tạm dừng = chỉ Không bán) |
+| `@` | Mở bán **+** Dừng bán **+** Không bán (ghi đè lọc cột trạng thái) |
 | `@@` | **Chỉ** Dừng bán (`TAM_DUNG`) |
 
 Lọc cột Trạng thái = Tạm dừng / Không bán vẫn hiện đúng tập đó (không cần `@`).
@@ -275,8 +278,8 @@ Ba cột riêng: **Mở bán** · **Dừng bán** · **Không bán** (`DANG_BAN`
 | Tắt cột **Mở bán** đang `ON` | → **Dừng bán** (`TAM_DUNG`) |
 | Tắt cột **Dừng bán** đang `ON` | → **Mở bán** (`DANG_BAN`) |
 | Tắt cột **Không bán** đang `ON` | **Không đổi** — ra khỏi Không bán bằng cách bấm Mở bán hoặc Dừng bán |
-| Lọc cột | Icon lọc **trên cả 3 cột** (Mở bán / Dừng bán / Không bán): menu «Tất cả» · «Chỉ …»; mặc định Tất cả; Xóa lọc về Tất cả |
-| Sau khi → Dừng bán / Không bán | Vẫn còn trên list mặc định (Tất cả); chọn «Chỉ Mở bán» thì ẩn |
+| Lọc cột | Icon lọc **trên cả 3 cột**. Mỗi cột menu 3 mục: **Tất cả** · **đúng trạng thái** · **không đúng** (AND giữa các cột; mặc định cả 3 = Tất cả) |
+| Sau khi → Dừng bán / Không bán | Vẫn còn trên list mặc định; lọc «Mở bán» / «Không mở bán»… theo cột |
 
 Không phải đã bán / đặt cọc (thuộc GD). **Mobile thẻ:** badge trạng thái (không 3 cột).
 

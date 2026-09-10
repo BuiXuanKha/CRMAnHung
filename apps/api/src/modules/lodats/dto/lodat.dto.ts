@@ -42,6 +42,23 @@ export class ListLodatsQueryDto {
   @IsIn(['DANG_BAN', 'TAM_DUNG', 'KHONG_BAN'])
   status?: 'DANG_BAN' | 'TAM_DUNG' | 'KHONG_BAN';
 
+  /** Comma-separated: DANG_BAN,TAM_DUNG,KHONG_BAN. Empty string = no rows. */
+  @IsOptional()
+  @Transform(({ value }) => {
+    if (value === undefined || value === null) return undefined;
+    if (value === '') return [];
+    const parts = Array.isArray(value)
+      ? value.map(String)
+      : String(value)
+          .split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+    return parts;
+  })
+  @IsArray()
+  @IsIn(['DANG_BAN', 'TAM_DUNG', 'KHONG_BAN'], { each: true })
+  statusIn?: Array<'DANG_BAN' | 'TAM_DUNG' | 'KHONG_BAN'>;
+
   @IsOptional()
   @IsIn(['NHA', 'DAT'])
   kind?: 'NHA' | 'DAT';

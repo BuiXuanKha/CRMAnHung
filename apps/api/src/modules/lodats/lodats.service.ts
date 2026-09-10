@@ -479,6 +479,16 @@ export class LodatsService {
       and.push({
         maps: { some: { isActive: true, status: 'TAM_DUNG' } },
       });
+    } else if (query.statusIn !== undefined) {
+      if (query.statusIn.length === 0) {
+        and.push({ id: { in: [] } });
+      } else {
+        and.push({
+          maps: {
+            some: { isActive: true, status: { in: query.statusIn } },
+          },
+        });
+      }
     } else if (query.status) {
       and.push({
         maps: { some: { isActive: true, status: query.status } },

@@ -3,6 +3,8 @@ import {
   LodatSaleStatus,
   LODAT_DIRECTION_OPTIONS,
   type LodatListItem,
+  type LodatListingStatus,
+  type LodatStatusColFilter,
 } from '@crmanhung/shared';
 import type { BadgeTone } from '@/shared/ui/badge';
 
@@ -125,10 +127,10 @@ export const KIND_FILTER_OPTIONS = [
   { value: LodatKind.DAT, label: 'Đất' },
 ];
 
-/** Sentinel lọc «Tất cả» = Mở bán + Tạm dừng + Không bán (`includePaused`). */
+/** Sentinel lọc «Tất cả» mobile = Mở bán + Tạm dừng + Không bán. */
 export const STATUS_FILTER_ALL = 'all';
 
-/** Mặc định list: hiện hết Mở bán / Dừng bán / Không bán. */
+/** Mobile Bộ lọc: một dropdown; desktop dùng 3 cột tri-state. */
 export const STATUS_FILTER_DEFAULT = STATUS_FILTER_ALL;
 
 export const STATUS_FILTER_OPTIONS = [
@@ -137,6 +139,105 @@ export const STATUS_FILTER_OPTIONS = [
   { value: LodatSaleStatus.TAM_DUNG, label: 'Dừng bán' },
   { value: LodatSaleStatus.KHONG_BAN, label: 'Không bán' },
 ];
+
+/** Lọc một cột trạng thái: Tất cả · đúng · không đúng. */
+export type StatusColFilter = LodatStatusColFilter;
+
+export type StatusColFilters = {
+  open: StatusColFilter; // Mở bán
+  paused: StatusColFilter; // Dừng bán / Tạm dừng
+  off: StatusColFilter; // Không bán
+};
+
+export const DEFAULT_STATUS_COL_FILTERS: StatusColFilters = {
+  open: 'all',
+  paused: 'all',
+  off: 'all',
+};
+
+export const STATUS_COL_FILTER_OPTIONS: Record<
+  keyof StatusColFilters,
+  { value: StatusColFilter; label: string }[]
+> = {
+  open: [
+    { value: 'all', label: 'Tất cả' },
+    { value: 'yes', label: 'Mở bán' },
+    { value: 'no', label: 'Không mở bán' },
+  ],
+  paused: [
+    { value: 'all', label: 'Tất cả' },
+    { value: 'yes', label: 'Tạm dừng' },
+    { value: 'no', label: 'Không tạm dừng' },
+  ],
+  off: [
+    { value: 'all', label: 'Tất cả' },
+    { value: 'yes', label: 'Không bán' },
+    { value: 'no', label: 'Không phải Không bán' },
+  ],
+};
+
+const STATUS_COL_TO_VALUE: Record<keyof StatusColFilters, LodatListingStatus> = {
+  open: LodatSaleStatus.DANG_BAN,
+  paused: LodatSaleStatus.TAM_DUNG,
+  off: LodatSaleStatus.KHONG_BAN,
+};
+
+/**
+ * AND 3 cột → tập status còn lại.
+ * `'all'` = đủ 3; `'empty'` = mâu thuẫn (không dòng).
+ */
+export function resolveStatusColFilters(
+  cols: StatusColFilters,
+): LodatListingStatus[] | 'all' | 'empty' {
+  let set = new Set<LodatListingStatus>([
+    LodatSaleStatus.DANG_BAN,
+    LodatSaleStatus.TAM_DUNG,
+    LodatSaleStatus.KHONG_BAN,
+  ]);
+  for (const key of Object.keys(STATUS_COL_TO_VALUE) as (keyof StatusColFilters)[]) {
+    const mode = cols[key];
+    const status = STATUS_COL_TO_VALUE[key];
+    if (mode === 'yes') {
+      set = new Set([...set].filter((s) => s === status));
+    } else if (mode === 'no') {
+      set.delete(status);
+    }
+  }
+  if (set.size === 0) return 'empty';
+  if (set.size === 3) return 'all';
+  return [...set];
+}
+
+/** Mobile dropdown → 3 cột (một trạng thái hoặc tất cả). */
+export function statusColsFromMobileStatus(status: string): StatusColFilters {
+  if (status === LodatSaleStatus.DANG_BAN) {
+    return { open: 'yes', paused: 'all', off: 'all' };
+  }
+  if (status === LodatSaleStatus.TAM_DUNG) {
+    return { open: 'all', paused: 'yes', off: 'all' };
+  }
+  if (status === LodatSaleStatus.KHONG_BAN) {
+    return { open: 'all', paused: 'all', off: 'yes' };
+  }
+  return { ...DEFAULT_STATUS_COL_FILTERS };
+}
+
+/** 3 cột → giá trị select mobile (best-effort). */
+export function mobileStatusFromCols(cols: StatusColFilters): string {
+  const resolved = resolveStatusColFilters(cols);
+  if (resolved === 'all') return STATUS_FILTER_ALL;
+  if (resolved === 'empty') return STATUS_FILTER_ALL;
+  if (resolved.length === 1) return resolved[0];
+  return STATUS_FILTER_ALL;
+}
+
+export function countActiveStatusColFilters(cols: StatusColFilters): number {
+  let n = 0;
+  if (cols.open !== 'all') n += 1;
+  if (cols.paused !== 'all') n += 1;
+  if (cols.off !== 'all') n += 1;
+  return n;
+}
 
 export function listingSaleStatusLabel(status: string): string {
   if (status === LodatSaleStatus.DANG_BAN) return 'Mở bán';
@@ -185,14 +286,12 @@ export function matchesPriceBracket(
 }
 
 export function countActiveLodatFilters(
-  status: string,
+  statusCols: StatusColFilters,
   kind: string,
   extra: ExtraFilters,
   priceBracket: PriceBracket = '',
 ): number {
-  let n = 0;
-  // Mặc định «Tất cả» không tính là «đang lọc»; chọn 1 trạng thái thì có.
-  if (status && status !== STATUS_FILTER_DEFAULT) n += 1;
+  let n = countActiveStatusColFilters(statusCols);
   if (kind) n += 1;
   if (extra.photo !== 'all') n += 1;
   if (extra.address !== 'all') n += 1;
@@ -202,8 +301,11 @@ export function countActiveLodatFilters(
   return n;
 }
 
-export function countMobileLodatFilters(status: string, priceBracket: PriceBracket): number {
-  return (status && status !== STATUS_FILTER_DEFAULT ? 1 : 0) + (priceBracket ? 1 : 0);
+export function countMobileLodatFilters(
+  statusCols: StatusColFilters,
+  priceBracket: PriceBracket,
+): number {
+  return countActiveStatusColFilters(statusCols) + (priceBracket ? 1 : 0);
 }
 
 export function applyExtraFilters(

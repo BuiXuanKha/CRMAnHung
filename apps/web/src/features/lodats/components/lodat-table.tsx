@@ -12,7 +12,7 @@ import {
   KIND_FILTER_OPTIONS,
   PHOTO_FILTER_OPTIONS,
   PRICE_BRACKET_OPTIONS,
-  STATUS_FILTER_ALL,
+  STATUS_COL_FILTER_OPTIONS,
   formatArea,
   formatBrokerFee,
   formatFrontageDir,
@@ -21,6 +21,8 @@ import {
   kindTone,
   type ExtraFilters,
   type PriceBracket,
+  type StatusColFilter,
+  type StatusColFilters,
 } from '../display';
 import { ActionMenu, type LodatAction } from './action-menu';
 import {
@@ -35,16 +37,25 @@ type HeaderFilter =
   | 'kind'
   | 'specs'
   | 'price'
-  | 'status-dang'
-  | 'status-tam'
-  | 'status-khong'
+  | 'status-open'
+  | 'status-paused'
+  | 'status-off'
   | null;
 
-const STATUS_TRIAD_FILTER_KEYS = {
-  [LodatSaleStatus.DANG_BAN]: 'status-dang',
-  [LodatSaleStatus.TAM_DUNG]: 'status-tam',
-  [LodatSaleStatus.KHONG_BAN]: 'status-khong',
-} as const;
+const STATUS_COL_BY_SALE: Record<
+  (typeof SALE_STATUS_TRIAD_COLUMNS)[number]['status'],
+  keyof StatusColFilters
+> = {
+  [LodatSaleStatus.DANG_BAN]: 'open',
+  [LodatSaleStatus.TAM_DUNG]: 'paused',
+  [LodatSaleStatus.KHONG_BAN]: 'off',
+};
+
+const STATUS_HEADER_KEY: Record<keyof StatusColFilters, HeaderFilter> = {
+  open: 'status-open',
+  paused: 'status-paused',
+  off: 'status-off',
+};
 
 function BrokerFeeLine({ plot }: { plot: LodatListItem }) {
   const fee = formatBrokerFee(plot.brokerFeeNote, plot.commissionPercent);
@@ -57,11 +68,11 @@ type Props = {
   total: number;
   selectedId: string | null;
   menuId: string | null;
-  status: string;
+  statusCols: StatusColFilters;
   kind: string;
   extra: ExtraFilters;
   priceBracket: PriceBracket;
-  onStatus: (v: string) => void;
+  onStatusCols: (next: StatusColFilters) => void;
   onKind: (v: string) => void;
   onExtra: (next: ExtraFilters) => void;
   onPriceBracket: (v: PriceBracket) => void;
@@ -85,11 +96,11 @@ export function LodatTable({
   total,
   selectedId,
   menuId,
-  status,
+  statusCols,
   kind,
   extra,
   priceBracket,
-  onStatus,
+  onStatusCols,
   onKind,
   onExtra,
   onPriceBracket,
@@ -179,9 +190,9 @@ export function LodatTable({
             />
           </div>
           {SALE_STATUS_TRIAD_COLUMNS.map((col) => {
-            const filterKey = STATUS_TRIAD_FILTER_KEYS[col.status];
-            const colValue =
-              status === col.status ? col.status : STATUS_FILTER_ALL;
+            const colKey = STATUS_COL_BY_SALE[col.status];
+            const filterKey = STATUS_HEADER_KEY[colKey];
+            const colValue = statusCols[colKey];
             return (
               <div
                 key={col.status}
@@ -192,15 +203,17 @@ export function LodatTable({
                 <ColumnFilter
                   label={col.label}
                   value={colValue}
-                  allValue={STATUS_FILTER_ALL}
-                  options={[
-                    { value: STATUS_FILTER_ALL, label: 'Tất cả trạng thái' },
-                    { value: col.status, label: `Chỉ ${col.label}` },
-                  ]}
+                  allValue="all"
+                  options={STATUS_COL_FILTER_OPTIONS[colKey]}
                   open={headerFilter === filterKey}
                   onToggle={() => toggleFilter(filterKey)}
                   onClose={() => setHeaderFilter(null)}
-                  onChange={onStatus}
+                  onChange={(v) =>
+                    onStatusCols({
+                      ...statusCols,
+                      [colKey]: v as StatusColFilter,
+                    })
+                  }
                 />
               </div>
             );

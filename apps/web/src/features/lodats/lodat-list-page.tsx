@@ -27,12 +27,15 @@ import { LodatCardList } from './components/lodat-card-list';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatTable } from './components/lodat-table';
 import {
-  STATUS_FILTER_ALL,
-  STATUS_FILTER_DEFAULT,
+  DEFAULT_STATUS_COL_FILTERS,
   countMobileLodatFilters,
+  mobileStatusFromCols,
   parseSearchKeyword,
+  resolveStatusColFilters,
+  statusColsFromMobileStatus,
   type ExtraFilters,
   type PriceBracket,
+  type StatusColFilters,
 } from './display';
 import {
   getActiveListScrollEl,
@@ -88,7 +91,9 @@ export function LodatListPage() {
   const qc = useQueryClient();
   const { user } = useAuth();
   const [keyword, setKeyword] = useState('');
-  const [status, setStatus] = useState<string>(STATUS_FILTER_DEFAULT);
+  const [statusCols, setStatusCols] = useState<StatusColFilters>({
+    ...DEFAULT_STATUS_COL_FILTERS,
+  });
   const [kind, setKind] = useState('');
   const [extra, setExtra] = useState<ExtraFilters>(DEFAULT_EXTRA);
   const [priceBracket, setPriceBracket] = useState<PriceBracket>('');
@@ -108,7 +113,7 @@ export function LodatListPage() {
   const cardsScrollRef = useRef<HTMLDivElement>(null);
   const persistRef = useRef({
     searchKeyword: keyword,
-    status,
+    statusCols,
     kind,
     extra,
     priceBracket,
@@ -116,7 +121,7 @@ export function LodatListPage() {
   });
   persistRef.current = {
     searchKeyword: keyword,
-    status,
+    statusCols,
     kind,
     extra,
     priceBracket,
@@ -124,16 +129,23 @@ export function LodatListPage() {
   };
 
   const search = parseSearchKeyword(keyword);
-  const statusAll = status === STATUS_FILTER_ALL;
   const searchOverridesStatus = Boolean(search.includePaused || search.pausedOnly);
+  const statusResolved = resolveStatusColFilters(statusCols);
   // Lọc cột đẩy xuống API để phân trang đúng (§12.1.2)
   const listQuery: LodatListQuery = {
     ...search,
-    status:
-      statusAll || searchOverridesStatus || !status
+    status: undefined,
+    statusIn: searchOverridesStatus
+      ? undefined
+      : statusResolved === 'all'
         ? undefined
-        : (status as LodatListingStatus),
-    includePaused: statusAll || Boolean(search.includePaused),
+        : statusResolved === 'empty'
+          ? []
+          : statusResolved,
+    includePaused:
+      searchOverridesStatus
+        ? Boolean(search.includePaused)
+        : statusResolved === 'all',
     kind: (kind || undefined) as LodatKind | undefined,
     priceBracket: priceBracket || undefined,
     areaBracket: extra.area !== 'all' ? extra.area : undefined,
@@ -185,10 +197,12 @@ export function LodatListPage() {
   }, [galleryLodatId, galleryQ.isLoading, galleryQ.isError, galleryImages.length]);
 
   const items = rawItems;
-  const mobileFilterCount = countMobileLodatFilters(status, priceBracket);
+  const mobileFilterCount = countMobileLodatFilters(statusCols, priceBracket);
   const filterKey = [
     keyword,
-    status,
+    statusCols.open,
+    statusCols.paused,
+    statusCols.off,
     kind,
     extra.photo,
     extra.address,
@@ -196,6 +210,7 @@ export function LodatListPage() {
     extra.direction,
     priceBracket,
   ].join('\0');
+  const mobileStatus = mobileStatusFromCols(statusCols);
 
   const toggleMut = useMutation({
     mutationFn: ({
@@ -237,7 +252,7 @@ export function LodatListPage() {
     restoreSnap.current = snap;
     if (snap) {
       setKeyword(snap.searchKeyword);
-      setStatus(snap.status);
+      setStatusCols(snap.statusCols);
       setKind(snap.kind);
       setExtra(snap.extra);
       setPriceBracket(snap.priceBracket);
@@ -341,7 +356,7 @@ export function LodatListPage() {
   useEffect(() => {
     if (!restoreReady || listConcealed || !restoreDone.current) return;
     persistListState();
-  }, [keyword, status, kind, extra, priceBracket, selectedId, restoreReady, listConcealed]);
+  }, [keyword, statusCols, kind, extra, priceBracket, selectedId, restoreReady, listConcealed]);
 
   useEffect(() => {
     function persist() {
@@ -413,13 +428,13 @@ export function LodatListPage() {
             onKeyword={setKeyword}
             filtersOpen={filterOpen}
             onToggleFilters={() => setFilterOpen((v) => !v)}
-            status={status}
-            onStatus={setStatus}
+            status={mobileStatus}
+            onStatus={(v) => setStatusCols(statusColsFromMobileStatus(v))}
             priceBracket={priceBracket}
             onPriceBracket={setPriceBracket}
             hasActiveFilters={mobileFilterCount > 0}
             onResetFilters={() => {
-              setStatus(STATUS_FILTER_DEFAULT);
+              setStatusCols({ ...DEFAULT_STATUS_COL_FILTERS });
               setPriceBracket('');
             }}
           />
@@ -439,12 +454,12 @@ export function LodatListPage() {
                 loadingMore={list.isFetchingNextPage}
                 selectedId={selectedId}
                 menuId={menuId}
-                status={status}
+                statusCols={statusCols}
                 kind={kind}
                 extra={extra}
                 priceBracket={priceBracket}
                 togglingId={toggleMut.isPending ? (toggleMut.variables?.plot.id ?? null) : null}
-                onStatus={setStatus}
+                onStatusCols={setStatusCols}
                 onKind={setKind}
                 onExtra={setExtra}
                 onPriceBracket={setPriceBracket}

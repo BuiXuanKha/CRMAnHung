@@ -72,9 +72,20 @@ export const lodatHasFilterSchema = z.enum(['has', 'empty']);
 
 export type LodatHasFilter = z.infer<typeof lodatHasFilterSchema>;
 
+/** Lọc cột trạng thái: Tất cả · đúng · không đúng. */
+export const lodatStatusColFilterSchema = z.enum(['all', 'yes', 'no']);
+
+export type LodatStatusColFilter = z.infer<typeof lodatStatusColFilterSchema>;
+
 export const lodatListQuerySchema = z.object({
   keyword: z.string().trim().optional(),
   status: lodatListingStatusSchema.optional(),
+  /**
+   * Tập trạng thái map active được giữ (AND từ 3 cột lọc).
+   * Khi có `statusIn`, bỏ qua `status` / `includePaused` / `pausedOnly`
+   * trừ khi ô tìm `@` / `@@` ghi đè ở client.
+   */
+  statusIn: z.array(lodatListingStatusSchema).max(3).optional(),
   kind: z.nativeEnum(LodatKind).optional(),
   includePaused: z.boolean().optional(),
   pausedOnly: z.boolean().optional(),
