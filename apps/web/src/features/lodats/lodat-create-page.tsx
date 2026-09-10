@@ -21,6 +21,7 @@ import {
   type ProjectLotOption,
 } from '@crmanhung/shared';
 import { AddressPicker } from '@/features/addresses/components/address-picker';
+import { listAddressImages } from '@/features/addresses/api';
 import { useAuth } from '@/features/auth/auth-context';
 import { getCustomer, listCustomerMessages } from '@/features/customers/api';
 import { Icon } from '@/shared/ui/icon';
@@ -123,6 +124,12 @@ export function LodatCreatePage() {
   });
   const lotOptions = lotsQ.data?.items ?? [];
 
+  const projectImagesQ = useQuery({
+    queryKey: ['address-images', address?.id],
+    queryFn: () => listAddressImages(address!.id),
+    enabled: isProject && Boolean(address?.id),
+  });
+
   useEffect(() => {
     return () => {
       queue.forEach((img) => {
@@ -133,7 +140,20 @@ export function LodatCreatePage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const previewImages: LodatImage[] = useMemo(
+  const projectImages: LodatImage[] = useMemo(
+    () =>
+      (projectImagesQ.data?.items ?? [])
+        .filter((img) => Boolean(img.url?.trim()))
+        .map((img) => ({
+          id: img.id,
+          url: img.url!,
+          rotationDeg: 0,
+          source: 'address' as const,
+        })),
+    [projectImagesQ.data],
+  );
+
+  const queueImages: LodatImage[] = useMemo(
     () =>
       queue.map((img, i) => ({
         id: `q-${i}`,
@@ -143,9 +163,22 @@ export function LodatCreatePage() {
       })),
     [queue],
   );
+
+  /** Ảnh dự án (chỉ xem) trước, rồi ảnh thửa / chat sẽ upload. */
+  const previewImages: LodatImage[] = useMemo(
+    () => [...projectImages, ...queueImages],
+    [projectImages, queueImages],
+  );
+  const projectImageCount = projectImages.length;
   const chatCount = queue.filter((q) => q.kind === 'chat').length;
   const atLimit = queue.length >= LODAT_MAX_UPLOAD_IMAGES;
   const pasteDisabled = saving || atLimit;
+
+  useEffect(() => {
+    if (selectedIndex >= previewImages.length) {
+      setSelectedIndex(Math.max(0, previewImages.length - 1));
+    }
+  }, [previewImages.length, selectedIndex]);
 
   function flash(msg: string) {
     setToast(msg);
@@ -163,17 +196,22 @@ export function LodatCreatePage() {
         url: URL.createObjectURL(file),
       }));
       const merged = [...cur, ...next];
-      setSelectedIndex(Math.max(0, merged.length - 1));
+      setSelectedIndex(projectImageCount + Math.max(0, merged.length - 1));
       return merged;
     });
   }
 
-  function removeAt(idx: number) {
+  function removeQueueAt(queueIdx: number) {
     setQueue((cur) => {
-      const target = cur[idx];
+      const target = cur[queueIdx];
       if (target?.kind === 'file') URL.revokeObjectURL(target.url);
-      const next = cur.filter((_, i) => i !== idx);
-      setSelectedIndex((s) => Math.min(s, Math.max(0, next.length - 1)));
+      const next = cur.filter((_, i) => i !== queueIdx);
+      setSelectedIndex((s) => {
+        const abs = projectImageCount + queueIdx;
+        if (s === abs) return Math.min(s, Math.max(0, projectImageCount + next.length - 1));
+        if (s > abs) return s - 1;
+        return s;
+      });
       return next;
     });
   }
@@ -181,7 +219,9 @@ export function LodatCreatePage() {
   function clearChatImages() {
     setQueue((cur) => {
       const next = cur.filter((img) => img.kind !== 'chat');
-      setSelectedIndex((s) => Math.min(s, Math.max(0, next.length - 1)));
+      setSelectedIndex((s) =>
+        Math.min(s, Math.max(0, projectImageCount + next.length - 1)),
+      );
       return next;
     });
   }
@@ -515,8 +555,8 @@ export function LodatCreatePage() {
                 <h2 className="ld-edit-section-title">Hình ảnh</h2>
                 {isProject ? (
                   <p className="ld-edit-hint">
-                    Ảnh dự án (chung KĐT) do Admin quản lý trên sổ địa chỉ — hiện trên
-                    chi tiết sau khi tạo. Ảnh bạn thêm ở đây là ảnh riêng của thửa.
+                    Ảnh dự án (chung KĐT) hiện bên phải — chỉ xem; Admin sửa trên sổ
+                    địa chỉ. Ảnh bạn thêm ở đây là ảnh riêng của thửa.
                   </p>
                 ) : null}
                 {chatCount > 0 ? (
@@ -634,42 +674,54 @@ export function LodatCreatePage() {
                 onRotate={() => undefined}
               />
               {previewImages.length ? (
-                <div className="ld-edit-thumbs" role="list" aria-label="Ảnh sẽ gắn vào lô">
-                  {previewImages.map((img, idx) => (
-                    <div
-                      key={img.id ?? idx}
-                      className={
-                        idx === selectedIndex ? 'ld-edit-thumb active' : 'ld-edit-thumb'
-                      }
-                    >
-                      <button
-                        type="button"
-                        className="ld-edit-thumb-btn"
-                        aria-label={`Xem ảnh ${idx + 1}`}
-                        onClick={() => setSelectedIndex(idx)}
+                <div className="ld-edit-thumbs" role="list" aria-label="Ảnh dự án và ảnh sẽ gắn vào lô">
+                  {previewImages.map((img, idx) => {
+                    const isProjectImg = img.source === 'address';
+                    const queueIdx = idx - projectImageCount;
+                    return (
+                      <div
+                        key={img.id ?? idx}
+                        className={
+                          idx === selectedIndex ? 'ld-edit-thumb active' : 'ld-edit-thumb'
+                        }
                       >
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={img.url}
-                          alt=""
-                          style={
-                            img.rotationDeg
-                              ? { transform: `rotate(${img.rotationDeg}deg)` }
-                              : undefined
+                        <button
+                          type="button"
+                          className="ld-edit-thumb-btn"
+                          aria-label={
+                            isProjectImg
+                              ? `Xem ảnh dự án ${idx + 1}`
+                              : `Xem ảnh ${queueIdx + 1}`
                           }
-                        />
-                      </button>
-                      <button
-                        type="button"
-                        className="ld-edit-thumb-del"
-                        aria-label="Bỏ ảnh"
-                        disabled={saving}
-                        onClick={() => removeAt(idx)}
-                      >
-                        <Icon icon={X} size={14} />
-                      </button>
-                    </div>
-                  ))}
+                          onClick={() => setSelectedIndex(idx)}
+                        >
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={img.url}
+                            alt=""
+                            style={
+                              img.rotationDeg
+                                ? { transform: `rotate(${img.rotationDeg}deg)` }
+                                : undefined
+                            }
+                          />
+                        </button>
+                        {isProjectImg ? (
+                          <span className="ld-edit-thumb-badge">Dự án</span>
+                        ) : (
+                          <button
+                            type="button"
+                            className="ld-edit-thumb-del"
+                            aria-label="Bỏ ảnh"
+                            disabled={saving}
+                            onClick={() => removeQueueAt(queueIdx)}
+                          >
+                            <Icon icon={X} size={14} />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               ) : null}
             </div>
