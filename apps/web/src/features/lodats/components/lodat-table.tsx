@@ -198,9 +198,9 @@ export function LodatTable({
             />
           </div>
           <div className="ld-col-head" role="columnheader">
-            <span>Đã đăng web</span>
+            <span>Web</span>
             <ColumnFilter
-              label="Đã đăng web"
+              label="Web"
               value={extra.webBody}
               options={WEB_BODY_FILTER_OPTIONS}
               open={headerFilter === 'web'}

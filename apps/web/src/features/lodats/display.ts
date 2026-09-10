@@ -64,7 +64,7 @@ export function hasSpecs(p: LodatListItem): boolean {
 export type ExtraFilters = {
   photo: 'all' | 'has' | 'empty';
   address: 'all' | 'has' | 'empty';
-  /** Đã đăng web — bodyHtml không rỗng */
+  /** Web — bodyHtml không rỗng (Đã soạn / Chưa soạn, cùng `/dang-bai`) */
   webBody: 'all' | 'has' | 'empty';
   /** Khoảng diện tích (m²) — cột DT · MT · Hướng */
   area: AreaBracket;
@@ -88,15 +88,15 @@ export const ADDRESS_FILTER_OPTIONS = [
   { value: 'empty', label: 'Chưa có địa chỉ' },
 ];
 
-/** Lọc cột Đã đăng web — đã soạn bodyHtml / chưa. */
+/** Lọc cột Web — đã soạn bodyHtml / chưa (cùng `/dang-bai`). */
 export const WEB_BODY_FILTER_OPTIONS = [
   { value: 'all', label: 'Tất cả web' },
-  { value: 'has', label: 'Đã đăng' },
-  { value: 'empty', label: 'Chưa đăng' },
+  { value: 'has', label: 'Đã soạn' },
+  { value: 'empty', label: 'Chưa soạn' },
 ];
 
 export function lodatWebBodyLabel(hasWebBody: boolean): string {
-  return hasWebBody ? 'Đã đăng' : 'Chưa đăng';
+  return hasWebBody ? 'Đã soạn' : 'Chưa soạn';
 }
 
 export function lodatWebBodyTone(hasWebBody: boolean): BadgeTone {

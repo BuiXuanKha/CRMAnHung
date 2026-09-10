@@ -348,7 +348,7 @@ export function LodatDetailPage() {
                   ) : (
                     <CrmBadge tone="gray">Đất dân</CrmBadge>
                   )}
-                  <span className="ld-web-row" title="Đã đăng web">
+                  <span className="ld-web-row" title="Web">
                     <CrmBadge tone={lodatWebBodyTone(Boolean(detail.hasWebBody))}>
                       {lodatWebBodyLabel(Boolean(detail.hasWebBody))}
                     </CrmBadge>

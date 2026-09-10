@@ -328,7 +328,7 @@ Không hiện trên list/preview/bài khách: tên khách, SĐT khách, hoa hồ
 | DT · MT · Hướng | Khoảng DT + hướng (AND), cùng `/lo-dat` |
 | Giá | Khoảng 500tr + Chưa có giá — theo giá hiện trên cột (Liên hệ = chưa có giá) |
 | NV | Tất cả NV · từng tên NV trong list |
-| Web | Tất cả web · Đang hiện · Chờ đăng |
+| Web | Tất cả · Đã soạn · Chưa soạn |
 | AI GPT | Không lọc (nút mở modal) |
 
 Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Không dropdown lọc trên thanh tìm desktop.
@@ -343,7 +343,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 | DT · MT · Hướng | DT dòng 1; MT · hướng dòng phụ. Trống: `—` |
 | Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM. Chưa soạn + CRM có giá → nhãn làm mờ gợi ý |
 | NV | Tên nhân viên đang rao lô |
-| Web | **Đang hiện** `green` · **Chờ đăng** `gray` |
+| Web | **Đã soạn** `green` · **Chưa soạn** `gray` |
 | AI GPT | Nút **GPT** (`Sparkles`) → `LotGptContentDialog` — JSON request + Gửi GPT + phản hồi |
 
 ### 13.3a Modal Tạo content bằng AI GPT
