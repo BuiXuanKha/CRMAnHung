@@ -376,7 +376,7 @@ export function LodatDetailPage() {
                         aria-label="Lô CRM đã cập nhật, cần cập nhật bài đăng web"
                         onClick={() =>
                           showAlert(
-                            `«${detail.title}» đã đổi trên CRM sau lần lưu bài web.\n\n${formatNeedsWebUpdateMessage()}`,
+                            formatNeedsWebUpdateMessage(detail.needsWebUpdateChanges),
                             'Lô CRM đã cập nhật',
                           )
                         }

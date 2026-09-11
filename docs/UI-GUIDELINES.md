@@ -729,6 +729,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-08 | Lịch sử chăm sóc + tiến độ sổ đỏ: **không** gạch chữ khi xong (chỉ hangtag **Đã hoàn thành**) |
 | 2026-09-08 | `/cong-viec`: việc xong → hangtag **Đã hoàn thành**; dừng đếm hạn (Hôm nay / Quá hạn…) |
 | 2026-09-09 | `/lo-dat`: icon đỏ = CRM đã cập nhật sau bài web (`needsWebUpdate`); không so khớp title/địa chỉ |
+| 2026-09-11 | `/lo-dat` icon đỏ: alert liệt kê thuộc tính đổi (`Diện tích thay đổi: 90m² thành 100m²`) |
 | 2026-09-09 | `/lo-dat` mobile: Preview chỉ khi đã chọn lô; ẩn empty «Chọn một lô…» |
 | 2026-09-09 | `/lo-dat`: Chưa soạn + CRM có giá → gợi ý giá làm mờ; GPT được nêu sổ sẵn / sang tên |
 | 2026-09-09 | `/cong-viec`: menu **Sửa** (chưa xong) — sửa nội dung + hạn; nguồn không đổi |

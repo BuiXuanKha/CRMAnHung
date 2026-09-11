@@ -271,7 +271,7 @@ Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
 
 ##### 5b. Web
 
-Hangtag: **Đã soạn** (`hasWebBody` — `PublicLotListing.bodyHtml` không rỗng) `green` · **Chưa soạn** `gray`. Cột **Web** / badge Đã soạn · Chưa soạn. Lọc cột: Tất cả web · Đã soạn · Chưa soạn. Icon đỏ `needsWebUpdate` (nếu có) cạnh hangtag — CRM đổi sau lần lưu bài.
+Hangtag: **Đã soạn** (`hasWebBody` — `PublicLotListing.bodyHtml` không rỗng) `green` · **Chưa soạn** `gray`. Cột **Web** / badge Đã soạn · Chưa soạn. Lọc cột: Tất cả web · Đã soạn · Chưa soạn. Icon đỏ `needsWebUpdate` (nếu có) cạnh hangtag — CRM đổi sau lần lưu bài; bấm → alert liệt kê cũ→mới (`Diện tích thay đổi: 90m² thành 100m²`).
 
 ##### 5c. AI GPT
 
@@ -410,7 +410,7 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-Hangtag hàng dưới tiêu đề: loại · Đất dân/Dự án · **Đã soạn** / **Chưa soạn** (cùng cột **Web** list §12.1.5b + `/lo-dat`; `hasWebBody`). Icon đỏ `needsWebUpdate` cạnh hangtag web nếu CRM đổi sau lần lưu bài.
+Hangtag hàng dưới tiêu đề: loại · Đất dân/Dự án · **Đã soạn** / **Chưa soạn** (cùng cột **Web** list §12.1.5b + `/lo-dat`; `hasWebBody`). Icon đỏ `needsWebUpdate` cạnh hangtag web nếu CRM đổi sau lần lưu bài — alert liệt kê thuộc tính đổi (cũ → mới).
 
 **Giao dịch** → `/giao-dich/tao?lodatId=` (open-or-create, cùng §12.1.3 mục 7). **Sửa lô đất** → `/lo-dat/[id]/sua`. **Copy gửi sales** — clipboard nội bộ: dòng đầu `THÔNG TIN NỘI BỘ - KHÔNG GỬI KHÁCH`, mỗi dòng có icon; gồm tiêu đề / địa chỉ / DT·MT·hướng + **giá bán · ghi chú giá · hoa hồng**; dòng cuối **link share** lô (cùng mã NV như nút Chia sẻ); **không** footer hotline/địa chỉ VP. **Share link** — chỉ khi lô đã publish web; mã cố định theo (NV + lô); URL `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}?share=CODE`. Khách vào bằng mã NV A → liên hệ A trên trang chủ + chi tiết lô **30 ngày** (cùng NV không reset hạn; NV khác ghi đè). Vào thẳng domain hết cookie → hotline công ty. [`public-content.md`](./public-content.md) §18. Lô Tạm dừng / Đã bán — link vẫn mở.
 

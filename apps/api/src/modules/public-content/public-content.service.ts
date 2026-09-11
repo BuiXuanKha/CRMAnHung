@@ -12,8 +12,11 @@ import {
   PUBLIC_MEDIA_MAX_BYTES,
   listingBodyToExcerpt,
   listingCommuneHubPath,
+  mergeLodatWebUpdateChanges,
+  parseLodatWebUpdateChanges,
   postBodyToExcerpt,
   suggestPublicPrice,
+  type LodatWebUpdateChange,
 } from '@crmanhung/shared';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -387,12 +390,15 @@ export class PublicContentService {
 
   /**
    * Đồng bộ title/location overlay từ CRM (slug giữ nguyên). Revalidate hangtag/catalog.
-   * Nếu listing đã tồn tại + published trước lần sync → bật needsWebUpdate (icon đỏ /lo-dat).
+   * Nếu listing đã publish + có `changes` web-facing → bật needsWebUpdate + ghi chi tiết cũ→mới.
    */
-  async syncListingFromLodat(lodatId: string): Promise<void> {
+  async syncListingFromLodat(
+    lodatId: string,
+    options?: { changes?: LodatWebUpdateChange[] },
+  ): Promise<void> {
     const existingBefore = await this.prisma.publicLotListing.findUnique({
       where: { lodatId },
-      select: { id: true, isPublished: true },
+      select: { id: true, isPublished: true, needsWebUpdateChanges: true },
     });
     await this.ensureListingForLodat(lodatId);
     const lodat = await this.prisma.lodat.findUnique({
@@ -410,7 +416,17 @@ export class PublicContentService {
       listing.bodyHtml?.trim()
         ? listing.excerpt
         : [title, location].filter(Boolean).join('. ');
-    const markNeedsWebUpdate = Boolean(existingBefore?.isPublished);
+    const nextChanges = options?.changes ?? [];
+    const markNeedsWebUpdate =
+      Boolean(existingBefore?.isPublished) && nextChanges.length > 0;
+    const mergedChanges = markNeedsWebUpdate
+      ? mergeLodatWebUpdateChanges(
+          parseLodatWebUpdateChanges(
+            existingBefore?.needsWebUpdateChanges ?? listing.needsWebUpdateChanges,
+          ),
+          nextChanges,
+        )
+      : null;
     const saved = await this.prisma.publicLotListing.update({
       where: { id: listing.id },
       data: {
@@ -419,7 +435,12 @@ export class PublicContentService {
         excerpt,
         isPublished: true,
         ...(!listing.publishedAt ? { publishedAt: new Date() } : {}),
-        ...(markNeedsWebUpdate ? { needsWebUpdate: true } : {}),
+        ...(markNeedsWebUpdate && mergedChanges
+          ? {
+              needsWebUpdate: true,
+              needsWebUpdateChanges: mergedChanges as Prisma.InputJsonValue,
+            }
+          : {}),
       },
     });
     const hub = await this.persistCommuneHubForLodat(lodat);
@@ -548,6 +569,7 @@ export class PublicContentService {
       bodyHtml: string;
       isPublished: boolean;
       needsWebUpdate: boolean;
+      needsWebUpdateChanges: Prisma.InputJsonValue;
       publishedAt?: Date;
       metaDescription?: string | null;
       seoTitle?: string | null;
@@ -560,6 +582,7 @@ export class PublicContentService {
       bodyHtml,
       isPublished: true,
       needsWebUpdate: false,
+      needsWebUpdateChanges: [],
       ...(!existing.publishedAt ? { publishedAt: new Date() } : {}),
     };
     if (metaDescription !== undefined) {
@@ -820,6 +843,7 @@ export class PublicContentService {
       excerpt: row.excerpt,
       bodyHtml: row.bodyHtml ?? '',
       needsWebUpdate: Boolean(row.needsWebUpdate),
+      needsWebUpdateChanges: parseLodatWebUpdateChanges(row.needsWebUpdateChanges),
     };
   }
 

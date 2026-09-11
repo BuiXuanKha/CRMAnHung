@@ -49,6 +49,17 @@ export const lodatListItemSchema = z.object({
   hasWebBody: z.boolean().default(false),
   /** CRM đổi sau lần lưu bài web — icon đỏ (tuỳ chọn hiển thị). */
   needsWebUpdate: z.boolean().default(false),
+  /** Chi tiết thuộc tính CRM đổi (cũ → mới) khi needsWebUpdate. */
+  needsWebUpdateChanges: z
+    .array(
+      z.object({
+        key: z.string(),
+        label: z.string(),
+        from: z.string(),
+        to: z.string(),
+      }),
+    )
+    .default([]),
   updatedAt: z.string(),
 });
 
@@ -340,3 +351,114 @@ export const changeLodatOwnerSchema = z.object({
 });
 
 export type ChangeLodatOwnerInput = z.infer<typeof changeLodatOwnerSchema>;
+
+export const lodatWebUpdateChangeSchema = z.object({
+  key: z.string(),
+  label: z.string(),
+  from: z.string(),
+  to: z.string(),
+});
+
+export type LodatWebUpdateChange = z.infer<typeof lodatWebUpdateChangeSchema>;
+
+/** Dòng hiển thị: «Diện tích thay đổi: 90m² thành 100m²». */
+export function formatLodatWebUpdateChangeLine(change: LodatWebUpdateChange): string {
+  return `${change.label} thay đổi: ${change.from} thành ${change.to}`;
+}
+
+/**
+ * Alert icon đỏ: chỉ liệt kê các dòng đổi (cũ → mới).
+ * Không có chi tiết (dữ liệu cũ) → nhắc Soạn/Lưu chung.
+ */
+export function formatLodatWebUpdateChangesMessage(
+  changes: LodatWebUpdateChange[] | undefined | null,
+): string {
+  const lines = (changes ?? [])
+    .filter((c) => c.from !== c.to)
+    .map(formatLodatWebUpdateChangeLine);
+  if (!lines.length) {
+    return [
+      'Lô đất trên CRM đã được cập nhật sau lần lưu bài đăng web.',
+      '',
+      'Vào Soạn bài đăng và Lưu lại để cập nhật nội dung trên web khách.',
+    ].join('\n');
+  }
+  return lines.join('\n');
+}
+
+/** Gộp theo `key`: giữ `from` lần đầu, cập nhật `to` lần sau. */
+export function mergeLodatWebUpdateChanges(
+  existing: LodatWebUpdateChange[] | undefined | null,
+  next: LodatWebUpdateChange[] | undefined | null,
+): LodatWebUpdateChange[] {
+  const byKey = new Map<string, LodatWebUpdateChange>();
+  for (const row of existing ?? []) {
+    if (!row?.key) continue;
+    byKey.set(row.key, {
+      key: row.key,
+      label: row.label || row.key,
+      from: row.from ?? '—',
+      to: row.to ?? '—',
+    });
+  }
+  for (const row of next ?? []) {
+    if (!row?.key || row.from === row.to) continue;
+    const prev = byKey.get(row.key);
+    if (!prev) {
+      byKey.set(row.key, {
+        key: row.key,
+        label: row.label || row.key,
+        from: row.from,
+        to: row.to,
+      });
+      continue;
+    }
+    byKey.set(row.key, {
+      key: row.key,
+      label: row.label || prev.label,
+      from: prev.from,
+      to: row.to,
+    });
+  }
+  return [...byKey.values()].filter((c) => c.from !== c.to);
+}
+
+/** Parse JSON Prisma / API → mảng change hợp lệ. */
+export function parseLodatWebUpdateChanges(raw: unknown): LodatWebUpdateChange[] {
+  if (!Array.isArray(raw)) return [];
+  const out: LodatWebUpdateChange[] = [];
+  for (const item of raw) {
+    if (!item || typeof item !== 'object') continue;
+    const row = item as Record<string, unknown>;
+    const key = typeof row.key === 'string' ? row.key.trim() : '';
+    if (!key) continue;
+    const label =
+      typeof row.label === 'string' && row.label.trim() ? row.label.trim() : key;
+    const from = typeof row.from === 'string' ? row.from : '—';
+    const to = typeof row.to === 'string' ? row.to : '—';
+    out.push({ key, label, from, to });
+  }
+  return out;
+}
+
+export function formatLodatWebUpdateArea(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return '—';
+  return `${n.toLocaleString('vi-VN')}m²`;
+}
+
+export function formatLodatWebUpdateMeters(n: number | null | undefined): string {
+  if (n == null || !Number.isFinite(n)) return '—';
+  return `${n.toLocaleString('vi-VN')}m`;
+}
+
+export function formatLodatWebUpdatePrice(n: number | string | null | undefined): string {
+  if (n == null || n === '') return '—';
+  const v = typeof n === 'string' ? Number(n) : n;
+  if (!Number.isFinite(v)) return '—';
+  return `${v.toLocaleString('vi-VN')} đ`;
+}
+
+export function formatLodatWebUpdateText(value: string | null | undefined): string {
+  const t = value?.trim();
+  return t ? t : '—';
+}
