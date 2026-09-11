@@ -547,10 +547,7 @@ export function LodatListPage() {
                 onNeedsWebUpdate={(plot) => {
                   setAlertBox({
                     title: 'Lô CRM đã cập nhật',
-                    message:
-                      `«${plot.title}» đã đổi trên CRM sau lần lưu bài web.
-
-${formatNeedsWebUpdateMessage()}`,
+                    message: formatNeedsWebUpdateMessage(plot.needsWebUpdateChanges),
                   });
                 }}
                 scrollRef={tableScrollRef}

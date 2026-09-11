@@ -338,7 +338,7 @@ Không lọc trạng thái Mở bán (list đã chỉ lô đang mở bán). Khô
 | Cột | Ô |
 |-----|---|
 | Ảnh | Thumb 52px; thiếu = ô xám + `ImageOff` |
-| Tiêu đề / Địa chỉ | **Đậm**; dòng phụ địa chỉ. Không tên khách. Icon đỏ (`CircleAlert`) khi `needsWebUpdate` — CRM đã sửa sau lần lưu bài web; bấm → alert nhắc Soạn/Lưu lại |
+| Tiêu đề / Địa chỉ | **Đậm**; dòng phụ địa chỉ. Không tên khách. Icon đỏ (`CircleAlert`) khi `needsWebUpdate` — CRM đã sửa sau lần lưu bài web; bấm → alert liệt kê cũ→mới (`Diện tích thay đổi: 90m² thành 100m²`) |
 | Phân loại | Hangtag Nhà `blue` / Đất `amber` |
 | DT · MT · Hướng | DT dòng 1; MT · hướng dòng phụ. Trống: `—` |
 | Giá | Giá công khai (`crm-money`) hoặc `Liên hệ` — không đúng số CRM. Chưa soạn + CRM có giá → nhãn làm mờ gợi ý |
@@ -427,7 +427,7 @@ Cùng máy tính / mobile. Icon Lucide `PenLine`. Khung `CrmDialog` rộng (`crm
 7. **Huỷ** · **Lưu nháp** (ghi overlay; không đổi `isPublished`; được thiếu mô tả) · **Đăng web** (lưu overlay rồi `CrmConfirm` nếu đang chờ đăng — **bắt buộc** có nội dung mô tả).
 8. Sau lưu: list + preview cập nhật tiêu đề / giá / hangtag Web; **tắt** icon đỏ (`needsWebUpdate = false`). Preview render HTML mô tả.
 
-**Icon đỏ (`needsWebUpdate`):** bật khi NV/API **cập nhật lô CRM** mà listing đã `isPublished` (đồng thời vẫn sync title/location overlay). Tắt khi **Lưu** Soạn bài đăng. GPT đổi H1 **không** bật icon. Lô lệch xếp đầu list.
+**Icon đỏ (`needsWebUpdate`):** bật khi NV/API **cập nhật thuộc tính CRM ảnh hưởng web** (tiêu đề, địa chỉ, diện tích, mặt tiền, hướng, phân loại, giá, ghi chú giá, trạng thái bán) mà listing đã `isPublished`. Alert **liệt kê** từng dòng dạng `Diện tích thay đổi: 90m² thành 100m²` (`needsWebUpdateChanges`). Nhiều lần sửa cùng field: giữ giá trị **cũ lần đầu**, cập nhật **mới**. Tắt + xoá danh sách khi **Lưu** Soạn bài đăng. GPT đổi H1 **không** bật icon. Chỉ đổi ghi chú nội bộ CRM **không** bật. Lô lệch xếp đầu list.
 
 ---
 

@@ -25,7 +25,19 @@ import {
   retargetLodatSeoImages,
   uniqueSeoLotImageKey,
 } from './lodat-seo-image-upload';
-import { facebookPageUrlFromRawMeta } from '@crmanhung/shared';
+import {
+  facebookPageUrlFromRawMeta,
+  LODAT_KIND_LABELS,
+  LODAT_SALE_STATUS_LABELS,
+  LodatKind,
+  LodatSaleStatus,
+  formatLodatWebUpdateArea,
+  formatLodatWebUpdateMeters,
+  formatLodatWebUpdatePrice,
+  formatLodatWebUpdateText,
+  parseLodatWebUpdateChanges,
+  type LodatWebUpdateChange,
+} from '@crmanhung/shared';
 import { PublicContentService } from '../public-content/public-content.service';
 
 const ADDRESS_INCLUDE = {
@@ -81,7 +93,7 @@ const LIST_INCLUDE = {
   },
   createdBy: { select: { id: true, fullName: true } },
   publicListing: {
-    select: { bodyHtml: true, needsWebUpdate: true },
+    select: { bodyHtml: true, needsWebUpdate: true, needsWebUpdateChanges: true },
   },
 } satisfies Prisma.LodatInclude;
 
@@ -104,9 +116,14 @@ export class LodatsService {
     private readonly publicContent: PublicContentService,
   ) {}
 
-  private async syncPublicListing(lodatId: string): Promise<void> {
+  private async syncPublicListing(
+    lodatId: string,
+    changes?: LodatWebUpdateChange[],
+  ): Promise<void> {
     try {
-      await this.publicContent.syncListingFromLodat(lodatId);
+      await this.publicContent.syncListingFromLodat(lodatId, {
+        ...(changes?.length ? { changes } : {}),
+      });
     } catch (err) {
       this.logger.warn(
         `Public listing sync skipped for lodat ${lodatId}: ${
@@ -114,6 +131,123 @@ export class LodatsService {
         }`,
       );
     }
+  }
+
+  /** Snapshot thuộc tính CRM ảnh hưởng bài web (để liệt kê cũ → mới). */
+  private webFacingSnapshot(row: LodatRow): {
+    title: string;
+    address: string;
+    areaM2: number | null;
+    frontageM: number | null;
+    direction: string;
+    kind: string;
+    status: string;
+    priceVnd: number | null;
+    priceNote: string;
+  } {
+    const mapped = this.mapRow(row);
+    return {
+      title: mapped.title,
+      address: mapped.address?.trim() || '',
+      areaM2: mapped.areaM2 ?? null,
+      frontageM: mapped.frontageM ?? null,
+      direction: mapped.direction?.trim() || '',
+      kind: mapped.kind,
+      status: mapped.status,
+      priceVnd: mapped.priceVnd ?? null,
+      priceNote: mapped.priceNote?.trim() || '',
+    };
+  }
+
+  private diffWebFacingChanges(
+    before: ReturnType<LodatsService['webFacingSnapshot']>,
+    after: ReturnType<LodatsService['webFacingSnapshot']>,
+  ): LodatWebUpdateChange[] {
+    const push = (
+      key: string,
+      label: string,
+      from: string,
+      to: string,
+      out: LodatWebUpdateChange[],
+    ) => {
+      if (from === to) return;
+      out.push({ key, label, from, to });
+    };
+    const out: LodatWebUpdateChange[] = [];
+    push(
+      'title',
+      'Tiêu đề',
+      formatLodatWebUpdateText(before.title),
+      formatLodatWebUpdateText(after.title),
+      out,
+    );
+    push(
+      'address',
+      'Địa chỉ',
+      formatLodatWebUpdateText(before.address),
+      formatLodatWebUpdateText(after.address),
+      out,
+    );
+    push(
+      'areaM2',
+      'Diện tích',
+      formatLodatWebUpdateArea(before.areaM2),
+      formatLodatWebUpdateArea(after.areaM2),
+      out,
+    );
+    push(
+      'frontageM',
+      'Mặt tiền',
+      formatLodatWebUpdateMeters(before.frontageM),
+      formatLodatWebUpdateMeters(after.frontageM),
+      out,
+    );
+    push(
+      'direction',
+      'Hướng',
+      formatLodatWebUpdateText(before.direction),
+      formatLodatWebUpdateText(after.direction),
+      out,
+    );
+    const kindLabel = (k: string) =>
+      k === LodatKind.NHA || k === 'NHA'
+        ? LODAT_KIND_LABELS[LodatKind.NHA]
+        : LODAT_KIND_LABELS[LodatKind.DAT];
+    push('kind', 'Phân loại', kindLabel(before.kind), kindLabel(after.kind), out);
+    const statusLabel = (s: string) => {
+      if (
+        s === LodatSaleStatus.DANG_BAN ||
+        s === LodatSaleStatus.TAM_DUNG ||
+        s === LodatSaleStatus.KHONG_BAN ||
+        s === LodatSaleStatus.DAT_COC ||
+        s === LodatSaleStatus.DA_BAN
+      ) {
+        return LODAT_SALE_STATUS_LABELS[s];
+      }
+      return s || '—';
+    };
+    push(
+      'status',
+      'Trạng thái bán',
+      statusLabel(before.status),
+      statusLabel(after.status),
+      out,
+    );
+    push(
+      'priceVnd',
+      'Giá',
+      formatLodatWebUpdatePrice(before.priceVnd),
+      formatLodatWebUpdatePrice(after.priceVnd),
+      out,
+    );
+    push(
+      'priceNote',
+      'Ghi chú giá',
+      formatLodatWebUpdateText(before.priceNote),
+      formatLodatWebUpdateText(after.priceNote),
+      out,
+    );
+    return out;
   }
 
   private async ensurePublicListing(lodatId: string): Promise<void> {
@@ -301,6 +435,9 @@ export class LodatsService {
       createdByEmployeeName: row.createdBy?.fullName ?? null,
       hasWebBody: Boolean(row.publicListing?.bodyHtml?.trim()),
       needsWebUpdate: Boolean(row.publicListing?.needsWebUpdate),
+      needsWebUpdateChanges: parseLodatWebUpdateChanges(
+        row.publicListing?.needsWebUpdateChanges,
+      ),
       updatedAt: updatedAt.toISOString(),
     };
   }
@@ -693,7 +830,11 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
-    await this.syncPublicListing(id);
+    const changes = this.diffWebFacingChanges(
+      this.webFacingSnapshot(row),
+      this.webFacingSnapshot(refreshed),
+    );
+    await this.syncPublicListing(id, changes);
     return this.mapDetail(refreshed, user);
   }
 
@@ -1146,6 +1287,7 @@ export class LodatsService {
 
     const isProject = Boolean(row.projectLotId);
     const lodatData: Prisma.LodatUpdateInput = {};
+    const beforeSnap = this.webFacingSnapshot(row);
 
     if (!isProject) {
       if (dto.title !== undefined) {
@@ -1233,8 +1375,10 @@ export class LodatsService {
       where: { id },
       include: LIST_INCLUDE,
     });
-    const mapped = this.mapDetail(await this.retargetImagesAfterWrite(refreshed), user);
-    await this.syncPublicListing(id);
+    const afterWrite = await this.retargetImagesAfterWrite(refreshed);
+    const changes = this.diffWebFacingChanges(beforeSnap, this.webFacingSnapshot(afterWrite));
+    const mapped = this.mapDetail(afterWrite, user);
+    await this.syncPublicListing(id, changes);
     return mapped;
   }
 

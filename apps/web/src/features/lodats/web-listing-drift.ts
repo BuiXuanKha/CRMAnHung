@@ -1,14 +1,16 @@
 /**
  * Icon đỏ trên /lo-dat: CRM đã cập nhật sau lần NV lưu bài web (`needsWebUpdate`).
- * Không so khớp title/location overlay vs CRM.
+ * Alert liệt kê cụ thể: «Diện tích thay đổi: 90m² thành 100m²».
  */
+import {
+  formatLodatWebUpdateChangesMessage,
+  type LodatWebUpdateChange,
+} from '@crmanhung/shared';
 
-export function formatNeedsWebUpdateMessage(): string {
-  return [
-    'Lô đất trên CRM đã được cập nhật sau lần lưu bài đăng web.',
-    '',
-    'Vào Soạn bài đăng và Lưu lại để cập nhật nội dung trên web khách (ảnh, mô tả, giá công khai…).',
-  ].join('\n');
+export function formatNeedsWebUpdateMessage(
+  changes?: LodatWebUpdateChange[] | null,
+): string {
+  return formatLodatWebUpdateChangesMessage(changes);
 }
 
 /** Lô cần cập nhật bài web xếp trước; giữ thứ tự tương đối trong mỗi nhóm. */

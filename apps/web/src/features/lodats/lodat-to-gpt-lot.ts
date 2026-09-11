@@ -47,6 +47,7 @@ export function lodatListItemToGptLot(plot: LodatListItem): PublicWebStaffLotRow
     excerpt,
     bodyHtml: '',
     needsWebUpdate: Boolean(plot.needsWebUpdate),
+    needsWebUpdateChanges: plot.needsWebUpdateChanges ?? [],
     staffName: plot.createdByEmployeeName?.trim() || '—',
     kind,
     areaM2,

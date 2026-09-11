@@ -202,6 +202,17 @@ export const publicWebLotRowSchema = z.object({
    * Không phải so khớp title/location (GPT đổi H1 không bật).
    */
   needsWebUpdate: z.boolean().optional().default(false),
+  needsWebUpdateChanges: z
+    .array(
+      z.object({
+        key: z.string(),
+        label: z.string(),
+        from: z.string(),
+        to: z.string(),
+      }),
+    )
+    .optional()
+    .default([]),
 });
 
 export type PublicWebLotRow = z.infer<typeof publicWebLotRowSchema>;
