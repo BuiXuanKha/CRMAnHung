@@ -69,6 +69,10 @@
   touch-action: pan-y;
 }
 
+.ld-img-gallery-stage--pc {
+  touch-action: none;
+}
+
 .ld-img-gallery-frame {
   position: relative;
   width: min(92vw, 880px);
@@ -79,6 +83,37 @@
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  user-select: none;
+}
+
+.ld-img-gallery-frame.is-grab {
+  cursor: grab;
+}
+
+.ld-img-gallery-frame.is-grabbing {
+  cursor: grabbing;
+}
+
+.ld-img-gallery-viewport {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.ld-img-gallery-transform {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+  will-change: transform;
 }
 
 .ld-img-gallery-img {
@@ -89,16 +124,32 @@
   max-height: 100%;
   object-fit: contain;
   user-select: none;
+  pointer-events: none;
   -webkit-user-drag: none;
-  transition: transform 0.18s ease;
   background: #111827;
   border-radius: 4px;
+}
+
+.ld-img-gallery-img.is-draggable {
+  pointer-events: auto;
+  cursor: grab;
+  -webkit-user-drag: element;
+}
+
+.ld-img-gallery-img.is-draggable:active {
+  cursor: grabbing;
+}
+
+.ld-img-gallery-img.is-drag-wait {
+  pointer-events: auto;
+  cursor: wait;
 }
 
 .ld-img-gallery-scan {
   position: absolute;
   right: 8px;
   bottom: 8px;
+  z-index: 2;
   width: 34px;
   height: 34px;
   border-radius: 8px;
@@ -210,7 +261,7 @@
   font-size: 0.78rem;
   line-height: 1.35;
   color: rgba(226, 232, 240, 0.78);
-  max-width: 28rem;
+  max-width: 40rem;
 }
 
 .ld-img-gallery-actions {

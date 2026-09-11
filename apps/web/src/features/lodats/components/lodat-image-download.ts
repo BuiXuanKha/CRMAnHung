@@ -31,9 +31,9 @@ async function blobFromGalleryUrl(url: string): Promise<Blob> {
   return apiFetchBlob(`/storage/public-image?url=${encodeURIComponent(url)}`);
 }
 
-async function rotateBlob(blob: Blob, rotationDeg: number): Promise<Blob> {
+async function rotateBlob(blob: Blob, rotationDeg: number, maxDim = 0): Promise<Blob> {
   const deg = normalizeRotationDeg(rotationDeg);
-  if (!deg) return blob;
+  if (!deg && maxDim <= 0) return blob;
 
   const objectUrl = URL.createObjectURL(blob);
   try {
@@ -44,16 +44,24 @@ async function rotateBlob(blob: Blob, rotationDeg: number): Promise<Blob> {
       el.src = objectUrl;
     });
 
+    let width = img.naturalWidth;
+    let height = img.naturalHeight;
+    if (maxDim > 0) {
+      const shrink = Math.min(1, maxDim / Math.max(width, height));
+      width = Math.max(1, Math.round(width * shrink));
+      height = Math.max(1, Math.round(height * shrink));
+    }
+
     const swap = deg === 90 || deg === 270;
     const canvas = document.createElement('canvas');
-    canvas.width = swap ? img.naturalHeight : img.naturalWidth;
-    canvas.height = swap ? img.naturalWidth : img.naturalHeight;
+    canvas.width = swap ? height : width;
+    canvas.height = swap ? width : height;
     const ctx = canvas.getContext('2d');
     if (!ctx) throw new Error('Không tạo được ảnh tải về');
 
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.rotate((deg * Math.PI) / 180);
-    ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+    ctx.drawImage(img, -width / 2, -height / 2, width, height);
 
     const outType = blob.type.includes('png') ? 'image/png' : 'image/jpeg';
     return await new Promise<Blob>((resolve, reject) => {
@@ -116,8 +124,29 @@ async function saveBlob(blob: Blob, fileName: string): Promise<'saved' | 'cancel
   return 'saved';
 }
 
+export async function galleryImageFile(
+  url: string,
+  rotationDeg: number,
+  fileName: string,
+  opts?: { maxDim?: number },
+): Promise<File> {
+  const blob = await rotateBlob(await blobFromGalleryUrl(url), rotationDeg, opts?.maxDim ?? 0);
+  const mime = mimeForFileName(fileName, blob.type);
+  const name = downloadFileName(fileName, mime);
+  return new File([blob], name, { type: mime });
+}
+
+export function fileToDataUrl(file: Blob): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('Không đọc được ảnh'));
+    reader.readAsDataURL(file);
+  });
+}
+
 /** Download the current gallery image in-place. Never opens a new tab. */
 export async function downloadGalleryImage(url: string, rotationDeg: number, fileName: string) {
-  const blob = await rotateBlob(await blobFromGalleryUrl(url), rotationDeg);
-  return saveBlob(blob, fileName);
+  const file = await galleryImageFile(url, rotationDeg, fileName);
+  return saveBlob(file, file.name);
 }
