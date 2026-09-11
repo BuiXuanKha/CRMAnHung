@@ -398,7 +398,7 @@ Của tôi / Ghi nhận. **Tạo** đổi được. **Sửa** khoá.
 
 ##### 3. Lô đất
 
-Tạo: chọn lô (khoá nếu có `?lodatId=`). Sửa: chỉ đọc tiêu đề.
+Tạo: chọn lô qua ô tìm (khoá nếu có `?lodatId=`). Gợi ý chỉ **Mở bán** + **Dừng bán** — không hiện **Không bán**. Sửa: chỉ đọc tiêu đề.
 
 ##### 4. Trạng thái
 

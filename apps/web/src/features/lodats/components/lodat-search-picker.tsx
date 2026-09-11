@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { type LodatListItem } from '@crmanhung/shared';
+import { LodatSaleStatus, type LodatListItem } from '@crmanhung/shared';
 import { listLodats } from '../api';
 import { listingSaleStatusLabel } from '../display';
 import './lodat-search-picker.css';
@@ -60,9 +60,10 @@ export function LodatSearchPicker({ value, labelHint, disabled, onChange }: Prop
     let cancelled = false;
     setLoading(true);
     setError(null);
+    // Tạo GD: chỉ Mở bán + Dừng bán — ẩn Không bán (hồ sơ chủ chưa rao).
     void listLodats({
       keyword: debounced,
-      includePaused: true,
+      statusIn: [LodatSaleStatus.DANG_BAN, LodatSaleStatus.TAM_DUNG],
       limit: PICKER_LIMIT,
     })
       .then((res) => {
