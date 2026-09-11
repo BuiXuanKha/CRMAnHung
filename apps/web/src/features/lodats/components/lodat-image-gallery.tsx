@@ -18,6 +18,13 @@ import {
   fileNameFromImageUrl,
   normalizeRotationDeg,
 } from './lodat-image-download';
+import {
+  ZOOM_MIN,
+  galleryPcCursorClass,
+  useGalleryDragToZalo,
+  useGalleryPcView,
+  usePointerFine,
+} from './lodat-image-gallery-pc';
 import './lodat-image-gallery.css';
 
 const SWIPE_PX = 48;
@@ -44,6 +51,7 @@ export function LodatImageGallery({
   onToast,
   onError,
 }: Props) {
+  const pointerFine = usePointerFine();
   const [index, setIndex] = useState(startIndex);
   const [localRotations, setLocalRotations] = useState<Record<string, number>>({});
   const [busyDownload, setBusyDownload] = useState(false);
@@ -71,6 +79,25 @@ export function LodatImageGallery({
   const url = current?.url ?? '';
   const rotationKey = current ? (current.id ?? current.url) : '';
   const rotationDeg = rotationKey ? (localRotations[rotationKey] ?? 0) : 0;
+  const imageKey = `${rotationKey}:${safeIndex}`;
+
+  const pcView = useGalleryPcView({
+    pointerFine,
+    rotationDeg,
+    imageKey,
+    enabled: mounted && Boolean(url),
+  });
+  const drag = useGalleryDragToZalo(url, rotationDeg, safeIndex, pointerFine && Boolean(url));
+  const zoomed = pcView.scale > ZOOM_MIN + 0.001;
+  const canNativeDrag = pointerFine && !zoomed && drag.ready;
+  const cursorClass = galleryPcCursorClass({
+    pointerFine,
+    canPan: pcView.canPan,
+    isPanning: pcView.isPanning,
+    canNativeDrag,
+    dragLoading: drag.loading,
+    zoomed,
+  });
 
   const goTo = useCallback(
     (next: number) => {
@@ -181,6 +208,20 @@ export function LodatImageGallery({
     </button>
   );
 
+  const counterBits = [
+    `${safeIndex + 1} / ${count}`,
+    rotationDeg ? `${rotationDeg}°` : '',
+    pointerFine && zoomed ? `${Math.round(pcView.scale * 100)}%` : '',
+  ].filter(Boolean);
+
+  const hint = pointerFine
+    ? count > 1
+      ? 'Con lăn: phóng to/thu nhỏ (tối đa 4×) · Nút xoay ở dưới · Giữ chuột kéo sang Zalo khi chưa zoom · Mũi tên đổi ảnh'
+      : 'Con lăn: phóng to/thu nhỏ (tối đa 4×) · Nút xoay ở dưới · Giữ chuột kéo sang Zalo khi chưa zoom'
+    : count > 1
+      ? 'Vuốt trái/phải đổi ảnh · Tải về · Nút xoay ở dưới'
+      : 'Tải về · Nút xoay ở dưới để xoay ảnh';
+
   if (!mounted || count < 1 || !url) return null;
 
   return createPortal(
@@ -194,7 +235,7 @@ export function LodatImageGallery({
         <div className="ld-img-gallery-heading">
           <h2 className="ld-img-gallery-title">{title}</h2>
           <p className="ld-img-gallery-counter" aria-live="polite">
-            {safeIndex + 1} / {count}
+            {counterBits.join(' · ')}
           </p>
         </div>
         <button
@@ -208,12 +249,19 @@ export function LodatImageGallery({
       </header>
 
       <div
-        className="ld-img-gallery-stage"
+        className={[
+          'ld-img-gallery-stage',
+          pointerFine ? 'ld-img-gallery-stage--pc' : '',
+        ]
+          .filter(Boolean)
+          .join(' ')}
         onTouchStart={(e) => {
+          if (pointerFine && zoomed) return;
           const t = e.touches[0];
           setTouchStart({ x: t.clientX, y: t.clientY });
         }}
         onTouchEnd={(e) => {
+          if (pointerFine && zoomed) return;
           if (!touchStart || count < 2) return;
           const t = e.changedTouches[0];
           const dx = t.clientX - touchStart.x;
@@ -235,15 +283,40 @@ export function LodatImageGallery({
           </button>
         ) : null}
 
-        <div className="ld-img-gallery-frame">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={url}
-            alt=""
-            className="ld-img-gallery-img"
-            style={{ transform: `rotate(${rotationDeg}deg)` }}
-            draggable={false}
-          />
+        <div
+          ref={pcView.stageRef}
+          className={['ld-img-gallery-frame', cursorClass].filter(Boolean).join(' ')}
+          onMouseDown={pcView.handlePanMouseDown}
+        >
+          <div className="ld-img-gallery-viewport">
+            <div
+              className="ld-img-gallery-transform"
+              style={{
+                transform: `translate(${pcView.translate.x}px, ${pcView.translate.y}px) rotate(${rotationDeg}deg) scale(${pcView.totalScale})`,
+              }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                ref={pcView.imgRef}
+                src={url}
+                alt=""
+                className={[
+                  'ld-img-gallery-img',
+                  canNativeDrag ? 'is-draggable' : '',
+                  pointerFine && !zoomed && drag.loading ? 'is-drag-wait' : '',
+                ]
+                  .filter(Boolean)
+                  .join(' ')}
+                draggable={canNativeDrag}
+                onDragStart={
+                  canNativeDrag
+                    ? drag.handleDragStart
+                    : (event) => event.preventDefault()
+                }
+                onLoad={pcView.onImgLoad}
+              />
+            </div>
+          </div>
           <a
             className="ld-img-gallery-scan"
             href={url}
@@ -290,9 +363,7 @@ export function LodatImageGallery({
           </div>
         ) : null}
 
-        <p className="ld-img-gallery-hint">
-          Vuốt trái/phải đổi ảnh • Tải về • Nút xoay ở dưới
-        </p>
+        <p className="ld-img-gallery-hint">{hint}</p>
       </div>
 
       <footer className="ld-img-gallery-actions">

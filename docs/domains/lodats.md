@@ -434,11 +434,21 @@ Không chủ / không SĐT và không FB → vẫn hiện «⋯» (Giao dịch /
 
 #### 12.3.3 Gallery ảnh (đã làm)
 
-Full-screen giống CRM cũ: tiêu đề + `N / M` · đóng · prev/next · vuốt · chấm · **Tải về** · **Xoay trái/phải**.
+Full-screen: tiêu đề + `N / M` · đóng · prev/next · vuốt · chấm · **Tải về** · **Xoay trái/phải**.
 
-**Máy tính:** nút **Tải về** dưới ảnh; icon mở ảnh gốc (tab mới) góc phải ảnh.
+Máy tính = chuột `(hover: hover) and (pointer: fine)` — không chỉ theo độ rộng màn.
 
-**Điện thoại:** nút **Tải về** nổi giữa-dưới **trên ảnh**; bấm tải trong modal (blob / share sheet). **Không** mở tab/trang mới. Ẩn icon mở ảnh gốc (tránh đụng nhầm). CDN không CORS → web gọi `GET /api/v1/storage/public-image?url=` (JWT, allowlist host).
+**Máy tính**
+
+1. Con lăn: phóng to / thu nhỏ **1×–4×**. Đang zoom thì bộ đếm thêm `%`.
+2. Đang zoom: giữ chuột trái **kéo pan** (con trỏ grab).
+3. Chưa zoom: giữ chuột **kéo ảnh sang Zalo** (file đã xoay). Cursor chờ khi file chưa sẵn.
+4. Một nút **Tải về** dưới ảnh. Icon mở ảnh gốc (tab mới) góc phải ảnh — không phải nút tải thứ hai.
+5. Gợi ý: *Con lăn phóng to · kéo Zalo khi chưa zoom · mũi tên đổi ảnh · nút xoay ở dưới.*
+
+**Điện thoại**
+
+Nút **Tải về** nổi giữa-dưới **trên ảnh**; bấm tải trong modal (blob / share sheet). **Không** mở tab/trang mới. Ẩn icon mở ảnh gốc. CDN không CORS → `GET /api/v1/storage/public-image?url=` (JWT, allowlist host). Không pinch-zoom.
 
 - Ảnh **lô** (`LodatImage`): xoay **lưu DB** (`rotationDeg`).
 - Ảnh **dự án chung** (`AddressImage`): chỉ xem; xoay phiên không lưu (Admin sửa ảnh dự án trên sổ địa chỉ).
