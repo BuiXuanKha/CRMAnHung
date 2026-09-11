@@ -91,6 +91,7 @@ type Props = {
   ) => void;
   onOpenGallery: (plot: LodatListItem) => void;
   onGptContent: (plot: LodatListItem) => void;
+  onComposeListing?: (plot: LodatListItem) => void;
   onNeedsWebUpdate?: (plot: LodatListItem) => void;
   loadingMore?: boolean;
   scrollRef?: Ref<HTMLDivElement>;
@@ -118,6 +119,7 @@ export function LodatTable({
   onSetSaleStatus,
   onOpenGallery,
   onGptContent,
+  onComposeListing,
   onNeedsWebUpdate,
   loadingMore = false,
   scrollRef,
@@ -273,6 +275,7 @@ export function LodatTable({
                 .filter(Boolean)
                 .join(' ')}
               onClick={() => onSelect(p.id)}
+              onDoubleClick={() => onComposeListing?.(p)}
             >
               <div className="ld-cell" role="cell">
                 <button

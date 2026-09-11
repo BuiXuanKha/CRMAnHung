@@ -120,7 +120,7 @@ Nhân viên xem / tìm lô đang rao: ảnh, địa chỉ, DT·MT·hướng, gi�
 
 | Actor | Được | Không |
 |-------|------|--------|
-| STAFF | List lô đã gắn chủ của mình; tạo lô dân từ khách; gắn chủ lô kho; đổi chủ (khi đã chốt quyền); sửa DT·MT lô dân mình tạo; thêm/gỡ **ảnh riêng thửa** (kể lô dự án); công tắc Mở bán/Tạm dừng trên map mình; soạn/Đăng web lô mình trên `/dang-bai` | Tạo địa chỉ; import kho; sửa/xoá ảnh dự án trên sổ địa chỉ; thêm lô vào dự án; hard-delete thửa; bài CMS |
+| STAFF | List lô đã gắn chủ của mình; tạo lô dân từ khách; gắn chủ lô kho; đổi chủ (khi đã chốt quyền); sửa DT·MT lô dân mình tạo; thêm/gỡ **ảnh riêng thửa** (kể lô dự án); công tắc Mở bán/Tạm dừng trên map mình; soạn bài đăng web lô mình trên `/lo-dat` | Tạo địa chỉ; import kho; sửa/xoá ảnh dự án trên sổ địa chỉ; thêm lô vào dự án; hard-delete thửa; bài CMS |
 | ADMIN | Sổ địa chỉ; import/sửa kho dự án; ảnh dự án; xem mọi lô đã gắn chủ; dọn lô kho tạo nhầm | Tạo lô từ menu khách |
 
 Tạo lô NV: từ khách → «Tạo lô đất». Không nút thêm trên `/lo-dat`.
@@ -162,7 +162,7 @@ Tạm hoãn (chưa bàn):
 
 1. List **ADMIN** `/lo-dat`: hiển thị theo cách nào (tách theo NV/luồng hay gộp theo LK12)? — **chờ bàn sau**.
 
-Đăng lô lên web khách — không tự theo Mở bán. STAFF soạn trên `/dang-bai` — [`public-content.md`](./public-content.md). ADMIN không vào trang này.
+Đăng lô lên web khách — không tự theo Mở bán. STAFF soạn bài đăng trên `/lo-dat` — [`public-content.md`](./public-content.md). ADMIN không vào trang này.
 
 Nhẹ hơn (mặc định nếu không bác): hangtag Nhà/Đất copy = `DAT`; số lô trùng trong kho = cấm; admin được bổ sung lô vào dự án đã import; `DAT_COC`/`DA_BAN` cũ giữ khi copy, list chỉ hiện Mở bán/Tạm dừng. Giá `BIGINT`; hoa hồng chữ.
 
@@ -271,11 +271,11 @@ Dòng 1: diện tích. Dòng 2: `MT … · hướng`. Thiếu = `—`.
 
 ##### 5b. Web
 
-Hangtag: **Đã soạn** (`hasWebBody` — `PublicLotListing.bodyHtml` không rỗng) `green` · **Chưa soạn** `gray`. Cùng cột **Web** / badge trên `/dang-bai`. Lọc cột: Tất cả web · Đã soạn · Chưa soạn. Icon đỏ `needsWebUpdate` (nếu có) cạnh hangtag — CRM đổi sau lần lưu bài.
+Hangtag: **Đã soạn** (`hasWebBody` — `PublicLotListing.bodyHtml` không rỗng) `green` · **Chưa soạn** `gray`. Cột **Web** / badge Đã soạn · Chưa soạn. Lọc cột: Tất cả web · Đã soạn · Chưa soạn. Icon đỏ `needsWebUpdate` (nếu có) cạnh hangtag — CRM đổi sau lần lưu bài.
 
 ##### 5c. AI GPT
 
-Nút **GPT** (`Sparkles`) → modal tạo content (cùng `LotGptContentDialog` `/dang-bai`). Không lọc cột. **Dùng cho bài đăng** → mở `LotListingEditorDialog` (Soạn bài đăng) trên `/lo-dat` với nội dung GPT — cùng hành vi `/dang-bai` (không redirect mất phản hồi). API `POST …/lots/gpt-content` chỉ **STAFF** (ADMIN 403).
+Nút **GPT** (`Sparkles`) → modal tạo content (cùng `LotGptContentDialog`). Không lọc cột. **Dùng cho bài đăng** → mở `LotListingEditorDialog` (Soạn bài đăng) trên `/lo-dat` với nội dung GPT — mở Soạn bài đăng tại chỗ (không redirect mất phản hồi). API `POST …/lots/gpt-content` chỉ **STAFF** (ADMIN 403).
 
 ##### 6. Trạng thái — 3 cột công tắc (desktop)
 
@@ -410,7 +410,7 @@ Học CRM cũ `LodatDetailPage` — **không** copy god-file. Slice 1 (đọc + 
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-Hangtag hàng dưới tiêu đề: loại · Đất dân/Dự án · **Đã soạn** / **Chưa soạn** (cùng cột **Web** list §12.1.5b + `/dang-bai`; `hasWebBody`). Icon đỏ `needsWebUpdate` cạnh hangtag web nếu CRM đổi sau lần lưu bài.
+Hangtag hàng dưới tiêu đề: loại · Đất dân/Dự án · **Đã soạn** / **Chưa soạn** (cùng cột **Web** list §12.1.5b + `/lo-dat`; `hasWebBody`). Icon đỏ `needsWebUpdate` cạnh hangtag web nếu CRM đổi sau lần lưu bài.
 
 **Giao dịch** → `/giao-dich/tao?lodatId=` (open-or-create, cùng §12.1.3 mục 7). **Sửa lô đất** → `/lo-dat/[id]/sua`. **Copy gửi sales** — clipboard nội bộ: dòng đầu `THÔNG TIN NỘI BỘ - KHÔNG GỬI KHÁCH`, mỗi dòng có icon; gồm tiêu đề / địa chỉ / DT·MT·hướng + **giá bán · ghi chú giá · hoa hồng**; dòng cuối **link share** lô (cùng mã NV như nút Chia sẻ); **không** footer hotline/địa chỉ VP. **Share link** — chỉ khi lô đã publish web; mã cố định theo (NV + lô); URL `https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/{slug}?share=CODE`. Khách vào bằng mã NV A → liên hệ A trên trang chủ + chi tiết lô **30 ngày** (cùng NV không reset hạn; NV khác ghi đè). Vào thẳng domain hết cookie → hotline công ty. [`public-content.md`](./public-content.md) §18. Lô Tạm dừng / Đã bán — link vẫn mở.
 

@@ -154,8 +154,6 @@ export const config = {
     '/dich-vu-so-do/:path*',
     '/cong-viec',
     '/cong-viec/:path*',
-    '/dang-bai',
-    '/dang-bai/:path*',
     '/dashboard',
     '/dashboard/:path*',
     '/dashbroad',

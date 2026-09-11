@@ -1,12 +1,12 @@
 'use client';
 
-import { ChevronDown, ChevronUp, CreditCard, Eye, ListTodo, Pencil } from 'lucide-react';
+import { ChevronDown, ChevronUp, CreditCard, Eye, FilePenLine, ListTodo, Pencil } from 'lucide-react';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import type { LodatListItem } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 
-export type LodatAction = 'detail' | 'task' | 'deal' | 'edit';
+export type LodatAction = 'detail' | 'task' | 'deal' | 'edit' | 'compose';
 
 type Props = {
   plot: LodatListItem;
@@ -80,6 +80,11 @@ export function ActionMenu({ plot, open, onToggle, onClose, onAction }: Props) {
             <li>
               <button type="button" role="menuitem" onClick={() => onAction('deal')}>
                 <Icon icon={CreditCard} /> Giao dịch
+              </button>
+            </li>
+            <li>
+              <button type="button" role="menuitem" onClick={() => onAction('compose')}>
+                <Icon icon={FilePenLine} /> Soạn bài đăng
               </button>
             </li>
             <li>

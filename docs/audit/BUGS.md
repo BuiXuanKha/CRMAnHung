@@ -910,7 +910,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Severity:** HIGH
 - **Module:** public-content / dashboard
 - **File:** `apps/web/src/features/public-content/api.ts`, `apps/web/src/features/public-content/staff-lots.ts`, `apps/web/src/features/public-content/public-web-dashboard.tsx`
-- **Function:** `loadOpenPlots`, `getPublicWebDashboard`, `listStaffOpenLots`, `buildPublicWebDashboard`
+- **Function:** `loadOpenPlots`, `getPublicWebDashboard`, `listLodats (+ listing overlay)`, `buildPublicWebDashboard`
 - **Vị trí code:** `loadOpenPlots` → `listLodats({ status: DANG_BAN, limit: LODAT_LIST_MAX_PAGE_SIZE })` (`200`, không lặp `offset`). `publishedLotCount` / `pendingLotCount` = đếm `staffOpen` (giao `plots` đã cắt ∩ overlay). `recentLots: lots.slice(0, 8)` từ `GET /admin/public-web/lots`. Dialog «Đăng lô» = `(data?.recentLots ?? []).filter(!isPublished)`. `/dashboard/lo-dat` dùng cùng `loadOpenPlots`.
 - **Problem:** (1) Công ty / Admin > 200 lô đang Mở bán: thẻ «Lô đang hiện / Chờ đăng» thiếu; list `/dashboard/lo-dat` không hiện lô ngoài 200 `updatedAt` mới nhất — không soạn/đăng được. (2) Nút Tổng quan «Đăng lô» không lấy lô Mở bán chưa có hàng `PublicLotListing`; chỉ unpublished nằm trong 8 listing `updatedAt` mới nhất. Nếu 8 hàng đó đều đã đăng → dialog «Không còn lô chờ đăng» dù `pendingLotCount` > 0. (3) Lô Tạm dừng vẫn `isPublished` (BUG-023) không vào `staffOpen` (chỉ `DANG_BAN`) nên thẻ «Lô đang hiện» thấp hơn catalog slug.
 - **Root cause:** Dashboard ghép client: cap list lô CRM + slice overlay; không COUNT/full join Mở bán × listing.

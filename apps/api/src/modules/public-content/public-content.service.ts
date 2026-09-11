@@ -387,7 +387,7 @@ export class PublicContentService {
 
   /**
    * Đồng bộ title/location overlay từ CRM (slug giữ nguyên). Revalidate hangtag/catalog.
-   * Nếu listing đã tồn tại + published trước lần sync → bật needsWebUpdate (icon đỏ /dang-bai).
+   * Nếu listing đã tồn tại + published trước lần sync → bật needsWebUpdate (icon đỏ /lo-dat).
    */
   async syncListingFromLodat(lodatId: string): Promise<void> {
     const existingBefore = await this.prisma.publicLotListing.findUnique({

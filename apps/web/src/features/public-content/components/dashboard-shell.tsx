@@ -20,7 +20,7 @@ const ADMIN_MENU = [
  *
  * STAFF lỡ vào đây → về `/khach-hang` (luồng CRM thường). Soft `router.replace`
  * dễ kẹt «Đang tải…» khi cookie role lệch ADMIN; sync `/auth/me` rồi hard-navigate.
- * `/dang-bai` không phải đích fallback — chỉ khi NV mở menu Đăng bài.
+ * `/lo-dat` không phải đích fallback — chỉ khi NV mở menu Quản lý lô đất.
  */
 export function DashboardShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
