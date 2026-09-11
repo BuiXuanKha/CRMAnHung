@@ -227,11 +227,17 @@ export function LodatImageGallery({
   return createPortal(
     <div
       className="ld-img-gallery"
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Xem ảnh ${title}`}
+      role="presentation"
+      onClick={onClose}
     >
-      <header className="ld-img-gallery-top">
+      <div
+        className="ld-img-gallery-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Xem ảnh ${title}`}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <header className="ld-img-gallery-top">
         <div className="ld-img-gallery-heading">
           <h2 className="ld-img-gallery-title">{title}</h2>
           <p className="ld-img-gallery-counter" aria-live="polite">
@@ -386,6 +392,7 @@ export function LodatImageGallery({
           Xoay phải
         </button>
       </footer>
+      </div>
     </div>,
     document.body,
   );
