@@ -595,7 +595,7 @@ Hai việc **khác nhau** — không gộp một màn:
 | Việc | Trạng thái |
 |------|------------|
 | **Đăng web công khai** (tin, bài, lô bán) | **Dashboard** `/dashboard` — ADMIN: Tổng quan, Bài viết, Thống kê. STAFF: soạn bài đăng lô trên `/lo-dat` (cột Web / GPT / Soạn bài đăng; không mục menu riêng). |
-| Registry / xóa cứng khách, CRUD NV | **Tạm hoãn** (P4). `/quan-tri/khach-hang` vẫn placeholder. |
+| Registry / xóa cứng khách | **Tạm hoãn** (P4). `/quan-tri/khach-hang` vẫn placeholder. CRUD NV đã có `/quan-tri/nguoi-dung`. Checklist: [`ADMIN-HOAN-THIEN.md`](./ADMIN-HOAN-THIEN.md). |
 
 Khi mock Đăng web: shell CRM §4.2; bảng list §4.5; dialog §4.7. Không dùng layout marketing public cho màn admin.
 

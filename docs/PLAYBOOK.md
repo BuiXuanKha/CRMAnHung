@@ -111,7 +111,7 @@ Tham chiếu nhanh:
 | **P1** | Customers | Quản lý khách + ingest stub |
 | **P2** | Lodats + Addresses | Lô đất / địa chỉ |
 | **P3** | Transactions + Title services | Giao dịch / sổ đỏ |
-| **P4** | Admin registry + migrate data | Sẵn sàng cutover |
+| **P4** | Admin registry + migrate data | Sẵn sàng cutover — checklist [`ADMIN-HOAN-THIEN.md`](./ADMIN-HOAN-THIEN.md) |
 | **P5** | Cutover `crm.anhungland.com` | Tắt dần hệ cũ |
 
 Trong mỗi phase domain: **luôn** đi ①→⑨, không code API trước docs/UI mock.
