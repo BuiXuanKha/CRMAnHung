@@ -12,9 +12,11 @@
 | Transactions | [transactions.md](./transactions.md) | Ready for API — Prisma + contract; UI mock list + chi tiết + form |
 | Title services | [title-services.md](./title-services.md) | Ready for API — copy script + ADMIN lọc NV + audit xem file |
 | Công việc (nhắc việc) | [tasks.md](./tasks.md) | Ready for API — bảng `/cong-viec` + FAB tạo + ghim + hoàn thành |
-| Users / admin registry | [users.md](./users.md) §11 mục 5 | P4 — CRUD NV, chưa làm |
+| Users / admin registry | [users.md](./users.md) · [`ADMIN-HOAN-THIEN.md`](../ADMIN-HOAN-THIEN.md) B1 | CRUD NV **xong** `/quan-tri/nguoi-dung`. P4 còn **registry xóa cứng khách** (`/quan-tri/khach-hang` placeholder) |
 | Public content (web khách) | [public-content.md](./public-content.md) | Done — STAFF soạn listing trên `/lo-dat`; bài CMS ADMIN |
 
 Trước khi code UI/API: domain doc phải ở trạng thái **Ready for mock** trở lên.
+
+Việc Admin còn thiếu (lọc NV, kho lô, registry, CMS sửa bài, copy data, cutover): [`ADMIN-HOAN-THIEN.md`](../ADMIN-HOAN-THIEN.md).
 
 **Cách viết đặc tả màn:** mỗi trang chia **máy tính** rồi **mobile**, sau đó mới chi tiết từng thành phần — mẫu [`customers.md`](./customers.md) §12. Đánh số, ngắn; không trộn PC/mobile trong một mục.
