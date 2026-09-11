@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+import { facebookPageUrlFromRawMeta } from '@crmanhung/shared';
 import type {
   TitleServiceAttachment,
   TitleServiceDetail,
@@ -82,11 +83,12 @@ export const DETAIL_INCLUDE = {
   customer: {
     select: {
       fullName: true,
+      isHidden: true,
       phones: {
         orderBy: [{ sortOrder: 'asc' as const }, { createdAt: 'asc' as const }],
-        take: 1,
-        select: { phone: true },
+        select: { id: true, phone: true, label: true },
       },
+      facebook: true,
     },
   },
   createdBy: { select: { fullName: true } },
@@ -235,12 +237,33 @@ export function toListItem(row: ListRow): TitleServiceListItem {
 export function toDetail(row: DetailRow): TitleServiceDetail {
   const latest = row.progress[0] ?? null;
   const { totalThuVnd, totalChiVnd } = moneyTotals(row.moneyEntries);
+  const phones = row.customer.phones.map((ph) => ({
+    id: ph.id,
+    phone: ph.phone,
+    label: ph.label ?? null,
+  }));
+  const fb = row.customer.facebook;
   return {
     id: row.id,
     code: row.code,
     customerId: row.customerId,
     customerName: row.customer.fullName,
-    primaryPhone: row.customer.phones[0]?.phone ?? null,
+    primaryPhone: phones[0]?.phone ?? null,
+    customerIsHidden: row.customer.isHidden,
+    phones,
+    facebook: fb
+      ? {
+          customerUid: fb.customerUid,
+          threadId: fb.threadId,
+          facebookName: fb.facebookName,
+          /* FAB Messenger không cần avatar — tránh phụ thuộc StorageService. */
+          avatarUrl: null,
+          scanSource: fb.scanSource,
+          scanSourceLabel: fb.scanSourceLabel,
+          employeeFacebookUid: fb.employeeFacebookUid,
+          pageUrl: facebookPageUrlFromRawMeta(fb.rawMeta),
+        }
+      : null,
     status: row.status as TitleServiceListItem['status'],
     agreedFeeVnd: toMoney(row.agreedFeeVnd),
     needSummary: row.needSummary,

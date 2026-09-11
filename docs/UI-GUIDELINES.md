@@ -708,6 +708,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-03 | Chi tiết `/khach-hang/[id]` mobile: ẩn «← Danh sách khách»; FAB gọi (`tel:`) + **Zalo** (`zalo.me`) khi có SĐT + **Mở Messenger** (cùng menu list mobile); máy tính không đổi |
 | 2026-09-03 | Chi tiết `/lo-dat/[id]` mobile: ẩn «← Danh sách lô đất»; FAB liên hệ **chủ đất** (Gọi / Zalo / Mở Messenger); nổi trên footer Giao dịch·Sửa; máy tính không đổi |
 | 2026-09-10 | Chi tiết `/lo-dat/[id]` mobile FAB «⋯»: thêm **AI GPT** (cùng modal list / `/dang-bai`; STAFF only) |
+| 2026-09-10 | Chi tiết `/dich-vu-so-do/[id]` mobile: ẩn «← Dịch vụ sổ đỏ»; FAB gọi / Zalo / Messenger + 「⋯」 (công việc · ghim · sửa / khôi phục); máy tính không đổi |
 | 2026-09-10 | Chi tiết `/lo-dat/[id]`: hangtag **Đã soạn** / **Chưa soạn** (cột Web list, cùng `/dang-bai`) + icon đỏ `needsWebUpdate` |
 | 2026-09-10 | `/lo-dat` cột Web + nhãn Đã/Chưa soạn — đồng nhất với `/dang-bai` (bỏ «Đã đăng web» / Đã·Chưa đăng) |
 | 2026-09-04 | Chi tiết `/khach-hang/[id]`: dưới tên chỉ hiện **tên kênh**; FAB **«⋯»** popover + icon Lucide (chăm sóc / tạo lô / sổ đỏ) |

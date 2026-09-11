@@ -3,20 +3,27 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { TitleServiceMoneyKind } from '@crmanhung/shared';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  TaskTargetType,
+  TitleServiceMoneyKind,
+  TitleServiceStatus,
+} from '@crmanhung/shared';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import { CrmBadge } from '@/shared/ui/badge';
+import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
 import {
   addTitleServiceAttachment,
   addTitleServiceMoney,
   addTitleServiceProgress,
   getTitleService,
   getTitleServiceAttachmentUrl,
+  pinTitleService,
   updateTitleService,
 } from './api';
 import { ActionDialogs, type DialogKind } from './components/action-dialogs';
 import { TitleServiceDetailBody } from './components/detail-body';
+import { TitleServiceDetailFab } from './components/title-service-detail-fab';
 import { statusLabel, statusTone } from './display';
 import './title-service-detail.css';
 import './title-services-panel.css';
@@ -49,6 +56,27 @@ export function TitleServiceDetailPage() {
     await qc.invalidateQueries({ queryKey: ['title-service', id] });
   }
 
+  const { openTaskModal, dialog: createTaskDialog } = useCreateTaskModal(() => {
+    void refresh();
+  });
+
+  const pinMut = useMutation({
+    mutationFn: () => {
+      if (!d) throw new Error('Thiếu hồ sơ.');
+      return pinTitleService(d.id, { pinned: !d.isPinned });
+    },
+    onSuccess: async (updated) => {
+      await refresh();
+      flash(updated.isPinned ? `Đã ghim ${updated.code}.` : `Đã bỏ ghim ${updated.code}.`);
+    },
+    onError: (err) => {
+      setAlertBox({
+        title: 'Không ghim được hồ sơ',
+        message: (err as Error).message,
+      });
+    },
+  });
+
   async function runDialog(work: () => Promise<void>) {
     setDialogBusy(true);
     setDialogError(null);
@@ -74,8 +102,22 @@ export function TitleServiceDetailPage() {
     }
   }
 
+  async function restoreCase() {
+    if (!d) return;
+    try {
+      await updateTitleService(d.id, { status: TitleServiceStatus.DANG_LAM });
+      await refresh();
+      flash(`Đã khôi phục ${d.code} về Đang làm.`);
+    } catch (err) {
+      setAlertBox({
+        title: 'Không khôi phục được hồ sơ',
+        message: (err as Error).message,
+      });
+    }
+  }
+
   return (
-    <div className="sd-detail-page">
+    <div className={d ? 'sd-detail-page has-fab' : 'sd-detail-page'}>
       <div className="sd-detail-inner">
         <Link href="/dich-vu-so-do" scroll={false} className="sd-detail-back">
           ← Dịch vụ sổ đỏ
@@ -121,6 +163,29 @@ export function TitleServiceDetailPage() {
           </>
         ) : null}
       </div>
+
+      {d ? (
+        <TitleServiceDetailFab
+          detail={d}
+          onAddTask={() => {
+            openTaskModal({
+              type: TaskTargetType.TITLE_SERVICE,
+              id: d.id,
+              label: d.customerName,
+            });
+          }}
+          onPin={() => {
+            void pinMut.mutateAsync();
+          }}
+          onEdit={() => {
+            setDialogError(null);
+            setDialog('edit');
+          }}
+          onRestore={() => {
+            void restoreCase();
+          }}
+        />
+      ) : null}
 
       <ActionDialogs
         kind={dialog}
@@ -174,6 +239,7 @@ export function TitleServiceDetailPage() {
         }}
       />
 
+      {createTaskDialog}
       <CrmToast message={toast} />
       <CrmAlertDialog
         open={Boolean(alertBox)}
