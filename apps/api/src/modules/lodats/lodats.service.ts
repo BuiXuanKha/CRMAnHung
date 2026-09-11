@@ -969,9 +969,19 @@ export class LodatsService {
       return { wardName: null, items: [], total: 0 };
     }
 
+    // Gợi ý cùng xã: Mở bán + Dừng bán; ẩn Không bán (hồ sơ chủ chưa rao).
     const and: Prisma.LodatWhereInput[] = [
       this.ownershipWhere(user),
-      { maps: { some: { isActive: true } } },
+      {
+        maps: {
+          some: {
+            isActive: true,
+            status: {
+              in: [LodatSaleStatus.DANG_BAN, LodatSaleStatus.TAM_DUNG],
+            },
+          },
+        },
+      },
       { id: { not: id } },
       {
         OR: [

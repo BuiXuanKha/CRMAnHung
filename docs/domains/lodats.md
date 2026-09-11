@@ -459,7 +459,7 @@ Full-screen (không bo góc). Nút **Tải về** nổi giữa-dưới **trên �
 
 #### 12.3.4 Lô cùng xã (đã làm)
 
-CRM cũ `relatedAside`: desktop **cột phải sticky** (`max-height` + scroll thân); mobile dưới content. Danh sách lô **cùng `wardId`**, cùng quyền list (STAFF chỉ luồng mình), trừ lô đang xem. Thẻ bấm → `/lo-dat/[id]` (`scroll={false}`). **Nhớ cuộn** trang chi tiết (`sessionStorage` `crmanhung:lodat-detail-scroll-state`, theo `lodatId`) — bấm lô cùng xã rồi Back / quay lại → khôi phục đúng `scrollTop` vùng `.ld-detail-page` (sau khi detail + cùng xã đã tải). Không có xã → ẩn khối.
+CRM cũ `relatedAside`: desktop **cột phải sticky** (`max-height` + scroll thân); mobile dưới content. Danh sách lô **cùng `wardId`**, cùng quyền list (STAFF chỉ luồng mình), trừ lô đang xem; chỉ **Mở bán** (`DANG_BAN`) và **Dừng bán** (`TAM_DUNG`) — **không** hiện **Không bán** (`KHONG_BAN`). Thẻ bấm → `/lo-dat/[id]` (`scroll={false}`). **Nhớ cuộn** trang chi tiết (`sessionStorage` `crmanhung:lodat-detail-scroll-state`, theo `lodatId`) — bấm lô cùng xã rồi Back / quay lại → khôi phục đúng `scrollTop` vùng `.ld-detail-page` (sau khi detail + cùng xã đã tải). Không có xã → ẩn khối.
 
 #### 12.3.5 Lịch sử giao dịch (đã làm)
 
