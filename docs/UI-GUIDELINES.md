@@ -743,6 +743,7 @@ Brand An Hưng Land (đỏ dịu / vàng) áp dụng **public**; CRM có thể d
 | 2026-09-09 | Trang khách: nhãn góc ảnh **Mở bán** / **Tạm dừng** / **Đã bán** (và Đặt cọc) — không đổi CRM |
 | 2026-09-09 | `/dich-vu-so-do` Tạm dừng/Hoàn thành: menu chỉ Xem chi tiết + Khôi phục; tự bỏ ghim |
 | 2026-09-11 | Gallery ảnh lô máy tính: con lăn zoom 1–4×, pan khi zoom, kéo ảnh sang Zalo khi chưa zoom |
+| 2026-09-11 | Gallery ảnh lô máy tính: khung cố định 960×88vh giữa nền tối; bấm ra ngoài đóng |
 
 ---
 

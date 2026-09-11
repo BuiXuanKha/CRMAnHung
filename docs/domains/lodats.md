@@ -434,11 +434,15 @@ Không chủ / không SĐT và không FB → vẫn hiện «⋯» (Giao dịch /
 
 #### 12.3.3 Gallery ảnh (đã làm)
 
-Full-screen: tiêu đề + `N / M` · đóng · prev/next · vuốt · chấm · **Tải về** · **Xoay trái/phải**.
+Tiêu đề + `N / M` · đóng · prev/next · vuốt · chấm · **Tải về** · **Xoay trái/phải**.
 
 Máy tính = chuột `(hover: hover) and (pointer: fine)` — không chỉ theo độ rộng màn.
 
-**Máy tính**
+**Máy tính — khung**
+
+Không full-screen. Nền tối `rgba(15, 23, 42, 0.88)`. Giữa màn **khung cố định** `960px × 88vh` (bo 14px, nền `#0f172a`). Đổi ảnh không co giãn khung. **Bấm ra ngoài khung thì đóng.**
+
+**Máy tính — thao tác**
 
 1. Con lăn: phóng to / thu nhỏ **1×–4×**. Đang zoom thì bộ đếm thêm `%`.
 2. Đang zoom: giữ chuột trái **kéo pan** (con trỏ grab).
@@ -448,7 +452,7 @@ Máy tính = chuột `(hover: hover) and (pointer: fine)` — không chỉ theo 
 
 **Điện thoại**
 
-Nút **Tải về** nổi giữa-dưới **trên ảnh**; bấm tải trong modal (blob / share sheet). **Không** mở tab/trang mới. Ẩn icon mở ảnh gốc. CDN không CORS → `GET /api/v1/storage/public-image?url=` (JWT, allowlist host). Không pinch-zoom.
+Full-screen (không bo góc). Nút **Tải về** nổi giữa-dưới **trên ảnh**; bấm tải trong modal (blob / share sheet). **Không** mở tab/trang mới. Ẩn icon mở ảnh gốc. CDN không CORS → `GET /api/v1/storage/public-image?url=` (JWT, allowlist host). Không pinch-zoom.
 
 - Ảnh **lô** (`LodatImage`): xoay **lưu DB** (`rotationDeg`).
 - Ảnh **dự án chung** (`AddressImage`): chỉ xem; xoay phiên không lưu (Admin sửa ảnh dự án trên sổ địa chỉ).
