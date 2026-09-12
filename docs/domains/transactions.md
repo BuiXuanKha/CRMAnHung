@@ -376,7 +376,11 @@ Người bán / người mua: mỗi tên một dòng. Rỗng = `—`.
 
 ##### 6. Snapshot lô
 
-Địa chỉ, DT · MT · hướng, giá map lúc tạo. Thiếu = ẩn dòng. Ảnh snapshot: thumbnail; bấm → tab mới (`url` CDN). Không ảnh = ẩn lưới.
+Địa chỉ, DT · MT · hướng, giá map lúc tạo. Thiếu = ẩn dòng. Ảnh snapshot: lưới thumbnail lớn hơn; **bấm → gallery phóng to** (cùng `LodatImageGallery` như chi tiết lô — vuốt/prev·next; **không** xoay lưu vì ảnh đóng băng). Không ảnh = ẩn lưới.
+
+##### 7. Bố cục / typography
+
+Hero trong thẻ trắng (cùng kiểu chi tiết sổ đỏ). Nhãn field **không** IN HOA dày. Giá bán nhấn mạnh trong khối số liệu. Các bên: bán → mua đọc rõ trên mobile.
 
 #### 12.3.2 Giao diện mobile
 
