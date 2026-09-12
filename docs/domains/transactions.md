@@ -380,7 +380,18 @@ Người bán / người mua: mỗi tên một dòng. Rỗng = `—`.
 
 #### 12.3.2 Giao diện mobile
 
-Cùng 12.3.1. Một cột. Nút **Sửa** full-width đáy nội dung. Input không — chỉ đọc. Ô 16px không áp (không form).
+Cùng 12.3.1. Một cột. Input không — chỉ đọc. Ô 16px không áp (không form).
+
+**Ẩn** «← Quản lý giao dịch» và nút **Sửa** header (máy tính giữ nguyên).
+
+**FAB** góc phải dưới (máy tính **không** FAB) — cùng kiểu chi tiết khách / lô / sổ đỏ:
+
+| Nút | Khi nào | Hành vi |
+|-----|---------|---------|
+| 「⋯」 | luôn | Popover: **Thêm công việc** · **Sửa** · **Xóa** (cùng menu list) |
+| Gọi / Zalo / Messenger | — | Không — detail GD không có SĐT/FB bên (chỉ tên + `customerId`) |
+
+Sửa → `/giao-dich/[id]/sua`. Xóa → confirm rồi về list. Padding đáy trang đủ để nội dung không bị FAB che.
 
 ---
 

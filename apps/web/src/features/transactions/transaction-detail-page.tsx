@@ -1,13 +1,17 @@
 'use client';
 
 import Link from 'next/link';
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { Pencil } from 'lucide-react';
-import { TransactionPartyRole, TransactionType } from '@crmanhung/shared';
+import { useParams, useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { AlertTriangle, Pencil, Trash2 } from 'lucide-react';
+import { TaskTargetType, TransactionPartyRole, TransactionType } from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
+import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import { Icon } from '@/shared/ui/icon';
-import { getTransaction } from './api';
+import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
+import { deleteTransaction, getTransaction } from './api';
+import { TransactionDetailFab } from './components/transaction-detail-fab';
 import {
   formatCreatedAt,
   formatMoneyVnd,
@@ -27,7 +31,13 @@ function dash(v?: string | null): string {
 
 export function TransactionDetailPage() {
   const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const qc = useQueryClient();
   const id = params.id;
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
+  const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
+
   const q = useQuery({
     queryKey: ['transaction', id],
     queryFn: () => getTransaction(id),
@@ -40,8 +50,33 @@ export function TransactionDetailPage() {
   const sellers = d?.parties.filter((p) => p.role === TransactionPartyRole.SELLER) ?? [];
   const buyers = d?.parties.filter((p) => p.role === TransactionPartyRole.BUYER) ?? [];
 
+  function flash(msg: string) {
+    setToast(msg);
+    window.setTimeout(() => setToast(null), 2800);
+  }
+
+  const { openTaskModal, dialog: createTaskDialog } = useCreateTaskModal(() =>
+    flash('Đã thêm công việc.'),
+  );
+
+  const deleteMut = useMutation({
+    mutationFn: () => deleteTransaction(id),
+    onSuccess: async () => {
+      await qc.invalidateQueries({ queryKey: ['transactions'] });
+      setConfirmDelete(false);
+      router.replace('/giao-dich');
+    },
+    onError: (err) => {
+      setConfirmDelete(false);
+      setAlertBox({
+        title: 'Không xóa được giao dịch',
+        message: err instanceof Error ? err.message : 'Thử lại sau.',
+      });
+    },
+  });
+
   return (
-    <div className="tx-detail-page">
+    <div className={d ? 'tx-detail-page has-fab' : 'tx-detail-page'}>
       <div className="tx-detail-head">
         <Link href="/giao-dich" scroll={false} className="tx-detail-back">
           ← Quản lý giao dịch
@@ -202,6 +237,49 @@ export function TransactionDetailPage() {
           ) : null}
         </div>
       ) : null}
+
+      {d ? (
+        <TransactionDetailFab
+          onAddTask={() => {
+            openTaskModal({
+              type: TaskTargetType.TRANSACTION,
+              id: d.id,
+              label: d.code,
+            });
+          }}
+          onEdit={() => {
+            router.push(`/giao-dich/${d.id}/sua`);
+          }}
+          onDelete={() => setConfirmDelete(true)}
+        />
+      ) : null}
+
+      <CrmConfirmDialog
+        open={confirmDelete}
+        title="Xóa giao dịch"
+        icon={Trash2}
+        message={d ? `Bạn có chắc muốn xóa giao dịch ${d.code}?` : ''}
+        confirmLabel="Xóa"
+        danger
+        busy={deleteMut.isPending}
+        onCancel={() => {
+          if (!deleteMut.isPending) setConfirmDelete(false);
+        }}
+        onConfirm={() => {
+          void deleteMut.mutateAsync();
+        }}
+      />
+
+      <CrmAlertDialog
+        open={Boolean(alertBox)}
+        title={alertBox?.title ?? ''}
+        icon={AlertTriangle}
+        message={alertBox?.message ?? ''}
+        onClose={() => setAlertBox(null)}
+      />
+
+      {createTaskDialog}
+      <CrmToast message={toast} />
     </div>
   );
 }
