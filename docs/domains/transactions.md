@@ -38,6 +38,18 @@ Không nút «Thêm GD» trên list — tạo từ lô / khách.
 | Hoàn thành | `HOAN_TAT` | green |
 | Đã hủy | `HUY` | red |
 
+**Đồng bộ `LodatCustomerMap.status`** (map gắn GD lúc tạo; chỉ khi map còn `isActive`):
+
+| Tình trạng GD | Map status | Ghi chú |
+|---------------|------------|---------|
+| Đã cọc | `TAM_DUNG` | Ngừng rao (list + web khách) |
+| Đã công chứng | `TAM_DUNG` | GD vẫn mở |
+| Hoàn thành | `KHONG_BAN` | Đã chốt bán |
+| Đã hủy | `DANG_BAN` nếu map đang `TAM_DUNG` (hoặc legacy `DAT_COC`); **giữ nguyên** nếu đang `KHONG_BAN` / `DANG_BAN` / `DA_BAN` | Không tự mở bán khi trước đó Không bán |
+| Xóa GD đang mở | Cùng luật **Đã hủy** | Không ghi đè map `isActive: false` (đổi chủ) |
+
+Tình trạng GD và công tắc rao bán lô là hai hệ; list `/lo-dat` vẫn chỉ hiện Mở bán / Dừng bán / Không bán — không cột Đã cọc / Đã bán.
+
 **3 thẻ thống kê** (trên ô tìm):
 
 1. Số lô giao dịch = số dòng đang hiện
@@ -48,10 +60,10 @@ Gợi ý dưới số 2–3: «Chỉ giao dịch của tôi · Hoàn thành». M
 
 ## 4. Use cases
 
-1. **Tạo GD từ lô** — nếu lô đã có GD mở (`DA_COC` / `DA_CONG_CHUNG`) → mở sửa GD đó (`OPEN_TRANSACTION_EXISTS`). Không thì tạo mới, status luôn **Đã cọc**. Snapshot lô + map đóng băng lúc tạo.
+1. **Tạo GD từ lô** — nếu lô đã có GD mở (`DA_COC` / `DA_CONG_CHUNG`) → mở sửa GD đó (`OPEN_TRANSACTION_EXISTS`). Không thì tạo mới, status luôn **Đã cọc**; map active → `TAM_DUNG`. Snapshot lô + map đóng băng lúc tạo.
 2. **List `/giao-dich`** — tìm / lọc; STAFF chỉ GD mình; ADMIN tất cả.
-3. **Sửa** — đổi status, giá, thuế, hoa hồng, hẹn CC, bên, ghi chú. Hủy bắt buộc `cancelReason`.
-4. **Xóa cứng** — xóa hàng + nếu GD đang mở (`DA_COC` / `DA_CONG_CHUNG`) thì đưa map về **Mở bán**.
+3. **Sửa** — đổi status, giá, thuế, hoa hồng, hẹn CC, bên, ghi chú. Hủy bắt buộc `cancelReason`. Đổi status → đồng bộ map (bảng mục 3).
+4. **Xóa cứng** — xóa hàng; nếu GD đang mở thì áp luật map như **Đã hủy** (mục 3).
 5. **Lịch sử trên chi tiết lô** — list GD của lô (lodats.md §12.3.5, đã làm).
 
 Tạo GD: **OWN** bắt buộc ngày hẹn CC; **RECORD** hẹn CC tuỳ chọn, hoa hồng = 0, **không** vào thẻ doanh thu. Tạo từ lô: điền sẵn người bán = chủ map active (tên + `customerId`); lô chưa có chủ → không lưu.

@@ -25,6 +25,7 @@ import {
   DETAIL_INCLUDE,
   keywordWhere,
   LIST_INCLUDE,
+  listingStatusForTxStatus,
   OPEN_EXISTS_BODY,
   OPEN_STATUSES,
   TX_PARTY,
@@ -131,23 +132,27 @@ export class TransactionsService {
     let lastErr: unknown;
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
       try {
-        const created = await this.prisma.transaction.create({
-          data: {
-            code: await this.nextCode(),
-            lodatId: lodat.id,
-            lodatCustomerMapId: map.id,
-            type: dto.type,
-            status: TX_STATUS.DA_COC,
-            notaryAppointmentAt: this.parseDate(dto.notaryAppointmentAt) ?? null,
-            salePriceVnd: sale,
-            taxPriceVnd: tax ?? null,
-            commissionVnd: commission,
-            note: dto.note?.trim() || null,
-            createdByEmployeeId: user.id,
-            parties: { create: this.partyRows(dto.sellers, dto.buyers) },
-            snapshot: { create: snapshot },
-          },
-          include: DETAIL_INCLUDE,
+        const created = await this.prisma.$transaction(async (tx) => {
+          const row = await tx.transaction.create({
+            data: {
+              code: await this.nextCode(),
+              lodatId: lodat.id,
+              lodatCustomerMapId: map.id,
+              type: dto.type,
+              status: TX_STATUS.DA_COC,
+              notaryAppointmentAt: this.parseDate(dto.notaryAppointmentAt) ?? null,
+              salePriceVnd: sale,
+              taxPriceVnd: tax ?? null,
+              commissionVnd: commission,
+              note: dto.note?.trim() || null,
+              createdByEmployeeId: user.id,
+              parties: { create: this.partyRows(dto.sellers, dto.buyers) },
+              snapshot: { create: snapshot },
+            },
+            include: DETAIL_INCLUDE,
+          });
+          await this.syncMapListingStatus(tx, map.id, TX_STATUS.DA_COC);
+          return row;
         });
         return toDetail(created, this.storage);
       } catch (err) {
@@ -200,7 +205,7 @@ export class TransactionsService {
             })),
           });
         }
-        return tx.transaction.update({
+        const row = await tx.transaction.update({
           where: { id },
           data: {
             status: nextStatus,
@@ -227,6 +232,10 @@ export class TransactionsService {
           },
           include: DETAIL_INCLUDE,
         });
+        if (nextStatus !== current.status) {
+          await this.syncMapListingStatus(tx, current.lodatCustomerMapId, nextStatus);
+        }
+        return row;
       });
       return toDetail(updated, this.storage);
     } catch (err) {
@@ -245,10 +254,7 @@ export class TransactionsService {
 
     await this.prisma.$transaction(async (tx) => {
       if (OPEN_STATUSES.includes(row.status as (typeof OPEN_STATUSES)[number])) {
-        await tx.lodatCustomerMap.update({
-          where: { id: row.lodatCustomerMapId },
-          data: { status: 'DANG_BAN' },
-        });
+        await this.syncMapListingStatus(tx, row.lodatCustomerMapId, TX_STATUS.HUY);
       }
       await tx.transaction.delete({ where: { id } });
     });
@@ -371,6 +377,26 @@ export class TransactionsService {
         sortOrder: p.sortOrder ?? i,
       })),
     ];
+  }
+
+
+  /** Đồng bộ LodatCustomerMap.status theo tình trạng GD (chỉ map isActive). */
+  private async syncMapListingStatus(
+    db: Prisma.TransactionClient,
+    mapId: string,
+    txStatus: string,
+  ) {
+    const map = await db.lodatCustomerMap.findUnique({
+      where: { id: mapId },
+      select: { id: true, status: true, isActive: true },
+    });
+    if (!map?.isActive) return;
+    const next = listingStatusForTxStatus(txStatus, map.status);
+    if (!next || next === map.status) return;
+    await db.lodatCustomerMap.update({
+      where: { id: map.id },
+      data: { status: next },
+    });
   }
 
   private assertCreateRules(dto: CreateTransactionDto) {

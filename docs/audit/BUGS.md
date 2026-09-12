@@ -629,7 +629,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Logic «mở bán lại khi xóa GD» còn sót; không đối xứng với create/complete; không kiểm tra map còn active / status hiện tại.
 - **Impact:** Lô đang cọc/đã bán vẫn hiện Mở bán. Xóa GD có thể tự bật lại rao bán. Đổi chủ + xóa GD làm lệch lịch sử map cũ.
 - **Evidence:** `transactions.service.ts` `create` data không có map status. `update` `transaction.update` chỉ cột GD. `remove` khối `OPEN_STATUSES` → `status: 'DANG_BAN'`. Domain lodats §3: đã cọc/đã bán thuộc GD, không phải công tắc list — nhưng `remove` vẫn ghi công tắc.
-- **Status:** OPEN
+- **Status:** FIXED (2026-09-12) — Đồng bộ map theo `transactions.md` §3: tạo/cọc/CC → `TAM_DUNG`; hoàn tất → `KHONG_BAN`; hủy/xóa GD mở → `DANG_BAN` chỉ khi map đang `TAM_DUNG`/`DAT_COC`; bỏ qua map `isActive: false`.
 
 ### BUG-026 — Ép `DAT_COC`/`DA_BAN` thành Tạm dừng rồi Lưu/công tắc ghi đè DB
 

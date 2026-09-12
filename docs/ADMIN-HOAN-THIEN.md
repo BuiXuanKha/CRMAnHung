@@ -278,7 +278,7 @@ Chi tiết trong [`audit/BUGS.md`](./audit/BUGS.md). Sổ ghi «OPEN thuần»: 
 | ID | Admin thấy gì | Ghi chú |
 |----|----------------|---------|
 | BUG-023 | Khách mở slug lô đã Tạm dừng | Có thể by design (listing always-on, trừ Không bán) |
-| BUG-025 | Xóa GD mở ép map về Mở bán; tạo/sửa/hoàn tất GD không đổi trạng thái rao | Nghiệp vụ trạng thái lô vs GD |
+| BUG-025 | Xóa GD mở ép map về Mở bán; tạo/sửa/hoàn tất GD không đổi trạng thái rao | FIXED — đồng bộ map theo `transactions.md` §3 |
 | BUG-026 | Ép `DAT_COC`/`DA_BAN` thành Tạm dừng rồi Lưu ghi đè | Data copy cũ |
 | BUG-027 | Ẩn khách, `/lo-dat` vẫn hiện chủ; không API gỡ chủ/xóa lô | Owner BUG-063 hướng B: ẩn chỉ khỏi list khách |
 | BUG-029 | Unique 1 luồng/NV/kho lệch Prisma/`create`; không đóng luồng rồi gắn lại | Liên quan merge / kho |
