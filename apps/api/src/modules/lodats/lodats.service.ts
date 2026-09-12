@@ -1139,6 +1139,58 @@ export class LodatsService {
     }
   }
 
+
+  /**
+   * Gắn ảnh temp của NV vào lô: copy SEO → LodatImage → xoá temp.
+   * Trả về số ảnh đã gắn.
+   */
+  private async attachTempImages(
+    user: RequestUser,
+    lodatId: string,
+    tempImageIds: string[],
+    opts: { title: string; location: string | null; startSortOrder: number },
+  ): Promise<number> {
+    const tempIds = tempImageIds.slice(0, 5);
+    if (!tempIds.length) return 0;
+    const temps = await this.prisma.lodatTempImage.findMany({
+      where: { id: { in: tempIds }, createdByEmployeeId: user.id },
+    });
+    const ordered = tempIds
+      .map((id) => temps.find((t) => t.id === id))
+      .filter((t): t is (typeof temps)[number] => Boolean(t));
+    if (ordered.length !== tempIds.length) {
+      throw new BadRequestException('Một số ảnh tạm không còn hợp lệ. Chọn lại ảnh.');
+    }
+    let sortOrder = opts.startSortOrder;
+    for (const temp of ordered) {
+      const objectKey = await copyPublicImageToSeoLotKey(this.storage, temp.objectKey, {
+        lodatId,
+        title: opts.title,
+        location: opts.location,
+        index: sortOrder + 1,
+      });
+      await this.prisma.lodatImage.create({
+        data: {
+          lodatId,
+          objectKey,
+          sortOrder,
+          rotationDeg: 0,
+        },
+      });
+      sortOrder += 1;
+      await this.prisma.lodatTempImage.delete({ where: { id: temp.id } });
+      const refs = await countPublicImageKeyRefs(this.prisma, temp.objectKey);
+      if (refs === 0) {
+        try {
+          await this.storage.delete(temp.objectKey, 'public');
+        } catch {
+          // orphan ok
+        }
+      }
+    }
+    return ordered.length;
+  }
+
   async uploadTempImage(
     user: RequestUser,
     sessionId: string,
@@ -1520,6 +1572,36 @@ export class LodatsService {
       });
       if (!Object.keys(lodatData).length) {
         // DB sort theo lodat.updatedAt — chạm khi chỉ map đổi
+        await this.prisma.lodat.update({
+          where: { id },
+          data: { updatedAt: new Date() },
+        });
+      }
+    }
+
+    const tempIds = (dto.tempImageIds ?? []).slice(0, 5);
+    if (tempIds.length) {
+      await this.purgeExpiredTempImages();
+      const current = await this.prisma.lodat.findUniqueOrThrow({
+        where: { id },
+        include: LIST_INCLUDE,
+      });
+      const existingLodatImages = current.images.length;
+      if (existingLodatImages + tempIds.length > 5) {
+        throw new BadRequestException('Tối đa 5 ảnh lô đất.');
+      }
+      const title =
+        (current.projectLotId ? current.projectLot?.title : current.title)?.trim() ||
+        current.title?.trim() ||
+        current.projectLot?.title?.trim() ||
+        'Lô đất';
+      const location = this.formatAddress(this.resolveAddress(current));
+      await this.attachTempImages(user, id, tempIds, {
+        title,
+        location,
+        startSortOrder: existingLodatImages,
+      });
+      if (!Object.keys(lodatData).length && !Object.keys(mapData).length) {
         await this.prisma.lodat.update({
           where: { id },
           data: { updatedAt: new Date() },

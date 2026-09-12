@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -23,12 +23,13 @@ import '@/shared/ui/money.css';
 import {
   changeLodatOwner,
   deleteLodatImage,
+  deleteLodatTempImage,
   formatPriceInput,
   getLodat,
   parsePriceInput,
   updateLodat,
   updateLodatImageRotation,
-  uploadLodatImage,
+  uploadLodatTempImage,
 } from './api';
 import { getOpenTransaction } from '@/features/transactions/api';
 import { ChangeOwnerModal } from './components/change-owner-modal';
@@ -82,6 +83,15 @@ function normalizeDeg(deg: number): number {
   return ((deg % 360) + 360) % 360;
 }
 
+type PendingUpload = {
+  localId: string;
+  file: File;
+  url: string;
+  tempId?: string;
+  status: 'uploading' | 'ready' | 'error';
+  error?: string;
+};
+
 export function LodatEditPage() {
   const params = useParams<{ id: string }>();
   const id = params.id;
@@ -96,6 +106,14 @@ export function LodatEditPage() {
   const [ownerOpen, setOwnerOpen] = useState(false);
   const [ownerError, setOwnerError] = useState<string | null>(null);
   const [selectedIndex, setSelectedIndex] = useState(0);
+  const [pendingUploads, setPendingUploads] = useState<PendingUpload[]>([]);
+  const uploadSessionIdRef = useRef(
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `edit-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+  );
+  const pendingRef = useRef(pendingUploads);
+  pendingRef.current = pendingUploads;
   const [galleryOpen, setGalleryOpen] = useState(false);
 
   const q = useQuery({
@@ -146,14 +164,51 @@ export function LodatEditPage() {
   }
 
   const canEditImages = detail?.canEditImages ?? false;
-  const images = detail?.images ?? [];
-  const lodatImageCount = images.filter((i) => i.source === 'lodat').length;
+  const serverImages = detail?.images ?? [];
+  const lodatImageCount = serverImages.filter((i) => i.source === 'lodat').length;
+  const displayImages = useMemo(() => {
+    const pendingAsImages = pendingUploads.map((p) => ({
+      id: `pending:${p.localId}`,
+      url: p.url,
+      rotationDeg: 0,
+      source: 'lodat' as const,
+    }));
+    return [...serverImages, ...pendingAsImages];
+  }, [serverImages, pendingUploads]);
+  const images = displayImages;
+  const pendingMeta = useMemo(() => {
+    const map: Record<string, { status: PendingUpload['status']; error?: string }> = {};
+    for (const p of pendingUploads) {
+      map[`pending:${p.localId}`] = { status: p.status, error: p.error };
+    }
+    return map;
+  }, [pendingUploads]);
+  const pendingUploading = pendingUploads.some((p) => p.status === 'uploading');
+  const pendingHasError = pendingUploads.some((p) => p.status === 'error');
+  const readyTempIds = pendingUploads
+    .filter((p) => p.status === 'ready' && p.tempId)
+    .map((p) => p.tempId!);
+
+  useEffect(() => {
+    return () => {
+      for (const p of pendingRef.current) {
+        URL.revokeObjectURL(p.url);
+        if (p.tempId) {
+          void deleteLodatTempImage(p.tempId).catch(() => undefined);
+        }
+      }
+    };
+  }, []);
 
   const saveMut = useMutation({
     mutationFn: (input: UpdateLodatInput) => updateLodat(id, input),
     onSuccess: async () => {
       await qc.invalidateQueries({ queryKey: ['lodat', id] });
       await qc.invalidateQueries({ queryKey: ['lodats'] });
+      for (const p of pendingRef.current) {
+        URL.revokeObjectURL(p.url);
+      }
+      setPendingUploads([]);
       flash('Đã lưu thay đổi.');
       router.push(`/lo-dat/${id}`);
     },
@@ -173,17 +228,6 @@ export function LodatEditPage() {
     onError: (err: Error) => setOwnerError(err.message),
   });
 
-  const uploadMut = useMutation({
-    mutationFn: (file: File) => uploadLodatImage(id, file),
-    onSuccess: async (updated) => {
-      qc.setQueryData(['lodat', id], updated);
-      await qc.invalidateQueries({ queryKey: ['lodats'] });
-      const nextIdx = Math.max(0, updated.images.length - 1);
-      setSelectedIndex(nextIdx);
-      flash('Đã thêm ảnh.');
-    },
-    onError: (err: Error) => setAlertMsg(err.message),
-  });
 
   const deleteMut = useMutation({
     mutationFn: (imageId: string) => deleteLodatImage(id, imageId),
@@ -252,34 +296,104 @@ export function LodatEditPage() {
       input.brokerFeeNote = mapForm.brokerFeeNote.trim() || null;
       input.mapNote = mapForm.mapNote.trim() || null;
     }
-    if (!canEditSpecs && !canEditMap) {
+    if (pendingUploading) {
+      setFormError('Đang tải ảnh lên server — chờ xong rồi bấm Lưu.');
+      return;
+    }
+    if (pendingHasError) {
+      setFormError('Có ảnh tải lên lỗi. Gỡ ảnh lỗi hoặc chọn lại trước khi lưu.');
+      return;
+    }
+    if (readyTempIds.length) {
+      input.tempImageIds = readyTempIds;
+    }
+    if (!canEditSpecs && !canEditMap && !readyTempIds.length) {
       setFormError('Bạn không có quyền sửa lô này.');
+      return;
+    }
+    if (!canEditSpecs && !canEditMap && readyTempIds.length && !canEditImages) {
+      setFormError('Bạn không có quyền thêm ảnh trên lô này.');
       return;
     }
     void saveMut.mutateAsync(input);
   }
 
-  async function onPickFiles(files: FileList | File[] | null) {
-    if (!files || !canEditImages) return;
-    const list = Array.from(files);
-    let remaining = LODAT_MAX_UPLOAD_IMAGES - lodatImageCount;
-    for (const file of list) {
-      if (remaining <= 0) break;
-      await uploadMut.mutateAsync(file);
-      remaining -= 1;
+  async function startPendingUpload(localId: string, file: File) {
+    try {
+      const uploaded = await uploadLodatTempImage(uploadSessionIdRef.current, file);
+      setPendingUploads((cur) =>
+        cur.map((p) =>
+          p.localId === localId
+            ? { ...p, tempId: uploaded.id, status: 'ready' as const, error: undefined }
+            : p,
+        ),
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không tải được ảnh.';
+      setPendingUploads((cur) =>
+        cur.map((p) =>
+          p.localId === localId
+            ? { ...p, status: 'error' as const, error: message }
+            : p,
+        ),
+      );
     }
+  }
+
+  function onPickFiles(files: FileList | File[] | null) {
+    if (!files || !canEditImages) return;
+    const list = Array.from(files).filter((f) =>
+      String(f.type || '').startsWith('image/'),
+    );
+    const room = LODAT_MAX_UPLOAD_IMAGES - lodatImageCount - pendingUploads.length;
+    const accepted = list.slice(0, Math.max(0, room)).map((file) => ({
+      localId:
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `p-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      file,
+      url: URL.createObjectURL(file),
+      status: 'uploading' as const,
+    }));
+    if (!accepted.length) return;
+    setPendingUploads((cur) => {
+      const merged = [...cur, ...accepted];
+      setSelectedIndex(serverImages.length + Math.max(0, merged.length - 1));
+      return merged;
+    });
+    for (const item of accepted) {
+      void startPendingUpload(item.localId, item.file);
+    }
+  }
+
+  async function onDeleteImage(imageId: string) {
+    if (imageId.startsWith('pending:')) {
+      const localId = imageId.slice('pending:'.length);
+      setPendingUploads((cur) => {
+        const target = cur.find((p) => p.localId === localId);
+        if (target) {
+          URL.revokeObjectURL(target.url);
+          if (target.tempId) {
+            void deleteLodatTempImage(target.tempId).catch(() => undefined);
+          }
+        }
+        return cur.filter((p) => p.localId !== localId);
+      });
+      return;
+    }
+    await deleteMut.mutateAsync(imageId);
   }
 
   async function onRotate(delta: number) {
     const img = images[selectedIndex];
-    if (!img?.id || img.source !== 'lodat') return;
+    if (!img?.id || img.source !== 'lodat' || img.id.startsWith('pending:')) return;
     const nextDeg = normalizeDeg((img.rotationDeg ?? 0) + delta);
     await rotateMut.mutateAsync({ imageId: img.id, rotationDeg: nextDeg });
   }
 
   const busy =
     saveMut.isPending ||
-    uploadMut.isPending ||
+    pendingUploading ||
     deleteMut.isPending ||
     rotateMut.isPending ||
     ownerMut.isPending ||
@@ -554,10 +668,11 @@ export function LodatEditPage() {
                 canEditImages={canEditImages}
                 isProject={isProject}
                 busy={busy}
-                uploading={uploadMut.isPending}
+                uploading={pendingUploading}
+                pendingMeta={pendingMeta}
                 onSelect={setSelectedIndex}
-                onUpload={(files) => void onPickFiles(files)}
-                onDelete={(imageId) => void deleteMut.mutateAsync(imageId)}
+                onUpload={(files) => onPickFiles(files)}
+                onDelete={(imageId) => void onDeleteImage(imageId)}
               />
 
               <LodatEditPreview
@@ -581,9 +696,18 @@ export function LodatEditPage() {
               <button
                 type="submit"
                 className="ld-edit-save"
-                disabled={busy || (!canEditSpecs && !canEditMap)}
+                disabled={
+                  busy ||
+                  pendingUploading ||
+                  pendingHasError ||
+                  (!canEditSpecs && !canEditMap && !readyTempIds.length)
+                }
               >
-                {saveMut.isPending ? 'Đang lưu…' : 'Lưu thay đổi'}
+                {pendingUploading
+                  ? 'Đang tải ảnh…'
+                  : saveMut.isPending
+                    ? 'Đang lưu…'
+                    : 'Lưu thay đổi'}
               </button>
             </footer>
           </div>

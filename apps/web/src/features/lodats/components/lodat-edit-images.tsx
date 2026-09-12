@@ -5,6 +5,11 @@ import { ImagePlus, X } from 'lucide-react';
 import { LODAT_MAX_UPLOAD_IMAGES, type LodatImage } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
 
+type PendingMeta = {
+  status: 'uploading' | 'ready' | 'error';
+  error?: string;
+};
+
 type Props = {
   images: LodatImage[];
   selectedIndex: number;
@@ -12,6 +17,7 @@ type Props = {
   isProject: boolean;
   busy: boolean;
   uploading: boolean;
+  pendingMeta?: Record<string, PendingMeta>;
   onSelect: (index: number) => void;
   onUpload: (files: FileList | File[]) => void;
   onDelete: (imageId: string) => void;
@@ -30,6 +36,7 @@ export function LodatEditImages({
   isProject,
   busy,
   uploading,
+  pendingMeta,
   onSelect,
   onUpload,
   onDelete,
@@ -212,6 +219,24 @@ export function LodatEditImages({
               </button>
               {img.source === 'address' ? (
                 <span className="ld-edit-thumb-badge">Dự án</span>
+              ) : null}
+              {img.id && pendingMeta?.[img.id]?.status === 'uploading' ? (
+                <span className="ld-edit-thumb-badge ld-edit-thumb-badge-muted">
+                  Đang tải…
+                </span>
+              ) : null}
+              {img.id && pendingMeta?.[img.id]?.status === 'error' ? (
+                <span
+                  className="ld-edit-thumb-badge ld-edit-thumb-badge-error"
+                  title={pendingMeta[img.id]?.error || 'Lỗi tải ảnh'}
+                >
+                  Lỗi
+                </span>
+              ) : null}
+              {img.id && pendingMeta?.[img.id]?.status === 'ready' ? (
+                <span className="ld-edit-thumb-badge ld-edit-thumb-badge-muted">
+                  Chờ lưu
+                </span>
               ) : null}
               {canEditImages && img.source === 'lodat' && img.id ? (
                 <button
