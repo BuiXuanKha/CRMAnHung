@@ -6,6 +6,7 @@ import {
   Logger,
   NotFoundException,
 } from '@nestjs/common';
+import { randomUUID } from 'node:crypto';
 import { Prisma } from '@prisma/client';
 import type { RequestUser } from '../../common/decorators/current-user.decorator';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -1114,6 +1115,91 @@ export class LodatsService {
    * Tạo lô từ khách (§12.5): dân (addressId REGULAR + specs)
    * hoặc dự án (projectLotId trỏ kho). Khách = chủ gắn ngay (map active).
    */
+
+  private static readonly TEMP_IMAGE_TTL_MS = 24 * 60 * 60 * 1000;
+
+  /** Xoá ảnh tạm quá hạn (orphan form tạo lô). */
+  private async purgeExpiredTempImages(): Promise<void> {
+    const cutoff = new Date(Date.now() - LodatsService.TEMP_IMAGE_TTL_MS);
+    const expired = await this.prisma.lodatTempImage.findMany({
+      where: { createdAt: { lt: cutoff } },
+      select: { id: true, objectKey: true },
+      take: 100,
+    });
+    for (const row of expired) {
+      await this.prisma.lodatTempImage.delete({ where: { id: row.id } }).catch(() => undefined);
+      const refs = await countPublicImageKeyRefs(this.prisma, row.objectKey);
+      if (refs === 0) {
+        try {
+          await this.storage.delete(row.objectKey, 'public');
+        } catch {
+          // orphan ok
+        }
+      }
+    }
+  }
+
+  async uploadTempImage(
+    user: RequestUser,
+    sessionId: string,
+    file: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    const session = String(sessionId || '').trim();
+    if (session.length < 8 || session.length > 80) {
+      throw new BadRequestException('Session upload không hợp lệ.');
+    }
+    if (!/^[a-zA-Z0-9_-]+$/.test(session)) {
+      throw new BadRequestException('Session upload không hợp lệ.');
+    }
+    await this.purgeExpiredTempImages();
+    const existing = await this.prisma.lodatTempImage.count({
+      where: { sessionId: session, createdByEmployeeId: user.id },
+    });
+    if (existing >= 5) {
+      throw new BadRequestException('Tối đa 5 ảnh tạm mỗi lần tạo lô.');
+    }
+    const objectKey = `lodats/temp/${user.id}/${session}/${randomUUID()}.webp`;
+    const uploaded = await this.storage.upload({
+      folder: `lodats/temp/${user.id}`,
+      buffer: file.buffer,
+      contentType: file.mimetype,
+      originalName: file.originalname,
+      objectKey,
+      contentFileName: `${randomUUID()}.webp`,
+    });
+    const row = await this.prisma.lodatTempImage.create({
+      data: {
+        sessionId: session,
+        objectKey: uploaded.objectKey,
+        createdByEmployeeId: user.id,
+      },
+    });
+    return {
+      id: row.id,
+      sessionId: row.sessionId,
+      objectKey: row.objectKey,
+      url: this.publicUrl(row.objectKey) ?? uploaded.url,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async deleteTempImage(user: RequestUser, tempImageId: string) {
+    const row = await this.prisma.lodatTempImage.findFirst({
+      where: { id: tempImageId, createdByEmployeeId: user.id },
+    });
+    if (!row) throw new NotFoundException('Không tìm thấy ảnh tạm.');
+    await this.prisma.lodatTempImage.delete({ where: { id: row.id } });
+    const refs = await countPublicImageKeyRefs(this.prisma, row.objectKey);
+    if (refs === 0) {
+      try {
+        await this.storage.delete(row.objectKey, 'public');
+      } catch {
+        // orphan ok
+      }
+    }
+    return { ok: true as const };
+  }
+
   async create(user: RequestUser, dto: CreateLodatDto) {
     if (user.role === 'ADMIN') {
       throw new ForbiddenException(
@@ -1212,33 +1298,44 @@ export class LodatsService {
       select: { id: true },
     });
 
-    // Ảnh chat reuse — copy sang key SEO của lô; giữ file customers/chat/ gốc.
+    const chatIds = (dto.chatImageIds ?? []).slice(0, 5);
+    const tempIds = (dto.tempImageIds ?? []).slice(0, 5);
+    if (chatIds.length + tempIds.length > 5) {
+      await this.prisma.lodat.delete({ where: { id: created.id } }).catch(() => undefined);
+      throw new BadRequestException('Tối đa 5 ảnh (chat + file).');
+    }
+
+    await this.purgeExpiredTempImages();
+
+    // Ảnh chat reuse + ảnh temp — copy sang key SEO của lô.
     // BUG-034: lỗi copy/ghi ảnh → xóa lô vừa tạo (không để mồ côi / retry trùng).
-    if (dto.chatImageIds?.length) {
+    if (chatIds.length || tempIds.length) {
       const copiedKeys: string[] = [];
+      const claimedTempIds: string[] = [];
       try {
-        const chatImages = await this.prisma.customerMessengerImage.findMany({
-          where: {
-            id: { in: dto.chatImageIds.slice(0, 5) },
-            message: { customerFacebook: { customerId: customer.id } },
-          },
-          orderBy: [{ createdAt: 'asc' }],
-          select: { id: true, objectKey: true, rotationDeg: true },
+        const createdFull = await this.prisma.lodat.findUniqueOrThrow({
+          where: { id: created.id },
+          include: LIST_INCLUDE,
         });
-        const ordered = dto.chatImageIds
-          .map((id) => chatImages.find((img) => img.id === id))
-          .filter((img): img is (typeof chatImages)[number] => Boolean(img))
-          .slice(0, 5);
-        if (ordered.length) {
-          const createdFull = await this.prisma.lodat.findUniqueOrThrow({
-            where: { id: created.id },
-            include: LIST_INCLUDE,
+        const title =
+          createdFull.title?.trim() ||
+          createdFull.projectLot?.title?.trim() ||
+          'Lô đất';
+        const location = this.formatAddress(this.resolveAddress(createdFull));
+        let sortOrder = 0;
+
+        if (chatIds.length) {
+          const chatImages = await this.prisma.customerMessengerImage.findMany({
+            where: {
+              id: { in: chatIds },
+              message: { customerFacebook: { customerId: customer.id } },
+            },
+            orderBy: [{ createdAt: 'asc' }],
+            select: { id: true, objectKey: true, rotationDeg: true },
           });
-          const title =
-            createdFull.title?.trim() ||
-            createdFull.projectLot?.title?.trim() ||
-            'Lô đất';
-          const location = this.formatAddress(this.resolveAddress(createdFull));
+          const ordered = chatIds
+            .map((id) => chatImages.find((img) => img.id === id))
+            .filter((img): img is (typeof chatImages)[number] => Boolean(img));
           for (let i = 0; i < ordered.length; i += 1) {
             const img = ordered[i]!;
             copiedKeys.push(
@@ -1246,27 +1343,75 @@ export class LodatsService {
                 lodatId: created.id,
                 title,
                 location,
-                index: i + 1,
+                index: sortOrder + 1,
               }),
             );
+            await this.prisma.lodatImage.create({
+              data: {
+                lodatId: created.id,
+                objectKey: copiedKeys[copiedKeys.length - 1]!,
+                sortOrder: sortOrder,
+                rotationDeg: ((img.rotationDeg % 360) + 360) % 360,
+              },
+            });
+            sortOrder += 1;
           }
-          await this.prisma.lodatImage.createMany({
-            data: ordered.map((img, i) => ({
-              lodatId: created.id,
-              objectKey: copiedKeys[i] ?? img.objectKey,
-              sortOrder: i,
-              rotationDeg: ((img.rotationDeg % 360) + 360) % 360,
-            })),
+        }
+
+        if (tempIds.length) {
+          const temps = await this.prisma.lodatTempImage.findMany({
+            where: {
+              id: { in: tempIds },
+              createdByEmployeeId: user.id,
+            },
           });
+          const orderedTemps = tempIds
+            .map((id) => temps.find((t) => t.id === id))
+            .filter((t): t is (typeof temps)[number] => Boolean(t));
+          if (orderedTemps.length !== tempIds.length) {
+            throw new BadRequestException('Một số ảnh tạm không còn hợp lệ. Chọn lại ảnh.');
+          }
+          for (const temp of orderedTemps) {
+            copiedKeys.push(
+              await copyPublicImageToSeoLotKey(this.storage, temp.objectKey, {
+                lodatId: created.id,
+                title,
+                location,
+                index: sortOrder + 1,
+              }),
+            );
+            await this.prisma.lodatImage.create({
+              data: {
+                lodatId: created.id,
+                objectKey: copiedKeys[copiedKeys.length - 1]!,
+                sortOrder: sortOrder,
+                rotationDeg: 0,
+              },
+            });
+            sortOrder += 1;
+            claimedTempIds.push(temp.id);
+          }
+          // Xoá bản ghi temp + object tạm (đã copy sang SEO).
+          for (const temp of orderedTemps) {
+            await this.prisma.lodatTempImage.delete({ where: { id: temp.id } });
+            const refs = await countPublicImageKeyRefs(this.prisma, temp.objectKey);
+            if (refs === 0) {
+              try {
+                await this.storage.delete(temp.objectKey, 'public');
+              } catch {
+                // orphan ok
+              }
+            }
+          }
         }
       } catch (err) {
         this.logger.warn(
-          `Chat image copy failed for lodat ${created.id}; rolling back create`,
+          `Image attach failed for lodat ${created.id}; rolling back create`,
           err instanceof Error ? err.stack : err,
         );
         await this.prisma.lodat.delete({ where: { id: created.id } }).catch((delErr) => {
           this.logger.error(
-            `Failed to roll back lodat ${created.id} after chat image error`,
+            `Failed to roll back lodat ${created.id} after image error`,
             delErr instanceof Error ? delErr.stack : delErr,
           );
         });
@@ -1284,6 +1429,7 @@ export class LodatsService {
     await this.ensurePublicListing(created.id);
     return this.mapDetail(refreshed, user);
   }
+
 
   async update(user: RequestUser, id: string, dto: UpdateLodatDto) {
     const row = await this.prisma.lodat.findUnique({

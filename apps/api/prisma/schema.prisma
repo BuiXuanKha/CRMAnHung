@@ -512,12 +512,16 @@ model LodatImage {
 }
 
 model LodatTempImage {
-  id        String   @id @default(cuid())
-  sessionId String
-  objectKey String
-  createdAt DateTime @default(now())
+  id                  String   @id @default(cuid())
+  sessionId           String
+  objectKey           String
+  /// NV upload — chỉ owner mới gắn vào create / xoá.
+  createdByEmployeeId String
+  createdAt           DateTime @default(now())
 
   @@index([sessionId])
+  @@index([createdByEmployeeId])
+  @@index([createdAt])
 }
 
 /// Map NV–khách–lô: giá, mở bán, lịch sử chủ (isActive / endedAt).

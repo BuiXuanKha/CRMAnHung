@@ -318,6 +318,8 @@ export const createLodatSchema = z
     mapNote: z.string().trim().max(4000).nullable().optional(),
     /** Ảnh chat Messenger reuse cho lô dân (CRM cũ «ảnh từ hội thoại») */
     chatImageIds: z.array(z.string()).max(LODAT_MAX_UPLOAD_IMAGES).optional(),
+    /** Ảnh đã upload tạm (`POST /lodats/temp-images`) — gắn khi tạo lô thành công */
+    tempImageIds: z.array(z.string()).max(LODAT_MAX_UPLOAD_IMAGES).optional(),
   })
   .superRefine((v, ctx) => {
     const hasAddress = Boolean(v.addressId);
@@ -336,9 +338,39 @@ export const createLodatSchema = z
         message: 'Cần nhập tiêu đề lô đất.',
       });
     }
+    const chatN = v.chatImageIds?.length ?? 0;
+    const tempN = v.tempImageIds?.length ?? 0;
+    if (chatN + tempN > LODAT_MAX_UPLOAD_IMAGES) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tempImageIds'],
+        message: `Tối đa ${LODAT_MAX_UPLOAD_IMAGES} ảnh (chat + file).`,
+      });
+    }
   });
 
 export type CreateLodatInput = z.infer<typeof createLodatSchema>;
+
+/** Upload ảnh tạm trước khi tạo lô (multipart `file` + `sessionId`). */
+export const lodatTempImageSchema = z.object({
+  id: z.string(),
+  sessionId: z.string(),
+  objectKey: z.string(),
+  url: z.string(),
+  createdAt: z.string(),
+});
+
+export type LodatTempImage = z.infer<typeof lodatTempImageSchema>;
+
+export const uploadLodatTempImageMetaSchema = z.object({
+  sessionId: z
+    .string()
+    .trim()
+    .min(8, 'Thiếu session upload.')
+    .max(80, 'Session upload quá dài.'),
+});
+
+export type UploadLodatTempImageMeta = z.infer<typeof uploadLodatTempImageMetaSchema>;
 
 /** Đổi chủ trên trang sửa (§12.4.4) — map mới nhận giá/trạng thái từ form. */
 export const changeLodatOwnerSchema = z.object({

@@ -28,19 +28,28 @@ import { Icon } from '@/shared/ui/icon';
 import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
 import {
   createLodat,
+  deleteLodatTempImage,
   formatPriceInput,
   listProjectLotOptions,
   parsePriceInput,
-  uploadLodatImage,
+  uploadLodatTempImage,
 } from './api';
 import { LodatEditPreview } from './components/lodat-edit-preview';
 import { ProjectLotModal } from './components/project-lot-modal';
 import './lodat-edit.css';
 
-/** Hàng ảnh chờ tạo: ảnh chat reuse hoặc file chọn từ máy. */
+/** Hàng ảnh chờ tạo: ảnh chat reuse hoặc file upload tạm ngay khi chọn. */
 type QueueImage =
   | { kind: 'chat'; id: string; url: string; rotationDeg: number }
-  | { kind: 'file'; file: File; url: string };
+  | {
+      kind: 'file';
+      localId: string;
+      file: File;
+      url: string;
+      tempId?: string;
+      status: 'uploading' | 'ready' | 'error';
+      error?: string;
+    };
 
 function filterImageFiles(list: FileList | File[] | null | undefined): File[] {
   return Array.from(list ?? []).filter((f) =>
@@ -83,6 +92,11 @@ export function LodatCreatePage() {
 
   const fileRef = useRef<HTMLInputElement>(null);
   const zoneRef = useRef<HTMLDivElement>(null);
+  const uploadSessionIdRef = useRef(
+    typeof crypto !== 'undefined' && crypto.randomUUID
+      ? crypto.randomUUID()
+      : `sess-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`,
+  );
 
   const isProject = address?.kind === AddressKind.PROJECT;
 
@@ -130,14 +144,19 @@ export function LodatCreatePage() {
     enabled: isProject && Boolean(address?.id),
   });
 
+  // Giữ queue mới nhất cho cleanup unmount (tránh stale closure).
+  const queueRef = useRef(queue);
+  queueRef.current = queue;
   useEffect(() => {
     return () => {
-      queue.forEach((img) => {
-        if (img.kind === 'file') URL.revokeObjectURL(img.url);
-      });
+      for (const img of queueRef.current) {
+        if (img.kind !== 'file') continue;
+        URL.revokeObjectURL(img.url);
+        if (img.tempId) {
+          void deleteLodatTempImage(img.tempId).catch(() => undefined);
+        }
+      }
     };
-    // Dọn objectURL khi rời trang
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const projectImages: LodatImage[] = useMemo(
@@ -172,6 +191,9 @@ export function LodatCreatePage() {
   const projectImageCount = projectImages.length;
   const chatCount = queue.filter((q) => q.kind === 'chat').length;
   const atLimit = queue.length >= LODAT_MAX_UPLOAD_IMAGES;
+  const uploadingFiles = queue.some(
+    (img) => img.kind === 'file' && img.status === 'uploading',
+  );
   const pasteDisabled = saving || atLimit;
 
   useEffect(() => {
@@ -185,26 +207,62 @@ export function LodatCreatePage() {
     window.setTimeout(() => setToast(null), 2400);
   }
 
+  async function startTempUpload(localId: string, file: File) {
+    try {
+      const uploaded = await uploadLodatTempImage(uploadSessionIdRef.current, file);
+      setQueue((cur) =>
+        cur.map((img) =>
+          img.kind === 'file' && img.localId === localId
+            ? { ...img, tempId: uploaded.id, status: 'ready' as const, error: undefined }
+            : img,
+        ),
+      );
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Không tải được ảnh.';
+      setQueue((cur) =>
+        cur.map((img) =>
+          img.kind === 'file' && img.localId === localId
+            ? { ...img, status: 'error' as const, error: message }
+            : img,
+        ),
+      );
+    }
+  }
+
   function addFiles(list: FileList | File[] | null | undefined) {
     const files = filterImageFiles(list);
     if (!files.length || pasteDisabled) return;
+    const room = LODAT_MAX_UPLOAD_IMAGES - queue.length;
+    const accepted = files.slice(0, Math.max(0, room)).map((file) => ({
+      kind: 'file' as const,
+      localId:
+        typeof crypto !== 'undefined' && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `f-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      file,
+      url: URL.createObjectURL(file),
+      status: 'uploading' as const,
+    }));
+    if (!accepted.length) return;
     setQueue((cur) => {
-      const room = LODAT_MAX_UPLOAD_IMAGES - cur.length;
-      const next = files.slice(0, Math.max(0, room)).map((file) => ({
-        kind: 'file' as const,
-        file,
-        url: URL.createObjectURL(file),
-      }));
-      const merged = [...cur, ...next];
+      const merged = [...cur, ...accepted];
       setSelectedIndex(projectImageCount + Math.max(0, merged.length - 1));
       return merged;
     });
+    for (const item of accepted) {
+      void startTempUpload(item.localId, item.file);
+    }
   }
 
   function removeQueueAt(queueIdx: number) {
     setQueue((cur) => {
       const target = cur[queueIdx];
-      if (target?.kind === 'file') URL.revokeObjectURL(target.url);
+      if (target?.kind === 'file') {
+        URL.revokeObjectURL(target.url);
+        if (target.tempId) {
+          void deleteLodatTempImage(target.tempId).catch(() => undefined);
+        }
+      }
       const next = cur.filter((_, i) => i !== queueIdx);
       setSelectedIndex((s) => {
         const abs = projectImageCount + queueIdx;
@@ -233,6 +291,18 @@ export function LodatCreatePage() {
 
     if (!address) {
       setFormError('Cần chọn địa chỉ tổng quát.');
+      return;
+    }
+
+    const fileItems = queue.filter(
+      (img): img is Extract<QueueImage, { kind: 'file' }> => img.kind === 'file',
+    );
+    if (fileItems.some((img) => img.status === 'uploading')) {
+      setFormError('Đang tải ảnh lên server — chờ xong rồi bấm Lưu.');
+      return;
+    }
+    if (fileItems.some((img) => img.status === 'error' || !img.tempId)) {
+      setFormError('Có ảnh tải lên lỗi. Gỡ ảnh lỗi hoặc chọn lại trước khi lưu.');
       return;
     }
 
@@ -268,25 +338,13 @@ export function LodatCreatePage() {
       .map((img) => img.id);
     if (chatIds.length) input.chatImageIds = chatIds;
 
-    const files = queue.filter(
-      (img): img is Extract<QueueImage, { kind: 'file' }> => img.kind === 'file',
-    );
+    const tempImageIds = fileItems.map((img) => img.tempId!).filter(Boolean);
+    if (tempImageIds.length) input.tempImageIds = tempImageIds;
 
     setSaving(true);
-    setSaveProgress(files.length ? 'Đang tạo lô…' : null);
+    setSaveProgress(tempImageIds.length ? 'Đang tạo lô…' : null);
     try {
       const created = await createLodat(input);
-      for (let i = 0; i < files.length; i += 1) {
-        setSaveProgress(`Đang tải ảnh ${i + 1}/${files.length}…`);
-        try {
-          await uploadLodatImage(created.id, files[i]!.file);
-        } catch {
-          setAlertMsg(
-            'Tạo lô thành công nhưng một số ảnh chưa tải lên được. Thêm lại ảnh trong trang Sửa.',
-          );
-          break;
-        }
-      }
       flash('Đã tạo lô đất.');
       router.push(`/lo-dat/${created.id}`);
     } catch (err) {
@@ -709,15 +767,39 @@ export function LodatCreatePage() {
                         {isProjectImg ? (
                           <span className="ld-edit-thumb-badge">Dự án</span>
                         ) : (
-                          <button
-                            type="button"
-                            className="ld-edit-thumb-del"
-                            aria-label="Bỏ ảnh"
-                            disabled={saving}
-                            onClick={() => removeQueueAt(queueIdx)}
-                          >
-                            <Icon icon={X} size={14} />
-                          </button>
+                          <>
+                            {(() => {
+                              const q = queue[queueIdx];
+                              if (!q || q.kind !== 'file') return null;
+                              if (q.status === 'uploading') {
+                                return (
+                                  <span className="ld-edit-thumb-badge ld-edit-thumb-badge-muted">
+                                    Đang tải…
+                                  </span>
+                                );
+                              }
+                              if (q.status === 'error') {
+                                return (
+                                  <span
+                                    className="ld-edit-thumb-badge ld-edit-thumb-badge-error"
+                                    title={q.error || 'Lỗi tải ảnh'}
+                                  >
+                                    Lỗi
+                                  </span>
+                                );
+                              }
+                              return null;
+                            })()}
+                            <button
+                              type="button"
+                              className="ld-edit-thumb-del"
+                              aria-label="Bỏ ảnh"
+                              disabled={saving}
+                              onClick={() => removeQueueAt(queueIdx)}
+                            >
+                              <Icon icon={X} size={14} />
+                            </button>
+                          </>
                         )}
                       </div>
                     );
@@ -735,8 +817,10 @@ export function LodatCreatePage() {
               >
                 Hủy
               </button>
-              <button type="submit" className="ld-edit-save" disabled={saving}>
-                {saveProgress ?? (saving ? 'Đang lưu…' : 'Lưu')}
+              <button type="submit" className="ld-edit-save" disabled={saving || uploadingFiles}>
+                {uploadingFiles
+                  ? 'Đang tải ảnh…'
+                  : (saveProgress ?? (saving ? 'Đang lưu…' : 'Lưu'))}
               </button>
             </footer>
           </div>
