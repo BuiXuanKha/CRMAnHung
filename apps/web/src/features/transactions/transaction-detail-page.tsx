@@ -2,13 +2,19 @@
 
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AlertTriangle, Pencil, Trash2 } from 'lucide-react';
-import { TaskTargetType, TransactionPartyRole, TransactionType } from '@crmanhung/shared';
+import {
+  TaskTargetType,
+  TransactionPartyRole,
+  TransactionType,
+  type LodatImage,
+} from '@crmanhung/shared';
 import { CrmBadge } from '@/shared/ui/badge';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import { Icon } from '@/shared/ui/icon';
+import { LodatImageGallery } from '@/features/lodats/components/lodat-image-gallery';
 import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
 import { deleteTransaction, getTransaction } from './api';
 import { TransactionDetailFab } from './components/transaction-detail-fab';
@@ -37,6 +43,7 @@ export function TransactionDetailPage() {
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
+  const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
 
   const q = useQuery({
     queryKey: ['transaction', id],
@@ -49,6 +56,18 @@ export function TransactionDetailPage() {
   const lotTitle = snapshot?.title?.trim() || d?.lodatTitle?.trim() || '—';
   const sellers = d?.parties.filter((p) => p.role === TransactionPartyRole.SELLER) ?? [];
   const buyers = d?.parties.filter((p) => p.role === TransactionPartyRole.BUYER) ?? [];
+
+  const galleryImages: LodatImage[] = useMemo(() => {
+    if (!snapshot?.images?.length) return [];
+    return snapshot.images
+      .filter((img) => Boolean(img.url))
+      .map((img) => ({
+        id: img.id,
+        url: img.url as string,
+        rotationDeg: img.rotationDeg ?? 0,
+        source: 'lodat' as const,
+      }));
+  }, [snapshot?.images]);
 
   function flash(msg: string) {
     setToast(msg);
@@ -94,21 +113,23 @@ export function TransactionDetailPage() {
       {d ? (
         <div className="tx-detail-body">
           <header className="tx-detail-hero">
-            <h1>{d.code}</h1>
+            <p className="tx-detail-code">{d.code}</p>
             <div className="tx-detail-badges">
               <CrmBadge tone={typeTone(d.type)}>{typeLabel(d.type)}</CrmBadge>
               <CrmBadge tone={statusTone(d.status)}>{statusLabel(d.status)}</CrmBadge>
             </div>
-            <p className="tx-detail-lot">{lotTitle}</p>
+            <h1 className="tx-detail-lot">{lotTitle}</h1>
           </header>
 
           <section className="tx-detail-card">
             <h2>Số liệu</h2>
+            <div className="tx-detail-price-block">
+              <span className="tx-detail-price-label">Giá bán</span>
+              <strong className="tx-detail-price-value crm-money">
+                {formatMoneyVnd(d.salePriceVnd)}
+              </strong>
+            </div>
             <dl className="tx-detail-dl">
-              <div>
-                <dt>Giá bán</dt>
-                <dd className="crm-money">{formatMoneyVnd(d.salePriceVnd)}</dd>
-              </div>
               <div>
                 <dt>Thuế</dt>
                 <dd className="crm-money">{formatMoneyVnd(d.taxPriceVnd)}</dd>
@@ -119,7 +140,7 @@ export function TransactionDetailPage() {
                   {d.type === TransactionType.RECORD ? '—' : formatMoneyVnd(d.commissionVnd)}
                 </dd>
               </div>
-              <div>
+              <div className="tx-detail-full">
                 <dt>Hẹn công chứng</dt>
                 <dd>
                   <span className="tx-detail-notary">
@@ -151,22 +172,25 @@ export function TransactionDetailPage() {
 
           <section className="tx-detail-card">
             <h2>Các bên</h2>
-            <dl className="tx-detail-dl">
+            <div className="tx-detail-parties">
               <div>
-                <dt>Người bán</dt>
-                <dd>
+                <span className="tx-detail-party-label">Người bán</span>
+                <div className="tx-detail-party-names">
                   {sellers.length
                     ? sellers.map((p) => <div key={p.id}>{p.freeTextName}</div>)
                     : '—'}
-                </dd>
+                </div>
+              </div>
+              <div className="tx-detail-party-arrow" aria-hidden>
+                →
               </div>
               <div>
-                <dt>Người mua</dt>
-                <dd>
+                <span className="tx-detail-party-label">Người mua</span>
+                <div className="tx-detail-party-names">
                   {buyers.length ? buyers.map((p) => <div key={p.id}>{p.freeTextName}</div>) : '—'}
-                </dd>
+                </div>
               </div>
-            </dl>
+            </div>
           </section>
 
           {snapshot ? (
@@ -206,31 +230,29 @@ export function TransactionDetailPage() {
                   </div>
                 ) : null}
               </dl>
-              {snapshot.images.some((img) => img.url) ? (
+              {galleryImages.length > 0 ? (
                 <ul className="tx-detail-photos">
-                  {snapshot.images
-                    .filter((img) => img.url)
-                    .map((img) => (
-                      <li key={img.id}>
-                        <a
-                          href={img.url ?? undefined}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="tx-detail-photo"
-                        >
-                          {/* eslint-disable-next-line @next/next/no-img-element */}
-                          <img
-                            src={img.url ?? ''}
-                            alt=""
-                            style={
-                              img.rotationDeg
-                                ? { transform: `rotate(${img.rotationDeg}deg)` }
-                                : undefined
-                            }
-                          />
-                        </a>
-                      </li>
-                    ))}
+                  {galleryImages.map((img, index) => (
+                    <li key={img.id ?? img.url}>
+                      <button
+                        type="button"
+                        className="tx-detail-photo"
+                        onClick={() => setGalleryIndex(index)}
+                        aria-label={`Xem ảnh ${index + 1} / ${galleryImages.length}`}
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img
+                          src={img.url}
+                          alt=""
+                          style={
+                            img.rotationDeg
+                              ? { transform: `rotate(${img.rotationDeg}deg)` }
+                              : undefined
+                          }
+                        />
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               ) : null}
             </section>
@@ -251,6 +273,16 @@ export function TransactionDetailPage() {
             router.push(`/giao-dich/${d.id}/sua`);
           }}
           onDelete={() => setConfirmDelete(true)}
+        />
+      ) : null}
+
+      {galleryIndex != null && galleryImages.length > 0 ? (
+        <LodatImageGallery
+          title={lotTitle}
+          images={galleryImages}
+          startIndex={galleryIndex}
+          onClose={() => setGalleryIndex(null)}
+          onIndexChange={setGalleryIndex}
         />
       ) : null}
 
