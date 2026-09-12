@@ -234,55 +234,88 @@
   }
 
   .tx-card-lot {
-    margin: 0 0 10px;
+    margin: 0 0 8px;
     font-size: 0.95rem;
     font-weight: 700;
     color: #0f172a;
     line-height: 1.35;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .tx-card-meta {
-    margin: 0;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px 12px;
-  }
-
-  .tx-card-meta > div {
-    min-width: 0;
-  }
-
-  .tx-card-meta-full {
-    grid-column: 1 / -1;
-  }
-
-  .tx-card-meta dt {
-    margin: 0;
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.03em;
-    color: #94a3b8;
-  }
-
-  .tx-card-meta dd {
-    margin: 2px 0 0;
-    font-size: 0.84rem;
-    color: #1e293b;
-    word-break: break-word;
-  }
-
-  .tx-card-notary {
+  /* Phương án A: bán → mua một dòng, không label IN HOA */
+  .tx-card-parties {
+    margin: 0 0 10px;
     display: flex;
     flex-wrap: wrap;
     align-items: baseline;
     gap: 6px;
+    font-size: 0.84rem;
+    color: #334155;
+    line-height: 1.35;
+  }
+
+  .tx-card-party {
+    min-width: 0;
+    word-break: break-word;
+  }
+
+  .tx-card-party-arrow {
+    flex-shrink: 0;
+    color: #94a3b8;
+    font-weight: 600;
+  }
+
+  .tx-card-money {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px 12px;
+    margin: 0 0 8px;
+  }
+
+  .tx-card-price {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 800;
+    line-height: 1.2;
+  }
+
+  .tx-card-commission {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.3;
+  }
+
+  .tx-card-commission-label {
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #94a3b8;
+  }
+
+  .tx-card-notary-line {
+    margin: 0 0 6px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 8px;
+    font-size: 0.8rem;
+    color: #475569;
   }
 
   .tx-card-note {
+    margin: 0;
+    font-size: 0.8rem;
+    color: #64748b;
+    line-height: 1.35;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
-    line-clamp: 2;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }

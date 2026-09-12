@@ -347,16 +347,17 @@ Thẻ: nền trắng, viền `#e2e8f0`, bo 12px. Số tiền dùng `crm-money`.
 ┌─ ô tìm ───── [ Bộ lọc ] [ Tìm ] ─────┐
 │ (mở Bộ lọc: Loại · Trạng thái)       │
 │ thẻ: mã GD   [Loại] [Trạng thái] [▾] │
-│      tiêu đề lô                      │
-│      Người bán / Người mua           │
-│      Giá bán · Hoa hồng              │
-│      Hẹn CC · Ghi chú · Ngày tạo     │
+│      tiêu đề lô (≤2 dòng)            │
+│      người bán → người mua           │
+│      giá đậm · HH phụ                │
+│      Hẹn CC (chỉ Của tôi·Đã cọc)     │
+│      ghi chú 1 dòng (nếu có)         │
 └─ Hiển thị N / Tổng M giao dịch ──────┘
 ```
 
 | Hạng mục | Quy tắc |
 |----------|---------|
-| Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px. Đầu thẻ: **mã GD** + hangtag Loại + hangtag Trạng thái + chevron thao tác. **Tiêu đề lô** đậm. Meta 2 cột: người bán, người mua, giá `crm-money`, hoa hồng, hẹn CC (kèm đếm ngược), ghi chú (1 dòng `…`), ngày tạo. Ghi nhận / thiếu = `—`. **Không** nút Xóa riêng trên thẻ |
+| Thẻ | Nền trắng, viền `#e2e8f0`, bo 12px. **Phương án A (phiếu gọn):** mã + hangtag Loại/TT + chevron → tiêu đề lô (≤2 dòng) → `bán → mua` một dòng → giá đậm + `HH` phụ → hẹn CC chỉ **Của tôi · Đã cọc** → ghi chú 1 dòng nếu có. **Không** ngày tạo trên list; **không** label IN HOA. Ghi nhận / thiếu = `—`. **Không** nút Xóa riêng trên thẻ |
 | Thống kê | 3 cột như desktop; chữ nhỏ hơn; **ẩn** gợi ý dưới số; số tiền rút gọn (`2,6 tỷ`, `26 triệu`) |
 | Bấm thẻ | Mở chi tiết `/giao-dich/[id]`. Chevron → menu §4.3.6 (Xem chi tiết / Sửa / Xóa) |
 | Tìm / lọc | Cùng **một hàng**: ô tìm + nút **Bộ lọc** + nút **Tìm** (nền xanh). Bộ lọc bung panel **inline** dưới hàng (không `CrmDialog`): select Loại, select Trạng thái, nút Xoá lọc khi đang lọc. Nút Tìm đóng bàn phím; gõ ô tìm vẫn lọc. Desktop không hiện Bộ lọc / Tìm |
