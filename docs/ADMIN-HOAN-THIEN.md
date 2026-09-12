@@ -273,20 +273,21 @@ Không chặn CRM Admin. Ghi để khỏi quên nếu làm web khách:
 
 ### C7. Bug lô / GD / URL public còn OPEN (chưa HOÃN)
 
-Chi tiết trong [`audit/BUGS.md`](./audit/BUGS.md). Sổ ghi «OPEN thuần»: **023, 025, 026, 027, 029**. Riêng **023** (URL lô Tạm dừng vẫn mở): sau chốt listing sống mãi, có thể **đúng sản phẩm** — chưa CLOSED by design.
+Chi tiết trong [`audit/BUGS.md`](./audit/BUGS.md). Còn OPEN thuần: **026, 027, 029**. **023** CLOSED by design (2026-09-12). **025** FIXED.
 
 | ID | Admin thấy gì | Ghi chú |
 |----|----------------|---------|
-| BUG-023 | Khách mở slug lô đã Tạm dừng | Có thể by design (listing always-on, trừ Không bán) |
-| BUG-025 | Xóa GD mở ép map về Mở bán; tạo/sửa/hoàn tất GD không đổi trạng thái rao | FIXED — đồng bộ map theo `transactions.md` §3 |
-| BUG-026 | Ép `DAT_COC`/`DA_BAN` thành Tạm dừng rồi Lưu ghi đè | Data copy cũ |
+| BUG-023 | Khách mở slug lô đã Tạm dừng | **CLOSED by design** — listing always-on, trừ Không bán |
+| BUG-025 | Xóa GD mở ép map về Mở bán; tạo/sửa/hoàn tất GD không đổi trạng thái rao | **FIXED** — đồng bộ map theo `transactions.md` §3 |
+| BUG-026 | Ép `DAT_COC`/`DA_BAN` thành Tạm dừng rồi Lưu ghi đè | Data copy cũ — còn OPEN |
 | BUG-027 | Ẩn khách, `/lo-dat` vẫn hiện chủ; không API gỡ chủ/xóa lô | Owner BUG-063 hướng B: ẩn chỉ khỏi list khách |
 | BUG-029 | Unique 1 luồng/NV/kho lệch Prisma/`create`; không đóng luồng rồi gắn lại | Liên quan merge / kho |
 
 Checklist:
 
-- [ ] Owner: từng bug SỬA / BỎ / by design (giống đợt CHOT 051–083)
-- [ ] Không sửa đống này trong một PR
+- [x] Owner 2026-09-12: BUG-023 CLOSED by design
+- [ ] Owner: 026 / 027 / 029 — SỬA / BỎ / by design
+- [ ] Không sửa đống còn lại trong một PR
 
 ---
 
