@@ -367,4 +367,10 @@ export class UpdateLodatDto {
   @IsOptional()
   @IsIn(['DANG_BAN', 'TAM_DUNG', 'KHONG_BAN'])
   status?: 'DANG_BAN' | 'TAM_DUNG' | 'KHONG_BAN';
+
+  /** Ảnh tạm từ form sửa — gắn khi Lưu. */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tempImageIds?: string[];
 }

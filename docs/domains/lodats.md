@@ -106,8 +106,8 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 
 Upload **mới** từ máy:
 
-- **Sửa lô:** `POST /lodats/:id/images` — object key CDN = `{slug tên+địa chỉ}-anh-{n}.webp` (API convert WebP).
-- **Tạo lô:** chọn/dán ảnh → **nén client ngay** → `POST /lodats/temp-images` (session + `LodatTempImage`, key tạm `lodats/temp/{nvId}/…`). Bấm Lưu → `POST /lodats` kèm `tempImageIds` (giữ file, copy sang key SEO, xoá bản ghi temp). Gỡ ảnh trên form / orphan > 24h → xoá R2 + temp. Không thành công tạo lô thì **giữ temp** để bấm Lưu lại (không bắt chọn lại file).
+- **Tạo lô / Sửa lô (ảnh thêm):** chọn/dán ảnh → **nén client ngay** → `POST /lodats/temp-images` (session + `LodatTempImage`, key tạm `lodats/temp/{nvId}/…`). Bấm Lưu → `POST /lodats` hoặc `PATCH /lodats/:id` kèm `tempImageIds` (giữ file, copy sang key SEO, xoá bản ghi temp). Gỡ ảnh chờ trên form / orphan > 24h → xoá R2 + temp. Lưu fail → **giữ temp** để bấm Lưu lại.
+- **Sửa lô (ảnh đã gắn):** gỡ vẫn `DELETE /lodats/:id/images/:imageId`. `POST /lodats/:id/images` giữ cho API/khác; UI form sửa dùng temp như trên.
 
 **Web nén JPEG cạnh dài ≤ 2560 trước khi gửi.** Đổi tiêu đề / địa chỉ rồi Lưu → đổi lại key cho khớp. Ảnh gắn từ chat: **copy** sang key lô SEO WebP, **giữ** file `customers/chat/` (WebP sau `images:webp-replace`; cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}.webp` từ `Address.detail`. **Đăng web không làm SEO ảnh lần nữa.**
 
@@ -518,7 +518,7 @@ Xếp dọc: thông số → chủ/giá → lịch sử → hình ảnh → xem 
 - Ghi chú giá: Thương lượng · Cứng giá · Chưa chi tiết  
 - Hoa hồng: 1% · 2% · Chưa trao đổi  
 
-Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thông số thửa; map giá vẫn sửa được. **Ảnh thêm** (`LodatImage`): dán/kéo thả/chọn file, tối đa 5, gỡ bằng × (không hiện đoạn hướng dẫn dài trên UI). **Ảnh dự án** (`AddressImage`): chỉ xem.
+Quyền: NV/Admin chỉ sửa lô mình được truy cập. PROJECT khoá thông số thửa; map giá vẫn sửa được. **Ảnh thêm** (`LodatImage`): dán/kéo thả/chọn file → upload **temp ngay** (badge Đang tải/Lỗi); Lưu mới gắn vào lô. Tối đa 5. Gỡ ảnh chờ = xoá temp; gỡ ảnh đã gắn = DELETE. (Không hiện đoạn hướng dẫn dài trên UI). **Ảnh dự án** (`AddressImage`): chỉ xem.
 
 #### 12.4.4 Đổi chủ
 

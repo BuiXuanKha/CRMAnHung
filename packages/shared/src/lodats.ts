@@ -239,20 +239,32 @@ export const LODAT_BROKER_FEE_CHIPS = ['1%', '2%', 'Chưa trao đổi'] as const
 
 export const LODAT_MAX_UPLOAD_IMAGES = 5;
 
-export const updateLodatSchema = z.object({
-  title: z.string().trim().min(1, 'Cần nhập tiêu đề lô đất.').max(200).optional(),
-  addressId: z.string().nullable().optional(),
-  areaM2: z.number().nonnegative().nullable().optional(),
-  frontageM: z.number().nonnegative().nullable().optional(),
-  direction: z.string().trim().max(40).nullable().optional(),
-  note: z.string().trim().max(4000).nullable().optional(),
-  kind: z.nativeEnum(LodatKind).optional(),
-  priceVnd: z.union([z.number().nonnegative(), z.string()]).nullable().optional(),
-  priceNote: z.string().trim().max(200).nullable().optional(),
-  brokerFeeNote: z.string().trim().max(200).nullable().optional(),
-  mapNote: z.string().trim().max(4000).nullable().optional(),
-  status: lodatListingStatusSchema.optional(),
-});
+export const updateLodatSchema = z
+  .object({
+    title: z.string().trim().min(1, 'Cần nhập tiêu đề lô đất.').max(200).optional(),
+    addressId: z.string().nullable().optional(),
+    areaM2: z.number().nonnegative().nullable().optional(),
+    frontageM: z.number().nonnegative().nullable().optional(),
+    direction: z.string().trim().max(40).nullable().optional(),
+    note: z.string().trim().max(4000).nullable().optional(),
+    kind: z.nativeEnum(LodatKind).optional(),
+    priceVnd: z.union([z.number().nonnegative(), z.string()]).nullable().optional(),
+    priceNote: z.string().trim().max(200).nullable().optional(),
+    brokerFeeNote: z.string().trim().max(200).nullable().optional(),
+    mapNote: z.string().trim().max(4000).nullable().optional(),
+    status: lodatListingStatusSchema.optional(),
+    /** Ảnh đã upload tạm trên form sửa — gắn khi Lưu thành công */
+    tempImageIds: z.array(z.string()).max(LODAT_MAX_UPLOAD_IMAGES).optional(),
+  })
+  .superRefine((v, ctx) => {
+    if ((v.tempImageIds?.length ?? 0) > LODAT_MAX_UPLOAD_IMAGES) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['tempImageIds'],
+        message: `Tối đa ${LODAT_MAX_UPLOAD_IMAGES} ảnh tạm.`,
+      });
+    }
+  });
 
 export type UpdateLodatInput = z.infer<typeof updateLodatSchema>;
 
