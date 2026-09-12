@@ -20,6 +20,41 @@ export const TX_PARTY = { SELLER: 'SELLER', BUYER: 'BUYER' } as const;
 export const OPEN_STATUSES = [TX_STATUS.DA_COC, TX_STATUS.DA_CONG_CHUNG] as const;
 export const OPEN_TRANSACTION_EXISTS_CODE = 'OPEN_TRANSACTION_EXISTS';
 
+/** Công tắc rao bán trên map — đồng bộ từ tình trạng GD (transactions.md §3). */
+export const MAP_LISTING_STATUS = {
+  DANG_BAN: 'DANG_BAN',
+  TAM_DUNG: 'TAM_DUNG',
+  KHONG_BAN: 'KHONG_BAN',
+} as const;
+
+/**
+ * Map status mục tiêu theo status GD.
+ * `null` = giữ nguyên (vd. hủy khi map đang KHONG_BAN).
+ */
+export function listingStatusForTxStatus(
+  txStatus: string,
+  currentMapStatus: string,
+): string | null {
+  switch (txStatus) {
+    case TX_STATUS.DA_COC:
+    case TX_STATUS.DA_CONG_CHUNG:
+      return MAP_LISTING_STATUS.TAM_DUNG;
+    case TX_STATUS.HOAN_TAT:
+      return MAP_LISTING_STATUS.KHONG_BAN;
+    case TX_STATUS.HUY:
+      if (
+        currentMapStatus === MAP_LISTING_STATUS.TAM_DUNG ||
+        currentMapStatus === 'DAT_COC'
+      ) {
+        return MAP_LISTING_STATUS.DANG_BAN;
+      }
+      return null;
+    default:
+      return null;
+  }
+}
+
+
 const TYPE_LABELS: Record<string, string> = { OWN: 'Của tôi', RECORD: 'Ghi nhận' };
 const STATUS_LABELS: Record<string, string> = {
   DA_COC: 'Đã cọc',
