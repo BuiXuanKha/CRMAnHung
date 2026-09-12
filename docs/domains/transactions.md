@@ -320,22 +320,21 @@ Placeholder và quy tắc field: **cùng 12.1.2**. Nút **Tìm** = đóng bàn p
 
 Nút **Bộ lọc** + **Tìm** — Loại, Trạng thái. Xoá lọc.
 
-#### 12.2.4 Item (thẻ)
+#### 12.2.4 Item (thẻ) — phương án A (phiếu gọn)
 
-##### 1. Đầu thẻ
+Thứ tự đọc (không form label IN HOA):
 
-Mã GD + hangtag Loại + hangtag Trạng thái + chevron (cùng menu 12.1.4 mục 12).
+1. **Đầu** — mã GD + hangtag Loại + hangtag Trạng thái + chevron (menu 12.1.4 mục 12)
+2. **Tiêu đề lô** — đậm, tối đa 2 dòng
+3. **Các bên** — một dòng `người bán → người mua` (thiếu = `—`)
+4. **Tiền** — giá bán đậm (`crm-money`) · `HH` phụ bên phải (`RECORD` = `—`)
+5. **Hẹn CC** — chỉ hiện khi **Của tôi · Đã cọc** (ngày + đếm ngược 12.1.4 mục 9); ẩn khi Hoàn thành / Đã hủy / Ghi nhận
+6. **Ghi chú** — tối đa 1 dòng `…` nếu có; không hàng trống
+7. **Ngày tạo** — không hiện trên thẻ list (xem ở chi tiết)
 
-##### 2. Thân
+##### Hoa hồng
 
-- Tiêu đề lô đậm
-- Người bán / Người mua
-- Giá · Hoa hồng
-- Hẹn CC (kèm đếm ngược) · Ghi chú · Ngày tạo
-
-##### 3. Hẹn CC / hoa hồng
-
-Cùng quy tắc 12.1.4 mục 7 và 9.
+Cùng quy tắc 12.1.4 mục 7.
 
 #### 12.2.5 Footer
 

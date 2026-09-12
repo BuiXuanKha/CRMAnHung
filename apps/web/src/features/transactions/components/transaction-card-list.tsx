@@ -1,11 +1,10 @@
 'use client';
 
-import { TransactionType, type TransactionListItem } from '@crmanhung/shared';
+import { TransactionStatus, TransactionType, type TransactionListItem } from '@crmanhung/shared';
 import type { Ref } from 'react';
 import { CrmBadge } from '@/shared/ui/badge';
 import { TransactionListEmpty } from './list-empty';
 import {
-  formatCreatedAt,
   formatMoneyVnd,
   getNotaryAppointmentDisplay,
   statusLabel,
@@ -31,32 +30,43 @@ type Props = {
   onScroll?: () => void;
 };
 
-function PartyNames({ names }: { names: string[] }) {
-  const list = names.map((n) => n.trim()).filter(Boolean);
-  if (!list.length) return <span className="tx-empty">—</span>;
-  return <span>{list.join(', ')}</span>;
+function partyLine(names: string[]): string {
+  return names
+    .map((n) => n.trim())
+    .filter(Boolean)
+    .join(', ');
 }
 
 function CommissionValue({ item }: { item: TransactionListItem }) {
   if (item.type === TransactionType.RECORD) {
     return <span className="tx-empty">—</span>;
   }
-  return <span className="crm-money">{formatMoneyVnd(item.commissionVnd)}</span>;
+  return <span>{formatMoneyVnd(item.commissionVnd)}</span>;
 }
 
-function NotaryValue({ item }: { item: TransactionListItem }) {
+/** Hẹn CC trên list: chỉ Của tôi · Đã cọc (còn việc phải theo dõi). */
+function showNotaryOnCard(item: TransactionListItem): boolean {
+  return item.type === TransactionType.OWN && item.status === TransactionStatus.DA_COC;
+}
+
+function NotaryLine({ item }: { item: TransactionListItem }) {
   const { dateLabel, countdownLabel, countdownTone } = getNotaryAppointmentDisplay(item);
-  if (!dateLabel) return <span className="tx-empty">—</span>;
+  if (!dateLabel) return null;
   return (
-    <span className="tx-card-notary">
-      {dateLabel}
+    <p className="tx-card-notary-line">
+      <span>Hẹn CC {dateLabel}</span>
       {countdownLabel ? (
         <span className={`tx-countdown tx-countdown--${countdownTone}`}>{countdownLabel}</span>
       ) : null}
-    </span>
+    </p>
   );
 }
 
+/**
+ * Mobile list card — phương án A (phiếu gọn):
+ * mã+hangtag → tiêu đề lô → bán→mua → giá/HH → hẹn CC (nếu cần) → ghi chú.
+ * Không label IN HOA; ẩn ngày tạo trên list.
+ */
 export function TransactionCardList({
   items,
   total,
@@ -91,6 +101,9 @@ export function TransactionCardList({
               onSelect(item.id);
               onOpen(item.id);
             }
+            const sellers = partyLine(item.sellerNames);
+            const buyers = partyLine(item.buyerNames);
+            const note = item.note?.trim() ?? '';
             return (
               <article
                 key={item.id}
@@ -128,55 +141,32 @@ export function TransactionCardList({
                     </div>
                   </div>
                 </header>
+
                 <p className="tx-card-lot">{item.lodatTitle?.trim() || '—'}</p>
-                <dl className="tx-card-meta">
-                  <div className="tx-card-meta-full">
-                    <dt>Người bán</dt>
-                    <dd>
-                      <PartyNames names={item.sellerNames} />
-                    </dd>
-                  </div>
-                  <div className="tx-card-meta-full">
-                    <dt>Người mua</dt>
-                    <dd>
-                      <PartyNames names={item.buyerNames} />
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Giá bán</dt>
-                    <dd>
-                      <span className="crm-money">{formatMoneyVnd(item.salePriceVnd)}</span>
-                    </dd>
-                  </div>
-                  <div>
-                    <dt>Hoa hồng</dt>
-                    <dd>
-                      <CommissionValue item={item} />
-                    </dd>
-                  </div>
-                  <div className="tx-card-meta-full">
-                    <dt>Hẹn công chứng</dt>
-                    <dd>
-                      <NotaryValue item={item} />
-                    </dd>
-                  </div>
-                  <div className="tx-card-meta-full">
-                    <dt>Ghi chú</dt>
-                    <dd>
-                      {item.note?.trim() ? (
-                        <span className="tx-card-note" title={item.note.trim()}>
-                          {item.note.trim()}
-                        </span>
-                      ) : (
-                        <span className="tx-empty">—</span>
-                      )}
-                    </dd>
-                  </div>
-                  <div className="tx-card-meta-full">
-                    <dt>Ngày tạo</dt>
-                    <dd>{formatCreatedAt(item.createdAt)}</dd>
-                  </div>
-                </dl>
+
+                <p className="tx-card-parties" aria-label="Người bán và người mua">
+                  <span className="tx-card-party">{sellers || '—'}</span>
+                  <span className="tx-card-party-arrow" aria-hidden>
+                    →
+                  </span>
+                  <span className="tx-card-party">{buyers || '—'}</span>
+                </p>
+
+                <div className="tx-card-money">
+                  <p className="tx-card-price crm-money">{formatMoneyVnd(item.salePriceVnd)}</p>
+                  <p className="tx-card-commission">
+                    <span className="tx-card-commission-label">HH</span>{' '}
+                    <CommissionValue item={item} />
+                  </p>
+                </div>
+
+                {showNotaryOnCard(item) ? <NotaryLine item={item} /> : null}
+
+                {note ? (
+                  <p className="tx-card-note" title={note}>
+                    {note}
+                  </p>
+                ) : null}
               </article>
             );
           })
