@@ -24,6 +24,7 @@ import {
   UpdateLodatImageRotationDto,
   UpdateLodatSaleStatusDto,
   ChangeLodatOwnerDto,
+  UploadLodatTempImageDto,
 } from './dto/lodat.dto';
 import { LodatsService } from './lodats.service';
 import { LotSharesService } from '../lot-shares/lot-shares.service';
@@ -47,6 +48,37 @@ export class LodatsController {
     @Query() query: ListProjectLotsQueryDto,
   ) {
     return this.lodats.listProjectLots(user, query.addressId);
+  }
+
+  /** Ảnh tạm form tạo lô — phải đứng trước `:id`. */
+  @Post('temp-images')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 4 * 1024 * 1024 },
+    }),
+  )
+  uploadTempImage(
+    @CurrentUser() user: RequestUser,
+    @Body() dto: UploadLodatTempImageDto,
+    @UploadedFile()
+    file?: { buffer: Buffer; mimetype: string; originalname?: string },
+  ) {
+    if (!file?.buffer?.length) {
+      throw new BadRequestException('Thiếu file ảnh.');
+    }
+    const mime = String(file.mimetype || '');
+    if (!mime.startsWith('image/')) {
+      throw new BadRequestException('Chỉ nhận file ảnh.');
+    }
+    return this.lodats.uploadTempImage(user, dto.sessionId, file);
+  }
+
+  @Delete('temp-images/:tempImageId')
+  deleteTempImage(
+    @CurrentUser() user: RequestUser,
+    @Param('tempImageId') tempImageId: string,
+  ) {
+    return this.lodats.deleteTempImage(user, tempImageId);
   }
 
   @Post()

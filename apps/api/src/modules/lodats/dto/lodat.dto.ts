@@ -272,6 +272,19 @@ export class CreateLodatDto {
   @IsArray()
   @IsString({ each: true })
   chatImageIds?: string[];
+
+  /** Ảnh đã upload tạm trên form tạo lô — gắn khi tạo thành công. */
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tempImageIds?: string[];
+}
+
+export class UploadLodatTempImageDto {
+  @IsString()
+  @MinLength(8, { message: 'Thiếu session upload.' })
+  @MaxLength(80, { message: 'Session upload quá dài.' })
+  sessionId!: string;
 }
 
 export class UpdateLodatDto {

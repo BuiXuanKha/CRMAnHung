@@ -10,6 +10,7 @@ import {
   type LodatListQuery,
   type LodatListResponse,
   type LodatSameWardResponse,
+  type LodatTempImage,
   type ProjectLotOptionsResponse,
   type UpdateLodatImageRotationInput,
   type UpdateLodatInput,
@@ -103,6 +104,27 @@ export async function uploadLodatImage(
   return apiFetch<LodatDetail>(`/lodats/${lodatId}/images`, {
     method: 'POST',
     body,
+  });
+}
+
+/** Upload ảnh tạm ngay khi chọn file trên form tạo lô. */
+export async function uploadLodatTempImage(
+  sessionId: string,
+  file: File,
+): Promise<LodatTempImage> {
+  const prepared = await compressImageForUpload(file);
+  const body = new FormData();
+  body.append('sessionId', sessionId);
+  body.append('file', prepared);
+  return apiFetch<LodatTempImage>('/lodats/temp-images', {
+    method: 'POST',
+    body,
+  });
+}
+
+export async function deleteLodatTempImage(tempImageId: string): Promise<void> {
+  await apiFetch<unknown>(`/lodats/temp-images/${tempImageId}`, {
+    method: 'DELETE',
   });
 }
 

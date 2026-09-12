@@ -512,6 +512,14 @@
   border-radius: 4px;
 }
 
+.ld-edit-thumb-badge-muted {
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.ld-edit-thumb-badge-error {
+  background: rgba(185, 28, 28, 0.9);
+}
+
 .ld-edit-thumb-del {
   position: absolute;
   top: 4px;

@@ -104,7 +104,12 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 | Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng hoặc gắn path ảnh chat (reuse) |
 | Ảnh **thêm** trên thửa dự án (`LodatImage` theo luồng NV) | NV giữ luồng: tạo/sửa | **Không** ghi sổ địa chỉ / kho `ProjectLot`. Tối đa 5. Ghép sau ảnh dự án trên chi tiết + web khách (giống CRM cũ `tblLodatImages`). NV khác cùng số lô kho không thấy ảnh này. |
 
-Upload **mới** từ máy (tạo lô hoặc sửa lô): object key CDN = `{slug tên+địa chỉ}-anh-{n}.webp` (API convert WebP). **Web nén JPEG cạnh dài ≤ 2560 trước khi gửi** (giảm dung lượng mạng điện thoại). Đổi tiêu đề / địa chỉ rồi Lưu → đổi lại key cho khớp. Ảnh gắn từ chat: **copy** sang key lô SEO WebP, **giữ** file `customers/chat/` (WebP sau `images:webp-replace`; cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}.webp` từ `Address.detail`. **Đăng web không làm SEO ảnh lần nữa.**
+Upload **mới** từ máy:
+
+- **Sửa lô:** `POST /lodats/:id/images` — object key CDN = `{slug tên+địa chỉ}-anh-{n}.webp` (API convert WebP).
+- **Tạo lô:** chọn/dán ảnh → **nén client ngay** → `POST /lodats/temp-images` (session + `LodatTempImage`, key tạm `lodats/temp/{nvId}/…`). Bấm Lưu → `POST /lodats` kèm `tempImageIds` (giữ file, copy sang key SEO, xoá bản ghi temp). Gỡ ảnh trên form / orphan > 24h → xoá R2 + temp. Không thành công tạo lô thì **giữ temp** để bấm Lưu lại (không bắt chọn lại file).
+
+**Web nén JPEG cạnh dài ≤ 2560 trước khi gửi.** Đổi tiêu đề / địa chỉ rồi Lưu → đổi lại key cho khớp. Ảnh gắn từ chat: **copy** sang key lô SEO WebP, **giữ** file `customers/chat/` (WebP sau `images:webp-replace`; cùng ảnh chat trên hai lô → hai bản SEO). Ảnh **dự án**: `{tên dự án}-anh-{n}.webp` từ `Address.detail`. **Đăng web không làm SEO ảnh lần nữa.**
 
 **Kho cũ:** ảnh lô + ảnh dự án — `pnpm images:seo-copy` rồi `APPLY=1`. Ảnh lô trỏ chat: copy SEO, giữ chat. Ảnh dự án còn UUID: `pnpm images:seo-copy-addresses`.
 
@@ -552,13 +557,13 @@ Layout 2 cột như §12.4.1: trái form; phải Hình ảnh + Xem nhanh sticky;
 │ Dự án:  địa chỉ PROJECT → chọn lô kho (ẩn/khoá lô NV đã giữ)  │
 │ Giá bán: trạng thái (mặc định Không bán) · giá · chip ghi chú giá │
 │          · chip hoa hồng · ghi chú liên kết chủ                  │
-└ Hình ảnh (đất dân + lô dự án, tối đa 5 ảnh thêm) — upload sau khi tạo xong ─┘
+└ Hình ảnh (đất dân + lô dự án, tối đa 5 ảnh thêm) — upload temp ngay khi chọn ─┘
 ```
 
 - **Trạng thái mặc định khi tạo = Không bán** (`KHONG_BAN`) — chưa rao; NV chọn Mở bán / Dừng bán trên form nếu cần. API `POST /lodats` nếu thiếu `status` cũng gán `KHONG_BAN`.
 - Lô **dự án**: chọn địa chỉ dự án → mở **modal «Chọn lô đất trong dự án»** (CRM cũ): ô tìm theo tiêu đề; danh sách lô = thumb ảnh dự án + badge (Chọn được / Bạn đang giữ) + tên đậm + DT·MT·hướng·ghi chú; nút «Huỷ chọn dự án» bỏ luôn địa chỉ. Không nhập specs. **Panel xem nhanh + thumbnail:** hiện **ảnh dự án** (`AddressImage`, chỉ xem, không gỡ) trước; ảnh chat / dán / file = ảnh riêng thửa (tối đa 5, có ×). Admin sửa ảnh dự án trên sổ địa chỉ.
 - Lô **dân**: bắt buộc tiêu đề + địa chỉ REGULAR; specs như trang sửa; chip hướng/ghi chú giá/hoa hồng §12.4.3.
-- Submit: `POST /lodats` (tạo Lodat + map chủ active) → upload ảnh chờ lần lượt (mỗi file **nén client** trước; nếu có) → toast «Đã tạo lô đất» → `/lo-dat/[id]`. Nút Lưu hiện `Đang tải ảnh k/n…` khi đang gửi file. Lô mới (Không bán) **có** trên list mặc định (Tất cả trạng thái); lọc «Mở bán» thì chưa thấy cho đến khi NV bật Mở bán.
+- Chọn/dán file: **nén + `POST /lodats/temp-images` ngay** (thumbnail có trạng thái đang tải / lỗi). Submit: `POST /lodats` + `chatImageIds` + `tempImageIds` → toast «Đã tạo lô đất» → `/lo-dat/[id]`. Nút Lưu chờ upload temp dở (nếu còn) rồi tạo lô — **không** upload tuần tự sau create. Lô mới (Không bán) **có** trên list mặc định (Tất cả trạng thái); lọc «Mở bán» thì chưa thấy cho đến khi NV bật Mở bán.
 - 1 luồng active / NV / lô kho — API chặn, picker cũng khoá («Bạn đang giữ»).
 
 #### 12.5.2 Mobile
@@ -570,7 +575,9 @@ Xếp dọc như §12.4.2 (một cột; Huỷ/Tạo cuối form; nút «Thêm �
 | Endpoint | Việc |
 |----------|------|
 | `GET /lodats/project-lots?addressId=` | Kho lô của địa chỉ PROJECT + cờ `takenByMe` |
-| `POST /lodats` | Tạo lô dân (addressId REGULAR + specs) hoặc lô dự án (projectLotId) + map chủ; chặn ADMIN; khách phải thuộc NV. `chatImageIds` + upload file sau tạo: ảnh thêm (`LodatImage`), cả dân lẫn dự án |
+| `POST /lodats/temp-images` | Upload ảnh tạm khi đang form tạo lô (`sessionId` + file). Ghi `LodatTempImage` (theo NV). Tối đa 5 / session. |
+| `DELETE /lodats/temp-images/:id` | Gỡ ảnh tạm (NV chỉ xoá của mình) + R2 nếu hết ref. |
+| `POST /lodats` | Tạo lô dân (addressId REGULAR + specs) hoặc lô dự án (projectLotId) + map chủ; chặn ADMIN; khách phải thuộc NV. `chatImageIds` + `tempImageIds` → ảnh thêm (`LodatImage`), cả dân lẫn dự án |
 | `POST /lodats/:id/change-owner` | Đổi chủ: đóng map active, mở map mới. Body `{ customerId, status?, priceVnd?, priceNote?, brokerFeeNote?, mapNote? }`. **Chỉ STAFF** giữ luồng + khách của mình. ADMIN → 403. |
 
 ---
