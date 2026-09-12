@@ -262,7 +262,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-053 | MEDIUM | addresses | List địa chỉ `take: 500`, `total: items.length` — picker/sổ thiếu địa chỉ cũ. | FIXED |
 | BUG-054 | MEDIUM | transactions / title-services | `nextCode()` đọc max rồi +1, không khóa — race trùng `code` unique → 500. | FIXED |
 | BUG-055 | MEDIUM | customers | Lọc tài chính theo khoảng vẫn khớp khách «Chưa xác định» (min/max null). | FIXED |
-| BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN |
+| BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN (HOÃN) |
 | BUG-057 | MEDIUM | addresses | Đổi `PROJECT` → `REGULAR` không kiểm kho `ProjectLot` — picker kho chết, lô cũ còn. | OPEN |
 | BUG-058 | MEDIUM | transactions / lodats | Form tạo GD (không `?lodatId`) picker tối đa 200 lô — lô cũ không chọn được. | FIXED |
 | BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | FIXED |
@@ -1032,7 +1032,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Contract domain chỉ create + status; UI không edit.
 - **Impact:** Bài trùng trên anhungland.com; SEO/nội dung lệch; nháp cũ tồn tại.
 - **Evidence:** Controller không update body. `createPost` + `uniquePostSlug`. Domain bảng API §7 không có PATCH content.
-- **Status:** OPEN (HOÃN — owner 2026-09-06: làm sau)
+- **Status:** OPEN (HOÃN — owner 2026-09-06: làm sau; **2026-09-12:** bỏ qua chưa làm — mobile bất tiện, UX list chưa chốt; máy tính làm sau. Xem `ADMIN-HOAN-THIEN.md` A1.)
 
 ### BUG-057 — Đổi địa chỉ dự án sang đất dân không kiểm kho `ProjectLot`
 
