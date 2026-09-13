@@ -42,6 +42,13 @@ const OG_SAME_ORIGIN_PILOT_SLUGS = new Set([
   'lk3-11-khu-do-thi-dong-khe-hong-phong-nam-sach-hai-duong',
 ]);
 
+/**
+ * One-lot Zalo A/B: cover WebP via same-origin `/og-media/…webp` (no JPEG sibling).
+ * If Zalo still shows the image → WebP is fine when same-origin; else keep JPEG for OG.
+ */
+const OG_WEBP_SAME_ORIGIN_TEST_SLUG =
+  'lo-34-dau-gia-man-de-nam-trung-dien-tich-106-m-nam-sach-hai-duong';
+
 type ListingSeoInput = PublicGuestListing & {
   placeLabel?: string | null;
   communeLabel?: string | null;
@@ -89,6 +96,11 @@ function listingOgImage(listing: PublicGuestListing & { placeLabel?: string | nu
   const cover = listing.coverImageUrl?.trim() || '';
   if (!cover) {
     return { url: toAbsoluteUrl(PUBLIC_OG_DEFAULT), alt: listingCoverAlt(listing) };
+  }
+  // One-lot WebP A/B: same-origin proxy of gallery cover (no JPEG sibling).
+  if (listing.slug === OG_WEBP_SAME_ORIGIN_TEST_SLUG) {
+    const og = publicCdnUrlToSameOriginOgPath(cover) || cover;
+    return { url: toAbsoluteUrl(og), alt: listingCoverAlt(listing) };
   }
   // Gallery stays WebP on CDN. Social preview uses JPEG sibling (~100KB).
   // Pilot: serve via same-origin `/og-media/…` (Zalo cannot render cdn.* previews).
