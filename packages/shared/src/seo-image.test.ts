@@ -11,6 +11,7 @@ import {
   publicOgImageObjectKeyFromWebp,
   publicOgImageUrlFromCoverUrl,
   publicOgLegacyJpegUrlFromCoverUrl,
+  publicCdnUrlToSameOriginOgPath,
 } from './seo-image.js';
 
 describe('seoPostImageFileName', () => {
@@ -103,6 +104,20 @@ describe('public OG PNG sibling keys', () => {
         'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.webp',
       ),
       'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.og.jpg',
+    );
+  });
+
+  it('maps CDN URLs onto same-origin /og-media proxy paths', () => {
+    assert.equal(
+      publicCdnUrlToSameOriginOgPath(
+        'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.og.jpg',
+      ),
+      '/og-media/lodats/lot1/foo-anh-1.og.jpg',
+    );
+    assert.equal(publicCdnUrlToSameOriginOgPath('/og-default.png'), null);
+    assert.equal(
+      publicCdnUrlToSameOriginOgPath('https://evil.example/lodats/x.webp'),
+      null,
     );
   });
 });

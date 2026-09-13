@@ -5,7 +5,7 @@ import {
   listingSearchDescription,
   listingSeoTitle,
   publicAreaLabelToM2,
-  publicOgImageUrlFromCoverUrl,
+  publicCdnUrlToSameOriginOgPath,
   publicOgLegacyJpegUrlFromCoverUrl,
   publicPriceLabelToVnd,
   type PublicGuestListing,
@@ -32,11 +32,11 @@ export { listingHeadline, listingPageH1, listingSeoTitle } from '@crmanhung/shar
 export { listingSeoImageUrls } from './listing-image-seo';
 
 /**
- * Temporary Zalo A/B: only these published lots use `….og.png` (1200×630).
- * Everyone else keeps existing `….og.jpg` until full `[og-png]` backfill.
- * Remove this set after owner confirms Zalo preview OK.
+ * Temporary Zalo A/B: these lots get same-origin `/og-media/…og.jpg` first.
+ * (CDN `og:image` fails on Zalo; apex `/og-default.png` works — format PNG/JPG was a red herring.)
+ * Remove this set after owner confirms, then apply same-origin to all listings.
  */
-const OG_PNG_PILOT_SLUGS = new Set([
+const OG_SAME_ORIGIN_PILOT_SLUGS = new Set([
   'lo-34-dau-gia-man-de-nam-trung-dien-tich-106-m-nam-sach-hai-duong',
   'lk1-28-truc-duong-doi-khu-do-thi-tay-nam-sach-thi-tran-nam-sach-nam-sach-hai-duong',
   'lk3-11-khu-do-thi-dong-khe-hong-phong-nam-sach-hai-duong',
@@ -90,10 +90,13 @@ function listingOgImage(listing: PublicGuestListing & { placeLabel?: string | nu
   if (!cover) {
     return { url: toAbsoluteUrl(PUBLIC_OG_DEFAULT), alt: listingCoverAlt(listing) };
   }
-  // Gallery stays WebP. Pilot slugs → PNG 1200×630 (Zalo); others keep legacy JPEG sibling.
-  const og = OG_PNG_PILOT_SLUGS.has(listing.slug)
-    ? publicOgImageUrlFromCoverUrl(cover) || cover
-    : publicOgLegacyJpegUrlFromCoverUrl(cover) || cover;
+  // Gallery stays WebP on CDN. Social preview uses JPEG sibling (~100KB).
+  // Pilot: serve via same-origin `/og-media/…` (Zalo cannot render cdn.* previews).
+  const cdnOg = publicOgLegacyJpegUrlFromCoverUrl(cover) || cover;
+  const og =
+    OG_SAME_ORIGIN_PILOT_SLUGS.has(listing.slug)
+      ? publicCdnUrlToSameOriginOgPath(cdnOg) || cdnOg
+      : cdnOg;
   return { url: toAbsoluteUrl(og), alt: listingCoverAlt(listing) };
 }
 

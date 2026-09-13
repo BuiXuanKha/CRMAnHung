@@ -228,7 +228,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | **HTML** | Mọi URL gallery nằm trong HTML lần tải đầu (SSR). Ảnh nằm cạnh H1 + địa chỉ + mô tả | Chỉ đổi `src` bằng JS nên bot chỉ thấy 1 ảnh; CSS `background-image` cho ảnh lô |
 | **Sitemap** | Trong `sitemap.xml`, mỗi URL lô/bài published có `image:image` → `image:loc` tuyệt đối (CDN). Bìa + gallery; bài = bìa + `img` trong body | `/og-default.png`; nháp; `data:` URI |
 | **JSON-LD** | `ImageObject`: `contentUrl`, `caption` (= alt), `description` (= meta/excerpt). Ảnh bìa `representativeOfPage` | Bịa EXIF / license; caption khác nội dung trang |
-| **OG** | `og:image` = **PNG sibling** của ảnh bìa (`….webp` → `….og.png` 1200×630, sinh lúc upload/retarget + `pnpm images:og-jpg`). Trong lúc pilot Zalo: vài slug dùng PNG, còn lại tạm `….og.jpg`. Gallery trang khách vẫn WebP. Thiếu bìa → `/og-default.png` (không đưa fallback vào image sitemap). | `og:image` trỏ WebP; ảnh chat / nội bộ CRM |
+| **OG** | `og:image` = JPEG sibling của ảnh bìa (`….webp` → `….og.jpg`), **phục vụ cùng origin** qua `/og-media/…` (proxy CDN) — Zalo lấy title được nhưng gãy ảnh trên `cdn.anhungland.com`; `/og-default.png` trên apex thì ổn. Gallery trang khách vẫn WebP trên CDN. Thiếu bìa → `/og-default.png`. | `og:image` trỏ WebP; ảnh chat / nội bộ CRM; `og:image` trỏ thẳng `cdn.*` (Zalo) |
 | **CDN** | `cdn.anhungland.com` phải **crawl được**. Search Console: xác minh cả property ảnh (CDN) nếu khác apex | `robots` / WAF chặn Googlebot ảnh; hotlink protection chặn bot |
 | **Bảo ảnh** | Ưu tiên ngữ cảnh + CDN public. Watermark nhẹ nếu cần sau — không chặn chuột phải / không `noindex` ảnh | Chặn download làm Google không lấy được file |
 

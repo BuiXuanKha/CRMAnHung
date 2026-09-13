@@ -18,6 +18,16 @@ export const PUBLIC_OG_IMAGE_MIME = 'image/png';
 /** Legacy JPEG sibling from the first Zalo attempt — kept until full PNG backfill. */
 export const PUBLIC_OG_LEGACY_JPEG_EXT = '.og.jpg';
 
+/** Public R2 CDN (gallery WebP + OG siblings). */
+export const PUBLIC_CDN_ORIGIN = 'https://cdn.anhungland.com';
+
+/**
+ * Same-origin path prefix that Next proxies to {@link PUBLIC_CDN_ORIGIN}.
+ * Zalo scrapes title/description from listing pages but fails on `cdn.*` images;
+ * `/og-default.png` on the apex host works — serve `og:image` via this proxy.
+ */
+export const PUBLIC_OG_MEDIA_PATH_PREFIX = '/og-media';
+
 const EXT_FROM_MIME: Record<string, string> = {
   'image/jpeg': '.jpg',
   'image/jpg': '.jpg',
@@ -99,6 +109,25 @@ export function publicOgImageUrlFromCoverUrl(coverUrl: string): string | null {
 
 /** @deprecated alias — OG sibling is PNG now (prefer `publicOgImageUrlFromCoverUrl`) */
 export const publicOgJpegUrlFromCoverUrl = publicOgImageUrlFromCoverUrl;
+
+/**
+ * Absolute CDN URL → same-origin `/og-media/…` path for Zalo/FB `og:image`.
+ * Non-CDN URLs (brand `/og-default.png`, already-proxied paths) → null.
+ */
+export function publicCdnUrlToSameOriginOgPath(cdnUrl: string): string | null {
+  const trimmed = cdnUrl.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    if (url.protocol !== 'https:') return null;
+    if (url.hostname.toLowerCase() !== new URL(PUBLIC_CDN_ORIGIN).hostname) return null;
+    const path = url.pathname;
+    if (!path || path === '/' || path.includes('..')) return null;
+    return `${PUBLIC_OG_MEDIA_PATH_PREFIX}${path}`;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Cover WebP → legacy `….og.jpg` (JPEG backfill still on CDN for non-pilot lots).
