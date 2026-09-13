@@ -7,10 +7,9 @@ export const PUBLIC_SEO_IMAGE_EXT = '.webp';
 export const PUBLIC_SEO_IMAGE_MIME = 'image/webp';
 
 /**
- * Sibling of a gallery WebP previously used for `og:image` (PNG/JPEG experiments).
- * Zalo failed on CDN URLs of any format; same-origin `/og-media/…webp` works.
- * Prefer proxying the gallery cover WebP — do not generate new OG siblings.
- * Example (legacy): `…-anh-1.webp` → `…-anh-1.og.png`
+ * Sibling of a gallery WebP from early OG experiments (`.og.png` / `.og.jpg`).
+ * Production `og:image` is the gallery cover WebP via same-origin `/og-media/…?og=N`.
+ * Do not generate new OG siblings.
  */
 export const PUBLIC_OG_IMAGE_EXT = '.og.png';
 export const PUBLIC_OG_IMAGE_MIME = 'image/png';
@@ -23,10 +22,16 @@ export const PUBLIC_CDN_ORIGIN = 'https://cdn.anhungland.com';
 
 /**
  * Same-origin path prefix that Next proxies to {@link PUBLIC_CDN_ORIGIN}.
- * Zalo scrapes title/description from listing pages but fails on `cdn.*` images;
- * `/og-default.png` and `/og-media/…webp` on the apex host work — serve `og:image` here.
+ * Zalo scrapes title/description but fails on `cdn.*` images; WebP via `/og-media` works.
+ * Do not put cache-bust query on the *page* share URL (`?v=`) — version the image URL instead.
  */
 export const PUBLIC_OG_MEDIA_PATH_PREFIX = '/og-media';
+
+/**
+ * Bump when the OG serving contract changes (e.g. CDN → same-origin) so scrapers
+ * re-fetch `og:image` without changing listing / `?share=` URLs.
+ */
+export const PUBLIC_OG_MEDIA_GENERATION = '1';
 
 const EXT_FROM_MIME: Record<string, string> = {
   'image/jpeg': '.jpg',
@@ -111,8 +116,9 @@ export function publicOgImageUrlFromCoverUrl(coverUrl: string): string | null {
 export const publicOgJpegUrlFromCoverUrl = publicOgImageUrlFromCoverUrl;
 
 /**
- * Absolute CDN URL → same-origin `/og-media/…` path for Zalo/FB `og:image`.
+ * Absolute CDN URL → same-origin `/og-media/…?og=N` path for Zalo/FB `og:image`.
  * Non-CDN URLs (brand `/og-default.png`, already-proxied paths) → null.
+ * Gallery stays on CDN; only social preview uses this proxy (WebP OK).
  */
 export function publicCdnUrlToSameOriginOgPath(cdnUrl: string): string | null {
   const trimmed = cdnUrl.trim();
@@ -123,7 +129,7 @@ export function publicCdnUrlToSameOriginOgPath(cdnUrl: string): string | null {
     if (url.hostname.toLowerCase() !== new URL(PUBLIC_CDN_ORIGIN).hostname) return null;
     const path = url.pathname;
     if (!path || path === '/' || path.includes('..')) return null;
-    return `${PUBLIC_OG_MEDIA_PATH_PREFIX}${path}`;
+    return `${PUBLIC_OG_MEDIA_PATH_PREFIX}${path}?og=${PUBLIC_OG_MEDIA_GENERATION}`;
   } catch {
     return null;
   }

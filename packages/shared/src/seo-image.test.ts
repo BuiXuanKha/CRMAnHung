@@ -42,7 +42,7 @@ describe('lot image SEO keys at create/edit', () => {
     });
     assert.equal(
       key,
-      'lodats/lot1/lo-dat-105m-nham-cap-dong-lac-nam-sach-hai-duong-anh-1.webp',
+      'lodats/lot1/lo-dat-105m2-nham-cap-dong-lac-nam-sach-hai-duong-anh-1.webp',
     );
     assert.equal(isSeoNamedImageKey(key), true);
   });
@@ -107,12 +107,12 @@ describe('public OG PNG sibling keys', () => {
     );
   });
 
-  it('maps CDN URLs onto same-origin /og-media proxy paths', () => {
+  it('maps CDN URLs onto same-origin /og-media proxy paths with generation', () => {
     assert.equal(
       publicCdnUrlToSameOriginOgPath(
-        'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.og.jpg',
+        'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.webp',
       ),
-      '/og-media/lodats/lot1/foo-anh-1.og.jpg',
+      '/og-media/lodats/lot1/foo-anh-1.webp?og=1',
     );
     assert.equal(publicCdnUrlToSameOriginOgPath('/og-default.png'), null);
     assert.equal(

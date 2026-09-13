@@ -6,8 +6,8 @@ export const dynamic = 'force-dynamic';
 
 /**
  * Same-origin proxy for public CDN images used as `og:image`.
- * Zalo fetches listing HTML on anhungland.com but fails to render images hosted
- * on cdn.anhungland.com; `/og-default.png` on the apex works.
+ * Zalo fails on cdn.anhungland.com; WebP (and other formats) work via this apex path.
+ * Query `?og=N` is ignored here — only used so scrapers treat the URL as a new asset.
  */
 export async function GET(
   _request: Request,

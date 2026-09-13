@@ -21,7 +21,7 @@ description: SEO standards for CRMAnHung public web (anhungland.com, no login). 
 3. Nội dung chính SSR/RSC — không để bot chỉ thấy shell trống
 4. URL mới → cập nhật `sitemap.ts` (chỉ phát URL khi `PUBLIC_SEO_INDEX` bật); giữ `robots.ts` chặn khu CRM + `/login`; **không** `Disallow: /`
 5. **Lô `/mua-ban-nha-dat-huyen-nam-sach/[slug]`:** làm đúng công thức [`PUBLIC-SEO.md`](../../../docs/PUBLIC-SEO.md) §7 (excerpt → meta; cover → OG; sitemap chỉ `isPublished`; JSON-LD không bịa giá). Hub địa bàn: domain `public-content` §17.
-6. **Ảnh:** lúc **tạo/sửa lô** (upload + Lưu title/địa chỉ) CDN key `{slug-ten-dia-chi}-anh-n.webp` (server convert WebP). Meta `og:image` = **cùng origin** `/og-media/…webp` (proxy cover CDN) — Zalo gãy ảnh trên `cdn.*`; WebP qua `/og-media` OK (không cần sibling JPG/PNG). **Đăng web không làm lại SEO ảnh.**
+6. **Ảnh:** lúc **tạo/sửa lô** CDN key `{slug}-anh-n.webp` (gallery). Meta `og:image` = **cùng origin** `/og-media/…webp?og=N` (proxy cover) — Zalo gãy `cdn.*`; WebP qua `/og-media` OK. **Không** gắn `?v=` vào link share trang; chỉ `?share=` để gắn NV. **Đăng web không làm lại SEO ảnh.**
 
 ## Cấm
 

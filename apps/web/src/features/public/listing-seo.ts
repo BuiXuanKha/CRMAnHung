@@ -78,8 +78,8 @@ function listingOgImage(listing: PublicGuestListing & { placeLabel?: string | nu
   if (!cover) {
     return { url: toAbsoluteUrl(PUBLIC_OG_DEFAULT), alt: listingCoverAlt(listing) };
   }
-  // Gallery WebP on CDN; Zalo needs same-origin `og:image` — proxy cover via `/og-media/…`.
-  // No JPG/PNG sibling required (owner Zalo A/B: WebP via /og-media works).
+  // Gallery WebP on CDN; Zalo needs same-origin `og:image` — proxy cover via `/og-media/…?og=N`.
+  // No JPG/PNG sibling; no `?v=` on the page/`?share=` URL.
   const og = publicCdnUrlToSameOriginOgPath(cover) || cover;
   return { url: toAbsoluteUrl(og), alt: listingCoverAlt(listing) };
 }
