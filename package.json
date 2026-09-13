@@ -34,6 +34,7 @@
     "images:seo-copy-addresses": "pnpm --filter @crmanhung/api images:seo-copy-addresses",
     "images:seo-copy-posts": "pnpm --filter @crmanhung/api images:seo-copy-posts",
     "images:webp-public-media": "pnpm --filter @crmanhung/api images:webp-public-media",
+    "images:og-jpg": "pnpm --filter @crmanhung/api images:og-jpg",
     "images:webp-replace": "pnpm --filter @crmanhung/api images:webp-replace",
     "transactions:migrate-legacy": "pnpm --filter @crmanhung/api transactions:migrate-legacy",
     "title-services:migrate-legacy": "pnpm --filter @crmanhung/api title-services:migrate-legacy",

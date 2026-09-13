@@ -6,6 +6,10 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
+import {
+  deletePublicOgJpegForWebp,
+  ensurePublicOgJpegForWebp,
+} from '../../storage/ensure-public-og-jpeg';
 import type {
   CreateAddressDto,
   ImportProjectLotRowDto,
@@ -376,6 +380,10 @@ export class AddressesService {
         sortOrder: count,
       },
     });
+    // First project photo is often the lot cover — keep OG JPEG in sync for Zalo/FB.
+    if (count === 0) {
+      await ensurePublicOgJpegForWebp(this.storage, uploaded.objectKey);
+    }
     return {
       item: {
         id: row.id,
@@ -395,6 +403,7 @@ export class AddressesService {
     await this.prisma.addressImage.delete({ where: { id: imageId } });
     try {
       await this.storage.delete(image.objectKey, 'public');
+      await deletePublicOgJpegForWebp(this.storage, image.objectKey);
     } catch {
       // DB already dropped the row; orphan object is acceptable for now.
     }

@@ -5,6 +5,7 @@ import {
   listingSearchDescription,
   listingSeoTitle,
   publicAreaLabelToM2,
+  publicOgJpegUrlFromCoverUrl,
   publicPriceLabelToVnd,
   type PublicGuestListing,
 } from '@crmanhung/shared';
@@ -73,8 +74,10 @@ function listingOgImage(listing: PublicGuestListing & { placeLabel?: string | nu
   url: string;
   alt: string;
 } {
-  const src = listing.coverImageUrl?.trim() || PUBLIC_OG_DEFAULT;
-  return { url: toAbsoluteUrl(src), alt: listingCoverAlt(listing) };
+  const cover = listing.coverImageUrl?.trim() || '';
+  // Gallery stays WebP; Zalo needs JPEG for link preview (FB accepts both).
+  const og = cover ? publicOgJpegUrlFromCoverUrl(cover) || cover : PUBLIC_OG_DEFAULT;
+  return { url: toAbsoluteUrl(og), alt: listingCoverAlt(listing) };
 }
 
 export function unpublishedListingMetadata(): Metadata {

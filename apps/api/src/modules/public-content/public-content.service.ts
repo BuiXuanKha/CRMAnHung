@@ -21,6 +21,7 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
+import { ensurePublicOgJpegForWebp } from '../../storage/ensure-public-og-jpeg';
 import type { UpdatePublicListingDraftDto } from './dto/public-listing.dto';
 import type { CreatePublicPostDto } from './dto/public-post.dto';
 import { PublicWebRevalidateService } from './public-web-revalidate.service';
@@ -786,6 +787,7 @@ export class PublicContentService {
         lodat.projectLotId && lodat.projectLot?.address ? lodat.projectLot.address : null;
       if (!addr?.id || !addr.images?.length) return;
       const project = projectAddressSeoFields(addr);
+      let addressCoverKey: string | null = null;
       for (let i = 0; i < addr.images.length; i += 1) {
         const img = addr.images[i]!;
         const plan = await planSeoAddressImageCopy(this.storage, img, {
@@ -794,8 +796,15 @@ export class PublicContentService {
           location: project.location,
           index: i + 1,
         });
-        if (!plan) continue;
+        if (!plan) {
+          if (i === 0) addressCoverKey = img.objectKey;
+          continue;
+        }
         await applySeoImageMove(this.prisma, this.storage, plan, 'address');
+        if (i === 0) addressCoverKey = plan.to;
+      }
+      if (addressCoverKey) {
+        await ensurePublicOgJpegForWebp(this.storage, addressCoverKey);
       }
     } catch (err) {
       this.logger.warn(

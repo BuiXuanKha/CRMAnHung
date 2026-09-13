@@ -12,6 +12,7 @@ import type { RequestUser } from '../../common/decorators/current-user.decorator
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
+import { deletePublicOgJpegForWebp } from '../../storage/ensure-public-og-jpeg';
 import type {
   ChangeLodatOwnerDto,
   CreateLodatDto,
@@ -1685,6 +1686,7 @@ export class LodatsService {
     if (refs === 0) {
       try {
         await this.storage.delete(image.objectKey, 'public');
+        await deletePublicOgJpegForWebp(this.storage, image.objectKey);
       } catch {
         // orphan ok
       }

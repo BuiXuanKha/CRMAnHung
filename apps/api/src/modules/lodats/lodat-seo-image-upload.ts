@@ -11,6 +11,10 @@ import {
 } from '../public-content/public-slug';
 import type { StorageService } from '../../storage/storage.service';
 import { toPublicWebp } from '../../storage/to-public-webp';
+import {
+  deletePublicOgJpegForWebp,
+  ensurePublicOgJpegForWebp,
+} from '../../storage/ensure-public-og-jpeg';
 import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
 
 export async function uniqueSeoLotImageKey(
@@ -218,6 +222,7 @@ export async function retargetLodatSeoImages(
 ): Promise<number> {
   if (!storage.isConfigured() || !input.images.length) return 0;
   let moved = 0;
+  const keysAfter: string[] = [];
   for (let i = 0; i < input.images.length; i += 1) {
     const img = input.images[i]!;
     const plan = await planSeoLotImageCopy(storage, img, {
@@ -226,9 +231,17 @@ export async function retargetLodatSeoImages(
       location: input.location,
       index: i + 1,
     });
-    if (!plan) continue;
+    if (!plan) {
+      keysAfter.push(img.objectKey);
+      continue;
+    }
     await applySeoImageMove(db, storage, plan, 'lodat');
+    keysAfter.push(plan.to);
     moved += 1;
+  }
+  // Cover (first gallery key) always gets an OG JPEG for social scrapers.
+  if (keysAfter[0]) {
+    await ensurePublicOgJpegForWebp(storage, keysAfter[0]);
   }
   return moved;
 }
@@ -237,27 +250,31 @@ export async function applySeoImageCopy(
   storage: StorageService,
   plan: Pick<SeoCopyPlan, 'from' | 'to' | 'fileName'>,
 ): Promise<void> {
-  if (plan.from === plan.to) return;
-  const destExists = await storage.publicObjectExists(plan.to);
-  if (destExists) return;
-  const src = await storage.getPublicObject(plan.from);
-  if (!src) throw new Error(`Không đọc được ảnh ${plan.from}`);
-  let buffer = src.buffer;
-  let contentType = src.contentType;
-  try {
-    const webp = await toPublicWebp(src.buffer);
-    buffer = webp.buffer;
-    contentType = webp.contentType;
-  } catch (err) {
-    throw new Error(
-      `Không chuyển được ảnh ${plan.from} sang WebP${err instanceof Error ? `: ${err.message}` : ''}`,
-    );
+  if (plan.from !== plan.to) {
+    const destExists = await storage.publicObjectExists(plan.to);
+    if (!destExists) {
+      const src = await storage.getPublicObject(plan.from);
+      if (!src) throw new Error(`Không đọc được ảnh ${plan.from}`);
+      let buffer = src.buffer;
+      let contentType = src.contentType;
+      try {
+        const webp = await toPublicWebp(src.buffer);
+        buffer = webp.buffer;
+        contentType = webp.contentType;
+      } catch (err) {
+        throw new Error(
+          `Không chuyển được ảnh ${plan.from} sang WebP${err instanceof Error ? `: ${err.message}` : ''}`,
+        );
+      }
+      await storage.uploadPublicAtKey(plan.to, {
+        buffer,
+        contentType,
+        contentFileName: plan.fileName,
+      });
+    }
   }
-  await storage.uploadPublicAtKey(plan.to, {
-    buffer,
-    contentType,
-    contentFileName: plan.fileName,
-  });
+  // Gallery stays WebP; sibling .og.jpg is for Facebook/Zalo link preview only.
+  await ensurePublicOgJpegForWebp(storage, plan.to);
 }
 
 /**
@@ -292,6 +309,7 @@ export async function applySeoImageMove(
   const leftover = await countPublicImageKeyRefs(db, plan.from);
   if (leftover === 0 && plan.from !== plan.to) {
     await storage.delete(plan.from, 'public');
+    await deletePublicOgJpegForWebp(storage, plan.from);
     return { deletedSource: true };
   }
   return { deletedSource: false };

@@ -31,6 +31,7 @@
     "images:seo-copy-addresses": "tsx scripts/seo-copy-orphan-addresses.ts",
     "images:seo-copy-posts": "tsx scripts/seo-copy-post-images.ts",
     "images:webp-public-media": "tsx scripts/seo-webp-public-media.ts",
+    "images:og-jpg": "tsx scripts/seo-og-jpg-covers.ts",
     "images:webp-replace": "tsx scripts/seo-webp-replace-public.ts",
     "db:studio": "prisma studio"
   },

@@ -1,5 +1,9 @@
 import sharp from 'sharp';
-import { PUBLIC_SEO_IMAGE_MIME, withPublicWebpExt } from '@crmanhung/shared';
+import {
+  PUBLIC_OG_IMAGE_MIME,
+  PUBLIC_SEO_IMAGE_MIME,
+  withPublicWebpExt,
+} from '@crmanhung/shared';
 
 /** Long-edge cap so phone photos are not 4000px on the CDN. */
 export const PUBLIC_WEBP_MAX_EDGE = 2560;
@@ -40,6 +44,28 @@ export async function assertDecodedWebp(buffer: Buffer): Promise<void> {
   if (meta.format !== 'webp' || !meta.width || !meta.height) {
     throw new Error('WebP decode không hợp lệ');
   }
+}
+
+
+/** Long-edge for OG/Twitter JPEG — keeps social scrapers happy without huge files. */
+export const PUBLIC_OG_JPEG_MAX_EDGE = 1200;
+export const PUBLIC_OG_JPEG_QUALITY = 82;
+
+export async function toPublicOgJpeg(buffer: Buffer): Promise<{
+  buffer: Buffer;
+  contentType: typeof PUBLIC_OG_IMAGE_MIME;
+}> {
+  const out = await sharp(buffer, { failOn: 'none', animated: false })
+    .rotate()
+    .resize({
+      width: PUBLIC_OG_JPEG_MAX_EDGE,
+      height: PUBLIC_OG_JPEG_MAX_EDGE,
+      fit: 'inside',
+      withoutEnlargement: true,
+    })
+    .jpeg({ quality: PUBLIC_OG_JPEG_QUALITY, mozjpeg: true })
+    .toBuffer();
+  return { buffer: out, contentType: PUBLIC_OG_IMAGE_MIME };
 }
 
 export { withPublicWebpExt };

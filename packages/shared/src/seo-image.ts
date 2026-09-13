@@ -6,6 +6,14 @@ export const SEO_IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'] as cons
 export const PUBLIC_SEO_IMAGE_EXT = '.webp';
 export const PUBLIC_SEO_IMAGE_MIME = 'image/webp';
 
+/**
+ * Sibling of a gallery WebP used only for `og:image` / Twitter cards.
+ * Zalo (and some scrapers) fail on WebP previews; JPEG works for FB + Zalo.
+ * Example: `…-anh-1.webp` → `…-anh-1.og.jpg` (not part of the gallery).
+ */
+export const PUBLIC_OG_IMAGE_EXT = '.og.jpg';
+export const PUBLIC_OG_IMAGE_MIME = 'image/jpeg';
+
 const EXT_FROM_MIME: Record<string, string> = {
   'image/jpeg': '.jpg',
   'image/jpg': '.jpg',
@@ -34,6 +42,11 @@ export function isWebpObjectKey(objectKey: string): boolean {
   return base.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT);
 }
 
+export function isPublicOgJpegObjectKey(objectKey: string): boolean {
+  const base = objectKey.replace(/^\/+/, '').split('?')[0] ?? '';
+  return base.toLowerCase().endsWith(PUBLIC_OG_IMAGE_EXT);
+}
+
 /** Swap a path/filename image suffix for the public WebP key. */
 export function withPublicWebpExt(pathOrName: string): string {
   const cleaned = pathOrName.replace(/\\/g, '/');
@@ -41,6 +54,36 @@ export function withPublicWebpExt(pathOrName: string): string {
   const dot = cleaned.lastIndexOf('.');
   const stem = dot > slash ? cleaned.slice(0, dot) : cleaned;
   return `${stem}${PUBLIC_SEO_IMAGE_EXT}`;
+}
+
+/** WebP gallery key → sibling OG JPEG key (`….webp` → `….og.jpg`). */
+export function publicOgJpegObjectKeyFromWebp(webpObjectKey: string): string | null {
+  const key = normalizeObjectKey(webpObjectKey);
+  if (!isWebpObjectKey(key) || isPublicOgJpegObjectKey(key)) return null;
+  return `${key.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_IMAGE_EXT}`;
+}
+
+/**
+ * Cover CDN URL (WebP) → OG JPEG URL for social preview.
+ * Non-WebP covers (PNG default, legacy JPEG) are left unchanged → returns null.
+ */
+export function publicOgJpegUrlFromCoverUrl(coverUrl: string): string | null {
+  const trimmed = coverUrl.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    const path = url.pathname;
+    if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
+    if (path.toLowerCase().endsWith(PUBLIC_OG_IMAGE_EXT)) return null;
+    url.pathname = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_IMAGE_EXT}`;
+    return url.toString();
+  } catch {
+    const [pathPart, query] = trimmed.split('?');
+    const path = pathPart ?? '';
+    if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
+    const next = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_IMAGE_EXT}`;
+    return query ? `${next}?${query}` : next;
+  }
 }
 
 /**

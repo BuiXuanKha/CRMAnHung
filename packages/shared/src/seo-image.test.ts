@@ -8,6 +8,8 @@ import {
   seoImageObjectKeyNeedsRetarget,
   objectKeyMatchesSeoStem,
   seoImageSlugStem,
+  publicOgJpegObjectKeyFromWebp,
+  publicOgJpegUrlFromCoverUrl,
 } from './seo-image.js';
 
 describe('seoPostImageFileName', () => {
@@ -69,5 +71,28 @@ describe('lot image SEO keys at create/edit', () => {
       objectKeyMatchesSeoStem(desired, seoImageSlugStem(title, location)),
       true,
     );
+  });
+});
+
+
+describe('public OG JPEG sibling keys', () => {
+  it('derives ….og.jpg from a gallery WebP object key', () => {
+    assert.equal(
+      publicOgJpegObjectKeyFromWebp(
+        'lodats/lot1/lo-dat-105m-nham-cap-dong-lac-nam-sach-hai-duong-anh-1.webp',
+      ),
+      'lodats/lot1/lo-dat-105m-nham-cap-dong-lac-nam-sach-hai-duong-anh-1.og.jpg',
+    );
+    assert.equal(publicOgJpegObjectKeyFromWebp('lodats/lot1/photo.jpg'), null);
+  });
+
+  it('rewrites cover CDN WebP URLs for og:image', () => {
+    assert.equal(
+      publicOgJpegUrlFromCoverUrl(
+        'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.webp',
+      ),
+      'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.og.jpg',
+    );
+    assert.equal(publicOgJpegUrlFromCoverUrl('/og-default.png'), null);
   });
 });
