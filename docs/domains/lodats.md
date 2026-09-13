@@ -486,6 +486,17 @@ GD đang mở (`DA_COC` / `DA_CONG_CHUNG`): viền `#fcd34d`, nền `#fffbeb`. S
 
 Nút **Giao dịch** giữ open-or-create (`/giao-dich/tao?lodatId=`). **Không làm:** gắn thêm ảnh chat trên form sửa.
 
+#### 12.3.6 Lịch sử chủ đất (chi tiết)
+
+Cột content: ngay **trên** «Lịch sử giao dịch» (sau ghi chú). Dùng `ownerHistory` từ `GET /lodats/:id` (đã có — không thêm API).
+
+**Ẩn** khi không có dòng lịch sử. Có dữ liệu → khối «Lịch sử chủ đất»:
+
+- Mỗi dòng (mới → cũ, active trước): tên chủ · hangtag Đang active / Đã kết thúc · trạng thái rao · giá `crm-money` · Từ … · Đến …
+- Mặc định hiện **3 dòng gần nhất**. Nếu còn nhiều hơn → nút text **Xem thêm** (secondary); bấm → hiện đủ; nút đổi **Thu gọn**.
+
+Trang sửa (§12.4.5) vẫn hiện **toàn bộ** lịch sử chủ (không cắt 3).
+
 ---
 
 ### 12.4 Trang sửa `/lo-dat/[id]/sua`
@@ -626,7 +637,7 @@ Map chủ (giá, mở bán, lịch sử)
 | **10** | Copy **ảnh lô** → `LodatImage` | Ảnh dự án Address đã ở bước 2 | **Xong staging** (10d + 10e) |
 | **11** | API + nối UI **list `/lo-dat` STAFF** | Màn hình NV | **Done** — `GET/PATCH /api/v1/lodats`; lọc `createdBy`; `@` / `@@`; công tắc Mở bán/Tạm dừng |
 | **12** | Tạo lô từ khách: dân (tạo Lodat) / dự án (chọn kho → tạo Lodat trỏ) | Không nút thêm trên `/lo-dat` | **Done** — §12.5; `POST /lodats` + picker kho |
-| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + form sửa + **đổi chủ** + **lịch sử GD** (GET kèm detail). Nút Giao dịch = open-or-create |
+| **13** | Chi tiết `/lo-dat/[id]` (đọc) + đổi chủ / ảnh upload | Đã chốt quyền | Đọc + gallery + cùng xã + form sửa + **đổi chủ** + **lịch sử chủ** (3 + Xem thêm) + **lịch sử GD** (GET kèm detail). Nút Giao dịch = open-or-create |
 | **14** | List UI **ADMIN** `/lo-dat` | Bạn bảo làm sau | Không làm trong lịch STAFF |
 
 Copy data: script **chỉ đọc** SQLite, idempotent, map id trong schema `migrate` — như khách. Skill agent: **`migrate-legacy-data`** (preflight FK, giữ luồng kha/buinam, reshape PROJECT → `ProjectLot`).
