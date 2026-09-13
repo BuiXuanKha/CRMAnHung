@@ -160,6 +160,15 @@ jobs:
           RSH="$HOME/.ssh/rsh.sh"
           "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-webp-replace-public.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-webp-replace-public.sh"
 
+      # One-shot: cover WebP → sibling ….og.jpg (Zalo/FB og:image). Gallery stays WebP.
+      - name: Generate OG JPEG covers on R2
+        if: contains(github.event.head_commit.message, '[og-jpg]')
+        run: |
+          set -euo pipefail
+          source "$HOME/.ssh/deploy.env"
+          RSH="$HOME/.ssh/rsh.sh"
+          "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-og-jpg.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-og-jpg.sh"
+
       # One-shot: rewrite existing lot URLs (301 old → new). Not on every deploy.
       - name: Apply public lot slug rewrite
         if: contains(github.event.head_commit.message, '[apply-lot-slugs]')

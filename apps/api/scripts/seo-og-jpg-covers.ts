@@ -77,19 +77,19 @@ async function main() {
       title: true,
       projectLotId: true,
       images: {
-        orderBy: { sortOrder: 'asc' },
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
         select: { objectKey: true },
       },
       address: {
         select: {
-          images: { orderBy: { sortOrder: 'asc' }, select: { objectKey: true } },
+          images: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }], select: { objectKey: true } },
         },
       },
       projectLot: {
         select: {
           address: {
             select: {
-              images: { orderBy: { sortOrder: 'asc' }, select: { objectKey: true } },
+              images: { orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }], select: { objectKey: true } },
             },
           },
         },
