@@ -28,6 +28,7 @@ import { createLodatShareLink } from '@/features/lot-shares/api';
 import { LodatImageGallery } from './components/lodat-image-gallery';
 import { LodatOwnerFab } from './components/lodat-owner-fab';
 import { LodatTransactionHistory } from './components/lodat-transaction-history';
+import { LodatOwnerHistory } from './components/lodat-owner-history';
 import { SameWardList } from './components/same-ward-list';
 import { SaleToggle } from './components/sale-toggle';
 import { buildLodatCopyText, buildLodatShareClipboard, copyTextToClipboard } from './copy-text';
@@ -564,6 +565,8 @@ export function LodatDetailPage() {
                 <p>{detail.note}</p>
               </section>
             ) : null}
+
+            <LodatOwnerHistory detail={detail} />
 
             <LodatTransactionHistory items={detail.transactionHistory} />
 
