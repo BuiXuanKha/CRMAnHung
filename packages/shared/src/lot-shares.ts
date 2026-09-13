@@ -1,10 +1,13 @@
 import { z } from 'zod';
 import { LodatSaleStatus } from './enums.js';
 import { PUBLIC_LISTING_PATH, PUBLIC_SITE_ORIGIN } from './public-content.js';
+import { PUBLIC_OG_MEDIA_GENERATION } from './seo-image.js';
 
 /**
- * Staff share links (`?share=CODE`) + guest contact attribution.
+ * Staff share links (`?share=CODE&og=N`) + guest contact attribution.
  * Query/cookie identify the **referring employee**, not the listing owner.
+ * `og=N` matches {@link PUBLIC_OG_MEDIA_GENERATION} so Zalo treats the page URL
+ * as new when the OG contract changes (scrapers cache by full URL, not by lot).
  */
 
 export const lotShareContactSchema = z.object({
@@ -197,7 +200,7 @@ export function resolvePublicShareOrigin(raw?: string | null): string {
   return s.replace(/\/$/, '');
 }
 
-/** Build guest share URL (canonical catalog path + `?share=`). */
+/** Build guest share URL (catalog path + `?share=` + `og=` generation). */
 export function buildLotShareUrl(
   origin: string,
   slug: string,
@@ -206,7 +209,10 @@ export function buildLotShareUrl(
   const base = resolvePublicShareOrigin(origin);
   const path = `${PUBLIC_LISTING_PATH}/${encodeURIComponent(slug)}`;
   const code = normalizeShareCode(shareCode);
-  const qs = new URLSearchParams({ share: code || shareCode.trim() });
+  const qs = new URLSearchParams({
+    share: code || shareCode.trim(),
+    og: PUBLIC_OG_MEDIA_GENERATION,
+  });
   return `${base}${path}?${qs.toString()}`;
 }
 

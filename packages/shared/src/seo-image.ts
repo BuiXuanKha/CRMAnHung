@@ -28,8 +28,9 @@ export const PUBLIC_CDN_ORIGIN = 'https://cdn.anhungland.com';
 export const PUBLIC_OG_MEDIA_PATH_PREFIX = '/og-media';
 
 /**
- * Bump when the OG serving contract changes (e.g. CDN → same-origin) so scrapers
- * re-fetch `og:image` without changing listing / `?share=` URLs.
+ * Bump when the OG serving contract changes (e.g. CDN → same-origin).
+ * Applied to `og:image` (`/og-media/…?og=N`) and CRM share page URLs
+ * (`?share=CODE&og=N`) so Zalo re-scrapes without random `?v=` hacks.
  */
 export const PUBLIC_OG_MEDIA_GENERATION = '1';
 

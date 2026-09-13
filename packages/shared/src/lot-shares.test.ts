@@ -66,17 +66,17 @@ describe('pickShareCode', () => {
 });
 
 describe('buildLotShareUrl', () => {
-  it('puts share on the canonical catalog path', () => {
+  it('puts share + og generation on the canonical catalog path', () => {
     assert.equal(
       buildLotShareUrl('https://anhungland.com', 'lo-33', 'ab2k9'),
-      'https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/lo-33?share=AB2K9',
+      'https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/lo-33?share=AB2K9&og=1',
     );
   });
 
   it('rewrites loopback origin to the public site', () => {
     assert.equal(
       buildLotShareUrl('http://127.0.0.1:5001', 'lo-33', 'D4XD7'),
-      'https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/lo-33?share=D4XD7',
+      'https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/lo-33?share=D4XD7&og=1',
     );
   });
 });
@@ -93,7 +93,7 @@ describe('guestLotShareUrl', () => {
   it('ignores a loopback origin override', () => {
     assert.equal(
       guestLotShareUrl('ban-dat-136m2-van-tai-dong-hong-phong', 'd4xd7', 'http://127.0.0.1:5001'),
-      'https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/ban-dat-136m2-van-tai-dong-hong-phong?share=D4XD7',
+      'https://anhungland.com/mua-ban-nha-dat-huyen-nam-sach/ban-dat-136m2-van-tai-dong-hong-phong?share=D4XD7&og=1',
     );
   });
 });
