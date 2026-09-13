@@ -13,7 +13,6 @@ import type { StorageService } from '../../storage/storage.service';
 import { toPublicWebp } from '../../storage/to-public-webp';
 import {
   deletePublicOgJpegForWebp,
-  ensurePublicOgJpegForWebp,
 } from '../../storage/ensure-public-og-jpeg';
 import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
 
@@ -239,10 +238,6 @@ export async function retargetLodatSeoImages(
     keysAfter.push(plan.to);
     moved += 1;
   }
-  // Cover (first gallery key) always gets an OG JPEG for social scrapers.
-  if (keysAfter[0]) {
-    await ensurePublicOgJpegForWebp(storage, keysAfter[0]);
-  }
   return moved;
 }
 
@@ -273,8 +268,6 @@ export async function applySeoImageCopy(
       });
     }
   }
-  // Gallery stays WebP; sibling .og.jpg is for Facebook/Zalo link preview only.
-  await ensurePublicOgJpegForWebp(storage, plan.to);
 }
 
 /**

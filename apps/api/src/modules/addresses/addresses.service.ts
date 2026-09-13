@@ -8,7 +8,6 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import {
   deletePublicOgJpegForWebp,
-  ensurePublicOgJpegForWebp,
 } from '../../storage/ensure-public-og-jpeg';
 import type {
   CreateAddressDto,
@@ -380,10 +379,6 @@ export class AddressesService {
         sortOrder: count,
       },
     });
-    // First project photo is often the lot cover — keep OG JPEG in sync for Zalo/FB.
-    if (count === 0) {
-      await ensurePublicOgJpegForWebp(this.storage, uploaded.objectKey);
-    }
     return {
       item: {
         id: row.id,

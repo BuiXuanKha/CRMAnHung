@@ -4,8 +4,9 @@ import type { StorageService } from './storage.service';
 import { toPublicOgPng } from './to-public-webp';
 
 /**
- * Ensure a sibling `….og.png` exists for a gallery WebP (social OG / Twitter).
- * Idempotent — skips when the PNG is already on R2 unless FORCE=1.
+ * Ensure a sibling `….og.png` exists for a gallery WebP.
+ * @deprecated Zalo/FB `og:image` now uses same-origin `/og-media/…webp` (cover).
+ * Kept for optional one-shot scripts only — not called from upload/publish paths.
  */
 export async function ensurePublicOgJpegForWebp(
   storage: StorageService,

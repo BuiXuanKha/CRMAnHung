@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import {
   clipMetaDescription,
   listingSearchDescription,
+  publicCdnUrlToSameOriginOgPath,
   type PublicGuestPost,
 } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
@@ -45,7 +46,10 @@ export function postMetadata(post: PublicGuestPost): Metadata {
     excerpt: post.excerpt,
   });
   const url = postCanonicalUrl(post.category, post.slug);
-  const imageSrc = post.coverImageUrl?.trim() || PUBLIC_OG_DEFAULT;
+  const cover = post.coverImageUrl?.trim() || '';
+  const imageSrc = cover
+    ? publicCdnUrlToSameOriginOgPath(cover) || cover
+    : PUBLIC_OG_DEFAULT;
   const image = { url: toAbsoluteUrl(imageSrc), alt: post.title };
   const branded = `${post.title} | ${ANHUNG_BRAND.name}`;
   return {

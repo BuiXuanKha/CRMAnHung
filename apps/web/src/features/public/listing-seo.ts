@@ -6,7 +6,6 @@ import {
   listingSeoTitle,
   publicAreaLabelToM2,
   publicCdnUrlToSameOriginOgPath,
-  publicOgLegacyJpegUrlFromCoverUrl,
   publicPriceLabelToVnd,
   type PublicGuestListing,
 } from '@crmanhung/shared';
@@ -30,24 +29,6 @@ import {
 
 export { listingHeadline, listingPageH1, listingSeoTitle } from '@crmanhung/shared';
 export { listingSeoImageUrls } from './listing-image-seo';
-
-/**
- * Temporary Zalo A/B: these lots get same-origin `/og-media/…og.jpg` first.
- * (CDN `og:image` fails on Zalo; apex `/og-default.png` works — format PNG/JPG was a red herring.)
- * Remove this set after owner confirms, then apply same-origin to all listings.
- */
-const OG_SAME_ORIGIN_PILOT_SLUGS = new Set([
-  'lo-34-dau-gia-man-de-nam-trung-dien-tich-106-m-nam-sach-hai-duong',
-  'lk1-28-truc-duong-doi-khu-do-thi-tay-nam-sach-thi-tran-nam-sach-nam-sach-hai-duong',
-  'lk3-11-khu-do-thi-dong-khe-hong-phong-nam-sach-hai-duong',
-]);
-
-/**
- * One-lot Zalo A/B: cover WebP via same-origin `/og-media/…webp` (no JPEG sibling).
- * If Zalo still shows the image → WebP is fine when same-origin; else keep JPEG for OG.
- */
-const OG_WEBP_SAME_ORIGIN_TEST_SLUG =
-  'lo-34-dau-gia-man-de-nam-trung-dien-tich-106-m-nam-sach-hai-duong';
 
 type ListingSeoInput = PublicGuestListing & {
   placeLabel?: string | null;
@@ -97,18 +78,9 @@ function listingOgImage(listing: PublicGuestListing & { placeLabel?: string | nu
   if (!cover) {
     return { url: toAbsoluteUrl(PUBLIC_OG_DEFAULT), alt: listingCoverAlt(listing) };
   }
-  // One-lot WebP A/B: same-origin proxy of gallery cover (no JPEG sibling).
-  if (listing.slug === OG_WEBP_SAME_ORIGIN_TEST_SLUG) {
-    const og = publicCdnUrlToSameOriginOgPath(cover) || cover;
-    return { url: toAbsoluteUrl(og), alt: listingCoverAlt(listing) };
-  }
-  // Gallery stays WebP on CDN. Social preview uses JPEG sibling (~100KB).
-  // Pilot: serve via same-origin `/og-media/…` (Zalo cannot render cdn.* previews).
-  const cdnOg = publicOgLegacyJpegUrlFromCoverUrl(cover) || cover;
-  const og =
-    OG_SAME_ORIGIN_PILOT_SLUGS.has(listing.slug)
-      ? publicCdnUrlToSameOriginOgPath(cdnOg) || cdnOg
-      : cdnOg;
+  // Gallery WebP on CDN; Zalo needs same-origin `og:image` — proxy cover via `/og-media/…`.
+  // No JPG/PNG sibling required (owner Zalo A/B: WebP via /og-media works).
+  const og = publicCdnUrlToSameOriginOgPath(cover) || cover;
   return { url: toAbsoluteUrl(og), alt: listingCoverAlt(listing) };
 }
 
