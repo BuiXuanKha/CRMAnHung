@@ -8,9 +8,6 @@ import {
   seoImageObjectKeyNeedsRetarget,
   objectKeyMatchesSeoStem,
   seoImageSlugStem,
-  publicOgImageObjectKeyFromWebp,
-  publicOgImageUrlFromCoverUrl,
-  publicOgLegacyJpegUrlFromCoverUrl,
   publicCdnUrlToSameOriginOgPath,
 } from './seo-image.js';
 
@@ -77,36 +74,7 @@ describe('lot image SEO keys at create/edit', () => {
 });
 
 
-describe('public OG PNG sibling keys', () => {
-  it('derives ….og.png from a gallery WebP object key', () => {
-    assert.equal(
-      publicOgImageObjectKeyFromWebp(
-        'lodats/lot1/lo-dat-105m-nham-cap-dong-lac-nam-sach-hai-duong-anh-1.webp',
-      ),
-      'lodats/lot1/lo-dat-105m-nham-cap-dong-lac-nam-sach-hai-duong-anh-1.og.png',
-    );
-    assert.equal(publicOgImageObjectKeyFromWebp('lodats/lot1/photo.jpg'), null);
-  });
-
-  it('rewrites cover CDN WebP URLs for og:image', () => {
-    assert.equal(
-      publicOgImageUrlFromCoverUrl(
-        'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.webp',
-      ),
-      'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.og.png',
-    );
-    assert.equal(publicOgImageUrlFromCoverUrl('/og-default.png'), null);
-  });
-
-  it('rewrites cover CDN WebP URLs to legacy ….og.jpg', () => {
-    assert.equal(
-      publicOgLegacyJpegUrlFromCoverUrl(
-        'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.webp',
-      ),
-      'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.og.jpg',
-    );
-  });
-
+describe('same-origin /og-media OG paths', () => {
   it('maps CDN URLs onto same-origin /og-media proxy paths with generation', () => {
     assert.equal(
       publicCdnUrlToSameOriginOgPath(

@@ -6,9 +6,6 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
-import {
-  deletePublicOgJpegForWebp,
-} from '../../storage/ensure-public-og-jpeg';
 import type {
   CreateAddressDto,
   ImportProjectLotRowDto,
@@ -398,7 +395,6 @@ export class AddressesService {
     await this.prisma.addressImage.delete({ where: { id: imageId } });
     try {
       await this.storage.delete(image.objectKey, 'public');
-      await deletePublicOgJpegForWebp(this.storage, image.objectKey);
     } catch {
       // DB already dropped the row; orphan object is acceptable for now.
     }

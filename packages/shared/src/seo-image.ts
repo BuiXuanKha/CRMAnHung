@@ -6,18 +6,7 @@ export const SEO_IMAGE_EXTS = ['.jpg', '.jpeg', '.png', '.webp', '.gif'] as cons
 export const PUBLIC_SEO_IMAGE_EXT = '.webp';
 export const PUBLIC_SEO_IMAGE_MIME = 'image/webp';
 
-/**
- * Sibling of a gallery WebP from early OG experiments (`.og.png` / `.og.jpg`).
- * Production `og:image` is the gallery cover WebP via same-origin `/og-media/…?og=N`.
- * Do not generate new OG siblings.
- */
-export const PUBLIC_OG_IMAGE_EXT = '.og.png';
-export const PUBLIC_OG_IMAGE_MIME = 'image/png';
-
-/** Legacy JPEG sibling from early Zalo attempts — no longer written on upload. */
-export const PUBLIC_OG_LEGACY_JPEG_EXT = '.og.jpg';
-
-/** Public R2 CDN (gallery WebP + OG siblings). */
+/** Public R2 CDN (gallery WebP). */
 export const PUBLIC_CDN_ORIGIN = 'https://cdn.anhungland.com';
 
 /**
@@ -61,15 +50,6 @@ export function isWebpObjectKey(objectKey: string): boolean {
   return base.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT);
 }
 
-export function isPublicOgImageObjectKey(objectKey: string): boolean {
-  const base = objectKey.replace(/^\/+/, '').split('?')[0] ?? '';
-  return base.toLowerCase().endsWith(PUBLIC_OG_IMAGE_EXT);
-}
-
-/** @deprecated alias — OG sibling is PNG now */
-export const isPublicOgJpegObjectKey = isPublicOgImageObjectKey;
-
-
 /** Swap a path/filename image suffix for the public WebP key. */
 export function withPublicWebpExt(pathOrName: string): string {
   const cleaned = pathOrName.replace(/\\/g, '/');
@@ -78,42 +58,6 @@ export function withPublicWebpExt(pathOrName: string): string {
   const stem = dot > slash ? cleaned.slice(0, dot) : cleaned;
   return `${stem}${PUBLIC_SEO_IMAGE_EXT}`;
 }
-
-/** WebP gallery key → sibling OG PNG key (`….webp` → `….og.png`). */
-export function publicOgImageObjectKeyFromWebp(webpObjectKey: string): string | null {
-  const key = normalizeObjectKey(webpObjectKey);
-  if (!isWebpObjectKey(key) || isPublicOgImageObjectKey(key)) return null;
-  return `${key.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_IMAGE_EXT}`;
-}
-
-/** @deprecated alias — OG sibling is PNG now */
-export const publicOgJpegObjectKeyFromWebp = publicOgImageObjectKeyFromWebp;
-
-/**
- * Cover CDN URL (WebP) → OG PNG URL for social preview.
- * Non-WebP covers (brand PNG default, legacy JPEG) are left unchanged → returns null.
- */
-export function publicOgImageUrlFromCoverUrl(coverUrl: string): string | null {
-  const trimmed = coverUrl.trim();
-  if (!trimmed) return null;
-  try {
-    const url = new URL(trimmed);
-    const path = url.pathname;
-    if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
-    if (path.toLowerCase().endsWith(PUBLIC_OG_IMAGE_EXT)) return null;
-    url.pathname = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_IMAGE_EXT}`;
-    return url.toString();
-  } catch {
-    const [pathPart, query] = trimmed.split('?');
-    const path = pathPart ?? '';
-    if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
-    const next = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_IMAGE_EXT}`;
-    return query ? `${next}?${query}` : next;
-  }
-}
-
-/** @deprecated alias — OG sibling is PNG now (prefer `publicOgImageUrlFromCoverUrl`) */
-export const publicOgJpegUrlFromCoverUrl = publicOgImageUrlFromCoverUrl;
 
 /**
  * Absolute CDN URL → same-origin `/og-media/…?og=N` path for Zalo/FB `og:image`.
@@ -135,28 +79,6 @@ export function publicCdnUrlToSameOriginOgPath(cdnUrl: string): string | null {
   }
 }
 
-/**
- * Cover WebP → legacy `….og.jpg` (JPEG backfill still on CDN for non-pilot lots).
- */
-export function publicOgLegacyJpegUrlFromCoverUrl(coverUrl: string): string | null {
-  const trimmed = coverUrl.trim();
-  if (!trimmed) return null;
-  try {
-    const url = new URL(trimmed);
-    const path = url.pathname;
-    if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
-    if (path.toLowerCase().endsWith(PUBLIC_OG_IMAGE_EXT)) return null;
-    if (path.toLowerCase().endsWith(PUBLIC_OG_LEGACY_JPEG_EXT)) return null;
-    url.pathname = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_LEGACY_JPEG_EXT}`;
-    return url.toString();
-  } catch {
-    const [pathPart, query] = trimmed.split('?');
-    const path = pathPart ?? '';
-    if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
-    const next = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_LEGACY_JPEG_EXT}`;
-    return query ? `${next}?${query}` : next;
-  }
-}
 
 /**
  * Descriptive CDN filename: `{title+location}-anh-{n}.webp`

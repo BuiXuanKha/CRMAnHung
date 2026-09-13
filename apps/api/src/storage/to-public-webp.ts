@@ -1,6 +1,5 @@
 import sharp from 'sharp';
 import {
-  PUBLIC_OG_IMAGE_MIME,
   PUBLIC_SEO_IMAGE_MIME,
   withPublicWebpExt,
 } from '@crmanhung/shared';
@@ -46,32 +45,6 @@ export async function assertDecodedWebp(buffer: Buffer): Promise<void> {
   }
 }
 
-
-/** Match working `/og-default.png` — Zalo preview OK with this box. */
-export const PUBLIC_OG_IMAGE_WIDTH = 1200;
-export const PUBLIC_OG_IMAGE_HEIGHT = 630;
-
-/** Cover → PNG 1200×630 for `og:image` (Zalo). Gallery WebP unchanged. */
-export async function toPublicOgPng(buffer: Buffer): Promise<{
-  buffer: Buffer;
-  contentType: typeof PUBLIC_OG_IMAGE_MIME;
-}> {
-  const out = await sharp(buffer, { failOn: 'none', animated: false })
-    .rotate()
-    .resize({
-      width: PUBLIC_OG_IMAGE_WIDTH,
-      height: PUBLIC_OG_IMAGE_HEIGHT,
-      fit: 'cover',
-      position: 'centre',
-    })
-    .png({ compressionLevel: 8, palette: false })
-    .toBuffer();
-  return { buffer: out, contentType: PUBLIC_OG_IMAGE_MIME };
-}
-
-/** @deprecated alias */
-export const toPublicOgJpeg = toPublicOgPng;
-export const PUBLIC_OG_JPEG_MAX_EDGE = PUBLIC_OG_IMAGE_WIDTH;
 
 
 export { withPublicWebpExt };

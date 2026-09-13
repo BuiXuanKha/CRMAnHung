@@ -11,9 +11,6 @@ import {
 } from '../public-content/public-slug';
 import type { StorageService } from '../../storage/storage.service';
 import { toPublicWebp } from '../../storage/to-public-webp';
-import {
-  deletePublicOgJpegForWebp,
-} from '../../storage/ensure-public-og-jpeg';
 import { countPublicImageKeyRefs } from '../../storage/retarget-public-key';
 
 export async function uniqueSeoLotImageKey(
@@ -302,7 +299,6 @@ export async function applySeoImageMove(
   const leftover = await countPublicImageKeyRefs(db, plan.from);
   if (leftover === 0 && plan.from !== plan.to) {
     await storage.delete(plan.from, 'public');
-    await deletePublicOgJpegForWebp(storage, plan.from);
     return { deletedSource: true };
   }
   return { deletedSource: false };
