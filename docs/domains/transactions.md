@@ -66,7 +66,7 @@ Gợi ý dưới số 2–3: «Chỉ giao dịch của tôi · Hoàn thành». M
 4. **Xóa cứng** — xóa hàng; nếu GD đang mở thì áp luật map như **Đã hủy** (mục 3).
 5. **Lịch sử trên chi tiết lô** — list GD của lô (lodats.md §12.3.5, đã làm).
 
-Tạo GD: **OWN** bắt buộc ngày hẹn CC; **RECORD** hẹn CC tuỳ chọn, hoa hồng = 0, **không** vào thẻ doanh thu. Tạo từ lô: điền sẵn người bán = chủ map active (tên + `customerId`); lô chưa có chủ → không lưu.
+Tạo GD: **OWN** bắt buộc ngày hẹn CC; **RECORD** hẹn CC tuỳ chọn, hoa hồng = 0, **không** vào thẻ doanh thu. Tạo từ lô: điền sẵn người bán = chủ map active (tên + `customerId`); lô chưa có chủ → không lưu. Người bán và người mua lúc Lưu đều phải là khách CRM (`customerId`).
 
 ## 5. Quan hệ dữ liệu
 
@@ -90,7 +90,9 @@ Transaction 1 ── n TransactionAttachment (R2 objectKey, kind HOP_DONG|SO_DO|
 | `createdByEmployeeId` | FK User | ownership list STAFF |
 | `completedAt` | DateTime? | khi chuyển `HOAN_TAT` |
 
-**Bên:** `customerId` tuỳ chọn (khách CRM) + `freeTextName` **luôn ghi** (tên lúc tạo). Xoá khách → `customerId` SET NULL, tên còn.
+**Bên (tạo / sửa):** mỗi người bán và người mua **bắt buộc** `customerId` (khách trong CRM) + `freeTextName` (tên lúc lưu, snapshot). Không lưu bên chỉ có tên gõ tay. Xoá khách sau này → DB có thể `customerId` SET NULL, tên còn trên GD cũ; lần sửa GD sau phải chọn lại khách CRM.
+
+**Hoàn thành (`HOAN_TAT`):** chỉ đóng GD + map listing `KHONG_BAN` + `completedAt`. **Chưa** tự đổi chủ lô — đổi chủ vẫn làm tay trên lô.
 
 **1 GD mở / lô:** unique index SQL `Transaction_lodatId_open_uidx` (`DA_COC` \| `DA_CONG_CHUNG`). Cũ chỉ chặn ở app.
 
@@ -440,7 +442,7 @@ Số VND, format nghìn. RECORD: ô HH disabled.
 
 ##### 7. Người bán / mua
 
-Mỗi bên ≥ 1 hangtag lúc Lưu. **Không** nút «+ Thêm người…». Ô tìm: gõ tên/SĐT → danh sách avatar + tên + SĐT. Chỉ chọn khách trong list → hangtag `CrmBadge` `blue`; × xoá. Gõ tiếp để thêm người. **Không** tạo hangtag từ tên vừa gõ khi không khớp CRM. **Tạo:** điền sẵn hangtag người bán = chủ lô (`owner`); đổi lô thì thay bên bán. Lô chưa có chủ → báo, khoá Lưu.
+Mỗi bên ≥ 1 hangtag lúc Lưu; mỗi hangtag phải có `customerId` CRM. **Không** nút «+ Thêm người…». Ô tìm: gõ tên/SĐT → danh sách avatar + tên + SĐT. Chỉ chọn khách trong list → hangtag `CrmBadge` `blue`; × xoá. Gõ tiếp để thêm người. **Không** tạo hangtag từ tên vừa gõ khi không khớp CRM. Lưu mà thiếu người bán/mua CRM → báo lỗi, không gọi API. **Tạo:** điền sẵn hangtag người bán = chủ lô (`owner`); đổi lô thì thay bên bán. Lô chưa có chủ → báo, khoá Lưu.
 
 ##### 8. Ghi chú
 

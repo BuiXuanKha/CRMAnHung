@@ -5,11 +5,17 @@ import {
   TRANSACTION_TYPE_LABELS,
   TransactionStatus,
   TransactionType,
-  type TransactionPartyInput,
 } from '@crmanhung/shared';
 import { formatPriceInput } from '../api';
 import { LodatSearchPicker } from '@/features/lodats/components/lodat-search-picker';
 import { PartyFields, emptyParty } from './party-fields';
+
+export type TransactionFormParty = {
+  key: string;
+  freeTextName: string;
+  customerId: string | null;
+  sortOrder: number;
+};
 
 export type TransactionFormValues = {
   type: TransactionType;
@@ -21,8 +27,8 @@ export type TransactionFormValues = {
   commission: string;
   note: string;
   cancelReason: string;
-  sellers: Array<TransactionPartyInput & { key: string }>;
-  buyers: Array<TransactionPartyInput & { key: string }>;
+  sellers: TransactionFormParty[];
+  buyers: TransactionFormParty[];
 };
 
 

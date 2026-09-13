@@ -55,12 +55,10 @@ export class ListTransactionsQueryDto {
 }
 
 export class TransactionPartyInputDto {
-  @IsOptional()
-  @Transform(({ value }) => (value === '' || value === undefined ? null : value))
-  @ValidateIf((_, v) => v !== null)
-  @IsString()
+  @IsString({ message: 'Người bán và người mua phải là khách trong CRM.' })
+  @MinLength(1, { message: 'Người bán và người mua phải là khách trong CRM.' })
   @MaxLength(60)
-  customerId?: string | null;
+  customerId!: string;
 
   @IsString()
   @MinLength(1, { message: 'Cần tên bên giao dịch.' })
