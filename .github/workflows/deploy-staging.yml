@@ -160,14 +160,20 @@ jobs:
           RSH="$HOME/.ssh/rsh.sh"
           "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-webp-replace-public.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-webp-replace-public.sh"
 
-      # One-shot: cover WebP → sibling ….og.jpg (Zalo/FB og:image). Gallery stays WebP.
-      - name: Generate OG JPEG covers on R2
-        if: contains(github.event.head_commit.message, '[og-jpg]')
+      # One-shot: cover WebP → sibling ….og.png 1200×630 (Zalo/FB). Gallery stays WebP.
+      - name: Generate OG PNG covers on R2
+        if: contains(github.event.head_commit.message, '[og-jpg]') || contains(github.event.head_commit.message, '[og-png]') || contains(github.event.head_commit.message, '[og-png-test]')
         run: |
           set -euo pipefail
           source "$HOME/.ssh/deploy.env"
           RSH="$HOME/.ssh/rsh.sh"
-          "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-og-jpg.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} bash ${REMOTE_ROOT}/repo/scripts/seo-og-jpg.sh"
+          # [og-png-test] → only 3 pilot lots (Zalo PNG A/B). Full backfill: commit with [og-png].
+          if echo "${{ github.event.head_commit.message }}" | grep -q '\[og-png-test\]'; then
+            export SCOPE=published
+            export SLUGS='lo-34-dau-gia-man-de-nam-trung-dien-tich-106-m-nam-sach-hai-duong,lk1-28-truc-duong-doi-khu-do-thi-tay-nam-sach-thi-tran-nam-sach-nam-sach-hai-duong,lk3-11-khu-do-thi-dong-khe-hong-phong-nam-sach-hai-duong'
+            export LIMIT=3
+          fi
+          "$RSH" "$REMOTE" "chmod +x ${REMOTE_ROOT}/repo/scripts/seo-og-jpg.sh && CRMANHUNG_ROOT=${REMOTE_ROOT} SCOPE=${SCOPE:-} SLUGS=${SLUGS:-} LIMIT=${LIMIT:-} bash ${REMOTE_ROOT}/repo/scripts/seo-og-jpg.sh"
 
       # One-shot: rewrite existing lot URLs (301 old → new). Not on every deploy.
       - name: Apply public lot slug rewrite

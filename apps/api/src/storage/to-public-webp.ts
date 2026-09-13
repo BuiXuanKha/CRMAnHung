@@ -47,25 +47,31 @@ export async function assertDecodedWebp(buffer: Buffer): Promise<void> {
 }
 
 
-/** Long-edge for OG/Twitter JPEG — keeps social scrapers happy without huge files. */
-export const PUBLIC_OG_JPEG_MAX_EDGE = 1200;
-export const PUBLIC_OG_JPEG_QUALITY = 82;
+/** Match working `/og-default.png` — Zalo preview OK with this box. */
+export const PUBLIC_OG_IMAGE_WIDTH = 1200;
+export const PUBLIC_OG_IMAGE_HEIGHT = 630;
 
-export async function toPublicOgJpeg(buffer: Buffer): Promise<{
+/** Cover → PNG 1200×630 for `og:image` (Zalo). Gallery WebP unchanged. */
+export async function toPublicOgPng(buffer: Buffer): Promise<{
   buffer: Buffer;
   contentType: typeof PUBLIC_OG_IMAGE_MIME;
 }> {
   const out = await sharp(buffer, { failOn: 'none', animated: false })
     .rotate()
     .resize({
-      width: PUBLIC_OG_JPEG_MAX_EDGE,
-      height: PUBLIC_OG_JPEG_MAX_EDGE,
-      fit: 'inside',
-      withoutEnlargement: true,
+      width: PUBLIC_OG_IMAGE_WIDTH,
+      height: PUBLIC_OG_IMAGE_HEIGHT,
+      fit: 'cover',
+      position: 'centre',
     })
-    .jpeg({ quality: PUBLIC_OG_JPEG_QUALITY, mozjpeg: true })
+    .png({ compressionLevel: 8, palette: false })
     .toBuffer();
   return { buffer: out, contentType: PUBLIC_OG_IMAGE_MIME };
 }
+
+/** @deprecated alias */
+export const toPublicOgJpeg = toPublicOgPng;
+export const PUBLIC_OG_JPEG_MAX_EDGE = PUBLIC_OG_IMAGE_WIDTH;
+
 
 export { withPublicWebpExt };

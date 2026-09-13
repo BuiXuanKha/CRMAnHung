@@ -8,11 +8,15 @@ export const PUBLIC_SEO_IMAGE_MIME = 'image/webp';
 
 /**
  * Sibling of a gallery WebP used only for `og:image` / Twitter cards.
- * Zalo (and some scrapers) fail on WebP previews; JPEG works for FB + Zalo.
- * Example: `…-anh-1.webp` → `…-anh-1.og.jpg` (not part of the gallery).
+ * Zalo failed on WebP; JPEG sibling also failed in owner Zalo tests while
+ * same-origin PNG (`/og-default.png`) worked — use PNG 1200×630 for OG.
+ * Example: `…-anh-1.webp` → `…-anh-1.og.png` (not part of the gallery).
  */
-export const PUBLIC_OG_IMAGE_EXT = '.og.jpg';
-export const PUBLIC_OG_IMAGE_MIME = 'image/jpeg';
+export const PUBLIC_OG_IMAGE_EXT = '.og.png';
+export const PUBLIC_OG_IMAGE_MIME = 'image/png';
+
+/** Legacy JPEG sibling from the first Zalo attempt — kept until full PNG backfill. */
+export const PUBLIC_OG_LEGACY_JPEG_EXT = '.og.jpg';
 
 const EXT_FROM_MIME: Record<string, string> = {
   'image/jpeg': '.jpg',
@@ -42,10 +46,14 @@ export function isWebpObjectKey(objectKey: string): boolean {
   return base.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT);
 }
 
-export function isPublicOgJpegObjectKey(objectKey: string): boolean {
+export function isPublicOgImageObjectKey(objectKey: string): boolean {
   const base = objectKey.replace(/^\/+/, '').split('?')[0] ?? '';
   return base.toLowerCase().endsWith(PUBLIC_OG_IMAGE_EXT);
 }
+
+/** @deprecated alias — OG sibling is PNG now */
+export const isPublicOgJpegObjectKey = isPublicOgImageObjectKey;
+
 
 /** Swap a path/filename image suffix for the public WebP key. */
 export function withPublicWebpExt(pathOrName: string): string {
@@ -56,18 +64,21 @@ export function withPublicWebpExt(pathOrName: string): string {
   return `${stem}${PUBLIC_SEO_IMAGE_EXT}`;
 }
 
-/** WebP gallery key → sibling OG JPEG key (`….webp` → `….og.jpg`). */
-export function publicOgJpegObjectKeyFromWebp(webpObjectKey: string): string | null {
+/** WebP gallery key → sibling OG PNG key (`….webp` → `….og.png`). */
+export function publicOgImageObjectKeyFromWebp(webpObjectKey: string): string | null {
   const key = normalizeObjectKey(webpObjectKey);
-  if (!isWebpObjectKey(key) || isPublicOgJpegObjectKey(key)) return null;
+  if (!isWebpObjectKey(key) || isPublicOgImageObjectKey(key)) return null;
   return `${key.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_IMAGE_EXT}`;
 }
 
+/** @deprecated alias — OG sibling is PNG now */
+export const publicOgJpegObjectKeyFromWebp = publicOgImageObjectKeyFromWebp;
+
 /**
- * Cover CDN URL (WebP) → OG JPEG URL for social preview.
- * Non-WebP covers (PNG default, legacy JPEG) are left unchanged → returns null.
+ * Cover CDN URL (WebP) → OG PNG URL for social preview.
+ * Non-WebP covers (brand PNG default, legacy JPEG) are left unchanged → returns null.
  */
-export function publicOgJpegUrlFromCoverUrl(coverUrl: string): string | null {
+export function publicOgImageUrlFromCoverUrl(coverUrl: string): string | null {
   const trimmed = coverUrl.trim();
   if (!trimmed) return null;
   try {
@@ -82,6 +93,32 @@ export function publicOgJpegUrlFromCoverUrl(coverUrl: string): string | null {
     const path = pathPart ?? '';
     if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
     const next = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_IMAGE_EXT}`;
+    return query ? `${next}?${query}` : next;
+  }
+}
+
+/** @deprecated alias — OG sibling is PNG now (prefer `publicOgImageUrlFromCoverUrl`) */
+export const publicOgJpegUrlFromCoverUrl = publicOgImageUrlFromCoverUrl;
+
+/**
+ * Cover WebP → legacy `….og.jpg` (JPEG backfill still on CDN for non-pilot lots).
+ */
+export function publicOgLegacyJpegUrlFromCoverUrl(coverUrl: string): string | null {
+  const trimmed = coverUrl.trim();
+  if (!trimmed) return null;
+  try {
+    const url = new URL(trimmed);
+    const path = url.pathname;
+    if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
+    if (path.toLowerCase().endsWith(PUBLIC_OG_IMAGE_EXT)) return null;
+    if (path.toLowerCase().endsWith(PUBLIC_OG_LEGACY_JPEG_EXT)) return null;
+    url.pathname = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_LEGACY_JPEG_EXT}`;
+    return url.toString();
+  } catch {
+    const [pathPart, query] = trimmed.split('?');
+    const path = pathPart ?? '';
+    if (!path.toLowerCase().endsWith(PUBLIC_SEO_IMAGE_EXT)) return null;
+    const next = `${path.slice(0, -PUBLIC_SEO_IMAGE_EXT.length)}${PUBLIC_OG_LEGACY_JPEG_EXT}`;
     return query ? `${next}?${query}` : next;
   }
 }

@@ -200,7 +200,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 
 Ảnh lô / bài đã có ngữ cảnh mạnh (tên, xã/huyện, excerpt, giá công bố). Gắn đúng tín hiệu thì Google Images và link chia sẻ dùng được.
 
-**Lúc tạo lô và sửa lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server **convert WebP** (`sharp`) rồi đặt object key CDN theo **tên lô + địa chỉ** (`…-anh-n.webp`, cùng slug trang khách). Đồng thời sinh **một** JPEG sibling `…-anh-1.og.jpg` (chỉ cho `og:image` / Twitter — Zalo không hiện preview WebP). Đổi tiêu đề / địa chỉ rồi **Lưu** → đổi key CDN cho khớp slug mới. Cạnh dài tối đa 2560px. Tài liệu mật (sổ đỏ) **không** convert.
+**Lúc tạo lô và sửa lô:** file điện thoại (`IMG_4521.jpg`) **không** đủ cho SEO. Server **convert WebP** (`sharp`) rồi đặt object key CDN theo **tên lô + địa chỉ** (`…-anh-n.webp`, cùng slug trang khách). Đồng thời sinh **một** sibling OG `…-anh-1.og.png` (1200×630, chỉ cho `og:image` / Twitter — Zalo không hiện preview WebP; JPEG thử trước cũng gãy trên Zalo trong khi `/og-default.png` ổn). Đổi tiêu đề / địa chỉ rồi **Lưu** → đổi key CDN cho khớp slug mới. Cạnh dài tối đa 2560px. Tài liệu mật (sổ đỏ) **không** convert.
 
 **Đăng web không phải bước SEO ảnh.** Nhân viên không làm SEO lần nữa khi bật đăng bán. `setPublished` chỉ copy nốt nếu còn UUID / JPEG / slug cũ (lô kho cũ) — không chặn đăng nếu lỗi.
 
@@ -216,7 +216,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | Ảnh dự án còn UUID (không gắn lô) | Tên file = **tên dự án** (`Address.detail`); không đụng `lodats/` hay chat | `APPLY=1 pnpm images:seo-copy-addresses` (VPS: commit `[seo-copy-orphan-addr]`) |
 | Khi Đăng web | **Không** làm SEO ảnh. Chỉ copy nốt UUID / slug cũ nếu còn (an toàn) | `setPublished` — không chặn đăng nếu lỗi |
 | Ảnh bài CMS (`public-web/`) | Bìa + ảnh TipTap: lúc upload convert WebP **và** đặt key `{slug-tieu-de}-anh-n.webp`. Bài cũ UUID: `APPLY=1 pnpm images:seo-copy-posts` (VPS: commit `[seo-copy-posts]`) — copy từng bài (file dùng chung không xóa). Alt guest = `title`. Kho JPEG cũ: `APPLY=1 pnpm images:webp-public-media` (VPS: commit `[seo-webp-posts]`) |
-| OG JPEG cover (Zalo/FB) | Cover WebP → sibling `….og.jpg`; gallery không đổi | `pnpm images:og-jpg` / `APPLY=1 pnpm images:og-jpg` (`SCOPE=published`, `LIMIT=30`) |
+| OG PNG cover (Zalo/FB) | Cover WebP → sibling `….og.png` 1200×630; gallery không đổi. Pilot 3 lô: commit `[og-png-test]`; full: `[og-png]` | `pnpm images:og-jpg` / `APPLY=1 SLUGS=… pnpm images:og-jpg` |
 | Ảnh chat / avatar JPEG migrate | Cùng stem `.webp`, cập nhật mọi `objectKey`, xóa JPEG/PNG khi DB hết ref | `APPLY=1 pnpm images:webp-replace` (VPS: `[seo-webp-replace]`) |
 
 Ảnh đã đúng `{slug}-anh-n` thì script bỏ qua (idempotent). Snapshot giao dịch đổi sang key mới rồi mới xóa nguồn.
@@ -228,7 +228,7 @@ Slice API + route guest: domain doc §16 Phase 5–7.
 | **HTML** | Mọi URL gallery nằm trong HTML lần tải đầu (SSR). Ảnh nằm cạnh H1 + địa chỉ + mô tả | Chỉ đổi `src` bằng JS nên bot chỉ thấy 1 ảnh; CSS `background-image` cho ảnh lô |
 | **Sitemap** | Trong `sitemap.xml`, mỗi URL lô/bài published có `image:image` → `image:loc` tuyệt đối (CDN). Bìa + gallery; bài = bìa + `img` trong body | `/og-default.png`; nháp; `data:` URI |
 | **JSON-LD** | `ImageObject`: `contentUrl`, `caption` (= alt), `description` (= meta/excerpt). Ảnh bìa `representativeOfPage` | Bịa EXIF / license; caption khác nội dung trang |
-| **OG** | `og:image` = **JPEG sibling** của ảnh bìa (`….webp` → `….og.jpg`, sinh lúc upload/retarget + `pnpm images:og-jpg`). Gallery trang khách vẫn WebP. Thiếu bìa → `/og-default.png` (không đưa fallback vào image sitemap). Lý do: Zalo không hiện preview WebP; Facebook chấp nhận cả hai. | `og:image` trỏ WebP; ảnh chat / nội bộ CRM |
+| **OG** | `og:image` = **PNG sibling** của ảnh bìa (`….webp` → `….og.png` 1200×630, sinh lúc upload/retarget + `pnpm images:og-jpg`). Trong lúc pilot Zalo: vài slug dùng PNG, còn lại tạm `….og.jpg`. Gallery trang khách vẫn WebP. Thiếu bìa → `/og-default.png` (không đưa fallback vào image sitemap). | `og:image` trỏ WebP; ảnh chat / nội bộ CRM |
 | **CDN** | `cdn.anhungland.com` phải **crawl được**. Search Console: xác minh cả property ảnh (CDN) nếu khác apex | `robots` / WAF chặn Googlebot ảnh; hotlink protection chặn bot |
 | **Bảo ảnh** | Ưu tiên ngữ cảnh + CDN public. Watermark nhẹ nếu cần sau — không chặn chuột phải / không `noindex` ảnh | Chặn download làm Google không lấy được file |
 
