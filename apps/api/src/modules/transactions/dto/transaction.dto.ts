@@ -168,4 +168,11 @@ export class UpdateTransactionDto {
   @ValidateNested({ each: true })
   @Type(() => TransactionPartyInputDto)
   buyers?: TransactionPartyInputDto[];
+
+  /** OWN + HOAN_TAT + ≥2 buyers: customerId của buyer được chọn làm chủ mới. */
+  @IsOptional()
+  @IsString()
+  @MinLength(1)
+  @MaxLength(60)
+  newOwnerCustomerId?: string;
 }

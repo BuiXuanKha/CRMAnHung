@@ -537,6 +537,8 @@ Bấm → **CrmDialog** form «Đổi chủ đất»:
 
 **Nghiệp vụ:** đóng map active (`isActive=false`, `endedAt=now`) → tạo map mới (cùng lô, khách mới) với giá / ghi chú giá / hoa hồng / trạng thái / ghi chú liên kết **lấy từ form modal**. Field không gửi → copy từ map cũ. Toast «Đã đổi chủ sang …». Card lịch sử hiện map đã kết thúc + map active.
 
+**Từ giao dịch OWN hoàn thành:** API GD tái sử dụng đóng/mở map (status map mới = `KHONG_BAN`, copy giá/ghi chú); không qua modal đổi chủ trên lô. Admin hoàn thành GD không đổi chủ. Chi tiết: `transactions.md` mục 5.
+
 Không đổi `Lodat.createdByEmployeeId` (luồng NV giữ nguyên).
 
 #### 12.4.5 Lịch sử chủ đất
