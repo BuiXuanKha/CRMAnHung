@@ -61,10 +61,10 @@ function cleanParties(rows: TransactionFormValues['sellers']) {
   return rows
     .map((row, i) => ({
       freeTextName: row.freeTextName.trim(),
-      customerId: row.customerId || null,
+      customerId: row.customerId?.trim() || '',
       sortOrder: i,
     }))
-    .filter((row) => row.freeTextName);
+    .filter((row) => row.freeTextName && row.customerId);
 }
 
 function fromDetail(d: TransactionDetail): TransactionFormValues {
@@ -192,6 +192,12 @@ export function TransactionFormPage({ mode }: Props) {
     mutationFn: async () => {
       const sellers = cleanParties(values.sellers);
       const buyers = cleanParties(values.buyers);
+      if (!sellers.length) {
+        throw new Error('Cần ít nhất một người bán đã chọn từ CRM.');
+      }
+      if (!buyers.length) {
+        throw new Error('Cần ít nhất một người mua đã chọn từ CRM.');
+      }
       const notary = dateInputToIso(values.notaryDate);
       if (mode === 'create') {
         if (user?.role === UserRole.ADMIN) {

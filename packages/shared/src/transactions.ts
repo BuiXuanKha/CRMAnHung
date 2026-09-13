@@ -131,7 +131,10 @@ export const transactionDetailSchema = transactionListItemSchema.extend({
 export type TransactionDetail = z.infer<typeof transactionDetailSchema>;
 
 export const transactionPartyInputSchema = z.object({
-  customerId: z.string().nullable().optional(),
+  customerId: z
+    .string({ required_error: 'Người bán và người mua phải là khách trong CRM.' })
+    .trim()
+    .min(1, 'Người bán và người mua phải là khách trong CRM.'),
   freeTextName: z.string().trim().min(1, 'Cần tên bên giao dịch.'),
   sortOrder: z.number().int().nonnegative().optional(),
 });

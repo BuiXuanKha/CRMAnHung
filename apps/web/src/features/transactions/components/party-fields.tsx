@@ -2,13 +2,18 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
 import { X } from 'lucide-react';
-import type { CustomerListItem, TransactionPartyInput } from '@crmanhung/shared';
+import type { CustomerListItem } from '@crmanhung/shared';
 import { listCustomers } from '@/features/customers/api';
 import { initials } from '@/features/customers/display';
 import { CrmBadge } from '@/shared/ui/badge';
 import { Icon } from '@/shared/ui/icon';
 
-type PartyDraft = TransactionPartyInput & { key: string };
+type PartyDraft = {
+  key: string;
+  freeTextName: string;
+  customerId: string | null;
+  sortOrder: number;
+};
 
 type Hit = {
   id: string;

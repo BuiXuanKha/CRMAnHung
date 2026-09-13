@@ -346,10 +346,12 @@ export class TransactionsService {
   }
 
   private async assertPartyCustomers(user: RequestUser, parties: TransactionPartyInputDto[]) {
-    const ids = [
-      ...new Set(parties.map((p) => p.customerId?.trim()).filter((id): id is string => Boolean(id))),
-    ];
-    if (!ids.length) return;
+    for (const p of parties) {
+      if (!p.customerId?.trim()) {
+        throw new BadRequestException('Người bán và người mua phải là khách trong CRM.');
+      }
+    }
+    const ids = [...new Set(parties.map((p) => p.customerId.trim()))];
     const customers = await this.prisma.customer.findMany({
       where: { id: { in: ids } },
       select: { id: true, employeeId: true },
@@ -366,13 +368,13 @@ export class TransactionsService {
     return [
       ...sellers.map((p, i) => ({
         role: TX_PARTY.SELLER,
-        customerId: p.customerId?.trim() || null,
+        customerId: p.customerId.trim(),
         freeTextName: p.freeTextName.trim(),
         sortOrder: p.sortOrder ?? i,
       })),
       ...buyers.map((p, i) => ({
         role: TX_PARTY.BUYER,
-        customerId: p.customerId?.trim() || null,
+        customerId: p.customerId.trim(),
         freeTextName: p.freeTextName.trim(),
         sortOrder: p.sortOrder ?? i,
       })),
