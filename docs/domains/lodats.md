@@ -104,6 +104,8 @@ Admin `/lo-dat`: mỗi NV một dòng LK12 (hai luồng hiện đủ). **Chưa c
 | Ảnh **lô đất thường** (Lodat REGULAR) | NV tạo lô | Upload riêng hoặc gắn path ảnh chat (reuse) |
 | Ảnh **thêm** trên thửa dự án (`LodatImage` theo luồng NV) | NV giữ luồng: tạo/sửa | **Không** ghi sổ địa chỉ / kho `ProjectLot`. Tối đa 5. Ghép sau ảnh dự án trên chi tiết + web khách (giống CRM cũ `tblLodatImages`). NV khác cùng số lô kho không thấy ảnh này. |
 
+**Ảnh bìa (preview list CRM / web khách / Zalo OG):** ảnh NV đang chọn ở **Xem nhanh** khi bấm Lưu. Lưu `Lodat.coverImageId` → `LodatImage` của lô. Gallery vẫn: ảnh dự án trước, rồi ảnh thêm (`sortOrder`). Không chọn / chọn ảnh dự án (không có `LodatImage.id`) / xoá ảnh bìa → `coverImageId = null` → fallback ảnh đầu gallery (ảnh dự án nếu có, không thì ảnh lô đầu). Create: gửi `coverTempImageId` hoặc `coverChatImageId` khớp ảnh đang chọn; Update: `coverImageId` hoặc `coverTempImageId`.
+
 Upload **mới** từ máy:
 
 - **Tạo lô / Sửa lô (ảnh thêm):** chọn/dán ảnh → **nén client ngay** → `POST /lodats/temp-images` (session + `LodatTempImage`, key tạm `lodats/temp/{nvId}/…`). Bấm Lưu → `POST /lodats` hoặc `PATCH /lodats/:id` kèm `tempImageIds` (giữ file, copy sang key SEO, xoá bản ghi temp). Gỡ ảnh chờ trên form / orphan > 24h → xoá R2 + temp. Lưu fail → **giữ temp** để bấm Lưu lại.
@@ -500,6 +502,7 @@ Layout: **2 cột** desktop — trái form (thông số / chủ & giá / lịch 
 │ ┌ areaInfo ─────────────────────┐  ┌ areaSide (sticky top) ─────┐ │
 │ │ Thông số lô                   │  │ Hình ảnh · dán/kéo thả     │ │
 │ │ Chủ đất & giá bán · Đổi chủ   │  │ thumb + × · Xem nhanh N/M  │ │
+│ │                               │  │ chọn thumb = ảnh bìa khi Lưu │ │
 │ │ Lịch sử chủ đất (nếu có)      │  │ [xoay] preview → gallery   │ │
 │ └───────────────────────────────┘  └────────────────────────────┘ │
 │ ┌ areaActions (full width) ─────────────────────────────────────┐ │

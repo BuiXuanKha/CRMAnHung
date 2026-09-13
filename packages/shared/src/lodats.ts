@@ -206,6 +206,11 @@ export const lodatDetailSchema = lodatListItemSchema.extend({
   /** @deprecated dùng `images` — giữ để tương thích tạm */
   imageUrls: z.array(z.string()).default([]),
   images: z.array(lodatImageSchema).default([]),
+  /**
+   * `LodatImage.id` đang làm ảnh bìa (Xem nhanh khi Lưu).
+   * null = fallback ảnh đầu gallery (ảnh dự án nếu có).
+   */
+  coverImageId: z.string().nullable().optional(),
   wardName: z.string().nullable().optional(),
   owner: lodatOwnerSchema.nullable().optional(),
   canEditSpecs: z.boolean().default(false),
@@ -255,6 +260,13 @@ export const updateLodatSchema = z
     status: lodatListingStatusSchema.optional(),
     /** Ảnh đã upload tạm trên form sửa — gắn khi Lưu thành công */
     tempImageIds: z.array(z.string()).max(LODAT_MAX_UPLOAD_IMAGES).optional(),
+    /**
+     * Ảnh bìa = thumb đang chọn ở Xem nhanh.
+     * `coverImageId` = `LodatImage` đã gắn; `coverTempImageId` = temp vừa upload;
+     * `null`/`coverImageId: null` = bỏ chọn → fallback gallery đầu.
+     */
+    coverImageId: z.string().nullable().optional(),
+    coverTempImageId: z.string().optional(),
   })
   .superRefine((v, ctx) => {
     if ((v.tempImageIds?.length ?? 0) > LODAT_MAX_UPLOAD_IMAGES) {
@@ -262,6 +274,20 @@ export const updateLodatSchema = z
         code: z.ZodIssueCode.custom,
         path: ['tempImageIds'],
         message: `Tối đa ${LODAT_MAX_UPLOAD_IMAGES} ảnh tạm.`,
+      });
+    }
+    if (v.coverTempImageId && v.tempImageIds && !v.tempImageIds.includes(v.coverTempImageId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['coverTempImageId'],
+        message: 'Ảnh bìa tạm phải nằm trong tempImageIds.',
+      });
+    }
+    if (v.coverImageId && v.coverTempImageId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['coverImageId'],
+        message: 'Chỉ gửi một trong coverImageId / coverTempImageId.',
       });
     }
   });
@@ -332,6 +358,9 @@ export const createLodatSchema = z
     chatImageIds: z.array(z.string()).max(LODAT_MAX_UPLOAD_IMAGES).optional(),
     /** Ảnh đã upload tạm (`POST /lodats/temp-images`) — gắn khi tạo lô thành công */
     tempImageIds: z.array(z.string()).max(LODAT_MAX_UPLOAD_IMAGES).optional(),
+    /** Ảnh bìa = thumb đang chọn (temp hoặc chat). Thiếu = ảnh đầu sau khi gắn. */
+    coverTempImageId: z.string().optional(),
+    coverChatImageId: z.string().optional(),
   })
   .superRefine((v, ctx) => {
     const hasAddress = Boolean(v.addressId);
@@ -357,6 +386,27 @@ export const createLodatSchema = z
         code: z.ZodIssueCode.custom,
         path: ['tempImageIds'],
         message: `Tối đa ${LODAT_MAX_UPLOAD_IMAGES} ảnh (chat + file).`,
+      });
+    }
+    if (v.coverTempImageId && v.coverChatImageId) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['coverTempImageId'],
+        message: 'Chỉ gửi một trong coverTempImageId / coverChatImageId.',
+      });
+    }
+    if (v.coverTempImageId && !(v.tempImageIds ?? []).includes(v.coverTempImageId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['coverTempImageId'],
+        message: 'Ảnh bìa tạm phải nằm trong tempImageIds.',
+      });
+    }
+    if (v.coverChatImageId && !(v.chatImageIds ?? []).includes(v.coverChatImageId)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        path: ['coverChatImageId'],
+        message: 'Ảnh bìa chat phải nằm trong chatImageIds.',
       });
     }
   });

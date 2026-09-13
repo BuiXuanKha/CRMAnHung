@@ -341,6 +341,18 @@ export function LodatCreatePage() {
     const tempImageIds = fileItems.map((img) => img.tempId!).filter(Boolean);
     if (tempImageIds.length) input.tempImageIds = tempImageIds;
 
+    // Ảnh bìa = thumb đang chọn ở Xem nhanh (bỏ qua nếu chọn ảnh dự án).
+    const selectedPreview = previewImages[selectedIndex];
+    if (selectedPreview && selectedPreview.source !== 'address') {
+      const queueIdx = selectedIndex - projectImageCount;
+      const q = queue[queueIdx];
+      if (q?.kind === 'chat') {
+        input.coverChatImageId = q.id;
+      } else if (q?.kind === 'file' && q.tempId) {
+        input.coverTempImageId = q.tempId;
+      }
+    }
+
     setSaving(true);
     setSaveProgress(tempImageIds.length ? 'Đang tạo lô…' : null);
     try {
@@ -764,43 +776,45 @@ export function LodatCreatePage() {
                             }
                           />
                         </button>
-                        {isProjectImg ? (
+                        {idx === selectedIndex ? (
+                          <span className="ld-edit-thumb-badge">Bìa</span>
+                        ) : isProjectImg ? (
                           <span className="ld-edit-thumb-badge">Dự án</span>
                         ) : (
-                          <>
-                            {(() => {
-                              const q = queue[queueIdx];
-                              if (!q || q.kind !== 'file') return null;
-                              if (q.status === 'uploading') {
-                                return (
-                                  <span className="ld-edit-thumb-badge ld-edit-thumb-badge-muted">
-                                    Đang tải…
-                                  </span>
-                                );
-                              }
-                              if (q.status === 'error') {
-                                return (
-                                  <span
-                                    className="ld-edit-thumb-badge ld-edit-thumb-badge-error"
-                                    title={q.error || 'Lỗi tải ảnh'}
-                                  >
-                                    Lỗi
-                                  </span>
-                                );
-                              }
-                              return null;
-                            })()}
-                            <button
-                              type="button"
-                              className="ld-edit-thumb-del"
-                              aria-label="Bỏ ảnh"
-                              disabled={saving}
-                              onClick={() => removeQueueAt(queueIdx)}
-                            >
-                              <Icon icon={X} size={14} />
-                            </button>
-                          </>
+                          (() => {
+                            const q = queue[queueIdx];
+                            if (!q || q.kind !== 'file') return null;
+                            if (q.status === 'uploading') {
+                              return (
+                                <span className="ld-edit-thumb-badge ld-edit-thumb-badge-muted">
+                                  Đang tải…
+                                </span>
+                              );
+                            }
+                            if (q.status === 'error') {
+                              return (
+                                <span
+                                  className="ld-edit-thumb-badge ld-edit-thumb-badge-error"
+                                  title={q.error || 'Lỗi tải ảnh'}
+                                >
+                                  Lỗi
+                                </span>
+                              );
+                            }
+                            return null;
+                          })()
                         )}
+                        {!isProjectImg ? (
+                          <button
+                            type="button"
+                            className="ld-edit-thumb-del"
+                            aria-label="Bỏ ảnh"
+                            disabled={saving}
+                            onClick={() => removeQueueAt(queueIdx)}
+                          >
+                            <Icon icon={X} size={14} />
+                          </button>
+                        ) : null}
                       </div>
                     );
                   })}

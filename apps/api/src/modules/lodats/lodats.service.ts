@@ -341,6 +341,18 @@ export class LodatsService {
     return merged;
   }
 
+  /**
+   * Object key for list/detail cover: explicit `coverImageId` when it still
+   * belongs to this lodat, else first gallery key (address then lodat).
+   */
+  private resolveCoverObjectKey(row: LodatRow): string | null {
+    if (row.coverImageId) {
+      const hit = row.images.find((i) => i.id === row.coverImageId);
+      if (hit?.objectKey) return hit.objectKey;
+    }
+    return this.coverObjectKeys(row)[0] ?? null;
+  }
+
   private galleryImages(row: LodatRow): GalleryImage[] {
     const addr = this.resolveAddress(row);
     const out: GalleryImage[] = [];
@@ -429,7 +441,7 @@ export class LodatsService {
       commissionPercent: null as number | null,
       kind,
       status,
-      coverImageUrl: this.publicUrl(keys[0] ?? null),
+      coverImageUrl: this.publicUrl(this.resolveCoverObjectKey(row)),
       extraPhotoCount: Math.max(0, keys.length - 1),
       customerHint: activeMap?.customer?.fullName ?? null,
       projectLotId: row.projectLotId ?? null,
@@ -465,6 +477,7 @@ export class LodatsService {
       mapNote: activeMap?.note ?? null,
       images,
       imageUrls: images.map((i) => i.url),
+      coverImageId: row.coverImageId ?? null,
       wardName,
       owner: customer
         ? {
@@ -1142,16 +1155,17 @@ export class LodatsService {
 
   /**
    * Gắn ảnh temp của NV vào lô: copy SEO → LodatImage → xoá temp.
-   * Trả về số ảnh đã gắn.
+   * Trả về map tempImageId → lodatImageId đã tạo.
    */
   private async attachTempImages(
     user: RequestUser,
     lodatId: string,
     tempImageIds: string[],
     opts: { title: string; location: string | null; startSortOrder: number },
-  ): Promise<number> {
+  ): Promise<Map<string, string>> {
     const tempIds = tempImageIds.slice(0, 5);
-    if (!tempIds.length) return 0;
+    const idMap = new Map<string, string>();
+    if (!tempIds.length) return idMap;
     const temps = await this.prisma.lodatTempImage.findMany({
       where: { id: { in: tempIds }, createdByEmployeeId: user.id },
     });
@@ -1169,7 +1183,7 @@ export class LodatsService {
         location: opts.location,
         index: sortOrder + 1,
       });
-      await this.prisma.lodatImage.create({
+      const created = await this.prisma.lodatImage.create({
         data: {
           lodatId,
           objectKey,
@@ -1177,6 +1191,7 @@ export class LodatsService {
           rotationDeg: 0,
         },
       });
+      idMap.set(temp.id, created.id);
       sortOrder += 1;
       await this.prisma.lodatTempImage.delete({ where: { id: temp.id } });
       const refs = await countPublicImageKeyRefs(this.prisma, temp.objectKey);
@@ -1188,7 +1203,7 @@ export class LodatsService {
         }
       }
     }
-    return ordered.length;
+    return idMap;
   }
 
   async uploadTempImage(
@@ -1361,6 +1376,8 @@ export class LodatsService {
 
     // Ảnh chat reuse + ảnh temp — copy sang key SEO của lô.
     // BUG-034: lỗi copy/ghi ảnh → xóa lô vừa tạo (không để mồ côi / retry trùng).
+    const chatIdToImageId = new Map<string, string>();
+    const tempIdToImageId = new Map<string, string>();
     if (chatIds.length || tempIds.length) {
       const copiedKeys: string[] = [];
       const claimedTempIds: string[] = [];
@@ -1398,7 +1415,7 @@ export class LodatsService {
                 index: sortOrder + 1,
               }),
             );
-            await this.prisma.lodatImage.create({
+            const lodatImage = await this.prisma.lodatImage.create({
               data: {
                 lodatId: created.id,
                 objectKey: copiedKeys[copiedKeys.length - 1]!,
@@ -1406,6 +1423,7 @@ export class LodatsService {
                 rotationDeg: ((img.rotationDeg % 360) + 360) % 360,
               },
             });
+            chatIdToImageId.set(img.id, lodatImage.id);
             sortOrder += 1;
           }
         }
@@ -1432,7 +1450,7 @@ export class LodatsService {
                 index: sortOrder + 1,
               }),
             );
-            await this.prisma.lodatImage.create({
+            const lodatImage = await this.prisma.lodatImage.create({
               data: {
                 lodatId: created.id,
                 objectKey: copiedKeys[copiedKeys.length - 1]!,
@@ -1440,6 +1458,7 @@ export class LodatsService {
                 rotationDeg: 0,
               },
             });
+            tempIdToImageId.set(temp.id, lodatImage.id);
             sortOrder += 1;
             claimedTempIds.push(temp.id);
           }
@@ -1455,6 +1474,26 @@ export class LodatsService {
               }
             }
           }
+        }
+
+        // Ảnh bìa từ thumb đang chọn; thiếu → null (fallback gallery đầu).
+        let coverImageId: string | null = null;
+        if (dto.coverChatImageId) {
+          coverImageId = chatIdToImageId.get(dto.coverChatImageId) ?? null;
+          if (!coverImageId) {
+            throw new BadRequestException('Ảnh bìa chat không hợp lệ.');
+          }
+        } else if (dto.coverTempImageId) {
+          coverImageId = tempIdToImageId.get(dto.coverTempImageId) ?? null;
+          if (!coverImageId) {
+            throw new BadRequestException('Ảnh bìa tạm không hợp lệ.');
+          }
+        }
+        if (coverImageId) {
+          await this.prisma.lodat.update({
+            where: { id: created.id },
+            data: { coverImageId },
+          });
         }
       } catch (err) {
         this.logger.warn(
@@ -1472,6 +1511,9 @@ export class LodatsService {
         }
         throw err;
       }
+    } else if (dto.coverChatImageId || dto.coverTempImageId) {
+      await this.prisma.lodat.delete({ where: { id: created.id } }).catch(() => undefined);
+      throw new BadRequestException('Ảnh bìa không hợp lệ.');
     }
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({
@@ -1580,6 +1622,7 @@ export class LodatsService {
     }
 
     const tempIds = (dto.tempImageIds ?? []).slice(0, 5);
+    let tempIdToImageId = new Map<string, string>();
     if (tempIds.length) {
       await this.purgeExpiredTempImages();
       const current = await this.prisma.lodat.findUniqueOrThrow({
@@ -1596,7 +1639,7 @@ export class LodatsService {
         current.projectLot?.title?.trim() ||
         'Lô đất';
       const location = this.formatAddress(this.resolveAddress(current));
-      await this.attachTempImages(user, id, tempIds, {
+      tempIdToImageId = await this.attachTempImages(user, id, tempIds, {
         title,
         location,
         startSortOrder: existingLodatImages,
@@ -1607,6 +1650,36 @@ export class LodatsService {
           data: { updatedAt: new Date() },
         });
       }
+    }
+
+    // Ảnh bìa từ thumb đang chọn (temp mới hoặc LodatImage có sẵn / null = fallback).
+    if (dto.coverTempImageId) {
+      const mappedId = tempIdToImageId.get(dto.coverTempImageId);
+      if (!mappedId) {
+        throw new BadRequestException('Ảnh bìa tạm không hợp lệ.');
+      }
+      await this.prisma.lodat.update({
+        where: { id },
+        data: { coverImageId: mappedId },
+      });
+    } else if (dto.coverImageId === null) {
+      await this.prisma.lodat.update({
+        where: { id },
+        data: { coverImageId: null },
+      });
+    } else if (typeof dto.coverImageId === 'string' && dto.coverImageId.trim()) {
+      const coverId = dto.coverImageId.trim();
+      const belongs = await this.prisma.lodatImage.findFirst({
+        where: { id: coverId, lodatId: id },
+        select: { id: true },
+      });
+      if (!belongs) {
+        throw new BadRequestException('Ảnh bìa không thuộc lô này.');
+      }
+      await this.prisma.lodat.update({
+        where: { id },
+        data: { coverImageId: coverId },
+      });
     }
 
     const refreshed = await this.prisma.lodat.findUniqueOrThrow({

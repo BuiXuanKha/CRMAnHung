@@ -825,6 +825,10 @@ export class PublicContentService {
   }
 
   private coverUrl(lodat: LodatLoaded): string | null {
+    if (lodat.coverImageId) {
+      const hit = lodat.images.find((i) => i.id === lodat.coverImageId);
+      if (hit?.objectKey) return this.storage.publicUrl(hit.objectKey);
+    }
     return this.imageUrls(lodat)[0] ?? null;
   }
 

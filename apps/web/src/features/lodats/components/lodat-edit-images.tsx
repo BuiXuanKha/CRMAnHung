@@ -13,6 +13,8 @@ type PendingMeta = {
 type Props = {
   images: LodatImage[];
   selectedIndex: number;
+  /** Saved cover `LodatImage.id` — badge "Bìa" prefers current selected (will-be-cover). */
+  coverImageId?: string | null;
   canEditImages: boolean;
   isProject: boolean;
   busy: boolean;
@@ -32,6 +34,7 @@ function filterImageFiles(list: FileList | File[] | null | undefined): File[] {
 export function LodatEditImages({
   images,
   selectedIndex,
+  coverImageId = null,
   canEditImages,
   isProject,
   busy,
@@ -217,8 +220,12 @@ export function LodatEditImages({
                   }
                 />
               </button>
-              {img.source === 'address' ? (
+              {idx === selectedIndex ? (
+                <span className="ld-edit-thumb-badge">Bìa</span>
+              ) : img.source === 'address' ? (
                 <span className="ld-edit-thumb-badge">Dự án</span>
+              ) : coverImageId && img.id === coverImageId ? (
+                <span className="ld-edit-thumb-badge">Bìa</span>
               ) : null}
               {img.id && pendingMeta?.[img.id]?.status === 'uploading' ? (
                 <span className="ld-edit-thumb-badge ld-edit-thumb-badge-muted">
@@ -233,7 +240,9 @@ export function LodatEditImages({
                   Lỗi
                 </span>
               ) : null}
-              {img.id && pendingMeta?.[img.id]?.status === 'ready' ? (
+              {img.id &&
+              pendingMeta?.[img.id]?.status === 'ready' &&
+              idx !== selectedIndex ? (
                 <span className="ld-edit-thumb-badge ld-edit-thumb-badge-muted">
                   Chờ lưu
                 </span>

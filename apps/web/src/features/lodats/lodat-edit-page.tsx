@@ -132,13 +132,31 @@ export function LodatEditPage() {
 
   useEffect(() => {
     if (!detail) return;
-    const n = detail.images.length;
-    if (!n) {
+    const imgs = detail.images;
+    if (!imgs.length) {
       setSelectedIndex(0);
       return;
     }
-    setSelectedIndex((cur) => Math.min(cur, n - 1));
-  }, [detail]);
+    const coverIdx = detail.coverImageId
+      ? imgs.findIndex((i) => i.id === detail.coverImageId)
+      : -1;
+    if (coverIdx >= 0) {
+      setSelectedIndex(coverIdx);
+      return;
+    }
+    setSelectedIndex(0);
+  }, [detail?.id, detail?.coverImageId]);
+
+  useEffect(() => {
+    const n = detail?.images.length ?? 0;
+    const pendingN = pendingUploads.length;
+    const total = n + pendingN;
+    if (!total) {
+      setSelectedIndex(0);
+      return;
+    }
+    setSelectedIndex((cur) => Math.min(cur, total - 1));
+  }, [detail?.images.length, pendingUploads.length]);
 
   const isProject = Boolean(detail?.projectLotId);
   const canEditSpecs = detail?.canEditSpecs ?? false;
@@ -307,6 +325,21 @@ export function LodatEditPage() {
     if (readyTempIds.length) {
       input.tempImageIds = readyTempIds;
     }
+
+    // Ảnh bìa = thumb đang chọn ở Xem nhanh.
+    const selectedImg = images[selectedIndex];
+    if (selectedImg?.source === 'address') {
+      input.coverImageId = null;
+    } else if (selectedImg?.id?.startsWith('pending:')) {
+      const localId = selectedImg.id.slice('pending:'.length);
+      const pending = pendingUploads.find((p) => p.localId === localId);
+      if (pending?.tempId && pending.status === 'ready') {
+        input.coverTempImageId = pending.tempId;
+      }
+    } else if (selectedImg?.source === 'lodat' && selectedImg.id) {
+      input.coverImageId = selectedImg.id;
+    }
+
     if (!canEditSpecs && !canEditMap && !readyTempIds.length) {
       setFormError('Bạn không có quyền sửa lô này.');
       return;
@@ -665,6 +698,7 @@ export function LodatEditPage() {
               <LodatEditImages
                 images={images}
                 selectedIndex={selectedIndex}
+                coverImageId={detail.coverImageId ?? null}
                 canEditImages={canEditImages}
                 isProject={isProject}
                 busy={busy}

@@ -278,6 +278,16 @@ export class CreateLodatDto {
   @IsArray()
   @IsString({ each: true })
   tempImageIds?: string[];
+
+  /** Ảnh bìa = temp đang chọn ở Xem nhanh. */
+  @IsOptional()
+  @IsString()
+  coverTempImageId?: string;
+
+  /** Ảnh bìa = ảnh chat đang chọn ở Xem nhanh. */
+  @IsOptional()
+  @IsString()
+  coverChatImageId?: string;
 }
 
 export class UploadLodatTempImageDto {
@@ -373,4 +383,18 @@ export class UpdateLodatDto {
   @IsArray()
   @IsString({ each: true })
   tempImageIds?: string[];
+
+  /**
+   * Ảnh bìa = `LodatImage` đang chọn; `null` = bỏ chọn → fallback gallery đầu.
+   */
+  @IsOptional()
+  @Transform(({ value }) => emptyToNull(value))
+  @ValidateIf((_, v) => v !== null && v !== undefined)
+  @IsString()
+  coverImageId?: string | null;
+
+  /** Ảnh bìa = temp vừa upload trên form sửa. */
+  @IsOptional()
+  @IsString()
+  coverTempImageId?: string;
 }

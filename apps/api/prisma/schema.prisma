@@ -353,6 +353,8 @@ model Lodat {
   projectLotId        String?
   /// Hangtag Nhà/Đất (web mới) — mặc định DAT khi copy
   propertyKind        String   @default("DAT") // NHA | DAT
+  /// Ảnh bìa list/web/OG — `LodatImage` NV chọn ở Xem nhanh khi Lưu. null = ảnh đầu gallery.
+  coverImageId        String?  @unique
   createdByEmployeeId String
   createdAt           DateTime @default(now())
   updatedAt           DateTime @updatedAt
@@ -360,7 +362,8 @@ model Lodat {
   address    Address?           @relation(fields: [addressId], references: [id], onDelete: Restrict)
   projectLot ProjectLot?        @relation(fields: [projectLotId], references: [id], onDelete: Restrict)
   createdBy  User               @relation("LodatCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
-  images         LodatImage[]
+  coverImage     LodatImage?        @relation("LodatCover", fields: [coverImageId], references: [id], onDelete: SetNull)
+  images         LodatImage[]       @relation("LodatImages")
   maps           LodatCustomerMap[]
   transactions   Transaction[]
   publicListing  PublicLotListing?
@@ -505,7 +508,8 @@ model LodatImage {
   rotationDeg Int      @default(0)
   createdAt   DateTime @default(now())
 
-  lodat Lodat @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+  lodat          Lodat                      @relation("LodatImages", fields: [lodatId], references: [id], onDelete: Cascade)
+  coverOf        Lodat?                     @relation("LodatCover")
   snapshotImages TransactionSnapshotImage[]
 
   @@index([lodatId, sortOrder])
