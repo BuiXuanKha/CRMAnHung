@@ -7,15 +7,15 @@ export const PUBLIC_SEO_IMAGE_EXT = '.webp';
 export const PUBLIC_SEO_IMAGE_MIME = 'image/webp';
 
 /**
- * Sibling of a gallery WebP used only for `og:image` / Twitter cards.
- * Zalo failed on WebP; JPEG sibling also failed in owner Zalo tests while
- * same-origin PNG (`/og-default.png`) worked — use PNG 1200×630 for OG.
- * Example: `…-anh-1.webp` → `…-anh-1.og.png` (not part of the gallery).
+ * Sibling of a gallery WebP previously used for `og:image` (PNG/JPEG experiments).
+ * Zalo failed on CDN URLs of any format; same-origin `/og-media/…webp` works.
+ * Prefer proxying the gallery cover WebP — do not generate new OG siblings.
+ * Example (legacy): `…-anh-1.webp` → `…-anh-1.og.png`
  */
 export const PUBLIC_OG_IMAGE_EXT = '.og.png';
 export const PUBLIC_OG_IMAGE_MIME = 'image/png';
 
-/** Legacy JPEG sibling from the first Zalo attempt — kept until full PNG backfill. */
+/** Legacy JPEG sibling from early Zalo attempts — no longer written on upload. */
 export const PUBLIC_OG_LEGACY_JPEG_EXT = '.og.jpg';
 
 /** Public R2 CDN (gallery WebP + OG siblings). */
@@ -24,7 +24,7 @@ export const PUBLIC_CDN_ORIGIN = 'https://cdn.anhungland.com';
 /**
  * Same-origin path prefix that Next proxies to {@link PUBLIC_CDN_ORIGIN}.
  * Zalo scrapes title/description from listing pages but fails on `cdn.*` images;
- * `/og-default.png` on the apex host works — serve `og:image` via this proxy.
+ * `/og-default.png` and `/og-media/…webp` on the apex host work — serve `og:image` here.
  */
 export const PUBLIC_OG_MEDIA_PATH_PREFIX = '/og-media';
 
