@@ -185,6 +185,11 @@ export const updateTransactionSchema = z
     note: z.string().trim().max(4000).nullable().optional(),
     sellers: z.array(transactionPartyInputSchema).min(1).optional(),
     buyers: z.array(transactionPartyInputSchema).min(1).optional(),
+    /**
+     * Khi chuyển OWN → HOAN_TAT và ≥2 người mua: bắt buộc chọn một buyer làm chủ mới.
+     * 1 buyer: có thể bỏ trống (API lấy buyer đó). RECORD / Admin: bỏ qua.
+     */
+    newOwnerCustomerId: z.string().trim().min(1).optional(),
   })
   .superRefine((v, ctx) => {
     if (v.status === TransactionStatus.HUY && !v.cancelReason?.trim()) {

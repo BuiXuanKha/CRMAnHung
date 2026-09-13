@@ -62,7 +62,7 @@ Gợi ý dưới số 2–3: «Chỉ giao dịch của tôi · Hoàn thành». M
 
 1. **Tạo GD từ lô** — nếu lô đã có GD mở (`DA_COC` / `DA_CONG_CHUNG`) → mở sửa GD đó (`OPEN_TRANSACTION_EXISTS`). Không thì tạo mới, status luôn **Đã cọc**; map active → `TAM_DUNG`. Snapshot lô + map đóng băng lúc tạo.
 2. **List `/giao-dich`** — tìm / lọc; STAFF chỉ GD mình; ADMIN tất cả.
-3. **Sửa** — đổi status, giá, thuế, hoa hồng, hẹn CC, bên, ghi chú. Hủy bắt buộc `cancelReason`. Đổi status → đồng bộ map (bảng mục 3).
+3. **Sửa** — đổi status, giá, thuế, hoa hồng, hẹn CC, bên, ghi chú. Hủy bắt buộc `cancelReason`. Đổi status → đồng bộ map (bảng mục 3). Chuyển **Hoàn thành** trên GD **OWN** (NV) → đổi chủ lô theo người mua (mục 5); ≥2 buyers → chọn chủ trong modal trước khi Lưu.
 4. **Xóa cứng** — xóa hàng; nếu GD đang mở thì áp luật map như **Đã hủy** (mục 3).
 5. **Lịch sử trên chi tiết lô** — list GD của lô (lodats.md §12.3.5, đã làm).
 
@@ -92,7 +92,13 @@ Transaction 1 ── n TransactionAttachment (R2 objectKey, kind HOP_DONG|SO_DO|
 
 **Bên (tạo / sửa):** mỗi người bán và người mua **bắt buộc** `customerId` (khách trong CRM) + `freeTextName` (tên lúc lưu, snapshot). Không lưu bên chỉ có tên gõ tay. Xoá khách sau này → DB có thể `customerId` SET NULL, tên còn trên GD cũ; lần sửa GD sau phải chọn lại khách CRM.
 
-**Hoàn thành (`HOAN_TAT`):** chỉ đóng GD + map listing `KHONG_BAN` + `completedAt`. **Chưa** tự đổi chủ lô — đổi chủ vẫn làm tay trên lô.
+**Hoàn thành (`HOAN_TAT`):** đóng GD + `completedAt`. Đồng thời (chỉ **OWN**, NV giữ luồng lô, khi **chuyển sang** `HOAN_TAT`):
+
+- 1 người mua → đổi chủ lô sang đúng khách đó (đóng map active → mở map mới; giá/ghi chú copy từ map cũ; status map mới = `KHONG_BAN`).
+- ≥ 2 người mua → client gửi `newOwnerCustomerId` (một trong buyers); thiếu field → 400.
+- Người mua trùng chủ hiện tại → không tạo map mới; chỉ set listing `KHONG_BAN` trên map đang active.
+- **RECORD** hoặc **Admin** hoàn thành → **không** đổi chủ (chỉ đóng GD + sync listing trên map gắn GD nếu còn active).
+- FK `lodatCustomerMapId` của GD **không** đổi (vẫn trỏ map lúc tạo deal).
 
 **1 GD mở / lô:** unique index SQL `Transaction_lodatId_open_uidx` (`DA_COC` \| `DA_CONG_CHUNG`). Cũ chỉ chặn ở app.
 
@@ -430,7 +436,7 @@ Tạo: chọn lô qua ô tìm (khoá nếu có `?lodatId=`). Gợi ý chỉ **M�
 
 ##### 4. Trạng thái
 
-Chỉ trang sửa. Hủy → hiện ô lý do (bắt buộc).
+Chỉ trang sửa. Hủy → hiện ô lý do (bắt buộc). Chọn **Hoàn thành** rồi Lưu trên GD **OWN** (NV): 1 buyer → confirm đổi chủ; ≥2 buyers → `CrmDialog` chọn một người mua làm chủ mới; gửi `newOwnerCustomerId`. **RECORD** / Admin: Lưu thẳng, không modal đổi chủ.
 
 ##### 5. Hẹn CC
 

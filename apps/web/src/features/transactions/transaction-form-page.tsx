@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter, useSearchParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, UserRoundCheck } from 'lucide-react';
 import {
   OPEN_TRANSACTION_EXISTS_CODE,
   TransactionPartyRole,
@@ -16,7 +16,7 @@ import {
   type UpdateTransactionInput,
 } from '@crmanhung/shared';
 import { ApiError } from '@/shared/api/client';
-import { CrmAlertDialog, CrmToast } from '@/shared/ui/dialog';
+import { CrmAlertDialog, CrmConfirmDialog, CrmDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
 import { getLodat } from '@/features/lodats/api';
 import {
@@ -30,6 +30,7 @@ import {
 import {
   TransactionFormFields,
   defaultFormValues,
+  type TransactionFormParty,
   type TransactionFormValues,
 } from './components/transaction-form';
 import { emptyParty } from './components/party-fields';
@@ -57,7 +58,7 @@ function vndOrEmpty(raw: string): string | undefined {
   return digits ? digits : undefined;
 }
 
-function cleanParties(rows: TransactionFormValues['sellers']) {
+function cleanParties(rows: TransactionFormParty[]) {
   return rows
     .map((row, i) => ({
       freeTextName: row.freeTextName.trim(),
@@ -103,6 +104,10 @@ function fromDetail(d: TransactionDetail): TransactionFormValues {
 
 type Props = { mode: 'create' | 'edit' };
 
+type PendingComplete =
+  | { kind: 'confirm'; ownerCustomerId: string; ownerName: string }
+  | { kind: 'pick'; buyers: { customerId: string; freeTextName: string }[] };
+
 export function TransactionFormPage({ mode }: Props) {
   const params = useParams<{ id?: string }>();
   const search = useSearchParams();
@@ -113,9 +118,11 @@ export function TransactionFormPage({ mode }: Props) {
   const queryLodatId = search.get('lodatId')?.trim() || '';
   const adminBlockedCreate = mode === 'create' && user?.role === UserRole.ADMIN;
 
-  const [values, setValues] = useState<TransactionFormValues>(defaultFormValues);
+  const [values, setValues] = useState<TransactionFormValues>(defaultFormValues());
   const [toast, setToast] = useState<string | null>(null);
   const [alertMsg, setAlertMsg] = useState<string | null>(null);
+  const [pendingComplete, setPendingComplete] = useState<PendingComplete | null>(null);
+  const [pickedOwnerId, setPickedOwnerId] = useState<string>('');
 
   const detailQ = useQuery({
     queryKey: ['transaction', id],
@@ -131,7 +138,6 @@ export function TransactionFormPage({ mode }: Props) {
     queryFn: () => getLodat(pickedLodatId),
     enabled: mode === 'create' && !adminBlockedCreate && Boolean(pickedLodatId),
   });
-
 
   const openQ = useQuery({
     queryKey: ['transaction-open', queryLodatId],
@@ -159,23 +165,23 @@ export function TransactionFormPage({ mode }: Props) {
     lastPrefillLodatRef.current = pickedLodatId;
     const owner = lodatQ.data.owner;
     const name = owner?.fullName.trim() ?? '';
-    const seller = owner && name
-      ? [
-          {
-            key: `owner_${owner.customerId}`,
-            freeTextName: name,
-            customerId: owner.customerId,
-            sortOrder: 0,
-          },
-        ]
-      : [emptyParty(0)];
+    const seller =
+      owner && name
+        ? [
+            {
+              key: `owner_${owner.customerId}`,
+              freeTextName: name,
+              customerId: owner.customerId,
+              sortOrder: 0,
+            },
+          ]
+        : [emptyParty(0)];
     setValues((cur) => ({
       ...cur,
       lodatId: pickedLodatId,
       sellers: seller,
     }));
   }, [mode, pickedLodatId, lodatQ.data]);
-
 
   const lockedTitle = queryLodatId
     ? lodatQ.data?.title || queryLodatId
@@ -189,7 +195,7 @@ export function TransactionFormPage({ mode }: Props) {
         : '/giao-dich';
 
   const saveMut = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (newOwnerCustomerId?: string) => {
       const sellers = cleanParties(values.sellers);
       const buyers = cleanParties(values.buyers);
       if (!sellers.length) {
@@ -211,7 +217,8 @@ export function TransactionFormPage({ mode }: Props) {
           notaryAppointmentAt: notary,
           salePriceVnd: vndOrEmpty(values.salePrice) ?? '0',
           taxPriceVnd: vndOrEmpty(values.taxPrice) ?? null,
-          commissionVnd: values.type === TransactionType.RECORD ? 0 : (vndOrEmpty(values.commission) ?? 0),
+          commissionVnd:
+            values.type === TransactionType.RECORD ? 0 : (vndOrEmpty(values.commission) ?? 0),
           note: values.note.trim() || null,
           sellers,
           buyers,
@@ -224,14 +231,18 @@ export function TransactionFormPage({ mode }: Props) {
         notaryAppointmentAt: notary,
         salePriceVnd: vndOrEmpty(values.salePrice) ?? '0',
         taxPriceVnd: vndOrEmpty(values.taxPrice) ?? null,
-        commissionVnd: values.type === TransactionType.RECORD ? 0 : (vndOrEmpty(values.commission) ?? 0),
+        commissionVnd:
+          values.type === TransactionType.RECORD ? 0 : (vndOrEmpty(values.commission) ?? 0),
         note: values.note.trim() || null,
         sellers,
         buyers,
+        ...(newOwnerCustomerId ? { newOwnerCustomerId } : {}),
       };
       return updateTransaction(id!, body);
     },
     onSuccess: async (saved) => {
+      setPendingComplete(null);
+      setPickedOwnerId('');
       const snap = peekTransactionListState();
       saveTransactionListState(null, {
         searchKeyword: snap?.searchKeyword ?? '',
@@ -256,6 +267,46 @@ export function TransactionFormPage({ mode }: Props) {
     },
   });
 
+  function trySubmit() {
+    if (mode !== 'edit') {
+      saveMut.mutate(undefined);
+      return;
+    }
+    const wasComplete = detailQ.data?.status === TransactionStatus.HOAN_TAT;
+    const completing =
+      values.status === TransactionStatus.HOAN_TAT &&
+      !wasComplete &&
+      values.type === TransactionType.OWN &&
+      user?.role !== UserRole.ADMIN;
+
+    if (!completing) {
+      saveMut.mutate(undefined);
+      return;
+    }
+
+    const buyers = cleanParties(values.buyers);
+    if (!buyers.length) {
+      setAlertMsg('Cần ít nhất một người mua đã chọn từ CRM.');
+      return;
+    }
+    if (buyers.length === 1) {
+      setPendingComplete({
+        kind: 'confirm',
+        ownerCustomerId: buyers[0].customerId,
+        ownerName: buyers[0].freeTextName,
+      });
+      return;
+    }
+    setPickedOwnerId('');
+    setPendingComplete({
+      kind: 'pick',
+      buyers: buyers.map((b) => ({
+        customerId: b.customerId,
+        freeTextName: b.freeTextName,
+      })),
+    });
+  }
+
   const heading =
     mode === 'create' ? 'Tạo giao dịch' : `Sửa ${detailQ.data?.code ?? 'giao dịch'}`;
   const missingOwner =
@@ -276,8 +327,12 @@ export function TransactionFormPage({ mode }: Props) {
       {detailQ.isLoading || (mode === 'create' && queryLodatId && openQ.isLoading) ? (
         <p className="tx-form-state">Đang tải…</p>
       ) : null}
-      {detailQ.error ? <p className="tx-form-state error">{(detailQ.error as Error).message}</p> : null}
-      {lodatQ.error ? <p className="tx-form-state error">{(lodatQ.error as Error).message}</p> : null}
+      {detailQ.error ? (
+        <p className="tx-form-state error">{(detailQ.error as Error).message}</p>
+      ) : null}
+      {lodatQ.error ? (
+        <p className="tx-form-state error">{(lodatQ.error as Error).message}</p>
+      ) : null}
       {adminBlockedCreate && !openQ.data?.id && (openQ.isFetched || !queryLodatId) ? (
         <p className="tx-form-state error">
           Admin không tạo giao dịch. Nhân viên tạo giao dịch từ lô của mình.
@@ -297,7 +352,7 @@ export function TransactionFormPage({ mode }: Props) {
           className="tx-form"
           onSubmit={(e) => {
             e.preventDefault();
-            saveMut.mutate();
+            trySubmit();
           }}
         >
           <TransactionFormFields
@@ -317,12 +372,92 @@ export function TransactionFormPage({ mode }: Props) {
             >
               Huỷ
             </button>
-            <button type="submit" className="tx-form-save" disabled={saveMut.isPending || missingOwner}>
+            <button
+              type="submit"
+              className="tx-form-save"
+              disabled={saveMut.isPending || missingOwner}
+            >
               {saveMut.isPending ? 'Đang lưu…' : 'Lưu'}
             </button>
           </footer>
         </form>
       ) : null}
+
+      <CrmConfirmDialog
+        open={pendingComplete?.kind === 'confirm'}
+        title="Hoàn thành và đổi chủ"
+        icon={UserRoundCheck}
+        message={
+          pendingComplete?.kind === 'confirm'
+            ? `Hoàn thành giao dịch và đổi chủ lô sang ${pendingComplete.ownerName}?`
+            : ''
+        }
+        confirmLabel="Hoàn thành"
+        cancelLabel="Huỷ"
+        busy={saveMut.isPending}
+        onCancel={() => setPendingComplete(null)}
+        onConfirm={() => {
+          if (pendingComplete?.kind !== 'confirm') return;
+          saveMut.mutate(pendingComplete.ownerCustomerId);
+        }}
+      />
+
+      <CrmDialog
+        open={pendingComplete?.kind === 'pick'}
+        title="Chọn chủ mới"
+        icon={UserRoundCheck}
+        busy={saveMut.isPending}
+        onClose={() => {
+          if (saveMut.isPending) return;
+          setPendingComplete(null);
+          setPickedOwnerId('');
+        }}
+      >
+        <p className="crm-dialog-message">
+          Giao dịch có nhiều người mua. Chọn một người làm chủ lô sau khi hoàn thành.
+        </p>
+        <div className="tx-owner-pick-list" role="radiogroup" aria-label="Người mua làm chủ mới">
+          {pendingComplete?.kind === 'pick'
+            ? pendingComplete.buyers.map((b) => (
+                <label key={b.customerId} className="tx-owner-pick-item">
+                  <input
+                    type="radio"
+                    name="new-owner"
+                    value={b.customerId}
+                    checked={pickedOwnerId === b.customerId}
+                    disabled={saveMut.isPending}
+                    onChange={() => setPickedOwnerId(b.customerId)}
+                  />
+                  <span>{b.freeTextName}</span>
+                </label>
+              ))
+            : null}
+        </div>
+        <div className="crm-dialog-actions">
+          <button
+            type="button"
+            className="crm-btn"
+            disabled={saveMut.isPending}
+            onClick={() => {
+              setPendingComplete(null);
+              setPickedOwnerId('');
+            }}
+          >
+            Huỷ
+          </button>
+          <button
+            type="button"
+            className="crm-btn primary"
+            disabled={saveMut.isPending || !pickedOwnerId}
+            onClick={() => {
+              if (!pickedOwnerId) return;
+              saveMut.mutate(pickedOwnerId);
+            }}
+          >
+            {saveMut.isPending ? 'Đang lưu…' : 'Hoàn thành'}
+          </button>
+        </div>
+      </CrmDialog>
 
       <CrmAlertDialog
         open={Boolean(alertMsg)}

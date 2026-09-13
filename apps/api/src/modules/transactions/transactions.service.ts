@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -10,6 +11,7 @@ import type { RequestUser } from '../../common/decorators/current-user.decorator
 import { PrismaService } from '../../prisma/prisma.service';
 import { StorageService } from '../../storage/storage.service';
 import { assertCanAccess as assertCustomerAccess } from '../customers/customers-view';
+import { PublicContentService } from '../public-content/public-content.service';
 import type {
   CreateTransactionDto,
   ListTransactionsQueryDto,
@@ -26,6 +28,7 @@ import {
   keywordWhere,
   LIST_INCLUDE,
   listingStatusForTxStatus,
+  MAP_LISTING_STATUS,
   OPEN_EXISTS_BODY,
   OPEN_STATUSES,
   TX_PARTY,
@@ -37,9 +40,12 @@ import {
 
 @Injectable()
 export class TransactionsService {
+  private readonly logger = new Logger(TransactionsService.name);
+
   constructor(
     private readonly prisma: PrismaService,
     private readonly storage: StorageService,
+    private readonly publicContent: PublicContentService,
   ) {}
 
   async list(user: RequestUser, query: ListTransactionsQueryDto) {
@@ -194,6 +200,18 @@ export class TransactionsService {
           ? (this.parsePrice(dto.commissionVnd) ?? 0n)
           : current.commissionVnd;
 
+    const transitioningToComplete =
+      nextStatus === TX_STATUS.HOAN_TAT && current.status !== TX_STATUS.HOAN_TAT;
+    const shouldTransferOwner =
+      transitioningToComplete &&
+      current.type === TX_TYPE.OWN &&
+      user.role !== 'ADMIN';
+
+    let newOwnerCustomerId: string | null = null;
+    if (shouldTransferOwner) {
+      newOwnerCustomerId = await this.resolveNewOwnerCustomerId(user, current, dto);
+    }
+
     try {
       const updated = await this.prisma.$transaction(async (tx) => {
         if (dto.sellers && dto.buyers) {
@@ -232,11 +250,31 @@ export class TransactionsService {
           },
           include: DETAIL_INCLUDE,
         });
-        if (nextStatus !== current.status) {
+
+        if (shouldTransferOwner && newOwnerCustomerId) {
+          await this.transferLodatOwnerOnComplete(tx, {
+            lodatId: current.lodatId,
+            newCustomerId: newOwnerCustomerId,
+            employeeId: user.id,
+          });
+        } else if (nextStatus !== current.status) {
           await this.syncMapListingStatus(tx, current.lodatCustomerMapId, nextStatus);
         }
         return row;
       });
+
+      if (shouldTransferOwner && newOwnerCustomerId) {
+        try {
+          await this.publicContent.ensureListingForLodat(current.lodatId);
+        } catch (err) {
+          this.logger.warn(
+            `Public listing ensure skipped for lodat ${current.lodatId}: ${
+              err instanceof Error ? err.message : String(err)
+            }`,
+          );
+        }
+      }
+
       return toDetail(updated, this.storage);
     } catch (err) {
       await this.rethrowOpenConflict(err, current.lodatId);
@@ -469,5 +507,121 @@ export class TransactionsService {
       return target.some((x) => String(x).toLowerCase().includes('code'));
     }
     return String(target ?? '').toLowerCase().includes('code');
+  }
+
+  private async resolveNewOwnerCustomerId(
+    user: RequestUser,
+    current: Awaited<ReturnType<TransactionsService['requireDetail']>>,
+    dto: UpdateTransactionDto,
+  ): Promise<string> {
+    const lodat = await this.prisma.lodat.findUnique({
+      where: { id: current.lodatId },
+      select: { id: true, createdByEmployeeId: true },
+    });
+    if (!lodat) throw new NotFoundException('Không tìm thấy lô đất.');
+    if (lodat.createdByEmployeeId !== user.id) {
+      throw new ForbiddenException(
+        'Chỉ nhân viên giữ luồng lô mới được đổi chủ khi hoàn thành giao dịch.',
+      );
+    }
+
+    const buyers: { customerId: string; freeTextName: string }[] = dto.buyers
+      ? dto.buyers.map((b) => ({
+          customerId: b.customerId.trim(),
+          freeTextName: b.freeTextName.trim(),
+        }))
+      : current.parties
+          .filter((p) => p.role === TX_PARTY.BUYER)
+          .map((p) => ({
+            customerId: (p.customerId ?? '').trim(),
+            freeTextName: p.freeTextName,
+          }));
+
+    const buyerIds = [...new Set(buyers.map((b) => b.customerId).filter(Boolean))];
+    if (!buyerIds.length) {
+      throw new BadRequestException(
+        'Giao dịch của tôi cần ít nhất một người mua trong CRM để đổi chủ khi hoàn thành.',
+      );
+    }
+
+    let ownerId = dto.newOwnerCustomerId?.trim() || '';
+    if (!ownerId) {
+      if (buyerIds.length > 1) {
+        throw new BadRequestException(
+          'Có nhiều người mua — chọn một người làm chủ mới trước khi hoàn thành.',
+        );
+      }
+      ownerId = buyerIds[0];
+    }
+    if (!buyerIds.includes(ownerId)) {
+      throw new BadRequestException('Chủ mới phải là một trong những người mua của giao dịch.');
+    }
+
+    const customer = await this.prisma.customer.findUnique({
+      where: { id: ownerId },
+      select: { id: true, employeeId: true, isHidden: true },
+    });
+    if (!customer || customer.isHidden) {
+      throw new BadRequestException('Không tìm thấy khách làm chủ mới.');
+    }
+    assertCustomerAccess(user, customer.employeeId);
+    return customer.id;
+  }
+
+  /**
+   * Đóng map active + mở map mới (KHONG_BAN). Trùng chủ → chỉ set KHONG_BAN.
+   * Gọi sau khi GD đã chuyển HOAN_TAT trong cùng transaction (không bị chặn GD mở).
+   */
+  private async transferLodatOwnerOnComplete(
+    db: Prisma.TransactionClient,
+    params: { lodatId: string; newCustomerId: string; employeeId: string },
+  ) {
+    const { lodatId, newCustomerId, employeeId } = params;
+    const activeMap = await db.lodatCustomerMap.findFirst({
+      where: { lodatId, isActive: true },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    if (activeMap && activeMap.customerId === newCustomerId) {
+      if (activeMap.status !== MAP_LISTING_STATUS.KHONG_BAN) {
+        await db.lodatCustomerMap.update({
+          where: { id: activeMap.id },
+          data: { status: MAP_LISTING_STATUS.KHONG_BAN },
+        });
+      }
+      return;
+    }
+
+    const now = new Date();
+    await db.lodatCustomerMap.updateMany({
+      where: { lodatId, isActive: true },
+      data: { isActive: false, endedAt: now },
+    });
+    try {
+      await db.lodatCustomerMap.create({
+        data: {
+          lodatId,
+          customerId: newCustomerId,
+          priceVnd: activeMap?.priceVnd ?? null,
+          priceNote: activeMap?.priceNote ?? null,
+          brokerFeeNote: activeMap?.brokerFeeNote ?? null,
+          note: activeMap?.note ?? null,
+          status: MAP_LISTING_STATUS.KHONG_BAN,
+          isActive: true,
+          createdByEmployeeId: employeeId,
+        },
+      });
+    } catch (err) {
+      if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
+        throw new ConflictException(
+          'Lô đang có chủ active khác (thao tác trùng). Thử lại.',
+        );
+      }
+      throw err;
+    }
+    await db.lodat.update({
+      where: { id: lodatId },
+      data: { updatedAt: now },
+    });
   }
 }
