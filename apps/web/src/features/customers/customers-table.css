@@ -71,6 +71,7 @@
   flex: 1;
   min-height: 0;
   overflow: auto;
+  overflow-anchor: none;
   /* Không dùng scrollbar-gutter:stable — tránh khe góc header lệch màu */
   overscroll-behavior: contain;
   scrollbar-width: thin;

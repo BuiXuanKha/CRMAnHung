@@ -6,6 +6,7 @@ export {
   needsMoreListScrollHeight,
   resetListScrollIfFiltersChanged,
   restoreListScroll,
+  scrollSnapshotForSave,
   type ListScrollSnapshot,
 } from './scroll';
 

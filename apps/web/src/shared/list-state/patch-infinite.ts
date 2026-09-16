@@ -1,5 +1,5 @@
 import type { InfiniteData, QueryClient } from '@tanstack/react-query';
-import { captureListScroll, restoreListScroll } from './scroll';
+import { captureListScroll, restoreListScroll, type ListScrollSnapshot } from './scroll';
 import type { CrmListPage } from './use-crm-infinite-list';
 
 /**
@@ -27,12 +27,23 @@ export function patchInfiniteListItem<T extends { id: string }>(
   );
 }
 
-/** Capture list scroll, run work (which may re-render the table), then put scroll back. */
+/**
+ * Capture list scroll, run work (which may re-render the table / close a modal),
+ * then put scroll back on the **same** element.
+ *
+ * Pass `snapshot` when scroll was captured *before* a dialog opened — opening
+ * `CrmDialog` used to zero the table `scrollTop`, so capturing at save time
+ * would restore 0.
+ */
 export async function withPreservedListScroll(
   getRoot: () => HTMLElement | null,
   work: () => void | Promise<void>,
+  snapshot?: ListScrollSnapshot | null,
 ): Promise<void> {
-  const snap = captureListScroll(getRoot());
+  const root = getRoot();
+  const snap = snapshot ?? captureListScroll(root);
   await work();
-  restoreListScroll(getRoot(), snap);
+  const el =
+    root && typeof document !== 'undefined' && document.contains(root) ? root : getRoot();
+  restoreListScroll(el, snap);
 }

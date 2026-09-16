@@ -11,6 +11,9 @@ export type ListScrollSnapshot = {
   scrollTop: number;
 };
 
+/** Snapshot currently being restored — persist must not save a layout-reset 0. */
+let restoreTarget: ListScrollSnapshot | null = null;
+
 function isVerticallyScrollable(el: HTMLElement | null): boolean {
   if (!el) return false;
   return el.scrollHeight > el.clientHeight + 2;
@@ -63,6 +66,16 @@ export function captureListScroll(
   return { anchorId, anchorOffset, scrollTop: root.scrollTop };
 }
 
+/** Prefer the in-flight restore target so a layout jump to 0 is not persisted. */
+export function scrollSnapshotForSave(
+  root: HTMLElement | null,
+  rowAttr: string = LIST_ROW_ATTR,
+): ListScrollSnapshot | null {
+  if (restoreTarget) return restoreTarget;
+  if (!root) return null;
+  return captureListScroll(root, rowAttr);
+}
+
 export function maxListScrollTop(root: HTMLElement | null): number {
   if (!root) return 0;
   return Math.max(0, root.scrollHeight - root.clientHeight);
@@ -76,13 +89,30 @@ export function needsMoreListScrollHeight(
   return scrollTop > maxListScrollTop(root) + 2;
 }
 
+/**
+ * Restore exact pixels, then re-apply across layout frames.
+ * Layout / `overflow: hidden` on body often resets descendant `scrollTop` to 0
+ * *after* the first apply — that is not user scroll, so keep putting it back
+ * until the user actually wheels / touches the list.
+ */
 export function restoreListScroll(
   root: HTMLElement | null,
   snapshot: ListScrollSnapshot,
   rowAttr: string = LIST_ROW_ATTR,
-) {
+): void {
   if (!root) return;
-  let lastApplied = -1;
+  restoreTarget = snapshot;
+  let userTouched = false;
+  let frames = 0;
+  const maxFrames = 16;
+
+  const markTouched = () => {
+    userTouched = true;
+  };
+  root.addEventListener('wheel', markTouched, { passive: true });
+  root.addEventListener('touchmove', markTouched, { passive: true });
+  root.addEventListener('pointerdown', markTouched);
+
   const apply = () => {
     // Exact pixels first: the list is normally unchanged, and re-aligning the
     // anchor row to the top would drop the partially scrolled row, which reads
@@ -111,22 +141,31 @@ export function restoreListScroll(
   };
 
   const run = () => {
+    if (userTouched) return;
     apply();
-    lastApplied = root.scrollTop;
   };
 
-  /** Re-apply only while the user has not scrolled yet, so we never fight them. */
-  const runIfUntouched = () => {
-    if (Math.abs(root.scrollTop - lastApplied) > 1) return;
-    run();
+  const cleanup = () => {
+    root.removeEventListener('wheel', markTouched);
+    root.removeEventListener('touchmove', markTouched);
+    root.removeEventListener('pointerdown', markTouched);
+    if (restoreTarget === snapshot) restoreTarget = null;
   };
 
   run();
-  requestAnimationFrame(runIfUntouched);
-  requestAnimationFrame(() => requestAnimationFrame(runIfUntouched));
+  const tick = () => {
+    frames += 1;
+    run();
+    if (!userTouched && frames < maxFrames) {
+      requestAnimationFrame(tick);
+      return;
+    }
+    window.setTimeout(cleanup, 80);
+  };
+  requestAnimationFrame(tick);
   // Swapping the web font re-measures card titles and can change row heights
   // after the list is already visible.
-  document.fonts?.ready.then(runIfUntouched).catch(() => {});
+  document.fonts?.ready.then(run).catch(() => {});
 }
 
 /**

@@ -138,7 +138,7 @@ Các màn list (`/khach-hang`, `/lo-dat`, `/giao-dich`, `/dich-vu-so-do`) dùng 
 - Đăng xuất → xóa mọi key `*-list-state`
 - Feature bọc thin store (`createListStateStore`) — xem skill `crm-list-state`
 - **Cuộn tải thêm:** `useCrmInfiniteList` — mỗi lần 50 dòng, gần đáy 160px thì nối trang (`/khach-hang`, `/lo-dat`)
-- **Sửa một dòng trên list đang mở** (vd. lưu chăm sóc máy tính): `patchInfiniteListItem` + `withPreservedListScroll` — không refetch/`updatedAt` kéo hàng lên đầu
+- **Sửa một dòng trên list đang mở** (vd. lưu chăm sóc): `patchInfiniteListItem` + `withPreservedListScroll` — không refetch/`updatedAt` kéo hàng lên đầu. Máy tính chụp scroll trước khi mở modal; restore không nhầm layout-reset `scrollTop=0` với user cuộn.
 
 Không nhớ panel cột phụ (chỉ list). Chi tiết domain: `customers.md` §12.1.5, `lodats.md` §12.1.5, `title-services.md` §12.1.6.
 

@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getCustomer, stashCareToast, updateCustomerCare } from './api';
+import { patchInfiniteListItem } from '@/shared/list-state';
+import type { CustomerListItem } from '@crmanhung/shared';
+import {
+  customerDetailToListItem,
+  getCustomer,
+  stashCareToast,
+  updateCustomerCare,
+} from './api';
 import { CustomerCareEditForm } from './components/care-edit-form';
 import './components/care-edit-form.css';
 
@@ -81,9 +88,12 @@ export function CustomerCarePage() {
           setError(null);
           try {
             const result = await updateCustomerCare(customer.id, input);
-            await qc.invalidateQueries({ queryKey: ['customers'] });
-            await qc.invalidateQueries({ queryKey: ['customer', customer.id] });
-            stashCareToast(result.unchanged);
+            const { unchanged, ...detail } = result;
+            patchInfiniteListItem<CustomerListItem>(qc, ['customers'], customer.id, () =>
+              customerDetailToListItem(detail),
+            );
+            qc.setQueryData(['customer', customer.id], detail);
+            stashCareToast(unchanged);
             goBack();
           } catch (err) {
             setError(err instanceof Error ? err.message : 'Không lưu được.');

@@ -32,7 +32,7 @@ Nhớ **ô tìm + lọc + selectedId + vị trí cuộn** khi rời list (chi ti
 4. Gắn `scrollRef` + `onScroll` vào vùng cuộn (bảng desktop / thẻ mobile); `onScroll` gọi `loadMoreIfNearEnd(el)`
 5. Che list lúc restore (`is-restoring` opacity 0, timeout ~4s) nếu cần tránh nháy đầu trang
 6. Footer: `Hiển thị n / Tổng N` khi chưa hết; `Tổng N` khi đã tải hết; `— Đang tải thêm…` khi `isFetchingNextPage`
-7. **Sửa một dòng rồi ở lại list** (chăm sóc máy tính, …): `patchInfiniteListItem` + `withPreservedListScroll` — **không** `invalidateQueries` cả list (refetch `orderBy updatedAt` kéo hàng lên đầu)
+7. **Sửa một dòng rồi ở lại list** (chăm sóc máy tính / trang mobile): `patchInfiniteListItem` + `withPreservedListScroll` — **không** `invalidateQueries` cả list (refetch `orderBy updatedAt` kéo hàng lên đầu). Máy tính: chụp scroll **trước khi** mở modal; restore không coi layout-reset `scrollTop=0` là user đã cuộn.
 
 ## Docs
 

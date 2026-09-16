@@ -14,6 +14,7 @@ import {
   type CreateCustomerInput,
   type CreateEmployeeHotlineInput,
   type CustomerDetail,
+  type CustomerListItem,
   type CustomerListQuery,
   type CustomerListResponse,
   type CustomerLodatListResponse,
@@ -174,6 +175,13 @@ export async function updateHotline(
 
 export async function listContactChannels(): Promise<ContactChannelList> {
   return apiFetch<ContactChannelList>('/customers/contact-channels');
+}
+
+export function customerDetailToListItem(
+  detail: CustomerDetail & { unchanged?: boolean },
+): CustomerListItem {
+  const { careNotes: _careNotes, unchanged: _unchanged, ...item } = detail;
+  return item;
 }
 
 export async function updateCustomerCare(

@@ -11,18 +11,18 @@ import {
   TaskTargetType,
   UserRole,
   type CreateCustomerInput,
-  type CustomerDetail,
   type CustomerListItem,
   type PhoneDuplicateExisting,
   type UpdateCustomerCareInput,
 } from '@crmanhung/shared';
-import { resetListScrollIfFiltersChanged, patchInfiniteListItem, useCrmInfiniteList, withPreservedListScroll } from '@/shared/list-state';
+import { resetListScrollIfFiltersChanged, captureListScroll, patchInfiniteListItem, useCrmInfiniteList, withPreservedListScroll, type ListScrollSnapshot } from '@/shared/list-state';
 import { CrmAlertDialog, CrmConfirmDialog, CrmToast } from '@/shared/ui/dialog';
 import { useAuth } from '@/features/auth/auth-context';
 import { useCreateTaskModal } from '@/features/tasks/use-create-task-modal';
 import { HotlinesSettingsDialog } from '@/features/settings/hotlines-dialog';
 import {
   consumeCareToast,
+  customerDetailToListItem,
   acknowledgePhoneDuplicate,
   addCustomerPhone,
   createCustomer,
@@ -103,13 +103,6 @@ type AlertState = {
   confirmLabel?: string;
 } | null;
 
-function customerDetailToListItem(
-  detail: CustomerDetail & { unchanged?: boolean },
-): CustomerListItem {
-  const { careNotes: _careNotes, unchanged: _unchanged, ...item } = detail;
-  return item;
-}
-
 export function CustomerListPage() {
   const router = useRouter();
   const qc = useQueryClient();
@@ -152,6 +145,10 @@ export function CustomerListPage() {
   const restoredFiltersKey = useRef<string | null>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const cardsScrollRef = useRef<HTMLDivElement>(null);
+  const careListScroll = useRef<{
+    root: HTMLElement | null;
+    snap: ListScrollSnapshot;
+  } | null>(null);
   const persistRef = useRef({
     searchKeyword: keyword,
     statusFilter: status,
@@ -418,6 +415,21 @@ export function CustomerListPage() {
     }
   }
 
+  function snapshotCareListScroll() {
+    const root = getListScrollEl();
+    const snap = captureListScroll(root);
+    careListScroll.current = { root, snap };
+    return snap;
+  }
+
+  function restoreCareListScroll() {
+    const saved = careListScroll.current;
+    if (!saved) return;
+    const root =
+      saved.root && document.contains(saved.root) ? saved.root : getListScrollEl();
+    restoreListScroll(root, saved.snap);
+  }
+
   function openCareEdit(customer: CustomerListItem) {
     if (customer.isHidden) return;
     if (isMobileList()) {
@@ -425,8 +437,19 @@ export function CustomerListPage() {
       router.push(`/khach-hang/${customer.id}/cham-soc`);
       return;
     }
+    snapshotCareListScroll();
+    persistListState(customer.id);
     setCareError(null);
     setCareEdit({ customer });
+  }
+
+  function closeCareEdit() {
+    if (careBusy) return;
+    flushSync(() => {
+      setCareEdit(null);
+      setCareError(null);
+    });
+    restoreCareListScroll();
   }
 
   function openManagePhones(customer: CustomerListItem) {
@@ -561,25 +584,31 @@ export function CustomerListPage() {
     setCareBusy(true);
     setCareError(null);
     const customerId = careEdit.customer.id;
+    const saved = careListScroll.current;
     try {
-      await withPreservedListScroll(getListScrollEl, async () => {
-        const result = await updateCustomerCare(customerId, input);
-        const { unchanged, ...detail } = result;
-        flushSync(() => {
-          patchInfiniteListItem<CustomerListItem>(qc, ['customers'], customerId, () =>
-            customerDetailToListItem(detail),
+      await withPreservedListScroll(
+        () =>
+          saved?.root && document.contains(saved.root) ? saved.root : getListScrollEl(),
+        async () => {
+          const result = await updateCustomerCare(customerId, input);
+          const { unchanged, ...detail } = result;
+          flushSync(() => {
+            patchInfiniteListItem<CustomerListItem>(qc, ['customers'], customerId, () =>
+              customerDetailToListItem(detail),
+            );
+            qc.setQueryData(['customer', customerId], detail);
+            setSelectedId(customerId);
+            setRail('care');
+            setCareEdit(null);
+          });
+          flash(
+            unchanged
+              ? 'Không có thay đổi. Bỏ qua cập nhật.'
+              : 'Đã lưu cập nhật chăm sóc.',
           );
-          qc.setQueryData(['customer', customerId], detail);
-          setSelectedId(customerId);
-          setRail('care');
-          setCareEdit(null);
-        });
-        flash(
-          unchanged
-            ? 'Không có thay đổi. Bỏ qua cập nhật.'
-            : 'Đã lưu cập nhật chăm sóc.',
-        );
-      });
+        },
+        saved?.snap,
+      );
       persistListState(customerId);
     } catch (err) {
       setCareError(err instanceof Error ? err.message : 'Không lưu được.');
@@ -905,12 +934,7 @@ export function CustomerListPage() {
         customer={careEdit?.customer ?? null}
         busy={careBusy}
         error={careError}
-        onClose={() => {
-          if (!careBusy) {
-            setCareEdit(null);
-            setCareError(null);
-          }
-        }}
+        onClose={closeCareEdit}
         onSubmit={submitCare}
       />
 

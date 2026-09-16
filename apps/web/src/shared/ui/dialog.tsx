@@ -43,10 +43,32 @@ export function CrmDialog({
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const opener = document.activeElement;
     return () => {
-      document.body.style.overflow = prev;
+      if (
+        opener instanceof HTMLElement &&
+        opener !== document.body &&
+        opener !== document.documentElement &&
+        document.contains(opener)
+      ) {
+        opener.focus({ preventScroll: true });
+      }
+    };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    const body = document.body;
+    const html = document.documentElement;
+    const bodyScrolls = body.scrollHeight > body.clientHeight + 1;
+    const htmlScrolls = html.scrollHeight > html.clientHeight + 1;
+    // CRM shell already uses overflow:hidden. Locking body here reflows and
+    // resets descendant list scroll (table/cards) to 0 — skip when unused.
+    if (!bodyScrolls && !htmlScrolls) return undefined;
+    const prev = body.style.overflow;
+    body.style.overflow = 'hidden';
+    return () => {
+      body.style.overflow = prev;
     };
   }, [open]);
 
