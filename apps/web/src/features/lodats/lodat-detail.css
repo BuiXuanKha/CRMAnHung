@@ -356,6 +356,33 @@
   border: 1px solid #e2e8f0;
 }
 
+.ld-detail-video-cta {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .ld-detail-video-cta {
+    display: block;
+    margin: 12px 0;
+  }
+
+  .ld-detail-video-cta-btn {
+    width: 100%;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    border-radius: 10px;
+    border: 1px solid #c7d2fe;
+    background: linear-gradient(180deg, #eef2ff 0%, #e0e7ff 100%);
+    color: #3730a3;
+    font-weight: 700;
+    font-size: 0.95rem;
+    cursor: pointer;
+  }
+}
+
 .ld-detail-mobile-footer {
   position: fixed;
   left: 0;

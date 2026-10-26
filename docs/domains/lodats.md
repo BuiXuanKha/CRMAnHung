@@ -431,8 +431,10 @@ Xếp dọc: content → **Lịch sử giao dịch** (nếu có) → **Lô đấ
 
 | Nút | Điều kiện | Hành vi |
 |-----|-----------|---------|
-| «⋯» Thêm thao tác | Luôn hiện | Popover: **Giao dịch** · **Sửa lô đất** · **AI GPT** |
+| **Tạo video** (khối CTA trong content) | Mobile; **STAFF** | Full-width, sau specs/chủ, trước lịch sử GD → `/lo-dat/[id]/video` — [`video-studio.md`](./video-studio.md) §5 |
+| «⋯» Thêm thao tác | Luôn hiện | Popover: **Giao dịch** · **Sửa lô đất** · **Soạn bài đăng** · **AI GPT** · **Tạo video** (cùng route studio) |
 | AI GPT (trong «⋯») | Luôn trong menu | Cùng list §12.1.5c: `LotGptContentDialog` → **Dùng cho bài đăng** → `LotListingEditorDialog`. STAFF only; ADMIN → CrmAlert |
+| Tạo video (trong «⋯» hoặc CTA) | STAFF | **AI Video Studio** — mobile slice 1; ADMIN → CrmAlert |
 | Gọi điện | Chủ có ≥1 SĐT | **1 số** → `tel:` thẳng; **≥2 số** → modal chọn số |
 | Zalo | Chủ có ≥1 SĐT | Tab `zalo.me/84…` (cùng trang public) |
 | Mở Messenger | Chủ có Facebook và **chưa** ẩn | Cùng menu list khách mobile (`messenger.com` / CrmAlert) |

@@ -10,6 +10,7 @@ import {
   Pencil,
   Phone,
   Sparkles,
+  Clapperboard,
 } from 'lucide-react';
 import type { LodatOwner } from '@crmanhung/shared';
 import { Icon } from '@/shared/ui/icon';
@@ -32,6 +33,7 @@ type Props = {
   onEdit: () => void;
   onComposeListing: () => void;
   onGptContent: () => void;
+  onCreateVideo: () => void;
 };
 
 /**
@@ -45,6 +47,7 @@ export function LodatOwnerFab({
   onEdit,
   onComposeListing,
   onGptContent,
+  onCreateVideo,
 }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [alertBox, setAlertBox] = useState<{ title: string; message: string } | null>(null);
@@ -125,6 +128,15 @@ export function LodatOwnerFab({
               >
                 <Icon icon={Sparkles} size={16} />
                 AI GPT
+              </button>
+              <button
+                type="button"
+                role="menuitem"
+                className="ld-owner-fab-menu-item"
+                onClick={() => { setMenuOpen(false); onCreateVideo(); }}
+              >
+                <Icon icon={Clapperboard} size={16} />
+                Tạo video
               </button>
             </div>
           ) : null}

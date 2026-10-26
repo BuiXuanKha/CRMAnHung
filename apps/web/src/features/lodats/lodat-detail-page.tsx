@@ -4,7 +4,16 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, ChevronRight, CircleAlert, Copy, Phone, Share2, SquarePen } from 'lucide-react';
+import {
+  ChevronLeft,
+  ChevronRight,
+  CircleAlert,
+  Clapperboard,
+  Copy,
+  Phone,
+  Share2,
+  SquarePen,
+} from 'lucide-react';
 import {
   LodatSaleStatus,
   UserRole,
@@ -283,6 +292,19 @@ export function LodatDetailPage() {
       return;
     }
     router.push(createTransactionHref(detail.id));
+  }
+
+  function goCreateVideo() {
+    if (!detail) return;
+    if (user?.role === UserRole.ADMIN) {
+      showAlert(
+        'AI Video Studio chỉ dành cho tài khoản nhân viên (STAFF).',
+        'Chỉ nhân viên',
+      );
+      return;
+    }
+    persistDetailScroll();
+    router.push(`/lo-dat/${detail.id}/video`);
   }
 
   async function handleCopy() {
@@ -566,6 +588,19 @@ export function LodatDetailPage() {
               </section>
             ) : null}
 
+            {!isAdmin ? (
+              <div className="ld-detail-video-cta">
+                <button
+                  type="button"
+                  className="ld-detail-video-cta-btn"
+                  onClick={goCreateVideo}
+                >
+                  <Clapperboard size={18} aria-hidden />
+                  Tạo video
+                </button>
+              </div>
+            ) : null}
+
             <LodatOwnerHistory detail={detail} />
 
             <LodatTransactionHistory items={detail.transactionHistory} />
@@ -640,6 +675,7 @@ export function LodatDetailPage() {
           onEdit={() => router.push(`/lo-dat/${detail.id}/sua`)}
           onComposeListing={openComposeListing}
           onGptContent={openGptContent}
+          onCreateVideo={goCreateVideo}
         />
       ) : null}
 
