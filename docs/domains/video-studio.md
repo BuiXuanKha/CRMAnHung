@@ -1,7 +1,7 @@
 # Domain: AI Video Studio (AnHungLand)
 
 - **Slug:** `video-studio`
-- **Status:** **Ready for mock** — mobile UI + entry từ chi tiết lô; API/render **chưa** slice
+- **Status:** **Ready for mock** — mobile UI slice 1 (hub/cảnh/preview/export mock) + entry chi tiết lô; API/render **chưa**
 - **Liên quan:** [`lodats.md`](./lodats.md) §12.3 (chi tiết lô) · [`public-content.md`](./public-content.md) (marketing)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 (mobile trước)
 - **Route dự kiến:** `/lo-dat/[lodatId]/video` (+ nested steps, xem §12)
@@ -46,6 +46,8 @@ Nhân viên tạo **video BĐS dọc 9:16 (MP4)** từ video thô theo **cảnh*
 Cập nhật [`lodats.md`](./lodats.md) §12.3.2 — bổ sung **Tạo video** (slice Video Studio).
 
 ### 5.1 Mobile (ưu tiên slice 1)
+
+**Owner chốt 2026-10-26:** CTA **nổi trong content** + mục **Tạo video** trong FAB «⋯» (cùng route).
 
 1. **Khối CTA trong content** (sau khối thông số/chủ, **trước** Lịch sử giao dịch):
    - Nút full-width secondary: icon **Clapperboard** (Lucide) + chữ **Tạo video**.
