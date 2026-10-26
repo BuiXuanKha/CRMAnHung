@@ -4,9 +4,9 @@
 
 | Hạng mục | Giá trị |
 |----------|---------|
-| Domain production (cũ) | `https://crm.anhungland.com` — **đã chuyển** VPS `103.15.51.19` |
-| Server (cũ + mới) | `103.15.51.19` (secret `DEPLOY_SSH_HOST`) |
-| SSH | `deploy@103.15.51.19` |
+| Domain production (cũ) | `https://crm.anhungland.com` — **đã chuyển** VPS MatBao |
+| Server | `103.110.129.137` (secret `DEPLOY_SSH_HOST`; IP cũ `103.15.51.19`) |
+| SSH | `deploy@103.110.129.137` |
 | App root (cũ) | `/var/www/anhungland-crm/` |
 | API (PM2) | `anhungland-api` · port **5000** |
 | Web (nginx `root`) | `/var/www/anhungland-crm/web/` |
@@ -71,9 +71,9 @@ Thêm / kiểm tra bản ghi:
 
 | Host | Type | Value | Ghi chú |
 |------|------|-------|---------|
-| `@` | A | `103.15.51.19` | `anhungland.com` → VPS mới |
-| `www` | CNAME hoặc A | `@` hoặc `103.15.51.19` | tuỳ chọn |
-| `crm` | A | `103.15.51.19` | CRM cũ đã chuyển cùng VPS |
+| `@` | A | `103.110.129.137` | `anhungland.com` → VPS |
+| `www` | CNAME hoặc A | `@` hoặc `103.110.129.137` | tuỳ chọn |
+| `crm` | A | `103.110.129.137` | CRM cũ cùng VPS |
 | `cdn` | (R2 Custom Domain) | do Cloudflare R2 quản | ảnh public |
 
 Proxy (đám mây cam) OK cho `@` / `www` / `crm`. SSL Cloudflare: **Full**.

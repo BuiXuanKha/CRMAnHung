@@ -10,7 +10,7 @@ cdn.anhungland.com  → R2 (đã xong)
 
 | Hạng mục | Giá trị |
 |----------|---------|
-| VPS (cũ + mới) | `103.15.51.19` |
+| VPS (MatBao) | `103.110.129.137` (IP cũ `103.15.51.19`, đổi ~10/2026) |
 | SSH deploy | user `deploy` (key-based; không commit mật khẩu) |
 | App root mới | `/var/www/crmanhung/` |
 | App root cũ | `/var/www/anhungland-crm/` |
@@ -24,10 +24,10 @@ cdn.anhungland.com  → R2 (đã xong)
 
 | Type | Name | Content | Proxy |
 |------|------|---------|-------|
-| **A** | `@` | `103.15.51.19` | Proxied (cam) |
-| **A** | `www` | `103.15.51.19` | Proxied (cam) |
+| **A** | `@` | `103.110.129.137` | Proxied (cam) |
+| **A** | `www` | `103.110.129.137` | Proxied (cam) |
 
-3. Bản ghi **`crm`** → `103.15.51.19` (CRM cũ đã ở server này).
+3. Bản ghi **`crm`** → `103.110.129.137` (CRM cũ cùng VPS).
 4. **`cdn`** — không sửa (R2).
 5. SSL/TLS: **Full** (sau khi ổn có thể gắn Origin Certificate).
 
@@ -44,7 +44,7 @@ Repo CRMAnHung → Settings → **Secrets and variables** → **Actions** (khôn
 
 | Secret | Giá trị |
 |--------|---------|
-| `DEPLOY_SSH_HOST` | `103.15.51.19` |
+| `DEPLOY_SSH_HOST` | `103.110.129.137` |
 | `DEPLOY_SSH_KEY` | Private key user `deploy` |
 
 Đã gắn. Deploy: skill **`deploy-staging`** — gộp `main`, Actions tự chạy.
