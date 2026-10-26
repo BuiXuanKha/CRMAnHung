@@ -85,7 +85,7 @@ Repo → Settings → Secrets and variables → Actions:
 
 | Secret | Ý nghĩa |
 |--------|---------|
-| `DEPLOY_SSH_HOST` | VPS `103.15.51.19` |
+| `DEPLOY_SSH_HOST` | VPS `103.110.129.137` |
 | `DEPLOY_SSH_KEY` | Private key user `deploy` |
 
 Không dán private key / mật khẩu root vào chat. Không commit `.env`.
