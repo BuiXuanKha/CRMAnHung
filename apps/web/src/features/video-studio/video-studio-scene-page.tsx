@@ -22,7 +22,8 @@ export function VideoStudioScenePage() {
   const { id: lodatId, sceneId } = params;
   const router = useRouter();
   const qc = useQueryClient();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [narrationLocal, setNarrationLocal] = useState<string | null>(null);
 
@@ -118,8 +119,20 @@ export function VideoStudioScenePage() {
 
       <section className="vs-panel">
         <span className="vs-label">Video thô</span>
+        {/* Không dùng capture trên input chính — mobile mới mở Thư viện / file đã quay */}
         <input
-          ref={fileRef}
+          ref={galleryRef}
+          type="file"
+          accept="video/*"
+          hidden
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) uploadMut.mutate(file);
+            e.target.value = '';
+          }}
+        />
+        <input
+          ref={cameraRef}
           type="file"
           accept="video/*"
           capture="environment"
@@ -138,21 +151,43 @@ export function VideoStudioScenePage() {
               className="vs-btn-secondary"
               style={{ width: '100%', marginTop: 8 }}
               disabled={busy}
-              onClick={() => fileRef.current?.click()}
+              onClick={() => galleryRef.current?.click()}
             >
-              Thay video
+              Chọn video khác (thư viện)
+            </button>
+            <button
+              type="button"
+              className="vs-btn-secondary"
+              style={{ width: '100%', marginTop: 8 }}
+              disabled={busy}
+              onClick={() => cameraRef.current?.click()}
+            >
+              Quay video mới
             </button>
           </>
         ) : (
-          <button
-            type="button"
-            className="vs-upload-zone"
-            disabled={busy}
-            onClick={() => fileRef.current?.click()}
-          >
-            <strong>Chọn video</strong>
-            <span className="vs-hint">Tối đa 80MB · 9:16 khuyến nghị</span>
-          </button>
+          <>
+            <button
+              type="button"
+              className="vs-upload-zone"
+              disabled={busy}
+              onClick={() => galleryRef.current?.click()}
+            >
+              <strong>Chọn video đã quay</strong>
+              <span className="vs-hint">
+                Thư viện ảnh / file · tối đa 80MB · 9:16 khuyến nghị
+              </span>
+            </button>
+            <button
+              type="button"
+              className="vs-btn-secondary"
+              style={{ width: '100%', marginTop: 8 }}
+              disabled={busy}
+              onClick={() => cameraRef.current?.click()}
+            >
+              Quay video mới
+            </button>
+          </>
         )}
       </section>
 
