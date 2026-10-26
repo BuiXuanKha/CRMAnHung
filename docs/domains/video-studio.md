@@ -140,13 +140,18 @@ Safe area đáy; header CRM shell (menu trái). Không full-bleed che header.
 
 ---
 
-## 13. API dự kiến (slice sau — không mock)
+## 13. Secrets (server)
+
+- `ELEVENLABS_API_KEY` — `apps/api/.env` (gitignored); mẫu `apps/api/.env.example`. **Không** ghi key vào docs/git.
+- Production VPS: thêm cùng biến vào env deploy CRMAnHung (skill `deploy-staging` / `DEPLOYMENT.md`), không commit.
+
+## 14. API dự kiến (slice sau — không mock)
 
 Prefix `/api/v1/video-projects` · ownership `lodatId` + JWT STAFF. Contract Zod trong `packages/shared` trước khi nối.
 
 ---
 
-## 14. Lịch slice
+## 15. Lịch slice
 
 | # | Việc | Trạng thái |
 |---|------|------------|
@@ -156,7 +161,7 @@ Prefix `/api/v1/video-projects` · ownership `lodatId` + JWT STAFF. Contract Zod
 
 ---
 
-## 15. Câu hỏi mở (không chặn mock UI)
+## 16. Câu hỏi mở (không chặn mock UI)
 
 1. Một lô nhiều dự án video hay chỉ **1 dự án active**?
 2. Giọng ElevenLabs: một preset công ty hay NV chọn?
