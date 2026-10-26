@@ -16,6 +16,7 @@ import { TitleServicesModule } from './modules/title-services/title-services.mod
 import { PublicContentModule } from './modules/public-content/public-content.module';
 import { LotSharesModule } from './modules/lot-shares/lot-shares.module';
 import { TasksModule } from './modules/tasks/tasks.module';
+import { VideoStudioModule } from './modules/video-studio/video-studio.module';
 import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
 
 @Module({
@@ -43,6 +44,7 @@ import { JwtAuthGuard } from './common/guards/jwt-auth.guard';
     PublicContentModule,
     LotSharesModule,
     TasksModule,
+    VideoStudioModule,
   ],
   providers: [
     { provide: APP_GUARD, useClass: ThrottlerGuard },

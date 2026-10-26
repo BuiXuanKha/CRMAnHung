@@ -47,6 +47,7 @@ model User {
   publicLotShares           PublicLotShare[]
   publicShareViewStat       PublicShareViewStat?
   workTasks             WorkTask[]
+  videoProjects         VideoProject[]       @relation("VideoProjectCreator")
 }
 
 model RefreshToken {
@@ -368,6 +369,7 @@ model Lodat {
   transactions   Transaction[]
   publicListing  PublicLotListing?
   workTasks      WorkTask[]
+  videoProjects  VideoProject[]
 
   @@index([addressId])
   @@index([projectLotId])
@@ -801,4 +803,41 @@ model ImageRotation {
   objectKey  String   @unique
   degrees   Int      @default(0)
   updatedAt DateTime @updatedAt
+}
+
+/// AI Video Studio — dự án video gắn một lô (NV owner lô).
+model VideoProject {
+  id                  String   @id @default(cuid())
+  lodatId             String
+  createdByEmployeeId String
+  status              String   @default("DRAFT") // DRAFT | PROCESSING | COMPLETED | FAILED
+  exportObjectKey     String?
+  exportError         String?
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  lodat     Lodat         @relation(fields: [lodatId], references: [id], onDelete: Cascade)
+  createdBy User          @relation("VideoProjectCreator", fields: [createdByEmployeeId], references: [id], onDelete: Restrict)
+  scenes    VideoScene[]
+
+  @@index([lodatId, createdByEmployeeId])
+  @@index([lodatId, updatedAt])
+}
+
+model VideoScene {
+  id                String   @id @default(cuid())
+  projectId         String
+  kind              String
+  customLabel       String?
+  sortOrder         Int
+  status            String   @default("draft") // draft | approved
+  rawVideoObjectKey String?
+  narrationText     String   @default("")
+  aiNotes           String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  project VideoProject @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, sortOrder])
 }
