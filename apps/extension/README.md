@@ -4,16 +4,28 @@ Chrome MV3 — quét khách + tin từ Meta Inbox / Messenger, gửi vào **CRM 
 
 Đây là scanner đang dùng (cùng file với thư mục `AnhunglandExtension` trên máy), đặt trong repo CRMAnHung.
 
-**Không** Load unpacked thư mục Downloads zip nữa. Dùng thư mục này.
+**Không** dùng zip extension cũ trong Downloads / `AnhunglandExtension` trên máy.
+
+## Tải bản zip (NV / cài lại)
+
+Trên GitHub (nhánh `main`), tải file:
+
+| File | Link |
+|------|------|
+| **Mới nhất** | [`release/an-hung-land-crm-extension-latest.zip`](release/an-hung-land-crm-extension-latest.zip) |
+| Theo version | [`release/an-hung-land-crm-extension-2.15.0.zip`](release/an-hung-land-crm-extension-2.15.0.zip) (đổi số khi bump `manifest.json`) |
+
+URL đầy đủ (thay `main` nếu cần):  
+`https://github.com/BuiXuanKha/CRMAnHung/raw/main/apps/extension/release/an-hung-land-crm-extension-latest.zip`
+
+Giải nén → **Load unpacked** thư mục đã giải nén (có `manifest.json`).
+
+Dev trong repo: `pnpm extension:zip` tạo lại file trong `apps/extension/release/`.
 
 ## Cài đặt
 
-1. Gỡ bản cũ **Anhungland Extension** trên `chrome://extensions` (nếu còn).
-2. Bật Developer mode → **Load unpacked** → chọn thư mục có `manifest.json`:
-
-   `crmanhung/apps/extension`
-
-   Hoặc giải nén zip bản phát hành rồi chọn thư mục đó.
+1. Gỡ bản cũ **Anhungland Extension** / extension UID Facebook khác trên `chrome://extensions` (nếu còn).
+2. Bật Developer mode → **Load unpacked** → chọn thư mục có `manifest.json` (repo: `apps/extension`, hoặc thư mục sau khi giải nén zip ở trên).
 
 3. Icon extension / Options: API URL mặc định `https://anhungland.com/api/v1`. Dev: `http://localhost:5050/api/v1`.
 4. Mở Business Suite Inbox hoặc Messenger → panel: đăng nhập `kha` / Admin → **Bật quét** → đổi hội thoại để gửi (hoặc **Dừng** để gửi khách đang mở).
