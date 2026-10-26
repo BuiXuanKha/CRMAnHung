@@ -66,7 +66,6 @@ export class VideoStudioNarrationService {
             { role: 'system', content: SYSTEM },
             { role: 'user', content: JSON.stringify(userPayload, null, 2) },
           ],
-          temperature: 0.7,
         }),
       });
     } catch {
