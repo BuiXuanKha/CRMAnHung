@@ -14,6 +14,7 @@
 | Công việc (nhắc việc) | [tasks.md](./tasks.md) | Ready for API — bảng `/cong-viec` + FAB tạo + ghim + hoàn thành |
 | Users / admin registry | [users.md](./users.md) · [`ADMIN-HOAN-THIEN.md`](../ADMIN-HOAN-THIEN.md) B1 | CRUD NV **xong** `/quan-tri/nguoi-dung`. P4 còn **registry xóa cứng khách** (`/quan-tri/khach-hang` placeholder) |
 | Public content (web khách) | [public-content.md](./public-content.md) | Done — STAFF soạn listing trên `/lo-dat`; bài CMS ADMIN |
+| AI Video Studio | [video-studio.md](./video-studio.md) | Ready for mock — mobile; entry **Tạo video** từ `/lo-dat/[id]` |
 
 Trước khi code UI/API: domain doc phải ở trạng thái **Ready for mock** trở lên.
 
