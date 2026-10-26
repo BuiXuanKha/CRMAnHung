@@ -6,21 +6,30 @@ import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react';
 import { getVideoProjectForLodat } from './api';
 import { sceneTitle } from './default-scenes';
+import { routeParamId } from './route-params';
 import './video-studio.css';
 
 export function VideoStudioPreviewPage() {
   const params = useParams<{ id: string }>();
-  const lodatId = params.id;
+  const lodatId = routeParamId(params.id);
 
   const projectQ = useQuery({
     queryKey: ['videoProject', lodatId],
     queryFn: () => getVideoProjectForLodat(lodatId),
+    enabled: Boolean(lodatId),
   });
 
-  const approved =
-    projectQ.data?.scenes
-      .filter((s) => s.status === 'approved')
-      .sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
+  const approved = (projectQ.data?.scenes ?? [])
+    .filter((s) => s.status === 'approved')
+    .sort((a, b) => a.sortOrder - b.sortOrder);
+
+  if (!lodatId) {
+    return (
+      <div className="vs-page">
+        <p className="vs-hint">Không xác định được lô đất.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="vs-page">
@@ -48,7 +57,10 @@ export function VideoStudioPreviewPage() {
           <li key={scene.id} className="vs-scene-card" style={{ listStyle: 'none' }}>
             <div className="vs-scene-body">
               <div className="vs-scene-name">{sceneTitle(scene)}</div>
-              <div className="vs-scene-meta">{scene.narrationText.slice(0, 80)}…</div>
+              <div className="vs-scene-meta">
+                {(scene.narrationText ?? '').slice(0, 80)}
+                {(scene.narrationText ?? '').length > 80 ? '…' : ''}
+              </div>
             </div>
           </li>
         ))}

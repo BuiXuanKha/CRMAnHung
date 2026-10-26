@@ -13,13 +13,15 @@ import {
   uploadSceneRawVideo,
 } from './api';
 import { sceneTitle } from './default-scenes';
+import { routeParamId } from './route-params';
 import './video-studio.css';
 
 const projectKey = (lodatId: string) => ['videoProject', lodatId] as const;
 
 export function VideoStudioScenePage() {
   const params = useParams<{ id: string; sceneId: string }>();
-  const { id: lodatId, sceneId } = params;
+  const lodatId = routeParamId(params.id);
+  const sceneId = routeParamId(params.sceneId);
   const router = useRouter();
   const qc = useQueryClient();
   const galleryRef = useRef<HTMLInputElement>(null);
@@ -30,6 +32,7 @@ export function VideoStudioScenePage() {
   const projectQ = useQuery({
     queryKey: projectKey(lodatId),
     queryFn: () => getVideoProjectForLodat(lodatId),
+    enabled: Boolean(lodatId),
   });
 
   const project = projectQ.data;
@@ -77,6 +80,14 @@ export function VideoStudioScenePage() {
     },
     onError: (e: Error) => setToast(e.message),
   });
+
+  if (!lodatId || !sceneId) {
+    return (
+      <div className="vs-page">
+        <p className="vs-hint">Đường dẫn không hợp lệ.</p>
+      </div>
+    );
+  }
 
   if (projectQ.isLoading) {
     return (

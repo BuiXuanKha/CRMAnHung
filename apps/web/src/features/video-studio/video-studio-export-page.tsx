@@ -1,32 +1,37 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react';
 import { CrmToast } from '@/shared/ui/dialog';
 import { exportVideoProject, getVideoProjectForLodat } from './api';
+import { routeParamId } from './route-params';
 import './video-studio.css';
 
 const projectKey = (lodatId: string) => ['videoProject', lodatId] as const;
 
 export function VideoStudioExportPage() {
   const params = useParams<{ id: string }>();
-  const lodatId = params.id;
+  const lodatId = routeParamId(params.id);
   const qc = useQueryClient();
   const [toast, setToast] = useState<string | null>(null);
-  const started = useRef(false);
 
   const projectQ = useQuery({
     queryKey: projectKey(lodatId),
     queryFn: () => getVideoProjectForLodat(lodatId),
+    enabled: Boolean(lodatId),
     refetchInterval: (q) =>
       q.state.data?.status === 'PROCESSING' ? 4000 : false,
   });
 
   const exportMut = useMutation({
-    mutationFn: () => exportVideoProject(projectQ.data!.id),
+    mutationFn: () => {
+      const id = projectQ.data?.id;
+      if (!id) throw new Error('Dự án video chưa tải xong.');
+      return exportVideoProject(id);
+    },
     onSuccess: (data) => {
       qc.setQueryData(projectKey(lodatId), data);
       if (data.status === 'COMPLETED') {
@@ -44,14 +49,13 @@ export function VideoStudioExportPage() {
     project?.status === 'PROCESSING' || exportMut.isPending;
   const done = project?.status === 'COMPLETED' && project.exportDownloadUrl;
 
-  useEffect(() => {
-    if (!project || started.current) return;
-    if (project.status === 'COMPLETED' || project.status === 'PROCESSING') {
-      return;
-    }
-    started.current = true;
-    exportMut.mutate();
-  }, [project, exportMut]);
+  if (!lodatId) {
+    return (
+      <div className="vs-page">
+        <p className="vs-hint">Không xác định được lô đất.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="vs-page">
@@ -100,6 +104,8 @@ export function VideoStudioExportPage() {
               Quay về lô
             </Link>
           </>
+        ) : projectQ.isLoading ? (
+          <p className="vs-hint">Đang tải dự án…</p>
         ) : project?.status === 'FAILED' ? (
           <>
             <p className="vs-hint" style={{ color: 'var(--crm-danger, #c00)' }}>
@@ -109,10 +115,8 @@ export function VideoStudioExportPage() {
               type="button"
               className="vs-btn-primary"
               style={{ width: '100%', marginTop: 12 }}
-              onClick={() => {
-                started.current = true;
-                exportMut.mutate();
-              }}
+              disabled={!project?.id}
+              onClick={() => exportMut.mutate()}
             >
               Thử xuất lại
             </button>
@@ -122,6 +126,7 @@ export function VideoStudioExportPage() {
             type="button"
             className="vs-btn-primary"
             style={{ width: '100%' }}
+            disabled={!project?.id || exportMut.isPending}
             onClick={() => exportMut.mutate()}
           >
             Bắt đầu xuất

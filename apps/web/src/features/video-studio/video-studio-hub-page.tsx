@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getLodat } from '@/features/lodats/api';
 import { CrmToast } from '@/shared/ui/dialog';
 import { addVideoScene, getVideoProjectForLodat } from './api';
+import { routeParamId } from './route-params';
 import { POI_PRESETS, SCENE_KIND_LABELS, sceneTitle, type VideoSceneKind } from './default-scenes';
 import './video-studio.css';
 
@@ -15,7 +16,7 @@ const projectKey = (lodatId: string) => ['videoProject', lodatId] as const;
 
 export function VideoStudioHubPage() {
   const params = useParams<{ id: string }>();
-  const lodatId = params.id;
+  const lodatId = routeParamId(params.id);
   const router = useRouter();
   const qc = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -29,6 +30,7 @@ export function VideoStudioHubPage() {
   const projectQ = useQuery({
     queryKey: projectKey(lodatId),
     queryFn: () => getVideoProjectForLodat(lodatId),
+    enabled: Boolean(lodatId),
   });
 
   const addMut = useMutation({
@@ -55,6 +57,14 @@ export function VideoStudioHubPage() {
         : project?.status === 'FAILED'
           ? 'Lỗi xuất'
           : 'Nháp';
+
+  if (!lodatId) {
+    return (
+      <div className="vs-page">
+        <p className="vs-hint">Không xác định được lô đất.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="vs-page">
