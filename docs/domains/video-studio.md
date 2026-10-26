@@ -1,7 +1,7 @@
 # Domain: AI Video Studio (AnHungLand)
 
 - **Slug:** `video-studio`
-- **Status:** **Ready for mock** — mobile UI slice 1 (hub/cảnh/preview/export mock) + entry chi tiết lô; API/render **chưa**
+- **Status:** **API slice 1** — mobile UI nối API (upload, GPT lời đọc, xuất ElevenLabs + Creatomate)
 - **Liên quan:** [`lodats.md`](./lodats.md) §12.3 (chi tiết lô) · [`public-content.md`](./public-content.md) (marketing)
 - **UI visual:** [`UI-GUIDELINES.md`](../UI-GUIDELINES.md) §4.3.5 (mobile trước)
 - **Route dự kiến:** `/lo-dat/[lodatId]/video` (+ nested steps, xem §12)
@@ -135,10 +135,10 @@ Safe area đáy; header CRM shell (menu trái). Không full-bleed che header.
 
 ---
 
-### 12.3 Mock data (UI only)
+### 12.3 Dữ liệu
 
-- `lodatId` từ URL; gọi `GET /lodats/:id` thật cho header (tiêu đề, ảnh cover).
-- Cảnh / upload / render: **state local** hoặc fixture trong feature folder — **không** gọi OpenAI/Creatomate slice 1.
+- `GET /api/v1/video-projects/lodat/:lodatId` — get hoặc tạo dự án + 5 cảnh mặc định.
+- Upload video thô → R2 private; xuất → GPT (lời) · ElevenLabs (TTS) · Creatomate (MP4) → R2 public `video-exports/`.
 
 ---
 

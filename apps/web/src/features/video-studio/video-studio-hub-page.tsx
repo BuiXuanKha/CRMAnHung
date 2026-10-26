@@ -1,32 +1,23 @@
 'use client';
 
-import { useCallback, useMemo, useState } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { getLodat } from '@/features/lodats/api';
 import { CrmToast } from '@/shared/ui/dialog';
-import {
-  POI_PRESETS,
-  SCENE_KIND_LABELS,
-  newSceneId,
-  sceneTitle,
-  type VideoSceneDraft,
-  type VideoSceneKind,
-} from './default-scenes';
-import {
-  canAddScene,
-  loadVideoProjectMock,
-  saveVideoProjectMock,
-} from './mock-project-storage';
+import { addVideoScene, getVideoProjectForLodat } from './api';
+import { POI_PRESETS, SCENE_KIND_LABELS, sceneTitle, type VideoSceneKind } from './default-scenes';
 import './video-studio.css';
+
+const projectKey = (lodatId: string) => ['videoProject', lodatId] as const;
 
 export function VideoStudioHubPage() {
   const params = useParams<{ id: string }>();
   const lodatId = params.id;
   const router = useRouter();
-  const [project, setProject] = useState(() => loadVideoProjectMock(lodatId));
+  const qc = useQueryClient();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
 
@@ -35,40 +26,35 @@ export function VideoStudioHubPage() {
     queryFn: () => getLodat(lodatId),
   });
 
-  const scenes = useMemo(
-    () => [...project.scenes].sort((a, b) => a.sortOrder - b.sortOrder),
-    [project.scenes],
-  );
+  const projectQ = useQuery({
+    queryKey: projectKey(lodatId),
+    queryFn: () => getVideoProjectForLodat(lodatId),
+  });
 
-  const approvedCount = scenes.filter((s) => s.status === 'approved').length;
-  const canExport = approvedCount > 0;
-
-  const persist = useCallback(
-    (nextScenes: VideoSceneDraft[]) => {
-      const next = saveVideoProjectMock({ ...project, scenes: nextScenes });
-      setProject(next);
+  const addMut = useMutation({
+    mutationFn: (kind: VideoSceneKind) =>
+      addVideoScene(projectQ.data!.id, { kind }),
+    onSuccess: (data) => {
+      qc.setQueryData(projectKey(lodatId), data);
+      setSheetOpen(false);
+      setToast('Đã thêm cảnh.');
     },
-    [project],
-  );
+    onError: (e: Error) => setToast(e.message),
+  });
 
-  function addPresetScene(kind: VideoSceneKind) {
-    if (!canAddScene(scenes)) {
-      setToast('Tối đa 12 cảnh.');
-      return;
-    }
-    const next: VideoSceneDraft = {
-      id: newSceneId(),
-      kind,
-      sortOrder: scenes.length,
-      status: 'draft',
-      hasRawClip: false,
-      narrationText: '',
-      customLabel: kind === 'POI_CUSTOM' ? 'Địa điểm' : undefined,
-    };
-    persist([...scenes, next]);
-    setSheetOpen(false);
-    setToast(`Đã thêm: ${SCENE_KIND_LABELS[kind]}.`);
-  }
+  const project = projectQ.data;
+  const scenes = project?.scenes ?? [];
+  const approvedCount = scenes.filter((s) => s.status === 'approved').length;
+  const canExport = approvedCount > 0 && project?.status !== 'PROCESSING';
+
+  const statusLabel =
+    project?.status === 'PROCESSING'
+      ? 'Đang xử lý'
+      : project?.status === 'COMPLETED'
+        ? 'Hoàn thành'
+        : project?.status === 'FAILED'
+          ? 'Lỗi xuất'
+          : 'Nháp';
 
   return (
     <div className="vs-page">
@@ -89,61 +75,76 @@ export function VideoStudioHubPage() {
         </div>
       </header>
 
-      <span className="vs-status-chip">Nháp · {approvedCount}/{scenes.length} cảnh đã duyệt</span>
+      {projectQ.isLoading ? (
+        <p className="vs-hint">Đang tải dự án video…</p>
+      ) : projectQ.isError ? (
+        <p className="vs-hint">Không tải được dự án video.</p>
+      ) : (
+        <>
+          <span className="vs-status-chip">
+            {statusLabel} · {approvedCount}/{scenes.length} cảnh đã duyệt
+          </span>
+          {project?.exportError ? (
+            <p className="vs-hint" style={{ color: 'var(--crm-danger, #c00)' }}>
+              {project.exportError}
+            </p>
+          ) : null}
 
-      <div className="vs-scene-list">
-        {scenes.map((scene) => (
-          <Link
-            key={scene.id}
-            href={`/lo-dat/${lodatId}/video/scene/${scene.id}`}
-            scroll={false}
-            className="vs-scene-card"
+          <div className="vs-scene-list">
+            {scenes.map((scene) => (
+              <Link
+                key={scene.id}
+                href={`/lo-dat/${lodatId}/video/scene/${scene.id}`}
+                scroll={false}
+                className="vs-scene-card"
+              >
+                <div
+                  className={`vs-scene-thumb ${scene.hasRawClip ? 'has-clip' : ''}`}
+                  aria-hidden
+                >
+                  9:16
+                </div>
+                <div className="vs-scene-body">
+                  <div className="vs-scene-name">{sceneTitle(scene)}</div>
+                  <div className="vs-scene-meta">
+                    {scene.hasRawClip ? 'Đã có video thô' : 'Chưa có video'}
+                    {' · '}
+                    {scene.status === 'approved' ? 'Đã duyệt' : 'Chưa duyệt'}
+                  </div>
+                </div>
+                <ChevronRight className="vs-scene-chevron" size={20} aria-hidden />
+              </Link>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            className="vs-add-scene"
+            onClick={() => setSheetOpen(true)}
+            disabled={scenes.length >= 12}
           >
-            <div
-              className={`vs-scene-thumb ${scene.hasRawClip ? 'has-clip' : ''}`}
-              aria-hidden
+            + Thêm cảnh
+          </button>
+
+          <footer className="vs-footer">
+            <Link
+              href={`/lo-dat/${lodatId}/video/preview`}
+              scroll={false}
+              className="vs-btn-secondary"
             >
-              9:16
-            </div>
-            <div className="vs-scene-body">
-              <div className="vs-scene-name">{sceneTitle(scene)}</div>
-              <div className="vs-scene-meta">
-                {scene.hasRawClip ? 'Đã có video thô' : 'Chưa có video'}
-                {' · '}
-                {scene.status === 'approved' ? 'Đã duyệt' : 'Chưa duyệt'}
-              </div>
-            </div>
-            <ChevronRight className="vs-scene-chevron" size={20} aria-hidden />
-          </Link>
-        ))}
-      </div>
-
-      <button
-        type="button"
-        className="vs-add-scene"
-        onClick={() => setSheetOpen(true)}
-        disabled={!canAddScene(scenes)}
-      >
-        + Thêm cảnh
-      </button>
-
-      <footer className="vs-footer">
-        <Link
-          href={`/lo-dat/${lodatId}/video/preview`}
-          scroll={false}
-          className="vs-btn-secondary"
-        >
-          Xem trước
-        </Link>
-        <button
-          type="button"
-          className="vs-btn-primary"
-          disabled={!canExport}
-          onClick={() => router.push(`/lo-dat/${lodatId}/video/export`)}
-        >
-          Xuất video
-        </button>
-      </footer>
+              Xem trước
+            </Link>
+            <button
+              type="button"
+              className="vs-btn-primary"
+              disabled={!canExport}
+              onClick={() => router.push(`/lo-dat/${lodatId}/video/export`)}
+            >
+              Xuất video
+            </button>
+          </footer>
+        </>
+      )}
 
       {sheetOpen ? (
         <>
@@ -162,7 +163,8 @@ export function VideoStudioHubPage() {
                 key={kind}
                 type="button"
                 className="vs-sheet-item"
-                onClick={() => addPresetScene(kind)}
+                disabled={addMut.isPending}
+                onClick={() => addMut.mutate(kind)}
               >
                 {SCENE_KIND_LABELS[kind]}
               </button>

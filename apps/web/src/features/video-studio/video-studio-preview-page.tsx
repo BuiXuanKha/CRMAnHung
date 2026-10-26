@@ -2,16 +2,25 @@
 
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { useQuery } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react';
-import { loadVideoProjectMock } from './mock-project-storage';
+import { getVideoProjectForLodat } from './api';
 import { sceneTitle } from './default-scenes';
 import './video-studio.css';
 
 export function VideoStudioPreviewPage() {
   const params = useParams<{ id: string }>();
   const lodatId = params.id;
-  const project = loadVideoProjectMock(lodatId);
-  const scenes = [...project.scenes].sort((a, b) => a.sortOrder - b.sortOrder);
+
+  const projectQ = useQuery({
+    queryKey: ['videoProject', lodatId],
+    queryFn: () => getVideoProjectForLodat(lodatId),
+  });
+
+  const approved =
+    projectQ.data?.scenes
+      .filter((s) => s.status === 'approved')
+      .sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
 
   return (
     <div className="vs-page">
@@ -26,44 +35,38 @@ export function VideoStudioPreviewPage() {
         </Link>
         <div className="vs-header-text">
           <h1 className="vs-title">Xem trước</h1>
-          <p className="vs-subtitle">Mock player 9:16</p>
+          <p className="vs-subtitle">{approved.length} cảnh đã duyệt</p>
         </div>
       </header>
 
-      <div
-        className="vs-panel"
-        style={{
-          aspectRatio: '9/16',
-          maxHeight: '50dvh',
-          margin: '0 auto 12px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#0f172a',
-          color: '#94a3b8',
-        }}
-      >
-        ▶ Preview (Creatomate — slice sau)
+      <div className="vs-preview-frame" aria-hidden>
+        ▶ Preview sau khi xuất MP4
       </div>
 
-      <ul className="vs-scene-list">
-        {scenes.map((s) => (
-          <li key={s.id} className="vs-scene-card" style={{ cursor: 'default' }}>
+      <ul className="vs-scene-list" style={{ marginTop: 16 }}>
+        {approved.map((scene) => (
+          <li key={scene.id} className="vs-scene-card" style={{ listStyle: 'none' }}>
             <div className="vs-scene-body">
-              <div className="vs-scene-name">{sceneTitle(s)}</div>
-              <div className="vs-scene-meta">
-                {s.status === 'approved' ? 'Đã duyệt' : 'Chưa duyệt'}
-              </div>
+              <div className="vs-scene-name">{sceneTitle(scene)}</div>
+              <div className="vs-scene-meta">{scene.narrationText.slice(0, 80)}…</div>
             </div>
           </li>
         ))}
       </ul>
 
       <footer className="vs-footer">
-        <Link href={`/lo-dat/${lodatId}/video`} scroll={false} className="vs-btn-secondary">
+        <Link
+          href={`/lo-dat/${lodatId}/video`}
+          scroll={false}
+          className="vs-btn-secondary"
+        >
           Quay lại chỉnh
         </Link>
-        <Link href={`/lo-dat/${lodatId}/video/export`} scroll={false} className="vs-btn-primary">
+        <Link
+          href={`/lo-dat/${lodatId}/video/export`}
+          scroll={false}
+          className="vs-btn-primary"
+        >
           Xuất video
         </Link>
       </footer>

@@ -1,44 +1,91 @@
 'use client';
 
-import { useCallback, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ChevronLeft } from 'lucide-react';
-import { getLodat } from '@/features/lodats/api';
 import { CrmToast } from '@/shared/ui/dialog';
+import {
+  generateSceneNarration,
+  getVideoProjectForLodat,
+  updateVideoScene,
+  uploadSceneRawVideo,
+} from './api';
 import { sceneTitle } from './default-scenes';
-import { loadVideoProjectMock, saveVideoProjectMock } from './mock-project-storage';
 import './video-studio.css';
+
+const projectKey = (lodatId: string) => ['videoProject', lodatId] as const;
 
 export function VideoStudioScenePage() {
   const params = useParams<{ id: string; sceneId: string }>();
   const { id: lodatId, sceneId } = params;
   const router = useRouter();
+  const qc = useQueryClient();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [project, setProject] = useState(() => loadVideoProjectMock(lodatId));
   const [toast, setToast] = useState<string | null>(null);
+  const [narrationLocal, setNarrationLocal] = useState<string | null>(null);
 
-  useQuery({
-    queryKey: ['lodat', lodatId],
-    queryFn: () => getLodat(lodatId),
+  const projectQ = useQuery({
+    queryKey: projectKey(lodatId),
+    queryFn: () => getVideoProjectForLodat(lodatId),
   });
 
-  const scene = project.scenes.find((s) => s.id === sceneId);
+  const project = projectQ.data;
+  const scene = project?.scenes.find((s) => s.id === sceneId);
+  const narration =
+    narrationLocal ?? scene?.narrationText ?? '';
 
-  const persistScene = useCallback(
-    (patch: Partial<NonNullable<typeof scene>>) => {
-      if (!scene) return;
-      const scenes = project.scenes.map((s) =>
-        s.id === sceneId ? { ...s, ...patch } : s,
-      );
-      const next = saveVideoProjectMock({ ...project, scenes });
-      setProject(next);
+  const uploadMut = useMutation({
+    mutationFn: (file: File) =>
+      uploadSceneRawVideo(project!.id, sceneId, file),
+    onSuccess: (data) => {
+      qc.setQueryData(projectKey(lodatId), data);
+      setToast('Đã upload video thô.');
     },
-    [project, scene, sceneId],
-  );
+    onError: (e: Error) => setToast(e.message),
+  });
 
-  if (!scene) {
+  const saveNarrMut = useMutation({
+    mutationFn: (text: string) =>
+      updateVideoScene(project!.id, sceneId, { narrationText: text }),
+    onSuccess: (data) => {
+      qc.setQueryData(projectKey(lodatId), data);
+      setNarrationLocal(null);
+    },
+    onError: (e: Error) => setToast(e.message),
+  });
+
+  const gptMut = useMutation({
+    mutationFn: () => generateSceneNarration(project!.id, sceneId),
+    onSuccess: (data) => {
+      qc.setQueryData(projectKey(lodatId), data);
+      setNarrationLocal(null);
+      setToast('Đã tạo lời thuyết minh bằng GPT.');
+    },
+    onError: (e: Error) => setToast(e.message),
+  });
+
+  const approveMut = useMutation({
+    mutationFn: () =>
+      updateVideoScene(project!.id, sceneId, { status: 'approved' }),
+    onSuccess: (data) => {
+      qc.setQueryData(projectKey(lodatId), data);
+      setToast('Đã duyệt cảnh.');
+      router.push(`/lo-dat/${lodatId}/video`);
+    },
+    onError: (e: Error) => setToast(e.message),
+  });
+
+  if (projectQ.isLoading) {
+    return (
+      <div className="vs-page">
+        <p className="vs-hint">Đang tải…</p>
+      </div>
+    );
+  }
+
+  if (!scene || !project) {
     return (
       <div className="vs-page">
         <p className="vs-hint">Không tìm thấy cảnh.</p>
@@ -48,6 +95,9 @@ export function VideoStudioScenePage() {
       </div>
     );
   }
+
+  const busy =
+    uploadMut.isPending || gptMut.isPending || approveMut.isPending;
 
   return (
     <div className="vs-page">
@@ -62,7 +112,7 @@ export function VideoStudioScenePage() {
         </Link>
         <div className="vs-header-text">
           <h1 className="vs-title">{sceneTitle(scene)}</h1>
-          <p className="vs-subtitle">Chỉnh cảnh · mock UI</p>
+          <p className="vs-subtitle">Chỉnh cảnh</p>
         </div>
       </header>
 
@@ -74,18 +124,20 @@ export function VideoStudioScenePage() {
           accept="video/*"
           capture="environment"
           hidden
-          onChange={() => {
-            persistScene({ hasRawClip: true });
-            setToast('Đã gắn video thô (mock).');
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) uploadMut.mutate(file);
+            e.target.value = '';
           }}
         />
         {scene.hasRawClip ? (
           <>
-            <p className="vs-hint">Đã chọn file (chưa upload server — slice sau).</p>
+            <p className="vs-hint">Video đã lưu trên server.</p>
             <button
               type="button"
               className="vs-btn-secondary"
               style={{ width: '100%', marginTop: 8 }}
+              disabled={busy}
               onClick={() => fileRef.current?.click()}
             >
               Thay video
@@ -95,10 +147,11 @@ export function VideoStudioScenePage() {
           <button
             type="button"
             className="vs-upload-zone"
+            disabled={busy}
             onClick={() => fileRef.current?.click()}
           >
             <strong>Chọn video</strong>
-            <span className="vs-hint">Tỷ lệ 9:16 khuyến nghị</span>
+            <span className="vs-hint">Tối đa 80MB · 9:16 khuyến nghị</span>
           </button>
         )}
       </section>
@@ -106,8 +159,13 @@ export function VideoStudioScenePage() {
       <section className="vs-panel">
         <span className="vs-label">Phân tích AI</span>
         <p className="vs-hint">
-          OpenAI + chọn đoạn đẹp sẽ nối ở slice API. Hiện chỉ nhập / sửa lời thủ công.
+          GPT soạn lời đọc theo lô + loại cảnh (vision video — bổ sung sau).
         </p>
+        {scene.aiNotes ? (
+          <p className="vs-hint" style={{ marginTop: 4 }}>
+            {scene.aiNotes}
+          </p>
+        ) : null}
       </section>
 
       <section className="vs-panel">
@@ -117,17 +175,24 @@ export function VideoStudioScenePage() {
         <textarea
           id="vs-narration"
           className="vs-textarea"
-          value={scene.narrationText}
+          value={narration}
           placeholder="Lời đọc ElevenLabs…"
-          onChange={(e) => persistScene({ narrationText: e.target.value })}
+          disabled={busy}
+          onChange={(e) => setNarrationLocal(e.target.value)}
+          onBlur={() => {
+            if (narrationLocal !== null && narrationLocal !== scene.narrationText) {
+              saveNarrMut.mutate(narrationLocal);
+            }
+          }}
         />
         <button
           type="button"
           className="vs-btn-secondary"
           style={{ width: '100%', marginTop: 8 }}
-          onClick={() => setToast('Tạo lại từ AI — sắp có.')}
+          disabled={busy}
+          onClick={() => gptMut.mutate()}
         >
-          Tạo lại từ AI
+          {gptMut.isPending ? 'Đang gọi GPT…' : 'Tạo lại từ AI'}
         </button>
       </section>
 
@@ -135,11 +200,8 @@ export function VideoStudioScenePage() {
         <button
           type="button"
           className="vs-btn-primary"
-          onClick={() => {
-            persistScene({ status: 'approved' });
-            setToast('Đã duyệt cảnh.');
-            router.push(`/lo-dat/${lodatId}/video`);
-          }}
+          disabled={busy || !scene.hasRawClip}
+          onClick={() => approveMut.mutate()}
         >
           Duyệt cảnh
         </button>
