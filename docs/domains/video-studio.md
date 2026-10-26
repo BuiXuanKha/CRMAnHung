@@ -114,7 +114,7 @@ Safe area đáy; header CRM shell (menu trái). Không full-bleed che header.
 
 1. Header: **Quay lại** hub + tên cảnh.
 2. **Vùng upload video thô**
-   - Chưa có file: zone «Chọn video» (input file `accept=video/*`, capture camcorder mobile nếu trình duyệt hỗ trợ).
+   - Chưa có file: **Chọn video đã quay** (thư viện, không `capture`) + tuỳ chọn **Quay video mới** (`capture`).
    - Có file: preview 9:16, nút **Thay video**.
 3. **Trạng thai phân tích** (mock static): «Phân tích AI — sẽ nối API sau» hoặc skeleton.
 4. **Lời đọc** — `textarea` nhiều dòng, label «Lời thuyết minh»; nút **Tạo lại từ AI** (disabled mock / toast «Sắp có»).
