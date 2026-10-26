@@ -27,5 +27,5 @@ export function sceneTitle(scene: {
   if (scene.kind === 'POI_CUSTOM' && scene.customLabel?.trim()) {
     return scene.customLabel.trim();
   }
-  return SCENE_KIND_LABELS[scene.kind];
+  return SCENE_KIND_LABELS[scene.kind] ?? scene.kind;
 }
