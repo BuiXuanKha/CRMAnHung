@@ -144,8 +144,11 @@ Safe area đáy; header CRM shell (menu trái). Không full-bleed che header.
 
 ## 13. Secrets (server)
 
-- `ELEVENLABS_API_KEY` — `apps/api/.env` (gitignored); mẫu `apps/api/.env.example`. **Không** ghi key vào docs/git.
-- Production VPS: thêm cùng biến vào env deploy CRMAnHung (skill `deploy-staging` / `DEPLOYMENT.md`), không commit.
+- `ELEVENLABS_API_KEY` — TTS giọng đọc.
+- `CREATOMATE_API_KEY` — render video (API Creatomate).
+- `CREATOMATE_TEMPLATE_ID` — (slice sau) template 9:16 trên dashboard Creatomate.
+- Cấu hình: `apps/api/.env` (gitignored); mẫu `apps/api/.env.example`. **Không** ghi key vào docs/git.
+- Production VPS: thêm cùng biến vào `/var/www/crmanhung/apps/api/.env` (deploy **không** ghi đè `.env`), rồi restart API nếu cần.
 
 ## 14. API dự kiến (slice sau — không mock)
 
