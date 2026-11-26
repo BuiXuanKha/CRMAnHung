@@ -13,7 +13,7 @@ Trên GitHub (nhánh `main`), tải file:
 | File | Link |
 |------|------|
 | **Mới nhất** | [`release/an-hung-land-crm-extension-latest.zip`](release/an-hung-land-crm-extension-latest.zip) |
-| Theo version | [`release/an-hung-land-crm-extension-2.15.0.zip`](release/an-hung-land-crm-extension-2.15.0.zip) (đổi số khi bump `manifest.json`) |
+| Theo version | [`release/an-hung-land-crm-extension-2.15.1.zip`](release/an-hung-land-crm-extension-2.15.1.zip) (đổi số khi bump `manifest.json`) |
 
 URL đầy đủ (thay `main` nếu cần):  
 `https://github.com/BuiXuanKha/CRMAnHung/raw/main/apps/extension/release/an-hung-land-crm-extension-latest.zip`

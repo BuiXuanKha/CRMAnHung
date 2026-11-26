@@ -23,7 +23,7 @@ function resolveExtensionVersion() {
   } catch (_e) {
     /* ignore */
   }
-  return '2.15.0';
+  return '2.15.1';
 }
 
 const CRM_EXTENSION_VERSION = resolveExtensionVersion();
