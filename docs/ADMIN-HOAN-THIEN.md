@@ -43,21 +43,22 @@ Việc Admin **đụng hàng ngày** mà đang kẹt hoặc thiếu nút.
 
 ### A1. Sửa nội dung bài CMS đã tạo
 
-- **Chốt:** HOÃN (owner 2026-09-06 — «làm sau»). Mai nếu làm: bỏ HOÃN trên BUG-056.
+- **Chốt:** HOÃN / **bỏ qua chưa làm** (owner 2026-09-12). Lý do: thao tác trên **điện thoại** bất tiện; chưa chốt UX list (menu Thao tác vs mở sửa vs FAB). **Máy tính làm sau** khi owner mở lại. Giữ HOÃN BUG-056 — không code / không tốn token đợt này.
 - **Bug:** [BUG-056](./audit/BUGS.md) — MEDIUM, OPEN
 - **Ai / ở đâu:** Admin mở `/dashboard/bai-viet` hoặc Tổng quan `/dashboard`. Bài đã Lưu nháp / Xuất bản.
-- **Hiện tại:** API chỉ `POST` tạo + `PATCH /admin/public-web/posts/:id/status`. Dialog «Soạn bài viết» luôn tạo bài mới. Sai chính tả / ảnh / HTML → **không Lưu đè**. Soạn lại cùng tiêu đề → slug `-2`, xuất bản cả hai URL khách.
-- **Mong đợi:** mở bài đã có → sửa title / body / ảnh bìa / excerpt / meta → Lưu. Không tạo slug mới. GPT «Dùng cho bài soạn» điền vào bài đang mở, không `POST` bài thứ hai.
+- **Hiện tại:** API chỉ `POST` tạo + `PATCH /admin/public-web/posts/:id/status`. Dialog «Soạn bài viết» luôn tạo bài mới. Sai chính tả / ảnh / HTML → **không Lưu đè**. Soạn lại cùng tiêu đề → slug `-2`, xuất bản cả hai URL khách. Bấm hàng list → chỉ confirm Xuất bản / Về nháp.
+- **Mong đợi (khi làm sau, ưu tiên desktop):** mở bài đã có → sửa title / body / ảnh bìa / excerpt / meta → Lưu. Không tạo slug mới. GPT «Dùng cho bài soạn» điền vào bài đang mở, không `POST` bài thứ hai. UX mobile (FAB / thẻ) **chưa bàn xong** — owner có thể làm desktop trước.
 - **File neo:** `apps/api/src/modules/public-content/admin-public-web.controller.ts`, `public-content.service.ts`; `apps/web/src/features/public-content/components/compose-post-dialog.tsx`; `docs/domains/public-content.md` §7 / §14
-- **Playbook:** cập nhật domain + Zod PATCH → UI dialog edit → API `PATCH /posts/:id` (không đổi slug trừ khi owner chốt được đổi)
+- **Playbook (khi mở lại):** cập nhật domain + Zod PATCH → UI dialog edit (desktop) → API `PATCH /posts/:id` (không đổi slug trừ khi owner chốt được đổi)
 
 Checklist:
 
-- [ ] Owner xác nhận: **làm** (bỏ HOÃN) hay vẫn để sau
+- [x] Owner 2026-09-12: **bỏ qua chưa làm**; desktop làm sau; không làm mobile đợt này
+- [ ] Owner mở lại A1 / bỏ HOÃN BUG-056 khi sẵn sàng (ưu tiên máy tính)
 - [ ] Domain `public-content.md`: thêm PATCH nội dung; cấm tạo trùng published cùng ý
 - [ ] Contract Zod update post
 - [ ] API PATCH title/body/cover/excerpt/seo (giữ slug)
-- [ ] UI: Soạn = sửa bài đang chọn; GPT đổ vào form đang mở
+- [ ] UI desktop: Soạn = sửa bài đang chọn; GPT đổ vào form đang mở
 - [ ] Không xuất bản hai bài cùng chuyên mục + cùng ý do «soạn lại»
 - [ ] Đánh BUG-056 FIXED khi xong
 
@@ -346,15 +347,15 @@ Checklist (chỉ khi A–B + D1 đủ, owner bảo cutover):
 Làm **từng dòng**, tick, một PR / slice. Đủ 5 PR bug-fix mới hỏi merge tuần tự — skill `fix-audit-bug`. Feature mới: hỏi deploy khi slice ổn.
 
 ```
-1. A1  Sửa bài CMS          — nếu bỏ HOÃN BUG-056
-2. A2  Lọc NV trên khách
-3. A4  Lọc NV trên giao dịch — API gần sẵn
-4. A3  Lọc NV trên lô        — chưa gộp dòng (C1)
-5. B3  Bổ sung kho đã import
-6. B2  Sửa/xóa từng dòng kho
-7. B1  Registry xóa cứng     — sau khi chốt cascade
-8. D1  Copy 10d + sổ đỏ VPS
-9. C*  Chỉ khi owner chốt
+1. A2  Lọc NV trên khách
+2. A4  Lọc NV trên giao dịch — API gần sẵn
+3. A3  Lọc NV trên lô        — chưa gộp dòng (C1)
+4. B3  Bổ sung kho đã import
+5. B2  Sửa/xóa từng dòng kho
+6. B1  Registry xóa cứng     — sau khi chốt cascade
+7. D1  Copy 10d + sổ đỏ VPS
+8. C*  Chỉ khi owner chốt
+9. A1  Sửa bài CMS           — HOÃN; desktop làm sau (owner 2026-09-12)
 10. D2 Cutover               — cuối
 ```
 

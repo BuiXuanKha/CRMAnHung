@@ -172,6 +172,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-09 | UI FAB / SĐT / tiền | BUG-084 … BUG-086 | Rà source mọi FAB + mọi ô `type=tel` + mọi ô giá/tiền. **SĐT:** 5 form đều `phoneDigitsFromChange` + `handlePhonePaste` — chuẩn. **FAB:** 2 nút `Plus` (khách/công việc) + Gọi/`Phone` + Messenger/`MessageCircle` đủ; Zalo chữ (cố ý). Lệch: menu «⋯» chi tiết lô **không** icon Lucide. **Tiền:** lô/GD format chấm nghìn; sổ đỏ Thu/Chi/Sửa giá **không** format. Thẻ mobile khách ngân sách màu xanh (không `crm-money`). Không sửa code. |
 | 2026-09-09 | UI màu giá / ghi chú / hoa hồng | BUG-086 mở rộng + BUG-087…088 | Chuẩn chốt: số VND = `crm-money` `#b45309`. **Giá:** list lô/GD/sổ (cột Giá) đã gắn; còn thiếu/đè màu → 086/087. **Ghi chú giá + hoa hồng lô:** guidelines = dòng phụ xám (không màu money) — list đúng; chi tiết lô cùng màu chữ đen body. **Hoa hồng GD (VND):** đã `crm-money`. **Thu/Chi sổ đỏ:** cố ý xanh/đỏ; thẻ thống kê vừa `crm-money` vừa `sd-stat-thu/chi` → xung đột cascade (088). Không sửa code. |
 | 2026-09-09 | UI money / FAB | BUG-084…088 FIXED | Đổi `crm-money` `#b45309`→`#ea580c` (owner: nâu không nhấn). Gắn class còn thiếu; CSS chi tiết lô; format ô sổ đỏ; FAB menu lô có Lucide; Thu/Chi thống kê bỏ xung đột. |
+| 2026-09-12 | public-content | BUG-056 HOÃN | Owner: bỏ qua chưa làm A1 (sửa bài CMS) — mobile bất tiện, UX list chưa chốt; máy tính làm sau. Cập nhật `ADMIN-HOAN-THIEN.md` A1 + thứ tự. |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -262,7 +263,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-053 | MEDIUM | addresses | List địa chỉ `take: 500`, `total: items.length` — picker/sổ thiếu địa chỉ cũ. | FIXED |
 | BUG-054 | MEDIUM | transactions / title-services | `nextCode()` đọc max rồi +1, không khóa — race trùng `code` unique → 500. | FIXED |
 | BUG-055 | MEDIUM | customers | Lọc tài chính theo khoảng vẫn khớp khách «Chưa xác định» (min/max null). | FIXED |
-| BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN |
+| BUG-056 | MEDIUM | public-content | Không PATCH nội dung bài; sửa = `POST` bài mới (slug-2) — dễ hai bài published. | OPEN (HOÃN) |
 | BUG-057 | MEDIUM | addresses | Đổi `PROJECT` → `REGULAR` không kiểm kho `ProjectLot` — picker kho chết, lô cũ còn. | OPEN |
 | BUG-058 | MEDIUM | transactions / lodats | Form tạo GD (không `?lodatId`) picker tối đa 200 lô — lô cũ không chọn được. | FIXED |
 | BUG-059 | HIGH | lodats / transactions | Đổi chủ khi GD mở: TX vẫn trỏ map cũ; unique khóa lô; xóa GD sửa map inactive. | FIXED |
@@ -1032,7 +1033,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Contract domain chỉ create + status; UI không edit.
 - **Impact:** Bài trùng trên anhungland.com; SEO/nội dung lệch; nháp cũ tồn tại.
 - **Evidence:** Controller không update body. `createPost` + `uniquePostSlug`. Domain bảng API §7 không có PATCH content.
-- **Status:** OPEN (HOÃN — owner 2026-09-06: làm sau)
+- **Status:** OPEN (HOÃN — owner 2026-09-06: làm sau; **2026-09-12:** bỏ qua chưa làm — mobile bất tiện, UX list chưa chốt; máy tính làm sau. Xem `ADMIN-HOAN-THIEN.md` A1.)
 
 ### BUG-057 — Đổi địa chỉ dự án sang đất dân không kiểm kho `ProjectLot`
 
