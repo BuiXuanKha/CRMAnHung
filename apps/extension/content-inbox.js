@@ -26,6 +26,10 @@
   const MESSAGE_SCROLL_LATE_MERGE_MS = 900;
   const MESSAGE_MIN_TOP = 130;
   const MESSAGE_MAX_BOTTOM_GAP = 140;
+  const DraftSendQueue = window.__ANHUNGLAND_DRAFT_SEND_QUEUE__;
+  if (!DraftSendQueue) {
+    throw new Error("draft-send-queue.js must load before content-inbox.js");
+  }
 
   const STATE = {
     watching: false,
@@ -74,8 +78,13 @@
     messagesCopyStatus: "",
     scanInfoCopyStatus: "",
     draftSubmitting: false,
+    draftActiveLabel: "",
     draftStatus: "",
-    /** Snapshot khách vừa quét — tự gửi BE khi chuyển sang khách khác. */
+    /** FIFO payloads already copied off the live snapshot. */
+    draftSendQueue: [],
+    /** Customers who did not reach CRM. Kept visible after the next send. */
+    draftMissedNotices: [],
+    /** Snapshot khách đang mở — tự gửi BE khi chuyển sang khách khác. */
     autoDraftSnapshot: null,
   };
 
@@ -2711,13 +2720,6 @@
     return payload;
   }
 
-  function draftCustomerLabel(snapshot) {
-    const name = normalizeText(snapshot?.scan?.customerName || "");
-    if (name) return name;
-    const uid = normalizeText(snapshot?.scan?.customerUid || snapshot?.scan?.threadId || "");
-    return uid || "khách trước";
-  }
-
   function blobToDataUrl(blob) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -2826,47 +2828,72 @@
     return data;
   }
 
-  async function autoSubmitDraftForPreviousCustomer(prevScanKey) {
+  function renderDraftActivityHtml() {
+    const lines = [];
+    for (const notice of STATE.draftMissedNotices || []) {
+      if (notice) lines.push(escapeHtml(notice));
+    }
+    const status = STATE.draftSubmitting
+      ? STATE.draftStatus || "Đang gửi BE tự động…"
+      : STATE.draftStatus;
+    if (status) lines.push(escapeHtml(status));
+    if (!lines.length) return "";
+    return `<div class="pf-meta" style="margin-top:8px">${lines.join("<br>")}</div>`;
+  }
+
+  function autoSubmitDraftForPreviousCustomer(prevScanKey) {
     const prevKey = normalizeText(prevScanKey || "");
-    if (!prevKey) return;
-
     const snap = STATE.autoDraftSnapshot;
-    if (!snap || snap.scanKey !== prevKey) return;
+    if (!prevKey || !snap || snap.scanKey !== prevKey) return;
 
-    const payload = draftPayloadFromSnapshot(snap);
-    const label = draftCustomerLabel(snap);
-    if (!payloadHasIngestCustomerUid(payload)) {
-      STATE.draftStatus = `Chưa có UID Facebook — «${label}» chưa gửi BE.`;
-      renderPanel();
-      return;
+    const preview = draftPayloadFromSnapshot(snap);
+    const result = DraftSendQueue.enqueueLeftCustomer(STATE, snap, prevKey, {
+      hasCustomerUid: payloadHasIngestCustomerUid(preview),
+      hasAuth: hasAuthToken(),
+    });
+    if (!result.taken) return;
+
+    STATE.autoDraftSnapshot = null;
+    if (result.queued && STATE.draftSubmitting && STATE.draftActiveLabel) {
+      STATE.draftStatus = DraftSendQueue.sendingStatus(
+        STATE.draftActiveLabel,
+        DraftSendQueue.waitingLabels(STATE),
+      );
     }
+    renderPanel();
+    if (result.queued) void drainDraftSendQueue();
+  }
 
-    if (!hasAuthToken()) {
-      STATE.draftStatus = `Chưa đăng nhập — «${label}» chưa gửi BE.`;
-      renderPanel();
-      return;
-    }
+  async function drainDraftSendQueue() {
+    const job = DraftSendQueue.takeNextJob(STATE);
+    if (!job) return;
 
-    if (STATE.draftSubmitting) return;
-
-    STATE.draftSubmitting = true;
-    STATE.draftStatus = `Đang gửi BE tự động: ${label}…`;
+    STATE.draftStatus = DraftSendQueue.sendingStatus(
+      job.label,
+      DraftSendQueue.waitingLabels(STATE),
+    );
     renderPanel();
 
     try {
-      const data = await submitDraftScanToBackend(payload);
-      const msgCount = Array.isArray(payload.chatMessages) ? payload.chatMessages.length : 0;
+      const data = await submitDraftScanToBackend(job.payload);
+      const msgCount = Array.isArray(job.payload.chatMessages) ? job.payload.chatMessages.length : 0;
       const appended = Number(data?.messagesAppended) || 0;
       const appendHint = appended > 0 ? ` (+${appended} tin mới trên BE)` : "";
       STATE.draftStatus = data.updated
-        ? `Đã gửi tự động (cập nhật #${data.id}): ${label}${msgCount ? ` — ${msgCount} tin gửi` : ""}${appendHint}.`
-        : `Đã gửi tự động (#${data.id}): ${label}${msgCount ? ` — ${msgCount} tin` : ""}.`;
+        ? `Đã gửi tự động (cập nhật #${data.id}): ${job.label}${msgCount ? ` — ${msgCount} tin gửi` : ""}${appendHint}.`
+        : `Đã gửi tự động (#${data.id}): ${job.label}${msgCount ? ` — ${msgCount} tin` : ""}.`;
+      DraftSendQueue.finishSend(STATE, { ok: true, label: job.label });
     } catch (error) {
-      STATE.draftStatus = error?.message || `Gửi tự động thất bại: ${label}.`;
-    } finally {
-      STATE.draftSubmitting = false;
-      renderPanel();
+      const reason = error?.message || "Gửi tự động thất bại";
+      DraftSendQueue.finishSend(STATE, { ok: false, label: job.label, reason });
+      STATE.draftStatus = "";
     }
+
+    if (STATE.draftSendQueue.length) {
+      void drainDraftSendQueue();
+      return;
+    }
+    renderPanel();
   }
 
   function hydrateBackendUrl(done) {
@@ -4008,15 +4035,7 @@
             <button type="button" class="pf-btn danger" data-role="stop-watch"
               ${STATE.watching ? "" : "disabled"}>Dừng</button>
           </div>
-          ${
-            STATE.draftSubmitting || STATE.draftStatus
-              ? `<div class="pf-meta" style="margin-top:8px">${escapeHtml(
-                  STATE.draftSubmitting
-                    ? STATE.draftStatus || "Đang gửi BE tự động…"
-                    : STATE.draftStatus,
-                )}</div>`
-              : ""
-          }
+          ${renderDraftActivityHtml()}
         </div>
         ${renderScanInfoSection()}
         ${renderMessagesSection()}

@@ -61,6 +61,7 @@ const include = [
   'manifest.json',
   'background.js',
   'config.js',
+  'draft-send-queue.js',
   'content-inbox.js',
   'ext-source.js',
   'ext-person-name.js',
