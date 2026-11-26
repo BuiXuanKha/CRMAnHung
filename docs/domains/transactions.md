@@ -63,7 +63,7 @@ Gợi ý dưới số 2–3: «Chỉ giao dịch của tôi · Hoàn thành». M
 1. **Tạo GD từ lô** — nếu lô đã có GD mở (`DA_COC` / `DA_CONG_CHUNG`) → mở sửa GD đó (`OPEN_TRANSACTION_EXISTS`). Không thì tạo mới, status luôn **Đã cọc**; map active → `TAM_DUNG`. Snapshot lô + map đóng băng lúc tạo.
 2. **List `/giao-dich`** — tìm / lọc; STAFF chỉ GD mình; ADMIN tất cả.
 3. **Sửa** — đổi status, giá, thuế, hoa hồng, hẹn CC, bên, ghi chú. Hủy bắt buộc `cancelReason`. Đổi status → đồng bộ map (bảng mục 3). Chuyển **Hoàn thành** trên GD **OWN** (NV) → đổi chủ lô theo người mua (mục 5); ≥2 buyers → chọn chủ trong modal trước khi Lưu.
-4. **Xóa cứng** — xóa hàng; nếu GD đang mở thì áp luật map như **Đã hủy** (mục 3).
+4. **Xóa cứng** — xóa hàng; nếu GD đang mở thì áp luật map như **Đã hủy** (mục 3). Còn việc nhắc gắn giao dịch thì không xóa: API `409`, câu tiếng Việt bảo hoàn thành hoặc gỡ việc nhắc trước. Không xóa việc nhắc theo giao dịch.
 5. **Lịch sử trên chi tiết lô** — list GD của lô (lodats.md §12.3.5, đã làm).
 
 Tạo GD: **OWN** bắt buộc ngày hẹn CC; **RECORD** hẹn CC tuỳ chọn, hoa hồng = 0, **không** vào thẻ doanh thu. Tạo từ lô: điền sẵn người bán = chủ map active (tên + `customerId`); lô chưa có chủ → không lưu. Người bán và người mua lúc Lưu đều phải là khách CRM (`customerId`).
@@ -102,7 +102,7 @@ Transaction 1 ── n TransactionAttachment (R2 objectKey, kind HOP_DONG|SO_DO|
 
 **1 GD mở / lô:** unique index SQL `Transaction_lodatId_open_uidx` (`DA_COC` \| `DA_CONG_CHUNG`). Cũ chỉ chặn ở app.
 
-**Xoá lô / map:** `Restrict` — còn GD thì không xoá thửa/map. Party/snapshot/ảnh/đính kèm cascade theo GD.
+**Xoá lô / map:** `Restrict` — còn GD thì không xoá thửa/map. Party/snapshot/ảnh/đính kèm cascade theo GD. Việc nhắc (`WorkTask.transactionId`) là `Restrict`: còn việc (kể cả đã hoàn thành) thì xóa GD trả `409`, giao dịch và việc nhắc đều giữ nguyên.
 
 **Đổi chủ sau GD:** map mới không thay `lodatCustomerMapId` của GD cũ.
 
@@ -129,7 +129,7 @@ Prefix `/api/v1`. Zod: `packages/shared/src/transactions.ts`. Nest: `apps/api/sr
 | GET | `/transactions/:id` | owner / ADMIN | `TransactionDetail` |
 | POST | `/transactions` | owner lô (**STAFF**). ADMIN → 403 | `lodatId` hoặc `lodatCustomerMapId`; trùng mở → `OPEN_TRANSACTION_EXISTS` |
 | PATCH | `/transactions/:id` | owner / ADMIN | `UpdateTransactionInput`; `HUY` cần `cancelReason` |
-| DELETE | `/transactions/:id` | owner / ADMIN | xóa cứng; GD mở → map `DANG_BAN` |
+| DELETE | `/transactions/:id` | owner / ADMIN | xóa cứng; GD mở → map `DANG_BAN`. Còn việc nhắc → `409`, không xóa việc |
 | GET | `/transactions/lodat/:lodatId/open` | owner lô / ADMIN | `{ id }` hoặc `id: null` |
 
 Tạo: status = `DA_COC`; sinh `code`; copy snapshot từ lô + map active. RECORD: `commissionVnd = 0`.
@@ -280,7 +280,7 @@ Một dòng, cắt `…`. Thiếu = `—`.
 | Xem chi tiết | `/giao-dich/[id]` — menu portal `document.body` (cùng lô đất), không để overflow bảng cắt |
 | Thêm công việc | Modal: nội dung, hạn (mặc định ngày mai). Gắn giao dịch này |
 | Sửa | `/giao-dich/[id]/sua` |
-| Xóa | Đỏ → confirm → xóa cứng. GD đang mở → map về Mở bán |
+| Xóa | Đỏ → confirm → xóa cứng. GD đang mở → map về Mở bán. Còn việc nhắc → hộp thoại «Không xóa được giao dịch» và câu còn việc nhắc |
 
 #### 12.1.5 Footer + cuộn tải thêm + nhớ vị trí
 
