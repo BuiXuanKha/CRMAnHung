@@ -1,10 +1,12 @@
+/** Locked production API. Popup and inbox panel do not accept a custom URL. */
 const CRM_DEFAULT_API_URL = 'https://anhungland.com/api/v1';
 const CRM_DEFAULT_WEB_URL = 'https://anhungland.com';
+/** Stale key from older builds. Cleared on load; never read as the API base. */
 const BACKEND_URL_STORAGE_KEY = 'anhungland_ext_api_url';
 const AUTH_TOKEN_STORAGE_KEY = 'anhungland_ext_jwt';
 const AUTH_REFRESH_STORAGE_KEY = 'anhungland_ext_refresh';
 const AUTH_USER_STORAGE_KEY = 'anhungland_ext_user';
-/** @deprecated — đọc một lần để migrate cài đặt cũ */
+/** @deprecated — cleared on load; do not use as the API base */
 const LEGACY_BACKEND_URL_STORAGE_KEY = 'pages_facebook_customer_crm_api_url';
 const LEGACY_AUTH_TOKEN_STORAGE_KEY = 'pages_facebook_customer_crm_jwt';
 const LEGACY_AUTH_USER_STORAGE_KEY = 'pages_facebook_customer_crm_user';

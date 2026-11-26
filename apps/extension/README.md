@@ -27,7 +27,7 @@ Dev trong repo: `pnpm extension:zip` tạo lại file trong `apps/extension/rele
 1. Gỡ bản cũ **Anhungland Extension** / extension UID Facebook khác trên `chrome://extensions` (nếu còn).
 2. Bật Developer mode → **Load unpacked** → chọn thư mục có `manifest.json` (repo: `apps/extension`, hoặc thư mục sau khi giải nén zip ở trên).
 
-3. Icon extension / Options: API URL mặc định `https://anhungland.com/api/v1`. Dev: `http://localhost:5050/api/v1`.
+3. Icon extension: API cố định `https://anhungland.com/api/v1`. Đăng nhập trên panel Inbox / Messenger (không trên popup).
 4. Mở Business Suite Inbox hoặc Messenger → panel: đăng nhập `kha` / Admin → **Bật quét** → đổi hội thoại để gửi (hoặc **Dừng** để gửi khách đang mở).
 5. Sửa file xong: Reload extension, refresh tab Meta.
 
@@ -45,7 +45,7 @@ Ingest (v2.14.0+): **bắt buộc UID Facebook khách**. Messenger E2EE chưa hi
 
 ## API (CRMAnHung)
 
-Base = API URL (có `/api/v1`):
+Base cố định `https://anhungland.com/api/v1`:
 
 | | |
 |--|--|

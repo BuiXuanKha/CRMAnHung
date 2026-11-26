@@ -23,7 +23,7 @@ Nguồn hỗ trợ (theo `manifest.json` + `ext-source.js`):
 | Messenger thường | `facebook.com` / `web.facebook.com` → `/messages/t/*` | `messenger_standard` |
 | Messenger E2EE | `…/messages/e2ee/t/*` | `messenger_e2ee` |
 
-Production CRM API mặc định: `https://anhungland.com/api/v1` (và localhost:5050 khi dev).
+Production CRM API cố định: `https://anhungland.com/api/v1` (popup và panel không nhận URL khác).
 
 ---
 
@@ -36,7 +36,7 @@ AnhunglandExtension/
 ├── manifest.json                 # MV3, content_scripts, host_permissions
 ├── background.js                 # Service worker — proxy fetch API
 ├── config.js                     # Default URL, storage keys, version label
-├── options.html / options.js     # Popup / trang cài đặt API URL
+├── options.html / options.js     # Popup: version + API cố định (không nhập URL)
 ├── content-inbox.js              # Orchestrator + panel UI + gửi BE
 ├── ext-source.js                 # detectAnhunglandSource()
 ├── ext-person-name.js            # Chuẩn hoá / lọc tên đa ngôn ngữ
@@ -70,7 +70,7 @@ Nguồn: `manifest.json`.
 - `https://www.facebook.com/*`, `https://web.facebook.com/*`
 - `https://anhungland.com/*`
 - `http://localhost:5050/*`, `http://127.0.0.1:5050/*`
-- Optional: `http://*/*`, `https://*/*` (mở rộng API URL tùy chỉnh)
+- Optional: `http://*/*`, `https://*/*` (còn trong manifest; extension không đọc URL API tùy chỉnh)
 
 **content_scripts**
 
@@ -102,12 +102,12 @@ Trang Meta khớp match
 
 | Hằng | Ý nghĩa |
 |------|---------|
-| `CRM_DEFAULT_API_URL` | `http://localhost:5000` |
+| `CRM_DEFAULT_API_URL` | `https://anhungland.com/api/v1` (khóa cứng) |
 | `CRM_DEFAULT_WEB_URL` | `http://localhost:5001` |
-| `BACKEND_URL_STORAGE_KEY` | `anhungland_ext_api_url` |
+| `BACKEND_URL_STORAGE_KEY` | `anhungland_ext_api_url` — xóa khi load, không đọc |
 | `AUTH_TOKEN_STORAGE_KEY` | `anhungland_ext_jwt` |
 | `AUTH_USER_STORAGE_KEY` | `anhungland_ext_user` |
-| Legacy keys | `pages_facebook_customer_crm_*` — migrate đọc một lần |
+| Legacy keys | JWT/user đọc một lần; `…_api_url` xóa, không đọc |
 | `CRM_EXTENSION_UI_LABEL` | `v{version}-ai-icon` — chip trên panel |
 
 ### 5.2. Context adapters
@@ -141,7 +141,7 @@ Export `window.__ANHUNGLAND_MESSENGER_SCANNER__` với `scan`, `collectMessages`
 
 Trách nhiệm chính:
 
-- Panel UI (collapse, sections: server, scan info, messages, DOM LIVE debug)
+- Panel UI (collapse, sections: scan info, messages, DOM LIVE debug). API khóa `CRM_DEFAULT_API_URL`
 - Watch URL / đổi hội thoại (`WATCH_INTERVAL_MS = 1200`)
 - Quét Business Suite bằng logic nội bộ; Messenger uỷ quyền scanner
 - Đăng nhập: `POST /auth/login`, kiểm tra `GET /auth/me`
@@ -157,7 +157,7 @@ Helper tên đa ngôn ngữ (Latin/VN, Hán, Hangul, Kana…): normalize, độ 
 
 ### 5.6. `options.html` / `options.js`
 
-Lưu `anhungland_ext_api_url` vào `chrome.storage.local`. Version hiển thị lấy từ `CRM_EXTENSION_VERSION` (manifest).
+Popup chỉ hiện version (`CRM_EXTENSION_VERSION` từ manifest) và dòng API cố định. Không lưu URL tùy chỉnh.
 
 ---
 
@@ -180,10 +180,11 @@ Payload draft gồm object `scan` (UID, tên, page, source, thread…) + `chatMe
 
 | Key | Nội dung |
 |-----|----------|
-| `anhungland_ext_api_url` | Base URL API |
+| `anhungland_ext_api_url` | Không đọc. Xóa khi mở panel (bản cũ) |
 | `anhungland_ext_jwt` | JWT sau login |
 | `anhungland_ext_user` | User JSON |
-| Legacy `pages_facebook_customer_crm_*` | Đọc để migrate bản cũ |
+| Legacy `pages_facebook_customer_crm_jwt` / `_user` | Đọc một lần để migrate phiên cũ |
+| Legacy `pages_facebook_customer_crm_api_url` | Xóa khi load, không đọc |
 
 ---
 
@@ -191,11 +192,11 @@ Payload draft gồm object `scan` (UID, tên, page, source, thread…) + `chatMe
 
 1. Chrome → `chrome://extensions` → Developer mode → **Load unpacked** → chọn thư mục `apps/extension`.
 2. Mở Business Suite Inbox hoặc Messenger thread khớp URL trong manifest.
-3. Icon extension / Options → đặt API URL (`http://localhost:5050/api/v1` hoặc `https://anhungland.com/api/v1`).
+3. Icon extension: API cố định `https://anhungland.com/api/v1` (không nhập URL).
 4. Trên panel: đăng nhập tài khoản CRM (cùng user Web), bật quét, mở hội thoại khách.
 5. Sau mỗi lần sửa JS: **Reload** extension trên `chrome://extensions`, rồi refresh tab Meta.
 
-Dev CRM Web thường chạy `:5001`; API `:5050` (`/api/v1`). Production: `anhungland.com`.
+Dev CRM Web thường chạy `:5001`; API local `:5050`. Extension luôn gọi `https://anhungland.com/api/v1`.
 
 ---
 

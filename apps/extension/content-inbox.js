@@ -57,7 +57,6 @@
     },
     backendBaseUrl: CRM_DEFAULT_API_URL,
     backendLoaded: false,
-    backendSaving: false,
     auth: {
       token: "",
       refreshToken: "",
@@ -69,7 +68,6 @@
     domLiveStatus:
       "Bam Quet DOM LIVE de tai file (summary + full DOM) gui dev.",
     domLiveExporting: false,
-    serverSectionCollapsed: true,
     domLiveSectionCollapsed: true,
     scanInfoSectionCollapsed: true,
     messagesSectionCollapsed: false,
@@ -2266,30 +2264,6 @@
     }
   }
 
-  function normalizeBackendBaseUrl(value) {
-    const raw = normalizeText(value).replace(/\/+$/, "");
-    if (!raw) return CRM_DEFAULT_API_URL;
-    try {
-      const url = new URL(raw);
-      if (url.protocol !== "http:" && url.protocol !== "https:") {
-        return CRM_DEFAULT_API_URL;
-      }
-      const host = url.host.toLowerCase();
-      if (host === "crm.anhungland.com") {
-        return CRM_DEFAULT_API_URL;
-      }
-      if (host === "localhost:5000" || host === "127.0.0.1:5000" || host === "localhost:4000") {
-        return "http://localhost:5050/api/v1";
-      }
-      let path = (url.pathname || "").replace(/\/+$/, "");
-      if (!path || path === "/") path = "/api/v1";
-      if (path === "/api") path = "/api/v1";
-      return `${url.protocol}//${url.host}${path}`;
-    } catch (_e) {
-      return null;
-    }
-  }
-
   function setAuthToken(token) {
     const value = normalizeText(token || "");
     STATE.auth.token = value;
@@ -2706,44 +2680,37 @@
       });
     };
 
+    STATE.backendBaseUrl = CRM_DEFAULT_API_URL;
+
     if (typeof chrome === "undefined" || !chrome.storage?.local) {
-      STATE.backendBaseUrl = CRM_DEFAULT_API_URL;
       STATE.backendLoaded = true;
       finishAuth();
       return;
     }
 
+    chrome.storage.local.remove([BACKEND_URL_STORAGE_KEY, LEGACY_BACKEND_URL_STORAGE_KEY]);
+
     chrome.storage.local.get(
       [
-        BACKEND_URL_STORAGE_KEY,
         AUTH_TOKEN_STORAGE_KEY,
         AUTH_REFRESH_STORAGE_KEY,
         AUTH_USER_STORAGE_KEY,
-        LEGACY_BACKEND_URL_STORAGE_KEY,
         LEGACY_AUTH_TOKEN_STORAGE_KEY,
         LEGACY_AUTH_USER_STORAGE_KEY,
       ],
       (items) => {
-        const rawUrl =
-          items?.[BACKEND_URL_STORAGE_KEY] ||
-          items?.[LEGACY_BACKEND_URL_STORAGE_KEY] ||
-          CRM_DEFAULT_API_URL;
-        const apiUrl = normalizeBackendBaseUrl(rawUrl) || CRM_DEFAULT_API_URL;
         const token =
           items?.[AUTH_TOKEN_STORAGE_KEY] || items?.[LEGACY_AUTH_TOKEN_STORAGE_KEY] || "";
         const refresh = items?.[AUTH_REFRESH_STORAGE_KEY] || "";
         const user = items?.[AUTH_USER_STORAGE_KEY] || items?.[LEGACY_AUTH_USER_STORAGE_KEY] || null;
 
-        STATE.backendBaseUrl = apiUrl;
+        STATE.backendBaseUrl = CRM_DEFAULT_API_URL;
         STATE.backendLoaded = true;
         STATE.auth.token = normalizeText(token);
         STATE.auth.refreshToken = normalizeText(refresh);
         STATE.auth.user = user;
 
         const migrate = {};
-        if (apiUrl && apiUrl !== items?.[BACKEND_URL_STORAGE_KEY]) {
-          migrate[BACKEND_URL_STORAGE_KEY] = apiUrl;
-        }
         if (!items?.[AUTH_TOKEN_STORAGE_KEY] && token) {
           migrate[AUTH_TOKEN_STORAGE_KEY] = token;
         }
@@ -2757,29 +2724,6 @@
         finishAuth();
       },
     );
-  }
-
-  async function saveBackendUrl(rawUrl) {
-    const baseUrl = normalizeBackendBaseUrl(rawUrl);
-    if (!baseUrl) {
-      setStatus(`URL server khong hop le (vd: ${CRM_DEFAULT_API_URL}).`);
-      return false;
-    }
-    STATE.backendSaving = true;
-    renderPanel();
-    if (typeof chrome !== "undefined" && chrome.storage?.local) {
-      await new Promise((resolve, reject) => {
-        chrome.storage.local.set({ [BACKEND_URL_STORAGE_KEY]: baseUrl }, () => {
-          const err = chrome.runtime?.lastError;
-          if (err) reject(err);
-          else resolve();
-        });
-      }).catch(() => {});
-    }
-    STATE.backendBaseUrl = baseUrl;
-    STATE.backendSaving = false;
-    setStatus(`Da luu server: ${baseUrl}`);
-    return true;
   }
 
   function setStatus(message) {
@@ -3833,20 +3777,6 @@
     const versionChip = panel.querySelector(".pf-chip");
     if (versionChip) versionChip.textContent = UI_VERSION;
 
-    const serverBlock = renderCollapsibleCard({
-      toggleRole: "toggle-server-section",
-      title: "Server CRM",
-      collapsed: STATE.serverSectionCollapsed,
-      bodyHtml: `
-        <input class="pf-input" data-role="server-url" type="url" spellcheck="false"
-          value="${escapeHtml(STATE.backendBaseUrl)}"
-          placeholder="${escapeHtml(CRM_DEFAULT_API_URL)}"
-          ${STATE.backendSaving ? "disabled" : ""} />
-        <button type="button" class="pf-btn ghost" data-role="save-server"
-          ${STATE.backendSaving ? "disabled" : ""}>Luu</button>
-      `,
-    });
-
     const domLiveBlock = renderCollapsibleCard({
       toggleRole: "toggle-dom-live-section",
       title: "Quet DOM LIVE",
@@ -3888,7 +3818,6 @@
         </div>
         ${renderScanInfoSection()}
         ${renderMessagesSection()}
-        ${serverBlock}
         ${domLiveBlock}
       `;
     }
@@ -3932,11 +3861,6 @@
         renderPanel();
         return;
       }
-      if (event.target.closest('[data-role="toggle-server-section"]')) {
-        STATE.serverSectionCollapsed = !STATE.serverSectionCollapsed;
-        renderPanel();
-        return;
-      }
       if (event.target.closest('[data-role="toggle-dom-live-section"]')) {
         STATE.domLiveSectionCollapsed = !STATE.domLiveSectionCollapsed;
         renderPanel();
@@ -3960,11 +3884,6 @@
       }
       if (event.target.closest('[data-role="export-dom-live"]')) {
         exportDomLiveSnapshot();
-        return;
-      }
-      if (event.target.closest('[data-role="save-server"]')) {
-        const input = panel.querySelector('[data-role="server-url"]');
-        await saveBackendUrl(input?.value || "");
         return;
       }
       if (event.target.closest('[data-role="auth-login"]')) {
