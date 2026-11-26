@@ -78,12 +78,16 @@ export function ManageCustomerPhonesModal({
             }
             setParseError(null);
             void (async () => {
-              if (draft.mode === 'edit') {
-                await onUpdate(draft.phone.id, parsed.data.phone);
-              } else {
-                await onAdd(parsed.data.phone);
+              try {
+                if (draft.mode === 'edit') {
+                  await onUpdate(draft.phone.id, parsed.data.phone);
+                } else {
+                  await onAdd(parsed.data.phone);
+                }
+                setDraft(null);
+              } catch {
+                // Parent records the message; keep this form open.
               }
-              setDraft(null);
             })();
           }}
         >

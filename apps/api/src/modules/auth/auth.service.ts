@@ -91,8 +91,22 @@ export class AuthService {
     }
 
     // Reuse of a rotated (already revoked) refresh token → kill all sessions (BUG-006).
+    // A second refresh of the same cookie a moment after rotation (page boot racing
+    // the first API call, or two tabs) must not wipe the session the winner just issued.
     if (stored.revokedAt) {
-      await this.revokeAllSessions(stored.userId);
+      const ageMs = Date.now() - stored.revokedAt.getTime();
+      const replaced = await this.prisma.refreshToken.findFirst({
+        where: {
+          userId: stored.userId,
+          revokedAt: null,
+          // App clock sets revokedAt; Postgres sets createdAt. Allow a few seconds of skew.
+          createdAt: { gte: new Date(stored.revokedAt.getTime() - 5_000) },
+        },
+        select: { id: true },
+      });
+      if (!replaced || ageMs > 15_000) {
+        await this.revokeAllSessions(stored.userId);
+      }
       throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
     }
 

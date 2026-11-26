@@ -650,6 +650,7 @@ export function CustomerListPage() {
       setAddPhoneError(
         err instanceof Error ? err.message : 'Không lưu được số điện thoại.',
       );
+      throw err;
     } finally {
       setAddPhoneBusy(false);
     }
@@ -688,6 +689,7 @@ export function CustomerListPage() {
       setAddPhoneError(
         err instanceof Error ? err.message : 'Không lưu được số điện thoại.',
       );
+      throw err;
     } finally {
       setAddPhoneBusy(false);
     }

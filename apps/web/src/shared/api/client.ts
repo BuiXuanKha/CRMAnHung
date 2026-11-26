@@ -100,6 +100,9 @@ async function parseError(res: Response): Promise<ApiError> {
     } else if (typeof body.message === 'string') {
       message = body.message;
     }
+    if (res.status === 401 && message === 'Unauthorized') {
+      message = 'Phiên đăng nhập không hợp lệ. Hãy tải lại trang và đăng nhập lại.';
+    }
     extra = {
       code: body.code,
       existing: body.existing,
@@ -115,8 +118,7 @@ async function parseError(res: Response): Promise<ApiError> {
 
 let refreshPromise: Promise<boolean> | null = null;
 
-/** Exchange HttpOnly refresh cookie for a new access token (memory). */
-export async function tryRefresh(): Promise<boolean> {
+async function refreshOnce(): Promise<boolean> {
   const res = await fetch(resolveApiUrl('/auth/refresh'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -135,6 +137,20 @@ export async function tryRefresh(): Promise<boolean> {
   };
   setAccessToken(data.accessToken);
   return true;
+}
+
+/**
+ * Exchange the HttpOnly refresh cookie for a new access token (memory).
+ * One in-flight call per tab: page boot and the first API 401 must not both
+ * rotate the same cookie (the loser was treated as theft and wiped the token).
+ */
+export function tryRefresh(): Promise<boolean> {
+  if (!refreshPromise) {
+    refreshPromise = refreshOnce().finally(() => {
+      refreshPromise = null;
+    });
+  }
+  return refreshPromise;
 }
 
 async function apiRequest(
@@ -160,10 +176,7 @@ async function apiRequest(
   });
 
   if (res.status === 401 && retry) {
-    refreshPromise ??= tryRefresh().finally(() => {
-      refreshPromise = null;
-    });
-    const refreshed = await refreshPromise;
+    const refreshed = await tryRefresh();
     if (refreshed) {
       return apiRequest(path, init, false);
     }
