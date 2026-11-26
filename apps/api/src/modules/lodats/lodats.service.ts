@@ -812,6 +812,36 @@ export class LodatsService {
     return this.mapDetail(row, user);
   }
 
+  /**
+   * BUG-091: a lot with an open deposit or notarized deal must not be
+   * switched (including back to Mở bán). Public listing reads the map
+   * status the transaction sync already wrote (cọc / công chứng → Dừng bán).
+   * Staff finish or cancel that transaction first. Does not touch `update()`
+   * (BUG-026 stays open).
+   */
+  private async assertNoOpenTransactionForSaleSwitch(
+    lodatId: string,
+    nextStatus: string,
+  ) {
+    const openTx = await this.prisma.transaction.findFirst({
+      where: {
+        lodatId,
+        status: { in: ['DA_COC', 'DA_CONG_CHUNG'] },
+      },
+      select: { status: true },
+    });
+    if (!openTx) return;
+
+    const txLabel =
+      openTx.status === 'DA_CONG_CHUNG' ? 'Đã công chứng' : 'Đã cọc';
+    const backToOpenSale = nextStatus === 'DANG_BAN';
+    throw new ConflictException(
+      backToOpenSale
+        ? `Lô này đang có giao dịch ${txLabel} nên không chuyển về Mở bán. Hãy hoàn thành hoặc hủy giao dịch đó trước khi mở bán lại.`
+        : `Lô này đang có giao dịch ${txLabel} nên không đổi được trạng thái rao bán. Hãy hoàn thành hoặc hủy giao dịch đó trước khi đổi trạng thái lô.`,
+    );
+  }
+
   async updateSaleStatus(
     user: RequestUser,
     id: string,
@@ -829,6 +859,10 @@ export class LodatsService {
     if (!activeMap) {
       throw new NotFoundException('Lô đất chưa gắn chủ.');
     }
+
+    // Open deposit / notarized deal owns the listing status (transactions.md §3).
+    // Staff finish or cancel that deal before the sale switch may move the lot.
+    await this.assertNoOpenTransactionForSaleSwitch(id, dto.status);
 
     await this.prisma.lodatCustomerMap.update({
       where: { id: activeMap.id },

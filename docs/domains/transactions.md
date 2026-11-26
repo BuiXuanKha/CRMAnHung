@@ -48,7 +48,7 @@ Không nút «Thêm GD» trên list — tạo từ lô / khách.
 | Đã hủy | `DANG_BAN` nếu map đang `TAM_DUNG` (hoặc legacy `DAT_COC`); **giữ nguyên** nếu đang `KHONG_BAN` / `DANG_BAN` / `DA_BAN` | Không tự mở bán khi trước đó Không bán |
 | Xóa GD đang mở | Cùng luật **Đã hủy** | Không ghi đè map `isActive: false` (đổi chủ) |
 
-Tình trạng GD và công tắc rao bán lô là hai hệ; list `/lo-dat` vẫn chỉ hiện Mở bán / Dừng bán / Không bán — không cột Đã cọc / Đã bán.
+Tình trạng GD và công tắc rao bán lô là hai hệ; list `/lo-dat` vẫn chỉ hiện Mở bán / Dừng bán / Không bán — không cột Đã cọc / Đã bán. Khi còn GD mở (`DA_COC` / `DA_CONG_CHUNG`), công tắc lô không đổi status (không gạt về Mở bán). Nhân viên hoàn thành hoặc hủy GD trước.
 
 **3 thẻ thống kê** (trên ô tìm):
 

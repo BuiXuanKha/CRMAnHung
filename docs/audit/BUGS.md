@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-101` |
 | Tổng bug đã ghi | 100 |
-| OPEN | 21 |
+| OPEN | 20 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 79 |
-| Lần audit gần nhất | 2026-11-26 — BUG-089 FIXED (refresh một cookie chỉ một tab được cấp token; tab kia không xóa cookie). |
+| FIXED / CLOSED | 80 |
+| Lần audit gần nhất | 2026-11-26 — BUG-091 FIXED (công tắc lô không gạt về Mở bán khi còn giao dịch Đã cọc hoặc Đã công chứng). |
 
 ## Cách ghi một bug
 
@@ -99,6 +99,7 @@ Mẫu (phát hiện qua trình duyệt):
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
+| 2026-11-26 | lodats | BUG-091 FIXED | Công tắc trạng thái từ chối khi lô còn giao dịch `DA_COC` hoặc `DA_CONG_CHUNG`. Web khách giữ status map (cọc / công chứng = Dừng bán). BUG-026 vẫn OPEN. |
 | 2026-11-26 | auth | BUG-089 FIXED | Một cookie refresh chỉ một request được `FOR UPDATE` rồi cấp token mới. Request thua trong 15 giây trả `REFRESH_SUPERSEDED` và không xóa cookie. Web thử đổi phiên thêm một lần. |
 | 2026-11-26 | auth, extension, lodats, transactions, customers, tasks, sổ đỏ, slug | BUG-089 … BUG-100 | Rà source, không đọc kết luận cũ để kết bug. Không sửa code. Bug đã có số thì không ghi lại: 016 gộp FB, 026 ép DAT_COC/DA_BAN, 029 unique lô kho, 041 thứ tự tin (CLOSED), 043 tin không unique (CLOSED), 057 đổi kind dự án, 061 xóa ảnh dự án (CLOSED by design). |
 | 2026-09-03 | — | — | Khởi tạo `docs/audit/BUGS.md`. Chưa audit. Chờ owner giao module đầu tiên. |
@@ -1510,7 +1511,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Đồng bộ trạng thái từ giao dịch nằm ở `transactions.service`; công tắc lô không gọi lại luật đó.
 - **Impact:** Khách thấy lô Mở bán trong lúc nhân viên đang giữ cọc.
 - **Evidence:** `updateSaleStatus` khoảng dòng 833–836. Không ghi trùng BUG-026 (ép `DAT_COC`/`DA_BAN` lúc đọc rồi Lưu ghi đè — mục đó vẫn OPEN).
-- **Status:** OPEN
+- **Status:** FIXED (2026-11-26) — `updateSaleStatus` từ chối mọi trạng thái khi lô còn giao dịch `DA_COC` hoặc `DA_CONG_CHUNG` (kể cả gạt về `DANG_BAN`). Không ghi map, không đồng bộ web khách. Nhân viên hoàn thành hoặc hủy giao dịch trước. `update` (Lưu form) không đụng — BUG-026 vẫn OPEN.
+- **Fix:** `apps/api/src/modules/lodats/lodats.service.ts` `assertNoOpenTransactionForSaleSwitch`.
 
 ### BUG-092 — Xóa giao dịch còn việc nhắc thì lỗi 500
 
@@ -1686,6 +1688,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 **Đếm sau rà màu giá / ghi chú giá / hoa hồng (2026-09-09, mở rộng 086 + BUG-087…088):** OPEN **18** · FIXED / CLOSED **70** · tổng **88**.
 
 **Đếm sau fix BUG-084…088 (2026-09-09):** OPEN **13** · FIXED / CLOSED **75** · tổng **88**.
+
+**Đếm sau fix BUG-091 (2026-11-26):** OPEN **20** · FIXED / CLOSED **80** · tổng **100**.
 
 **Đếm sau fix BUG-089 (2026-11-26):** OPEN **21** · FIXED / CLOSED **79** · tổng **100**.
 

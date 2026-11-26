@@ -299,6 +299,8 @@ Ba cột riêng: **Mở bán** · **Dừng bán** · **Không bán** (`DANG_BAN`
 
 Không phải đã bán / đặt cọc (thuộc GD). **Mobile thẻ:** badge trạng thái (không 3 cột).
 
+**Giao dịch đang mở** (`DA_COC` / `DA_CONG_CHUNG`): API từ chối mọi công tắc, kể cả về **Mở bán**. Nhân viên hoàn thành hoặc hủy giao dịch trước rồi mới đổi trạng thái lô. Web khách giữ status map đang khớp giao dịch đó (cọc / công chứng = **Dừng bán**). Lưu form sửa lô không nằm trong luật này (BUG-026 vẫn mở).
+
 ##### 7. Thao tác (chevron)
 
 | Mục | Việc hiện tại |
