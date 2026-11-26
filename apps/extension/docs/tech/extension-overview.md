@@ -6,7 +6,7 @@ Tài liệu kỹ thuật cho lập trình viên, dựa trên source trong `Anhun
 |---|---|
 | **Ngày khảo sát** | 16/07/2026 |
 | **Branch khảo sát** | `main` (sau cleanup dump) |
-| **Manifest version** | `2.15.2` (`manifest.json`) |
+| **Manifest version** | `2.15.3` (`manifest.json`) |
 | **Loại** | Chrome Extension Manifest V3 |
 
 ---
@@ -37,6 +37,7 @@ AnhunglandExtension/
 ├── background.js                 # Service worker — proxy fetch API
 ├── config.js                     # Default URL, storage keys, version label
 ├── options.html / options.js     # Popup: version + API cố định (không nhập URL)
+├── ext-refresh-lock.js           # Khóa refresh dùng chung; tab thua không xóa phiên
 ├── content-inbox.js              # Orchestrator + panel UI + gửi BE
 ├── ext-source.js                 # detectAnhunglandSource()
 ├── ext-person-name.js            # Chuẩn hoá / lọc tên đa ngôn ngữ
@@ -59,7 +60,7 @@ Nguồn: `manifest.json`.
 | Hạng mục | Giá trị |
 |----------|---------|
 | `manifest_version` | `3` |
-| `version` | `2.15.2` (single source of truth — JS đọc qua `chrome.runtime.getManifest()`) |
+| `version` | `2.15.3` (single source of truth — JS đọc qua `chrome.runtime.getManifest()`) |
 | Permissions | `activeTab`, `storage` |
 | Background | `background.js` (service worker) |
 | UI cài đặt | `options.html` (popup `action` + `options_ui` mở tab) |
@@ -75,8 +76,8 @@ Nguồn: `manifest.json`.
 **content_scripts**
 
 1. **Business Suite** — inject:
-   `config.js` → `ext-source.js` → `ext-person-name.js` → `ext-context-business-suite.js` → `content-inbox.js`
-2. **Messenger web** — inject thêm `ext-context-facebook-com.js` + `scanners/scanner-messenger-web.js` trước `content-inbox.js`
+   `config.js` → `ext-source.js` → `ext-person-name.js` → `ext-context-business-suite.js` → `ext-refresh-lock.js` → `content-inbox.js`
+2. **Messenger web** — inject thêm `ext-context-facebook-com.js` + `scanners/scanner-messenger-web.js`, rồi `ext-refresh-lock.js` trước `content-inbox.js`
 
 ---
 
@@ -183,6 +184,7 @@ Payload draft gồm object `scan` (UID, tên, page, source, thread…) + `chatMe
 | `anhungland_ext_api_url` | Không đọc. Xóa khi mở panel (bản cũ) |
 | `anhungland_ext_jwt` | JWT sau login. Mọi tab Messenger cùng một Chrome dùng chung khóa này |
 | `anhungland_ext_refresh` | Refresh token. Tab đang mở nghe `chrome.storage.onChanged` để hiện đúng phiên |
+| `anhungland_ext_refresh_lock` | Khóa ngắn khi làm mới phiên. Tab không giữ khóa thì không xóa storage |
 | `anhungland_ext_user` | User JSON |
 | Legacy `pages_facebook_customer_crm_jwt` / `_user` | Đọc một lần để migrate phiên cũ |
 | Legacy `pages_facebook_customer_crm_api_url` | Xóa khi load, không đọc |
@@ -222,7 +224,7 @@ Nút **Quét DOM LIVE** trên panel vẫn có thể tạo file tải về máy l
 | 3 | `ext-source.js` | Phân loại nguồn |
 | 4 | `ext-context-business-suite.js` / `ext-context-facebook-com.js` | Context theo nền tảng |
 | 5 | `scanners/scanner-messenger-web.js` | Quét Messenger |
-| 6 | `content-inbox.js` | Panel, auth, auto-draft, Business Suite scan |
+| 6 | `content-inbox.js` | Panel, auth, auto-draft, Business Suite scan. Khóa refresh: `ext-refresh-lock.js` |
 | 7 | `background.js` | Proxy API fetch |
 
 ---
@@ -231,7 +233,7 @@ Nút **Quét DOM LIVE** trên panel vẫn có thể tạo file tải về máy l
 
 - DOM Meta hay đổi → selector/aria có thể gãy; cần test lại trên inbox thật.
 - Phân quyền chi tiết lưu khách nằm ở Backend (`API/`), không chỉ ở extension.
-- Không có test tự động trong thư mục extension.
+- `node --test apps/extension/ext-refresh-lock.test.mjs` kiểm tra khóa refresh. Không có test UI panel.
 - `options.html` placeholder version có thể lệch cho đến khi `options.js` chạy (giá trị thật từ manifest).
 
 ### 11.1 Tin không mid — BUG-043 (owner bỏ qua)

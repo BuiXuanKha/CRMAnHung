@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-101` |
 | Tổng bug đã ghi | 100 |
-| OPEN | 19 |
+| OPEN | 18 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 81 |
-| Lần audit gần nhất | 2026-11-26 — BUG-092 FIXED (xóa giao dịch còn việc nhắc trả 409, không 500, không xóa việc). |
+| FIXED / CLOSED | 82 |
+| Lần audit gần nhất | 2026-11-26 — BUG-090 FIXED (tab Messenger thua refresh không xóa phiên chung; Đăng xuất vẫn xóa mọi tab). |
 
 ## Cách ghi một bug
 
@@ -99,6 +99,7 @@ Mẫu (phát hiện qua trình duyệt):
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
+| 2026-11-26 | extension | BUG-090 FIXED | Hai tab Messenger cùng làm mới: tab thua không xóa `chrome.storage`. Đăng xuất vẫn xóa phiên mọi tab. Extension 2.15.3. |
 | 2026-11-26 | transactions | BUG-092 FIXED | `remove` đếm việc nhắc trước khi xóa. Còn việc thì 409 tiếng Việt, giao dịch giữ nguyên, không xóa việc. Hết việc thì xóa như cũ. |
 | 2026-11-26 | lodats | BUG-091 FIXED | Công tắc trạng thái từ chối khi lô còn giao dịch `DA_COC` hoặc `DA_CONG_CHUNG`. Web khách giữ status map (cọc / công chứng = Dừng bán). BUG-026 vẫn OPEN. |
 | 2026-11-26 | auth | BUG-089 FIXED | Một cookie refresh chỉ một request được `FOR UPDATE` rồi cấp token mới. Request thua trong 15 giây trả `REFRESH_SUPERSEDED` và không xóa cookie. Web thử đổi phiên thêm một lần. |
@@ -1499,7 +1500,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Khóa là đọc-rồi-ghi, không chiếm quyền trước khi gửi. Token gửi đi không đọc lại sau khi chờ.
 - **Impact:** Đăng nhập extension ở tab này, tab kia làm mới phiên thì cả Chrome bị đăng xuất extension.
 - **Evidence:** `refreshAccessTokenOnce` khoảng dòng 2531–2564. `clearAuthSession()` khi refresh thất bại.
-- **Status:** OPEN
+- **Status:** FIXED (2026-11-26) — Tab ghi khóa rồi đọc lại; tab không còn thấy khóa của mình thì không gửi refresh token cũ. `REFRESH_SUPERSEDED` hoặc mất khóa không gọi `clearAuthSession()`. Phiên tab thắng trong `chrome.storage` được giữ. Bấm Đăng xuất vẫn xóa phiên chung cho mọi tab. Extension `2.15.3`.
 
 ### BUG-091 — Công tắc trạng thái lô không nhìn giao dịch đang mở
 
@@ -1695,5 +1696,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 **Đếm sau fix BUG-089 (2026-11-26):** OPEN **21** · FIXED / CLOSED **79** · tổng **100**.
 
 **Đếm sau fix BUG-092 (2026-11-26):** OPEN **19** · FIXED / CLOSED **81** · tổng **100**.
+
+**Đếm sau fix BUG-090 (2026-11-26):** OPEN **18** · FIXED / CLOSED **82** · tổng **100**.
 
 **Đếm sau rà source 2026-11-26 (BUG-089…100):** OPEN **22** · FIXED / CLOSED **78** · tổng **100**. Header 2026-09-12 ghi OPEN 11; detail chỉ còn 10 mục OPEN (016, 026, 027, 029, 056, 057, 070, 078, 080, 081).

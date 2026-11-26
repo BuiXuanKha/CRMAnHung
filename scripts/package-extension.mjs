@@ -64,6 +64,7 @@ const include = [
   'content-inbox.js',
   'ext-source.js',
   'ext-person-name.js',
+  'ext-refresh-lock.js',
   'ext-context-business-suite.js',
   'ext-context-facebook-com.js',
   'options.html',
