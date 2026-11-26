@@ -6,7 +6,7 @@ const BACKEND_URL_STORAGE_KEY = 'anhungland_ext_api_url';
 const AUTH_TOKEN_STORAGE_KEY = 'anhungland_ext_jwt';
 const AUTH_REFRESH_STORAGE_KEY = 'anhungland_ext_refresh';
 const AUTH_USER_STORAGE_KEY = 'anhungland_ext_user';
-/** Short lock so two Messenger tabs do not rotate the same refresh token. */
+/** Profile-wide refresh lock. The tab that loses it must not clear storage. */
 const AUTH_REFRESH_LOCK_KEY = 'anhungland_ext_refresh_lock';
 /** @deprecated — cleared on load; do not use as the API base */
 const LEGACY_BACKEND_URL_STORAGE_KEY = 'pages_facebook_customer_crm_api_url';
@@ -25,7 +25,7 @@ function resolveExtensionVersion() {
   } catch (_e) {
     /* ignore */
   }
-  return '2.15.2';
+  return '2.15.3';
 }
 
 const CRM_EXTENSION_VERSION = resolveExtensionVersion();

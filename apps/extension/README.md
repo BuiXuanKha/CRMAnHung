@@ -8,14 +8,14 @@ Chrome MV3 — quét khách + tin từ Meta Inbox / Messenger, gửi vào **CRM 
 
 ## Tải bản zip (NV / cài lại)
 
-Tên file tải về có số version để phân biệt từng bản build. Bản hiện tại là **2.15.2**.
+Tên file tải về có số version để phân biệt từng bản build. Bản hiện tại là **2.15.3**.
 
 Trên GitHub (nhánh `main`), tải:
 
-[`release/an-hung-land-crm-extension-2.15.2.zip`](release/an-hung-land-crm-extension-2.15.2.zip)
+[`release/an-hung-land-crm-extension-2.15.3.zip`](release/an-hung-land-crm-extension-2.15.3.zip)
 
 URL đầy đủ (thay `main` nếu cần):  
-`https://github.com/BuiXuanKha/CRMAnHung/raw/main/apps/extension/release/an-hung-land-crm-extension-2.15.2.zip`
+`https://github.com/BuiXuanKha/CRMAnHung/raw/main/apps/extension/release/an-hung-land-crm-extension-2.15.3.zip`
 
 Header web «Tải extension» lấy `version` từ `manifest.json` (một nguồn) nên href đổi theo khi bump version và build lại web. **Link trong README này là chuỗi tĩnh** — khi sửa `version` trong `manifest.json`, phải sửa href ở mục này cho đúng tên `an-hung-land-crm-extension-<version>.zip`.
 

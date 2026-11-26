@@ -2431,10 +2431,16 @@
   }
 
   function clearAuthSession() {
-    setAuthToken("");
-    setRefreshToken("");
-    setAuthUser(null);
+    STATE.auth.token = "";
+    STATE.auth.refreshToken = "";
+    STATE.auth.user = null;
     STATE.auth.status = "";
+    return storageLocalRemove([
+      AUTH_TOKEN_STORAGE_KEY,
+      AUTH_REFRESH_STORAGE_KEY,
+      AUTH_USER_STORAGE_KEY,
+      AUTH_REFRESH_LOCK_KEY,
+    ]);
   }
 
   function hasAuthToken() {
@@ -2524,56 +2530,65 @@
   }
 
   /**
-   * One refresh at a time per profile. The second tab waits, then uses the
-   * token the winner stored, instead of treating the rotated cookie as theft
-   * and wiping the shared session.
+   * One refresh at a time per profile. The tab that loses the lock, or gets
+   * REFRESH_SUPERSEDED, keeps the session the winner stored. Only a rejected
+   * refresh while this tab still holds the lock clears chrome.storage.
+   * Đăng xuất is logoutFromBackend, which always clears the shared session.
    */
   async function refreshAccessTokenOnce() {
-    const refresh = normalizeText(STATE.auth.refreshToken || "");
-    if (!refresh) return false;
-
-    const lockId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    const existing = await storageLocalGet([AUTH_REFRESH_LOCK_KEY]);
-    const lock = existing[AUTH_REFRESH_LOCK_KEY];
-    const lockIsFresh =
-      lock &&
-      lock.id &&
-      lock.id !== lockId &&
-      Date.now() - Number(lock.at || 0) < 8_000;
-    if (lockIsFresh) {
-      await delay(700);
-      if (await adoptStoredSessionIfDifferent()) return true;
+    if (typeof AnhunglandRefreshLock === "undefined") {
+      throw new Error("Extension thiếu file khóa phiên — hãy tải lại extension.");
     }
-
-    await storageLocalSet({
-      [AUTH_REFRESH_LOCK_KEY]: { id: lockId, at: Date.now() },
+    return AnhunglandRefreshLock.refreshSharedSession({
+      readSession: async () => authFromStorageItems(await storageLocalGet(AUTH_STORAGE_KEYS)),
+      readLock: async () => {
+        const items = await storageLocalGet([AUTH_REFRESH_LOCK_KEY]);
+        return items[AUTH_REFRESH_LOCK_KEY] || null;
+      },
+      writeLock: async (lock) => {
+        await storageLocalSet({ [AUTH_REFRESH_LOCK_KEY]: lock });
+      },
+      removeLock: async (lockId) => {
+        const items = await storageLocalGet([AUTH_REFRESH_LOCK_KEY]);
+        if (items[AUTH_REFRESH_LOCK_KEY]?.id === lockId) {
+          await storageLocalRemove(AUTH_REFRESH_LOCK_KEY);
+        }
+      },
+      postRefresh: async (refreshToken) => {
+        const response = await backendFetch("/auth/refresh", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ refreshToken }),
+        });
+        const data = parseJsonResponse(response);
+        return {
+          ok: Boolean(response.ok && data?.accessToken),
+          status: response.status,
+          code: data?.code || "",
+          accessToken: data?.accessToken || "",
+          refreshToken: data?.refreshToken || "",
+          user: authUserFromPayload(data),
+        };
+      },
+      saveSession: async (session) => {
+        const token = normalizeText(session.token || "");
+        const refreshToken = normalizeText(session.refreshToken || "");
+        STATE.auth.token = token;
+        if (refreshToken) STATE.auth.refreshToken = refreshToken;
+        if (session.user) STATE.auth.user = session.user;
+        const payload = { [AUTH_TOKEN_STORAGE_KEY]: token };
+        if (refreshToken) payload[AUTH_REFRESH_STORAGE_KEY] = refreshToken;
+        if (session.user) payload[AUTH_USER_STORAGE_KEY] = session.user;
+        await storageLocalSet(payload);
+      },
+      clearSession: () => clearAuthSession(),
+      adoptSession: async (session) => {
+        adoptAuthSnapshot(session || { token: "", refreshToken: "", user: null });
+      },
+      delay,
+      now: () => Date.now(),
+      createLockId: () => `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     });
-
-    try {
-      const response = await backendFetch("/auth/refresh", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ refreshToken: refresh }),
-      });
-      const data = parseJsonResponse(response);
-      if (!response.ok || !data?.accessToken) {
-        if (await adoptStoredSessionIfDifferent()) return true;
-        await delay(500);
-        if (await adoptStoredSessionIfDifferent()) return true;
-        clearAuthSession();
-        return false;
-      }
-      setAuthToken(data.accessToken);
-      if (data.refreshToken) setRefreshToken(data.refreshToken);
-      const user = authUserFromPayload(data);
-      if (user) setAuthUser(user);
-      return true;
-    } finally {
-      const current = await storageLocalGet([AUTH_REFRESH_LOCK_KEY]);
-      if (current[AUTH_REFRESH_LOCK_KEY]?.id === lockId) {
-        await storageLocalRemove(AUTH_REFRESH_LOCK_KEY);
-      }
-    }
   }
 
   async function backendFetchAuthed(path, init = {}) {
@@ -2596,6 +2611,15 @@
       const data = parseJsonResponse(response);
       const user = authUserFromPayload(data);
       if (!response.ok || !user) {
+        const latest = authFromStorageItems(await storageLocalGet(AUTH_STORAGE_KEYS));
+        if (
+          latest.token &&
+          (latest.token !== STATE.auth.token || latest.refreshToken !== STATE.auth.refreshToken)
+        ) {
+          adoptAuthSnapshot(latest);
+          return true;
+        }
+        if (latest.refreshToken) return false;
         clearAuthSession();
         return false;
       }
@@ -2633,7 +2657,7 @@
   }
 
   async function logoutFromBackend() {
-    clearAuthSession();
+    await clearAuthSession();
   }
 
   function buildExtensionDraftPayload() {
