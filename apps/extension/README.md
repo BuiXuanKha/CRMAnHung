@@ -8,19 +8,20 @@ Chrome MV3 — quét khách + tin từ Meta Inbox / Messenger, gửi vào **CRM 
 
 ## Tải bản zip (NV / cài lại)
 
-Trên GitHub (nhánh `main`), tải file:
+Tên file tải về có số version để phân biệt từng bản build. Bản hiện tại là **2.15.1**.
 
-| File | Link |
-|------|------|
-| **Mới nhất** | [`release/an-hung-land-crm-extension-latest.zip`](release/an-hung-land-crm-extension-latest.zip) |
-| Theo version | [`release/an-hung-land-crm-extension-2.15.1.zip`](release/an-hung-land-crm-extension-2.15.1.zip) (đổi số khi bump `manifest.json`) |
+Trên GitHub (nhánh `main`), tải:
+
+[`release/an-hung-land-crm-extension-2.15.1.zip`](release/an-hung-land-crm-extension-2.15.1.zip)
 
 URL đầy đủ (thay `main` nếu cần):  
-`https://github.com/BuiXuanKha/CRMAnHung/raw/main/apps/extension/release/an-hung-land-crm-extension-latest.zip`
+`https://github.com/BuiXuanKha/CRMAnHung/raw/main/apps/extension/release/an-hung-land-crm-extension-2.15.1.zip`
+
+Header web «Tải extension» lấy `version` từ `manifest.json` (một nguồn) nên href đổi theo khi bump version và build lại web. **Link trong README này là chuỗi tĩnh** — khi sửa `version` trong `manifest.json`, phải sửa href ở mục này cho đúng tên `an-hung-land-crm-extension-<version>.zip`.
 
 Giải nén → **Load unpacked** thư mục đã giải nén (có `manifest.json`).
 
-Dev trong repo: `pnpm extension:zip` tạo lại file trong `apps/extension/release/`.
+Dev trong repo: `pnpm extension:zip` tạo `release/an-hung-land-crm-extension-<version>.zip`. Không đưa link file `…-latest.zip` cho NV — tên file người dùng lưu phải có version.
 
 ## Cài đặt
 

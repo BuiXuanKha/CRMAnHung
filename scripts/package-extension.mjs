@@ -3,7 +3,9 @@
  * Zip apps/extension for Chrome Load unpacked / distribute to staff.
  * Output:
  *   apps/extension/release/an-hung-land-crm-extension-<version>.zip
+ *     (public header + README download this name)
  *   apps/extension/release/an-hung-land-crm-extension-latest.zip
+ *     (internal copy only — do not link it; the saved filename must include the version)
  */
 import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
@@ -25,6 +27,32 @@ const version = String(manifest.version || '0.0.0').trim();
 const baseName = `an-hung-land-crm-extension-${version}`;
 const zipPath = join(releaseDir, `${baseName}.zip`);
 const latestPath = join(releaseDir, 'an-hung-land-crm-extension-latest.zip');
+
+const readme = readFileSync(join(extDir, 'README.md'), 'utf8');
+if (!readme.includes(`${baseName}.zip`)) {
+  console.error(
+    `apps/extension/README.md download href is a static string and must include ${baseName}.zip after a manifest version bump.`,
+  );
+  process.exit(1);
+}
+if (readme.includes('](release/an-hung-land-crm-extension-latest.zip)')) {
+  console.error(
+    'apps/extension/README.md must not link an-hung-land-crm-extension-latest.zip.',
+  );
+  process.exit(1);
+}
+
+const navPath = join(root, 'apps/web/src/features/public/public-extension-nav.tsx');
+const navSource = readFileSync(navPath, 'utf8');
+if (
+  navSource.includes('an-hung-land-crm-extension-latest.zip') ||
+  !navSource.includes('extension/manifest.json')
+) {
+  console.error(
+    'Public header download URL must be built from apps/extension/manifest.json version, not latest.zip.',
+  );
+  process.exit(1);
+}
 
 mkdirSync(releaseDir, { recursive: true });
 
