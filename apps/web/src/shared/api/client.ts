@@ -118,25 +118,54 @@ async function parseError(res: Response): Promise<ApiError> {
 
 let refreshPromise: Promise<boolean> | null = null;
 
-async function refreshOnce(): Promise<boolean> {
+const REFRESH_SUPERSEDED_CODE = 'REFRESH_SUPERSEDED';
+
+type RefreshCall =
+  | { ok: true; accessToken: string }
+  | { ok: false; code?: string };
+
+async function postRefresh(): Promise<RefreshCall> {
   const res = await fetch(resolveApiUrl('/auth/refresh'), {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify({}),
   });
-
   if (!res.ok) {
+    let code: string | undefined;
+    try {
+      const body = (await res.json()) as { code?: string };
+      if (typeof body.code === 'string') code = body.code;
+    } catch {
+      // ignore
+    }
+    return { ok: false, code };
+  }
+  const data = (await res.json()) as { accessToken?: string };
+  if (!data.accessToken) return { ok: false };
+  return { ok: true, accessToken: data.accessToken };
+}
+
+async function refreshOnce(): Promise<boolean> {
+  const first = await postRefresh();
+  if (first.ok) {
+    setAccessToken(first.accessToken);
+    return true;
+  }
+  // Another tab rotated this cookie. Do not drop the in-memory token.
+  // Retry once: the browser should already have the winner's cookie.
+  if (first.code === REFRESH_SUPERSEDED_CODE) {
+    const second = await postRefresh();
+    if (second.ok) {
+      setAccessToken(second.accessToken);
+      return true;
+    }
+    if (second.code === REFRESH_SUPERSEDED_CODE) return false;
     clearTokens();
     return false;
   }
-
-  const data = (await res.json()) as {
-    accessToken: string;
-    refreshToken?: string;
-  };
-  setAccessToken(data.accessToken);
-  return true;
+  clearTokens();
+  return false;
 }
 
 /**
