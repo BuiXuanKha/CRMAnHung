@@ -76,7 +76,7 @@ Sắp xếp GET:
 2. Chưa xong + **không ghim** — `dueOn` asc, rồi `createdAt` desc  
 3. **Đã xong** — cuối list; `dueOn` asc, rồi `completedAt` desc  
 
-Tối đa 200.
+Lấy tối đa **200 việc mới nhất** (`createdAt` giảm dần, hòa thì `id` giảm dần) rồi mới sắp ba nhóm ở trên. `total` là số việc thật của nhân viên, có thể lớn hơn 200. Footer «Hiển thị N / Tổng M»: N là số dòng đang hiện, M là `total`.
 
 ## 8. Mock data
 
@@ -178,7 +178,7 @@ Nổi trên footer bảng / thẻ (cùng kiểu FAB chi tiết khách / lô — 
 
 #### 12.1.5 Footer
 
-`Hiển thị N / Tổng M công việc`. Cùng màu header cột.
+`Hiển thị N / Tổng M công việc`. N là số dòng đang hiện (tối đa 200 việc mới nhất). M là tổng việc thật của nhân viên. Cùng màu header cột.
 
 ### 12.2 Giao diện mobile
 
