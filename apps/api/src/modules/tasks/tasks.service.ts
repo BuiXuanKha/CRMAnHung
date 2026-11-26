@@ -27,18 +27,24 @@ function dueOnYmd(value: Date): string {
 export class TasksService {
   constructor(private readonly prisma: PrismaService) {}
 
+  /**
+   * The screen stays a single list. Over 200 tasks, return the 200 newest
+   * (`createdAt`, then `id`) so a new task is not dropped by an unordered take.
+   * `total` is the employee's real count. Display order is still
+   * `compareWorkTasksForList` on that slice.
+   */
   async list(user: RequestUser) {
-    const rows = await this.prisma.workTask.findMany({
-      where: { employeeId: user.id },
-      take: 200,
-    });
-    const items = rows
-      .map((row) => this.toItem(row))
-      .sort(compareWorkTasksForList);
-    return {
-      items,
-      total: items.length,
-    };
+    const where = { employeeId: user.id };
+    const [rows, total] = await Promise.all([
+      this.prisma.workTask.findMany({
+        where,
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+        take: 200,
+      }),
+      this.prisma.workTask.count({ where }),
+    ]);
+    const items = rows.map((row) => this.toItem(row)).sort(compareWorkTasksForList);
+    return { items, total };
   }
 
   async create(user: RequestUser, dto: CreateWorkTaskDto) {

@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-101` |
 | Tổng bug đã ghi | 100 |
-| OPEN | 16 |
+| OPEN | 15 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 84 |
-| Lần audit gần nhất | 2026-11-26 — BUG-095 CLOSED (won't fix). Owner từ chối: xóa trắng nhu cầu mà danh sách vẫn hiện nhu cầu trước không phải bug. BUG-094 cùng ngày, cùng won't fix. |
+| FIXED / CLOSED | 85 |
+| Lần audit gần nhất | 2026-11-26 — BUG-096 FIXED (danh sách việc lấy 200 việc mới nhất; tổng trên màn là số việc thật). |
 
 ## Cách ghi một bug
 
@@ -99,6 +99,7 @@ Mẫu (phát hiện qua trình duyệt):
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
+| 2026-11-26 | tasks | BUG-096 FIXED | `GET /tasks` lấy 200 việc mới nhất (`createdAt` giảm dần, hòa thì `id`). `total` là số việc thật. Màn `/cong-viec` giữ sắp xếp cũ trên 200 dòng đó. |
 | 2026-11-26 | customers | BUG-095 CLOSED | Owner từ chối: xóa trắng nhu cầu mà danh sách vẫn hiện nhu cầu trước — không phải bug, won't fix, không sửa code. |
 | 2026-11-26 | customers / extension | BUG-094 CLOSED | Owner từ chối: hai tab gửi cùng một người Facebook cùng lúc quá hiếm, người không gặp được — không phải bug, won't fix, không sửa code. |
 | 2026-11-26 | extension | BUG-090 FIXED | Hai tab Messenger cùng làm mới: tab thua không xóa `chrome.storage`. Đăng xuất vẫn xóa phiên mọi tab. Extension 2.15.3. |
@@ -1581,7 +1582,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Cắt trang không kèm sắp xếp và không đếm `count`.
 - **Impact:** Nhân viên nhiều việc không thấy đủ danh sách, số tổng không dùng để biết còn việc.
 - **Evidence:** `tasks.service.ts` `list` khoảng dòng 31–41.
-- **Status:** OPEN
+- **Status:** FIXED (2026-11-26) — `list` sắp `createdAt` giảm dần (hòa thì `id`) rồi `take: 200`, nên việc mới luôn nằm trong 200 dòng. `total` là `count` thật của nhân viên. Màn `/cong-viec` không phân trang thêm; footer «Hiển thị N / Tổng M» dùng số thật. Trong 200 dòng đó vẫn sắp `compareWorkTasksForList`.
 
 ### BUG-097 — Link lô cũ vẫn chuyển 301 khi lô đích đã Không bán
 
@@ -1700,6 +1701,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 **Đếm sau đóng BUG-094 (2026-11-26):** OPEN **17** · FIXED / CLOSED **83** · tổng **100**.
 
 **Đếm sau đóng BUG-095 (2026-11-26):** OPEN **16** · FIXED / CLOSED **84** · tổng **100**.
+
+**Đếm sau fix BUG-096 (2026-11-26):** OPEN **15** · FIXED / CLOSED **85** · tổng **100**.
 
 **Đếm sau fix BUG-089 (2026-11-26):** OPEN **21** · FIXED / CLOSED **79** · tổng **100**.
 
