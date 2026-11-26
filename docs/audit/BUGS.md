@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-101` |
 | Tổng bug đã ghi | 100 |
-| OPEN | 17 |
+| OPEN | 16 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 83 |
-| Lần audit gần nhất | 2026-11-26 — BUG-094 CLOSED (won't fix). Owner từ chối: hai tab gửi cùng một người Facebook cùng lúc quá hiếm, người không gặp được; không phải bug. |
+| FIXED / CLOSED | 84 |
+| Lần audit gần nhất | 2026-11-26 — BUG-095 CLOSED (won't fix). Owner từ chối: xóa trắng nhu cầu mà danh sách vẫn hiện nhu cầu trước không phải bug. BUG-094 cùng ngày, cùng won't fix. |
 
 ## Cách ghi một bug
 
@@ -99,6 +99,7 @@ Mẫu (phát hiện qua trình duyệt):
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
+| 2026-11-26 | customers | BUG-095 CLOSED | Owner từ chối: xóa trắng nhu cầu mà danh sách vẫn hiện nhu cầu trước — không phải bug, won't fix, không sửa code. |
 | 2026-11-26 | customers / extension | BUG-094 CLOSED | Owner từ chối: hai tab gửi cùng một người Facebook cùng lúc quá hiếm, người không gặp được — không phải bug, won't fix, không sửa code. |
 | 2026-11-26 | extension | BUG-090 FIXED | Hai tab Messenger cùng làm mới: tab thua không xóa `chrome.storage`. Đăng xuất vẫn xóa phiên mọi tab. Extension 2.15.3. |
 | 2026-11-26 | transactions | BUG-092 FIXED | `remove` đếm việc nhắc trước khi xóa. Còn việc thì 409 tiếng Việt, giao dịch giữ nguyên, không xóa việc. Hết việc thì xóa như cũ. |
@@ -1567,7 +1568,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** «Xóa trắng» không được ghi thành một mốc; phần đọc coi chuỗi rỗng là «chưa có, tìm tiếp».
 - **Impact:** Nhu cầu đã bỏ vẫn hiện trên `/khach-hang`.
 - **Evidence:** `addCare` điều kiện `careChanged` khoảng dòng 367–369. `loadCareSummaries` khoảng dòng 91–92.
-- **Status:** OPEN
+- **Status:** CLOSED (won't fix, 2026-11-26) — Owner: xóa trắng nhu cầu mà danh sách vẫn hiện nhu cầu trước không phải bug, không sửa.
 
 ### BUG-096 — Danh sách việc làm cắt 200 dòng và báo tổng sai
 
@@ -1678,6 +1679,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | **045 / 046** | won't fix (đổi tên tay; chat chỉ tham khảo). |
 | **061 / 063 / 065** | by design (ảnh dự án chung; ẩn khách không cascade; không đăng ký kênh trước). |
 | **094** | Race hai tab extension cùng UID — won't fix (2026-11-26); quá hiếm, người không gặp được. |
+| **095** | Xóa trắng nhu cầu vẫn hiện nhu cầu trước trên list — won't fix (2026-11-26); không phải bug. |
 
 ### D. OPEN thuần (chưa gắn HOÃN) — vẫn thấy trên code, không thuộc đợt «không làm» nhưng ghi để khỏi sót
 
@@ -1696,6 +1698,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 **Đếm sau fix BUG-091 (2026-11-26):** OPEN **20** · FIXED / CLOSED **80** · tổng **100**.
 
 **Đếm sau đóng BUG-094 (2026-11-26):** OPEN **17** · FIXED / CLOSED **83** · tổng **100**.
+
+**Đếm sau đóng BUG-095 (2026-11-26):** OPEN **16** · FIXED / CLOSED **84** · tổng **100**.
 
 **Đếm sau fix BUG-089 (2026-11-26):** OPEN **21** · FIXED / CLOSED **79** · tổng **100**.
 
