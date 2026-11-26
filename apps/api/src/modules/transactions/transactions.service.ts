@@ -38,6 +38,10 @@ import {
   toListItem,
 } from './transactions-view';
 
+/** Shown when delete hits WorkTask.transaction onDelete Restrict (including completed tasks). */
+export const TRANSACTION_HAS_WORK_TASKS_MESSAGE =
+  'Giao dịch này còn việc nhắc. Hãy hoàn thành hoặc gỡ những việc nhắc đó trước khi xóa.';
+
 @Injectable()
 export class TransactionsService {
   private readonly logger = new Logger(TransactionsService.name);
@@ -290,12 +294,38 @@ export class TransactionsService {
     if (!row) throw new NotFoundException('Không tìm thấy giao dịch.');
     this.assertCanAccessTx(user, row.createdByEmployeeId);
 
-    await this.prisma.$transaction(async (tx) => {
-      if (OPEN_STATUSES.includes(row.status as (typeof OPEN_STATUSES)[number])) {
-        await this.syncMapListingStatus(tx, row.lodatCustomerMapId, TX_STATUS.HUY);
+    try {
+      await this.prisma.$transaction(async (tx) => {
+        const taskCount = await tx.workTask.count({ where: { transactionId: id } });
+        if (taskCount > 0) {
+          throw new ConflictException(TRANSACTION_HAS_WORK_TASKS_MESSAGE);
+        }
+        if (OPEN_STATUSES.includes(row.status as (typeof OPEN_STATUSES)[number])) {
+          await this.syncMapListingStatus(tx, row.lodatCustomerMapId, TX_STATUS.HUY);
+        }
+        await tx.transaction.delete({ where: { id } });
+      });
+    } catch (err) {
+      if (err instanceof ConflictException) throw err;
+      if (this.isWorkTaskForeignKey(err)) {
+        throw new ConflictException(TRANSACTION_HAS_WORK_TASKS_MESSAGE);
       }
-      await tx.transaction.delete({ where: { id } });
-    });
+      throw err;
+    }
+  }
+
+  /** P2003 on this delete is WorkTask.transaction Restrict. Do not map a different constraint. */
+  private isWorkTaskForeignKey(err: unknown): boolean {
+    if (!(err instanceof Prisma.PrismaClientKnownRequestError) || err.code !== 'P2003') {
+      return false;
+    }
+    const meta = (err.meta ?? {}) as Record<string, unknown>;
+    const blob = [meta.field_name, meta.constraint, meta.modelName]
+      .filter((value): value is string => typeof value === 'string')
+      .join(' ')
+      .toLowerCase();
+    if (!blob) return true;
+    return blob.includes('worktask') || blob.includes('transactionid');
   }
 
   private ownershipWhere(

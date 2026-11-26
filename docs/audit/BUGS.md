@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-101` |
 | Tổng bug đã ghi | 100 |
-| OPEN | 20 |
+| OPEN | 19 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 80 |
-| Lần audit gần nhất | 2026-11-26 — BUG-091 FIXED (công tắc lô không gạt về Mở bán khi còn giao dịch Đã cọc hoặc Đã công chứng). |
+| FIXED / CLOSED | 81 |
+| Lần audit gần nhất | 2026-11-26 — BUG-092 FIXED (xóa giao dịch còn việc nhắc trả 409, không 500, không xóa việc). |
 
 ## Cách ghi một bug
 
@@ -99,6 +99,7 @@ Mẫu (phát hiện qua trình duyệt):
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
+| 2026-11-26 | transactions | BUG-092 FIXED | `remove` đếm việc nhắc trước khi xóa. Còn việc thì 409 tiếng Việt, giao dịch giữ nguyên, không xóa việc. Hết việc thì xóa như cũ. |
 | 2026-11-26 | lodats | BUG-091 FIXED | Công tắc trạng thái từ chối khi lô còn giao dịch `DA_COC` hoặc `DA_CONG_CHUNG`. Web khách giữ status map (cọc / công chứng = Dừng bán). BUG-026 vẫn OPEN. |
 | 2026-11-26 | auth | BUG-089 FIXED | Một cookie refresh chỉ một request được `FOR UPDATE` rồi cấp token mới. Request thua trong 15 giây trả `REFRESH_SUPERSEDED` và không xóa cookie. Web thử đổi phiên thêm một lần. |
 | 2026-11-26 | auth, extension, lodats, transactions, customers, tasks, sổ đỏ, slug | BUG-089 … BUG-100 | Rà source, không đọc kết luận cũ để kết bug. Không sửa code. Bug đã có số thì không ghi lại: 016 gộp FB, 026 ép DAT_COC/DA_BAN, 029 unique lô kho, 041 thứ tự tin (CLOSED), 043 tin không unique (CLOSED), 057 đổi kind dự án, 061 xóa ảnh dự án (CLOSED by design). |
@@ -1525,7 +1526,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Khóa ngoại chặn xóa; API không kiểm tra việc nhắc trước và không trả 409.
 - **Impact:** Nhân viên không xóa được giao dịch, không biết vì còn việc nhắc.
 - **Evidence:** `transactions.service.ts` `remove` khoảng dòng 293–298. `schema.prisma` model `WorkTask` quan hệ `transaction` Restrict.
-- **Status:** OPEN
+- **Status:** FIXED (2026-11-26) — `remove` đếm `WorkTask` gắn `transactionId` (kể cả việc đã hoàn thành, vì khóa ngoại vẫn còn). Còn việc thì `ConflictException` 409: «Giao dịch này còn việc nhắc. Hãy hoàn thành hoặc gỡ những việc nhắc đó trước khi xóa.» Không đổi map, không xóa giao dịch, không xóa việc. Hết việc thì xóa như cũ (GD mở vẫn đưa map về Mở bán). `onDelete: Restrict` giữ nguyên. `P2003` đúng khóa việc nhắc cũng trả cùng câu, không 500.
 
 ### BUG-093 — Chuyển hội thoại khi đang gửi thì khách ở giữa bị bỏ
 
@@ -1692,5 +1693,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 **Đếm sau fix BUG-091 (2026-11-26):** OPEN **20** · FIXED / CLOSED **80** · tổng **100**.
 
 **Đếm sau fix BUG-089 (2026-11-26):** OPEN **21** · FIXED / CLOSED **79** · tổng **100**.
+
+**Đếm sau fix BUG-092 (2026-11-26):** OPEN **19** · FIXED / CLOSED **81** · tổng **100**.
 
 **Đếm sau rà source 2026-11-26 (BUG-089…100):** OPEN **22** · FIXED / CLOSED **78** · tổng **100**. Header 2026-09-12 ghi OPEN 11; detail chỉ còn 10 mục OPEN (016, 026, 027, 029, 056, 057, 070, 078, 080, 081).
