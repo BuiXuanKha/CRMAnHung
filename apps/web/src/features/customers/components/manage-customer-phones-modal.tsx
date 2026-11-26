@@ -37,14 +37,14 @@ export function ManageCustomerPhonesModal({
   const [draft, setDraft] = useState<Draft | null>(null);
   const [value, setValue] = useState('');
   const [parseError, setParseError] = useState<string | null>(null);
+  const [openForId, setOpenForId] = useState('');
+  const customerId = customer?.id ?? '';
 
-  useEffect(() => {
-    if (!customer) {
-      setDraft(null);
-      setValue('');
-      setParseError(null);
-    }
-  }, [customer]);
+  // Orange phone icon means "add now". Skip the empty list when this customer has no number.
+  if (customerId !== openForId) {
+    setOpenForId(customerId);
+    setDraft(customer && phones.length === 0 ? { mode: 'add' } : null);
+  }
 
   useEffect(() => {
     if (!draft) {
@@ -120,9 +120,12 @@ export function ManageCustomerPhonesModal({
               type="button"
               className="crm-btn"
               disabled={busy}
-              onClick={() => setDraft(null)}
+              onClick={() => {
+                if (phones.length === 0) onClose();
+                else setDraft(null);
+              }}
             >
-              Quay lại
+              {phones.length === 0 ? 'Huỷ' : 'Quay lại'}
             </button>
             <button type="submit" className="crm-btn primary" disabled={busy}>
               {busy ? 'Đang lưu…' : 'Lưu số'}
