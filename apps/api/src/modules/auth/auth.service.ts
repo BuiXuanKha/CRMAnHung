@@ -1,6 +1,7 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Prisma } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
 import { createHash, randomBytes } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -21,6 +22,25 @@ export type AuthUserPayload = {
   phone?: string;
   avatarUrl?: string | null;
 };
+
+/** Losing tab of a same-cookie refresh. Session stays; do not clear the new cookie. */
+export const REFRESH_SUPERSEDED_CODE = 'REFRESH_SUPERSEDED';
+
+const REFRESH_REUSE_GRACE_MS = 15_000;
+
+export class RefreshSupersededException extends UnauthorizedException {
+  constructor() {
+    super({
+      statusCode: 401,
+      message: 'Refresh token không hợp lệ hoặc đã hết hạn',
+      code: REFRESH_SUPERSEDED_CODE,
+    });
+  }
+}
+
+export function isRefreshSuperseded(err: unknown): boolean {
+  return err instanceof RefreshSupersededException;
+}
 
 type AuthUserSource = {
   id: string;
@@ -81,53 +101,56 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
     }
     const tokenHash = this.hashToken(refreshToken);
-    const stored = await this.prisma.refreshToken.findUnique({
-      where: { tokenHash },
-      include: { user: true },
+
+    // Lock the row so two tabs cannot both rotate the same cookie (BUG-089).
+    // The loser runs only after the winner has committed the replacement token.
+    const outcome = await this.prisma.$transaction(async (tx) => {
+      const locked = await tx.$queryRaw<Array<{ id: string }>>`
+        SELECT id FROM "RefreshToken" WHERE "tokenHash" = ${tokenHash} FOR UPDATE
+      `;
+      if (locked.length === 0) {
+        return { kind: 'invalid' as const };
+      }
+      const stored = await tx.refreshToken.findUnique({
+        where: { id: locked[0]!.id },
+        include: { user: true },
+      });
+      if (!stored) {
+        return { kind: 'invalid' as const };
+      }
+      if (stored.revokedAt) {
+        return {
+          kind: 'reused' as const,
+          userId: stored.userId,
+          revokedAt: stored.revokedAt,
+        };
+      }
+      if (stored.expiresAt < new Date()) {
+        return { kind: 'invalid' as const };
+      }
+      if (!stored.user.isActive) {
+        return { kind: 'inactive' as const };
+      }
+
+      await tx.refreshToken.update({
+        where: { id: stored.id },
+        data: { revokedAt: new Date() },
+      });
+      const payload = toAuthUser(stored.user, this.storage);
+      const tokens = await this.issueTokens(payload, stored.user.sessionVersion, tx);
+      return { kind: 'ok' as const, tokens, user: payload };
     });
 
-    if (!stored) {
-      throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
-    }
-
-    // Reuse of a rotated (already revoked) refresh token → kill all sessions (BUG-006).
-    // A second refresh of the same cookie a moment after rotation (page boot racing
-    // the first API call, or two tabs) must not wipe the session the winner just issued.
-    if (stored.revokedAt) {
-      const ageMs = Date.now() - stored.revokedAt.getTime();
-      const replaced = await this.prisma.refreshToken.findFirst({
-        where: {
-          userId: stored.userId,
-          revokedAt: null,
-          // App clock sets revokedAt; Postgres sets createdAt. Allow a few seconds of skew.
-          createdAt: { gte: new Date(stored.revokedAt.getTime() - 5_000) },
-        },
-        select: { id: true },
-      });
-      if (!replaced || ageMs > 15_000) {
-        await this.revokeAllSessions(stored.userId);
-      }
-      throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
-    }
-
-    if (stored.expiresAt < new Date()) {
-      throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
-    }
-
-    if (!stored.user.isActive) {
+    if (outcome.kind === 'inactive') {
       throw new UnauthorizedException('Tài khoản đã bị vô hiệu hóa');
     }
-
-    // Rotation: revoke old token
-    await this.prisma.refreshToken.update({
-      where: { id: stored.id },
-      data: { revokedAt: new Date() },
-    });
-
-    const payload: AuthUserPayload = toAuthUser(stored.user, this.storage);
-
-    const tokens = await this.issueTokens(payload, stored.user.sessionVersion);
-    return { ...tokens, user: payload };
+    if (outcome.kind === 'reused') {
+      await this.rejectReusedRefresh(outcome.userId, outcome.revokedAt);
+    }
+    if (outcome.kind !== 'ok') {
+      throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
+    }
+    return { ...outcome.tokens, user: outcome.user };
   }
 
   async logout(refreshToken: string | undefined) {
@@ -140,6 +163,28 @@ export class AuthService {
       data: { revokedAt: new Date() },
     });
     return { ok: true };
+  }
+
+  /**
+   * A rotated cookie presented again. A sibling request that just issued a
+   * replacement is not theft (BUG-089). Older reuse still kills every session (BUG-006).
+   */
+  private async rejectReusedRefresh(userId: string, revokedAt: Date): Promise<never> {
+    const ageMs = Date.now() - revokedAt.getTime();
+    const replaced = await this.prisma.refreshToken.findFirst({
+      where: {
+        userId,
+        revokedAt: null,
+        // App clock sets revokedAt; Postgres sets createdAt. Allow a few seconds of skew.
+        createdAt: { gte: new Date(revokedAt.getTime() - 5_000) },
+      },
+      select: { id: true },
+    });
+    if (!replaced || ageMs > REFRESH_REUSE_GRACE_MS) {
+      await this.revokeAllSessions(userId);
+      throw new UnauthorizedException('Refresh token không hợp lệ hoặc đã hết hạn');
+    }
+    throw new RefreshSupersededException();
   }
 
   /** Revoke every refresh token and bump sessionVersion (invalidates access JWTs). */
@@ -179,6 +224,7 @@ export class AuthService {
   private async issueTokens(
     payload: AuthUserPayload,
     sessionVersion: number,
+    db: PrismaService | Prisma.TransactionClient = this.prisma,
   ): Promise<AuthTokens> {
     const accessExpiresIn =
       this.config.get<string>('JWT_ACCESS_EXPIRES_IN') ?? '15m';
@@ -201,7 +247,7 @@ export class AuthService {
     const expiresIn = this.config.get<string>('JWT_REFRESH_EXPIRES_IN') ?? '30d';
     const expiresAt = this.parseExpiryDate(expiresIn);
 
-    await this.prisma.refreshToken.create({
+    await db.refreshToken.create({
       data: {
         tokenHash: this.hashToken(refreshToken),
         userId: payload.id,

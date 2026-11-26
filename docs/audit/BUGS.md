@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-101` |
 | Tổng bug đã ghi | 100 |
-| OPEN | 22 |
+| OPEN | 21 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 78 |
-| Lần audit gần nhất | 2026-11-26 — Rà source. Bổ sung BUG-089…BUG-100. OPEN cũ trên detail là 10 (016, 026, 027, 029, 056, 057, 070, 078, 080, 081); header trước ghi 11. |
+| FIXED / CLOSED | 79 |
+| Lần audit gần nhất | 2026-11-26 — BUG-089 FIXED (refresh một cookie chỉ một tab được cấp token; tab kia không xóa cookie). |
 
 ## Cách ghi một bug
 
@@ -99,6 +99,7 @@ Mẫu (phát hiện qua trình duyệt):
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
+| 2026-11-26 | auth | BUG-089 FIXED | Một cookie refresh chỉ một request được `FOR UPDATE` rồi cấp token mới. Request thua trong 15 giây trả `REFRESH_SUPERSEDED` và không xóa cookie. Web thử đổi phiên thêm một lần. |
 | 2026-11-26 | auth, extension, lodats, transactions, customers, tasks, sổ đỏ, slug | BUG-089 … BUG-100 | Rà source, không đọc kết luận cũ để kết bug. Không sửa code. Bug đã có số thì không ghi lại: 016 gộp FB, 026 ép DAT_COC/DA_BAN, 029 unique lô kho, 041 thứ tự tin (CLOSED), 043 tin không unique (CLOSED), 057 đổi kind dự án, 061 xóa ảnh dự án (CLOSED by design). |
 | 2026-09-03 | — | — | Khởi tạo `docs/audit/BUGS.md`. Chưa audit. Chờ owner giao module đầu tiên. |
 | 2026-09-03 | — | — | Bổ sung quy tắc kiểm thử trình duyệt (tài khoản Admin / kha; cấm tự tạo-sửa-xóa dữ liệu; mẫu bug UI). Mật khẩu không lưu trong repo. |
@@ -1483,7 +1484,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Thu hồi và cấp token không nằm trong một bước có điều kiện «chỉ token còn sống». Xóa cookie không phân biệt 401 do token cũ bị xoay hợp lệ.
 - **Impact:** Nhân viên đang mở CRM bị đăng xuất khi hai tab hoặc hai request cùng làm mới phiên.
 - **Evidence:** `auth.service.ts` `refresh` khoảng dòng 121–130. `auth.controller.ts` `refresh` nhánh `catch` khoảng dòng 52–55. Không ghi trùng BUG-006 (reuse sau khi đã revoke thì hủy session — nhánh đó vẫn còn).
-- **Status:** OPEN
+- **Status:** FIXED (2026-11-26) — `SELECT … FOR UPDATE` trên dòng refresh: chỉ một request thu hồi cookie và cấp token mới. Request còn lại, nếu token thay đã được tạo trong 15 giây, ném `REFRESH_SUPERSEDED` và **không** xóa cookie. Web gọi refresh thêm một lần để lấy access token từ cookie tab thắng. Reuse sau 15 giây hoặc không có token thay vẫn `revokeAllSessions` (BUG-006).
 
 ### BUG-090 — Khóa refresh extension không atomic; tab thua xóa phiên mọi tab
 
@@ -1685,5 +1686,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 **Đếm sau rà màu giá / ghi chú giá / hoa hồng (2026-09-09, mở rộng 086 + BUG-087…088):** OPEN **18** · FIXED / CLOSED **70** · tổng **88**.
 
 **Đếm sau fix BUG-084…088 (2026-09-09):** OPEN **13** · FIXED / CLOSED **75** · tổng **88**.
+
+**Đếm sau fix BUG-089 (2026-11-26):** OPEN **21** · FIXED / CLOSED **79** · tổng **100**.
 
 **Đếm sau rà source 2026-11-26 (BUG-089…100):** OPEN **22** · FIXED / CLOSED **78** · tổng **100**. Header 2026-09-12 ghi OPEN 11; detail chỉ còn 10 mục OPEN (016, 026, 027, 029, 056, 057, 070, 078, 080, 081).

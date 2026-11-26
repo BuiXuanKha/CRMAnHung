@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, HttpCode, Req, Res } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config';
 import { Throttle } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
-import { AuthService } from './auth.service';
+import { AuthService, isRefreshSuperseded } from './auth.service';
 import {
   clearRefreshCookie,
   clearWebRoleCookie,
@@ -50,8 +50,11 @@ export class AuthController {
       setWebRoleCookie(res, result.user.role, this.config);
       return result;
     } catch (err) {
-      clearRefreshCookie(res, this.config);
-      clearWebRoleCookie(res, this.config);
+      // The other tab already stored the new cookie. Clearing here would log both tabs out.
+      if (!isRefreshSuperseded(err)) {
+        clearRefreshCookie(res, this.config);
+        clearWebRoleCookie(res, this.config);
+      }
       throw err;
     }
   }
