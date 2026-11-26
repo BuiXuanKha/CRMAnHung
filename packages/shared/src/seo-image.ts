@@ -11,7 +11,8 @@ export const PUBLIC_CDN_ORIGIN = 'https://cdn.anhungland.com';
 
 /**
  * Same-origin path prefix that Next proxies to {@link PUBLIC_CDN_ORIGIN}.
- * Zalo scrapes title/description but fails on `cdn.*` images; WebP via `/og-media` works.
+ * Zalo scrapes title/description but fails on `cdn.*` images.
+ * `/og-media` answers with JPEG (Facebook drops many WebP previews) plus Content-Length.
  * Do not put cache-bust query on the *page* share URL (`?v=`) — version the image URL instead.
  */
 export const PUBLIC_OG_MEDIA_PATH_PREFIX = '/og-media';
@@ -20,7 +21,7 @@ export const PUBLIC_OG_MEDIA_PATH_PREFIX = '/og-media';
  * Bump when the OG serving contract changes (e.g. CDN → same-origin) so scrapers
  * re-fetch `og:image` without changing listing / `?share=` URLs.
  */
-export const PUBLIC_OG_MEDIA_GENERATION = '1';
+export const PUBLIC_OG_MEDIA_GENERATION = '2';
 
 const EXT_FROM_MIME: Record<string, string> = {
   'image/jpeg': '.jpg',

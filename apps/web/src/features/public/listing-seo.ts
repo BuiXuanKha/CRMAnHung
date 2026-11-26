@@ -78,10 +78,15 @@ function listingOgImage(listing: PublicGuestListing & { placeLabel?: string | nu
   if (!cover) {
     return { url: toAbsoluteUrl(PUBLIC_OG_DEFAULT), alt: listingCoverAlt(listing) };
   }
-  // Gallery WebP on CDN; Zalo needs same-origin `og:image` — proxy cover via `/og-media/…?og=N`.
-  // No JPG/PNG sibling; no `?v=` on the page/`?share=` URL.
+  // Gallery stays WebP on CDN. Social preview is same-origin `/og-media/…?og=N`,
+  // which the proxy serves as JPEG so Facebook can paint the thumbnail.
   const og = publicCdnUrlToSameOriginOgPath(cover) || cover;
-  return { url: toAbsoluteUrl(og), alt: listingCoverAlt(listing) };
+  const url = toAbsoluteUrl(og);
+  return {
+    url,
+    alt: listingCoverAlt(listing),
+    ...(og.includes('/og-media/') ? { type: 'image/jpeg' as const } : {}),
+  };
 }
 
 export function unpublishedListingMetadata(): Metadata {

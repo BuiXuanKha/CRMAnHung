@@ -80,7 +80,7 @@ describe('same-origin /og-media OG paths', () => {
       publicCdnUrlToSameOriginOgPath(
         'https://cdn.anhungland.com/lodats/lot1/foo-anh-1.webp',
       ),
-      '/og-media/lodats/lot1/foo-anh-1.webp?og=1',
+      '/og-media/lodats/lot1/foo-anh-1.webp?og=2',
     );
     assert.equal(publicCdnUrlToSameOriginOgPath('/og-default.png'), null);
     assert.equal(

@@ -50,7 +50,11 @@ export function postMetadata(post: PublicGuestPost): Metadata {
   const imageSrc = cover
     ? publicCdnUrlToSameOriginOgPath(cover) || cover
     : PUBLIC_OG_DEFAULT;
-  const image = { url: toAbsoluteUrl(imageSrc), alt: post.title };
+  const image = {
+    url: toAbsoluteUrl(imageSrc),
+    alt: post.title,
+    ...(imageSrc.includes('/og-media/') ? { type: 'image/jpeg' as const } : {}),
+  };
   const branded = `${post.title} | ${ANHUNG_BRAND.name}`;
   return {
     title: post.title,
