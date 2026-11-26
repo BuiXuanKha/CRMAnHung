@@ -2264,6 +2264,140 @@
     }
   }
 
+  const AUTH_STORAGE_KEYS = [
+    AUTH_TOKEN_STORAGE_KEY,
+    AUTH_REFRESH_STORAGE_KEY,
+    AUTH_USER_STORAGE_KEY,
+  ];
+
+  function delay(ms) {
+    return new Promise((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
+  }
+
+  function storageLocalGet(keys) {
+    return new Promise((resolve) => {
+      if (typeof chrome === "undefined" || !chrome.storage?.local) {
+        resolve({});
+        return;
+      }
+      chrome.storage.local.get(keys, (items) => {
+        if (chrome.runtime?.lastError) {
+          resolve({});
+          return;
+        }
+        resolve(items || {});
+      });
+    });
+  }
+
+  function storageLocalSet(payload) {
+    return new Promise((resolve) => {
+      if (typeof chrome === "undefined" || !chrome.storage?.local) {
+        resolve();
+        return;
+      }
+      chrome.storage.local.set(payload, () => resolve());
+    });
+  }
+
+  function storageLocalRemove(keys) {
+    return new Promise((resolve) => {
+      if (typeof chrome === "undefined" || !chrome.storage?.local) {
+        resolve();
+        return;
+      }
+      chrome.storage.local.remove(keys, () => resolve());
+    });
+  }
+
+  function authFromStorageItems(items) {
+    return {
+      token: normalizeText(items?.[AUTH_TOKEN_STORAGE_KEY] || ""),
+      refreshToken: normalizeText(items?.[AUTH_REFRESH_STORAGE_KEY] || ""),
+      user: items?.[AUTH_USER_STORAGE_KEY] || null,
+    };
+  }
+
+  function authIdentity(user) {
+    if (!user || typeof user !== "object") return "";
+    return `${user.id || ""}|${user.fullName || ""}|${user.username || ""}`;
+  }
+
+  /**
+   * Copy a session another tab wrote. Never writes storage (that would loop).
+   * Returns true when this tab's memory changed.
+   */
+  function adoptAuthSnapshot(snapshot) {
+    const next = snapshot || { token: "", refreshToken: "", user: null };
+    const same =
+      next.token === STATE.auth.token &&
+      next.refreshToken === STATE.auth.refreshToken &&
+      authIdentity(next.user) === authIdentity(STATE.auth.user);
+    if (same) return false;
+    STATE.auth.token = next.token;
+    STATE.auth.refreshToken = next.refreshToken;
+    STATE.auth.user = next.user;
+    if (!next.token) STATE.auth.status = "";
+    renderPanel();
+    return true;
+  }
+
+  /**
+   * Another tab logged in or refreshed. Ignore an empty store so a write that
+   * has not landed yet cannot wipe the token this tab just saved.
+   */
+  async function adoptStoredSessionIfDifferent() {
+    const snapshot = authFromStorageItems(await storageLocalGet(AUTH_STORAGE_KEYS));
+    if (!snapshot.token) return false;
+    const same =
+      snapshot.token === STATE.auth.token &&
+      snapshot.refreshToken === STATE.auth.refreshToken &&
+      authIdentity(snapshot.user) === authIdentity(STATE.auth.user);
+    if (same) return false;
+    adoptAuthSnapshot(snapshot);
+    return true;
+  }
+
+  function applyRemoteAuthChange(changes) {
+    const token = Object.prototype.hasOwnProperty.call(changes, AUTH_TOKEN_STORAGE_KEY)
+      ? normalizeText(changes[AUTH_TOKEN_STORAGE_KEY]?.newValue || "")
+      : STATE.auth.token;
+    const refreshToken = Object.prototype.hasOwnProperty.call(changes, AUTH_REFRESH_STORAGE_KEY)
+      ? normalizeText(changes[AUTH_REFRESH_STORAGE_KEY]?.newValue || "")
+      : STATE.auth.refreshToken;
+    const user = Object.prototype.hasOwnProperty.call(changes, AUTH_USER_STORAGE_KEY)
+      ? changes[AUTH_USER_STORAGE_KEY]?.newValue || null
+      : STATE.auth.user;
+    adoptAuthSnapshot({ token, refreshToken, user });
+  }
+
+  /**
+   * Login on one Messenger tab is stored in chrome.storage.local (shared by this
+   * Chrome profile). Tabs already open do not re-run boot, so they listen here.
+   * A visible tab also re-reads storage in case it missed the change while frozen.
+   */
+  function installAuthStorageSync() {
+    if (installAuthStorageSync.installed) return;
+    installAuthStorageSync.installed = true;
+    if (typeof chrome === "undefined" || !chrome.storage?.onChanged) return;
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area !== "local" || !changes) return;
+      const touched = AUTH_STORAGE_KEYS.some((key) =>
+        Object.prototype.hasOwnProperty.call(changes, key),
+      );
+      if (!touched) return;
+      applyRemoteAuthChange(changes);
+    });
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState !== "visible") return;
+      void adoptStoredSessionIfDifferent();
+    });
+  }
+
   function setAuthToken(token) {
     const value = normalizeText(token || "");
     STATE.auth.token = value;
@@ -2378,24 +2512,68 @@
     return null;
   }
 
+  let refreshInFlight = null;
+
   async function refreshAccessToken() {
+    if (!refreshInFlight) {
+      refreshInFlight = refreshAccessTokenOnce().finally(() => {
+        refreshInFlight = null;
+      });
+    }
+    return refreshInFlight;
+  }
+
+  /**
+   * One refresh at a time per profile. The second tab waits, then uses the
+   * token the winner stored, instead of treating the rotated cookie as theft
+   * and wiping the shared session.
+   */
+  async function refreshAccessTokenOnce() {
     const refresh = normalizeText(STATE.auth.refreshToken || "");
     if (!refresh) return false;
-    const response = await backendFetch("/auth/refresh", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ refreshToken: refresh }),
-    });
-    const data = parseJsonResponse(response);
-    if (!response.ok || !data?.accessToken) {
-      clearAuthSession();
-      return false;
+
+    const lockId = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const existing = await storageLocalGet([AUTH_REFRESH_LOCK_KEY]);
+    const lock = existing[AUTH_REFRESH_LOCK_KEY];
+    const lockIsFresh =
+      lock &&
+      lock.id &&
+      lock.id !== lockId &&
+      Date.now() - Number(lock.at || 0) < 8_000;
+    if (lockIsFresh) {
+      await delay(700);
+      if (await adoptStoredSessionIfDifferent()) return true;
     }
-    setAuthToken(data.accessToken);
-    if (data.refreshToken) setRefreshToken(data.refreshToken);
-    const user = authUserFromPayload(data);
-    if (user) setAuthUser(user);
-    return true;
+
+    await storageLocalSet({
+      [AUTH_REFRESH_LOCK_KEY]: { id: lockId, at: Date.now() },
+    });
+
+    try {
+      const response = await backendFetch("/auth/refresh", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ refreshToken: refresh }),
+      });
+      const data = parseJsonResponse(response);
+      if (!response.ok || !data?.accessToken) {
+        if (await adoptStoredSessionIfDifferent()) return true;
+        await delay(500);
+        if (await adoptStoredSessionIfDifferent()) return true;
+        clearAuthSession();
+        return false;
+      }
+      setAuthToken(data.accessToken);
+      if (data.refreshToken) setRefreshToken(data.refreshToken);
+      const user = authUserFromPayload(data);
+      if (user) setAuthUser(user);
+      return true;
+    } finally {
+      const current = await storageLocalGet([AUTH_REFRESH_LOCK_KEY]);
+      if (current[AUTH_REFRESH_LOCK_KEY]?.id === lockId) {
+        await storageLocalRemove(AUTH_REFRESH_LOCK_KEY);
+      }
+    }
   }
 
   async function backendFetchAuthed(path, init = {}) {
@@ -3957,6 +4135,7 @@
       return;
     }
 
+    installAuthStorageSync();
     installUrlWatcher();
     installPassiveUrlPoll();
     hydrateBackendUrl(() => {
