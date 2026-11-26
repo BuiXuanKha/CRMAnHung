@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-089` |
 | Tổng bug đã ghi | 88 |
-| OPEN | 13 |
+| OPEN | 11 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 75 |
-| Lần audit gần nhất | 2026-09-09 — Fix BUG-084…088: màu money `#ea580c` + hiển thị/format/FAB; không hỏi deploy (chưa đủ 5 PR bug fix) |
+| FIXED / CLOSED | 77 |
+| Lần audit gần nhất | 2026-09-12 — Owner đóng BUG-023 CLOSED (by design, listing always-on); BUG-025 summary khớp FIXED |
 
 ## Cách ghi một bug
 
@@ -173,6 +173,7 @@ Mẫu (phát hiện qua trình duyệt):
 | 2026-09-09 | UI màu giá / ghi chú / hoa hồng | BUG-086 mở rộng + BUG-087…088 | Chuẩn chốt: số VND = `crm-money` `#b45309`. **Giá:** list lô/GD/sổ (cột Giá) đã gắn; còn thiếu/đè màu → 086/087. **Ghi chú giá + hoa hồng lô:** guidelines = dòng phụ xám (không màu money) — list đúng; chi tiết lô cùng màu chữ đen body. **Hoa hồng GD (VND):** đã `crm-money`. **Thu/Chi sổ đỏ:** cố ý xanh/đỏ; thẻ thống kê vừa `crm-money` vừa `sd-stat-thu/chi` → xung đột cascade (088). Không sửa code. |
 | 2026-09-09 | UI money / FAB | BUG-084…088 FIXED | Đổi `crm-money` `#b45309`→`#ea580c` (owner: nâu không nhấn). Gắn class còn thiếu; CSS chi tiết lô; format ô sổ đỏ; FAB menu lô có Lucide; Thu/Chi thống kê bỏ xung đột. |
 | 2026-09-12 | public-content | BUG-056 HOÃN | Owner: bỏ qua chưa làm A1 (sửa bài CMS) — mobile bất tiện, UX list chưa chốt; máy tính làm sau. Cập nhật `ADMIN-HOAN-THIEN.md` A1 + thứ tự. |
+| 2026-09-12 | public-content | BUG-023 CLOSED | Owner: listing always-on — slug Tạm dừng vẫn mở + hangtag; chỉ `KHONG_BAN` 404. CLOSED by design. Summary BUG-025 → FIXED (đã sửa 2026-09-12). |
 
 ## Bản đồ module (quan sát cấu trúc, chưa audit)
 
@@ -222,9 +223,9 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 | BUG-020 | MEDIUM | lodats / ChuDat | `LodatCustomerMap` không ràng buộc 1 chủ active / lô; list lấy 1 map theo `updatedAt`. | FIXED |
 | BUG-021 | MEDIUM | customers / extension | Ingest extension cập nhật khách `isHidden` nhưng không khôi phục — chat mới bị ẩn. | FIXED |
 | BUG-022 | MEDIUM | customers | Contract `updateCustomer` có `note`/budget; API DTO không nhận — không sửa được `Customer.note`. | FIXED |
-| BUG-023 | HIGH | lodats / public-content | `GET /public/listings/:slug` không kiểm tra Mở bán — lô Tạm dừng vẫn mở được bằng URL. | OPEN |
+| BUG-023 | HIGH | lodats / public-content | `GET /public/listings/:slug` không kiểm tra Mở bán — lô Tạm dừng vẫn mở được bằng URL. | CLOSED (by design) |
 | BUG-024 | HIGH | lodats / public-content | Gỡ Đăng web cũng đi qua `requireOpenLodat` — lô Tạm dừng không gỡ được listing. | CLOSED |
-| BUG-025 | HIGH | lodats / transactions | Xóa GD mở ép map `DANG_BAN`; tạo/sửa/hoàn tất GD không đụng trạng thái rao bán. | OPEN |
+| BUG-025 | HIGH | lodats / transactions | Xóa GD mở ép map `DANG_BAN`; tạo/sửa/hoàn tất GD không đụng trạng thái rao bán. | FIXED |
 | BUG-026 | HIGH | lodats | API ép `DAT_COC`/`DA_BAN` → `TAM_DUNG`; Lưu/công tắc ghi đè status thật trên map. | OPEN |
 | BUG-027 | MEDIUM | lodats / customers | Ẩn khách không đóng map — lô vẫn hiện chủ đã xoá; không API gỡ chủ/xóa lô. | OPEN |
 | BUG-028 | MEDIUM | lodats | Admin đổi chủ không bắt khách thuộc NV giữ luồng — gán nhầm Person sang lô NV khác. | FIXED |
@@ -604,7 +605,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Chi tiết slug không gọi `isOpenSale`. Tạm dừng lô cố ý không auto-gỡ Đăng web, nhưng guest API chi tiết không áp cùng rule với list.
 - **Impact:** Lô tạm dừng / không còn rao vẫn xem được trên web công khai nếu biết slug (SEO, share cũ, bookmark). List `/public/listings` thì ẩn.
 - **Evidence:** `getPublishedBySlug` vs `loadPublishedCatalog`. `lodats.service.ts` `updateSaleStatus` chỉ `lodatCustomerMap.status` + `lodat.updatedAt`. `docs/domains/public-content.md` §3.1 / API GET slug.
-- **Status:** OPEN
+- **Status:** CLOSED (by design, 2026-09-12) — Owner chốt listing always-on: khách mở slug khi còn Đăng web **trừ `KHONG_BAN`**; Tạm dừng / Đã bán hiện hangtag, không 404. Code hiện tại: `getPublishedBySlug` chỉ 404 khi `!isPublished` hoặc `saleStatus === 'KHONG_BAN'`. Catalog/sitemap cùng rule. Domain `public-content.md` chốt 2026-09-07 / 2026-09-10.
 
 ### BUG-024 — Không gỡ Đăng web được khi lô đã Tạm dừng
 
@@ -1516,7 +1517,9 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 
 ### D. OPEN thuần (chưa gắn HOÃN) — vẫn thấy trên code, không thuộc đợt «không làm» nhưng ghi để khỏi sót
 
-`BUG-023`, `025`, `026`, `027`, `029` — vẫn OPEN trên detail. Riêng **023** (URL Tạm dừng vẫn mở): sau chốt listing always-on, hành vi guest thấy lô + hangtag trạng thái có thể **đúng sản phẩm**; chưa đổi Status cho đến khi owner chốt CLOSED by design.
+`BUG-026`, `027`, `029` — vẫn OPEN trên detail. **023** CLOSED by design (2026-09-12, listing always-on). **025** FIXED (2026-09-12, đồng bộ map theo GD).
+
+**Đếm sau đóng BUG-023 + khớp summary BUG-025 (2026-09-12):** OPEN **11** · FIXED / CLOSED **77** · tổng **88**.
 
 **Đếm sau đóng BUG-041 và BUG-043 (2026-09-08, theo Status detail + header):** OPEN **13** · FIXED / CLOSED **70** · tổng **83**.
 
