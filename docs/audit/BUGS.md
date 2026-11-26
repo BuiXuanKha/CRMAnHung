@@ -27,10 +27,10 @@ Khi cần xác minh chức năng thực tế trên UI:
 |--------|---------|
 | ID tiếp theo | `BUG-101` |
 | Tổng bug đã ghi | 100 |
-| OPEN | 15 |
+| OPEN | 14 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 85 |
-| Lần audit gần nhất | 2026-11-26 — BUG-096 FIXED (danh sách việc lấy 200 việc mới nhất; tổng trên màn là số việc thật). |
+| FIXED / CLOSED | 86 |
+| Lần audit gần nhất | 2026-11-26 — BUG-093 FIXED (đổi hội thoại lúc đang gửi thì khách ở giữa được xếp hàng, gửi lần lượt; lỗi thì panel báo khách chưa lên CRM). |
 
 ## Cách ghi một bug
 
@@ -99,6 +99,7 @@ Mẫu (phát hiện qua trình duyệt):
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
+| 2026-11-26 | extension | BUG-093 FIXED | Đang gửi khách A mà chuyển B rồi C: B được xếp hàng, gửi A rồi B rồi C. Snapshot mỗi khách là bản sao riêng. Gửi lỗi thì panel giữ câu «tên» chưa lên CRM. Extension 2.15.4. |
 | 2026-11-26 | tasks | BUG-096 FIXED | `GET /tasks` lấy 200 việc mới nhất (`createdAt` giảm dần, hòa thì `id`). `total` là số việc thật. Màn `/cong-viec` giữ sắp xếp cũ trên 200 dòng đó. |
 | 2026-11-26 | customers | BUG-095 CLOSED | Owner từ chối: xóa trắng nhu cầu mà danh sách vẫn hiện nhu cầu trước — không phải bug, won't fix, không sửa code. |
 | 2026-11-26 | customers / extension | BUG-094 CLOSED | Owner từ chối: hai tab gửi cùng một người Facebook cùng lúc quá hiếm, người không gặp được — không phải bug, won't fix, không sửa code. |
@@ -1543,7 +1544,7 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Root cause:** Cờ đang gửi chỉ bỏ lượt, không giữ payload khách bị kẹt.
 - **Impact:** Tin và hồ sơ khách ở giữa không lên CRM, extension không báo thiếu khách đó.
 - **Evidence:** `autoSubmitDraftForPreviousCustomer` khoảng dòng 2826.
-- **Status:** OPEN
+- **Status:** FIXED (2026-11-26) — Rời khách thì chép snapshot vào hàng đợi FIFO (`draft-send-queue.js`) trước khi quét khách mới. Đang gửi vẫn nhận khách kế tiếp; gửi xong mới lấy người chờ. Lỗi, thiếu UID, hoặc chưa đăng nhập thì panel giữ «tên» chưa lên CRM. Extension `2.15.4`.
 
 ### BUG-094 — Hai lần nhập extension cùng lúc tạo hai khách
 
@@ -1703,6 +1704,8 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 **Đếm sau đóng BUG-095 (2026-11-26):** OPEN **16** · FIXED / CLOSED **84** · tổng **100**.
 
 **Đếm sau fix BUG-096 (2026-11-26):** OPEN **15** · FIXED / CLOSED **85** · tổng **100**.
+
+**Đếm sau fix BUG-093 (2026-11-26):** OPEN **14** · FIXED / CLOSED **86** · tổng **100**.
 
 **Đếm sau fix BUG-089 (2026-11-26):** OPEN **21** · FIXED / CLOSED **79** · tổng **100**.
 

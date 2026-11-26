@@ -6,7 +6,7 @@ Tài liệu kỹ thuật cho lập trình viên, dựa trên source trong `Anhun
 |---|---|
 | **Ngày khảo sát** | 16/07/2026 |
 | **Branch khảo sát** | `main` (sau cleanup dump) |
-| **Manifest version** | `2.15.3` (`manifest.json`) |
+| **Manifest version** | `2.15.4` (`manifest.json`) |
 | **Loại** | Chrome Extension Manifest V3 |
 
 ---
@@ -38,6 +38,7 @@ AnhunglandExtension/
 ├── config.js                     # Default URL, storage keys, version label
 ├── options.html / options.js     # Popup: version + API cố định (không nhập URL)
 ├── ext-refresh-lock.js           # Khóa refresh dùng chung; tab thua không xóa phiên
+├── draft-send-queue.js           # Hàng đợi gửi khách khi đổi hội thoại
 ├── content-inbox.js              # Orchestrator + panel UI + gửi BE
 ├── ext-source.js                 # detectAnhunglandSource()
 ├── ext-person-name.js            # Chuẩn hoá / lọc tên đa ngôn ngữ
@@ -60,7 +61,7 @@ Nguồn: `manifest.json`.
 | Hạng mục | Giá trị |
 |----------|---------|
 | `manifest_version` | `3` |
-| `version` | `2.15.3` (single source of truth — JS đọc qua `chrome.runtime.getManifest()`) |
+| `version` | `2.15.4` (single source of truth — JS đọc qua `chrome.runtime.getManifest()`) |
 | Permissions | `activeTab`, `storage` |
 | Background | `background.js` (service worker) |
 | UI cài đặt | `options.html` (popup `action` + `options_ui` mở tab) |
@@ -76,8 +77,8 @@ Nguồn: `manifest.json`.
 **content_scripts**
 
 1. **Business Suite** — inject:
-   `config.js` → `ext-source.js` → `ext-person-name.js` → `ext-context-business-suite.js` → `ext-refresh-lock.js` → `content-inbox.js`
-2. **Messenger web** — inject thêm `ext-context-facebook-com.js` + `scanners/scanner-messenger-web.js`, rồi `ext-refresh-lock.js` trước `content-inbox.js`
+   `config.js` → `ext-source.js` → `ext-person-name.js` → `ext-context-business-suite.js` → `ext-refresh-lock.js` → `draft-send-queue.js` → `content-inbox.js`
+2. **Messenger web** — inject thêm `ext-context-facebook-com.js` + `scanners/scanner-messenger-web.js`, rồi `ext-refresh-lock.js` và `draft-send-queue.js` trước `content-inbox.js`
 
 ---
 
@@ -146,7 +147,7 @@ Trách nhiệm chính:
 - Watch URL / đổi hội thoại (`WATCH_INTERVAL_MS = 1200`)
 - Quét Business Suite bằng logic nội bộ; Messenger uỷ quyền scanner
 - Đăng nhập: `POST /auth/login`, kiểm tra `GET /auth/me`
-- Auto-draft: snapshot khách hiện tại → khi đổi scan key → `POST /customers/from-extension`
+- Auto-draft: snapshot khách hiện tại → khi đổi scan key → xếp hàng FIFO rồi `POST /customers/from-extension`. Đang gửi khách A mà chuyển B rồi C thì B không bị ghi đè; lỗi gửi thì panel giữ câu «tên» chưa lên CRM
 - Chuẩn bị ảnh tin nhắn (`blob:` → data URL; giữ path `/img/imgsmessenger/…` nếu đã lưu server)
 - Nút debug **Quét DOM LIVE**: tải file summary/full DOM về máy (phục vụ dev) — **không** commit các file đó vào Git
 
@@ -224,8 +225,10 @@ Nút **Quét DOM LIVE** trên panel vẫn có thể tạo file tải về máy l
 | 3 | `ext-source.js` | Phân loại nguồn |
 | 4 | `ext-context-business-suite.js` / `ext-context-facebook-com.js` | Context theo nền tảng |
 | 5 | `scanners/scanner-messenger-web.js` | Quét Messenger |
-| 6 | `content-inbox.js` | Panel, auth, auto-draft, Business Suite scan. Khóa refresh: `ext-refresh-lock.js` |
-| 7 | `background.js` | Proxy API fetch |
+| 6 | `ext-refresh-lock.js` | Khóa refresh dùng chung; tab thua không xóa phiên |
+| 7 | `draft-send-queue.js` | Hàng đợi FIFO khi đổi khách lúc đang gửi |
+| 8 | `content-inbox.js` | Panel, auth, auto-draft, Business Suite scan |
+| 9 | `background.js` | Proxy API fetch |
 
 ---
 
