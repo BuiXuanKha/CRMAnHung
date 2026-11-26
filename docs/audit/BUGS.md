@@ -25,12 +25,12 @@ Khi cần xác minh chức năng thực tế trên UI:
 
 | Trường | Giá trị |
 |--------|---------|
-| ID tiếp theo | `BUG-089` |
-| Tổng bug đã ghi | 88 |
-| OPEN | 11 |
+| ID tiếp theo | `BUG-101` |
+| Tổng bug đã ghi | 100 |
+| OPEN | 22 |
 | NEEDS VERIFICATION | 0 |
-| FIXED / CLOSED | 77 |
-| Lần audit gần nhất | 2026-09-12 — Owner đóng BUG-023 CLOSED (by design, listing always-on); BUG-025 summary khớp FIXED |
+| FIXED / CLOSED | 78 |
+| Lần audit gần nhất | 2026-11-26 — Rà source. Bổ sung BUG-089…BUG-100. OPEN cũ trên detail là 10 (016, 026, 027, 029, 056, 057, 070, 078, 080, 081); header trước ghi 11. |
 
 ## Cách ghi một bug
 
@@ -99,6 +99,7 @@ Mẫu (phát hiện qua trình duyệt):
 
 | Ngày | Module | Bug mới | Ghi chú |
 |------|--------|---------|---------|
+| 2026-11-26 | auth, extension, lodats, transactions, customers, tasks, sổ đỏ, slug | BUG-089 … BUG-100 | Rà source, không đọc kết luận cũ để kết bug. Không sửa code. Bug đã có số thì không ghi lại: 016 gộp FB, 026 ép DAT_COC/DA_BAN, 029 unique lô kho, 041 thứ tự tin (CLOSED), 043 tin không unique (CLOSED), 057 đổi kind dự án, 061 xóa ảnh dự án (CLOSED by design). |
 | 2026-09-03 | — | — | Khởi tạo `docs/audit/BUGS.md`. Chưa audit. Chờ owner giao module đầu tiên. |
 | 2026-09-03 | — | — | Bổ sung quy tắc kiểm thử trình duyệt (tài khoản Admin / kha; cấm tự tạo-sửa-xóa dữ liệu; mẫu bug UI). Mật khẩu không lưu trong repo. |
 | 2026-09-03 | User / Login / Auth / Role / Permission | BUG-001 … BUG-012 | Đọc source API + web. Không sửa code. Không login production (Cloudflare 1010 chặn non-browser; login sẽ tạo refresh token). |
@@ -1471,6 +1472,162 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 - **Evidence:** `stats.tsx` dòng Tổng thu/chi. List page import `./title-services.css` trước `@/shared/ui/money.css`. Hàng bảng `title-service-table.tsx` chỉ `sd-thu`/`sd-chi`.
 - **Status:** FIXED (2026-09-09) — Thẻ thống kê Thu/Chi bỏ class `crm-money`; giữ `sd-stat-thu` / `sd-stat-chi` (xanh/đỏ).
 
+### BUG-089 — Refresh đồng thời cấp hai token; lỗi 401 xóa cookie cả trình duyệt
+
+- **Severity:** HIGH
+- **Module:** auth
+- **File:** `apps/api/src/modules/auth/auth.service.ts`, `apps/api/src/modules/auth/auth.controller.ts`
+- **Function:** `refresh`
+- **Vị trí code:** `refresh` revoke bằng `update` theo `id`, không `where: { revokedAt: null }`. Nhánh token đã revoke trong 15 giây không gọi `revokeAllSessions` nếu đã có token thay. `auth.controller` `catch` gọi `clearRefreshCookie` trên mọi lỗi.
+- **Problem:** Hai request làm mới cùng một refresh token đều đọc thấy token còn sống, rồi mỗi request cấp một token mới. Request dùng token vừa bị thu hồi trả 401 và xóa cookie HttpOnly của cả trình duyệt, kể cả cookie token mới vừa set.
+- **Root cause:** Thu hồi và cấp token không nằm trong một bước có điều kiện «chỉ token còn sống». Xóa cookie không phân biệt 401 do token cũ bị xoay hợp lệ.
+- **Impact:** Nhân viên đang mở CRM bị đăng xuất khi hai tab hoặc hai request cùng làm mới phiên.
+- **Evidence:** `auth.service.ts` `refresh` khoảng dòng 121–130. `auth.controller.ts` `refresh` nhánh `catch` khoảng dòng 52–55. Không ghi trùng BUG-006 (reuse sau khi đã revoke thì hủy session — nhánh đó vẫn còn).
+- **Status:** OPEN
+
+### BUG-090 — Khóa refresh extension không atomic; tab thua xóa phiên mọi tab
+
+- **Severity:** HIGH
+- **Module:** extension
+- **File:** `apps/extension/content-inbox.js`
+- **Function:** `refreshAccessTokenOnce`
+- **Vị trí code:** Đọc `AUTH_REFRESH_LOCK_KEY`, nếu khóa còn tươi thì chờ 700ms. Sau đó vẫn `storageLocalSet` khóa của mình và `POST /auth/refresh` bằng refresh token đã chụp lúc đầu. `!response.ok` và không nhận được phiên tab kia thì `clearAuthSession()`.
+- **Problem:** Hai tab Messenger cùng làm mới: cả hai có thể gửi refresh token cũ. Tab bị 401 xóa `chrome.storage`, mọi tab mất đăng nhập.
+- **Root cause:** Khóa là đọc-rồi-ghi, không chiếm quyền trước khi gửi. Token gửi đi không đọc lại sau khi chờ.
+- **Impact:** Đăng nhập extension ở tab này, tab kia làm mới phiên thì cả Chrome bị đăng xuất extension.
+- **Evidence:** `refreshAccessTokenOnce` khoảng dòng 2531–2564. `clearAuthSession()` khi refresh thất bại.
+- **Status:** OPEN
+
+### BUG-091 — Công tắc trạng thái lô không nhìn giao dịch đang mở
+
+- **Severity:** HIGH
+- **Module:** lodats
+- **File:** `apps/api/src/modules/lodats/lodats.service.ts`
+- **Function:** `updateSaleStatus`
+- **Vị trí code:** Sau khi có map active, `lodatCustomerMap.update` ghi thẳng `dto.status` (`DANG_BAN` / `TAM_DUNG` / `KHONG_BAN`). Không đọc giao dịch `DA_COC` / `DA_CONG_CHUNG`.
+- **Problem:** Lô đang cọc hoặc đã công chứng vẫn gạt được về Mở bán. Web khách hiện lô đang giao dịch.
+- **Root cause:** Đồng bộ trạng thái từ giao dịch nằm ở `transactions.service`; công tắc lô không gọi lại luật đó.
+- **Impact:** Khách thấy lô Mở bán trong lúc nhân viên đang giữ cọc.
+- **Evidence:** `updateSaleStatus` khoảng dòng 833–836. Không ghi trùng BUG-026 (ép `DAT_COC`/`DA_BAN` lúc đọc rồi Lưu ghi đè — mục đó vẫn OPEN).
+- **Status:** OPEN
+
+### BUG-092 — Xóa giao dịch còn việc nhắc thì lỗi 500
+
+- **Severity:** HIGH
+- **Module:** transactions
+- **File:** `apps/api/src/modules/transactions/transactions.service.ts`, `apps/api/prisma/schema.prisma`
+- **Function:** `remove`
+- **Vị trí code:** `remove` xóa `Transaction` trong transaction Prisma. `WorkTask.transaction` `onDelete: Restrict`. Không có `catch` dịch lỗi sang tiếng Việt.
+- **Problem:** Giao dịch đã gắn việc làm thì bấm xóa nhận 500, giao dịch không xóa.
+- **Root cause:** Khóa ngoại chặn xóa; API không kiểm tra việc nhắc trước và không trả 409.
+- **Impact:** Nhân viên không xóa được giao dịch, không biết vì còn việc nhắc.
+- **Evidence:** `transactions.service.ts` `remove` khoảng dòng 293–298. `schema.prisma` model `WorkTask` quan hệ `transaction` Restrict.
+- **Status:** OPEN
+
+### BUG-093 — Chuyển hội thoại khi đang gửi thì khách ở giữa bị bỏ
+
+- **Severity:** HIGH
+- **Module:** extension
+- **File:** `apps/extension/content-inbox.js`
+- **Function:** `autoSubmitDraftForPreviousCustomer`
+- **Vị trí code:** `if (STATE.draftSubmitting) return;` trước khi gửi snapshot khách vừa rời.
+- **Problem:** Đang gửi khách A, chuyển sang B rồi C trước khi A xong: B không được xếp hàng, snapshot bị ghi đè bởi C.
+- **Root cause:** Cờ đang gửi chỉ bỏ lượt, không giữ payload khách bị kẹt.
+- **Impact:** Tin và hồ sơ khách ở giữa không lên CRM, extension không báo thiếu khách đó.
+- **Evidence:** `autoSubmitDraftForPreviousCustomer` khoảng dòng 2826.
+- **Status:** OPEN
+
+### BUG-094 — Hai lần nhập extension cùng lúc tạo hai khách
+
+- **Severity:** MEDIUM
+- **Module:** customers / extension
+- **File:** `apps/api/src/modules/customers/from-extension.service.ts`, `apps/api/prisma/schema.prisma`
+- **Function:** `ingest`, `findExisting`, `createCustomer`
+- **Vị trí code:** `ingest` tìm khách rồi tạo. `CustomerFacebook.customerUid` chỉ có index, không `@@unique` theo nhân viên + UID.
+- **Problem:** Hai tab cùng gửi một UID trước khi dòng nào được ghi: cả hai không thấy khách cũ và tạo hai hồ sơ. Lần sau chỉ cập nhật hồ sơ mới hơn.
+- **Root cause:** Không có ràng buộc database cho một UID trên một nhân viên.
+- **Impact:** Một người Facebook thành hai khách, tin và số có thể nằm ở hồ sơ không mở.
+- **Evidence:** `from-extension.service.ts` `ingest` khoảng dòng 54–67. `schema.prisma` `CustomerFacebook` `@@index([customerUid])`. Không ghi trùng BUG-013 (tìm theo UID trước khi tạo — đã FIXED; race hai request cùng lúc vẫn còn) và BUG-043 (trùng tin — CLOSED, không mở lại).
+- **Status:** OPEN
+
+### BUG-095 — Xóa trắng nhu cầu thì danh sách vẫn hiện nhu cầu cũ
+
+- **Severity:** MEDIUM
+- **Module:** customers
+- **File:** `apps/api/src/modules/customers/customers.service.ts`, `apps/api/src/modules/customers/customers-view.ts`
+- **Function:** `addCare`, `loadCareSummaries`
+- **Vị trí code:** `careChanged` chỉ đúng khi nhu cầu hoặc ghi chú còn chữ. `loadCareSummaries` bỏ qua `needSummary` rỗng và lấy dòng cũ hơn.
+- **Problem:** Nhân viên xóa nhu cầu rồi lưu. Không có dòng chăm sóc mới. Cột nhu cầu và form lần sau vẫn là câu cũ.
+- **Root cause:** «Xóa trắng» không được ghi thành một mốc; phần đọc coi chuỗi rỗng là «chưa có, tìm tiếp».
+- **Impact:** Nhu cầu đã bỏ vẫn hiện trên `/khach-hang`.
+- **Evidence:** `addCare` điều kiện `careChanged` khoảng dòng 367–369. `loadCareSummaries` khoảng dòng 91–92.
+- **Status:** OPEN
+
+### BUG-096 — Danh sách việc làm cắt 200 dòng và báo tổng sai
+
+- **Severity:** MEDIUM
+- **Module:** tasks
+- **File:** `apps/api/src/modules/tasks/tasks.service.ts`
+- **Function:** `list`
+- **Vị trí code:** `findMany` `take: 200`, không `orderBy`. `total: items.length` sau khi sắp trên bộ nhớ.
+- **Problem:** Quá 200 việc thì Postgres trả 200 dòng tùy ý. Tổng trên màn hình bằng 200, không phải số việc thật. Việc mới có thể không nằm trong 200 dòng đó.
+- **Root cause:** Cắt trang không kèm sắp xếp và không đếm `count`.
+- **Impact:** Nhân viên nhiều việc không thấy đủ danh sách, số tổng không dùng để biết còn việc.
+- **Evidence:** `tasks.service.ts` `list` khoảng dòng 31–41.
+- **Status:** OPEN
+
+### BUG-097 — Link lô cũ vẫn chuyển 301 khi lô đích đã Không bán
+
+- **Severity:** MEDIUM
+- **Module:** public-content
+- **File:** `apps/api/src/modules/public-content/public-content.service.ts`
+- **Function:** `findLotSlugRedirect`, `getPublishedBySlug`
+- **Vị trí code:** Redirect chỉ cần còn hàng `PublicLotListing` theo `toSlug`. Chi tiết trả 404 khi map active là `KHONG_BAN`.
+- **Problem:** URL cũ chuyển 301 sang slug hiện tại, rồi trang đó 404 vì lô Không bán.
+- **Root cause:** BUG-073 chỉ chặn redirect khi listing không còn. Rule Không bán = không mở trang chi tiết đến sau, redirect không đọc trạng thái map.
+- **Impact:** Khách và Facebook bấm link cũ gặp chuyển trang rồi không thấy nhà đất.
+- **Evidence:** `findLotSlugRedirect` khoảng dòng 310–327. `getPublishedBySlug` khoảng dòng 145–148. Không sửa nội dung BUG-073 (đã FIXED theo điều kiện listing còn).
+- **Status:** OPEN
+
+### BUG-098 — Tạm dừng sổ đỏ ghi ngày hoàn thành
+
+- **Severity:** MEDIUM
+- **Module:** title-services
+- **File:** `apps/api/src/modules/title-services/title-services-view.ts`, `apps/api/src/modules/title-services/title-services.service.ts`
+- **Function:** `update`, `computeDaysWorking`
+- **Vị trí code:** `DONE_STATUSES` gồm `HOAN_THANH`, `TAM_DUNG`, `HUY`. `update` đặt `completedAt` khi status nằm trong nhóm đó, và khi Hoàn thành thì giữ `completedAt` cũ nếu đã có.
+- **Problem:** Bấm Tạm dừng ghi ngày hoàn thành và số ngày làm dừng ở ngày tạm dừng. Bấm Hoàn thành sau đó không lấy ngày hoàn thành thật.
+- **Root cause:** Tạm dừng bị gom vào «đã xong» cùng Hoàn thành.
+- **Impact:** Hồ sơ sổ đỏ tạm dừng hiện như đã xong; ngày hoàn thành bị sớm.
+- **Evidence:** `title-services-view.ts` `DONE_STATUSES` khoảng dòng 20–23. `title-services.service.ts` `completedAt` khoảng dòng 180.
+- **Status:** OPEN
+
+### BUG-099 — Phân trang khách không có id phụ
+
+- **Severity:** LOW
+- **Module:** customers
+- **File:** `apps/api/src/modules/customers/customers.service.ts`
+- **Function:** `list`
+- **Vị trí code:** `orderBy` chỉ `isPinned`, `pinnedAt`, `updatedAt`. `skip`/`take` theo offset.
+- **Problem:** Hai khách cùng thời điểm cập nhật, hoặc extension chạm `updatedAt` lúc đang cuộn, trang sau có thể bỏ một dòng hoặc hiện lại dòng đã thấy.
+- **Root cause:** Thứ tự không ổn định khi các cột sắp bằng nhau, và tập đang phân trang đổi trong lúc tải thêm.
+- **Impact:** Cuộn `/khach-hang` đôi khi thiếu khách hoặc thấy trùng.
+- **Evidence:** `customers.service.ts` `list` `orderBy` khoảng dòng 130–134.
+- **Status:** OPEN
+
+### BUG-100 — Đổi tên khách đã ẩn vẫn được
+
+- **Severity:** LOW
+- **Module:** customers
+- **File:** `apps/api/src/modules/customers/customers.service.ts`
+- **Function:** `update`, `addCare`
+- **Vị trí code:** `update` ghi `fullName` không xét `isHidden`. `addCare` từ chối khi `existing.isHidden`.
+- **Problem:** Khách đã xóa mềm vẫn sửa được tên trên danh sách. Chăm sóc và số điện thoại thì bị chặn đến khi khôi phục.
+- **Root cause:** Chặn khách ẩn chỉ gắn trên một số thao tác, không gắn trên sửa tên.
+- **Impact:** Tên khách đã ẩn đổi mà không mở lại hồ sơ.
+- **Evidence:** `update` khoảng dòng 265–266. `addCare` khoảng dòng 340–343.
+- **Status:** OPEN
+
 ---
 
 ## Rà soát HOÃN / bỏ qua / không làm — 2026-09-07
@@ -1528,3 +1685,5 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 **Đếm sau rà màu giá / ghi chú giá / hoa hồng (2026-09-09, mở rộng 086 + BUG-087…088):** OPEN **18** · FIXED / CLOSED **70** · tổng **88**.
 
 **Đếm sau fix BUG-084…088 (2026-09-09):** OPEN **13** · FIXED / CLOSED **75** · tổng **88**.
+
+**Đếm sau rà source 2026-11-26 (BUG-089…100):** OPEN **22** · FIXED / CLOSED **78** · tổng **100**. Header 2026-09-12 ghi OPEN 11; detail chỉ còn 10 mục OPEN (016, 026, 027, 029, 056, 057, 070, 078, 080, 081).
