@@ -6,7 +6,7 @@ Tài liệu kỹ thuật cho lập trình viên, dựa trên source trong `Anhun
 |---|---|
 | **Ngày khảo sát** | 16/07/2026 |
 | **Branch khảo sát** | `main` (sau cleanup dump) |
-| **Manifest version** | `2.15.1` (`manifest.json`) |
+| **Manifest version** | `2.15.2` (`manifest.json`) |
 | **Loại** | Chrome Extension Manifest V3 |
 
 ---
@@ -59,7 +59,7 @@ Nguồn: `manifest.json`.
 | Hạng mục | Giá trị |
 |----------|---------|
 | `manifest_version` | `3` |
-| `version` | `2.15.1` (single source of truth — JS đọc qua `chrome.runtime.getManifest()`) |
+| `version` | `2.15.2` (single source of truth — JS đọc qua `chrome.runtime.getManifest()`) |
 | Permissions | `activeTab`, `storage` |
 | Background | `background.js` (service worker) |
 | UI cài đặt | `options.html` (popup `action` + `options_ui` mở tab) |
@@ -181,7 +181,8 @@ Payload draft gồm object `scan` (UID, tên, page, source, thread…) + `chatMe
 | Key | Nội dung |
 |-----|----------|
 | `anhungland_ext_api_url` | Không đọc. Xóa khi mở panel (bản cũ) |
-| `anhungland_ext_jwt` | JWT sau login |
+| `anhungland_ext_jwt` | JWT sau login. Mọi tab Messenger cùng một Chrome dùng chung khóa này |
+| `anhungland_ext_refresh` | Refresh token. Tab đang mở nghe `chrome.storage.onChanged` để hiện đúng phiên |
 | `anhungland_ext_user` | User JSON |
 | Legacy `pages_facebook_customer_crm_jwt` / `_user` | Đọc một lần để migrate phiên cũ |
 | Legacy `pages_facebook_customer_crm_api_url` | Xóa khi load, không đọc |
