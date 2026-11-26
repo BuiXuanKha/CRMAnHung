@@ -8,6 +8,7 @@ import { ANHUNG_BRAND } from './brand';
 import { HomeProductSection } from './home-product-section';
 import { HomeListingSearch } from './listing-search';
 import { PublicAuthNavLink } from './public-auth-nav';
+import { PublicExtensionNavLink } from './public-extension-nav';
 import { PublicHotlineLink } from './public-hotline-link';
 import { PUBLIC_LISTING_PATH } from './site';
 import { postHref, publicPostCategoryLabel, teaserExcerpt } from './published-posts';
@@ -63,6 +64,7 @@ export function PublicHome({
               <a href="#mua-ban-nha-dat">Sản phẩm</a>
               <a href="#du-an">Dự án</a>
               <a href="#bai-viet">Kiến thức</a>
+              <PublicExtensionNavLink />
               <PublicAuthNavLink />
             </nav>
           </div>

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { PublicGuestPost } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { PublicAuthNavLink } from './public-auth-nav';
+import { PublicExtensionNavLink } from './public-extension-nav';
 import { PublicHotlineLink } from './public-hotline-link';
 import { sanitizeListingHtml } from './sanitize-listing-html';
 import {
@@ -47,6 +48,7 @@ export function PostArticleView({
             <PublicHotlineLink />
             <nav className="ph-nav" aria-label="Menu">
               <Link href={`/${post.category}`}>{categoryLabel}</Link>
+              <PublicExtensionNavLink />
               <PublicAuthNavLink />
             </nav>
           </div>
