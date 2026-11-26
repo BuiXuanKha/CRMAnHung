@@ -2,6 +2,7 @@ import Link from 'next/link';
 import type { LotShareContact } from '@crmanhung/shared';
 import { ANHUNG_BRAND } from './brand';
 import { PublicAuthNavLink } from './public-auth-nav';
+import { PublicExtensionNavLink } from './public-extension-nav';
 import { PublicHotlineLink } from './public-hotline-link';
 import { ListingContactAside, ListingContactMobileBar, PublicCardContact } from './listing-visitor-contact';
 import {
@@ -120,6 +121,7 @@ export function ProductDetailView({
             <PublicHotlineLink shareContact={shareContact} />
             <nav className="ph-nav" aria-label="Menu">
               <Link href={PUBLIC_LISTING_PATH}>Sản phẩm</Link>
+              <PublicExtensionNavLink />
               <PublicAuthNavLink />
             </nav>
           </div>
