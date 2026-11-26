@@ -1694,6 +1694,6 @@ Danh sách dưới đây chỉ phản ánh **thư mục/code hiện có**. Khôn
 
 **Đếm sau fix BUG-089 (2026-11-26):** OPEN **21** · FIXED / CLOSED **79** · tổng **100**.
 
-**Đếm sau fix BUG-092 (2026-11-26):** OPEN **19** · FIXED / CLOSED **81** · tổng **100**. |
+**Đếm sau fix BUG-092 (2026-11-26):** OPEN **19** · FIXED / CLOSED **81** · tổng **100**.
 
 **Đếm sau rà source 2026-11-26 (BUG-089…100):** OPEN **22** · FIXED / CLOSED **78** · tổng **100**. Header 2026-09-12 ghi OPEN 11; detail chỉ còn 10 mục OPEN (016, 026, 027, 029, 056, 057, 070, 078, 080, 081).
